@@ -11,7 +11,7 @@ use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\StageConfigInterface;
 use Magento\MagentoCloud\Config\Validator\Deploy\Variable\ConfigurationChecker;
 use Magento\MagentoCloud\Config\Environment\Reader as EnvironmentReader;
-use Magento\MagentoCloud\Filesystem\FileSystemException;
+use Magento\MagentoCloud\Filesystem\FilesystemException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -142,7 +142,7 @@ class ConfigurationCheckerTest extends TestCase
             ->willReturn([]);
         $this->environmentReaderMock->expects($this->any())
             ->method('read')
-            ->willThrowException(new FileSystemException('Some error'));
+            ->willThrowException(new FilesystemException('Some error'));
 
         $this->assertFalse($this->checker->isConfigured('test'));
     }

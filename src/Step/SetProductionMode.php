@@ -7,7 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Step;
 
-use Magento\MagentoCloud\Filesystem\FileSystemException;
+use Magento\MagentoCloud\Filesystem\FilesystemException;
 use Magento\MagentoCloud\Config\Magento\Env\WriterInterface;
 use Psr\Log\LoggerInterface;
 
@@ -49,7 +49,7 @@ class SetProductionMode implements StepInterface
 
         try {
             $this->writer->update(['MAGE_MODE' => 'production']);
-        } catch (FileSystemException $exception) {
+        } catch (FilesystemException $exception) {
             throw new StepException($exception->getMessage(), $exception->getCode(), $exception);
         }
     }

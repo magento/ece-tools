@@ -7,7 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Filesystem\DirectoryCopier;
 
-use Magento\MagentoCloud\Filesystem\FileSystemException;
+use Magento\MagentoCloud\Filesystem\FilesystemException;
 
 /**
  * Interface for different directory copying strategies.
@@ -23,7 +23,7 @@ interface StrategyInterface
      * @param string $fromDirectory Origin directory
      * @param string $toDirectory Destination directory
      * @return bool True if copy process finished successfully, False if folders copying wasn't performed
-     * @throws FileSystemException When happened filesystem related error
+     * @throws FilesystemException When happened filesystem related error
      */
     public function copy(string $fromDirectory, string $toDirectory): bool;
 }

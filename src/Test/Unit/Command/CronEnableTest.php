@@ -9,7 +9,7 @@ namespace Magento\MagentoCloud\Test\Unit\Command;
 
 use Magento\MagentoCloud\Command\CronEnable;
 use Magento\MagentoCloud\Cron\Switcher;
-use Magento\MagentoCloud\Filesystem\FileSystemException;
+use Magento\MagentoCloud\Filesystem\FilesystemException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -66,12 +66,12 @@ class CronEnableTest extends TestCase
 
     public function testExecuteWithException()
     {
-        $this->expectException(FileSystemException::class);
+        $this->expectException(FilesystemException::class);
         $this->expectExceptionMessage('save error');
 
         $this->cronSwitcherMock->expects($this->once())
             ->method('enable')
-            ->willThrowException(new FileSystemException('save error'));
+            ->willThrowException(new FilesystemException('save error'));
         $this->loggerMock->expects($this->once())
             ->method('critical')
             ->with('save error');

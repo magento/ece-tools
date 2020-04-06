@@ -7,12 +7,13 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Config\Magento\Shared;
 
+use Magento\MagentoCloud\Filesystem\FilesystemException;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Magento\MagentoCloud\Config\Magento\Shared\ReaderInterface;
 use Magento\MagentoCloud\Config\Magento\Shared\Writer;
 use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -20,17 +21,17 @@ use PHPUnit_Framework_MockObject_MockObject as Mock;
 class WriterTest extends TestCase
 {
     /**
-     * @var File|Mock
+     * @var File|MockObject
      */
     private $fileMock;
 
     /**
-     * @var FileList|Mock
+     * @var FileList|MockObject
      */
     private $fileListMock;
 
     /**
-     * @var ReaderInterface|Mock
+     * @var ReaderInterface|MockObject
      */
     private $readerMock;
 
@@ -42,7 +43,7 @@ class WriterTest extends TestCase
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->readerMock = $this->getMockForAbstractClass(ReaderInterface::class);
         $this->fileMock = $this->createMock(File::class);
@@ -58,9 +59,12 @@ class WriterTest extends TestCase
     /**
      * @param array $config
      * @param string $updatedConfig
+     *
+     * @throws FilesystemException
+     *
      * @dataProvider createDataProvider
      */
-    public function testCreate(array $config, $updatedConfig)
+    public function testCreate(array $config, $updatedConfig): void
     {
         $filePath = '/path/to/file';
         $this->fileListMock->expects($this->once())
@@ -98,6 +102,9 @@ class WriterTest extends TestCase
      * @param array $config
      * @param array $currentConfig
      * @param string $updatedConfig
+     *
+     * @throws FilesystemException
+     *
      * @dataProvider updateDataProvider
      */
     public function testupdate(array $config, array $currentConfig, $updatedConfig)

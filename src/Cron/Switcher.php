@@ -9,7 +9,7 @@ namespace Magento\MagentoCloud\Cron;
 
 use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface;
 use Magento\MagentoCloud\Config\Magento\Env\WriterInterface;
-use Magento\MagentoCloud\Filesystem\FileSystemException;
+use Magento\MagentoCloud\Filesystem\FilesystemException;
 
 /**
  * Enables/disables Magento crons
@@ -45,7 +45,7 @@ class Switcher
     /**
      * Unsets flag from Magento configuration file to enable cron running
      *
-     * @throws FileSystemException
+     * @throws FilesystemException
      */
     public function enable(): void
     {
@@ -57,7 +57,7 @@ class Switcher
     /**
      * Disable cron running by adding appropriate value to cron enable flag
      *
-     * @throws FileSystemException
+     * @throws FilesystemException
      */
     public function disable(): void
     {

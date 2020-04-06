@@ -8,7 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Step\Deploy\InstallUpdate\Install;
 
 use Magento\MagentoCloud\Config\AdminDataInterface;
-use Magento\MagentoCloud\Filesystem\FileSystemException;
+use Magento\MagentoCloud\Filesystem\FilesystemException;
 use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
 use Psr\Log\LoggerInterface;
@@ -97,7 +97,7 @@ class ResetPassword implements StepInterface
                     '{{ admin_name }}' => $adminName ?: $adminUsername,
                 ]
             );
-        } catch (FileSystemException $exception) {
+        } catch (FilesystemException $exception) {
             throw new StepException($exception->getMessage(), $exception->getCode(), $exception);
         }
 
@@ -117,7 +117,7 @@ class ResetPassword implements StepInterface
 
         try {
             $this->file->filePutContents($credentialsFile, $emailContent);
-        } catch (FileSystemException $exception) {
+        } catch (FilesystemException $exception) {
             throw new StepException($exception->getMessage(), $exception->getCode(), $exception);
         }
     }

@@ -10,6 +10,7 @@ namespace Magento\MagentoCloud\Test\Unit\Step\Deploy;
 use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface as ConfigReader;
 use Magento\MagentoCloud\Config\Magento\Env\WriterInterface as ConfigWriter;
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Filesystem\FilesystemException;
 use Magento\MagentoCloud\Step\Deploy\SetCryptKey;
 use Magento\MagentoCloud\Step\StepException;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -68,7 +69,7 @@ class SetCryptKeyTest extends TestCase
     /**
      * @throws StepException
      */
-    public function testConfigUpdated(): void
+    public function testConfigUpdate(): void
     {
         $this->configReaderMock->expects($this->once())
             ->method('read')
@@ -88,6 +89,37 @@ class SetCryptKeyTest extends TestCase
         $this->configWriterMock->expects($this->once())
             ->method('update')
             ->with(['crypt' => ['key' => 'TWFnZW50byBSb3g=']]);
+
+        $this->step->execute();
+    }
+
+    /**
+     * @throws StepException
+     */
+    public function testConfigUpdateWithError(): void
+    {
+        $this->expectException(StepException::class);
+        $this->expectExceptionMessage('Some error');
+
+        $this->configReaderMock->expects($this->once())
+            ->method('read')
+            ->willReturn([]);
+        $this->environmentMock->expects($this->once())
+            ->method('getCryptKey')
+            ->willReturn('TWFnZW50byBSb3g=');
+        $this->loggerMock->expects($this->never())
+            ->method('error')
+            ->with(
+                'Crypt key missing. Add the crypt key to the "app/etc/env.php" file, or set the "CRYPT_KEY" '
+                . 'environment variable in the Cloud Project web UI.'
+            );
+        $this->loggerMock->expects($this->once())
+            ->method('info')
+            ->with('Setting encryption key');
+        $this->configWriterMock->expects($this->once())
+            ->method('update')
+            ->with(['crypt' => ['key' => 'TWFnZW50byBSb3g=']])
+            ->willThrowException(new FilesystemException('Some error'));
 
         $this->step->execute();
     }

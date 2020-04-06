@@ -14,8 +14,8 @@ use Magento\MagentoCloud\Filesystem\DirectoryCopier\StrategyFactory;
 use Magento\MagentoCloud\Filesystem\DirectoryCopier\StrategyInterface;
 use Magento\MagentoCloud\Filesystem\DirectoryCopier\SubSymlinkStrategy;
 use Magento\MagentoCloud\Filesystem\DirectoryCopier\SymlinkStrategy;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -28,11 +28,14 @@ class StrategyFactoryTest extends TestCase
     private $strategyFactory;
 
     /**
-     * @var ContainerInterface|Mock
+     * @var ContainerInterface|MockObject
      */
     private $containerMock;
 
-    protected function setUp()
+    /**
+     * @inheritDoc
+     */
+    protected function setUp(): void
     {
         $this->containerMock = $this->getMockForAbstractClass(ContainerInterface::class);
 
@@ -44,7 +47,7 @@ class StrategyFactoryTest extends TestCase
      * @param string $expectedClass
      * @dataProvider createDataProvider
      */
-    public function testCreate(string $strategy, string $expectedClass)
+    public function testCreate(string $strategy, string $expectedClass): void
     {
         $this->containerMock->expects($this->once())
             ->method('get')
@@ -82,7 +85,7 @@ class StrategyFactoryTest extends TestCase
         ];
     }
 
-    public function testCopyFromDirNotExists()
+    public function testCopyFromDirNotExists(): void
     {
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('Strategy "not_exists_strategy" doesn\'t exist');

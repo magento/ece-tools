@@ -11,7 +11,7 @@ use Magento\MagentoCloud\Config\Schema;
 use Magento\MagentoCloud\Config\Schema\FormatterInterface;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileList;
-use Magento\MagentoCloud\Filesystem\FileSystemException;
+use Magento\MagentoCloud\Filesystem\FilesystemException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -76,7 +76,7 @@ class GenerateSchema extends Command
     /**
      * {@inheritDoc}
      *
-     * @throws FileSystemException
+     * @throws FilesystemException
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {

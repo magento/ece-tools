@@ -7,7 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Filesystem\Writer;
 
-use Magento\MagentoCloud\Filesystem\FileSystemException;
+use Magento\MagentoCloud\Filesystem\FilesystemException;
 
 /**
  * Write content of file.
@@ -19,7 +19,7 @@ interface WriterInterface
      *
      * @param array $config
      * @return void
-     * @throws FileSystemException
+     * @throws FilesystemException
      */
     public function create(array $config);
 
@@ -28,7 +28,7 @@ interface WriterInterface
      *
      * @param array $config
      * @return void
-     * @throws FileSystemException
+     * @throws FilesystemException
      */
     public function update(array $config);
 }

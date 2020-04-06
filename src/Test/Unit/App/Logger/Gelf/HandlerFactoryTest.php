@@ -10,12 +10,11 @@ namespace Magento\MagentoCloud\Test\Unit\App\Logger\Gelf;
 use Gelf\Transport\HttpTransport;
 use Gelf\Transport\TcpTransport;
 use Illuminate\Config\Repository;
-use Magento\MagentoCloud\App\Logger\Gelf\Handler;
 use Magento\MagentoCloud\App\Logger\Gelf\HandlerFactory;
 use Magento\MagentoCloud\App\Logger\Gelf\TransportFactory;
 use Monolog\Logger;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -28,12 +27,12 @@ class HandlerFactoryTest extends TestCase
     private $handlerFactory;
 
     /**
-     * @var TransportFactory|Mock
+     * @var TransportFactory|MockObject
      */
     private $transportFactoryMock;
 
     /**
-     * @var Repository|Mock
+     * @var Repository|MockObject
      */
     private $repositoryMock;
 
@@ -44,17 +43,20 @@ class HandlerFactoryTest extends TestCase
     {
         $this->transportFactoryMock = $this->createMock(TransportFactory::class);
         $this->repositoryMock = $this->createMock(Repository::class);
-        
+
         $this->handlerFactory = new HandlerFactory(
             $this->transportFactoryMock
         );
     }
 
-    public function testCreate()
+    /**
+     * @throws \Exception
+     */
+    public function testCreate(): void
     {
         $httpTransportMock = $this->createMock(HttpTransport::class);
         $tcpTransportMock = $this->createMock(TcpTransport::class);
-        
+
         $this->repositoryMock->expects($this->exactly(2))
             ->method('get')
             ->withConsecutive(
@@ -85,9 +87,6 @@ class HandlerFactoryTest extends TestCase
                 $tcpTransportMock
             );
 
-        $this->assertInstanceOf(
-            Handler::class,
-            $this->handlerFactory->create($this->repositoryMock, Logger::INFO)
-        );
+        $this->handlerFactory->create($this->repositoryMock, Logger::INFO);
     }
 }

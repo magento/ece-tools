@@ -9,7 +9,7 @@ namespace Magento\MagentoCloud\Command\ConfigDump;
 
 use Magento\MagentoCloud\DB\ConnectionInterface;
 use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Filesystem\FileSystemException;
+use Magento\MagentoCloud\Filesystem\FilesystemException;
 use Magento\MagentoCloud\Config\Magento\Shared\Resolver;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Package\UndefinedPackageException;
@@ -95,7 +95,7 @@ class Generate
      * {@inheritdoc}
      *
      * @throws UndefinedPackageException
-     * @throws FileSystemException
+     * @throws FilesystemException
      */
     public function execute(): void
     {

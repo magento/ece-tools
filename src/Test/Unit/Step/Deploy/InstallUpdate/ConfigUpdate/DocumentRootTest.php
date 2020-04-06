@@ -8,10 +8,11 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit\Step\Deploy\InstallUpdate\ConfigUpdate;
 
 use Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\DocumentRoot;
+use Magento\MagentoCloud\Step\StepException;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Magento\MagentoCloud\Config\Magento\Env\WriterInterface as ConfigWriter;
 use Psr\Log\LoggerInterface;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -19,12 +20,12 @@ use PHPUnit_Framework_MockObject_MockObject as Mock;
 class DocumentRootTest extends TestCase
 {
     /**
-     * @var LoggerInterface|Mock
+     * @var LoggerInterface|MockObject
      */
     private $loggerMock;
 
     /**
-     * @var ConfigWriter|Mock
+     * @var ConfigWriter|MockObject
      */
     private $configWriterMock;
 
@@ -36,7 +37,7 @@ class DocumentRootTest extends TestCase
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->configWriterMock = $this->createMock(ConfigWriter::class);
@@ -48,9 +49,9 @@ class DocumentRootTest extends TestCase
     }
 
     /**
-     * @inheritdoc
+     * @throws StepException
      */
-    public function testExecute()
+    public function testExecute(): void
     {
         $this->loggerMock->expects($this->once())
             ->method('info')

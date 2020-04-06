@@ -9,7 +9,7 @@ namespace Magento\MagentoCloud\Step\Build\BackupData;
 
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Filesystem\FileSystemException;
+use Magento\MagentoCloud\Filesystem\FilesystemException;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Step\StepInterface;
 use Psr\Log\LoggerInterface;
@@ -90,7 +90,7 @@ class StaticContent implements StepInterface
              */
             $this->logger->info('Recreating pub/static directory');
             $this->file->createDirectory($originalPubStatic);
-        } catch (FileSystemException $e) {
+        } catch (FilesystemException $e) {
             $this->logger->notice(
                 'Can\'t move static content. Copying static content to init directory'
             );

@@ -15,7 +15,7 @@ use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface as ConfigReader;
 use Magento\MagentoCloud\Config\Magento\Env\WriterInterface as ConfigWriter;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\DB\Data\RelationshipConnectionFactory;
-use Magento\MagentoCloud\Filesystem\FileSystemException;
+use Magento\MagentoCloud\Filesystem\FilesystemException;
 use Magento\MagentoCloud\Filesystem\Flag\ConfigurationMismatchException;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Step\StepInterface;
@@ -123,7 +123,7 @@ class DbConnection implements StepInterface
      * In the case when the database was split with the user configuration then sets the flag '.ignore_split_db'
      * If the flag '.ignore_split_db' exists, the split process will be ignored
      *
-     * @throws FileSystemException
+     * @throws FilesystemException
      * @throws ConfigException
      * @throws ConfigurationMismatchException
      */
@@ -178,7 +178,7 @@ class DbConnection implements StepInterface
      * Establishes basic connection configurations of app/etc/env.php
      *
      * @param bool $useSlave
-     * @throws FileSystemException
+     * @throws FilesystemException
      * @throws ConfigException
      */
     public function setOnlyMainConnectionsConfig(bool $useSlave)
@@ -197,7 +197,7 @@ class DbConnection implements StepInterface
      *
      * @param array $mageSplitConnectionsConfig
      * @param bool $useSlave
-     * @throws FileSystemException
+     * @throws FilesystemException
      * @throws ConfigException
      */
     private function updateConnectionsConfig(array $mageSplitConnectionsConfig, bool $useSlave)
@@ -338,7 +338,7 @@ class DbConnection implements StepInterface
      * Returns config from app/etc/env.php
      *
      * @return array
-     * @throws FileSystemException
+     * @throws FilesystemException
      */
     private function getMageConfigData(): array
     {
@@ -378,7 +378,7 @@ class DbConnection implements StepInterface
      * Returns the configuration of split connections from the file `app/etc/env.php`
      *
      * @return array
-     * @throws FileSystemException
+     * @throws FilesystemException
      */
     private function getMageSplitConnectionsConfig(): array
     {

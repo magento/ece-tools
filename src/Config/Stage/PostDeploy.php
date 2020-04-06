@@ -66,7 +66,7 @@ class PostDeploy implements PostDeployInterface
 
     /**
      * @return array
-     * @throws \Magento\MagentoCloud\Filesystem\FileSystemException
+     * @throws \Magento\MagentoCloud\Filesystem\FilesystemException
      */
     private function mergeConfig(): array
     {

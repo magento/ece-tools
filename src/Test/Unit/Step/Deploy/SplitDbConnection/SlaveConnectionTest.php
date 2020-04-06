@@ -12,7 +12,7 @@ use Magento\MagentoCloud\Config\Database\DbConfig;
 use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface as ConfigReader;
 use Magento\MagentoCloud\Config\Magento\Env\WriterInterface as ConfigWriter;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
-use Magento\MagentoCloud\Filesystem\FileSystemException;
+use Magento\MagentoCloud\Filesystem\FilesystemException;
 use Magento\MagentoCloud\Step\Deploy\SplitDbConnection\SlaveConnection;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -97,7 +97,7 @@ class SlaveConnectionTest extends TestCase
      *
      * @param array $dbConfig
      * @throws ConfigException
-     * @throws FileSystemException
+     * @throws FilesystemException
      * @dataProvider dataProviderUpdateWithoutSplitConnection
      */
     public function testUpdateWithoutSplitConnection(array $dbConfig)

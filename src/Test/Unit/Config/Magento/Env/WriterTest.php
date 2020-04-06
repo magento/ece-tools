@@ -11,8 +11,9 @@ use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface;
 use Magento\MagentoCloud\Config\Magento\Env\Writer;
 use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Filesystem\FilesystemException;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -20,17 +21,17 @@ use PHPUnit_Framework_MockObject_MockObject as Mock;
 class WriterTest extends TestCase
 {
     /**
-     * @var File|Mock
+     * @var File|MockObject
      */
     private $fileMock;
 
     /**
-     * @var FileList|Mock
+     * @var FileList|MockObject
      */
     private $fileListMock;
 
     /**
-     * @var ReaderInterface|Mock
+     * @var ReaderInterface|MockObject
      */
     private $readerMock;
 
@@ -59,8 +60,10 @@ class WriterTest extends TestCase
      * @param array $config
      * @param string $updatedConfig
      * @dataProvider createDataProvider
+     *
+     * @throws FilesystemException
      */
-    public function testCreate(array $config, $updatedConfig)
+    public function testCreate(array $config, $updatedConfig): void
     {
         $filePath = '/path/to/file';
         $this->fileListMock->expects($this->once())
@@ -76,7 +79,7 @@ class WriterTest extends TestCase
     /**
      * @return array
      */
-    public function createDataProvider()
+    public function createDataProvider(): array
     {
         return [
             [
@@ -99,8 +102,10 @@ class WriterTest extends TestCase
      * @param array $currentConfig
      * @param string $updatedConfig
      * @dataProvider getUpdateDataProvider
+     *
+     * @throws FilesystemException
      */
-    public function testUpdate(array $config, array $currentConfig, $updatedConfig)
+    public function testUpdate(array $config, array $currentConfig, $updatedConfig): void
     {
         $filePath = '/path/to/file';
         $this->fileListMock->expects($this->once())
@@ -119,7 +124,7 @@ class WriterTest extends TestCase
     /**
      * @return array
      */
-    public function getUpdateDataProvider()
+    public function getUpdateDataProvider(): array
     {
         return [
             [

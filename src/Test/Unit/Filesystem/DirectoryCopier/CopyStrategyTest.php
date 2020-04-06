@@ -9,9 +9,9 @@ namespace Magento\MagentoCloud\Test\Unit\Filesystem\DirectoryCopier;
 
 use Magento\MagentoCloud\Filesystem\DirectoryCopier\CopyStrategy;
 use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Filesystem\FileSystemException;
+use Magento\MagentoCloud\Filesystem\FilesystemException;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -25,16 +25,16 @@ class CopyStrategyTest extends TestCase
     private $copyStrategy;
 
     /**
-     * @var File|Mock
+     * @var File|MockObject
      */
     private $fileMock;
 
     /**
-     * @var LoggerInterface|Mock
+     * @var LoggerInterface|MockObject
      */
     private $loggerMock;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->fileMock = $this->createMock(File::class);
         $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
@@ -43,7 +43,10 @@ class CopyStrategyTest extends TestCase
         $this->copyStrategy = new CopyStrategy($this->fileMock, $this->loggerMock);
     }
 
-    public function testCopy()
+    /**
+     * @throws FilesystemException
+     */
+    public function testCopy(): void
     {
         $this->fileMock->expects($this->exactly(2))
             ->method('isExists')
@@ -65,7 +68,7 @@ class CopyStrategyTest extends TestCase
         $this->assertTrue($this->copyStrategy->copy('fromDir', 'toDir'));
     }
 
-    public function testCopyToDirectoryIsLink()
+    public function testCopyToDirectoryIsLink(): void
     {
         $this->fileMock->expects($this->exactly(2))
             ->method('isExists')
@@ -94,9 +97,9 @@ class CopyStrategyTest extends TestCase
         $this->assertTrue($this->copyStrategy->copy('fromDir', 'toDir'));
     }
 
-    public function testCopyFromDirNotExists()
+    public function testCopyFromDirNotExists(): void
     {
-        $this->expectException(FileSystemException::class);
+        $this->expectException(FilesystemException::class);
         $this->expectExceptionMessage('Can\'t copy directory fromDir. Directory does not exist.');
 
         $this->fileMock->expects($this->once())
@@ -107,7 +110,7 @@ class CopyStrategyTest extends TestCase
         $this->copyStrategy->copy('fromDir', 'toDir');
     }
 
-    public function testIsEmptyDirectory()
+    public function testIsEmptyDirectory(): void
     {
         $this->fileMock->expects($this->once())
             ->method('isExists')

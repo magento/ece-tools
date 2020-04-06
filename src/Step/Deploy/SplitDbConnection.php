@@ -8,7 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Step\Deploy;
 
 use Magento\MagentoCloud\Config\ConfigException;
-use Magento\MagentoCloud\Filesystem\FileSystemException;
+use Magento\MagentoCloud\Filesystem\FilesystemException;
 use Magento\MagentoCloud\Filesystem\Flag\ConfigurationMismatchException;
 use Magento\MagentoCloud\Package\UndefinedPackageException;
 use Magento\MagentoCloud\Shell\MagentoShell;
@@ -109,7 +109,7 @@ class SplitDbConnection implements StepInterface
      * Updates the configuration of slave connections for split connections
      *
      * @throws ConfigException
-     * @throws FileSystemException
+     * @throws FilesystemException
      * @throws ConfigurationMismatchException
      * @throws UndefinedPackageException
      */

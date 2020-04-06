@@ -7,7 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\EceToolExtend\Step\Build;
 
-use Magento\MagentoCloud\Filesystem\FileSystemException;
+use Magento\MagentoCloud\Filesystem\FilesystemException;
 use Magento\MagentoCloud\Config\Magento\Env\WriterInterface;
 use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
@@ -49,7 +49,7 @@ class SetProductionMode implements StepInterface
             $this->logger->info('Customized step for enabling production mode');
             #Do some actions
             $this->writer->update(['MAGE_MODE' => 'production']);
-        } catch (FileSystemException $exception) {
+        } catch (FilesystemException $exception) {
             throw new StepException($exception->getMessage(), $exception->getCode(), $exception);
         }
     }

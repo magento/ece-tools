@@ -9,7 +9,7 @@ namespace Magento\MagentoCloud\Util;
 
 use Magento\MagentoCloud\Filesystem\DirectoryCopier\StrategyFactory;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
-use Magento\MagentoCloud\Filesystem\FileSystemException;
+use Magento\MagentoCloud\Filesystem\FilesystemException;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -81,7 +81,7 @@ class BuildDirCopier
                     )
                 );
             }
-        } catch (FileSystemException $e) {
+        } catch (FilesystemException $e) {
             $this->logger->notice($e->getMessage());
         }
     }

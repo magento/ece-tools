@@ -12,7 +12,7 @@ use Magento\MagentoCloud\Config\Magento\Env\WriterInterface as EnvWriter;
 use Magento\MagentoCloud\Config\SearchEngine as SearchEngineConfig;
 use Magento\MagentoCloud\Config\Magento\Shared\ReaderInterface as SharedReader;
 use Magento\MagentoCloud\Config\Magento\Shared\WriterInterface as SharedWriter;
-use Magento\MagentoCloud\Filesystem\FileSystemException;
+use Magento\MagentoCloud\Filesystem\FilesystemException;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Package\UndefinedPackageException;
 use Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\SearchEngine;
@@ -319,7 +319,7 @@ class SearchEngineTest extends TestCase
         $this->envWriterMock->expects($this->once())
             ->method('create')
             ->with($config)
-            ->willThrowException(new FileSystemException('Some error'));
+            ->willThrowException(new FilesystemException('Some error'));
 
         $this->step->execute();
     }

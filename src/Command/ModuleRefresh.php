@@ -8,7 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Command;
 
 use Magento\MagentoCloud\Config\Module;
-use Magento\MagentoCloud\Filesystem\FileSystemException;
+use Magento\MagentoCloud\Filesystem\FilesystemException;
 use Magento\MagentoCloud\Shell\ShellException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -51,7 +51,7 @@ class ModuleRefresh extends Command
      * {@inheritDoc}
      *
      * @throws ShellException
-     * @throws FileSystemException
+     * @throws FilesystemException
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {

@@ -8,7 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Config\Validator\Deploy;
 
 use Magento\MagentoCloud\Config\Validator;
-use Magento\MagentoCloud\Filesystem\FileSystemException;
+use Magento\MagentoCloud\Filesystem\FilesystemException;
 use Magento\MagentoCloud\Service\EolValidator as EOLValidator;
 use Magento\MagentoCloud\Config\ValidatorInterface;
 use Magento\MagentoCloud\Service\ServiceMismatchException;
@@ -52,7 +52,7 @@ class ServiceEol implements ValidatorInterface
      * Get the defined services and versions and check for their EOLs by error level.
      *
      * @return Validator\ResultInterface
-     * @throws FileSystemException
+     * @throws FilesystemException
      */
     public function validate(): Validator\ResultInterface
     {

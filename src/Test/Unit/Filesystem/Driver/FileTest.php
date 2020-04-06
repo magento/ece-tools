@@ -8,7 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit\Filesystem\Driver;
 
 use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Filesystem\FileSystemException;
+use Magento\MagentoCloud\Filesystem\FilesystemException;
 use phpmock\phpunit\PHPMock;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -48,7 +48,7 @@ class FileTest extends TestCase
      * @param string $destination
      * @dataProvider copyDirectoryDataProvider
      *
-     * @throws FileSystemException
+     * @throws FilesystemException
      */
     public function testCopyDirectory(string $source, string $destination): void
     {
@@ -75,12 +75,12 @@ class FileTest extends TestCase
      * @param string $destination
      * @dataProvider copyDirectoryDataProvider
      *
-     * @throws FileSystemException
+     * @throws FilesystemException
      */
     public function testCopyDirectoryWithError(string $source, string $destination): void
     {
         $this->expectExceptionMessage('The content of path "source" cannot be copied to "destination"');
-        $this->expectException(FileSystemException::class);
+        $this->expectException(FilesystemException::class);
 
         $execCommand = "/bin/bash -c 'shopt -s dotglob; cp -R '\''source'\''/* '\''destination'\''/'";
 
@@ -122,7 +122,7 @@ class FileTest extends TestCase
     }
 
     /**
-     * @throws FileSystemException
+     * @throws FilesystemException
      */
     public function testIsLink(): void
     {
@@ -149,7 +149,7 @@ class FileTest extends TestCase
     }
 
     /**
-     * @throws FileSystemException
+     * @throws FilesystemException
      */
     public function testUnLink(): void
     {
@@ -164,7 +164,7 @@ class FileTest extends TestCase
     }
 
     /**
-     * @throws FileSystemException
+     * @throws FilesystemException
      */
     public function testParseIni(): void
     {
@@ -191,7 +191,7 @@ class FileTest extends TestCase
     }
 
     /**
-     * @throws FileSystemException
+     * @throws FilesystemException
      */
     public function testRename(): void
     {
@@ -273,11 +273,11 @@ class FileTest extends TestCase
     }
 
     /**
-     * @throws FileSystemException
+     * @throws FilesystemException
      */
     public function testFilePutContents(): void
     {
-        $this->expectException(FileSystemException::class);
+        $this->expectException(FilesystemException::class);
 
         $filePutContentsMock = $this->getFunctionMock(
             'Magento\MagentoCloud\Filesystem\Driver',

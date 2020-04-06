@@ -13,7 +13,7 @@ use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Config\StageConfigInterface;
 use Magento\MagentoCloud\Config\Validator\Deploy\JsonFormatVariable;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
-use Magento\MagentoCloud\Filesystem\FileSystemException;
+use Magento\MagentoCloud\Filesystem\FilesystemException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -165,7 +165,7 @@ class JsonFormatVariableTest extends TestCase
             ]);
         $this->mergedConfigMock->expects($this->any())
             ->method('get')
-            ->willThrowException(new FileSystemException('Read file error'));
+            ->willThrowException(new FilesystemException('Read file error'));
         $this->resultFactoryMock->expects($this->once())
             ->method('error')
             ->with('Can\'t read merged configuration: Read file error');

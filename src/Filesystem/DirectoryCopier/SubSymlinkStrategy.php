@@ -8,7 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Filesystem\DirectoryCopier;
 
 use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Filesystem\FileSystemException;
+use Magento\MagentoCloud\Filesystem\FilesystemException;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -51,7 +51,7 @@ class SubSymlinkStrategy implements StrategyInterface
         $fromDirectory = $this->file->getRealPath($fromDirectory);
 
         if ($fromDirectory === false || !$this->file->isExists($fromDirectory)) {
-            throw new FileSystemException(
+            throw new FilesystemException(
                 sprintf('Can\'t copy directory "%s". Directory does not exist.', $fromDirectory)
             );
         }

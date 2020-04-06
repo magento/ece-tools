@@ -11,7 +11,7 @@ use Magento\MagentoCloud\Config\Validator;
 use Magento\MagentoCloud\Config\ValidatorInterface;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileList;
-use Magento\MagentoCloud\Filesystem\FileSystemException;
+use Magento\MagentoCloud\Filesystem\FilesystemException;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Package\Manager;
 use Magento\MagentoCloud\Package\UndefinedPackageException;
@@ -93,7 +93,7 @@ class ComposerFile implements ValidatorInterface
             $autoloadPsr4 = $composerJson['autoload']['psr-4'] ?? [];
         } catch (UndefinedPackageException $e) {
             return $this->resultFactory->error('Can\'t get magento version: ' . $e->getMessage());
-        } catch (FileSystemException $e) {
+        } catch (FilesystemException $e) {
             return $this->resultFactory->error('Can\'t read composer.json file: ' . $e->getMessage());
         }
 

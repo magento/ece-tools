@@ -70,7 +70,7 @@ class Schema
      *
      * @param string $stage
      * @return array
-     * @throws \Magento\MagentoCloud\Filesystem\FileSystemException
+     * @throws \Magento\MagentoCloud\Filesystem\FilesystemException
      */
     public function getDefaults(string $stage): array
     {
@@ -97,7 +97,7 @@ class Schema
      * 'default_values' - array of default values
      *
      * @return array
-     * @throws \Magento\MagentoCloud\Filesystem\FileSystemException
+     * @throws \Magento\MagentoCloud\Filesystem\FilesystemException
      */
     public function getSchema(): array
     {
