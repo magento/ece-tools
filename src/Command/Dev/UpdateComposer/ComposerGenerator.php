@@ -214,29 +214,11 @@ class ComposerGenerator
      * @param array $repoOptions
      * @param array $composer
      * @return array
-     * @codeCoverageIgnore
+     *
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      */
     private function addModules(array $repoOptions, array $composer): array
     {
-        $add = function ($dir, $version = null) use (&$composer) {
-            if (!$this->file->isExists($dir . '/composer.json')) {
-                return 0;
-            }
-
-            $dirComposer = json_decode($this->file->fileGetContents($dir . '/composer.json'), true);
-            $composer['repositories'][$dirComposer['name']] = [
-                'type' => 'path',
-                'url' => ltrim(str_replace($this->directoryList->getMagentoRoot(), '', $dir), '/'),
-                'options' => [
-                    'symlink' => false,
-                ],
-            ];
-            $composer['require'][$dirComposer['name']] = $version ?? $dirComposer['version'] ?? '*';
-
-            return null;
-        };
-
         foreach ($repoOptions as $repoName => $gitOption) {
             $baseRepoFolder = $this->directoryList->getMagentoRoot() . '/' . $repoName;
             if ($this->isSinglePackage($gitOption)) {
@@ -312,6 +294,6 @@ class ComposerGenerator
      */
     private function isFlatStructurePackage(array $repoOptions): bool
     {
-        return isset($repoOptions['type']) && $repoOptions['type'] == self::REPO_TYPE_FLAT_STRUCTURE;
+        return isset($repoOptions['type']) && $repoOptions['type'] === self::REPO_TYPE_FLAT_STRUCTURE;
     }
 }
