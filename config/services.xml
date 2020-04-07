@@ -5,7 +5,6 @@
 
     <services>
         <defaults autowire="true" autoconfigure="true" public="true" />
-        <!-- ... -->
 
         <prototype namespace="Magento\MagentoCloud\" resource="../src/*" exclude="../src/{Test}"/>
 
@@ -30,13 +29,6 @@
         <service id="Magento\MagentoCloud\Filesystem\FileSystemException" autowire="false" />
         <service id="Magento\MagentoCloud\Filesystem\Flag\ConfigurationMismatchException" autowire="false" />
         <service id="Magento\MagentoCloud\Shell\UtilityException" autowire="false" />
-        <service id="Magento\MagentoCloud\Filesystem\Flag\Pool">
-            <argument type="collection">
-                <argument key="regenerate">var/.regenerate</argument>
-                <argument key="scd_in_build">.static_content_deploy</argument>
-                <argument key="deploy_is_failed">var/.deploy_is_failed</argument>
-            </argument>
-        </service>
         <service id="Magento\MagentoCloud\Filesystem\SystemList" autowire="false" />
         <service id="Magento\MagentoCloud\Package\UndefinedPackageException" autowire="false" />
         <service id="Magento\MagentoCloud\Scenario\Exception\ProcessorException" autowire="false" />
@@ -61,6 +53,7 @@
         <service id="Magento\MagentoCloud\Shell\ProcessException" autowire="false" />
         <service id="Symfony\Component\Yaml\Parser" autowire="false" />
         <service id="Symfony\Component\Yaml\Dumper" autowire="false" />
+        <!-- Service argument configuration -->
         <service id="Magento\MagentoCloud\Filesystem\Flag\Pool">
             <argument type="collection">
                 <argument key="regenerate">var/.regenerate</argument>
