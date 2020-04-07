@@ -45,7 +45,7 @@ class SwitcherTest extends TestCase
     }
 
     /**
-     * @throws \Magento\MagentoCloud\Filesystem\FilesystemException
+     * @throws \Magento\MagentoCloud\Filesystem\FileSystemException
      */
     public function testDisable()
     {
@@ -57,7 +57,7 @@ class SwitcherTest extends TestCase
     }
 
     /**
-     * @throws \Magento\MagentoCloud\Filesystem\FilesystemException
+     * @throws \Magento\MagentoCloud\Filesystem\FileSystemException
      */
     public function testEnable()
     {

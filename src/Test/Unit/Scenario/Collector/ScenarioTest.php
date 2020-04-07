@@ -8,7 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit\Scenario\Collector;
 
 use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Filesystem\FilesystemException;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Scenario\Collector\Scenario;
 use Magento\MagentoCloud\Scenario\Exception\ValidationException;
 use Magento\MagentoCloud\Scenario\PathResolver;
@@ -95,7 +95,7 @@ class ScenarioTest extends TestCase
             ->willReturn($scenario);
         $this->fileMock->expects($this->once())
             ->method('fileGetContents')
-            ->willThrowException(new FilesystemException('File doesn\'t exist'));
+            ->willThrowException(new FileSystemException('File doesn\'t exist'));
 
         $this->scenarioCollector->collect($scenario);
     }

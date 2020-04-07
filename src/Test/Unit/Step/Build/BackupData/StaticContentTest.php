@@ -15,7 +15,7 @@ use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Psr\Log\LoggerInterface;
 use Magento\MagentoCloud\Step\Build\BackupData\StaticContent;
-use Magento\MagentoCloud\Filesystem\FilesystemException;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 
 /**
  * @inheritdoc
@@ -283,7 +283,7 @@ class StaticContentTest extends TestCase
         $this->fileMock->expects($this->once())
             ->method('rename')
             ->with($this->originalPubStaticPath, $this->initPubStaticPath)
-            ->willThrowException(new FilesystemException('Some error'));
+            ->willThrowException(new FileSystemException('Some error'));
         $this->fileMock->expects($this->once())
             ->method('copyDirectory')
             ->with($this->originalPubStaticPath, $this->initPubStaticPath);

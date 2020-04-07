@@ -11,7 +11,7 @@ use Magento\MagentoCloud\Filesystem\DirectoryCopier\CopyStrategy;
 use Magento\MagentoCloud\Filesystem\DirectoryCopier\StrategyFactory;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Filesystem\FilesystemException;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Util\BuildDirCopier;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -178,7 +178,7 @@ class BuildDirCopierTest extends TestCase
             ->method('copy')
             ->with($fromDirectory, $toDirectory)
             ->willThrowException(
-                new FilesystemException('Can\'t copy directory /path/to/root/not-exist-dir. Directory does not exist.')
+                new FileSystemException('Can\'t copy directory /path/to/root/not-exist-dir. Directory does not exist.')
             );
         $this->strategyFactory->expects($this->once())
             ->method('create')

@@ -10,7 +10,7 @@ namespace Magento\MagentoCloud\Step\Deploy;
 use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface as ConfigReader;
 use Magento\MagentoCloud\Config\Magento\Env\WriterInterface as ConfigWriter;
 use Magento\MagentoCloud\Config\Environment;
-use Magento\MagentoCloud\Filesystem\FilesystemException;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
 use Psr\Log\LoggerInterface;
@@ -87,7 +87,7 @@ class SetCryptKey implements StepInterface
 
         try {
             $this->configWriter->update($config);
-        } catch (FilesystemException $exception) {
+        } catch (FileSystemException $exception) {
             throw new StepException($exception->getMessage(), $exception->getCode(), $exception);
         }
     }

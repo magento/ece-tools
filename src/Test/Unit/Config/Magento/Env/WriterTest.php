@@ -11,7 +11,7 @@ use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface;
 use Magento\MagentoCloud\Config\Magento\Env\Writer;
 use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Filesystem\FilesystemException;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -61,7 +61,7 @@ class WriterTest extends TestCase
      * @param string $updatedConfig
      * @dataProvider createDataProvider
      *
-     * @throws FilesystemException
+     * @throws FileSystemException
      */
     public function testCreate(array $config, $updatedConfig): void
     {
@@ -103,7 +103,7 @@ class WriterTest extends TestCase
      * @param string $updatedConfig
      * @dataProvider getUpdateDataProvider
      *
-     * @throws FilesystemException
+     * @throws FileSystemException
      */
     public function testUpdate(array $config, array $currentConfig, $updatedConfig): void
     {

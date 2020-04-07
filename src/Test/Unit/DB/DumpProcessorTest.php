@@ -15,7 +15,7 @@ use Magento\MagentoCloud\Cron\Switcher;
 use Magento\MagentoCloud\DB\Data\ConnectionFactory;
 use Magento\MagentoCloud\DB\DumpGenerator;
 use Magento\MagentoCloud\DB\DumpProcessor;
-use Magento\MagentoCloud\Filesystem\FilesystemException;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Package\UndefinedPackageException;
 use Magento\MagentoCloud\Util\BackgroundProcess;
 use Magento\MagentoCloud\Util\MaintenanceModeSwitcher;
@@ -116,7 +116,7 @@ class DumpProcessorTest extends TestCase
      * @param InvokedCount $expects
      * @param bool $removeDefiners
      * @throws ConfigException
-     * @throws FilesystemException
+     * @throws FileSystemException
      * @throws GenericException
      * @throws UndefinedPackageException
      * @dataProvider executeDataProvider
@@ -196,7 +196,7 @@ class DumpProcessorTest extends TestCase
      * @param array $databases
      * @param InvokedCount $expects
      * @throws ConfigException
-     * @throws FilesystemException
+     * @throws FileSystemException
      * @throws GenericException
      * @throws UndefinedPackageException
      * @dataProvider executeWithDatabasesDataProvider()

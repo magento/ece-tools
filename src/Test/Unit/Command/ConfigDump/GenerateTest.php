@@ -10,7 +10,7 @@ namespace Magento\MagentoCloud\Test\Unit\Command\ConfigDump;
 use Magento\MagentoCloud\Config\Magento\Shared\Resolver;
 use Magento\MagentoCloud\DB\ConnectionInterface;
 use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Filesystem\FilesystemException;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Command\ConfigDump\Generate;
 use Magento\MagentoCloud\Package\UndefinedPackageException;
@@ -80,7 +80,7 @@ class GenerateTest extends TestCase
     /**
      * @param bool $versionGreaterTwoDotTwo
      * @param string $generatedConfig
-     * @throws FilesystemException
+     * @throws FileSystemException
      * @throws UndefinedPackageException
      *
      * @dataProvider executeDataProvider

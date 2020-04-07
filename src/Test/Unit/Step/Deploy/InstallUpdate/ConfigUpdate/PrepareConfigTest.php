@@ -7,7 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Step\Deploy\InstallUpdate\ConfigUpdate;
 
-use Magento\MagentoCloud\Filesystem\FilesystemException;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\PrepareConfig;
 use Magento\MagentoCloud\Step\StepException;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -150,7 +150,7 @@ class PrepareConfigTest extends TestCase
         $this->configWriterMock->expects($this->once())
             ->method('update')
             ->with($expectedResult)
-            ->willThrowException(new FilesystemException('Some error'));
+            ->willThrowException(new FileSystemException('Some error'));
 
         $this->step->execute();
     }

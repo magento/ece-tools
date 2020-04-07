@@ -9,7 +9,7 @@ namespace Magento\MagentoCloud\Test\Unit\Command;
 
 use Magento\MagentoCloud\Command\ModuleRefresh;
 use Magento\MagentoCloud\Config\Module;
-use Magento\MagentoCloud\Filesystem\FilesystemException;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Shell\ShellException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -44,7 +44,7 @@ class ModuleRefreshTest extends TestCase
     }
 
     /**
-     * @throws FilesystemException
+     * @throws FileSystemException
      * @throws ShellException
      */
     public function testExecute(): void
@@ -66,7 +66,7 @@ class ModuleRefreshTest extends TestCase
     }
 
     /**
-     * @throws FilesystemException
+     * @throws FileSystemException
      * @throws ShellException
      */
     public function testExecuteNoModules(): void

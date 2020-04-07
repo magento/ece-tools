@@ -11,7 +11,7 @@ use Magento\MagentoCloud\Config\Magento\Shared\ReaderInterface;
 use Magento\MagentoCloud\Config\Magento\Shared\WriterInterface;
 use Magento\MagentoCloud\Config\Module;
 use Magento\MagentoCloud\Config\Stage\BuildInterface;
-use Magento\MagentoCloud\Filesystem\FilesystemException;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Shell\MagentoShell;
 use Magento\MagentoCloud\Shell\ShellFactory;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -72,7 +72,7 @@ class ModuleTest extends TestCase
     }
 
     /**
-     * @throws FilesystemException
+     * @throws FileSystemException
      */
     public function testRefreshWithMissingModuleConfig(): void
     {
@@ -107,7 +107,7 @@ class ModuleTest extends TestCase
     }
 
     /**
-     * @throws FilesystemException
+     * @throws FileSystemException
      */
     public function testRefreshWithNewModules(): void
     {

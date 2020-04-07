@@ -8,7 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Config;
 
 use Magento\MagentoCloud\Config\Environment\ReaderInterface as EnvironmentReader;
-use Magento\MagentoCloud\Filesystem\FilesystemException;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Symfony\Component\Yaml\Exception\ParseException;
 
 /**
@@ -67,7 +67,7 @@ class GlobalSection implements StageConfigInterface
     /**
      * @return array
      * @throws ParseException;
-     * @throws FilesystemException;
+     * @throws FileSystemException;
      */
     private function mergeConfig(): array
     {

@@ -10,7 +10,7 @@ namespace Magento\MagentoCloud\Test\Unit\Step\Deploy;
 use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface as ConfigReader;
 use Magento\MagentoCloud\Config\Magento\Env\WriterInterface as ConfigWriter;
 use Magento\MagentoCloud\Config\Environment;
-use Magento\MagentoCloud\Filesystem\FilesystemException;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Step\Deploy\SetCryptKey;
 use Magento\MagentoCloud\Step\StepException;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -119,7 +119,7 @@ class SetCryptKeyTest extends TestCase
         $this->configWriterMock->expects($this->once())
             ->method('update')
             ->with(['crypt' => ['key' => 'TWFnZW50byBSb3g=']])
-            ->willThrowException(new FilesystemException('Some error'));
+            ->willThrowException(new FileSystemException('Some error'));
 
         $this->step->execute();
     }

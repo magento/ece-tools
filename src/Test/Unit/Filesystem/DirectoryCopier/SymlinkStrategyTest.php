@@ -9,7 +9,7 @@ namespace Magento\MagentoCloud\Test\Unit\Filesystem\DirectoryCopier;
 
 use Magento\MagentoCloud\Filesystem\DirectoryCopier\SymlinkStrategy;
 use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Filesystem\FilesystemException;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -51,7 +51,7 @@ class SymlinkStrategyTest extends TestCase
     }
 
     /**
-     * @throws FilesystemException
+     * @throws FileSystemException
      */
     public function testCopy(): void
     {
@@ -74,7 +74,7 @@ class SymlinkStrategyTest extends TestCase
     }
 
     /**
-     * @throws FilesystemException
+     * @throws FileSystemException
      */
     public function testCopyToExistsLinkedDirectory(): void
     {
@@ -106,7 +106,7 @@ class SymlinkStrategyTest extends TestCase
     }
 
     /**
-     * @throws FilesystemException
+     * @throws FileSystemException
      */
     public function testCopyToExistsDirectory(): void
     {
@@ -138,7 +138,7 @@ class SymlinkStrategyTest extends TestCase
     }
 
     /**
-     * @throws FilesystemException
+     * @throws FileSystemException
      */
     public function testIsEmptyDirectory(): void
     {
@@ -165,11 +165,11 @@ class SymlinkStrategyTest extends TestCase
     }
 
     /**
-     * @throws FilesystemException
+     * @throws FileSystemException
      */
     public function testCopyFromDirNotExists(): void
     {
-        $this->expectException(FilesystemException::class);
+        $this->expectException(FileSystemException::class);
         $this->expectExceptionMessage('Can\'t copy directory realFromDir. Directory does not exist.');
 
         $this->fileMock->expects($this->once())

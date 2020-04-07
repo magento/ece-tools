@@ -10,7 +10,7 @@ namespace Magento\MagentoCloud\Config;
 use Magento\MagentoCloud\Config\Magento\Shared\ReaderInterface;
 use Magento\MagentoCloud\Config\Magento\Shared\WriterInterface;
 use Magento\MagentoCloud\Config\Stage\BuildInterface;
-use Magento\MagentoCloud\Filesystem\FilesystemException;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Shell\MagentoShell;
 use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Shell\ShellFactory;
@@ -63,7 +63,7 @@ class Module
      * Returns list of new enabled modules or an empty array if no modules were enabled.
      *
      * @throws ShellException
-     * @throws FilesystemException
+     * @throws FileSystemException
      */
     public function refresh(): array
     {

@@ -26,7 +26,7 @@
         <service id="Magento\MagentoCloud\DB\Data\Connection" autowire="false" />
         <service id="Magento\MagentoCloud\DB\Data\RelationshipConnection" autowire="false" />
         <service id="Magento\MagentoCloud\DB\PDOException" autowire="false" />
-        <service id="Magento\MagentoCloud\Filesystem\FilesystemException" autowire="false" />
+        <service id="Magento\MagentoCloud\Filesystem\FileSystemException" autowire="false" />
         <service id="Magento\MagentoCloud\Filesystem\Flag\ConfigurationMismatchException" autowire="false" />
         <service id="Magento\MagentoCloud\Shell\UtilityException" autowire="false" />
         <service id="Magento\MagentoCloud\Filesystem\SystemList" autowire="false" />

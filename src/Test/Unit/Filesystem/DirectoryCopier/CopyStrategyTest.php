@@ -9,7 +9,7 @@ namespace Magento\MagentoCloud\Test\Unit\Filesystem\DirectoryCopier;
 
 use Magento\MagentoCloud\Filesystem\DirectoryCopier\CopyStrategy;
 use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Filesystem\FilesystemException;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -44,7 +44,7 @@ class CopyStrategyTest extends TestCase
     }
 
     /**
-     * @throws FilesystemException
+     * @throws FileSystemException
      */
     public function testCopy(): void
     {
@@ -99,7 +99,7 @@ class CopyStrategyTest extends TestCase
 
     public function testCopyFromDirNotExists(): void
     {
-        $this->expectException(FilesystemException::class);
+        $this->expectException(FileSystemException::class);
         $this->expectExceptionMessage('Can\'t copy directory fromDir. Directory does not exist.');
 
         $this->fileMock->expects($this->once())

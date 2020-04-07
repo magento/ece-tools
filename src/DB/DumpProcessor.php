@@ -12,7 +12,7 @@ use Magento\MagentoCloud\Config\ConfigException;
 use Magento\MagentoCloud\Config\Database\DbConfig;
 use Magento\MagentoCloud\Cron\JobUnlocker;
 use Magento\MagentoCloud\Cron\Switcher;
-use Magento\MagentoCloud\Filesystem\FilesystemException;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Package\UndefinedPackageException;
 use Magento\MagentoCloud\Util\BackgroundProcess;
 use Magento\MagentoCloud\Util\MaintenanceModeSwitcher;
@@ -128,7 +128,7 @@ class DumpProcessor
      * @param bool $removeDefiners
      *
      * @throws ConfigException
-     * @throws FilesystemException
+     * @throws FileSystemException
      * @throws GenericException
      * @throws UndefinedPackageException
      */

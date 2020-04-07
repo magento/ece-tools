@@ -12,6 +12,6 @@ use Magento\MagentoCloud\App\GenericException;
 /**
  * Filesystem operations exception.
  */
-class FilesystemException extends GenericException
+class FileSystemException extends GenericException
 {
 }

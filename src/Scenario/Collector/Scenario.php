@@ -8,7 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Scenario\Collector;
 
 use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Filesystem\FilesystemException;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Scenario\Exception\ValidationException;
 use Magento\MagentoCloud\Scenario\PathResolver;
 use Symfony\Component\Serializer\Encoder\XmlEncoder;
@@ -61,7 +61,7 @@ class Scenario
                 $this->file->fileGetContents($scenarioPath),
                 XmlEncoder::FORMAT
             ) ?: [];
-        } catch (FilesystemException $exception) {
+        } catch (FileSystemException $exception) {
             throw new ValidationException($exception->getMessage(), $exception->getCode(), $exception);
         }
     }

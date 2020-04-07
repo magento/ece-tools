@@ -8,7 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit\Step;
 
 use Magento\MagentoCloud\Config\Magento\Env\WriterInterface;
-use Magento\MagentoCloud\Filesystem\FilesystemException;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Step\SetProductionMode;
 use Magento\MagentoCloud\Step\StepException;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -77,7 +77,7 @@ class SetProductionModeTest extends TestCase
             ->willReturn("Set Magento application mode to 'production'");
         $this->writer->expects($this->once())
             ->method('update')
-            ->willThrowException(new FilesystemException('can\'t update file'));
+            ->willThrowException(new FileSystemException('can\'t update file'));
 
         $this->step->execute();
     }

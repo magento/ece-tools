@@ -7,7 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Config\Magento\Shared;
 
-use Magento\MagentoCloud\Filesystem\FilesystemException;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Magento\MagentoCloud\Config\Magento\Shared\ReaderInterface;
@@ -60,7 +60,7 @@ class WriterTest extends TestCase
      * @param array $config
      * @param string $updatedConfig
      *
-     * @throws FilesystemException
+     * @throws FileSystemException
      *
      * @dataProvider createDataProvider
      */
@@ -103,7 +103,7 @@ class WriterTest extends TestCase
      * @param array $currentConfig
      * @param string $updatedConfig
      *
-     * @throws FilesystemException
+     * @throws FileSystemException
      *
      * @dataProvider updateDataProvider
      */

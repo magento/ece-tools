@@ -12,7 +12,7 @@ use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\App\Logger\Pool;
 use Magento\MagentoCloud\App\Logger\Processor\SanitizeProcessor;
-use Magento\MagentoCloud\Filesystem\FilesystemException;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Package\UndefinedPackageException;
 
 /**
@@ -83,7 +83,7 @@ class Logger extends \Monolog\Logger
             } elseif (!$deployLogFileExists && $buildLogFileExists) {
                 $this->file->copy($buildPhaseLogPath, $deployLogPath);
             }
-        } catch (FilesystemException | UndefinedPackageException $exception) {
+        } catch (FileSystemException | UndefinedPackageException $exception) {
             throw new LoggerException(
                 $exception->getMessage(),
                 $exception->getCode(),
@@ -99,7 +99,7 @@ class Logger extends \Monolog\Logger
      * @param string $buildPhaseLogContent build log content
      * @return bool
      *
-     * @throws FilesystemException
+     * @throws FileSystemException
      */
     private function isBuildLogApplied(string $deployLogPath, string $buildPhaseLogContent): bool
     {

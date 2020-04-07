@@ -14,7 +14,7 @@ use Magento\MagentoCloud\Config\Validator\ResultFactory;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Symfony\Component\Serializer\Encoder\XmlEncoder;
 use Magento\MagentoCloud\Config\Validator;
-use Magento\MagentoCloud\Filesystem\FilesystemException;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Symfony\Component\Serializer\Exception\NotEncodableValueException;
 
 /**
@@ -87,7 +87,7 @@ class ReportDirNestingLevel implements ValidatorInterface
                 'You can configure the setting using the `config.report.dir_nesting_level`'
                 . ' in the file ' . $reportConfigFile
             );
-        } catch (FilesystemException $exception) {
+        } catch (FileSystemException $exception) {
             return $this->resultFactory->error($exception->getMessage());
         } catch (NotEncodableValueException $exception) {
             $message = sprintf('Config of the file %s is invalid. ', $reportConfigFile);
@@ -106,7 +106,7 @@ class ReportDirNestingLevel implements ValidatorInterface
      *
      * @param string $file
      * @return int|string|null
-     * @throws FilesystemException
+     * @throws FileSystemException
      * @throws NotEncodableValueException
      */
     private function getConfigValue(string $file)

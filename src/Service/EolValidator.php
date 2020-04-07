@@ -12,7 +12,7 @@ use Composer\Semver\Semver;
 use Magento\MagentoCloud\Config\ValidatorInterface;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileList;
-use Magento\MagentoCloud\Filesystem\FilesystemException;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Symfony\Component\Yaml\Yaml;
 
 /**
@@ -76,7 +76,7 @@ class EolValidator
      * Validate the EOL of a given service and version by error level.
      *
      * @return array
-     * @throws FilesystemException
+     * @throws FileSystemException
      * @throws ServiceMismatchException
      */
     public function validateServiceEol(): array
@@ -104,7 +104,7 @@ class EolValidator
      * @param string $serviceName
      * @param string $serviceVersion
      * @return array
-     * @throws FilesystemException
+     * @throws FileSystemException
      */
     public function validateService(string $serviceName, string $serviceVersion) : array
     {
@@ -146,7 +146,7 @@ class EolValidator
      *
      * @param string $serviceName
      * @return array
-     * @throws FilesystemException
+     * @throws FileSystemException
      */
     private function getServiceConfigs(string $serviceName) : array
     {

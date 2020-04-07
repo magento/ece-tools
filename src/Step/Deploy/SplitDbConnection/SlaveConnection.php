@@ -12,7 +12,7 @@ use Magento\MagentoCloud\Config\Database\DbConfig;
 use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface as ConfigReader;
 use Magento\MagentoCloud\Config\Magento\Env\WriterInterface as ConfigWriter;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
-use Magento\MagentoCloud\Filesystem\FilesystemException;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -69,7 +69,7 @@ class SlaveConnection
     /**
      * Updates slave connections
      *
-     * @throws FilesystemException
+     * @throws FileSystemException
      * @throws ConfigException
      */
     public function update()

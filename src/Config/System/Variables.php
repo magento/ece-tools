@@ -11,7 +11,7 @@ use Magento\MagentoCloud\Config\ConfigException;
 use Magento\MagentoCloud\Config\Environment\ReaderInterface as EnvironmentReader;
 use Magento\MagentoCloud\Config\Schema;
 use Magento\MagentoCloud\Config\SystemConfigInterface;
-use Magento\MagentoCloud\Filesystem\FilesystemException;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 
 /**
  * @inheritdoc
@@ -68,7 +68,7 @@ class Variables implements SystemConfigInterface
 
     /**
      * @return array
-     * @throws FilesystemException
+     * @throws FileSystemException
      */
     private function mergeConfig(): array
     {

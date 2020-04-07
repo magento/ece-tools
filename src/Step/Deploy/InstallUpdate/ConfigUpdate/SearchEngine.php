@@ -123,7 +123,7 @@ class SearchEngine implements StepInterface
      * @param array $searchConfig
      * @param ReaderInterface $reader
      * @param WriterInterface $writer
-     * @throws \Magento\MagentoCloud\Filesystem\FilesystemException
+     * @throws \Magento\MagentoCloud\Filesystem\FileSystemException
      */
     private function updateSearchConfiguration(array $searchConfig, ReaderInterface $reader, WriterInterface $writer)
     {

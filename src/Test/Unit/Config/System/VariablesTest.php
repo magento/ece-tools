@@ -11,7 +11,7 @@ use Magento\MagentoCloud\Config\ConfigException;
 use Magento\MagentoCloud\Config\Schema;
 use Magento\MagentoCloud\Config\SystemConfigInterface;
 use Magento\MagentoCloud\Config\System\Variables;
-use Magento\MagentoCloud\Filesystem\FilesystemException;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Magento\MagentoCloud\Config\Environment\Reader as EnvironmentReader;
@@ -133,7 +133,7 @@ class VariablesTest extends TestCase
         $this->expectExceptionMessage('some error message');
 
         $this->environmentReaderMock->method('read')
-            ->willThrowException(new FilesystemException('some error message'));
+            ->willThrowException(new FileSystemException('some error message'));
 
         $this->config->get(SystemConfigInterface::VAR_ENV_ROUTES);
     }

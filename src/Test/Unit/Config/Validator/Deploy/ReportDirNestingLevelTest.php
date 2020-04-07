@@ -17,7 +17,7 @@ use Magento\MagentoCloud\Filesystem\ConfigFileList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Symfony\Component\Serializer\Encoder\XmlEncoder;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
-use Magento\MagentoCloud\Filesystem\FilesystemException;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Symfony\Component\Serializer\Exception\NotEncodableValueException;
 
 /**
@@ -186,7 +186,7 @@ class ReportDirNestingLevelTest extends TestCase
             ->willReturn(false);
         $this->fileMock->expects($this->once())
             ->method('fileGetContents')
-            ->willThrowException(new FilesystemException($message));
+            ->willThrowException(new FileSystemException($message));
         $this->resultFactoryMock->expects($this->once())
             ->method('error')
             ->with($message);

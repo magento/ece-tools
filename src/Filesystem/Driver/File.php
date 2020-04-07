@@ -9,7 +9,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Filesystem\Driver;
 
-use Magento\MagentoCloud\Filesystem\FilesystemException;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 
 /**
  * Class File.
@@ -54,7 +54,7 @@ class File
      *
      * @param string $path
      * @return bool
-     * @throws FilesystemException
+     * @throws FileSystemException
      */
     public function isLink($path): bool
     {
@@ -82,7 +82,7 @@ class File
      *
      * @param string $path
      * @return bool
-     * @throws FilesystemException
+     * @throws FileSystemException
      */
     public function unLink($path): bool
     {
@@ -100,7 +100,7 @@ class File
      *
      * @param string $path
      * @return array|bool
-     * @throws FilesystemException
+     * @throws FileSystemException
      */
     public function parseIni($path)
     {
@@ -129,7 +129,7 @@ class File
      *
      * @param string $path
      * @return string[]
-     * @throws FilesystemException
+     * @throws FileSystemException
      */
     public function readDirectory($path)
     {
@@ -145,7 +145,7 @@ class File
 
             return $result;
         } catch (\Exception $e) {
-            throw new FilesystemException($e->getMessage(), $e->getCode(), $e);
+            throw new FileSystemException($e->getMessage(), $e->getCode(), $e);
         }
     }
 
@@ -155,7 +155,7 @@ class File
      * @param string $oldPath
      * @param string $newPath
      * @return bool
-     * @throws FilesystemException
+     * @throws FileSystemException
      */
     public function rename($oldPath, $newPath)
     {
@@ -189,7 +189,7 @@ class File
      * @param string $destination The path of destination folder
      * @return void
      *
-     * @throws FilesystemException
+     * @throws FileSystemException
      */
     public function copyDirectory($source, $destination): void
     {
@@ -241,7 +241,7 @@ class File
      * @param string $source
      * @param string $destination
      * @return bool
-     * @throws FilesystemException
+     * @throws FileSystemException
      */
     public function symlink($source, $destination)
     {
@@ -392,7 +392,7 @@ class File
      * @param string $content
      * @param int|null $mode
      * @return int The number of bytes that were written.
-     * @throws FilesystemException
+     * @throws FileSystemException
      */
     public function filePutContents($path, $content, $mode = null)
     {
@@ -413,7 +413,7 @@ class File
      * @param string $message
      * @param array $arguments
      * @return void
-     * @throws FilesystemException
+     * @throws FileSystemException
      */
     private function fileSystemException($message, $arguments = []): void
     {
@@ -428,7 +428,7 @@ class File
             $message = strtr($message, $pairs);
         }
 
-        throw new FilesystemException($message);
+        throw new FileSystemException($message);
     }
 
     /**
@@ -461,7 +461,7 @@ class File
      * @param bool $useIncludedPath
      * @param resource|null $context
      * @return string
-     * @throws FilesystemException
+     * @throws FileSystemException
      */
     public function fileGetContents($path, $useIncludedPath = false, $context = null)
     {

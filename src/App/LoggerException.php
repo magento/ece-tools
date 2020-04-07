@@ -7,8 +7,6 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\App;
 
-use Magento\MagentoCloud\App\GenericException;
-
 /**
  * Generic logging exception;
  */

@@ -7,7 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate;
 
-use Magento\MagentoCloud\Filesystem\FilesystemException;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
 use Magento\MagentoCloud\Config\GlobalSection as GlobalConfig;
@@ -67,7 +67,7 @@ class PrepareConfig implements StepInterface
 
         try {
             $this->configWriter->update($config);
-        } catch (FilesystemException $exception) {
+        } catch (FileSystemException $exception) {
             throw new StepException($exception->getMessage(), $exception->getCode(), $exception);
         }
     }

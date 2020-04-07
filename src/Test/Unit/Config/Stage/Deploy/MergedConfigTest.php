@@ -14,7 +14,7 @@ use Magento\MagentoCloud\Config\Stage\Deploy;
 use Magento\MagentoCloud\Config\Stage\Deploy\EnvironmentConfig;
 use Magento\MagentoCloud\Config\Stage\Deploy\MergedConfig;
 use Magento\MagentoCloud\Config\StageConfigInterface;
-use Magento\MagentoCloud\Filesystem\FilesystemException;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Yaml\Exception\ParseException;
@@ -185,7 +185,7 @@ class MergedConfigTest extends TestCase
 
         $this->environmentReaderMock->expects($this->once())
             ->method('read')
-            ->willThrowException(new FilesystemException('File system error'));
+            ->willThrowException(new FileSystemException('File system error'));
 
         $this->mergedConfig->get();
     }

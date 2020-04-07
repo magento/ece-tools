@@ -10,7 +10,7 @@ namespace Magento\MagentoCloud\Test\Unit\Config\Environment;
 use Magento\MagentoCloud\Config\Environment\Reader;
 use Magento\MagentoCloud\Filesystem\ConfigFileList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Filesystem\FilesystemException;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use phpmock\phpunit\PHPMock;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -59,7 +59,7 @@ class ReaderTest extends TestCase
     }
 
     /**
-     * @throws FilesystemException
+     * @throws FileSystemException
      */
     public function testRead()
     {
@@ -98,7 +98,7 @@ class ReaderTest extends TestCase
     }
 
     /**
-     * @throws FilesystemException
+     * @throws FileSystemException
      */
     public function testReadNotExist()
     {
@@ -115,7 +115,7 @@ class ReaderTest extends TestCase
     }
 
     /**
-     * @throws FilesystemException
+     * @throws FileSystemException
      */
     public function testReadMainConfigWithEmptySectionAndStage()
     {
@@ -143,7 +143,7 @@ class ReaderTest extends TestCase
     }
 
     /**
-     * @throws FilesystemException
+     * @throws FileSystemException
      */
     public function testReadWithConstants()
     {
