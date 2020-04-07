@@ -68,7 +68,7 @@ class Deploy implements DeployInterface
 
         $value = $decodedValue !== null && json_last_error() === JSON_ERROR_NONE ? $decodedValue : $value;
 
-        $schemaDetails = $this->schema->getSchema()[$name];
+        $schemaDetails = $this->schema->getVariables()[$name];
 
         if ($schemaDetails[Schema::SCHEMA_TYPE] === ['array'] && !is_array($value)) {
             $value = $schemaDetails[Schema::SCHEMA_DEFAULT_VALUE][StageConfigInterface::STAGE_DEPLOY];

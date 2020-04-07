@@ -82,7 +82,7 @@ class GenerateSchema extends Command
     {
         $output->writeln('Starting schema dist file generation');
 
-        $data = $this->schema->getSchema();
+        $data = $this->schema->getVariables();
 
         $this->file->filePutContents(
             $this->fileList->getEnvDistConfig(),

@@ -61,7 +61,7 @@ class Validator
      */
     public function validate(string $key, string $stage, $value): ResultInterface
     {
-        $schema = $this->schema->getSchema();
+        $schema = $this->schema->getVariables();
         if (!isset($schema[$key])) {
             return $this->resultFactory->error(sprintf(
                 'The %s variable is not allowed in configuration.',
