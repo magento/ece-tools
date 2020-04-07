@@ -18,6 +18,8 @@ interface ContainerInterface extends \Psr\Container\ContainerInterface
      * @param string $abstract
      * @param array $params
      * @return mixed
+     *
+     * @throws ContainerException
      */
     public function create(string $abstract, array $params = []);
 
@@ -29,4 +31,13 @@ interface ContainerInterface extends \Psr\Container\ContainerInterface
      * @return void
      */
     public function set(string $id, $service): void;
+
+    /**
+     * {@inheritDoc}
+     *
+     * @throws ContainerException
+     *
+     * @see create() For factory-like usage
+     */
+    public function get($id);
 }

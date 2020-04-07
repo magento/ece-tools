@@ -9,19 +9,21 @@ namespace Magento\MagentoCloud\Command\Dev\UpdateComposer;
 
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Package\MagentoVersion;
+use Magento\MagentoCloud\Package\UndefinedPackageException;
 
 /**
  * Generates composer.json data for installation from git.
  */
 class ComposerGenerator
 {
-    const REPO_TYPE_SINGLE_PACKAGE = 'single-package';
+    public const REPO_TYPE_SINGLE_PACKAGE = 'single-package';
 
     /**
      * Type for packages with modules in the root directory such as Inventory
      */
-    const REPO_TYPE_FLAT_STRUCTURE = 'flat-structure';
+    public const REPO_TYPE_FLAT_STRUCTURE = 'flat-structure';
 
     /**
      * @var DirectoryList
@@ -58,6 +60,9 @@ class ComposerGenerator
      *
      * @param array $repoOptions
      * @return array
+     * @throws UndefinedPackageException
+     * @throws FileSystemException
+     *
      * @codeCoverageIgnore
      */
     public function generate(array $repoOptions): array
@@ -125,6 +130,7 @@ class ComposerGenerator
      *
      * @param array $repoOptions
      * @return array
+     * @throws UndefinedPackageException
      */
     private function getBaseComposer(array $repoOptions): array
     {
@@ -208,8 +214,11 @@ class ComposerGenerator
      * @param array $repoOptions
      * @param array $composer
      * @return array
-     * @codeCoverageIgnore
+     * @throws FilesystemException
+     *
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+     *
+     * @codeCoverageIgnore
      */
     private function addModules(array $repoOptions, array $composer): array
     {
@@ -252,7 +261,7 @@ class ComposerGenerator
      * @param string $dir
      * @param array $composer
      * @param string|null $version
-     * @throws \Magento\MagentoCloud\Filesystem\FileSystemException
+     * @throws FileSystemException
      */
     private function addModule(string $dir, array &$composer, string $version = null): void
     {
@@ -277,7 +286,7 @@ class ComposerGenerator
      */
     private function isSinglePackage(array $repoOptions): bool
     {
-        return isset($repoOptions['type']) && $repoOptions['type'] == self::REPO_TYPE_SINGLE_PACKAGE;
+        return isset($repoOptions['type']) && $repoOptions['type'] === self::REPO_TYPE_SINGLE_PACKAGE;
     }
 
     /**
@@ -288,6 +297,6 @@ class ComposerGenerator
      */
     private function isFlatStructurePackage(array $repoOptions): bool
     {
-        return isset($repoOptions['type']) && $repoOptions['type'] == self::REPO_TYPE_FLAT_STRUCTURE;
+        return isset($repoOptions['type']) && $repoOptions['type'] === self::REPO_TYPE_FLAT_STRUCTURE;
     }
 }

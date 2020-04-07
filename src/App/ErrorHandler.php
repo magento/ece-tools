@@ -7,6 +7,8 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\App;
 
+use RuntimeException;
+
 /**
  * An error handler that converts runtime errors into exceptions.
  */
@@ -43,7 +45,7 @@ class ErrorHandler
      * @param string $errorFile
      * @param int $errorLine
      * @return bool
-     * @throws \RuntimeException
+     * @throws RuntimeException
      */
     public function handle(int $errorNo, string $errorStr, string $errorFile, int $errorLine): bool
     {
