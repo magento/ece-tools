@@ -9,7 +9,7 @@ namespace Magento\MagentoCloud\Test\Unit\Filesystem;
 
 use Magento\MagentoCloud\Filesystem\ConfigFileList;
 use Magento\MagentoCloud\Filesystem\SystemList;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -23,19 +23,18 @@ class ConfigFileListTest extends TestCase
     private $configFileList;
 
     /**
-     * @var SystemList|Mock
+     * @var SystemList|MockObject
      */
     private $systemListMock;
 
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->systemListMock = $this->createMock(SystemList::class);
 
-        $this->systemListMock->expects($this->any())
-            ->method('getMagentoRoot')
+        $this->systemListMock->method('getMagentoRoot')
             ->willReturn('magento_root');
         $this->systemListMock->expects($this->any())
             ->method('getRoot')
@@ -44,32 +43,32 @@ class ConfigFileListTest extends TestCase
         $this->configFileList = new ConfigFileList($this->systemListMock);
     }
 
-    public function testGetConfig()
+    public function testGetConfig(): void
     {
         $this->assertSame('magento_root/app/etc/config.php', $this->configFileList->getConfig());
     }
 
-    public function testGetConfigLocal()
+    public function testGetConfigLocal(): void
     {
         $this->assertSame('magento_root/app/etc/config.local.php', $this->configFileList->getConfigLocal());
     }
 
-    public function testGetEnv()
+    public function testGetEnv(): void
     {
         $this->assertSame('magento_root/app/etc/env.php', $this->configFileList->getEnv());
     }
 
-    public function testGetBuildConfig()
+    public function testGetBuildConfig(): void
     {
         $this->assertSame('magento_root/build_options.ini', $this->configFileList->getBuildConfig());
     }
 
-    public function testGetToolsConfig()
+    public function testGetToolsConfig(): void
     {
         $this->assertSame('magento_root/.magento.env.yaml', $this->configFileList->getEnvConfig());
     }
 
-    public function testGetErrorReportConfig()
+    public function testGetErrorReportConfig(): void
     {
         $this->assertSame('magento_root/pub/errors/local.xml', $this->configFileList->getErrorReportConfig());
     }

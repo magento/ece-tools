@@ -10,8 +10,8 @@ namespace Magento\MagentoCloud\Test\Unit\Step\Deploy\PreDeploy;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Step\Deploy\PreDeploy\CleanFileCache;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -20,26 +20,29 @@ use Psr\Log\LoggerInterface;
 class CleanFileCacheTest extends TestCase
 {
     /**
-     * @var LoggerInterface|Mock
-     */
-    private $loggerMock;
-
-    /**
-     * @var File|Mock
-     */
-    private $fileMock;
-
-    /**
-     * @var DirectoryList|Mock
-     */
-    private $directoryListMock;
-
-    /**
      * @var CleanFileCache
      */
     private $step;
 
-    protected function setUp()
+    /**
+     * @var LoggerInterface|MockObject
+     */
+    private $loggerMock;
+
+    /**
+     * @var File|MockObject
+     */
+    private $fileMock;
+
+    /**
+     * @var DirectoryList|MockObject
+     */
+    private $directoryListMock;
+
+    /**
+     * @inheritDoc
+     */
+    protected function setUp(): void
     {
         $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
             ->getMockForAbstractClass();
@@ -53,7 +56,7 @@ class CleanFileCacheTest extends TestCase
         );
     }
 
-    public function testExecute()
+    public function testExecute(): void
     {
         $this->directoryListMock->expects($this->once())
             ->method('getMagentoRoot')
@@ -73,7 +76,7 @@ class CleanFileCacheTest extends TestCase
         $this->step->execute();
     }
 
-    public function testExecuteNoCacheDir()
+    public function testExecuteNoCacheDir(): void
     {
         $this->directoryListMock->expects($this->once())
             ->method('getMagentoRoot')

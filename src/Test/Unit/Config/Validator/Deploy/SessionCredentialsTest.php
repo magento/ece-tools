@@ -11,8 +11,8 @@ use Magento\MagentoCloud\Config\Validator\ResultInterface;
 use Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\Session\Config;
 use Magento\MagentoCloud\Config\Validator\Deploy\SessionCredentials;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -25,16 +25,19 @@ class SessionCredentialsTest extends TestCase
     private $sessionCredentials;
 
     /**
-     * @var Config|Mock
+     * @var Config|MockObject
      */
     private $sessionConfigMock;
 
     /**
-     * @var ResultFactory|Mock
+     * @var ResultFactory|MockObject
      */
     private $resultFactoryMock;
 
-    protected function setUp()
+    /**
+     * @inheritDoc
+     */
+    protected function setUp(): void
     {
         $this->sessionConfigMock = $this->createMock(Config::class);
         $this->resultFactoryMock = $this->createMock(ResultFactory::class);
@@ -49,10 +52,14 @@ class SessionCredentialsTest extends TestCase
      * @param array $sessionConfig
      * @param string $expectedResultType
      * @param string|null $expectedErrorMessage
+     *
      * @dataProvider validateDataProvider
      */
-    public function testValidate(array $sessionConfig, string $expectedResultType, string $expectedErrorMessage = null)
-    {
+    public function testValidate(
+        array $sessionConfig,
+        string $expectedResultType,
+        string $expectedErrorMessage = null
+    ): void {
         $this->sessionConfigMock->expects($this->once())
             ->method('get')
             ->willReturn($sessionConfig);
@@ -63,7 +70,10 @@ class SessionCredentialsTest extends TestCase
         $this->sessionCredentials->validate();
     }
 
-    public function validateDataProvider()
+    /**
+     * @return array
+     */
+    public function validateDataProvider(): array
     {
         return [
             [

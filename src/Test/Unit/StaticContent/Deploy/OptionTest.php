@@ -13,8 +13,8 @@ use Magento\MagentoCloud\DB\Connection;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\StaticContent\Deploy\Option;
 use Magento\MagentoCloud\StaticContent\ThreadCountOptimizer;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -27,34 +27,34 @@ class OptionTest extends TestCase
     private $option;
 
     /**
-     * @var MagentoVersion|Mock
+     * @var MagentoVersion|MockObject
      */
     private $magentoVersionMock;
 
     /**
-     * @var AdminDataInterface|Mock
+     * @var AdminDataInterface|MockObject
      */
     private $adminDataMock;
 
     /**
-     * @var Connection|Mock
+     * @var Connection|MockObject
      */
     private $connectionMock;
 
     /**
-     * @var ThreadCountOptimizer|Mock
+     * @var ThreadCountOptimizer|MockObject
      */
     private $threadCountOptimizerMock;
 
     /**
-     * @var DeployInterface|Mock
+     * @var DeployInterface|MockObject
      */
     private $stageConfigMock;
 
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
         $this->connectionMock = $this->createMock(Connection::class);
@@ -71,7 +71,7 @@ class OptionTest extends TestCase
         );
     }
 
-    public function testGetThreadCount()
+    public function testGetThreadCount(): void
     {
         $this->stageConfigMock->expects($this->exactly(2))
             ->method('get')
@@ -90,7 +90,7 @@ class OptionTest extends TestCase
     /**
      * Test getting the SCD strategy from the strategy checker.
      */
-    public function testGetStrategy()
+    public function testGetStrategy(): void
     {
         $this->stageConfigMock->expects($this->once())
             ->method('get')
@@ -105,7 +105,7 @@ class OptionTest extends TestCase
         $this->assertEquals('strategy', $this->option->getStrategy());
     }
 
-    public function testIsForce()
+    public function testIsForce(): void
     {
         $this->magentoVersionMock->expects($this->once())
             ->method('isGreaterOrEqual')
@@ -115,7 +115,7 @@ class OptionTest extends TestCase
         $this->assertTrue($this->option->isForce());
     }
 
-    public function testGetLocales()
+    public function testGetLocales(): void
     {
         $this->connectionMock->expects($this->once())
             ->method('select')
@@ -144,7 +144,7 @@ class OptionTest extends TestCase
         );
     }
 
-    public function testGetLocalesWithExistsAdminLocale()
+    public function testGetLocalesWithExistsAdminLocale(): void
     {
         $this->connectionMock->expects($this->once())
             ->method('select')
@@ -172,7 +172,7 @@ class OptionTest extends TestCase
         );
     }
 
-    public function testGetVerbosityLevel()
+    public function testGetVerbosityLevel(): void
     {
         $this->stageConfigMock->expects($this->once())
             ->method('get')
@@ -180,5 +180,17 @@ class OptionTest extends TestCase
             ->willReturn('-vv');
 
         $this->assertEquals('-vv', $this->option->getVerbosityLevel());
+    }
+
+    public function testGetMaxExecutionTime(): void
+    {
+        $this->stageConfigMock->method('get')
+            ->with(DeployInterface::VAR_SCD_MAX_EXEC_TIME)
+            ->willReturn(10);
+
+        $this->assertSame(
+            10,
+            $this->option->getMaxExecutionTime()
+        );
     }
 }

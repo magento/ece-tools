@@ -10,8 +10,8 @@ namespace Magento\MagentoCloud\Test\Unit\Config\Stage\Deploy;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Stage\Deploy\EnvironmentConfig;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -24,14 +24,14 @@ class EnvironmentConfigTest extends TestCase
     private $environmentConfig;
 
     /**
-     * @var Environment|Mock
+     * @var Environment|MockObject
      */
     private $environmentMock;
 
     /**
      * @inheritDoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->environmentMock = $this->createMock(Environment::class);
 
@@ -41,9 +41,10 @@ class EnvironmentConfigTest extends TestCase
     /**
      * @param array $expectedVariables
      * @param array $envVariables
+     *
      * @dataProvider getAllDataProvider
      */
-    public function testGetAll(array $expectedVariables, array $envVariables)
+    public function testGetAll(array $expectedVariables, array $envVariables): void
     {
         $this->environmentMock->method('getVariables')
             ->willReturn($envVariables);

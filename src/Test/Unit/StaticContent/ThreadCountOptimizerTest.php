@@ -11,8 +11,8 @@ use Magento\MagentoCloud\Config\StageConfigInterface;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\StaticContent\ThreadCountOptimizer;
 use Magento\MagentoCloud\Util\Cpu;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -26,21 +26,24 @@ class ThreadCountOptimizerTest extends TestCase
     private $optimizer;
 
     /**
-     * @var LoggerInterface|Mock
+     * @var LoggerInterface|MockObject
      */
     private $loggerMock;
 
     /**
-     * @var MagentoVersion|Mock
+     * @var MagentoVersion|MockObject
      */
     private $magentoVersionMock;
 
     /**
-     * @var Cpu|Mock
+     * @var Cpu|MockObject
      */
     private $cpuMock;
 
-    protected function setUp()
+    /**
+     * @inheritDoc
+     */
+    protected function setUp(): void
     {
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
@@ -58,6 +61,7 @@ class ThreadCountOptimizerTest extends TestCase
      * @param int $threadCount
      * @param string $strategy
      * @param int $expectedThreadCount
+     *
      * @dataProvider optimizeDataProvider
      */
     public function testOptimize(
@@ -65,7 +69,7 @@ class ThreadCountOptimizerTest extends TestCase
         int $threadCount,
         string $strategy,
         int $expectedThreadCount
-    ) {
+    ): void {
         $this->magentoVersionMock->expects($this->any())
             ->method('satisfies')
             ->willReturn($magentoVersionSatisfies);
@@ -108,7 +112,7 @@ class ThreadCountOptimizerTest extends TestCase
         ];
     }
 
-    public function testOptimizeWithNotice()
+    public function testOptimizeWithNotice(): void
     {
         $this->magentoVersionMock->expects($this->once())
             ->method('satisfies')
@@ -123,7 +127,7 @@ class ThreadCountOptimizerTest extends TestCase
         );
     }
 
-    public function testOptimizeWithOptimalValue()
+    public function testOptimizeWithOptimalValue(): void
     {
         $this->magentoVersionMock->expects($this->once())
             ->method('satisfies')
@@ -139,7 +143,7 @@ class ThreadCountOptimizerTest extends TestCase
         );
     }
 
-    public function testOptimizeWithCpuThreadsCountLowerOptimalValue()
+    public function testOptimizeWithCpuThreadsCountLowerOptimalValue(): void
     {
         $this->magentoVersionMock->expects($this->once())
             ->method('satisfies')

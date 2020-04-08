@@ -11,10 +11,10 @@ use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface;
 use Magento\MagentoCloud\Config\Magento\Env\WriterInterface;
 use Magento\MagentoCloud\DB\ConnectionInterface;
+use PHPUnit\Framework\MockObject\MockObject;
 use Psr\Log\LoggerInterface;
 use Magento\MagentoCloud\Config\State;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -24,22 +24,22 @@ class StateTest extends TestCase
     use \phpmock\phpunit\PHPMock;
 
     /**
-     * @var LoggerInterface|Mock
+     * @var LoggerInterface|MockObject
      */
     private $loggerMock;
 
     /**
-     * @var ConnectionInterface|Mock
+     * @var ConnectionInterface|MockObject
      */
     private $connectionMock;
 
     /**
-     * @var ReaderInterface|Mock
+     * @var ReaderInterface|MockObject
      */
     private $readerMock;
 
     /**
-     * @var WriterInterface|Mock
+     * @var WriterInterface|MockObject
      */
     private $writerMock;
 
@@ -51,7 +51,7 @@ class StateTest extends TestCase
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->connectionMock = $this->getMockForAbstractClass(ConnectionInterface::class);
@@ -68,9 +68,11 @@ class StateTest extends TestCase
 
     /**
      * @param mixed $tables
+     * @throws GenericException
+     *
      * @dataProvider tablesCountDataProvider
      */
-    public function testIsInstalledTablesCount($tables)
+    public function testIsInstalledTablesCount($tables): void
     {
         $this->loggerMock->expects($this->once())
             ->method('info')
@@ -94,10 +96,11 @@ class StateTest extends TestCase
 
     /**
      * @param array $tables
-     * @dataProvider tablesWithExceptionDataProvider
      * @throws GenericException
+     *
+     * @dataProvider tablesWithExceptionDataProvider
      */
-    public function testIsInstalledTablesWithException($tables)
+    public function testIsInstalledTablesWithException($tables): void
     {
         $this->expectException(\Exception::class);
 
@@ -125,7 +128,10 @@ class StateTest extends TestCase
         ];
     }
 
-    public function testIsInstalledConfigFileIsNotExistsOrEmpty()
+    /**
+     * @throws GenericException
+     */
+    public function testIsInstalledConfigFileIsNotExistsOrEmpty(): void
     {
         $date = 'Wed, 13 Sep 2017 13:41:32 +0000';
         $config['install']['date'] = $date;
@@ -155,7 +161,10 @@ class StateTest extends TestCase
         $this->assertTrue($this->state->isInstalled());
     }
 
-    public function testIsInstalledConfigFileWithDate()
+    /**
+     * @throws GenericException
+     */
+    public function testIsInstalledConfigFileWithDate(): void
     {
         $date = 'Wed, 12 Sep 2017 10:40:30 +0000';
         $config = ['install' => ['date' => $date]];
