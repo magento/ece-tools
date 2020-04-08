@@ -57,9 +57,9 @@ class ElasticSearchVersion implements ValidatorInterface
      */
     private static $versionsMap = [
         [
-            'packageVersion' => '~6.0',
-            'esVersion' => '~6.0',
-            'esVersionRaw' => '6.x',
+            'packageVersion' => '~2.0',
+            'esVersion' => '>= 1.0 < 3.0',
+            'esVersionRaw' => '1.x or 2.x',
         ],
         [
             'packageVersion' => '~5.0',
@@ -67,9 +67,14 @@ class ElasticSearchVersion implements ValidatorInterface
             'esVersionRaw' => '5.x',
         ],
         [
-            'packageVersion' => '~2.0',
-            'esVersion' => '>= 1.0 < 3.0',
-            'esVersionRaw' => '1.x or 2.x',
+            'packageVersion' => '~6.0',
+            'esVersion' => '~6.0',
+            'esVersionRaw' => '6.x',
+        ],
+        [
+            'packageVersion' => '~7.0',
+            'esVersion' => '~7.0',
+            'esVersionRaw' => '7.x',
         ],
     ];
 
@@ -126,7 +131,7 @@ class ElasticSearchVersion implements ValidatorInterface
                     return $this->generateError($esServiceVersion, $esPackageVersion, $versionInfo);
                 }
             }
-        } catch (\Exception $e) {
+        } catch (UndefinedPackageException $e) {
             $this->logger->warning('Can\'t validate version of elasticsearch: ' . $e->getMessage());
         }
 
