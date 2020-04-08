@@ -63,7 +63,7 @@ class HookCheckerTest extends TestCase
                 true,
             ],
             [
-                ['post_deploy' => 'php test\nphp test2\n'],
+                ['post_deploy' => 'php ./vendor/bin/ece-tools run'],
                 true,
             ],
             [

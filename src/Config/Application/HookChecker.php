@@ -38,6 +38,8 @@ class HookChecker
     {
         $appConfig = $this->environment->getApplication();
 
-        return !empty($appConfig['hooks'][self::HOOK_POST_DEPLOY]);
+        $postDeployHooks = $appConfig['hooks'][self::HOOK_POST_DEPLOY] ?? '';
+
+        return false !== strpos($postDeployHooks, '/ece-tools');
     }
 }
