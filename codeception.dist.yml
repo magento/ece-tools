@@ -41,10 +41,8 @@ modules:
           user: "%Magento.docker.settings.db.username%"
           password: "%Magento.docker.settings.db.password%"
           exposed_port: "%Magento.docker.settings.db_quote.port%"
-          reconnect: true
         db_sales:
           dsn: "mysql:host=%Magento.docker.settings.db.host%;port=%Magento.docker.settings.db_sales.port%;dbname=%Magento.docker.settings.db.path%"
           user: "%Magento.docker.settings.db.username%"
           password: "%Magento.docker.settings.db.password%"
           exposed_port: "%Magento.docker.settings.db_sales.port%"
-          reconnect: true
