@@ -78,7 +78,7 @@ class Schema
             return $this->defaults[$stage];
         }
 
-        foreach ($this->getSchema() as $itemName => $itemOptions) {
+        foreach ($this->getVariables() as $itemName => $itemOptions) {
             if (array_key_exists($stage, $itemOptions[self::SCHEMA_DEFAULT_VALUE])) {
                 $this->defaults[$stage][$itemName] = $itemOptions[self::SCHEMA_DEFAULT_VALUE][$stage];
             }
@@ -88,7 +88,7 @@ class Schema
     }
 
     /**
-     * Returns configuration schema.
+     * Returns variables configuration.
      *
      * Each configuration item can have next options:
      * 'type' - possible types (string, integer, array, etc..)
@@ -99,11 +99,13 @@ class Schema
      * @return array
      * @throws \Magento\MagentoCloud\Filesystem\FileSystemException
      */
-    public function getSchema(): array
+    public function getVariables(): array
     {
-        return $this->parser->parse(
+        $schema = $this->parser->parse(
             $this->file->fileGetContents($this->systemList->getConfig() . '/schema.yaml'),
             Yaml::PARSE_CONSTANT
         );
+
+        return $schema['variables'] ?? [];
     }
 }
