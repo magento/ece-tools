@@ -8,11 +8,9 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit\StaticContent;
 
 use Magento\MagentoCloud\StaticContent\ThemeResolver;
-use Magento\MagentoCloud\Filesystem\DirectoryList;
+use PHPUnit\Framework\MockObject\MockObject;
 use Psr\Log\LoggerInterface;
-use Magento\MagentoCloud\Filesystem\Driver\File;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -25,26 +23,31 @@ class ThemeResolverTest extends TestCase
     private $themeResolver;
 
     /**
-     * @var LoggerInterface|Mock
+     * @var LoggerInterface|MockObject
      */
     private $loggerMock;
 
-    protected function setUp()
+    /**
+     * @inheritDoc
+     */
+    protected function setUp(): void
     {
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
 
         $this->themeResolver = $this->getMockBuilder(ThemeResolver::class)
-            ->setMethods(array('getThemes'))
+            ->setMethods(['getThemes'])
             ->setConstructorArgs([
                 $this->loggerMock,
-                ])
-            ->getMock();
+            ])->getMock();
     }
 
     /**
+     * @param string $expectedReturn
+     * @param string $passedTheme
+     *
      * @dataProvider testResolveDataProvider
      */
-    public function testResolve(string $expectedReturn, string $passedTheme)
+    public function testResolve(string $expectedReturn, string $passedTheme): void
     {
         $this->themeResolver->expects($this->once())
             ->method('getThemes')
@@ -63,7 +66,7 @@ class ThemeResolverTest extends TestCase
         );
     }
 
-    public function testResolveDataProvider()
+    public function testResolveDataProvider(): array
     {
         return [
             'Incorrect Theme' => [
@@ -77,15 +80,13 @@ class ThemeResolverTest extends TestCase
         ];
     }
 
-    public function testCorrect()
+    public function testCorrect(): void
     {
         $this->themeResolver->expects($this->once())
             ->method('getThemes')
             ->willReturn(['SomeVendor/sometheme']);
-
         $this->loggerMock->expects($this->never())
             ->method('warning');
-
         $this->loggerMock->expects($this->never())
             ->method('error');
 
@@ -95,16 +96,14 @@ class ThemeResolverTest extends TestCase
         );
     }
 
-    public function testNoResolve()
+    public function testNoResolve(): void
     {
         $this->themeResolver->expects($this->once())
             ->method('getThemes')
             ->willReturn(['SomeVendor/sometheme']);
-
         $this->loggerMock->expects($this->once())
             ->method('warning')
             ->willReturn('Theme SomeVendor/doesntExist does not exist, attempting to resolve.');
-
         $this->loggerMock->expects($this->once())
             ->method('error')
             ->willReturn('Unable to resolve theme.');

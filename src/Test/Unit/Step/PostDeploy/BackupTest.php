@@ -10,9 +10,10 @@ namespace Magento\MagentoCloud\Test\Unit\Step\PostDeploy;
 use Magento\MagentoCloud\Step\PostDeploy\Backup;
 use Magento\MagentoCloud\Filesystem\BackupList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Step\StepException;
+use PHPUnit\Framework\MockObject\MockObject;
 use Psr\Log\LoggerInterface;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -20,29 +21,29 @@ use PHPUnit_Framework_MockObject_MockObject as Mock;
 class BackupTest extends TestCase
 {
     /**
-     * @var BackupList|Mock
-     */
-    private $backupListMock;
-
-    /**
-     * @var LoggerInterface|Mock
-     */
-    private $loggerMock;
-
-    /**
-     * @var File|Mock
-     */
-    private $fileMock;
-
-    /**
      * @var Backup
      */
     private $backup;
 
     /**
+     * @var BackupList|MockObject
+     */
+    private $backupListMock;
+
+    /**
+     * @var LoggerInterface|MockObject
+     */
+    private $loggerMock;
+
+    /**
+     * @var File|MockObject
+     */
+    private $fileMock;
+
+    /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->backupListMock = $this->createMock(BackupList::class);
         $this->fileMock = $this->createMock(File::class);
@@ -56,7 +57,10 @@ class BackupTest extends TestCase
         );
     }
 
-    public function testExecute()
+    /**
+     * @throws StepException
+     */
+    public function testExecute(): void
     {
         $configPath = 'path/config.php';
         $envPath = 'path/env.php';

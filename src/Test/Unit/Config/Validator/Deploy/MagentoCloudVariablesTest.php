@@ -12,8 +12,8 @@ use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Config\Validator;
 use Magento\MagentoCloud\Config\Validator\Deploy\MagentoCloudVariables;
 use Magento\MagentoCloud\Config\Validator\ResultInterface;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -26,19 +26,19 @@ class MagentoCloudVariablesTest extends TestCase
     private $validator;
 
     /**
-     * @var Environment|Mock
+     * @var Environment|MockObject
      */
     private $environmentMock;
 
     /**
-     * @var Validator\ResultFactory|Mock
+     * @var Validator\ResultFactory|MockObject
      */
     private $resultFactoryMock;
 
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->environmentMock = $this->createMock(Environment::class);
         $this->resultFactoryMock = $this->createMock(Validator\ResultFactory::class);
@@ -53,13 +53,14 @@ class MagentoCloudVariablesTest extends TestCase
      * @param array $magentoCloudVariables
      * @param string $expectedResultType
      * @param string|null $suggestionMessage
+     *
      * @dataProvider validateDataProvider
      */
     public function testValidate(
         array $magentoCloudVariables,
         string $expectedResultType,
         string $suggestionMessage = null
-    ) {
+    ): void {
         $this->environmentMock->expects($this->once())
             ->method('getVariables')
             ->willReturn($magentoCloudVariables);
@@ -75,6 +76,7 @@ class MagentoCloudVariablesTest extends TestCase
 
     /**
      * @return array
+     *
      * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
     public function validateDataProvider(): array

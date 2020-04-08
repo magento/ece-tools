@@ -11,6 +11,7 @@ use Magento\MagentoCloud\Step\Build\ComposerDumpAutoload;
 use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Magento\MagentoCloud\Step\StepException;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -24,14 +25,14 @@ class ComposerDumpAutoloadTest extends TestCase
     private $step;
 
     /**
-     * @var ShellInterface|\PHPUnit_Framework_MockObject_MockObject
+     * @var ShellInterface|MockObject
      */
     private $shell;
 
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->shell = $this->getMockBuilder(ShellInterface::class)
             ->getMockForAbstractClass();
@@ -41,7 +42,10 @@ class ComposerDumpAutoloadTest extends TestCase
         );
     }
 
-    public function testExecute()
+    /**
+     * @throws StepException
+     */
+    public function testExecute(): void
     {
         $this->shell->expects($this->once())
             ->method('execute')
@@ -50,7 +54,10 @@ class ComposerDumpAutoloadTest extends TestCase
         $this->step->execute();
     }
 
-    public function testExecuteWithException()
+    /**
+     * @throws StepException
+     */
+    public function testExecuteWithException(): void
     {
         $this->expectException(StepException::class);
         $this->expectExceptionMessage('something went wrong');

@@ -9,8 +9,8 @@ namespace Magento\MagentoCloud\Test\Unit\Command;
 
 use Magento\MagentoCloud\Command\BackupRestore;
 use Magento\MagentoCloud\Command\Backup\Restore;
+use PHPUnit\Framework\MockObject\MockObject;
 use Psr\Log\LoggerInterface;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Tester\CommandTester;
 use Symfony\Component\Console\Helper\HelperSet;
@@ -22,22 +22,22 @@ use Symfony\Component\Console\Helper\QuestionHelper;
 class BackupRestoreTest extends TestCase
 {
     /**
-     * @var Restore|Mock
+     * @var Restore|MockObject
      */
     private $restoreMock;
 
     /**
-     * @var LoggerInterface|Mock
+     * @var LoggerInterface|MockObject
      */
     private $loggerMock;
 
     /**
-     * @var HelperSet|Mock
+     * @var HelperSet|MockObject
      */
     private $helperSetMock;
 
     /**
-     * @var QuestionHelper|Mock
+     * @var QuestionHelper|MockObject
      */
     private $questionMock;
 
@@ -70,7 +70,7 @@ class BackupRestoreTest extends TestCase
      * @param int $runExpected
      * @dataProvider executeDataProvider
      */
-    public function testExecute(int $askExpected, bool $askAnswer, array $options, int $runExpected)
+    public function testExecute(int $askExpected, bool $askAnswer, array $options, int $runExpected): void
     {
         $this->helperSetMock->expects($this->exactly($askExpected))
             ->method('get')
@@ -94,16 +94,16 @@ class BackupRestoreTest extends TestCase
     public function executeDataProvider(): array
     {
         return [
-            ['askExpected' => 0,'askAnswer' => true, 'options' => [], 'runExpected' => 1],
-            ['askExpected' => 0,'askAnswer' => false, 'options' => [], 'runExpected' => 1],
-            ['askExpected' => 1,'askAnswer' => false, 'options' => ['-f' => true], 'runExpected' => 0],
-            ['askExpected' => 1,'askAnswer' => true, 'options' => ['-f' => true], 'runExpected' => 1],
-            ['askExpected' => 1,'askAnswer' => false, 'options' => ['--force' => true], 'runExpected' => 0],
-            ['askExpected' => 1,'askAnswer' => true, 'options' => ['--force' => true], 'runExpected' => 1],
+            ['askExpected' => 0, 'askAnswer' => true, 'options' => [], 'runExpected' => 1],
+            ['askExpected' => 0, 'askAnswer' => false, 'options' => [], 'runExpected' => 1],
+            ['askExpected' => 1, 'askAnswer' => false, 'options' => ['-f' => true], 'runExpected' => 0],
+            ['askExpected' => 1, 'askAnswer' => true, 'options' => ['-f' => true], 'runExpected' => 1],
+            ['askExpected' => 1, 'askAnswer' => false, 'options' => ['--force' => true], 'runExpected' => 0],
+            ['askExpected' => 1, 'askAnswer' => true, 'options' => ['--force' => true], 'runExpected' => 1],
         ];
     }
 
-    public function testExecuteWithException()
+    public function testExecuteWithException(): void
     {
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage('Sorry error');
