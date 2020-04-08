@@ -8,9 +8,10 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit\Step\Deploy\InstallUpdate\ConfigUpdate\Urls;
 
 use Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\Urls\Environment;
+use Magento\MagentoCloud\Step\StepException;
 use PHPUnit\Framework\MockObject\Matcher\InvokedCount;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface;
 use Magento\MagentoCloud\Config\Magento\Env\WriterInterface;
 use Psr\Log\LoggerInterface;
@@ -27,22 +28,22 @@ class EnvironmentTest extends TestCase
     private $step;
 
     /**
-     * @var LoggerInterface|Mock
+     * @var LoggerInterface|MockObject
      */
     private $loggerMock;
 
     /**
-     * @var UrlManager|Mock
+     * @var UrlManager|MockObject
      */
     private $urlManagerMock;
 
     /**
-     * @var ReaderInterface|Mock
+     * @var ReaderInterface|MockObject
      */
     private $readerMock;
 
     /**
-     * @var WriterInterface|Mock
+     * @var WriterInterface|MockObject
      */
     private $writerMock;
 
@@ -68,13 +69,16 @@ class EnvironmentTest extends TestCase
      * @param InvokedCount $loggerInfoExpects
      * @param array $urlManagerGetUrlsWillReturn
      * @param InvokedCount $writerWriteExpects
+     *
+     * @throws StepException
+     *
      * @dataProvider executeDataProvider
      */
     public function testExecute(
         InvokedCount $loggerInfoExpects,
         array $urlManagerGetUrlsWillReturn,
         InvokedCount $writerWriteExpects
-    ) {
+    ): void {
         $this->loggerMock->expects($loggerInfoExpects)
             ->method('info')
             ->withConsecutive(
@@ -146,7 +150,10 @@ class EnvironmentTest extends TestCase
         ];
     }
 
-    public function testExecuteWithPlaceholders()
+    /**
+     * @throws StepException
+     */
+    public function testExecuteWithPlaceholders(): void
     {
         $this->loggerMock->expects($this->once())
             ->method('info')

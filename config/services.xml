@@ -51,6 +51,7 @@
         <service id="Magento\MagentoCloud\Service\ServiceMismatchException" autowire="false" />
         <service id="Magento\MagentoCloud\Shell\Process" autowire="false" />
         <service id="Magento\MagentoCloud\Shell\ProcessException" autowire="false" />
+        <service id="Magento\MagentoCloud\App\LoggerException" autowire="false" />
         <service id="Symfony\Component\Yaml\Parser" autowire="false" />
         <service id="Symfony\Component\Yaml\Dumper" autowire="false" />
         <!-- Service argument configuration -->

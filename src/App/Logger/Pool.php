@@ -7,8 +7,10 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\App\Logger;
 
+use Magento\MagentoCloud\App\LoggerException;
 use Monolog\Handler\HandlerInterface;
 use Magento\MagentoCloud\Config\Log as LogConfig;
+use Exception;
 
 /**
  * The pool of handlers.
@@ -52,7 +54,7 @@ class Pool
 
     /**
      * @return HandlerInterface[]
-     * @throws \Exception If can't create handlers from config.
+     * @throws LoggerException If can't create handlers from config.
      */
     public function getHandlers(): array
     {
@@ -62,14 +64,22 @@ class Pool
 
         $this->handlers = [];
 
-        foreach ($this->logConfig->getHandlers() as $handlerName => $handlerConfig) {
-            $handler = $this->handlerFactory->create($handlerName);
+        try {
+            foreach ($this->logConfig->getHandlers() as $handlerName => $handlerConfig) {
+                $handler = $this->handlerFactory->create($handlerName);
 
-            if (empty($handlerConfig['use_default_formatter'])) {
-                $handler->setFormatter($this->lineFormatterFactory->create());
+                if (empty($handlerConfig['use_default_formatter'])) {
+                    $handler->setFormatter($this->lineFormatterFactory->create());
+                }
+
+                $this->handlers[] = $handler;
             }
-
-            $this->handlers[] = $handler;
+        } catch (Exception $exception) {
+            throw new LoggerException(
+                $exception->getMessage(),
+                $exception->getCode(),
+                $exception
+            );
         }
 
         return $this->handlers;

@@ -7,8 +7,9 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Step\Build\BackupData;
 
+use Magento\MagentoCloud\Step\StepException;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
@@ -27,22 +28,22 @@ class StaticContentTest extends TestCase
     private $step;
 
     /**
-     * @var File|Mock
+     * @var File|MockObject
      */
     private $fileMock;
 
     /**
-     * @var LoggerInterface|Mock
+     * @var LoggerInterface|MockObject
      */
     private $loggerMock;
 
     /**
-     * @var DirectoryList|Mock
+     * @var DirectoryList|MockObject
      */
     private $directoryListMock;
 
     /**
-     * @var FlagManager|Mock
+     * @var FlagManager|MockObject
      */
     private $flagManagerMock;
 
@@ -61,7 +62,10 @@ class StaticContentTest extends TestCase
      */
     private $originalPubStaticPath = 'magento_root/pub/static';
 
-    protected function setUp()
+    /**
+     * @inheritDoc
+     */
+    protected function setUp(): void
     {
         $this->fileMock = $this->createMock(File::class);
         $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
@@ -82,7 +86,10 @@ class StaticContentTest extends TestCase
         );
     }
 
-    public function testExecuteFlagSCDInBuildExistsAndInitPubStaticExists()
+    /**
+     * @throws StepException
+     */
+    public function testExecuteFlagSCDInBuildExistsAndInitPubStaticExists(): void
     {
         $this->flagManagerMock->expects($this->once())
             ->method('exists')
@@ -98,8 +105,7 @@ class StaticContentTest extends TestCase
             ->method('isExists')
             ->withConsecutive(
                 [$this->initPubStaticPath]
-            )
-            ->willReturn(true);
+            )->willReturn(true);
         $this->loggerMock->expects($this->exactly(3))
             ->method('info')
             ->withConsecutive(
@@ -116,14 +122,16 @@ class StaticContentTest extends TestCase
         $this->fileMock->expects($this->once())
             ->method('rename')
             ->with($this->originalPubStaticPath, $this->initPubStaticPath);
-
         $this->fileMock->expects($this->never())
             ->method('copyDirectory');
 
         $this->step->execute();
     }
 
-    public function testExecuteFlagSCDInBuildExistsAndInitPubStaticDoesNotExist()
+    /**
+     * @throws StepException
+     */
+    public function testExecuteFlagSCDInBuildExistsAndInitPubStaticDoesNotExist(): void
     {
         $this->flagManagerMock->expects($this->once())
             ->method('exists')
@@ -166,7 +174,10 @@ class StaticContentTest extends TestCase
         $this->step->execute();
     }
 
-    public function testExecuteSCDInAndInitPubStaticDoesNotExistAndRecreatePubStatic()
+    /**
+     * @throws StepException
+     */
+    public function testExecuteSCDInAndInitPubStaticDoesNotExistAndRecreatePubStatic(): void
     {
         $this->flagManagerMock->expects($this->once())
             ->method('exists')
@@ -182,8 +193,7 @@ class StaticContentTest extends TestCase
             ->method('isExists')
             ->withConsecutive(
                 [$this->initPubStaticPath]
-            )
-            ->willReturnOnConsecutiveCalls(false, false);
+            )->willReturnOnConsecutiveCalls(false, false);
         $this->loggerMock->expects($this->exactly(3))
             ->method('info')
             ->withConsecutive(
@@ -199,8 +209,7 @@ class StaticContentTest extends TestCase
             ->withConsecutive(
                 [$this->initPubStaticPath],
                 [$this->originalPubStaticPath]
-            )
-            ->willReturn(true);
+            )->willReturn(true);
         $this->fileMock->expects($this->once())
             ->method('rename')
             ->with($this->originalPubStaticPath, $this->initPubStaticPath);
@@ -210,28 +219,25 @@ class StaticContentTest extends TestCase
         $this->step->execute();
     }
 
-    public function testExecuteFlagSCDInBuildDoesNotExist()
+    /**
+     * @throws StepException
+     */
+    public function testExecuteFlagSCDInBuildDoesNotExist(): void
     {
         $this->flagManagerMock->expects($this->once())
             ->method('exists')
             ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)
             ->willReturn(false);
-
         $this->directoryListMock->expects($this->never())
             ->method('getPath');
-
         $this->fileMock->expects($this->never())
             ->method('isExists');
-
         $this->fileMock->expects($this->never())
             ->method('backgroundClearDirectory');
-
         $this->fileMock->expects($this->never())
             ->method('createDirectory');
-
         $this->fileMock->expects($this->never())
             ->method('copyDirectory');
-
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('SCD not performed during build');
@@ -239,7 +245,10 @@ class StaticContentTest extends TestCase
         $this->step->execute();
     }
 
-    public function testRenameFails()
+    /**
+     * @throws StepException
+     */
+    public function testRenameFails(): void
     {
         $this->flagManagerMock->expects($this->once())
             ->method('exists')
@@ -255,8 +264,7 @@ class StaticContentTest extends TestCase
             ->method('isExists')
             ->withConsecutive(
                 [$this->initPubStaticPath]
-            )
-            ->willReturn(false, true);
+            )->willReturn(false, true);
         $this->loggerMock->expects($this->once())
             ->method('notice')
             ->with('Can\'t move static content. Copying static content to init directory');

@@ -23,7 +23,7 @@ class SystemListTest extends TestCase
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->systemList = new SystemList(
             'tools_root',
@@ -31,7 +31,7 @@ class SystemListTest extends TestCase
         );
     }
 
-    public function testGetRoot()
+    public function testGetRoot(): void
     {
         $this->assertSame(
             'tools_root',
@@ -39,11 +39,19 @@ class SystemListTest extends TestCase
         );
     }
 
-    public function testGetMagentoRoot()
+    public function testGetMagentoRoot(): void
     {
         $this->assertSame(
             'magento_root',
             $this->systemList->getMagentoRoot()
+        );
+    }
+
+    public function testGetConfig(): void
+    {
+        $this->assertSame(
+            'tools_root/config',
+            $this->systemList->getConfig()
         );
     }
 }

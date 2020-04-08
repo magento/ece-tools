@@ -13,8 +13,9 @@ use Magento\MagentoCloud\Config\GlobalSection as GlobalConfig;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Step\Build\BackupData\WritableDirectories;
+use Magento\MagentoCloud\Step\StepException;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -27,27 +28,27 @@ class WritableDirectoriesTest extends TestCase
     public $step;
 
     /**
-     * @var File|Mock
+     * @var File|MockObject
      */
     private $fileMock;
 
     /**
-     * @var DirectoryList|Mock
+     * @var DirectoryList|MockObject
      */
     private $directoryListMock;
 
     /**
-     * @var GlobalConfig|Mock
+     * @var GlobalConfig|MockObject
      */
     private $globalConfigMock;
 
     /**
-     * @var Logger|Mock
+     * @var Logger|MockObject
      */
     private $loggerMock;
 
     /**
-     * @var LoggerPool|Mock
+     * @var LoggerPool|MockObject
      */
     private $loggerPoolMock;
 
@@ -82,31 +83,20 @@ class WritableDirectoriesTest extends TestCase
         $this->loggerMock = $this->createMock(Logger::class);
         $this->loggerPoolMock = $this->createMock(LoggerPool::class);
 
-        $this->step = new WritableDirectories(
-            $this->fileMock,
-            $this->directoryListMock,
-            $this->globalConfigMock,
-            $this->loggerMock,
-            $this->loggerPoolMock
-        );
-
         $this->directoryListMock->expects($this->once())
             ->method('getMagentoRoot')
             ->willReturn($this->magentoRootDir);
-
         $this->directoryListMock->expects($this->exactly(3))
             ->method('getPath')
             ->withConsecutive(
                 [DirectoryList::DIR_INIT],
                 [DirectoryList::DIR_VIEW_PREPROCESSED],
                 [DirectoryList::DIR_LOG]
-            )
-            ->willReturnOnConsecutiveCalls(
+            )->willReturnOnConsecutiveCalls(
                 $this->rootInitDir,
                 $this->viewPreprocessedDir,
                 $this->logDir
             );
-
         $this->directoryListMock->expects($this->once())
             ->method('getWritableDirectories')
             ->willReturn([
@@ -115,9 +105,20 @@ class WritableDirectoriesTest extends TestCase
                 $this->logDir,
                 'some/path/2',
             ]);
+
+        $this->step = new WritableDirectories(
+            $this->fileMock,
+            $this->directoryListMock,
+            $this->globalConfigMock,
+            $this->loggerMock,
+            $this->loggerPoolMock
+        );
     }
 
-    public function testExecuteCopyingViewPreprocessed()
+    /**
+     * @throws StepException
+     */
+    public function testExecuteCopyingViewPreprocessed(): void
     {
         $this->loggerMock->expects($this->once())
             ->method('info')
@@ -147,7 +148,6 @@ class WritableDirectoriesTest extends TestCase
                     ),
                 ]
             );
-
         $this->fileMock->expects($this->exactly(3))
             ->method('isExists')
             ->withConsecutive(
@@ -156,15 +156,12 @@ class WritableDirectoriesTest extends TestCase
                 [$this->magentoRootDir . '/some/path/2']
             )
             ->willReturnOnConsecutiveCalls(true, true, false);
-
         $this->loggerMock->expects($this->once())
             ->method('notice')
             ->with('Directory magento_root/some/path/2 does not exist.');
-
         $this->globalConfigMock->expects($this->once())
             ->method('get')
             ->willReturn(false);
-
         $this->fileMock->expects($this->exactly(3))
             ->method('createDirectory')
             ->withConsecutive(
@@ -182,7 +179,6 @@ class WritableDirectoriesTest extends TestCase
                 ],
                 [$this->magentoRootDir . '/' . $this->logDir, $this->rootInitDir . '/' . $this->logDir]
             );
-
         $this->loggerPoolMock->expects($this->once())
             ->method('getHandlers')
             ->willReturn(['handler1', 'handler2']);
@@ -196,7 +192,10 @@ class WritableDirectoriesTest extends TestCase
         $this->step->execute();
     }
 
-    public function testExecuteSkipCopyingViewPreprocessed()
+    /**
+     * @throws StepException
+     */
+    public function testExecuteSkipCopyingViewPreprocessed(): void
     {
         $this->loggerMock->expects($this->once())
             ->method('info')
@@ -219,7 +218,6 @@ class WritableDirectoriesTest extends TestCase
                     )
                 ]
             );
-
         $this->fileMock->expects($this->exactly(3))
             ->method('isExists')
             ->withConsecutive(
@@ -228,7 +226,6 @@ class WritableDirectoriesTest extends TestCase
                 [$this->magentoRootDir . '/some/path/2']
             )
             ->willReturnOnConsecutiveCalls(true, true, false);
-
         $this->loggerMock->expects($this->exactly(2))
             ->method('notice')
             ->withConsecutive(
@@ -241,11 +238,9 @@ class WritableDirectoriesTest extends TestCase
                 ],
                 ['Directory magento_root/some/path/2 does not exist.']
             );
-
         $this->globalConfigMock->expects($this->once())
             ->method('get')
             ->willReturn(true);
-
         $this->fileMock->expects($this->exactly(2))
             ->method('createDirectory')
             ->withConsecutive(
@@ -258,7 +253,6 @@ class WritableDirectoriesTest extends TestCase
                 [$this->magentoRootDir . '/some/path/1', $this->rootInitDir . '/some/path/1'],
                 [$this->magentoRootDir . '/' . $this->logDir, $this->rootInitDir . '/' . $this->logDir]
             );
-
         $this->loggerPoolMock->expects($this->once())
             ->method('getHandlers')
             ->willReturn(['handler1', 'handler2']);

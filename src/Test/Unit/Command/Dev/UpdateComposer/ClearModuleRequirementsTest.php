@@ -10,8 +10,8 @@ namespace Magento\MagentoCloud\Test\Unit\Command\Dev\UpdateComposer;
 use Magento\MagentoCloud\Command\Dev\UpdateComposer\ClearModuleRequirements;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -19,12 +19,12 @@ use PHPUnit_Framework_MockObject_MockObject as Mock;
 class ClearModuleRequirementsTest extends TestCase
 {
     /**
-     * @var DirectoryList|Mock
+     * @var DirectoryList|MockObject
      */
     private $directoryListMock;
 
     /**
-     * @var File|Mock
+     * @var File|MockObject
      */
     private $fileMock;
 
@@ -47,7 +47,7 @@ class ClearModuleRequirementsTest extends TestCase
         );
     }
 
-    public function testGenerate()
+    public function testGenerate(): void
     {
         $this->directoryListMock->expects($this->once())
             ->method('getMagentoRoot')

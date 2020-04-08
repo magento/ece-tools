@@ -8,12 +8,12 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit\Command\Backup;
 
 use Magento\MagentoCloud\Command\Backup\Restore;
+use PHPUnit\Framework\MockObject\MockObject;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Magento\MagentoCloud\Filesystem\BackupList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -21,12 +21,12 @@ use PHPUnit_Framework_MockObject_MockObject as Mock;
 class RestoreTest extends TestCase
 {
     /**
-     * @var BackupList|Mock
+     * @var BackupList|MockObject
      */
     private $backupListMock;
 
     /**
-     * @var File|Mock
+     * @var File|MockObject
      */
     private $fileMock;
 
@@ -71,10 +71,10 @@ class RestoreTest extends TestCase
         $filePath = 'path/config.php';
         $backupPath = $filePath . BackupList::BACKUP_SUFFIX;
 
-        /** @var InputInterface|Mock $inputMock */
+        /** @var InputInterface|MockObject $inputMock */
         $inputMock = $this->getMockBuilder(InputInterface::class)
             ->getMockForAbstractClass();
-        /** @var OutputInterface|Mock $outputMock */
+        /** @var OutputInterface|MockObject $outputMock */
         $outputMock = $this->getMockBuilder(OutputInterface::class)
             ->getMockForAbstractClass();
 

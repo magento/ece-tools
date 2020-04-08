@@ -9,8 +9,8 @@ namespace Magento\MagentoCloud\Test\Unit\Cron;
 
 use Magento\MagentoCloud\DB\ConnectionInterface;
 use Magento\MagentoCloud\Cron\JobUnlocker;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -18,7 +18,7 @@ use PHPUnit_Framework_MockObject_MockObject as Mock;
 class JobUnlockerTest extends TestCase
 {
     /**
-     * @var ConnectionInterface|Mock
+     * @var ConnectionInterface|MockObject
      */
     private $connectionMock;
 
@@ -30,14 +30,14 @@ class JobUnlockerTest extends TestCase
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->connectionMock = $this->getMockForAbstractClass(ConnectionInterface::class);
 
         $this->cronJobUnlocker = new JobUnlocker($this->connectionMock);
     }
 
-    public function testUnlockAll()
+    public function testUnlockAll(): void
     {
         $this->connectionMock->expects($this->once())
             ->method('affectingQuery')
@@ -59,13 +59,13 @@ class JobUnlockerTest extends TestCase
         $this->assertEquals(3, $this->cronJobUnlocker->unlockAll('some message'));
     }
 
-    public function testUnlockByJobCode()
+    public function testUnlockByJobCode(): void
     {
         $this->connectionMock->expects($this->once())
             ->method('affectingQuery')
             ->with(
                 'UPDATE `cron_schedule` SET `status` = :to_status, `messages` = :messages'
-                    . ' WHERE `status` = :from_status AND `job_code` = :job_code',
+                . ' WHERE `status` = :from_status AND `job_code` = :job_code',
                 [
                     ':to_status' => JobUnlocker::STATUS_ERROR,
                     ':from_status' => JobUnlocker::STATUS_RUNNING,

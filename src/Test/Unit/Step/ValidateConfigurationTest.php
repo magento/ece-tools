@@ -12,7 +12,7 @@ use Magento\MagentoCloud\Config\Validator\Result;
 use Magento\MagentoCloud\Config\ValidatorInterface;
 use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\ValidateConfiguration;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
@@ -22,7 +22,7 @@ use Psr\Log\LoggerInterface;
 class ValidateConfigurationTest extends TestCase
 {
     /**
-     * @var LoggerInterface|Mock
+     * @var LoggerInterface|MockObject
      */
     private $loggerMock;
 
@@ -32,9 +32,9 @@ class ValidateConfigurationTest extends TestCase
     }
 
     /**
-     * @throws \Magento\MagentoCloud\Step\StepException
+     * @throws StepException
      */
-    public function testExecuteWithoutValidators()
+    public function testExecuteWithoutValidators(): void
     {
         $step = new ValidateConfiguration(
             $this->loggerMock,
@@ -53,7 +53,10 @@ class ValidateConfigurationTest extends TestCase
         $step->execute();
     }
 
-    public function testExecuteWithCriticalError()
+    /**
+     * @throws StepException
+     */
+    public function testExecuteWithCriticalError(): void
     {
         $this->expectException(StepException::class);
         $this->expectExceptionMessage('Fix configuration with given suggestions');
@@ -83,9 +86,9 @@ class ValidateConfigurationTest extends TestCase
     }
 
     /**
-     * @throws \Magento\MagentoCloud\Step\StepException
+     * @throws StepException
      */
-    public function testExecuteWithWarningMessage()
+    public function testExecuteWithWarningMessage(): void
     {
         $this->loggerMock->expects($this->exactly(2))
             ->method('notice')
@@ -112,7 +115,10 @@ class ValidateConfigurationTest extends TestCase
         $step->execute();
     }
 
-    public function testExecuteWithWarningAndCriticalMessage()
+    /**
+     * @throws StepException
+     */
+    public function testExecuteWithWarningAndCriticalMessage(): void
     {
         $this->expectException(StepException::class);
         $this->expectExceptionMessage('Fix configuration with given suggestions');
@@ -146,7 +152,10 @@ class ValidateConfigurationTest extends TestCase
         $step->execute();
     }
 
-    public function testExecuteTypeStringLevel()
+    /**
+     * @throws StepException
+     */
+    public function testExecuteTypeStringLevel(): void
     {
         $this->expectException(StepException::class);
         $this->expectExceptionMessage('Fix configuration with given suggestions');
@@ -191,9 +200,9 @@ class ValidateConfigurationTest extends TestCase
     /**
      * @param string $error
      * @param string $suggestion
-     * @return \PHPUnit\Framework\MockObject\MockObject|ValidatorInterface
+     * @return MockObject|ValidatorInterface
      */
-    private function createValidatorWithError(string $error, string $suggestion)
+    private function createValidatorWithError(string $error, string $suggestion): MockObject
     {
         $warningValidator = $this->getMockForAbstractClass(ValidatorInterface::class);
         $warningResultMock = $this->createMock(Result\Error::class);

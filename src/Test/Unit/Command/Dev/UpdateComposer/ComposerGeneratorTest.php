@@ -11,8 +11,8 @@ use Magento\MagentoCloud\Command\Dev\UpdateComposer\ComposerGenerator;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Package\MagentoVersion;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -44,17 +44,17 @@ class ComposerGeneratorTest extends TestCase
     ];
 
     /**
-     * @var DirectoryList|Mock
+     * @var DirectoryList|MockObject
      */
     private $directoryListMock;
 
     /**
-     * @var File|Mock
+     * @var File|MockObject
      */
     private $fileMock;
 
     /**
-     * @var MagentoVersion|Mock
+     * @var MagentoVersion|MockObject
      */
     private $magentoVersionMock;
 
@@ -84,7 +84,7 @@ class ComposerGeneratorTest extends TestCase
         $this->assertInstallFromGitScripts($this->composerGenerator->getInstallFromGitScripts($this->repoOptions));
     }
 
-    public function testGenerate()
+    public function testGenerate(): void
     {
         $rootDir = '/root';
         $this->directoryListMock->expects($this->any())
@@ -147,7 +147,7 @@ class ComposerGeneratorTest extends TestCase
      *
      * @return void
      */
-    private function assertInstallFromGitScripts(array $actual)
+    private function assertInstallFromGitScripts(array $actual): void
     {
         $this->assertEquals(
             [

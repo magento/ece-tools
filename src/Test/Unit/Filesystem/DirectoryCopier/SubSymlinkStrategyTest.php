@@ -10,8 +10,8 @@ namespace Magento\MagentoCloud\Test\Unit\Filesystem\DirectoryCopier;
 use Magento\MagentoCloud\Filesystem\DirectoryCopier\SubSymlinkStrategy;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -25,16 +25,19 @@ class SubSymlinkStrategyTest extends TestCase
     private $subSymlinkStrategy;
 
     /**
-     * @var File|Mock
+     * @var File|MockObject
      */
     private $fileMock;
 
     /**
-     * @var LoggerInterface|Mock
+     * @var LoggerInterface|MockObject
      */
     private $loggerMock;
 
-    protected function setUp()
+    /**
+     * @inheritDoc
+     */
+    protected function setUp(): void
     {
         $this->fileMock = $this->createMock(File::class);
         $this->fileMock->expects($this->once())
@@ -47,7 +50,10 @@ class SubSymlinkStrategyTest extends TestCase
         $this->subSymlinkStrategy = new SubSymlinkStrategy($this->fileMock, $this->loggerMock);
     }
 
-    public function testCopy()
+    /**
+     * @throws FileSystemException
+     */
+    public function testCopy(): void
     {
         $this->fileMock->expects($this->once())
             ->method('isExists')
@@ -78,7 +84,10 @@ class SubSymlinkStrategyTest extends TestCase
         $this->assertTrue($this->subSymlinkStrategy->copy('fromDir', 'toDir'));
     }
 
-    public function testCopyFromDirNotExists()
+    /**
+     * @throws FileSystemException
+     */
+    public function testCopyFromDirNotExists(): void
     {
         $this->expectException(FileSystemException::class);
         $this->expectExceptionMessage('Can\'t copy directory "realFromDir". Directory does not exist.');
@@ -93,7 +102,7 @@ class SubSymlinkStrategyTest extends TestCase
     /**
      * @param bool $isDot
      * @param string $fileName
-     * @return Mock
+     * @return MockObject
      */
     private function createFileInfoMock(bool $isDot, string $fileName)
     {
@@ -116,70 +125,60 @@ class SubSymlinkStrategyTest extends TestCase
     /**
      * Setup methods required to mock an iterator
      *
-     * @param Mock $iteratorMock The mock to attach the iterator methods to
+     * @param MockObject $iteratorMock The mock to attach the iterator methods to
      * @param array $items The mock data we're going to use with the iterator
-     * @return Mock The iterator mock
+     * @return MockObject The iterator mock
      */
-    private function mockIterator(Mock $iteratorMock, array $items)
+    private function mockIterator(MockObject $iteratorMock, array $items): MockObject
     {
         $iteratorData = new \stdClass();
         $iteratorData->array = $items;
         $iteratorData->position = 0;
 
-        $iteratorMock->expects($this->any())
-            ->method('rewind')
-            ->will(
-                $this->returnCallback(
-                    function () use ($iteratorData) {
-                        $iteratorData->position = 0;
-                    }
-                )
+        $iteratorMock->method('rewind')
+            ->willReturnCallback(
+                static function () use ($iteratorData) {
+                    $iteratorData->position = 0;
+                }
             );
 
-        $iteratorMock->expects($this->any())
-            ->method('current')
-            ->will(
-                $this->returnCallback(
-                    function () use ($iteratorData) {
-                        return $iteratorData->array[$iteratorData->position];
-                    }
-                )
+        $iteratorMock->method('current')
+            ->willReturnCallback(
+                static function () use ($iteratorData) {
+                    return $iteratorData->array[$iteratorData->position];
+                }
             );
 
-        $iteratorMock->expects($this->any())
-            ->method('key')
-            ->will(
-                $this->returnCallback(
-                    function () use ($iteratorData) {
-                        return $iteratorData->position;
-                    }
-                )
+        $iteratorMock->method('key')
+            ->willReturnCallback(
+                static function () use ($iteratorData) {
+                    return $iteratorData->position;
+                }
             );
 
         $iteratorMock->expects($this->any())
             ->method('next')
-            ->will(
-                $this->returnCallback(
-                    function () use ($iteratorData) {
-                        $iteratorData->position++;
-                    }
-                )
+            ->willReturnCallback(
+                static function () use ($iteratorData) {
+                    $iteratorData->position++;
+                }
             );
 
         $iteratorMock->expects($this->any())
             ->method('valid')
-            ->will(
-                $this->returnCallback(
-                    function () use ($iteratorData) {
-                        return isset($iteratorData->array[$iteratorData->position]);
-                    }
-                )
+            ->willReturnCallback(
+                static function () use ($iteratorData) {
+                    return isset($iteratorData->array[$iteratorData->position]);
+                }
             );
 
         return $iteratorMock;
     }
 
-    public function testIsEmptyDirectory()
+    /**
+     * @throws FileSystemException
+     */
+    public function testIsEmptyDirectory(): void
     {
 
         $this->fileMock->expects($this->once())

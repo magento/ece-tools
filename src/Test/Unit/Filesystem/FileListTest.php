@@ -126,6 +126,16 @@ class FileListTest extends TestCase
         $this->assertSame('magento_root/.magento.env.md', $this->fileList->getEnvDistConfig());
     }
 
+    public function testGetServiceEolsConfig(): void
+    {
+        $this->assertSame('root/config/eol.yaml', $this->fileList->getServiceEolsConfig());
+    }
+
+    public function testGetFrontStaticDist(): void
+    {
+        $this->assertSame('root/dist/front-static.php.dist', $this->fileList->getFrontStaticDist());
+    }
+
     public function testGetLogDistConfig(): void
     {
         $this->assertSame('root/dist/.log.env.md', $this->fileList->getLogDistConfig());

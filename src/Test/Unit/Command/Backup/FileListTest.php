@@ -10,8 +10,8 @@ namespace Magento\MagentoCloud\Test\Unit\Command\Backup;
 use Magento\MagentoCloud\Command\Backup\FileList;
 use Magento\MagentoCloud\Filesystem\BackupList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -19,19 +19,19 @@ use PHPUnit_Framework_MockObject_MockObject as Mock;
 class FileListTest extends TestCase
 {
     /**
-     * @var BackupList|Mock
+     * @var FileList
+     */
+    private $fileList;
+
+    /**
+     * @var BackupList|MockObject
      */
     private $backupListMock;
 
     /**
-     * @var File|Mock
+     * @var File|MockObject
      */
     private $fileMock;
-
-    /**
-     * @var FileList
-     */
-    private $fileList;
 
     /**
      * @inheritdoc
@@ -44,7 +44,7 @@ class FileListTest extends TestCase
         $this->fileList = new FileList($this->backupListMock, $this->fileMock);
     }
 
-    public function testGet()
+    public function testGet(): void
     {
         $this->backupListMock->expects($this->once())
             ->method('getList')
