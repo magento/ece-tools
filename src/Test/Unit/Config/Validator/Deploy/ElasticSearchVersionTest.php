@@ -147,6 +147,8 @@ class ElasticSearchVersionTest extends TestCase
      * @param string $errorMessage
      * @param string|null $errorSuggestion
      * @dataProvider validateDataProvider
+     *
+     * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
     public function testValidate(
         string $esVersion,
