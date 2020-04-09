@@ -213,4 +213,16 @@ class OptionTest extends TestCase
 
         $this->assertEquals('-vv', $this->option->getVerbosityLevel());
     }
+
+    public function testGetMaxExecutionTime(): void
+    {
+        $this->stageConfigMock->method('get')
+            ->with(BuildInterface::VAR_SCD_MAX_EXEC_TIME)
+            ->willReturn(10);
+
+        $this->assertSame(
+            10,
+            $this->option->getMaxExecutionTime()
+        );
+    }
 }

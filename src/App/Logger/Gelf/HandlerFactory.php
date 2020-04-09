@@ -9,6 +9,7 @@ namespace Magento\MagentoCloud\App\Logger\Gelf;
 
 use Illuminate\Contracts\Config\Repository;
 use Gelf\Publisher;
+use Magento\MagentoCloud\App\LoggerException;
 
 /**
  * Creates instance of Gelf handler.
@@ -34,13 +35,14 @@ class HandlerFactory
      * @param Repository $configuration
      * @param int $minLevel
      * @return Handler
-     * @throws \Exception
+     * @throws LoggerException
      */
     public function create(Repository $configuration, int $minLevel): Handler
     {
         $this->increaseSocketTimeout();
 
         $publisher = new Publisher();
+
         foreach ($configuration->get('transport') as $transportType => $transportConfig) {
             $publisher->addTransport(
                 $this->transportFactory->create($transportType, $transportConfig)
@@ -64,7 +66,7 @@ class HandlerFactory
      *
      * @return void
      */
-    private function increaseSocketTimeout()
+    private function increaseSocketTimeout(): void
     {
         ini_set('default_socket_timeout', '3600');
     }

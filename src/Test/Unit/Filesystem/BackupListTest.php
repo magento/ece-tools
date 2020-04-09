@@ -8,10 +8,10 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit\Filesystem;
 
 use Magento\MagentoCloud\Package\MagentoVersion;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Filesystem\BackupList;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -19,12 +19,12 @@ use PHPUnit_Framework_MockObject_MockObject as Mock;
 class BackupListTest extends TestCase
 {
     /**
-     * @var FileList|Mock
+     * @var FileList|MockObject
      */
     private $fileListMock;
 
     /**
-     * @var MagentoVersion|Mock
+     * @var MagentoVersion|MockObject
      */
     private $magentoVersionMock;
 
@@ -44,7 +44,7 @@ class BackupListTest extends TestCase
         $this->fileBackupList = new BackupList($this->fileListMock, $this->magentoVersionMock);
     }
 
-    public function testGetList()
+    public function testGetList(): void
     {
         $env = '/some/path/env.php';
         $config = '/some/path/config.php';
@@ -71,7 +71,7 @@ class BackupListTest extends TestCase
         );
     }
 
-    public function testGetListVersion21x()
+    public function testGetListVersion21x(): void
     {
         $env = '/some/path/env.php';
         $config = '/some/path/config.php';

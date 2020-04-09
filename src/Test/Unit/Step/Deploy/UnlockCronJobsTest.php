@@ -9,7 +9,9 @@ namespace Magento\MagentoCloud\Test\Unit\Step\Deploy;
 
 use Magento\MagentoCloud\Cron\JobUnlocker;
 use Magento\MagentoCloud\Package\MagentoVersion;
+use Magento\MagentoCloud\Package\UndefinedPackageException;
 use Magento\MagentoCloud\Step\Deploy\UnlockCronJobs;
+use Magento\MagentoCloud\Step\StepException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -19,6 +21,11 @@ use Psr\Log\LoggerInterface;
  */
 class UnlockCronJobsTest extends TestCase
 {
+    /**
+     * @var UnlockCronJobs
+     */
+    private $step;
+
     /**
      * @var LoggerInterface|MockObject
      */
@@ -35,14 +42,9 @@ class UnlockCronJobsTest extends TestCase
     private $magentoVersionMock;
 
     /**
-     * @var UnlockCronJobs
-     */
-    private $step;
-
-    /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->jobUnlockerMock = $this->createMock(JobUnlocker::class);
@@ -55,7 +57,10 @@ class UnlockCronJobsTest extends TestCase
         );
     }
 
-    public function testExecute()
+    /**
+     * @throws StepException
+     */
+    public function testExecute(): void
     {
         $this->magentoVersionMock->method('isGreaterOrEqual')
             ->willReturn(false);
@@ -69,7 +74,24 @@ class UnlockCronJobsTest extends TestCase
         $this->step->execute();
     }
 
-    public function testExecuteNoJobsUpdated()
+    /**
+     * @throws StepException
+     */
+    public function testExecuteWithError(): void
+    {
+        $this->expectExceptionMessage('Some error');
+        $this->expectException(StepException::class);
+
+        $this->magentoVersionMock->method('isGreaterOrEqual')
+            ->willThrowException(new UndefinedPackageException('Some error'));
+
+        $this->step->execute();
+    }
+
+    /**
+     * @throws StepException
+     */
+    public function testExecuteNoJobsUpdated(): void
     {
         $this->magentoVersionMock->method('isGreaterOrEqual')
             ->willReturn(false);
@@ -82,7 +104,10 @@ class UnlockCronJobsTest extends TestCase
         $this->step->execute();
     }
 
-    public function testSkipExecute()
+    /**
+     * @throws StepException
+     */
+    public function testSkipExecute(): void
     {
         $this->magentoVersionMock->expects($this->once())
             ->method('isGreaterOrEqual')

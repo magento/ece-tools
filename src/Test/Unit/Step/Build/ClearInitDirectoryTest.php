@@ -11,6 +11,8 @@ use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Step\Build\ClearInitDirectory;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Step\StepException;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
@@ -25,29 +27,29 @@ class ClearInitDirectoryTest extends TestCase
     private $step;
 
     /**
-     * @var File|\PHPUnit_Framework_MockObject_MockObject
+     * @var File|MockObject
      */
     private $fileMock;
 
     /**
-     * @var DirectoryList|\PHPUnit_Framework_MockObject_MockObject
+     * @var DirectoryList|MockObject
      */
     private $directoryListMock;
 
     /**
-     * @var FileList|\PHPUnit_Framework_MockObject_MockObject
+     * @var FileList|MockObject
      */
     private $fileListMock;
 
     /**
-     * @var LoggerInterface|\PHPUnit_Framework_MockObject_MockObject
+     * @var LoggerInterface|MockObject
      */
     private $loggerMock;
 
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->fileMock = $this->createMock(File::class);
         $this->directoryListMock = $this->createMock(DirectoryList::class);
@@ -67,9 +69,12 @@ class ClearInitDirectoryTest extends TestCase
      * @param bool $isExists
      * @param int $clearDirectory
      * @param int $deleteFile
+     *
+     * @throws StepException
+     *
      * @dataProvider executeDataProvider
      */
-    public function testExecute($isExists, $clearDirectory, $deleteFile)
+    public function testExecute($isExists, $clearDirectory, $deleteFile): void
     {
         $this->loggerMock->expects($this->once())
             ->method('info')
@@ -101,7 +106,7 @@ class ClearInitDirectoryTest extends TestCase
     /**
      * @return array
      */
-    public function executeDataProvider()
+    public function executeDataProvider(): array
     {
         return [
             ['isExists' => true, 'clearDirectory' => 1, 'deleteFile' => 1],

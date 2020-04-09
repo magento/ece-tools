@@ -14,7 +14,6 @@ use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\StaticContent\ThemeResolver;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -23,27 +22,27 @@ use Psr\Log\LoggerInterface;
 class CommandFactoryTest extends TestCase
 {
     /**
-     * @var MagentoVersion|Mock
-     */
-    private $magentoVersionMock;
-
-    /**
      * @var CommandFactory
      */
     private $commandFactory;
 
     /**
-     * @var GlobalSection
+     * @var MagentoVersion|MockObject
      */
-    private $globalConfig;
+    private $magentoVersionMock;
 
     /**
-     * @var ThemeResolver|Mock
+     * @var GlobalSection|MockObject
+     */
+    private $globalConfigMock;
+
+    /**
+     * @var ThemeResolver|MockObject
      */
     private $themeResolverMock;
 
     /**
-     * @var LoggerInterface|Mock
+     * @var LoggerInterface|MockObject
      */
     private $loggerMock;
 
@@ -53,13 +52,13 @@ class CommandFactoryTest extends TestCase
     public function setUp()
     {
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
-        $this->globalConfig = $this->createMock(GlobalSection::class);
+        $this->globalConfigMock = $this->createMock(GlobalSection::class);
         $this->themeResolverMock = $this->createMock(ThemeResolver::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
 
         $this->commandFactory = new CommandFactory(
             $this->magentoVersionMock,
-            $this->globalConfig,
+            $this->globalConfigMock,
             $this->themeResolverMock,
             $this->loggerMock
         );
@@ -69,9 +68,10 @@ class CommandFactoryTest extends TestCase
      * @param array $optionConfig
      * @param bool $useScdStrategy
      * @param string $expected
+     *
      * @dataProvider createDataProvider
      */
-    public function testCreate(array $optionConfig, bool $useScdStrategy, string $expected)
+    public function testCreate(array $optionConfig, bool $useScdStrategy, string $expected): void
     {
         $this->magentoVersionMock
             ->expects($this->exactly(2))
@@ -175,7 +175,7 @@ class CommandFactoryTest extends TestCase
                 [
                     'thread_count' => 1,
                     'excluded_themes' => ['Theme1'],
-                    'resolve_pass' =>  [['Theme1']],
+                    'resolve_pass' => [['Theme1']],
                     'resolve_return' => ['theme1'],
                     'strategy' => 'quick',
                     'locales' => ['en_US', 'de_DE'],
@@ -193,7 +193,7 @@ class CommandFactoryTest extends TestCase
      * @param array $optionConfig
      * @param int $getStrategyTimes
      *
-     * @return Mock|OptionInterface
+     * @return MockObject|OptionInterface
      */
     private function createOption(array $optionConfig, int $getStrategyTimes)
     {
@@ -227,6 +227,7 @@ class CommandFactoryTest extends TestCase
      * @param array $optionConfig
      * @param array $matrix
      * @param array $expected
+     *
      * @dataProvider matrixDataProvider
      */
     public function testMatrix(array $optionConfig, array $matrix, array $expected)
@@ -351,7 +352,7 @@ class CommandFactoryTest extends TestCase
         $excludedThemes = ['Theme1'];
         $optionConfig = [
             'thread_count' => 1,
-            'resolve_pass' =>  [['Theme1']],
+            'resolve_pass' => [['Theme1']],
             'resolve_return' => [''],
             'strategy' => 'quick',
             'locales' => ['en_US', 'de_DE'],
@@ -377,15 +378,17 @@ class CommandFactoryTest extends TestCase
         );
     }
 
-    public function testMatrixNoResolve()
+    public function testMatrixNoResolve(): void
     {
         $matrix = [
             'Magento/Backend' => [
                 'language' => ['en_US', 'fr_FR', 'af_ZA'],
             ],
         ];
-        $expected =[ 'php ./bin/magento setup:static-content:deploy --ansi --no-interaction -s quick '
-            . '-v en_US de_DE' ];
+        $expected = [
+            'php ./bin/magento setup:static-content:deploy --ansi --no-interaction -s quick '
+            . '-v --no-html-minify en_US de_DE'
+        ];
 
         /** @var OptionInterface|MockObject $optionMock */
         $optionMock = $this->getMockForAbstractClass(OptionInterface::class);
@@ -421,6 +424,9 @@ class CommandFactoryTest extends TestCase
             ->expects($this->once())
             ->method('warning')
             ->with('Unable to resolve Magento/Backend to an available theme.');
+        $this->globalConfigMock->method('get')
+            ->with(GlobalSection::VAR_SKIP_HTML_MINIFICATION)
+            ->willReturn(true);
 
         $this->assertSame(
             $expected,

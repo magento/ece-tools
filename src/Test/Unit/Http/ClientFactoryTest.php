@@ -10,8 +10,8 @@ namespace Magento\MagentoCloud\Test\Unit\Http;
 use GuzzleHttp\Client;
 use Magento\MagentoCloud\App\ContainerInterface;
 use Magento\MagentoCloud\Http\ClientFactory;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -24,7 +24,7 @@ class ClientFactoryTest extends TestCase
     private $clientFactory;
 
     /**
-     * @var ContainerInterface|Mock
+     * @var ContainerInterface|MockObject
      */
     private $containerMock;
 
@@ -36,7 +36,7 @@ class ClientFactoryTest extends TestCase
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->containerMock = $this->getMockForAbstractClass(ContainerInterface::class);
         $this->clientMock = $this->createMock(Client::class);
@@ -46,15 +46,12 @@ class ClientFactoryTest extends TestCase
         );
     }
 
-    public function testCreate()
+    public function testCreate(): void
     {
         $this->containerMock->expects($this->once())
             ->method('create')
             ->willReturn($this->clientMock);
 
-        $this->assertInstanceOf(
-            Client::class,
-            $this->clientFactory->create(['some' => 'value'])
-        );
+        $this->clientFactory->create(['some' => 'value']);
     }
 }

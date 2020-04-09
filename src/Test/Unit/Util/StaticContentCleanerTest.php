@@ -10,9 +10,9 @@ namespace Magento\MagentoCloud\Test\Unit\Util;
 use Magento\MagentoCloud\Util\StaticContentCleaner;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
+use PHPUnit\Framework\MockObject\MockObject;
 use Psr\Log\LoggerInterface;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -20,29 +20,29 @@ use PHPUnit_Framework_MockObject_MockObject as Mock;
 class StaticContentCleanerTest extends TestCase
 {
     /**
-     * @var DirectoryList|Mock
-     */
-    private $directoryListMock;
-
-    /**
-     * @var File|Mock
-     */
-    private $fileMock;
-
-    /**
-     * @var LoggerInterface|Mock
-     */
-    private $loggerMock;
-
-    /**
      * @var StaticContentCleaner
      */
     private $staticContentCleaner;
 
     /**
+     * @var DirectoryList|MockObject
+     */
+    private $directoryListMock;
+
+    /**
+     * @var File|MockObject
+     */
+    private $fileMock;
+
+    /**
+     * @var LoggerInterface|MockObject
+     */
+    private $loggerMock;
+
+    /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->directoryListMock = $this->createMock(DirectoryList::class);
         $this->fileMock = $this->createMock(File::class);
@@ -55,7 +55,7 @@ class StaticContentCleanerTest extends TestCase
         );
     }
 
-    public function testClean()
+    public function testClean(): void
     {
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
