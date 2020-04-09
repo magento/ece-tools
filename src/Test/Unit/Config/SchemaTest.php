@@ -208,7 +208,7 @@ class SchemaTest extends TestCase
         ];
 
         foreach ($requiredItems as $item) {
-            $this->assertArrayHasKey($item, $this->schema->getSchema());
+            $this->assertArrayHasKey($item, $this->schema->getVariables());
         }
     }
 }

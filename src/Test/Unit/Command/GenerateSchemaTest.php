@@ -73,7 +73,7 @@ class GenerateSchemaTest extends TestCase
         $output->expects($this->exactly(2))
             ->method('writeln');
 
-        $this->schemaMock->method('getSchema')
+        $this->schemaMock->method('getVariables')
             ->willReturn(['some' => 'schema']);
         $this->fileListMock->method('getEnvDistConfig')
             ->willReturn('.magento.env.md');
