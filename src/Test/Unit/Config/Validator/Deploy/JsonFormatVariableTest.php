@@ -61,7 +61,7 @@ class JsonFormatVariableTest extends TestCase
     public function testValidateSuccess()
     {
         $this->schemaMock->expects($this->once())
-            ->method('getSchema')
+            ->method('getVariables')
             ->willReturn([
                 DeployInterface::VAR_CLEAN_STATIC_FILES => [
                     Schema::SCHEMA_TYPE => ['boolean'],
@@ -93,7 +93,7 @@ class JsonFormatVariableTest extends TestCase
     public function testValidateErrors()
     {
         $this->schemaMock->expects($this->once())
-            ->method('getSchema')
+            ->method('getVariables')
             ->willReturn([
                 DeployInterface::VAR_CLEAN_STATIC_FILES => [
                     Schema::SCHEMA_TYPE => ['boolean'],
@@ -153,7 +153,7 @@ class JsonFormatVariableTest extends TestCase
     public function testValidateErrorsWithException()
     {
         $this->schemaMock->expects($this->once())
-            ->method('getSchema')
+            ->method('getVariables')
             ->willReturn([
                 DeployInterface::VAR_CRON_CONSUMERS_RUNNER => [
                     Schema::SCHEMA_TYPE => ['array'],
