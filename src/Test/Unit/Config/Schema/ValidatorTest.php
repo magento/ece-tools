@@ -120,7 +120,7 @@ class ValidatorTest extends TestCase
             ->with('ErrorValidator', ['value1', 'value2'])
             ->willReturn($mockValidatorError);
         $this->schemaMock->expects($this->once())
-            ->method('getSchema')
+            ->method('getVariables')
             ->willReturn($schema);
 
         $this->assertEquals(
