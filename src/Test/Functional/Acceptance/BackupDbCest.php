@@ -30,7 +30,7 @@ class BackupDbCest extends AbstractCest
      * @param CliTester $I
      * @param Example $data
      * @throws Exception
-     * @dataProvider dataProviderVersions
+     * @dataProvider dataProviderMagentoCloudVersions
      */
     public function testBackUpDbUnavailable(CliTester $I, Example $data)
     {
@@ -75,7 +75,7 @@ class BackupDbCest extends AbstractCest
     /**
      * @param CliTester $I
      * @param Example $data
-     * @dataProvider dataProviderVersions
+     * @dataProvider dataProviderMagentoCloudVersions
      * @throws Exception
      */
     public function testCreateBackUp(CliTester $I, Example $data)
@@ -142,7 +142,7 @@ class BackupDbCest extends AbstractCest
     /**
      * @return array
      */
-    protected function dataProviderVersions(): array
+    protected function dataProviderMagentoCloudVersions(): array
     {
         return [
             ['version' => 'master'],
