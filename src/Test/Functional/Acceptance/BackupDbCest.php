@@ -13,7 +13,7 @@ use Exception;
 use Robo\Exception\TaskException;
 
 /**
- * General Cest for Backup Db tests
+ * Checks database backup functionality
  */
 class BackupDbCest extends AbstractCest
 {
