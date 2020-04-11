@@ -16,7 +16,7 @@ use Exception;
 /**
  * Checks split database functionality
  */
-abstract class SplitDbCest extends AbstractCest
+class SplitDbCest extends AbstractCest
 {
     /**
      * {@inheritDoc}
@@ -29,53 +29,43 @@ abstract class SplitDbCest extends AbstractCest
 
     /**
      * @param CliTester $I
-     * @throws TaskException
-     */
-    public function testDeploySplitDbInEnvWithoutSplitDbArchitecture(CliTester $I)
-    {
-        $this->prepareWorkplace($I, 'master');
-        $I->writeEnvMagentoYaml([
-            'stage' => [
-                'global' => ['SCD_ON_DEMAND' => true],
-                'deploy' => ['SPLIT_DB' => ['quote', 'sales']],
-            ]
-        ]);
-        $I->runEceDockerCommand('build:compose --mode=production');
-        $this->runDeploy($I);
-        $I->seeInOutput(
-            'ERROR: Enabling a split database will be skipped.'
-            . ' Relationship do not have configuration for next types: sales, quote'
-        );
-        $config = $this->getMagentoEnvPhpConfig($I);
-        $I->assertArrayHasKey('default', $config['db']['connection']);
-        $I->assertArrayHasKey('indexer', $config['db']['connection']);
-        $I->assertArrayHasKey('default_setup', $config['resource']);
-        $I->assertArrayNotHasKey('checkout', $config['db']['connection']);
-        $I->assertArrayNotHasKey('sales', $config['db']['connection']);
-        $I->assertArrayNotHasKey('checkout', $config['resource']);
-        $I->assertArrayNotHasKey('sales', $config['resource']);
-        $I->runDockerComposeCommand('run deploy cloud-post-deploy');
-        $I->amOnPage('/');
-        $I->see('Home page');
-        $I->see('CMS homepage content goes here.');
-    }
-
-    /**
-     * @param CliTester $I
      * @param Example $data
      * @throws Exception
      * @dataProvider dataProviderMagentoCloudVersions
      */
-    public function testDeploySplitDbWithInvalidSplitTypes(CliTester $I, Example $data)
+    public function testSplitDb(CliTester $I, Example $data)
     {
         $this->prepareWorkplace($I, $data['version']);
-        $I->writeEnvMagentoYaml([
-            'stage' => [
-                'global' => ['SCD_ON_DEMAND' => true],
-                'deploy' => ['SPLIT_DB' => 'quote']
-            ]
-        ]);
+        $envMagento = ['stage' => ['global' => ['SCD_ON_DEMAND' => true]]];
+
+        // Deploy 'Split Db' in an environment without prepared architecture
+        $this->partWithoutSplitDbArch($I, $envMagento);
+
+        // Prepare config for deploy
+        $this->prepareConfigToDeploySplitDb($I);
+
+        // Deploy 'Split Db' in an environment with prepared architecture. Case with upgrade
+        $this->partWithSplitDbArch($I, $envMagento);
+
+        // Install with Split db
+        $this->partInstallWithSplitDb($I, $envMagento);
+    }
+
+    /**
+     * Deploy 'Split Db' in an environment without prepared architecture
+     *
+     * @param CliTester $I
+     * @param array $envMagento
+     * @throws TaskException
+     */
+    private function partWithoutSplitDbArch(CliTester $I, array $envMagento)
+    {
         $I->runEceDockerCommand('build:compose --mode=production');
+
+        // Deploy 'Split Db' with the wrong Split Db type
+        $envMagento['stage']['deploy']['SPLIT_DB'] = 'quote';
+        $I->writeEnvMagentoYaml($envMagento);
+
         $I->runDockerComposeCommand('run build cloud-build');
         $I->seeInOutput([
             'ERROR: Fix configuration with given suggestions:',
@@ -83,12 +73,9 @@ abstract class SplitDbCest extends AbstractCest
             'Correct the following items in your .magento.env.yaml file:',
             'The SPLIT_DB variable contains an invalid value of type string. Use the following type: array.',
         ]);
-        $I->writeEnvMagentoYaml([
-            'stage' => [
-                'global' => ['SCD_ON_DEMAND' => true],
-                'deploy' => ['SPLIT_DB' => ['checkout']]
-            ]
-        ]);
+
+        $envMagento['stage']['deploy']['SPLIT_DB'] = ['checkout'];
+        $I->writeEnvMagentoYaml($envMagento);
         $I->runDockerComposeCommand('run build cloud-build');
         $I->seeInOutput([
             'ERROR: Fix configuration with given suggestions:',
@@ -97,12 +84,9 @@ abstract class SplitDbCest extends AbstractCest
             'The SPLIT_DB variable contains the invalid value.',
             'It should be array with next available values: [quote, sales].'
         ]);
-        $I->writeEnvMagentoYaml([
-            'stage' => [
-                'global' => ['SCD_ON_DEMAND' => true],
-                'deploy' => ['SPLIT_DB' => ['quote', 'checkout']]
-            ]
-        ]);
+
+        $envMagento['stage']['deploy']['SPLIT_DB'] = ['quote', 'checkout'];
+        $I->writeEnvMagentoYaml($envMagento);
         $I->runDockerComposeCommand('run build cloud-build');
         $I->seeInOutput([
             'ERROR: Fix configuration with given suggestions:',
@@ -112,228 +96,111 @@ abstract class SplitDbCest extends AbstractCest
             , 'It should be array with next available values: [quote, sales].',
         ]);
 
+        // Deploy 'Split Db' with the unavailable Split Db types
+        $envMagento['stage']['deploy']['SPLIT_DB'] = ['quote', 'sales'];
+        $I->writeEnvMagentoYaml($envMagento);
+        $this->runDeploy($I);
+        $I->seeInOutput(
+            'ERROR: Enabling a split database will be skipped.'
+            . ' Relationship do not have configuration for next types: sales, quote'
+        );
+        $this->checkEnvPhpConfig($I, [], ['checkout', 'sales']);
+        $this->checkMagentoFront($I);
     }
 
     /**
      * @param CliTester $I
-     * @param Example $data
-     * @throws TaskException
+     * @param array $envMagento
      * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
-     * @dataProvider dataProviderMagentoCloudVersions
      */
-    public function testDeploySplitDbWithRemovingExistsSplitDbType(CliTester $I, Example $data)
+    private function partWithSplitDbArch(CliTester $I, array $envMagento)
     {
-        $this->prepareConfigToDeploySplitDb($I, $data['version']);
-        $I->writeEnvMagentoYaml([
-            'stage' => [
-                'global' => ['SCD_ON_DEMAND' => true],
-                'deploy' => ['SPLIT_DB' => ['quote']],
-            ]
-        ]);
-        $I->startEnvironment();
-        $I->runDockerComposeCommand('run build cloud-build');
-        $I->runDockerComposeCommand('run deploy cloud-deploy');
+        // Run splitting database for 'quote' tables
+        $envMagento['stage']['deploy']['SPLIT_DB'] = ['quote'];
+        $I->writeEnvMagentoYaml($envMagento);
+        $this->runDeploy($I);
         $I->seeInOutput([
             'INFO: Quote tables were split to DB magento2 in db-quote',
             'INFO: Running setup upgrade.',
         ]);
-        $destination = sys_get_temp_dir() . '/app/etc/env.php';
-        $I->downloadFromContainer('/app/etc/env.php', $destination, Docker::DEPLOY_CONTAINER);
-        $config = require $destination;
-        $I->assertArrayHasKey('default', $config['db']['connection']);
-        $I->assertArrayHasKey('indexer', $config['db']['connection']);
-        $I->assertArrayHasKey('checkout', $config['db']['connection']);
-        $I->assertArrayNotHasKey('sales', $config['db']['connection']);
-        $I->assertArrayHasKey('default_setup', $config['resource']);
-        $I->assertArrayHasKey('checkout', $config['resource']);
-        $I->assertArrayNotHasKey('sales', $config['resource']);
-        $I->runDockerComposeCommand('run deploy cloud-post-deploy');
-        $I->amOnPage('/');
-        $I->see('Home page');
-        $I->see('CMS homepage content goes here.');
-        $I->writeEnvMagentoYaml([
-            'stage' => [
-                'global' => ['SCD_ON_DEMAND' => true],
-                'deploy' => ['SPLIT_DB' => []]
-            ]
-        ]);
+        $this->checkEnvPhpConfig($I, ['checkout'], ['sales']);
+        $this->checkMagentoFront($I);
+
+        // 'Split Db' type was deleted
+        $envMagento['stage']['deploy']['SPLIT_DB'] = [];
+        $I->writeEnvMagentoYaml($envMagento);
         $I->runDockerComposeCommand('run deploy cloud-deploy');
         $I->seeInOutput('WARNING: Variable SPLIT_DB does not have data which were already split types: quote');
-        $destination = sys_get_temp_dir() . '/app/etc/env.php';
-        $I->downloadFromContainer('/app/etc/env.php', $destination, Docker::DEPLOY_CONTAINER);
-        $config = require $destination;
-        $I->assertArrayHasKey('default', $config['db']['connection']);
-        $I->assertArrayHasKey('indexer', $config['db']['connection']);
-        $I->assertArrayHasKey('checkout', $config['db']['connection']);
-        $I->assertArrayNotHasKey('sales', $config['db']['connection']);
-        $I->assertArrayHasKey('default_setup', $config['resource']);
-        $I->assertArrayHasKey('checkout', $config['resource']);
-        $I->assertArrayNotHasKey('sales', $config['resource']);
-        $I->runDockerComposeCommand('run deploy cloud-post-deploy');
-        $I->amOnPage('/');
-        $I->see('Home page');
-        $I->see('CMS homepage content goes here.');
-        $I->writeEnvMagentoYaml([
-            'stage' => [
-                'global' => ['SCD_ON_DEMAND' => true],
-                'deploy' => ['SPLIT_DB' => ['sales']]
-            ]
-        ]);
+        $this->checkEnvPhpConfig($I, ['checkout'], ['sales']);
+        $this->checkMagentoFront($I);
+
+        // 'Split Db' current type was deleted and new type added
+        $envMagento['stage']['deploy']['SPLIT_DB'] = ['sales'];
+        $I->writeEnvMagentoYaml($envMagento);
         $I->runDockerComposeCommand('run deploy cloud-deploy');
         $I->seeInOutput('WARNING: Variable SPLIT_DB does not have data which were already split types: quote');
-        $destination = sys_get_temp_dir() . '/app/etc/env.php';
-        $I->downloadFromContainer('/app/etc/env.php', $destination, Docker::DEPLOY_CONTAINER);
-        $config = require $destination;
-        $I->assertArrayHasKey('default', $config['db']['connection']);
-        $I->assertArrayHasKey('indexer', $config['db']['connection']);
-        $I->assertArrayHasKey('checkout', $config['db']['connection']);
-        $I->assertArrayNotHasKey('sales', $config['db']['connection']);
-        $I->assertArrayHasKey('default_setup', $config['resource']);
-        $I->assertArrayHasKey('checkout', $config['resource']);
-        $I->assertArrayNotHasKey('sales', $config['resource']);
-        $I->runDockerComposeCommand('run deploy cloud-post-deploy');
-        $I->amOnPage('/');
-        $I->see('Home page');
-        $I->see('CMS homepage content goes here.');
-        $I->writeEnvMagentoYaml([
-            'stage' => [
-                'global' => ['SCD_ON_DEMAND' => true],
-                'deploy' => ['SPLIT_DB' => ['quote', 'sales']]
-            ]
-        ]);
+        $this->checkEnvPhpConfig($I, ['checkout'], ['sales']);
+        $this->checkMagentoFront($I);
+
+        // 'Split Db' current type was returned
+        $envMagento['stage']['deploy']['SPLIT_DB'][] = 'quote';
+        $I->writeEnvMagentoYaml($envMagento);
         $I->runDockerComposeCommand('run deploy cloud-deploy');
         $I->seeInOutput([
             'INFO: Sales tables were split to DB magento2 in db-sales',
             'INFO: Running setup upgrade.',
         ]);
-        $destination = sys_get_temp_dir() . '/app/etc/env.php';
-        $I->downloadFromContainer('/app/etc/env.php', $destination, Docker::DEPLOY_CONTAINER);
-        $config = require $destination;
-        $I->assertArrayHasKey('default', $config['db']['connection']);
-        $I->assertArrayHasKey('indexer', $config['db']['connection']);
-        $I->assertArrayHasKey('checkout', $config['db']['connection']);
-        $I->assertArrayHasKey('sales', $config['db']['connection']);
-        $I->assertArrayHasKey('default_setup', $config['resource']);
-        $I->assertArrayHasKey('checkout', $config['resource']);
-        $I->assertArrayHasKey('sales', $config['resource']);
-        $I->runDockerComposeCommand('run deploy cloud-post-deploy');
-        $I->amOnPage('/');
-        $I->see('Home page');
-        $I->see('CMS homepage content goes here.');
+        $this->checkEnvPhpConfig($I, ['checkout', 'sales']);
+        $this->checkMagentoFront($I);
     }
 
     /**
      * @param CliTester $I
-     * @param Example $data
+     * @param array $envMagento
      * @throws Exception
-     * @dataProvider dataProviderMagentoCloudVersions
      */
-    public function testSplitDbDeploy(CliTester $I, Example $data): void
+    private function partInstallWithSplitDb(CliTester $I, array $envMagento): void
     {
-        $this->prepareConfigToDeploySplitDb($I, $data['version']);
-        $I->writeEnvMagentoYaml([
-            'stage' => [
-                'global' => ['SCD_ON_DEMAND' => true],
-                'deploy' => ['SPLIT_DB' => ['quote']]
-            ]
-        ]);
-        $I->startEnvironment();
-        $I->runDockerComposeCommand('run build cloud-build');
-        $I->runDockerComposeCommand('run deploy cloud-deploy');
+        $I->stopEnvironment();
+
+        $envMagento['stage']['deploy']['SPLIT_DB'] = ['quote'];
+        $I->writeEnvMagentoYaml($envMagento);
+        $this->runDeploy($I);
         $I->seeInOutput([
             'INFO: Quote tables were split to DB magento2 in db-quote',
             'INFO: Running setup upgrade.',
         ]);
-        $destination = sys_get_temp_dir() . '/app/etc/env.php';
-        $I->downloadFromContainer('/app/etc/env.php', $destination, Docker::DEPLOY_CONTAINER);
-        $config = require $destination;
-        $I->assertArrayHasKey('default', $config['db']['connection']);
-        $I->assertArrayHasKey('indexer', $config['db']['connection']);
-        $I->assertArrayHasKey('checkout', $config['db']['connection']);
-        $I->assertArrayHasKey('default_setup', $config['resource']);
-        $I->assertArrayHasKey('checkout', $config['resource']);
-        $I->assertArrayNotHasKey('sales', $config['db']['connection']);
-        $I->assertArrayNotHasKey('sales', $config['resource']);
-        $I->amConnectedToDatabase('db_quota');
-        foreach ($this->getListTablesBySplitDbType('quota') as $table) {
-            $I->grabNumRecords($table);
-        }
-        $I->runDockerComposeCommand('run deploy cloud-post-deploy');
-        $I->amOnPage('/');
-        $I->see('Home page');
-        $I->see('CMS homepage content goes here.');
+        $this->checkEnvPhpConfig($I, ['checkout'], ['sales']);
+        $this->checkMagentoFront($I);
         $I->stopEnvironment();
-        $I->writeEnvMagentoYaml([
-            'stage' => [
-                'global' => ['SCD_ON_DEMAND' => true],
-                'deploy' => ['SPLIT_DB' => ['sales']]
-            ]
-        ]);
-        $I->startEnvironment();
-        $I->runDockerComposeCommand('run build cloud-build');
-        $I->runDockerComposeCommand('run deploy cloud-deploy');
+
+        $envMagento['stage']['deploy']['SPLIT_DB'] = ['sales'];
+        $I->writeEnvMagentoYaml($envMagento);
+        $this->runDeploy($I);
         $I->seeInOutput([
             'INFO: Sales tables were split to DB magento2 in db-sales',
             'INFO: Running setup upgrade.',
         ]);
-        $destination = sys_get_temp_dir() . '/app/etc/env.php';
-        $I->downloadFromContainer('/app/etc/env.php', $destination, Docker::DEPLOY_CONTAINER);
-        $config = require $destination;
-        $I->assertArrayHasKey('default', $config['db']['connection']);
-        $I->assertArrayHasKey('indexer', $config['db']['connection']);
-        $I->assertArrayHasKey('sales', $config['db']['connection']);
-        $I->assertArrayHasKey('default_setup', $config['resource']);
-        $I->assertArrayHasKey('sales', $config['resource']);
-        $I->assertArrayNotHasKey('checkout', $config['db']['connection']);
-        $I->assertArrayNotHasKey('checkout', $config['resource']);
-        $I->amConnectedToDatabase('db_sales');
-        foreach ($this->getListTablesBySplitDbType('sales') as $table) {
-            $I->grabNumRecords($table);
-        }
-        $I->runDockerComposeCommand('run deploy cloud-post-deploy');
-        $I->amOnPage('/');
-        $I->see('Home page');
-        $I->see('CMS homepage content goes here.');
+        $this->checkEnvPhpConfig($I, ['sales'], ['checkout']);
+        $this->checkMagentoFront($I);
         $I->stopEnvironment();
-        $I->writeEnvMagentoYaml([
-            'stage' => [
-                'global' => ['SCD_ON_DEMAND' => true],
-                'deploy' => ['SPLIT_DB' => ['quote', 'sales']]
-            ]
-        ]);
-        $I->startEnvironment();
-        $I->runDockerComposeCommand('run build cloud-build');
-        $I->runDockerComposeCommand('run deploy cloud-deploy');
+        $envMagento['stage']['deploy']['SPLIT_DB'][] = 'quote';
+        $I->writeEnvMagentoYaml($envMagento);
+        $this->runDeploy($I);
         $I->seeInOutput([
             'INFO: Quote tables were split to DB magento2 in db-quote',
             'INFO: Running setup upgrade.',
             'INFO: Sales tables were split to DB magento2 in db-sales',
             'INFO: Running setup upgrade.',
         ]);
-        $destination = sys_get_temp_dir() . '/app/etc/env.php';
-        $I->downloadFromContainer('/app/etc/env.php', $destination, Docker::DEPLOY_CONTAINER);
-        $config = require $destination;
-        $I->assertArrayHasKey('default', $config['db']['connection']);
-        $I->assertArrayHasKey('indexer', $config['db']['connection']);
-        $I->assertArrayHasKey('sales', $config['db']['connection']);
-        $I->assertArrayHasKey('checkout', $config['db']['connection']);
-        $I->assertArrayHasKey('default_setup', $config['resource']);
-        $I->assertArrayHasKey('sales', $config['resource']);
-        $I->assertArrayHasKey('checkout', $config['resource']);
-        $I->amConnectedToDatabase('db_sales');
-        foreach ($this->getListTablesBySplitDbType('quota') as $table) {
-            $I->grabNumRecords($table);
-        }
-        $I->runDockerComposeCommand('run deploy cloud-post-deploy');
-        $I->amOnPage('/');
-        $I->see('Home page');
-        $I->see('CMS homepage content goes here.');
+        $this->checkEnvPhpConfig($I, ['checkout', 'sales']);
+        $this->checkMagentoFront($I);
     }
 
     /**
      * @return array
      */
-    protected function dataProviderMagentoCloudVersions(): array
+    private function dataProviderMagentoCloudVersions(): array
     {
         return [
             ['version' => 'master'],
@@ -344,40 +211,11 @@ abstract class SplitDbCest extends AbstractCest
     }
 
     /**
-     * @param string $type
-     * @return array
-     */
-    private function getListTablesBySplitDbType(string $type): array
-    {
-        switch ($type) {
-            case 'quote':
-                return [
-                    'quote_id_mask',
-                    'quote_address_item',
-                    'quote_address',
-                    'quote',
-                ];
-            case 'sales':
-                return [
-                    'sales_invoice',
-                    'sales_invoice_grid',
-                    'sales_invoice_item',
-                    'sales_order',
-                    'sales_order_grid',
-                    'sales_order_tax',
-                ];
-        }
-        return [];
-    }
-
-    /**
      * @param CliTester $I
-     * @param string $version
      * @throws TaskException
      */
-    private function prepareConfigToDeploySplitDb(CliTester $I, string $version)
+    private function prepareConfigToDeploySplitDb(CliTester $I)
     {
-        $this->prepareWorkplace($I, $version);
         $services = $I->readServicesYaml();
         $magentoApp = $I->readAppMagentoYaml();
         $services['mysql-quote']['type'] = 'mysql:10.2';
@@ -407,7 +245,36 @@ abstract class SplitDbCest extends AbstractCest
     }
 
     /**
-     * @param $I
+     * @param CliTester $I
+     */
+    private function checkMagentoFront(CliTester $I)
+    {
+        $I->runDockerComposeCommand('run deploy cloud-post-deploy');
+        $I->amOnPage('/');
+        $I->see('Home page');
+        $I->see('CMS homepage content goes here.');
+    }
+
+    /**
+     * @param CliTester $I
+     * @param array $exists
+     * @param array $notExist
+     */
+    private function checkEnvPhpConfig(CliTester $I, array $exists = [], array $notExist = [])
+    {
+        $config = $this->getMagentoEnvPhpConfig($I);
+        foreach ($exists as $item) {
+            $I->assertArrayHasKey($item, $config['db']['connection']);
+            $I->assertArrayHasKey($item, $config['resource']);
+        }
+        foreach ($notExist as $item) {
+            $I->assertArrayNotHasKey($item, $config['db']['connection']);
+            $I->assertArrayNotHasKey($item, $config['resource']);
+        }
+    }
+
+    /**
+     * @param CliTester $I
      */
     private function runDeploy(CliTester $I)
     {

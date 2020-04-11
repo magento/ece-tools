@@ -27,57 +27,57 @@ class SplitDbWizardCest extends AbstractCest
 
     /**
      * @param CliTester $I
+     * @param Example $data
+     * @dataProvider dataProviderMagentoCloudVersions
      * @throws Exception
      */
-    public function testEnvWithoutSplitDbArchitecture(CliTester $I)
+    public function testSplitDbWizard(CliTester $I, Example $data)
     {
-        $this->prepareWorkplace($I, 'master');
-        $I->writeEnvMagentoYaml(['stage' => ['global' => ['SCD_ON_DEMAND' => true]]]);
+        $this->prepareWorkplace($I, $data['version']);
+        $envMagento = ['stage' => ['global' => ['SCD_ON_DEMAND' => true]]];
+        $I->writeEnvMagentoYaml($envMagento);
         $I->runEceDockerCommand('build:compose --mode=production');
         $I->runDockerComposeCommand('run build cloud-build');
+
+        // Running 'Split Db' wizard in an environment without Split Db architecture
         $I->runDockerComposeCommand('run deploy ece-command wizard:split-db-state');
         $I->seeInOutput([
             'DB is not split',
             '- DB cannot be split on this environment'
         ]);
-    }
 
-
-    /**
-     * @param CliTester $I
-     * @param Example $data
-     * @dataProvider dataProviderMagentoCloudVersions
-     * @throws Exception
-     */
-    public function testEnvWithSplitDbArchitecture(CliTester $I, Example $data)
-    {
-        $this->prepareWorkplace($I, $data['version']);
+        // Deploy 'Split Db' architecture
         $services = $I->readServicesYaml();
-        $magentoApp = $I->readAppMagentoYaml();
-        $magentoEnv = ['stage' => ['global' => ['SCD_ON_DEMAND' => true]]];
+        $appMagento = $I->readAppMagentoYaml();
         $services['mysql-quote']['type'] = 'mysql:10.2';
         $services['mysql-sales']['type'] = 'mysql:10.2';
-        $magentoApp['relationships']['database-quote'] = 'mysql-quote:mysql';
-        $magentoApp['relationships']['database-sales'] = 'mysql-sales:mysql';
+        $appMagento['relationships']['database-quote'] = 'mysql-quote:mysql';
+        $appMagento['relationships']['database-sales'] = 'mysql-sales:mysql';
         $I->writeServicesYaml($services);
-        $I->writeAppMagentoYaml($magentoApp);
-        $I->writeEnvMagentoYaml($magentoEnv);
+        $I->writeAppMagentoYaml($appMagento);
         $I->runEceDockerCommand('build:compose --mode=production');
         $I->startEnvironment();
-        $I->runDockerComposeCommand('run build cloud-build');
         $I->runDockerComposeCommand('run deploy cloud-deploy');
+
+        // Running 'Split Db' wizard in an environment with Split Db architecture and not splitting Magento Db
         $I->runDockerComposeCommand('run deploy ece-command wizard:split-db-state');
         $I->seeInOutput([
             'DB is not split',
             '- You may split DB using SPLIT_DB variable in .magento.env.yaml file'
         ]);
-        $magentoEnv['stage']['deploy']['SPLIT_DB'][] = 'quote';
-        $I->writeEnvMagentoYaml($magentoEnv);
+
+        // Running 'Split Db' wizard in an environment with Split Db architecture
+        // and splitting `quote` tables of Magento Db
+        $envMagento['stage']['deploy']['SPLIT_DB'][] = 'quote';
+        $I->writeEnvMagentoYaml($envMagento);
         $I->runDockerComposeCommand('run deploy cloud-deploy');
         $I->runDockerComposeCommand('run deploy ece-command wizard:split-db-state');
         $I->seeInOutput('DB is already split with type(s): quote');
-        $magentoEnv['stage']['deploy']['SPLIT_DB'][] = 'sales';
-        $I->writeEnvMagentoYaml($magentoEnv);
+
+        // Running 'Split Db' wizard in an environment with Split Db architecture
+        // and splitting `quote` and `sales` tables of Magento Db
+        $envMagento['stage']['deploy']['SPLIT_DB'][] = 'sales';
+        $I->writeEnvMagentoYaml($envMagento);
         $I->runDockerComposeCommand('run deploy cloud-deploy');
         $I->runDockerComposeCommand('run deploy ece-command wizard:split-db-state');
         $I->seeInOutput('DB is already split with type(s): quote, sales');
@@ -89,11 +89,10 @@ class SplitDbWizardCest extends AbstractCest
     protected function dataProviderMagentoCloudVersions(): array
     {
         return [
-//            ['version' => 'master'],
-//            ['version' => '2.3.4'],
-            ['version' => '2.3.3'],
-//            ['version' => '2.2.11'],
-//            ['version' => '2.1.18'],
+            ['version' => 'master'],
+            ['version' => '2.3.4'],
+            ['version' => '2.2.11'],
+            ['version' => '2.1.18'],
         ];
     }
 }
