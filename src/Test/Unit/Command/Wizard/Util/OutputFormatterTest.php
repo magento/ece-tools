@@ -8,8 +8,8 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit\Command\Wizard\Util;
 
 use Magento\MagentoCloud\Command\Wizard\Util\OutputFormatter;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
@@ -23,21 +23,21 @@ class OutputFormatterTest extends TestCase
     private $outputFormatter;
 
     /**
-     * @var OutputInterface|Mock
+     * @var OutputInterface|MockObject
      */
     private $outputMock;
 
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->outputMock = $this->createMock(OutputInterface::class);
 
         $this->outputFormatter = new OutputFormatter();
     }
 
-    public function testWriteResult()
+    public function testWriteResult(): void
     {
         $this->outputMock->expects($this->exactly(2))
             ->method('writeln')
@@ -58,7 +58,7 @@ class OutputFormatterTest extends TestCase
         );
     }
 
-    public function testWriteItem()
+    public function testWriteItem(): void
     {
         $this->outputMock->expects($this->once())
             ->method('writeln')

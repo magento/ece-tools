@@ -10,8 +10,8 @@ namespace Magento\MagentoCloud\Test\Unit\Config\Magento\Env;
 use Magento\MagentoCloud\Config\Magento\Env\Reader;
 use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -19,12 +19,12 @@ use PHPUnit_Framework_MockObject_MockObject as Mock;
 class ReaderTest extends TestCase
 {
     /**
-     * @var File|Mock
+     * @var File|MockObject
      */
     private $fileMock;
 
     /**
-     * @var FileList|Mock
+     * @var FileList|MockObject
      */
     private $fileListMock;
 
@@ -33,6 +33,9 @@ class ReaderTest extends TestCase
      */
     private $reader;
 
+    /**
+     * @inheritDoc
+     */
     protected function setUp()
     {
         $this->fileMock = $this->createMock(File::class);
@@ -44,7 +47,7 @@ class ReaderTest extends TestCase
         );
     }
 
-    public function testRead()
+    public function testRead(): void
     {
         $this->fileListMock->expects($this->once())
             ->method('getEnv')
@@ -64,7 +67,7 @@ class ReaderTest extends TestCase
         );
     }
 
-    public function testReadFileNotExists()
+    public function testReadFileNotExists(): void
     {
         $this->fileListMock->expects($this->once())
             ->method('getEnv')

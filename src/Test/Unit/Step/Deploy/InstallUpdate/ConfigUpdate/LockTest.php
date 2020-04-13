@@ -12,9 +12,10 @@ use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface as ConfigReader;
 use Magento\MagentoCloud\Config\Magento\Env\WriterInterface as ConfigWriter;
 use Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\Lock\Config as LockConfig;
 use Magento\MagentoCloud\Package\MagentoVersion;
+use Magento\MagentoCloud\Step\StepException;
+use PHPUnit\Framework\MockObject\MockObject;
 use Psr\Log\LoggerInterface;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -22,39 +23,39 @@ use PHPUnit_Framework_MockObject_MockObject as Mock;
 class LockTest extends TestCase
 {
     /**
-     * @var LoggerInterface|Mock
-     */
-    private $loggerMock;
-
-    /**
-     * @var ConfigWriter|Mock
-     */
-    private $configWriterMock;
-
-    /**
-     * @var ConfigReader|Mock
-     */
-    private $configReaderMock;
-
-    /**
-     * @var LockConfig|Mock
-     */
-    private $lockConfigMock;
-
-    /**
-     * @var MagentoVersion|Mock
-     */
-    private $magentoVersionMock;
-
-    /**
      * @var Lock
      */
     private $lock;
 
     /**
+     * @var LoggerInterface|MockObject
+     */
+    private $loggerMock;
+
+    /**
+     * @var ConfigWriter|MockObject
+     */
+    private $configWriterMock;
+
+    /**
+     * @var ConfigReader|MockObject
+     */
+    private $configReaderMock;
+
+    /**
+     * @var LockConfig|MockObject
+     */
+    private $lockConfigMock;
+
+    /**
+     * @var MagentoVersion|MockObject
+     */
+    private $magentoVersionMock;
+
+    /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->configWriterMock = $this->createMock(ConfigWriter::class);
@@ -72,9 +73,9 @@ class LockTest extends TestCase
     }
 
     /**
-     * @return void
+     * @throws StepException
      */
-    public function testExecuteMagento225OrGreater()
+    public function testExecuteMagento225OrGreater(): void
     {
         $this->magentoVersionMock->expects($this->once())
             ->method('isGreaterOrEqual')
@@ -107,13 +108,14 @@ class LockTest extends TestCase
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('The lock provider "lock-provider" was set.');
+
         $this->lock->execute();
     }
 
     /**
-     * return void
+     * @throws StepException
      */
-    public function testExecuteMagentoLess225()
+    public function testExecuteMagentoLess225(): void
     {
         $this->magentoVersionMock->expects($this->once())
             ->method('isGreaterOrEqual')
@@ -123,6 +125,7 @@ class LockTest extends TestCase
         $this->configReaderMock->expects($this->never())->method('read');
         $this->configWriterMock->expects($this->never())->method('create');
         $this->loggerMock->expects($this->never())->method('info');
+
         $this->lock->execute();
     }
 }

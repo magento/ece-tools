@@ -214,7 +214,7 @@ class ComposerGenerator
      * @param array $repoOptions
      * @param array $composer
      * @return array
-     * @throws FilesystemException
+     * @throws FileSystemException
      *
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      *

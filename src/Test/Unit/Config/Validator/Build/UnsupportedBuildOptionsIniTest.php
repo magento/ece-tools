@@ -11,8 +11,8 @@ use Magento\MagentoCloud\Config\Validator\Build\UnsupportedBuildOptionsIni;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileList;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -25,17 +25,17 @@ class UnsupportedBuildOptionsIniTest extends TestCase
     private $validator;
 
     /**
-     * @var File|Mock
+     * @var File|MockObject
      */
     private $fileMock;
 
     /**
-     * @var FileList|Mock
+     * @var FileList|MockObject
      */
     private $fileListMock;
 
     /**
-     * @var ResultFactory|Mock
+     * @var ResultFactory|MockObject
      */
     private $resultFactoryMock;
 
@@ -55,7 +55,7 @@ class UnsupportedBuildOptionsIniTest extends TestCase
         );
     }
 
-    public function testValidateSuccess()
+    public function testValidateSuccess(): void
     {
         $path = '/path/to/build_option.ini';
 
@@ -72,7 +72,7 @@ class UnsupportedBuildOptionsIniTest extends TestCase
         $this->validator->validate();
     }
 
-    public function testValidateError()
+    public function testValidateError(): void
     {
         $path = '/path/to/build_options.ini';
 

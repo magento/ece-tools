@@ -13,8 +13,8 @@ use Magento\MagentoCloud\Config\Validator\Deploy\SessionConfiguration;
 use Magento\MagentoCloud\Config\Validator\Result\Error;
 use Magento\MagentoCloud\Config\Validator\Result\Success;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -27,19 +27,19 @@ class SessionConfigurationTest extends TestCase
     private $validator;
 
     /**
-     * @var ResultFactory|Mock
+     * @var ResultFactory|MockObject
      */
     private $resultFactoryMock;
 
     /**
-     * @var DeployInterface|Mock
+     * @var DeployInterface|MockObject
      */
     private $stageConfigMock;
 
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->resultFactoryMock = $this->createConfiguredMock(ResultFactory::class, [
             'success' => $this->createMock(Success::class),
@@ -59,7 +59,7 @@ class SessionConfigurationTest extends TestCase
      * @param string $expectedResultClass
      * @dataProvider validateDataProvider
      */
-    public function testValidate(array $sessionConfiguration, string $expectedResultClass)
+    public function testValidate(array $sessionConfiguration, string $expectedResultClass): void
     {
         $this->stageConfigMock->expects($this->once())
             ->method('get')

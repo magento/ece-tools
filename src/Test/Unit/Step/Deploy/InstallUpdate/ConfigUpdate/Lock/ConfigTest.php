@@ -10,8 +10,8 @@ namespace Magento\MagentoCloud\Test\Unit\Step\Deploy\InstallUpdate\ConfigUpdate\
 use Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\Lock\Config;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -19,27 +19,28 @@ use PHPUnit_Framework_MockObject_MockObject as Mock;
 class ConfigTest extends TestCase
 {
     /**
-     * @var Environment|Mock
-     */
-    private $environmentMock;
-
-    /**
-     * @var DeployInterface|Mock
-     */
-    private $stageConfigMock;
-
-    /**
      * @var Config
      */
     private $config;
 
     /**
+     * @var Environment|MockObject
+     */
+    private $environmentMock;
+
+    /**
+     * @var DeployInterface|MockObject
+     */
+    private $stageConfigMock;
+
+    /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->environmentMock = $this->createMock(Environment::class);
         $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
+
         $this->config = new Config($this->environmentMock, $this->stageConfigMock);
     }
 
@@ -47,18 +48,19 @@ class ConfigTest extends TestCase
      * @param $lockPath
      * @param string $lockProvider
      * @param array $expectedResult
+     *
      * @dataProvider getDataProvider
      */
-    public function testGet($lockPath, $lockProvider, array $expectedResult)
+    public function testGet($lockPath, $lockProvider, array $expectedResult): void
     {
         $this->environmentMock->expects($this->once())
             ->method('getEnv')
             ->with('MAGENTO_CLOUD_LOCKS_DIR')
             ->willReturn($lockPath);
-        $this->stageConfigMock->expects($this->any())
-            ->method('get')
+        $this->stageConfigMock->method('get')
             ->with(DeployInterface::VAR_LOCK_PROVIDER)
             ->willReturn($lockProvider);
+
         $this->assertSame($expectedResult, $this->config->get());
     }
 

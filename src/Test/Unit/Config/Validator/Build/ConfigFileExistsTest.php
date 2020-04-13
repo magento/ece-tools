@@ -14,8 +14,8 @@ use Magento\MagentoCloud\Config\Validator\ResultInterface;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
 use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -28,17 +28,17 @@ class ConfigFileExistsTest extends TestCase
     private $configFile;
 
     /**
-     * @var File|Mock
+     * @var File|MockObject
      */
     private $fileMock;
 
     /**
-     * @var FileList|Mock
+     * @var FileList|MockObject
      */
     private $fileListMock;
 
     /**
-     * @var ResultFactory|Mock
+     * @var ResultFactory|MockObject
      */
     private $resultFactoryMock;
 
@@ -58,7 +58,7 @@ class ConfigFileExistsTest extends TestCase
         );
     }
 
-    public function testRun()
+    public function testRun(): void
     {
         $this->fileListMock->expects($this->once())
             ->method('getConfig')
@@ -77,7 +77,7 @@ class ConfigFileExistsTest extends TestCase
         $this->assertInstanceOf(Success::class, $result);
     }
 
-    public function testRunFileNotExists()
+    public function testRunFileNotExists(): void
     {
         $this->fileListMock->expects($this->once())
             ->method('getConfig')
@@ -94,10 +94,10 @@ class ConfigFileExistsTest extends TestCase
                 [
                     'error' => 'File app/etc/config.php does not exist',
                     'suggestion' => 'Please run the following commands:' . PHP_EOL
-                            . '1. bin/magento module:enable --all' . PHP_EOL
-                            . '2. git add -f app/etc/config.php' . PHP_EOL
-                            . '3. git commit -m \'Adding config.php\'' . PHP_EOL
-                            . '4. git push'
+                        . '1. bin/magento module:enable --all' . PHP_EOL
+                        . '2. git add -f app/etc/config.php' . PHP_EOL
+                        . '3. git commit -m \'Adding config.php\'' . PHP_EOL
+                        . '4. git push'
                 ]
             )
             ->willReturn($resultMock);

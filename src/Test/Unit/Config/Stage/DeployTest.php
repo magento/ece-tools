@@ -66,11 +66,11 @@ class DeployTest extends TestCase
 
         if ($schema !== null) {
             $this->schemaMock->expects($this->once())
-                ->method('getSchema')
+                ->method('getVariables')
                 ->willReturn($schema);
         } else {
             $this->schemaMock->expects($this->never())
-                ->method('getSchema');
+                ->method('getVariables');
         }
 
         $this->assertEquals($expectedValue, $this->deployConfig->get($name));

@@ -15,8 +15,9 @@ use Magento\MagentoCloud\Config\RepositoryFactory;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\CronConsumersRunner;
+use Magento\MagentoCloud\Step\StepException;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -30,44 +31,44 @@ class CronConsumersRunnerTest extends TestCase
     private $cronConsumersRunner;
 
     /**
-     * @var Environment|Mock
+     * @var Environment|MockObject
      */
     private $environmentMock;
 
     /**
-     * @var LoggerInterface|Mock
+     * @var LoggerInterface|MockObject
      */
     private $loggerMock;
 
     /**
-     * @var ConfigReader|Mock
+     * @var ConfigReader|MockObject
      */
     private $configReaderMock;
 
     /**
-     * @var ConfigWriter|Mock
+     * @var ConfigWriter|MockObject
      */
     private $configWriterMock;
 
     /**
-     * @var DeployInterface|Mock
+     * @var DeployInterface|MockObject
      */
     private $stageConfigMock;
 
     /**
-     * @var MagentoVersion|Mock
+     * @var MagentoVersion|MockObject
      */
     private $magentoVersionMock;
 
     /**
-     * @var RepositoryFactory|Mock
+     * @var RepositoryFactory|MockObject
      */
     private $repositoryFactoryMock;
 
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->environmentMock = $this->createMock(Environment::class);
         $this->configReaderMock = $this->createMock(ConfigReader::class);
@@ -92,13 +93,15 @@ class CronConsumersRunnerTest extends TestCase
      * @param array $config
      * @param array $configFromVariable
      * @param array $expectedResult
+     *
+     * @throws StepException
+     *
      * @dataProvider executeDataProvider
      */
-    public function testExecute(array $config, array $configFromVariable, array $expectedResult)
+    public function testExecute(array $config, array $configFromVariable, array $expectedResult): void
     {
         $this->magentoVersionMock->method('isGreaterOrEqual')
             ->willReturn(true);
-        
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Updating env.php cron consumers runner configuration.');
@@ -244,7 +247,10 @@ class CronConsumersRunnerTest extends TestCase
         ];
     }
 
-    public function testSkipExecute()
+    /**
+     * @throws StepException
+     */
+    public function testSkipExecute(): void
     {
         $this->magentoVersionMock->expects($this->once())
             ->method('isGreaterOrEqual')
@@ -256,7 +262,7 @@ class CronConsumersRunnerTest extends TestCase
             ->method('get');
         $this->configWriterMock->expects($this->never())
             ->method('create');
-        
+
         $this->cronConsumersRunner->execute();
     }
 }
