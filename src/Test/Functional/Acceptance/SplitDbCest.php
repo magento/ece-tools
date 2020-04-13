@@ -214,7 +214,7 @@ class SplitDbCest extends AbstractCest
     /**
      * @return array
      */
-    private function dataProviderMagentoCloudVersions(): array
+    protected function dataProviderMagentoCloudVersions(): array
     {
         return [
             ['version' => 'master'],
