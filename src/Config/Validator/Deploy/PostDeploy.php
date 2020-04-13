@@ -16,8 +16,6 @@ use Magento\MagentoCloud\Config\ValidatorInterface;
  */
 class PostDeploy implements ValidatorInterface
 {
-    private const URL = 'https://devdocs.magento.com/cloud/project/project-conf-files_magento-app.html#hooks';
-
     /**
      * @var Validator\ResultFactory
      */
@@ -48,7 +46,10 @@ class PostDeploy implements ValidatorInterface
         if (!$this->hookChecker->isPostDeployHookEnabled()) {
             return $this->resultFactory->error(
                 'Your application does not have the "post_deploy" hook enabled.',
-                sprintf('In order to minimize downtime, follow the guide %s', self::URL)
+                'In order to minimize downtime, add the following to ".magento.app.yaml":' . PHP_EOL .
+                'hooks:' . PHP_EOL .
+                '    post_deploy: |' . PHP_EOL .
+                '        php ./vendor/bin/ece-tools run scenario/post-deploy.xml'
             );
         }
 
