@@ -68,18 +68,29 @@ class ClearModuleRequirementsTest extends TestCase
             );
 
         $this->clearModuleRequirements->generate([
-            'repo1' => [
-                'branch' => '1.2',
-                'repo' => 'https://token@repo1.com',
+            'package1' => [
+                'type' => 'path',
+                'url' => 'repo1/app/code/package1',
             ],
-            'repo2' => [
-                'branch' => '2.2',
-                'repo' => 'https://token@repo2.com',
+            'package2' => [
+                'type' => 'path',
+                'url' => 'repo1/app/code/package2',
             ],
-            'repo3' => [
-                'branch' => '2.3',
-                'repo' => 'https://token@repo2.com',
-                'type' => 'single-package'
+            'package3' => [
+                'type' => 'composer',
+                'url' => 'https://packagist.org/vendor/package3',
+            ],
+            'package4' => [
+                'type' => 'git',
+                'url' => 'https://token@github.com/vendor/repo.git',
+            ],
+            'package5' => [
+                'type' => 'git',
+                'url' => 'git@github.com:vendor/repo.git',
+            ],
+            'package6' => [
+                'type' => 'path',
+                'url' => 'repo2/app/code/package6',
             ],
         ]);
     }

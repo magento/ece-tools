@@ -17,8 +17,6 @@ use Magento\MagentoCloud\Package\MagentoVersion;
  */
 class ComposerGenerator
 {
-    const REPO_TYPE_SINGLE_PACKAGE = 'single-package';
-
     /**
      * @var DirectoryList
      */
@@ -197,6 +195,7 @@ class ComposerGenerator
      *
      * @param string $path
      * @return array
+     * @throws FileSystemException
      */
     private function findPackages(string $path) {
         $path = rtrim($path, '\\/');

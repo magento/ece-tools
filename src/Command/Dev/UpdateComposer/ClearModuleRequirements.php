@@ -44,55 +44,14 @@ class ClearModuleRequirements
     /**
      * Generates script for clearing module requirements that run after composer install.
      *
-     * @param array $repos
-     * @return void
+     * @return string script name
+     *
+     * @throws \Magento\MagentoCloud\Filesystem\FileSystemException
      */
-    public function generate(array $repos)
+    public function generate()
     {
         $rootDirectory = $this->directoryList->getMagentoRoot();
-        $clearModulesFilePath = $rootDirectory . '/' . self::SCRIPT_PATH;
-        $stringRepos = var_export($repos, true);
-        $singlePackageType = ComposerGenerator::REPO_TYPE_SINGLE_PACKAGE;
-
-        $clearModulesCode = <<<CODE
-<?php
-\$repos = {$stringRepos};
-
-function clearRequirements(\$dir) {
-    if (!file_exists(\$dir . '/composer.json')) {
-        return;
-    }
-
-    \$composerJson = json_decode(file_get_contents(\$dir . '/composer.json'), true);
-
-    foreach (\$composerJson['require'] as \$requireName => \$requireVersion) {
-        if (preg_match('{^(magento\/|elasticsearch\/)}i', \$requireName)) {
-            unset(\$composerJson['require'][\$requireName]);
-        }
-    }
-
-    file_put_contents(
-        \$dir . '/composer.json',
-        json_encode(\$composerJson, JSON_PRETTY_PRINT)
-    );
-}
-
-foreach (\$repos as \$repoName => \$repoOptions) {
-    \$repoDir = __DIR__ .'/' . \$repoName;
-
-    if (isset(\$repoOptions['type']) && \$repoOptions['type'] == '{$singlePackageType}') {
-        clearRequirements(\$repoDir);
-        continue;
-    }
-
-    foreach (glob(\$repoDir . '/app/code/Magento/*') as \$moduleDir) {
-        clearRequirements(\$moduleDir);
-    }
-}
-
-CODE;
-        $this->file->filePutContents($clearModulesFilePath, $clearModulesCode);
-
+        $this->file->copy(__DIR__  . '/' . self::SCRIPT_PATH . '.tpl', $rootDirectory . '/' . self::SCRIPT_PATH);
         $gitIgnore = $this->file->fileGetContents($rootDirectory . '/.gitignore');
         if (strpos($gitIgnore ?? '', self::SCRIPT_PATH) === false) {
             $this->file->filePutContents(
@@ -101,5 +60,6 @@ CODE;
                 FILE_APPEND
             );
         }
+        return self::SCRIPT_PATH;
     }
 }
