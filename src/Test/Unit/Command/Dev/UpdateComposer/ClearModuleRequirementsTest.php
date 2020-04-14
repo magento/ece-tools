@@ -47,51 +47,61 @@ class ClearModuleRequirementsTest extends TestCase
         );
     }
 
-    public function testGenerate(): void
+    /**
+     * @dataProvider generateGitignoreUpdateDataProvider
+     */
+    public function testGenerateGitignoreUpdate($gitignoreContent): void
     {
         $this->directoryListMock->expects($this->once())
             ->method('getMagentoRoot')
             ->willReturn('/root');
 
-        $this->fileMock->expects($this->exactly(2))
+        $gitignorePath = '/root/.gitignore';
+        $this->fileMock->expects($this->any())
+            ->method('fileGetContents')
+            ->with($gitignorePath)
+            ->willReturn($gitignoreContent);
+        $this->fileMock->expects($this->exactly(1))
             ->method('filePutContents')
-            ->withConsecutive(
-                [
-                    '/root/clear_module_requirements.php',
-                    file_get_contents(__DIR__ . '/_files/clear_module_requirements.php'),
-                ],
-                [
-                    '/root/.gitignore',
-                    $this->stringContains('!/clear_module_requirements.php'),
-                    FILE_APPEND
-                ]
+            ->with(
+                $gitignorePath,
+                $this->stringContains('!/clear_module_requirements.php'),
+                FILE_APPEND
             );
+        $this->assertEquals('clear_module_requirements.php', $this->clearModuleRequirements->generate());
+    }
 
-        $this->clearModuleRequirements->generate([
-            'package1' => [
-                'type' => 'path',
-                'url' => 'repo1/app/code/package1',
-            ],
-            'package2' => [
-                'type' => 'path',
-                'url' => 'repo1/app/code/package2',
-            ],
-            'package3' => [
-                'type' => 'composer',
-                'url' => 'https://packagist.org/vendor/package3',
-            ],
-            'package4' => [
-                'type' => 'git',
-                'url' => 'https://token@github.com/vendor/repo.git',
-            ],
-            'package5' => [
-                'type' => 'git',
-                'url' => 'git@github.com:vendor/repo.git',
-            ],
-            'package6' => [
-                'type' => 'path',
-                'url' => 'repo2/app/code/package6',
-            ],
-        ]);
+    /**
+     * @dataProvider generateGitignoreNoUpdateDataProvider
+     */
+    public function testGenerateGitignoreNoUpdate($gitignoreContent): void
+    {
+        $this->directoryListMock->expects($this->once())
+            ->method('getMagentoRoot')
+            ->willReturn('/root');
+        $gitignorePath = '/root/.gitignore';
+        $this->fileMock->expects($this->any())
+            ->method('fileGetContents')
+            ->with($gitignorePath)
+            ->willReturn($gitignoreContent);
+        $this->fileMock->expects($this->never())
+            ->method('filePutContents');
+        $this->assertEquals('clear_module_requirements.php', $this->clearModuleRequirements->generate());
+    }
+
+    public static function generateGitignoreUpdateDataProvider()
+    {
+        return [
+            [''],
+            ['clear_module_requirements'],
+        ];
+    }
+
+    public static function generateGitignoreNoUpdateDataProvider()
+    {
+        return [
+            ['clear_module_requirements.php'],
+            ["something\n*\nclear_module_requirements.php"],
+        ];
     }
 }
