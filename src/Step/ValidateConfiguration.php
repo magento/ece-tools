@@ -9,6 +9,7 @@ namespace Magento\MagentoCloud\Step;
 
 use Magento\MagentoCloud\App\Logger;
 use Magento\MagentoCloud\Config\Validator\Result\Error;
+use Magento\MagentoCloud\Config\ValidatorException;
 use Magento\MagentoCloud\Config\ValidatorInterface;
 use Psr\Log\LoggerInterface;
 
@@ -42,7 +43,7 @@ class ValidateConfiguration implements StepInterface
     /**
      * @inheritdoc
      */
-    public function execute()
+    public function execute(): void
     {
         $this->logger->notice('Validating configuration');
 
@@ -66,9 +67,11 @@ class ValidateConfiguration implements StepInterface
 
     /**
      * Returns all validation messages grouped by validation level.
-     * Converts validation level to integer value using @see Logger::toMonologLevel() method
      *
      * @return array
+     *
+     * @throws StepException
+     * @see Logger::toMonologLevel()
      */
     private function collectMessages(): array
     {
@@ -83,13 +86,17 @@ class ValidateConfiguration implements StepInterface
                     continue;
                 }
 
-                $result = $validator->validate();
+                try {
+                    $result = $validator->validate();
+                } catch (ValidatorException $exception) {
+                    throw new StepException($exception->getMessage(), $exception->getCode(), $exception);
+                }
 
                 if ($result instanceof Error) {
                     $messages[$level][] = '- ' . $result->getError();
                     if ($suggestion = $result->getSuggestion()) {
                         $messages[$level][] = implode(PHP_EOL, array_map(
-                            function ($line) {
+                            static function ($line) {
                                 return '  ' . $line;
                             },
                             explode(PHP_EOL, $suggestion)

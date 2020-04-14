@@ -20,6 +20,8 @@ interface ValidatorInterface
 
     /**
      * @return Validator\ResultInterface
+     *
+     * @throws ValidatorException
      */
     public function validate(): Validator\ResultInterface;
 }
