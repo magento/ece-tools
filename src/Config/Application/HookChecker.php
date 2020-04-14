@@ -7,7 +7,6 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Config\Application;
 
-use Magento\MagentoCloud\Command\PostDeploy;
 use Magento\MagentoCloud\Config\Environment;
 
 /**
@@ -15,7 +14,7 @@ use Magento\MagentoCloud\Config\Environment;
  */
 class HookChecker
 {
-    const HOOK_POST_DEPLOY = 'post_deploy';
+    private const HOOK_POST_DEPLOY = 'post_deploy';
 
     /**
      * @var Environment
@@ -39,14 +38,8 @@ class HookChecker
     {
         $appConfig = $this->environment->getApplication();
 
-        if (isset($appConfig['hooks'][self::HOOK_POST_DEPLOY])) {
-            $postDeployHooks = $appConfig['hooks'][self::HOOK_POST_DEPLOY];
+        $postDeployHooks = $appConfig['hooks'][self::HOOK_POST_DEPLOY] ?? '';
 
-            if (preg_match(sprintf('/ece-tools\s+%s/', PostDeploy::NAME), $postDeployHooks)) {
-                return true;
-            }
-        }
-
-        return false;
+        return false !== strpos($postDeployHooks, '/ece-tools');
     }
 }
