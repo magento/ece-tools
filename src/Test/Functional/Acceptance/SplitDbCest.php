@@ -78,6 +78,8 @@ class SplitDbCest extends AbstractCest
             'The SPLIT_DB variable contains an invalid value of type string. Use the following type: array.',
         ]);
 
+        $I->stopEnvironment();
+
         $envMagento['stage']['deploy']['SPLIT_DB'] = ['checkout'];
         $I->writeEnvMagentoYaml($envMagento);
         $I->runDockerComposeCommand('run build cloud-build');
@@ -89,6 +91,8 @@ class SplitDbCest extends AbstractCest
             'It should be array with next available values: [quote, sales].'
         ]);
 
+        $I->stopEnvironment();
+
         $envMagento['stage']['deploy']['SPLIT_DB'] = ['quote', 'checkout'];
         $I->writeEnvMagentoYaml($envMagento);
         $I->runDockerComposeCommand('run build cloud-build');
@@ -99,6 +103,8 @@ class SplitDbCest extends AbstractCest
             'The SPLIT_DB variable contains the invalid value.'
             , 'It should be array with next available values: [quote, sales].',
         ]);
+
+        $I->stopEnvironment();
 
         // Deploy 'Split Db' with the unavailable Split Db types
         $envMagento['stage']['deploy']['SPLIT_DB'] = ['quote', 'sales'];
@@ -219,8 +225,6 @@ class SplitDbCest extends AbstractCest
         return [
             ['version' => 'master'],
             ['version' => '2.3.4'],
-            ['version' => '2.2.11'],
-            ['version' => '2.1.18'],
         ];
     }
 

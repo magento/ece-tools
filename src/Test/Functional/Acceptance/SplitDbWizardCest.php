@@ -46,6 +46,8 @@ class SplitDbWizardCest extends AbstractCest
             '- DB cannot be split on this environment'
         ]);
 
+        $I->stopEnvironment();
+
         // Deploy 'Split Db' architecture
         $services = $I->readServicesYaml();
         $appMagento = $I->readAppMagentoYaml();
@@ -57,6 +59,7 @@ class SplitDbWizardCest extends AbstractCest
         $I->writeAppMagentoYaml($appMagento);
         $I->runEceDockerCommand('build:compose --mode=production');
         $I->startEnvironment();
+        $I->runDockerComposeCommand('run build cloud-build');
         $I->runDockerComposeCommand('run deploy cloud-deploy');
 
         // Running 'Split Db' wizard in an environment with Split Db architecture and not splitting Magento Db
@@ -66,17 +69,23 @@ class SplitDbWizardCest extends AbstractCest
             '- You may split DB using SPLIT_DB variable in .magento.env.yaml file'
         ]);
 
+        $I->stopEnvironment();
+
         // Running 'Split Db' wizard in an environment with Split Db architecture
         // and splitting `quote` tables of Magento Db
-        $envMagento['stage']['deploy']['SPLIT_DB'][] = 'quote';
+        $envMagento['stage']['deploy']['SPLIT_DB'] = ['quote'];
         $I->writeEnvMagentoYaml($envMagento);
+        $I->startEnvironment();
+        $I->runDockerComposeCommand('run build cloud-build');
         $I->runDockerComposeCommand('run deploy cloud-deploy');
         $I->runDockerComposeCommand('run deploy ece-command wizard:split-db-state');
         $I->seeInOutput('DB is already split with type(s): quote');
 
+        $I->stopEnvironment();
+
         // Running 'Split Db' wizard in an environment with Split Db architecture
         // and splitting `quote` and `sales` tables of Magento Db
-        $envMagento['stage']['deploy']['SPLIT_DB'][] = 'sales';
+        $envMagento['stage']['deploy']['SPLIT_DB'] = ['quote', 'sales'];
         $I->writeEnvMagentoYaml($envMagento);
         $I->runDockerComposeCommand('run deploy cloud-deploy');
         $I->runDockerComposeCommand('run deploy ece-command wizard:split-db-state');
@@ -91,8 +100,6 @@ class SplitDbWizardCest extends AbstractCest
         return [
             ['version' => 'master'],
             ['version' => '2.3.4'],
-            ['version' => '2.2.11'],
-            ['version' => '2.1.18'],
         ];
     }
 }

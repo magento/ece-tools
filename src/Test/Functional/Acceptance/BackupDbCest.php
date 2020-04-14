@@ -50,6 +50,8 @@ class BackupDbCest extends AbstractCest
         // Part of test without 'SplitDB' architecture
         $this->partRunDbDumpWithoutSplitDbArch($I, $expectedLogs, $envMagento);
 
+        $I->stopEnvironment();
+
         // Part of test with 'SplitDB' architecture
         $this->partRunDbDumpWithSplitDbArch($I, $expectedLogs, $envMagento);
     }
@@ -62,8 +64,6 @@ class BackupDbCest extends AbstractCest
         return [
             ['version' => 'master'],
             ['version' => '2.3.4'],
-            ['version' => '2.2.11'],
-            ['version' => '2.1.18'],
         ];
     }
 
@@ -141,6 +141,8 @@ class BackupDbCest extends AbstractCest
         $I->writeEnvMagentoYaml($envMagento);
         $I->runEceDockerCommand('build:compose --mode=production');
         $I->startEnvironment();
+        $I->runDockerComposeCommand('run build cloud-build');
+        $I->runDockerComposeCommand('run deploy cloud-deploy');
 
         // Running database dump command without database labels (by default)
         $I->runDockerComposeCommand('run deploy ece-command db-dump');
