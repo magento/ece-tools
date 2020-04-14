@@ -33,18 +33,26 @@ class ComposerGenerator
     private $file;
 
     /**
+     * @var string
+     */
+    private $excludeRepoPathsPattern;
+
+    /**
      * @param DirectoryList $directoryList
      * @param MagentoVersion $magentoVersion
      * @param File $file
+     * @param string $excludeRepoPathsPattern
      */
     public function __construct(
         DirectoryList $directoryList,
         MagentoVersion $magentoVersion,
-        File $file
+        File $file,
+        $excludeRepoPathsPattern = '/^((?!test|Test|dev).)*$/'
     ) {
         $this->directoryList = $directoryList;
         $this->magentoVersion = $magentoVersion;
         $this->file = $file;
+        $this->excludeRepoPathsPattern = $excludeRepoPathsPattern;
     }
 
     /**
@@ -73,9 +81,9 @@ class ComposerGenerator
             $baseRepoFolder = $this->directoryList->getMagentoRoot() . '/' . $repoName;
 
             $dirComposerJson = $baseRepoFolder . '/composer.json';
-            if (file_exists($dirComposerJson)) {
+            if ($this->file->isExists($dirComposerJson)) {
                 $dirPackageInfo = json_decode($this->file->fileGetContents($dirComposerJson), true);
-                if ($dirPackageInfo['type'] == 'project') {
+                if (isset($dirPackageInfo['type']) && $dirPackageInfo['type'] == 'project') {
                     $composer['require'] = array_merge($composer['require'], $dirPackageInfo['require']);
                 }
             }
@@ -91,9 +99,10 @@ class ComposerGenerator
                 ];
                 $composer['require'][$packageName] = '*@dev';
             }
+            $excludeRepoStr = empty($repoPackages) ? '' : "--exclude='" . join("' --exclude='", $repoPackages) . "' ";
             $preparePackagesScripts[] = sprintf(
-                "rsync -azhm --stats --exclude='". join("' --exclude='", $repoPackages) ."'"
-                . " --exclude='dev/tests' --exclude='.git' --exclude='composer.json' --exclude='composer.lock' ./%s/ ./",
+                "rsync -azhm --stats $excludeRepoStr--exclude='dev/tests' --exclude='.git' " .
+                "--exclude='composer.json' --exclude='composer.lock' ./%s/ ./",
                 $repoName
             );
         }
@@ -148,16 +157,6 @@ class ComposerGenerator
                 'ce/bin/magento',
             ],
             'repositories' => [
-                'magento/framework' => [
-                    'type' => 'path',
-                    'url' => './ce/lib/internal/Magento/Framework/',
-                    'transport-options' => [
-                        'symlink' => false,
-                    ],
-                    'options' => [
-                        'symlink' => false,
-                    ],
-                ],
             ],
             'require' => [
             ],
@@ -202,13 +201,13 @@ class ComposerGenerator
         $packageTypes = ['magento2-module', 'magento2-theme', 'magento2-language', 'magento2-library'];
         $pathLength = strlen($path . '/');
 
-        $repoDirIterator = new \RecursiveDirectoryIterator($path);
-        $recursiveRepoDirIterator = new \RecursiveIteratorIterator($repoDirIterator);
-        $regexIteratorExcludeTests = new \RegexIterator($recursiveRepoDirIterator, '/^((?!test|Test|dev).)*$/', \RegexIterator::MATCH);
-        $regexIterator = new \RegexIterator($regexIteratorExcludeTests, '/composer.json$/', \RegexIterator::MATCH);
-
+        $dirIterator = $this->file->getRecursiveFileIterator(
+            $path,
+            '/composer.json$/',
+            $this->excludeRepoPathsPattern
+        );
         $packages = [];
-        foreach ($regexIterator as $currentFileInfo) {
+        foreach ($dirIterator as $currentFileInfo) {
             $packageInfo = json_decode($this->file->fileGetContents($currentFileInfo->getPathName()), true);
             if (isset($packageInfo['type']) && in_array($packageInfo['type'], $packageTypes)) {
                 $packages[$packageInfo['name']] = substr($currentFileInfo->getPath(), $pathLength);

@@ -1,0 +1,12 @@
+{
+  "name": "repo1",
+  "require": {
+    "package/require1": "*"
+  },
+  "repositories": {
+    "repo1": {
+      "type": "git",
+      "url": "url"
+    }
+  }
+}
