@@ -27,7 +27,10 @@ class HookCheckerTest extends TestCase
      */
     private $checker;
 
-    protected function setUp()
+    /**
+     * @inheritDoc
+     */
+    protected function setUp(): void
     {
         $this->environmentMock = $this->createMock(Environment::class);
 
@@ -37,9 +40,10 @@ class HookCheckerTest extends TestCase
     /**
      * @param array $hooks
      * @param bool $expectedResult
+     *
      * @dataProvider  isPostDeployEnabledDataProvider
      */
-    public function testIsPostDeployHookEnabled(array $hooks, bool $expectedResult)
+    public function testIsPostDeployHookEnabled(array $hooks, bool $expectedResult): void
     {
         $this->environmentMock->expects($this->once())
             ->method('getApplication')
@@ -59,8 +63,8 @@ class HookCheckerTest extends TestCase
                 true,
             ],
             [
-                ['post_deploy' => 'php test\nphp test2\n'],
-                false,
+                ['post_deploy' => 'php ./vendor/bin/ece-tools run'],
+                true,
             ],
             [
                 ['deploy' => 'php test\nphp test2\n'],
