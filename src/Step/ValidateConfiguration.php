@@ -67,6 +67,7 @@ class ValidateConfiguration implements StepInterface
 
     /**
      * Returns all validation messages grouped by validation level.
+     * Converts validation level to integer value.
      *
      * @return array
      *
