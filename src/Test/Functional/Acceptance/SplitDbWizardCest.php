@@ -46,7 +46,7 @@ class SplitDbWizardCest extends AbstractCest
             '- DB cannot be split on this environment'
         ]);
 
-        $I->stopEnvironment();
+        $I->stopEnvironment(true);
 
         // Deploy 'Split Db' architecture
         $services = $I->readServicesYaml();
@@ -59,7 +59,6 @@ class SplitDbWizardCest extends AbstractCest
         $I->writeAppMagentoYaml($appMagento);
         $I->runEceDockerCommand('build:compose --mode=production');
         $I->startEnvironment();
-        $I->runDockerComposeCommand('run build cloud-build');
         $I->runDockerComposeCommand('run deploy cloud-deploy');
 
         // Running 'Split Db' wizard in an environment with Split Db architecture and not splitting Magento Db
@@ -69,26 +68,24 @@ class SplitDbWizardCest extends AbstractCest
             '- You may split DB using SPLIT_DB variable in .magento.env.yaml file'
         ]);
 
-        $I->stopEnvironment();
+        $I->stopEnvironment(true);
 
         // Running 'Split Db' wizard in an environment with Split Db architecture
         // and splitting `quote` tables of Magento Db
         $envMagento['stage']['deploy']['SPLIT_DB'] = ['quote'];
         $I->writeEnvMagentoYaml($envMagento);
         $I->startEnvironment();
-        $I->runDockerComposeCommand('run build cloud-build');
         $I->runDockerComposeCommand('run deploy cloud-deploy');
         $I->runDockerComposeCommand('run deploy ece-command wizard:split-db-state');
         $I->seeInOutput('DB is already split with type(s): quote');
 
-        $I->stopEnvironment();
+        $I->stopEnvironment(true);
 
         // Running 'Split Db' wizard in an environment with Split Db architecture
         // and splitting `quote` and `sales` tables of Magento Db
         $envMagento['stage']['deploy']['SPLIT_DB'] = ['quote', 'sales'];
         $I->writeEnvMagentoYaml($envMagento);
         $I->startEnvironment();
-        $I->runDockerComposeCommand('run build cloud-build');
         $I->runDockerComposeCommand('run deploy cloud-deploy');
         $I->runDockerComposeCommand('run deploy ece-command wizard:split-db-state');
         $I->seeInOutput('DB is already split with type(s): quote, sales');

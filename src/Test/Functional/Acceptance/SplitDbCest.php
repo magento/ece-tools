@@ -41,7 +41,7 @@ class SplitDbCest extends AbstractCest
         // Deploy 'Split Db' in an environment without prepared architecture
         $this->partWithoutSplitDbArch($I, $envMagento);
 
-        $I->stopEnvironment();
+        $I->stopEnvironment(true);
 
         // Prepare config for deploy
         $this->prepareConfigToDeploySplitDb($I);
@@ -131,7 +131,8 @@ class SplitDbCest extends AbstractCest
         // Run splitting database for 'quote' tables
         $envMagento['stage']['deploy']['SPLIT_DB'] = ['quote'];
         $I->writeEnvMagentoYaml($envMagento);
-        $this->runDeploy($I);
+        $I->startEnvironment();
+        $I->runDockerComposeCommand('run deploy cloud-deploy');
         $I->seeInOutput([
             'INFO: Quote tables were split to DB magento2 in db-quote',
             'INFO: Running setup upgrade.',
@@ -144,7 +145,8 @@ class SplitDbCest extends AbstractCest
         // 'Split Db' type was deleted
         unset($envMagento['stage']['deploy']);
         $I->writeEnvMagentoYaml($envMagento);
-        $this->runDeploy($I);
+        $I->startEnvironment();
+        $I->runDockerComposeCommand('run deploy cloud-deploy');
         $I->seeInOutput('WARNING: Variable SPLIT_DB does not have data which were already split types: quote');
         $this->checkEnvPhpConfig($I, ['checkout'], ['sales']);
         $this->checkMagentoFront($I);
@@ -154,7 +156,8 @@ class SplitDbCest extends AbstractCest
         // 'Split Db' current type was deleted and new type added
         $envMagento['stage']['deploy']['SPLIT_DB'] = ['sales'];
         $I->writeEnvMagentoYaml($envMagento);
-        $this->runDeploy($I);
+        $I->startEnvironment();
+        $I->runDockerComposeCommand('run deploy cloud-deploy');
         $I->seeInOutput('WARNING: Variable SPLIT_DB does not have data which were already split types: quote');
         $this->checkEnvPhpConfig($I, ['checkout'], ['sales']);
         $this->checkMagentoFront($I);
@@ -164,7 +167,8 @@ class SplitDbCest extends AbstractCest
         // 'Split Db' current type was returned
         $envMagento['stage']['deploy']['SPLIT_DB'] = ['sales', 'quote'];
         $I->writeEnvMagentoYaml($envMagento);
-        $this->runDeploy($I);
+        $I->startEnvironment();
+        $I->runDockerComposeCommand('run deploy cloud-deploy');
         $I->seeInOutput([
             'INFO: Sales tables were split to DB magento2 in db-sales',
             'INFO: Running setup upgrade.',
@@ -180,18 +184,6 @@ class SplitDbCest extends AbstractCest
      */
     private function partInstallWithSplitDb(CliTester $I, array $envMagento): void
     {
-        $envMagento['stage']['deploy']['SPLIT_DB'] = ['quote'];
-        $I->writeEnvMagentoYaml($envMagento);
-        $this->runDeploy($I);
-        $I->seeInOutput([
-            'INFO: Quote tables were split to DB magento2 in db-quote',
-            'INFO: Running setup upgrade.',
-        ]);
-        $this->checkEnvPhpConfig($I, ['checkout'], ['sales']);
-        $this->checkMagentoFront($I);
-
-        $I->stopEnvironment();
-
         $envMagento['stage']['deploy']['SPLIT_DB'] = ['sales'];
         $I->writeEnvMagentoYaml($envMagento);
         $this->runDeploy($I);
