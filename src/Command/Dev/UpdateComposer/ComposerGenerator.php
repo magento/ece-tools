@@ -77,8 +77,8 @@ class ComposerGenerator
         }
 
         $preparePackagesScripts = [];
-        foreach ($repoOptions as $repoName => $gitOption) {
-            $baseRepoFolder = $this->directoryList->getMagentoRoot() . '/' . $repoName;
+        foreach (array_keys($repoOptions) as $repoDir) {
+            $baseRepoFolder = $this->directoryList->getMagentoRoot() . '/' . $repoDir;
 
             $dirComposerJson = $baseRepoFolder . '/composer.json';
             if ($this->file->isExists($dirComposerJson)) {
@@ -92,7 +92,7 @@ class ComposerGenerator
             foreach ($repoPackages as $packageName => $packagePath) {
                 $composer['repositories'][$packageName] = [
                     'type' => 'path',
-                    'url' => $repoName . '/' . $packagePath,
+                    'url' => $repoDir . '/' . $packagePath,
                     'options' => [
                         'symlink' => false,
                     ]
@@ -103,7 +103,7 @@ class ComposerGenerator
             $preparePackagesScripts[] = sprintf(
                 "rsync -azhm --stats $excludeRepoStr--exclude='dev/tests' --exclude='.git' " .
                 "--exclude='composer.json' --exclude='composer.lock' ./%s/ ./",
-                $repoName
+                $repoDir
             );
         }
         $composer['scripts']['prepare-packages'] = $preparePackagesScripts;
@@ -196,7 +196,8 @@ class ComposerGenerator
      * @return array
      * @throws FileSystemException
      */
-    private function findPackages(string $path) {
+    private function findPackages(string $path)
+    {
         $path = rtrim($path, '\\/');
         $packageTypes = ['magento2-module', 'magento2-theme', 'magento2-language', 'magento2-library'];
         $pathLength = strlen($path . '/');

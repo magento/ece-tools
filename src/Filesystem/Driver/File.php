@@ -493,8 +493,11 @@ class File
      * @param string $excludePattern Path pattern to exclude
      * @return \RegexIterator
      */
-    public function getRecursiveFileIterator(string $dir, string $filePattern, string $excludePattern = ''): \RegexIterator
-    {
+    public function getRecursiveFileIterator(
+        string $dir,
+        string $filePattern,
+        string $excludePattern = ''
+    ): \RegexIterator {
         $dirIterator = new \RecursiveDirectoryIterator($dir);
         $recursiveDirIterator = new \RecursiveIteratorIterator($dirIterator);
         if ($excludePattern) {
