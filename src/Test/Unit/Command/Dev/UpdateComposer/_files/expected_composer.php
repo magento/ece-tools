@@ -28,7 +28,7 @@ return array(
         ],
         'vendor/theme1' => [
             'type' => 'path',
-            'url' => 'repo2/app/design/Vendor/Theme1',
+            'url' => 'repo3/app/design/Vendor/Theme1',
             'options' => [
                 'symlink' => false,
             ],
@@ -57,8 +57,8 @@ return array(
         ],
         'prepare-packages' => [
             'rsync -azhm --stats --exclude=\'lib/internal/Vendor/Library1\' --exclude=\'dev/tests\' --exclude=\'.git\' --exclude=\'composer.json\' --exclude=\'composer.lock\' ./repo1/ ./',
-            'rsync -azhm --stats --exclude=\'app/design/Vendor/Theme1\' --exclude=\'app/code/Vendor/Module1\' --exclude=\'dev/tests\' --exclude=\'.git\' --exclude=\'composer.json\' --exclude=\'composer.lock\' ./repo2/ ./',
-            'rsync -azhm --stats --exclude=\'dev/tests\' --exclude=\'.git\' --exclude=\'composer.json\' --exclude=\'composer.lock\' ./repo3/ ./',
+            'rsync -azhm --stats --exclude=\'app/code/Vendor/Module1\' --exclude=\'dev/tests\' --exclude=\'.git\' --exclude=\'composer.json\' --exclude=\'composer.lock\' ./repo2/ ./',
+            'rsync -azhm --stats --exclude=\'app/design/Vendor/Theme1\' --exclude=\'dev/tests\' --exclude=\'.git\' --exclude=\'composer.json\' --exclude=\'composer.lock\' ./repo3/ ./',
             'rsync -azhm --stats --exclude=\'dev/tests\' --exclude=\'.git\' --exclude=\'composer.json\' --exclude=\'composer.lock\' ./repo4/ ./',
         ],
         'post-install-cmd' => [
