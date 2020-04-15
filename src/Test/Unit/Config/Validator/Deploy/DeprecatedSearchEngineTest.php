@@ -60,8 +60,7 @@ class DeprecatedSearchEngineTest extends TestCase
         $this->resultFactoryMock->expects($this->once())
             ->method('error')
             ->with(
-                '"MySQL" is configured as a search engine. ' . PHP_EOL .
-                'This option is deprecated and will be removed in one of the next versions.'
+                'The MySQL search configuration option is deprecated. Use Elasticsearch instead.'
             )->willReturn(new Error('Some error'));
 
         $this->validator->validate();

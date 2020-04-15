@@ -43,8 +43,7 @@ class DeprecatedSearchEngine implements ValidatorInterface
     {
         if (SearchEngine::ENGINE_MYSQL === $this->searchEngine->getName()) {
             return $this->resultFactory->error(
-                '"MySQL" is configured as a search engine. ' . PHP_EOL .
-                'This option is deprecated and will be removed in one of the next versions.'
+                'The MySQL search configuration option is deprecated. Use Elasticsearch instead.'
             );
         }
 
