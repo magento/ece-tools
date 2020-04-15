@@ -215,7 +215,7 @@ class ElasticSearchVersionTest extends TestCase
                 '2.3.0',
                 'Elasticsearch service version 6.2 on infrastructure layer is not compatible with current version of ' .
                 'elasticsearch/elasticsearch module (5.0), used by your Magento application.',
-                'You can fix this issue by upgrading the Elasticsearch service on your ' .
+                'You can fix this issue by downgrading the Elasticsearch service on your ' .
                 'Magento Cloud infrastructure to version 5.x.'
             ],
             [
@@ -236,7 +236,7 @@ class ElasticSearchVersionTest extends TestCase
                 '2.1.4',
                 'Elasticsearch service version 5.0 on infrastructure layer is not compatible with current version of ' .
                 'elasticsearch/elasticsearch module (2.0), used by your Magento application.',
-                'You can fix this issue by upgrading the Elasticsearch service on your ' .
+                'You can fix this issue by downgrading the Elasticsearch service on your ' .
                 'Magento Cloud infrastructure to version 1.x or 2.x.'
             ],
             [
@@ -292,7 +292,7 @@ class ElasticSearchVersionTest extends TestCase
                 '2.4.0',
                 'Elasticsearch service version 7.4 on infrastructure layer is not compatible with current version of ' .
                 'elasticsearch/elasticsearch module (6.2), used by your Magento application.',
-                'You can fix this issue by upgrading the Elasticsearch service on your ' .
+                'You can fix this issue by downgrading the Elasticsearch service on your ' .
                 'Magento Cloud infrastructure to version 6.x.'
             ],
         ];

@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Config\Validator\Deploy;
 
+use Composer\Semver\Comparator;
 use Composer\Semver\Semver;
 use Magento\MagentoCloud\Config\SearchEngine;
 use Magento\MagentoCloud\Config\Validator;
@@ -169,10 +170,15 @@ class ElasticSearchVersion implements ValidatorInterface
             $suggestion[] = '  Update the composer.json file for your Magento Cloud project to ' .
                 'require elasticsearch/elasticsearch module version ~2.0.';
         } else {
+            $mode = Comparator::greaterThan($esServiceVersion, $esPackageVersion)
+                ? 'downgrading'
+                : 'upgrading';
+
             $suggestion = [
                 sprintf(
-                    'You can fix this issue by upgrading the Elasticsearch service on your ' .
+                    'You can fix this issue by %s the Elasticsearch service on your ' .
                     'Magento Cloud infrastructure to version %s.',
+                    $mode,
                     $versionInfo['esVersionRaw']
                 )
             ];
