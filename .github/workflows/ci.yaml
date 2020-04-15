@@ -20,3 +20,7 @@ jobs:
           extensions: sockets
       - name: Composer Update
         run: composer update
+      - name: Static and Unit tests
+        run: tests/travis/static-unit.sh
+      - name: Integration tests
+        run: tests/travis/integration.sh
