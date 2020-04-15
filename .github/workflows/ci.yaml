@@ -1,0 +1,15 @@
+name: CI
+on: [pull_request]
+
+jobs:
+  static-unit:
+    name: Static and Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: PHPUnit tests
+        uses:
+          - actions/checkout@v1
+          - php-actions/composer@v1
+          - php-actions/phpunit@v1
+        config: tests/unit
+        memory: 256M
