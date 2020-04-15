@@ -3,14 +3,12 @@ on: [pull_request]
 
 jobs:
   static-unit:
-    name: Static and Unit Tests
+    name: PHPUnit tests
     runs-on: ubuntu-latest
     steps:
-      - name: PHPUnit tests
-        uses:
-          - actions/checkout@v1
-          - php-actions/composer@v1
-          - php-actions/phpunit@v1
-        with:
-          config: tests/unit
-          memory: 256M
+      - actions/checkout@v1
+      - php-actions/composer@v1
+      - php-actions/phpunit@v1
+    with:
+      config: tests/unit
+      memory: 256M
