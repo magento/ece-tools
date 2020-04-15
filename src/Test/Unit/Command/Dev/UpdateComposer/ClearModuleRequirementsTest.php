@@ -10,6 +10,7 @@ namespace Magento\MagentoCloud\Test\Unit\Command\Dev\UpdateComposer;
 use Magento\MagentoCloud\Command\Dev\UpdateComposer\ClearModuleRequirements;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
+use phpmock\phpunit\PHPMock;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -18,6 +19,8 @@ use PHPUnit\Framework\TestCase;
  */
 class ClearModuleRequirementsTest extends TestCase
 {
+    use PHPMock;
+
     /**
      * @var DirectoryList|MockObject
      */
@@ -38,6 +41,10 @@ class ClearModuleRequirementsTest extends TestCase
      */
     protected function setUp()
     {
+        self::defineFunctionMock('Magento\MagentoCloud\Filesystem\Driver', 'file_get_contents');
+        self::defineFunctionMock('Magento\MagentoCloud\Filesystem\Driver', 'file_put_contents');
+        self::defineFunctionMock('Magento\MagentoCloud\Filesystem\Driver', 'file_exists');
+
         $this->directoryListMock = $this->createMock(DirectoryList::class);
         $this->fileMock = $this->createMock(File::class);
 
