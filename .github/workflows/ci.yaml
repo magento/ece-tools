@@ -11,5 +11,6 @@ jobs:
           - actions/checkout@v1
           - php-actions/composer@v1
           - php-actions/phpunit@v1
-        config: tests/unit
-        memory: 256M
+        with:
+          config: tests/unit
+          memory: 256M
