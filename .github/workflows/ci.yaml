@@ -18,9 +18,5 @@ jobs:
         with:
           php-version: ${{ matrix.php-versions }}
           extensions: sockets
-      - name: Composer
-        uses: php-actions/composer@v1
-      - uses: php-actions/phpunit@v1
-        with:
-          config: tests/unit
-          memory: 256M
+      - name: Composer Update
+        run: composer update
