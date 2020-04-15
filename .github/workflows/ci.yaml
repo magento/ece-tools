@@ -5,6 +5,8 @@ jobs:
   static-unit:
     name: PHPUnit tests
     runs-on: ubuntu-latest
+    env:
+      COMPOSER_AUTH: '{"http-basic": {"repo.magento.com": {"username": "021659cd19664f0167a9f727a73f781a","password": "99c7a50a8c29319cafc4574e2ce4f91f"}}}'
     steps:
       - uses: actions/checkout@v1
       - uses: php-actions/composer@v1
