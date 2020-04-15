@@ -6,9 +6,9 @@ jobs:
     name: PHPUnit tests
     runs-on: ubuntu-latest
     steps:
-      - actions/checkout@v1
-      - php-actions/composer@v1
-      - php-actions/phpunit@v1
+      - uses: actions/checkout@v1
+      - uses: php-actions/composer@v1
+      - uses: php-actions/phpunit@v1
     with:
       config: tests/unit
       memory: 256M
