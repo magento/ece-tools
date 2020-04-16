@@ -109,7 +109,17 @@ class UpdateComposerTest extends TestCase
             ->method('generate')
             ->with($gitOptions['repositories'])
             ->willReturn([
-                'name' => 'magento/cloud'
+                'name' => 'magento/cloud',
+                'repositories' => [
+                    'vendor1/package1' => [
+                        'type' => 'path',
+                        'url' => 'repo1'
+                    ],
+                    'vendor2/package2' => [
+                        'type' => 'path',
+                        'url' => 'repo2'
+                    ],
+                ],
             ]);
         $this->shellMock->expects($this->exactly(3))
             ->method('execute')
