@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Config\Validator\Deploy;
 
+use Composer\Semver\Comparator;
 use Composer\Semver\Semver;
 use Magento\MagentoCloud\Config\SearchEngine;
 use Magento\MagentoCloud\Config\Validator;
@@ -57,9 +58,9 @@ class ElasticSearchVersion implements ValidatorInterface
      */
     private static $versionsMap = [
         [
-            'packageVersion' => '~6.0',
-            'esVersion' => '~6.0',
-            'esVersionRaw' => '6.x',
+            'packageVersion' => '~2.0',
+            'esVersion' => '>= 1.0 < 3.0',
+            'esVersionRaw' => '1.x or 2.x',
         ],
         [
             'packageVersion' => '~5.0',
@@ -67,9 +68,14 @@ class ElasticSearchVersion implements ValidatorInterface
             'esVersionRaw' => '5.x',
         ],
         [
-            'packageVersion' => '~2.0',
-            'esVersion' => '>= 1.0 < 3.0',
-            'esVersionRaw' => '1.x or 2.x',
+            'packageVersion' => '~6.0',
+            'esVersion' => '~6.0',
+            'esVersionRaw' => '6.x',
+        ],
+        [
+            'packageVersion' => '~7.0',
+            'esVersion' => '~7.0',
+            'esVersionRaw' => '7.x',
         ],
     ];
 
@@ -126,7 +132,7 @@ class ElasticSearchVersion implements ValidatorInterface
                     return $this->generateError($esServiceVersion, $esPackageVersion, $versionInfo);
                 }
             }
-        } catch (\Exception $e) {
+        } catch (UndefinedPackageException $e) {
             $this->logger->warning('Can\'t validate version of elasticsearch: ' . $e->getMessage());
         }
 
@@ -164,10 +170,15 @@ class ElasticSearchVersion implements ValidatorInterface
             $suggestion[] = '  Update the composer.json file for your Magento Cloud project to ' .
                 'require elasticsearch/elasticsearch module version ~2.0.';
         } else {
+            $mode = Comparator::greaterThan($esServiceVersion, $esPackageVersion)
+                ? 'downgrading'
+                : 'upgrading';
+
             $suggestion = [
                 sprintf(
-                    'You can fix this issue by upgrading the Elasticsearch service on your ' .
+                    'You can fix this issue by %s the Elasticsearch service on your ' .
                     'Magento Cloud infrastructure to version %s.',
+                    $mode,
                     $versionInfo['esVersionRaw']
                 )
             ];
