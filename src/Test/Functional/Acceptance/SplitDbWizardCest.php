@@ -34,8 +34,8 @@ class SplitDbWizardCest extends AbstractCest
     public function testSplitDbWizard(CliTester $I, Example $data)
     {
         $this->prepareWorkplace($I, $data['version']);
-        $envMagento = ['stage' => ['global' => ['SCD_ON_DEMAND' => true]]];
-        $I->writeEnvMagentoYaml($envMagento);
+        $I->writeEnvMagentoYaml(['stage' => ['global' => ['SCD_ON_DEMAND' => true]]]);
+
         $I->runEceDockerCommand('build:compose --mode=production');
         $I->runDockerComposeCommand('run build cloud-build');
 
@@ -58,37 +58,38 @@ class SplitDbWizardCest extends AbstractCest
         $I->writeServicesYaml($services);
         $I->writeAppMagentoYaml($appMagento);
         $I->runEceDockerCommand('build:compose --mode=production');
-        $I->startEnvironment();
-        $I->runDockerComposeCommand('run deploy cloud-deploy');
 
-        // Running 'Split Db' wizard in an environment with Split Db architecture and not splitting Magento Db
-        $I->runDockerComposeCommand('run deploy ece-command wizard:split-db-state');
-        $I->seeInOutput([
-            'DB is not split',
-            '- You may split DB using SPLIT_DB variable in .magento.env.yaml file'
-        ]);
+        foreach ($this->variationsData() as $variationData) {
+            $this->setSplitDbTypesIntoMagentoEnvYaml($I, $variationData['splitDbTypes']);
+            $this->runDeploy($I);
+            $I->runDockerComposeCommand('run deploy ece-command wizard:split-db-state');
+            $I->seeInOutput($variationData['messages']);
 
-        $I->stopEnvironment(true);
+            $I->stopEnvironment(true);
+        }
+    }
 
-        // Running 'Split Db' wizard in an environment with Split Db architecture
-        // and splitting `quote` tables of Magento Db
-        $envMagento['stage']['deploy']['SPLIT_DB'] = ['quote'];
-        $I->writeEnvMagentoYaml($envMagento);
-        $I->startEnvironment();
-        $I->runDockerComposeCommand('run deploy cloud-deploy');
-        $I->runDockerComposeCommand('run deploy ece-command wizard:split-db-state');
-        $I->seeInOutput('DB is already split with type(s): quote');
-
-        $I->stopEnvironment(true);
-
-        // Running 'Split Db' wizard in an environment with Split Db architecture
-        // and splitting `quote` and `sales` tables of Magento Db
-        $envMagento['stage']['deploy']['SPLIT_DB'] = ['quote', 'sales'];
-        $I->writeEnvMagentoYaml($envMagento);
-        $I->startEnvironment();
-        $I->runDockerComposeCommand('run deploy cloud-deploy');
-        $I->runDockerComposeCommand('run deploy ece-command wizard:split-db-state');
-        $I->seeInOutput('DB is already split with type(s): quote, sales');
+    private function variationsData(): array
+    {
+        return [
+            'Running Split Db wizard in an environment with Split Db architecture and not splitting Magento Db' => [
+                'splitDbTypes' => null,
+                'messages' => [
+                    'DB is not split',
+                    '- You may split DB using SPLIT_DB variable in .magento.env.yaml file'
+                ]
+            ],
+            'Running Split Db wizard in an environment with Split Db architecture'
+            . 'and splitting `quote` tables of Magento Db' => [
+                'splitDbTypes' => ['quote'],
+                'messages' => 'DB is already split with type(s): quote',
+            ],
+            'Running Split Db wizard in an environment with Split Db architecture'
+            . 'and splitting `quote` and `sales` tables of Magento Db' => [
+                'splitDbTypes' => ['quote', 'sales'],
+                'messages' => 'DB is already split with type(s): quote, sales',
+            ]
+        ];
     }
 
     /**
@@ -100,5 +101,29 @@ class SplitDbWizardCest extends AbstractCest
             ['version' => 'master'],
             ['version' => '2.3.4'],
         ];
+    }
+
+    /**
+     * @param CliTester $I
+     * @param $splitTypes
+     */
+    private function setSplitDbTypesIntoMagentoEnvYaml(CliTester $I, $splitTypes = null)
+    {
+        $config = $I->readEnvMagentoYaml();
+        if (null !== $splitTypes) {
+            $config['stage']['deploy']['SPLIT_DB'] = $splitTypes;
+        } else {
+            unset($config['stage']['deploy']['SPLIT_DB']);
+        }
+        $I->writeEnvMagentoYaml($config);
+    }
+
+    /**
+     * @param CliTester $I
+     */
+    private function runDeploy(CliTester $I)
+    {
+        $I->startEnvironment();
+        $I->runDockerComposeCommand('run deploy cloud-deploy');
     }
 }
