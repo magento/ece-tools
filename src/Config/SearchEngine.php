@@ -19,6 +19,8 @@ use Magento\MagentoCloud\Service\ElasticSearch;
  */
 class SearchEngine
 {
+    public const ENGINE_MYSQL = 'mysql';
+
     /**
      * @var Environment
      */
