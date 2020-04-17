@@ -21,5 +21,5 @@ interface StepInterface
      * @return void
      * @throws StepException
      */
-    public function execute();
+    public function execute(); // The :void return type declaration that should be here would cause a BC issue
 }
