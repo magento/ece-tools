@@ -1,28 +1,15 @@
 <?php
-/**
- * Copyright © Magento, Inc. All rights reserved.
- * See COPYING.txt for license details.
- */
-declare(strict_types=1);
 
-$repos = array (
-  'package1' => 
-  array (
-    'type' => 'path',
-    'url' => 'repo1/app/code/package1',
-  ),
-  'package2' => 
-  array (
-    'type' => 'path',
-    'url' => 'repo1/app/code/package2',
-  ),
-  'package6' => 
-  array (
-    'type' => 'path',
-    'url' => 'repo2/app/code/package6',
-  ),
-);
-$packages = var_export(array_keys($repos), true);
+$composer = json_decode(file_get_contents(__DIR__ . '/composer.json'), true);
+
+if (isset($composer['repositories'])) {
+    $repos = array_filter($composer['repositories'], function($val) {
+       return isset($val['type']) && $val['type'] == 'path';
+    });
+} else {
+    $repos = [];
+}
+$packages = array_keys($repos);
 
 function clearRequirements($dir, $packages) {
     if (!file_exists($dir . '/composer.json')) {

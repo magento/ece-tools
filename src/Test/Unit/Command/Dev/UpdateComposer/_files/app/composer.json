@@ -1,0 +1,11 @@
+{
+  "require": {
+    "package": "*"
+  },
+  "repositories": {
+    "repo": {
+      "type": "git",
+      "url": "url"
+    }
+  }
+}
