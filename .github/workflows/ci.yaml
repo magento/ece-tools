@@ -9,6 +9,7 @@ jobs:
       matrix:
         php-versions: ['7.1', '7.2', '7.3']
     env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       REPO_USERNAME_CE: ${{ secrets.REPO_USERNAME_CE }}
       REPO_PASSWORD_CE: ${{ secrets.REPO_PASSWORD_CE }}
     steps:
