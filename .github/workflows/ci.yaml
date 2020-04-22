@@ -26,8 +26,8 @@ jobs:
       - name: Composer credentials
         run: |
           set -e
-          composer config http-basic.repo.magento.com ${REPO_USERNAME_CE} ${REPO_PASSWORD_CE}
-          composer config github-oauth.github.com ${GITHUB_TOKEN}
+          composer config http-basic.repo.magento.com "$REPO_USERNAME_CE" "$REPO_PASSWORD_CE"
+          composer config github-oauth.github.com "$GITHUB_TOKEN"
       - name: Static and Unit tests
         run: |
           set -e
