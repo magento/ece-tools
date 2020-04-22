@@ -3,13 +3,14 @@ on: [pull_request]
 
 jobs:
   static-unit:
-    name: Static and Unit tests
+    name: Acceptance Tests
     runs-on: ubuntu-latest
     strategy:
       matrix:
         php-versions: ['7.1', '7.2', '7.3']
     env:
-      COMPOSER_AUTH: '{"http-basic": {"repo.magento.com": {"username": "021659cd19664f0167a9f727a73f781a","password": "99c7a50a8c29319cafc4574e2ce4f91f"}}}'
+      REPO_USERNAME_CE: ${{ secrets.REPO_USERNAME_CE }}
+      REPO_PASSWORD_CE: ${{ secrets.REPO_PASSWORD_CE }}
     steps:
       - name: Checkout
         uses: actions/checkout@v1
@@ -22,26 +23,17 @@ jobs:
           extensions: sockets
       - name: Composer Update
         run: composer update
+      - name: Composer credentials
+        run:
+          - composer config http-basic.repo.magento.com ${REPO_USERNAME_CE} ${REPO_PASSWORD_CE}
+          - composer config github-oauth.github.com ${GITHUB_TOKEN}
       - name: Static and Unit tests
-        run: tests/travis/static-unit.sh
-  integration:
-    name: Integration tests
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        php-versions: ['7.1', '7.2', '7.3']
-    env:
-      COMPOSER_AUTH: '{"http-basic": {"repo.magento.com": {"username": "021659cd19664f0167a9f727a73f781a","password": "99c7a50a8c29319cafc4574e2ce4f91f"}}}'
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v1
-      - name: Prepare PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: ${{ matrix.php-versions }}
-          extensions: sockets
-      - name: Composer Update
-        run: composer update
+        run:
+          - ./vendor/bin/phpstan analyse -c ./tests/static/phpstan.neon
+          - ./vendor/bin/phpcs ./src --standard=./tests/static/phpcs-ruleset.xml -p -n
+          - ./vendor/bin/phpmd ./src xml ./tests/static/phpmd-ruleset.xml
+          - ./vendor/bin/phpunit --configuration ./tests/unit --coverage-clover ./tests/unit/tmp/clover.xml && php ./tests/unit/code-coverage.php ./tests/unit/tmp/clover.xml
+          - ./vendor/bin/phpunit --configuration ./tests/unit
       - name: Integration tests
-        run: tests/travis/integration.sh
+        run: ./vendor/bin/phpunit --configuration ./tests/integration
 
