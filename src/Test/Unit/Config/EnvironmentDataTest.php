@@ -13,6 +13,9 @@ use Magento\MagentoCloud\Config\Schema;
 use Magento\MagentoCloud\Config\System\Variables;
 use Magento\MagentoCloud\Config\SystemConfigInterface;
 use Magento\MagentoCloud\PlatformVariable\DecoderInterface;
+use Magento\MagentoCloud\Filesystem\FileList;
+use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use phpmock\phpunit\PHPMock;
 use PHPStan\Testing\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -40,6 +43,16 @@ class EnvironmentDataTest extends TestCase
     private $decoderMock;
 
     /**
+     * @var FileList|MockObject
+     */
+    private $fileListMock;
+
+    /**
+     * @var File|MockObject
+     */
+    private $fileMock;
+
+    /**
      * @inheritDoc
      */
     protected function setUp(): void
@@ -65,8 +78,10 @@ class EnvironmentDataTest extends TestCase
         );
 
         $this->decoderMock = $this->getMockForAbstractClass(DecoderInterface::class);
+        $this->fileListMock = $this->createMock(FileList::class);
+        $this->fileMock = $this->createMock(File::class);
 
-        $this->environmentData = new EnvironmentData($this->variable, $this->decoderMock);
+        $this->environmentData = new EnvironmentData($this->variable, $this->decoderMock, $this->fileListMock, $this->fileMock);
     }
 
     public function testGetEnv(): void
@@ -126,5 +141,29 @@ class EnvironmentDataTest extends TestCase
         $_ENV['MAGENTO_CLOUD_ENVIRONMENT'] = 'production';
 
         $this->assertEquals('production', $this->environmentData->getBranchName());
+    }
+
+    // Following tests to see if .magento.app.yaml can be read (includes file missing)
+    public function testGetApplicationWithNoSystemVariablesFileExists(): void
+    {
+        $_ENV = null;
+
+        $this->fileMock->expects($this->once())
+            ->method('fileGetContents')
+            ->willReturn('[]');
+
+        $this->assertEquals([], $this->environmentData->getApplication());
+    }
+
+    public function testGetApplicationWithNoSystemVariablesFileNotExists(): void
+    {
+        $_ENV = null;
+        $exception = new FilesystemException('.magento.app.yaml not exist');
+
+        $this->fileMock->expects($this->once())
+            ->method('fileGetContents')
+            ->willThrowException($exception);
+
+        $this->assertEquals([], $this->environmentData->getApplication());
     }
 }

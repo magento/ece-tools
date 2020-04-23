@@ -9,6 +9,10 @@ namespace Magento\MagentoCloud\Config;
 
 use Magento\MagentoCloud\Config\System\Variables;
 use Magento\MagentoCloud\PlatformVariable\DecoderInterface;
+use Magento\MagentoCloud\Filesystem\FileList;
+use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
+use Symfony\Component\Yaml\Yaml;
 
 /**
  * Returns cloud environment data.
@@ -31,15 +35,33 @@ class EnvironmentData implements EnvironmentDataInterface
     private $data = [];
 
     /**
+     * @var FileList
+     */
+    private $fileList;
+
+    /**
+     * @var File
+     */
+    private $file;
+
+    /**
      * Environment constructor.
      *
      * @param Variables $systemConfig
      * @param DecoderInterface $decoder
+     * @param FileList $fileList
+     * @param File $file
      */
-    public function __construct(Variables $systemConfig, DecoderInterface $decoder)
-    {
+    public function __construct(
+        Variables $systemConfig,
+        DecoderInterface $decoder,
+        FileList $fileList,
+        File $file
+    ) {
         $this->systemConfig = $systemConfig;
         $this->decoder = $decoder;
+        $this->fileList = $fileList;
+        $this->file = $file;
     }
 
     /**
@@ -114,13 +136,26 @@ class EnvironmentData implements EnvironmentDataInterface
             return $this->data['application'];
         }
 
-        return $this->data['application'] = $this->getEnvVar(SystemConfigInterface::VAR_ENV_APPLICATION, []);
+        $application = $this->getEnvVar(SystemConfigInterface::VAR_ENV_APPLICATION, []);
+
+        if (!$application) {
+            // Try to read from .magento.app.yaml
+            try {
+                $application = Yaml::parse(
+                    $this->file->fileGetContents($this->fileList->getAppConfig())
+                );
+            } catch (FileSystemException $e) {
+                // Do nothing as $application needs to be empty
+            }
+        }
+
+        return $this->data['application'] = $application;
     }
 
     /**
      * Returns name of environment branch
-     *
      * @return string
+     *
      */
     public function getBranchName(): string
     {
