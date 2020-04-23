@@ -35,7 +35,6 @@
         <service id="Magento\MagentoCloud\Scenario\Exception\ValidationException" autowire="false" />
         <service id="Magento\MagentoCloud\Service\ServiceMismatchException" autowire="false" />
         <service id="Magento\MagentoCloud\Config\ValidatorException" autowire="false" />
-        <service id="Magento\MagentoCloud\Service\ServiceException" autowire="false" />
         <service id="Magento\MagentoCloud\Shell\Process" autowire="false" />
         <service id="Magento\MagentoCloud\Shell\ProcessException" autowire="false" />
         <service id="Magento\MagentoCloud\Step\Build\BackupData" autowire="false" />

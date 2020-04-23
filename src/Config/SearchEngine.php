@@ -179,7 +179,12 @@ class SearchEngine
      */
     private function getElasticSearchConfiguration(array $config): array
     {
-        $engine = $this->elasticSearch->getFullVersion();
+        $engine = ElasticSearch::ENGINE_NAME;
+
+        $esVersion = $this->elasticSearch->getVersion();
+        if (Semver::satisfies($esVersion, '>= 5')) {
+            $engine .= (int)$esVersion;
+        }
 
         $elasticSearchConfig = [
             'engine' => $engine,

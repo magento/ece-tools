@@ -13,8 +13,6 @@ use Magento\MagentoCloud\Config\SearchEngine\ElasticSuite;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\DB\Data\ConnectionFactory;
 use Magento\MagentoCloud\DB\Data\ConnectionInterface;
-use Magento\MagentoCloud\Package\MagentoVersion;
-use Magento\MagentoCloud\Service\ElasticSearch;
 use Magento\MagentoCloud\Step\Deploy\InstallUpdate\Install\Setup\InstallCommandFactory;
 use Magento\MagentoCloud\Util\PasswordGenerator;
 use Magento\MagentoCloud\Util\UrlManager;
@@ -67,19 +65,9 @@ class InstallCommandFactoryTest extends TestCase
     private $dbConfigMock;
 
     /**
-     * @var MagentoVersion|MockObject
-     */
-    private $magentoVersionMock;
-
-    /**
-     * @var ElasticSearch|MockObject
-     */
-    private $elasticSearchMock;
-
-    /**
      * @inheritdoc
      */
-    protected function setUp(): void
+    protected function setUp()
     {
         $this->adminDataMock = $this->getMockForAbstractClass(AdminDataInterface::class);
         $this->urlManagerMock = $this->createMock(UrlManager::class);
@@ -93,8 +81,6 @@ class InstallCommandFactoryTest extends TestCase
             ->willReturn($this->connectionDataMock);
         $this->elasticSuiteMock = $this->createMock(ElasticSuite::class);
         $this->dbConfigMock = $this->createMock(DbConfig::class);
-        $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
-        $this->elasticSearchMock = $this->createMock(ElasticSearch::class);
 
         $this->installCommandFactory = new InstallCommandFactory(
             $this->urlManagerMock,
@@ -103,9 +89,7 @@ class InstallCommandFactoryTest extends TestCase
             $this->passwordGeneratorMock,
             $this->stageConfigMock,
             $this->elasticSuiteMock,
-            $this->dbConfigMock,
-            $this->magentoVersionMock,
-            $this->elasticSearchMock
+            $this->dbConfigMock
         );
     }
 
@@ -141,7 +125,7 @@ class InstallCommandFactoryTest extends TestCase
         $adminLastnameExpected,
         bool $elasticSuite = false,
         array $mergedConfig = []
-    ): void {
+    ) {
         $this->urlManagerMock->expects($this->once())
             ->method('getUnSecureUrls')
             ->willReturn(['' => 'http://unsecure.url']);
@@ -202,8 +186,13 @@ class InstallCommandFactoryTest extends TestCase
             $this->elasticSuiteMock->expects($this->once())
                 ->method('isAvailable')
                 ->willReturn(true);
-            $this->elasticSuiteMock->method('getServers')
-                ->willReturn('localhost:9200');
+            $this->elasticSuiteMock->expects($this->once())
+                ->method('get')
+                ->willReturn([
+                    'es_client' => [
+                        'servers' => 'localhost:9200'
+                    ]
+                ]);
             $elasticSuiteOption = ' --es-hosts=\'localhost:9200\'';
         }
 
@@ -216,7 +205,7 @@ class InstallCommandFactoryTest extends TestCase
         $dbPrefix = isset($mergedConfig['table_prefix']) ? " --db-prefix='" . $mergedConfig['table_prefix'] . "'" : '';
 
         $expectedCommand =
-            'php ./bin/magento setup:install -v -n --session-save=db --cleanup-database'
+            'php ./bin/magento setup:install -n --session-save=db --cleanup-database'
             . ' --use-secure-admin=1 --use-rewrites=1 --ansi --no-interaction --currency=\'USD\''
             . ' --base-url=\'http://unsecure.url\' --base-url-secure=\'https://secure.url\''
             . ' --backend-frontname=\'' . $adminUrlExpected . '\''
@@ -225,7 +214,8 @@ class InstallCommandFactoryTest extends TestCase
             . ' --db-password=\'password\''
             . $dbPrefix
             . $adminCredential
-            . $elasticSuiteOption;
+            . $elasticSuiteOption
+            . ' -v';
 
         $this->assertEquals(
             $expectedCommand,
@@ -236,7 +226,7 @@ class InstallCommandFactoryTest extends TestCase
     /**
      * @return array
      */
-    public function executeDataProvider(): array
+    public function executeDataProvider()
     {
         return [
             [

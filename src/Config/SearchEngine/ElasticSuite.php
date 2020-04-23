@@ -74,14 +74,6 @@ class ElasticSuite
     }
 
     /**
-     * @return string
-     */
-    public function getServers(): string
-    {
-        return $this->get()['es_client']['servers'] ?? '';
-    }
-
-    /**
      * Checks if both ElasticSearch and ElasticSuite are installed.
      *
      * @return bool
