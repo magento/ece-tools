@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Config\Stage\Deploy;
 
+use Magento\MagentoCloud\Config\ConfigException;
 use Magento\MagentoCloud\Config\Environment\Reader as EnvironmentReader;
 use Magento\MagentoCloud\Config\Schema;
 use Magento\MagentoCloud\Config\Stage\Deploy;
@@ -65,8 +66,10 @@ class MergedConfigTest extends TestCase
      * @param array $envVarConfig
      * @param array $expectedConfig
      * @dataProvider getDataProvider
+     *
+     * @throws ConfigException
      */
-    public function testGet(array $defaults, array $envConfig, array $envVarConfig, array $expectedConfig)
+    public function testGet(array $defaults, array $envConfig, array $envVarConfig, array $expectedConfig): void
     {
         $this->schemaMock->expects($this->once())
             ->method('getDefaults')
@@ -87,7 +90,6 @@ class MergedConfigTest extends TestCase
 
     /**
      * @return array
-     * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
     public function getDataProvider(): array
     {
@@ -174,11 +176,13 @@ class MergedConfigTest extends TestCase
     }
 
     /**
-     * @expectedExceptionMessage File system error
-     * @expectedException \RuntimeException
+     * @throws ConfigException
      */
-    public function testGetWithFileSystemException()
+    public function testGetWithFileSystemException(): void
     {
+        $this->expectException(ConfigException::class);
+        $this->expectExceptionMessage('File system error');
+
         $this->environmentReaderMock->expects($this->once())
             ->method('read')
             ->willThrowException(new FileSystemException('File system error'));
@@ -187,11 +191,13 @@ class MergedConfigTest extends TestCase
     }
 
     /**
-     * @expectedExceptionMessage File system error
-     * @expectedException \RuntimeException
+     * @throws ConfigException
      */
-    public function testGetWithParseException()
+    public function testGetWithParseException(): void
     {
+        $this->expectException(ConfigException::class);
+        $this->expectExceptionMessage('File system error');
+
         $this->environmentReaderMock->expects($this->once())
             ->method('read')
             ->willThrowException(new ParseException('File system error'));

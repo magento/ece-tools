@@ -8,8 +8,8 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Config;
 
 use Magento\MagentoCloud\App\GenericException;
-use Magento\MagentoCloud\Config\Deploy\Reader;
-use Magento\MagentoCloud\Config\Deploy\Writer;
+use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface;
+use Magento\MagentoCloud\Config\Magento\Env\WriterInterface;
 use Magento\MagentoCloud\DB\ConnectionInterface;
 use Psr\Log\LoggerInterface;
 
@@ -29,26 +29,26 @@ class State
     private $connection;
 
     /**
-     * @var Reader
+     * @var ReaderInterface
      */
     private $reader;
 
     /**
-     * @var Writer
+     * @var WriterInterface
      */
     private $writer;
 
     /**
      * @param LoggerInterface $logger
      * @param ConnectionInterface $connection
-     * @param Reader $reader
-     * @param Writer $writer
+     * @param ReaderInterface $reader
+     * @param WriterInterface $writer
      */
     public function __construct(
         LoggerInterface $logger,
         ConnectionInterface $connection,
-        Reader $reader,
-        Writer $writer
+        ReaderInterface $reader,
+        WriterInterface $writer
     ) {
         $this->logger = $logger;
         $this->connection = $connection;
@@ -76,7 +76,9 @@ class State
             return false;
         }
 
-        if (!in_array('core_config_data', $output) || !in_array('setup_module', $output)) {
+        if (!in_array($this->connection->getTableName('core_config_data'), $output) ||
+            !in_array($this->connection->getTableName('setup_module'), $output)
+        ) {
             throw new GenericException('Missing either core_config_data or setup_module table');
         }
 

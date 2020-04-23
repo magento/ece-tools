@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Step\PostDeploy;
 
+use GuzzleHttp\Promise\PromiseInterface;
 use GuzzleHttp\RequestOptions;
 use Magento\MagentoCloud\Config\Stage\PostDeployInterface;
 use Magento\MagentoCloud\Http\PoolFactory;
@@ -82,7 +83,9 @@ class TimeToFirstByte implements StepInterface
                 'concurrency' => 1,
             ]);
 
-            $pool->promise()->wait();
+            /** @var PromiseInterface $promise */
+            $promise = $pool->promise();
+            $promise->wait();
         } catch (\Throwable $exception) {
             throw new StepException($exception->getMessage(), $exception->getCode(), $exception);
         }

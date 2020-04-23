@@ -13,6 +13,7 @@ use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Package\MagentoVersion;
+use Magento\MagentoCloud\Package\Manager;
 use Magento\MagentoCloud\Package\UndefinedPackageException;
 
 /**
@@ -41,27 +42,45 @@ class ComposerFile implements ValidatorInterface
     private $file;
 
     /**
+     * @var Manager
+     */
+    private $manager;
+
+    /**
+     * @var array
+     */
+    private static $map = [
+        'laminas/laminas-mvc' => 'Laminas\\Mvc\\Controller\\',
+        'zendframework/zend-mvc' => 'Zend\\Mvc\\Controller\\',
+    ];
+
+    /**
      * @param FileList $fileList
      * @param File $file
      * @param MagentoVersion $magentoVersion
      * @param Validator\ResultFactory $resultFactory
+     * @param Manager $manager
      */
     public function __construct(
         FileList $fileList,
         File $file,
         MagentoVersion $magentoVersion,
-        Validator\ResultFactory $resultFactory
+        Validator\ResultFactory $resultFactory,
+        Manager $manager
     ) {
         $this->fileList = $fileList;
         $this->file = $file;
         $this->magentoVersion = $magentoVersion;
         $this->resultFactory = $resultFactory;
+        $this->manager = $manager;
     }
 
     /**
      * Validates that composer.json has all required configuration for correct deployment.
      *
      * @return Validator\ResultInterface
+     *
+     * @throws UndefinedPackageException
      */
     public function validate(): Validator\ResultInterface
     {
@@ -78,14 +97,28 @@ class ComposerFile implements ValidatorInterface
             return $this->resultFactory->error('Can\'t read composer.json file: ' . $e->getMessage());
         }
 
-        if (!isset($autoloadPsr4['Zend\Mvc\Controller\\'])) {
-            return $this->resultFactory->error(
-                'Required configuration is missed in autoload section of composer.json file.',
-                'Add ("Zend\\\\Mvc\\\\Controller\\\\": "setup/src/Zend/Mvc/Controller/") to autoload -> psr-4 section' .
-                ' and re-run "composer update" command locally. Then commit new composer.json and composer.lock files.'
-            );
+        if (array_intersect_key(($autoloadPsr4), array_flip(self::$map))) {
+            return $this->resultFactory->success();
         }
 
+        foreach (self::$map as $name => $namespace) {
+            if ($this->manager->has($name)) {
+                return $this->resultFactory->error(
+                    'Required configuration is missed in autoload section of composer.json file.',
+                    sprintf(
+                        'Add ("%s: "%s") to autoload -> psr-4 section ' .
+                        'and re-run "composer update" command locally. ' .
+                        'Then commit new composer.json and composer.lock files.',
+                        $namespace,
+                        'setup/src/Zend/Mvc/Controller/'
+                    )
+                );
+            }
+        }
+
+        /**
+         * Edge case when none of MVC packages installed.
+         */
         return $this->resultFactory->success();
     }
 }

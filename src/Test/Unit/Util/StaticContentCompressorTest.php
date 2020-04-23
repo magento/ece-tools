@@ -105,7 +105,7 @@ class StaticContentCompressorTest extends TestCase
         $this->utilityManagerMock->method('get')
             ->willReturnMap([
                 [UtilityManager::UTILITY_TIMEOUT, $timeoutCommand],
-                [UtilityManager::UTILITY_BASH, $bash],
+                [UtilityManager::UTILITY_SHELL, $bash],
             ]);
         $this->loggerMock->expects($this->once())
             ->method('info');
@@ -136,12 +136,11 @@ class StaticContentCompressorTest extends TestCase
         $this->staticContentCompressor->process(0);
     }
 
-    /**
-     * @expectedException \RuntimeException
-     * @expectedExceptionMessage Utility was not found
-     */
     public function testUtilityNotFound()
     {
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Utility was not found');
+
         $this->shellMock
             ->expects($this->never())
             ->method('execute');

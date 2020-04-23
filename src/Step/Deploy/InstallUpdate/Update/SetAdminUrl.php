@@ -7,11 +7,11 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Step\Deploy\InstallUpdate\Update;
 
-use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\AdminDataInterface;
+use Magento\MagentoCloud\Config\Magento\Env\WriterInterface as ConfigWriter;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
-use Magento\MagentoCloud\Config\Deploy\Writer as ConfigWriter;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -20,9 +20,9 @@ use Psr\Log\LoggerInterface;
 class SetAdminUrl implements StepInterface
 {
     /**
-     * @var Environment
+     * @var AdminDataInterface
      */
-    private $environment;
+    private $adminData;
 
     /**
      * @var LoggerInterface
@@ -35,16 +35,16 @@ class SetAdminUrl implements StepInterface
     private $configWriter;
 
     /**
-     * @param Environment $environment
+     * @param AdminDataInterface $adminData
      * @param ConfigWriter $configWriter
      * @param LoggerInterface $logger
      */
     public function __construct(
-        Environment $environment,
+        AdminDataInterface $adminData,
         ConfigWriter $configWriter,
         LoggerInterface $logger
     ) {
-        $this->environment = $environment;
+        $this->adminData = $adminData;
         $this->configWriter = $configWriter;
         $this->logger = $logger;
     }
@@ -54,7 +54,7 @@ class SetAdminUrl implements StepInterface
      */
     public function execute()
     {
-        $adminUrl = $this->environment->getAdminUrl();
+        $adminUrl = $this->adminData->getUrl();
 
         if (!$adminUrl) {
             $this->logger->info('Not updating env.php backend front name. (ADMIN_URL not set)');

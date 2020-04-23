@@ -58,9 +58,9 @@ class JsonFormatVariable implements ValidatorInterface
         try {
             $errors = [];
 
-            foreach ($this->schema->getSchema() as $optionName => $optionConfig) {
+            foreach ($this->schema->getVariables() as $optionName => $optionConfig) {
                 if ($optionConfig[Schema::SCHEMA_TYPE] !== ['array'] ||
-                    !in_array(StageConfigInterface::STAGE_DEPLOY, $optionConfig[Schema::SCHEMA_STAGE]) ||
+                    !in_array(StageConfigInterface::STAGE_DEPLOY, $optionConfig[Schema::SCHEMA_STAGES]) ||
                     !is_string($this->mergedConfig->get()[$optionName])
                 ) {
                     continue;

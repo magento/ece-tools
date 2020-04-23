@@ -7,7 +7,8 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Config\Stage;
 
-use Magento\MagentoCloud\Config\Environment\Reader as EnvironmentReader;
+use Magento\MagentoCloud\Config\ConfigException;
+use Magento\MagentoCloud\Config\Environment\ReaderInterface as EnvironmentReader;
 use Magento\MagentoCloud\Config\Schema;
 use Magento\MagentoCloud\Config\StageConfigInterface;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
@@ -51,7 +52,7 @@ class Build implements BuildInterface
     public function get(string $name)
     {
         if (!array_key_exists($name, $this->schema->getDefaults(StageConfigInterface::STAGE_BUILD))) {
-            throw new \RuntimeException(sprintf(
+            throw new ConfigException(sprintf(
                 'Config %s was not defined.',
                 $name
             ));

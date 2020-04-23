@@ -59,7 +59,6 @@ class ScdOptionsIgnorance implements ValidatorInterface
             $scdVariables = [
                 StageConfigInterface::VAR_SCD_STRATEGY,
                 StageConfigInterface::VAR_SCD_THREADS,
-                StageConfigInterface::VAR_SCD_EXCLUDE_THEMES,
             ];
             $configuredScdVariables = [];
 

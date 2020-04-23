@@ -13,7 +13,11 @@ use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Config\Stage\PostDeployInterface;
 use Magento\MagentoCloud\Config\StageConfigInterface;
 use Magento\MagentoCloud\Config\SystemConfigInterface;
+use Magento\MagentoCloud\Filesystem\SystemList;
+use Magento\MagentoCloud\Filesystem\Driver\File;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Yaml\Parser;
 
 /**
  * @inheritdoc
@@ -21,19 +25,45 @@ use PHPUnit\Framework\TestCase;
 class SchemaTest extends TestCase
 {
     /**
-     * @var Schema
+     * @var Schema|MockObject
      */
     private $schema;
+
+    /**
+     * @var SystemList
+     */
+    private $systemListMock;
+
+    /**
+     * @var Parser|MockObject
+     */
+    private $parserMock;
+
+    /**
+     * @var File|MockObject
+     */
+    private $fileMock;
 
     /**
      * @inheritdoc
      */
     protected function setUp()
     {
-        $this->schema = new Schema();
+        $this->systemListMock = $this->createMock(SystemList::class);
+        $this->parserMock = $this->createTestProxy(Parser::class);
+        $this->fileMock = $this->createTestProxy(File::class);
+
+        $this->systemListMock->method('getConfig')
+            ->willReturn(ECE_BP . '/config');
+
+        $this->schema = new Schema(
+            $this->systemListMock,
+            $this->parserMock,
+            $this->fileMock
+        );
     }
 
-    public function testGetDefaultsForBuild()
+    public function testGetDefaultsForBuild(): void
     {
         $this->assertEquals(
             [
@@ -42,17 +72,17 @@ class SchemaTest extends TestCase
                 BuildInterface::VAR_SCD_COMPRESSION_LEVEL => 6,
                 BuildInterface::VAR_SCD_COMPRESSION_TIMEOUT => 600,
                 BuildInterface::VAR_SCD_THREADS => -1,
-                BuildInterface::VAR_SCD_EXCLUDE_THEMES => '',
                 BuildInterface::VAR_VERBOSE_COMMANDS => '',
                 BuildInterface::VAR_SCD_MATRIX => [],
                 BuildInterface::VAR_SCD_MAX_EXEC_TIME => null,
-                BuildInterface::VAR_ERROR_REPORT_DIR_NESTING_LEVEL => 1
+                BuildInterface::VAR_ERROR_REPORT_DIR_NESTING_LEVEL => 1,
+                BuildInterface::VAR_SCD_USE_BALER => false,
             ],
             $this->schema->getDefaults(StageConfigInterface::STAGE_BUILD)
         );
     }
 
-    public function testGetDefaultsForDeploy()
+    public function testGetDefaultsForDeploy(): void
     {
         $this->assertEquals(
             [
@@ -69,13 +99,11 @@ class SchemaTest extends TestCase
                 DeployInterface::VAR_VERBOSE_COMMANDS => '',
                 DeployInterface::VAR_CRON_CONSUMERS_RUNNER => [],
                 DeployInterface::VAR_CLEAN_STATIC_FILES => true,
-                DeployInterface::VAR_STATIC_CONTENT_SYMLINK => true,
                 DeployInterface::VAR_UPDATE_URLS => true,
                 DeployInterface::VAR_FORCE_UPDATE_URLS => false,
                 DeployInterface::VAR_SKIP_SCD => false,
                 DeployInterface::VAR_SCD_THREADS => -1,
                 DeployInterface::VAR_GENERATED_CODE_SYMLINK => true,
-                DeployInterface::VAR_SCD_EXCLUDE_THEMES => '',
                 DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION => false,
                 DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION => false,
                 DeployInterface::VAR_ENABLE_GOOGLE_ANALYTICS => false,
@@ -83,25 +111,40 @@ class SchemaTest extends TestCase
                 DeployInterface::VAR_RESOURCE_CONFIGURATION => [],
                 DeployInterface::VAR_LOCK_PROVIDER => 'file',
                 DeployInterface::VAR_CONSUMERS_WAIT_FOR_MAX_MESSAGES => false,
+                DeployInterface::VAR_SPLIT_DB => [],
             ],
             $this->schema->getDefaults(StageConfigInterface::STAGE_DEPLOY)
         );
     }
 
-    public function testGetDefaultsForPostDeploy()
+    public function testGetDefaultsForPostDeploy(): void
     {
         $this->assertEquals(
             [
                 PostDeployInterface::VAR_WARM_UP_PAGES => [
                     '',
                 ],
+                PostDeployInterface::VAR_WARM_UP_CONCURRENCY => 0,
                 PostDeployInterface::VAR_TTFB_TESTED_PAGES => [],
+                PostDeployInterface::VAR_VERBOSE_COMMANDS => '',
+            ],
+            $this->schema->getDefaults(StageConfigInterface::STAGE_POST_DEPLOY)
+        );
+        /** Lazy loading */
+        $this->assertEquals(
+            [
+                PostDeployInterface::VAR_WARM_UP_PAGES => [
+                    '',
+                ],
+                PostDeployInterface::VAR_WARM_UP_CONCURRENCY => 0,
+                PostDeployInterface::VAR_TTFB_TESTED_PAGES => [],
+                PostDeployInterface::VAR_VERBOSE_COMMANDS => '',
             ],
             $this->schema->getDefaults(StageConfigInterface::STAGE_POST_DEPLOY)
         );
     }
 
-    public function testGetDefaultsForSystemVariables()
+    public function testGetDefaultsForSystemVariables(): void
     {
         $this->assertEquals(
             [
@@ -115,13 +158,13 @@ class SchemaTest extends TestCase
         );
     }
 
-    public function testGetDefaultsForGlobalSection()
+    public function testGetDefaultsForGlobalSection(): void
     {
         $this->assertEquals(
             [
                 StageConfigInterface::VAR_SCD_ON_DEMAND => false,
                 StageConfigInterface::VAR_SKIP_HTML_MINIFICATION => true,
-                StageConfigInterface::VAR_DEPLOYED_MAGENTO_VERSION_FROM_GIT => false,
+                StageConfigInterface::VAR_DEPLOYED_MAGENTO_VERSION_FROM_GIT => '',
                 StageConfigInterface::VAR_DEPLOY_FROM_GIT_OPTIONS => [],
                 StageConfigInterface::VAR_MIN_LOGGING_LEVEL => '',
                 StageConfigInterface::VAR_X_FRAME_CONFIGURATION => 'SAMEORIGIN',
@@ -130,13 +173,12 @@ class SchemaTest extends TestCase
         );
     }
 
-    public function testGetSchemaItemsExists()
+    public function testGetSchemaItemsExists(): void
     {
         $requiredItems = [
             StageConfigInterface::VAR_SCD_COMPRESSION_LEVEL,
             StageConfigInterface::VAR_SCD_STRATEGY,
             StageConfigInterface::VAR_SCD_THREADS,
-            StageConfigInterface::VAR_SCD_EXCLUDE_THEMES,
             StageConfigInterface::VAR_SKIP_SCD,
             StageConfigInterface::VAR_VERBOSE_COMMANDS,
             StageConfigInterface::VAR_SCD_ON_DEMAND,
@@ -151,11 +193,11 @@ class SchemaTest extends TestCase
             DeployInterface::VAR_DATABASE_CONFIGURATION,
             DeployInterface::VAR_CRON_CONSUMERS_RUNNER,
             DeployInterface::VAR_CLEAN_STATIC_FILES,
-            DeployInterface::VAR_STATIC_CONTENT_SYMLINK,
             DeployInterface::VAR_UPDATE_URLS,
             DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION,
             DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION,
             DeployInterface::VAR_GENERATED_CODE_SYMLINK,
+            DeployInterface::VAR_SPLIT_DB,
             PostDeployInterface::VAR_WARM_UP_PAGES,
             PostDeployInterface::VAR_TTFB_TESTED_PAGES,
             SystemConfigInterface::VAR_ENV_RELATIONSHIPS,
@@ -166,7 +208,7 @@ class SchemaTest extends TestCase
         ];
 
         foreach ($requiredItems as $item) {
-            $this->assertArrayHasKey($item, $this->schema->getSchema());
+            $this->assertArrayHasKey($item, $this->schema->getVariables());
         }
     }
 }

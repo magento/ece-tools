@@ -8,11 +8,12 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit\Step\Deploy\InstallUpdate\ConfigUpdate\Urls;
 
 use Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\Urls\Environment;
+use Magento\MagentoCloud\Step\StepException;
 use PHPUnit\Framework\MockObject\Matcher\InvokedCount;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
-use Magento\MagentoCloud\Config\Deploy\Reader;
-use Magento\MagentoCloud\Config\Deploy\Writer;
+use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface;
+use Magento\MagentoCloud\Config\Magento\Env\WriterInterface;
 use Psr\Log\LoggerInterface;
 use Magento\MagentoCloud\Util\UrlManager;
 
@@ -27,22 +28,22 @@ class EnvironmentTest extends TestCase
     private $step;
 
     /**
-     * @var LoggerInterface|Mock
+     * @var LoggerInterface|MockObject
      */
     private $loggerMock;
 
     /**
-     * @var UrlManager|Mock
+     * @var UrlManager|MockObject
      */
     private $urlManagerMock;
 
     /**
-     * @var Reader|Mock
+     * @var ReaderInterface|MockObject
      */
     private $readerMock;
 
     /**
-     * @var Writer|Mock
+     * @var WriterInterface|MockObject
      */
     private $writerMock;
 
@@ -53,8 +54,8 @@ class EnvironmentTest extends TestCase
     {
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->urlManagerMock = $this->createMock(UrlManager::class);
-        $this->readerMock = $this->createMock(Reader::class);
-        $this->writerMock = $this->createMock(Writer::class);
+        $this->readerMock = $this->getMockForAbstractClass(ReaderInterface::class);
+        $this->writerMock = $this->getMockForAbstractClass(WriterInterface::class);
 
         $this->step = new Environment(
             $this->loggerMock,
@@ -68,13 +69,16 @@ class EnvironmentTest extends TestCase
      * @param InvokedCount $loggerInfoExpects
      * @param array $urlManagerGetUrlsWillReturn
      * @param InvokedCount $writerWriteExpects
+     *
+     * @throws StepException
+     *
      * @dataProvider executeDataProvider
      */
     public function testExecute(
         InvokedCount $loggerInfoExpects,
         array $urlManagerGetUrlsWillReturn,
         InvokedCount $writerWriteExpects
-    ) {
+    ): void {
         $this->loggerMock->expects($loggerInfoExpects)
             ->method('info')
             ->withConsecutive(
@@ -146,7 +150,10 @@ class EnvironmentTest extends TestCase
         ];
     }
 
-    public function testExecuteWithPlaceholders()
+    /**
+     * @throws StepException
+     */
+    public function testExecuteWithPlaceholders(): void
     {
         $this->loggerMock->expects($this->once())
             ->method('info')

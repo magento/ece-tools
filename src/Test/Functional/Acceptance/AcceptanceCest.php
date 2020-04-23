@@ -7,7 +7,10 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 
-use Magento\MagentoCloud\Test\Functional\Codeception\Docker;
+use CliTester;
+use Robo\Exception\TaskException;
+use Codeception\Example;
+use Magento\CloudDocker\Test\Functional\Codeception\Docker;
 use Magento\MagentoCloud\Util\ArrayManager;
 
 /**
@@ -21,44 +24,46 @@ use Magento\MagentoCloud\Util\ArrayManager;
 class AcceptanceCest extends AbstractCest
 {
     /**
-     * @param \CliTester $I
-     * @throws \Robo\Exception\TaskException
+     * @param CliTester $I
+     *
+     * @throws TaskException
      */
-    public function _before(\CliTester $I)
+    public function _before(CliTester $I): void
     {
         parent::_before($I);
-        $I->cloneTemplate();
-        $I->addEceComposerRepo();
-        $I->uploadToContainer('files/debug_logging/.magento.env.yaml', '/.magento.env.yaml', Docker::BUILD_CONTAINER);
+
+        $I->copyFileToWorkDir('files/debug_logging/.magento.env.yaml', '.magento.env.yaml');
     }
 
     /**
-     * @param \CliTester $I
-     * @param \Codeception\Example $data
-     * @throws \Robo\Exception\TaskException
+     * @param CliTester $I
+     * @param Example $data
+     *
+     * @throws TaskException
+     *
      * @dataProvider defaultDataProvider
      */
-    public function testDefault(\CliTester $I, \Codeception\Example $data)
+    public function testDefault(\CliTester $I, \Codeception\Example $data): void
     {
-        $I->assertTrue($I->runEceToolsCommand('build', Docker::BUILD_CONTAINER));
+        $I->runEceDockerCommand(
+            sprintf(
+                'build:compose --mode=production --env-vars="%s"',
+                $this->convertEnvFromArrayToJson($data['variables'])
+            )
+        );
+        $I->runDockerComposeCommand('run build cloud-build');
         $I->startEnvironment();
-        $I->assertTrue($I->runEceToolsCommand(
-            'deploy',
-            Docker::DEPLOY_CONTAINER,
-            $data['cloudVariables'],
-            $data['rawVariables']
-        ));
-        $I->assertTrue($I->runEceToolsCommand('post-deploy', Docker::DEPLOY_CONTAINER));
-
+        $I->runDockerComposeCommand('run deploy cloud-deploy');
         $I->amOnPage('/');
         $I->see('Home page');
+        $I->see('CMS homepage content goes here.');
 
         $destination = sys_get_temp_dir() . '/app/etc/env.php';
         $I->assertTrue($I->downloadFromContainer('/app/etc/env.php', $destination, Docker::DEPLOY_CONTAINER));
         $config = require $destination;
         $I->assertArraySubset($data['expectedConfig'], $config);
 
-        $I->assertTrue($I->runEceToolsCommand('config:dump', Docker::DEPLOY_CONTAINER));
+        $I->assertTrue($I->runDockerComposeCommand('run deploy ece-command config:dump'));
         $destination = sys_get_temp_dir() . '/app/etc/config.php';
         $I->assertTrue($I->downloadFromContainer('/app/etc/config.php', $destination, Docker::DEPLOY_CONTAINER));
         $config = require $destination;
@@ -80,6 +85,7 @@ class AcceptanceCest extends AbstractCest
 
         $I->amOnPage('/');
         $I->see('Home page');
+        $I->see('CMS homepage content goes here.');
 
         $log = $I->grabFileContent('/var/log/cloud.log');
         $I->assertContains('--admin-password=\'******\'', $log);
@@ -90,18 +96,18 @@ class AcceptanceCest extends AbstractCest
 
     /**
      * @return array
+     *
      * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
     protected function defaultDataProvider(): array
     {
         return [
             'default configuration' => [
-                'cloudVariables' => [
+                'variables' => [
                     'MAGENTO_CLOUD_VARIABLES' => [
                         'ADMIN_EMAIL' => 'admin@example.com',
                     ],
                 ],
-                'rawVariables' => [],
                 'expectedConfig' => [
                     'cron_consumers_runner' => [
                         'cron_run' => false,
@@ -120,7 +126,7 @@ class AcceptanceCest extends AbstractCest
                 ],
             ],
             'test cron_consumers_runner with array and there is MAGENTO_CLOUD_LOCKS_DIR' => [
-                'cloudVariables' => [
+                'variables' => [
                     'MAGENTO_CLOUD_VARIABLES' => [
                         'ADMIN_EMAIL' => 'admin@example.com',
                         'CRON_CONSUMERS_RUNNER' => [
@@ -129,8 +135,6 @@ class AcceptanceCest extends AbstractCest
                             'consumers' => ['test'],
                         ],
                     ],
-                ],
-                'rawVariables' => [
                     'MAGENTO_CLOUD_LOCKS_DIR' => '/tmp/locks',
                 ],
                 'expectedConfig' => [
@@ -151,7 +155,7 @@ class AcceptanceCest extends AbstractCest
                 ],
             ],
             'test cron_consumers_runner with wrong array, there is MAGENTO_CLOUD_LOCKS_DIR, LOCK_PROVIDER is db' => [
-                'cloudVariables' => [
+                'variables' => [
                     'MAGENTO_CLOUD_VARIABLES' => [
                         'ADMIN_EMAIL' => 'admin@example.com',
                         'LOCK_PROVIDER' => 'db',
@@ -161,8 +165,6 @@ class AcceptanceCest extends AbstractCest
                             'consumers' => ['test'],
                         ],
                     ],
-                ],
-                'rawVariables' => [
                     'MAGENTO_CLOUD_LOCKS_DIR' => '/tmp/locks',
                 ],
                 'expectedConfig' => [
@@ -183,13 +185,12 @@ class AcceptanceCest extends AbstractCest
                 ],
             ],
             'test cron_consumers_runner with string' => [
-                'cloudVariables' => [
+                'variables' => [
                     'MAGENTO_CLOUD_VARIABLES' => [
                         'ADMIN_EMAIL' => 'admin@example.com',
                         'CRON_CONSUMERS_RUNNER' => '{"cron_run":true, "max_messages":100, "consumers":["test2"]}',
                     ],
                 ],
-                'rawVariables' => [],
                 'expectedConfig' => [
                     'cron_consumers_runner' => [
                         'cron_run' => true,
@@ -202,13 +203,12 @@ class AcceptanceCest extends AbstractCest
                 ],
             ],
             'test cron_consumers_runner with wrong string' => [
-                'cloudVariables' => [
+                'variables' => [
                     'MAGENTO_CLOUD_VARIABLES' => [
                         'ADMIN_EMAIL' => 'admin@example.com',
                         'CRON_CONSUMERS_RUNNER' => '{"cron_run":"true", "max_messages":100, "consumers":["test2"]}',
                     ],
                 ],
-                'rawVariables' => [],
                 'expectedConfig' => [
                     'cron_consumers_runner' => [
                         'cron_run' => false,
@@ -221,14 +221,13 @@ class AcceptanceCest extends AbstractCest
                 ],
             ],
             'disabled static content symlinks 3 jobs' => [
-                'cloudVariables' => [
+                'variables' => [
                     'MAGENTO_CLOUD_VARIABLES' => [
                         'ADMIN_EMAIL' => 'admin@example.com',
                         'STATIC_CONTENT_SYMLINK' => 'disabled',
                         'STATIC_CONTENT_THREADS' => 3,
                     ],
                 ],
-                'rawVariables' => [],
                 'expectedConfig' => [
                     'cron_consumers_runner' => [
                         'cron_run' => false,
@@ -244,52 +243,58 @@ class AcceptanceCest extends AbstractCest
     }
 
     /**
-     * @param \CliTester $I
-     * @throws \Robo\Exception\TaskException
+     * @param CliTester $I
+     * @throws TaskException
      */
-    public function testWithSplitBuildCommand(\CliTester $I)
+    public function testWithOldNonSplitBuildCommand(\CliTester $I): void
     {
-        $I->assertTrue($I->runEceToolsCommand('build:generate', Docker::BUILD_CONTAINER));
-        $I->assertTrue($I->runEceToolsCommand('build:transfer', Docker::BUILD_CONTAINER));
+        $config = $I->readAppMagentoYaml();
+        $config['hooks']['build'] = 'set -e' . PHP_EOL . 'php ./vendor/bin/ece-tools build' . PHP_EOL;
+        $I->writeAppMagentoYaml($config);
+
+        $I->runEceDockerCommand('build:compose --mode=production');
+        $I->runDockerComposeCommand('run build cloud-build');
         $I->startEnvironment();
-        $I->assertTrue($I->runEceToolsCommand('deploy', Docker::DEPLOY_CONTAINER));
-        $I->assertTrue($I->runEceToolsCommand('post-deploy', Docker::DEPLOY_CONTAINER));
+        $I->runDockerComposeCommand('run deploy cloud-deploy');
         $I->amOnPage('/');
         $I->see('Home page');
         $I->see('CMS homepage content goes here.');
     }
 
     /**
-     * @param \CliTester $I
-     * @throws \Robo\Exception\TaskException
+     * @param CliTester $I
+     *
+     * @throws TaskException
      */
-    public function testDeployInBuild(\CliTester $I)
+    public function testDeployInBuild(\CliTester $I): void
     {
         $tmpConfig = sys_get_temp_dir() . '/app/etc/config.php';
+        $I->runEceDockerCommand('build:compose --mode=production');
+        $I->runDockerComposeCommand('run build cloud-build');
         $I->startEnvironment();
-        $I->assertTrue($I->runEceToolsCommand('build', Docker::BUILD_CONTAINER));
-        $I->assertTrue($I->runEceToolsCommand('deploy', Docker::DEPLOY_CONTAINER));
-        $I->assertTrue($I->runEceToolsCommand('post-deploy', Docker::DEPLOY_CONTAINER));
-        $I->assertTrue($I->runEceToolsCommand('config:dump', Docker::DEPLOY_CONTAINER));
+        $I->runDockerComposeCommand('run deploy cloud-deploy');
+        $I->amOnPage('/');
+        $I->see('Home page');
+        $I->see('CMS homepage content goes here.');
+        $I->runDockerComposeCommand('run deploy ece-command config:dump');
         $I->assertNotContains(
             'Static content deployment was performed during the build phase or disabled. '
-                . 'Skipping deploy phase static content compression.',
+            . 'Skipping deploy phase static content compression.',
             $I->grabFileContent('/var/log/cloud.log')
         );
         $I->amOnPage('/');
         $I->see('Home page');
         $I->see('CMS homepage content goes here.');
-        $I->assertTrue($I->downloadFromContainer('/app/etc/config.php', $tmpConfig, Docker::DEPLOY_CONTAINER));
+        $I->assertTrue(
+            $I->downloadFromContainer('/app/etc/config.php', $tmpConfig, Docker::DEPLOY_CONTAINER),
+            'Cannot download config.php from Docker'
+        );
 
-        $I->assertTrue($I->cleanUpEnvironment());
-
-        $I->assertTrue($I->cloneTemplate());
-        $I->assertTrue($I->addEceComposerRepo());
-        $I->assertTrue($I->uploadToContainer($tmpConfig, '/app/etc/config.php', Docker::BUILD_CONTAINER));
-        $I->assertTrue($I->runEceToolsCommand('build', Docker::BUILD_CONTAINER));
-        $I->assertTrue($I->runEceToolsCommand('deploy', Docker::DEPLOY_CONTAINER));
-        $I->assertTrue($I->runEceToolsCommand('post-deploy', Docker::DEPLOY_CONTAINER));
+        $I->assertTrue($I->stopEnvironment());
+        $I->assertTrue($I->copyFileToWorkDir($tmpConfig, 'app/etc/config.php'));
+        $I->runDockerComposeCommand('run build cloud-build');
         $I->startEnvironment();
+        $I->runDockerComposeCommand('run deploy cloud-deploy');
         $I->assertContains(
             'Static content deployment was performed during the build phase or disabled. '
             . 'Skipping deploy phase static content compression.',

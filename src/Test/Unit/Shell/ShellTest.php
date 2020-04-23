@@ -13,6 +13,7 @@ use Magento\MagentoCloud\Shell\ProcessException;
 use Magento\MagentoCloud\Shell\ProcessFactory;
 use Magento\MagentoCloud\Shell\ProcessInterface;
 use Magento\MagentoCloud\Shell\Shell;
+use Magento\MagentoCloud\Shell\ShellException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -154,13 +155,12 @@ class ShellTest extends TestCase
         $this->shell->execute($command);
     }
 
-    /**
-     * @expectedException \Magento\MagentoCloud\Shell\ShellException
-     * @expectedExceptionMessage Command ls -al --password="***" failed
-     * @expectedExceptionCode 3
-     */
     public function testExecuteException()
     {
+        $this->expectException(ShellException::class);
+        $this->expectExceptionMessage('Command ls -al --password="***" failed');
+        $this->expectExceptionCode(3);
+
         $command = 'ls -al --password="123"';
         $magentoRoot = '/magento';
 

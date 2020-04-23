@@ -16,6 +16,7 @@ use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
+use Exception;
 
 /**
  * @inheritdoc
@@ -32,15 +33,13 @@ class Container implements ContainerInterface
     /**
      * @param string $toolsBasePath
      * @param string $magentoBasePath
-     *
-     * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
-     * @throws \Exception
+     * @throws ContainerException
      */
     public function __construct(string $toolsBasePath, string $magentoBasePath)
     {
         $containerBuilder = new ContainerBuilder();
-        $containerBuilder->set('container', $containerBuilder);
-        $containerBuilder->setDefinition('container', new Definition(Container::class))
+        $containerBuilder->set('container', $this);
+        $containerBuilder->setDefinition('container', new Definition(__CLASS__))
             ->setArguments([$toolsBasePath, $magentoBasePath]);
 
         $systemList = new SystemList($toolsBasePath, $magentoBasePath);
@@ -51,14 +50,18 @@ class Container implements ContainerInterface
         $containerBuilder->set(Composer::class, $this->createComposerInstance($systemList));
         $containerBuilder->setDefinition(Composer::class, new Definition(Composer::class));
 
-        $loader = new XmlFileLoader($containerBuilder, new FileLocator($toolsBasePath . '/config/'));
-        $loader->load('services.xml');
+        try {
+            $loader = new XmlFileLoader($containerBuilder, new FileLocator($toolsBasePath . '/config/'));
+            $loader->load('services.xml');
 
-        foreach (ExtensionRegistrar::getPaths() as $extensionPath) {
-            if (file_exists($extensionPath . '/config/services.xml')) {
-                $loader = new XmlFileLoader($containerBuilder, new FileLocator($extensionPath . '/config/'));
-                $loader->load('services.xml');
+            foreach (ExtensionRegistrar::getPaths() as $extensionPath) {
+                if (file_exists($extensionPath . '/config/services.xml')) {
+                    $loader = new XmlFileLoader($containerBuilder, new FileLocator($extensionPath . '/config/'));
+                    $loader->load('services.xml');
+                }
             }
+        } catch (Exception $exception) {
+            throw new ContainerException($exception->getMessage(), $exception->getCode(), $exception);
         }
 
         $containerBuilder->compile();
@@ -77,24 +80,28 @@ class Container implements ContainerInterface
             ? $systemList->getMagentoRoot() . '/composer.json'
             : $systemList->getRoot() . '/composer.json';
 
-        $composer = $composerFactory->createComposer(
+        return $composerFactory->createComposer(
             new BufferIO(),
             $composerFile,
             false,
             $systemList->getMagentoRoot()
         );
-
-        return $composer;
     }
 
     /**
-     * {@inheritdoc}
-     *
-     * @see create() For factory-like usage
+     * @inheritDoc
      */
     public function get($id)
     {
-        return $this->container->get($id);
+        try {
+            return $this->container->get($id);
+        } catch (Exception $exception) {
+            throw new ContainerException(
+                $exception->getMessage(),
+                $exception->getCode(),
+                $exception
+            );
+        }
     }
 
     /**

@@ -7,11 +7,14 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Config\Validator\Build;
 
-use Magento\MagentoCloud\Config\Validator\SchemaValidator;
+use Magento\MagentoCloud\Config\Schema\Validator;
 use Magento\MagentoCloud\Config\StageConfigInterface;
-use Magento\MagentoCloud\Config\Validator;
+use Magento\MagentoCloud\Config\Validator\Result\Error;
+use Magento\MagentoCloud\Config\Validator\Result\Success;
+use Magento\MagentoCloud\Config\Validator\ResultFactory;
+use Magento\MagentoCloud\Config\Validator\ResultInterface;
 use Magento\MagentoCloud\Config\ValidatorInterface;
-use Magento\MagentoCloud\Config\Environment\Reader as EnvironmentReader;
+use Magento\MagentoCloud\Config\Environment\ReaderInterface as EnvironmentReader;
 
 /**
  * Validates 'stage' section of environment configuration.
@@ -24,24 +27,24 @@ class StageConfig implements ValidatorInterface
     private $environmentReader;
 
     /**
-     * @var Validator\ResultFactory
+     * @var ResultFactory
      */
     private $resultFactory;
 
     /**
-     * @var SchemaValidator
+     * @var Validator
      */
     private $schemaValidator;
 
     /**
      * @param EnvironmentReader $environmentReader
-     * @param Validator\ResultFactory $resultFactory
-     * @param SchemaValidator $schemaValidator
+     * @param ResultFactory $resultFactory
+     * @param Validator $schemaValidator
      */
     public function __construct(
         EnvironmentReader $environmentReader,
-        Validator\ResultFactory $resultFactory,
-        SchemaValidator $schemaValidator
+        ResultFactory $resultFactory,
+        Validator $schemaValidator
     ) {
         $this->environmentReader = $environmentReader;
         $this->resultFactory = $resultFactory;
@@ -51,7 +54,7 @@ class StageConfig implements ValidatorInterface
     /**
      * @inheritdoc
      */
-    public function validate(): Validator\ResultInterface
+    public function validate(): ResultInterface
     {
         $config = $this->environmentReader->read()[StageConfigInterface::SECTION_STAGE] ?? [];
         $errors = [];
@@ -61,20 +64,22 @@ class StageConfig implements ValidatorInterface
                 continue;
             }
             foreach ($stageConfig as $key => $value) {
-                if ($error = $this->schemaValidator->validate($key, $stage, $value)) {
-                    $errors[] = $error;
+                $result = $this->schemaValidator->validate($key, $stage, $value);
+
+                if ($result instanceof Error) {
+                    $errors[] = $result->getError();
                 }
             }
         }
 
         if ($errors) {
-            return $this->resultFactory->create(Validator\Result\Error::ERROR, [
+            return $this->resultFactory->create(Error::ERROR, [
                 'error' => 'Environment configuration is not valid. ' .
-                           'Correct the following items in your .magento.env.yaml file:',
+                    'Correct the following items in your .magento.env.yaml file:',
                 'suggestion' => implode(PHP_EOL, $errors),
             ]);
         }
 
-        return $this->resultFactory->create(Validator\Result\Success::SUCCESS);
+        return $this->resultFactory->create(Success::SUCCESS);
     }
 }

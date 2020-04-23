@@ -10,10 +10,10 @@ namespace Magento\MagentoCloud\Test\Unit\Step\Deploy\InstallUpdate\ConfigUpdate;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\PrepareConfig;
 use Magento\MagentoCloud\Step\StepException;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Magento\MagentoCloud\Config\GlobalSection as GlobalConfig;
-use Magento\MagentoCloud\Config\Deploy\Writer as ConfigWriter;
+use Magento\MagentoCloud\Config\Magento\Env\WriterInterface as ConfigWriter;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -27,24 +27,24 @@ class PrepareConfigTest extends TestCase
     private $step;
 
     /**
-     * @var LoggerInterface|Mock
+     * @var LoggerInterface|MockObject
      */
     private $loggerMock;
 
     /**
-     * @var ConfigWriter|Mock
+     * @var ConfigWriter|MockObject
      */
     private $configWriterMock;
 
     /**
-     * @var GlobalConfig|Mock
+     * @var GlobalConfig|MockObject
      */
     private $globalConfigMock;
 
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->configWriterMock = $this->createMock(ConfigWriter::class);
@@ -62,15 +62,17 @@ class PrepareConfigTest extends TestCase
      * @param bool $skipHtmlMinification
      * @param null|string $xFrameOptions
      * @param array $expectedResult
-     * @dataProvider executeDataProvider
+     *
      * @throws StepException
+     *
+     * @dataProvider executeDataProvider
      */
     public function testExecute(
         bool $scdOnDemand,
         bool $skipHtmlMinification,
         $xFrameOptions,
         array $expectedResult
-    ) {
+    ): void {
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Updating env.php.');
@@ -121,18 +123,20 @@ class PrepareConfigTest extends TestCase
      * @param bool $skipHtmlMinification
      * @param null|string $xFrameOptions
      * @param array $expectedResult
-     * @dataProvider executeDataProvider
+     *
      * @throws StepException
      *
-     * @expectedExceptionMessage Some error
-     * @expectedException \Magento\MagentoCloud\Step\StepException
+     * @dataProvider executeDataProvider
      */
     public function testExecuteWithException(
         bool $scdOnDemand,
         bool $skipHtmlMinification,
         $xFrameOptions,
         array $expectedResult
-    ) {
+    ): void {
+        $this->expectException(StepException::class);
+        $this->expectExceptionMessage('Some error');
+
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Updating env.php.');

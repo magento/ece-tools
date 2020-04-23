@@ -7,11 +7,11 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Step\Deploy\InstallUpdate\ConfigUpdate;
 
-use Magento\MagentoCloud\Config\Deploy\Reader as EnvReader;
-use Magento\MagentoCloud\Config\Deploy\Writer as EnvWriter;
+use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface as EnvReader;
+use Magento\MagentoCloud\Config\Magento\Env\WriterInterface as EnvWriter;
 use Magento\MagentoCloud\Config\SearchEngine as SearchEngineConfig;
-use Magento\MagentoCloud\Config\Shared\Reader as SharedReader;
-use Magento\MagentoCloud\Config\Shared\Writer as SharedWriter;
+use Magento\MagentoCloud\Config\Magento\Shared\ReaderInterface as SharedReader;
+use Magento\MagentoCloud\Config\Magento\Shared\WriterInterface as SharedWriter;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Package\UndefinedPackageException;
@@ -72,10 +72,10 @@ class SearchEngineTest extends TestCase
      */
     protected function setUp()
     {
-        $this->envWriterMock = $this->createMock(EnvWriter::class);
-        $this->envReaderMock = $this->createMock(EnvReader::class);
-        $this->sharedWriterMock = $this->createMock(SharedWriter::class);
-        $this->sharedReaderMock = $this->createMock(SharedReader::class);
+        $this->envWriterMock = $this->getMockForAbstractClass(EnvWriter::class);
+        $this->envReaderMock = $this->getMockForAbstractClass(EnvReader::class);
+        $this->sharedWriterMock = $this->getMockForAbstractClass(SharedWriter::class);
+        $this->sharedReaderMock = $this->getMockForAbstractClass(SharedReader::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
         $this->configMock = $this->createMock(SearchEngineConfig::class);
@@ -289,12 +289,12 @@ class SearchEngineTest extends TestCase
 
     /**
      * @throws StepException
-     *
-     * @expectedExceptionMessage Some error
-     * @expectedException \Magento\MagentoCloud\Step\StepException
      */
     public function testExecuteWithException()
     {
+        $this->expectException(StepException::class);
+        $this->expectExceptionMessage('Some error');
+
         $config['system']['default']['catalog']['search'] = ['engine' => 'mysql'];
 
         $this->configMock->expects($this->once())
@@ -326,12 +326,12 @@ class SearchEngineTest extends TestCase
 
     /**
      * @throws StepException
-     *
-     * @expectedExceptionMessage Some error
-     * @expectedException \Magento\MagentoCloud\Step\StepException
      */
     public function testExecuteWithPackageException()
     {
+        $this->expectException(StepException::class);
+        $this->expectExceptionMessage('Some error');
+
         $config['system']['default']['catalog']['search'] = ['engine' => 'mysql'];
 
         $this->configMock->expects($this->once())
@@ -356,12 +356,12 @@ class SearchEngineTest extends TestCase
 
     /**
      * @throws StepException
-     *
-     * @expectedExceptionMessage Some error
-     * @expectedException \Magento\MagentoCloud\Step\StepException
      */
     public function testExecuteWithConfigException()
     {
+        $this->expectException(StepException::class);
+        $this->expectExceptionMessage('Some error');
+
         $this->configMock->expects($this->once())
             ->method('getConfig')
             ->willThrowException(new UndefinedPackageException('Some error'));

@@ -7,12 +7,13 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Step\Deploy\InstallUpdate\ConfigUpdate;
 
+use Magento\MagentoCloud\Step\StepException;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Magento\MagentoCloud\Config\Deploy\Reader as ConfigReader;
-use Magento\MagentoCloud\Config\Deploy\Writer as ConfigWriter;
+use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface as ConfigReader;
+use Magento\MagentoCloud\Config\Magento\Env\WriterInterface as ConfigWriter;
 use Psr\Log\LoggerInterface;
 use Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\Amqp;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\Amqp\Config as AmqpConfig;
 
 /**
@@ -26,29 +27,29 @@ class AmqpTest extends TestCase
     private $step;
 
     /**
-     * @var LoggerInterface|Mock
+     * @var LoggerInterface|MockObject
      */
     private $loggerMock;
 
     /**
-     * @var ConfigWriter|Mock
+     * @var ConfigWriter|MockObject
      */
     private $configWriterMock;
 
     /**
-     * @var ConfigReader|Mock
+     * @var ConfigReader|MockObject
      */
     private $configReaderMock;
 
     /**
-     * @var AmqpConfig|Mock
+     * @var AmqpConfig|MockObject
      */
     private $amqpConfigMock;
 
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->configWriterMock = $this->createMock(ConfigWriter::class);
@@ -64,9 +65,9 @@ class AmqpTest extends TestCase
     }
 
     /**
-     * @return void
+     * @throws StepException
      */
-    public function testExecuteWithoutAmqp()
+    public function testExecuteWithoutAmqp(): void
     {
         $config = ['some config'];
 
@@ -86,9 +87,9 @@ class AmqpTest extends TestCase
     }
 
     /**
-     * @return void
+     * @throws StepException
      */
-    public function testExecuteAddUpdate()
+    public function testExecuteAddUpdate(): void
     {
         $config = ['some config'];
         $amqpConfig = [
@@ -122,9 +123,9 @@ class AmqpTest extends TestCase
     }
 
     /**
-     * @return void
+     * @throws StepException
      */
-    public function testExecuteRemoveAmqp()
+    public function testExecuteRemoveAmqp(): void
     {
         $config = [
             'some config',

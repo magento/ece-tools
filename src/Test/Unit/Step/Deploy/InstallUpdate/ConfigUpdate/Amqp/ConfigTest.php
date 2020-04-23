@@ -10,10 +10,11 @@ namespace Magento\MagentoCloud\Test\Unit\Step\Deploy\InstallUpdate\ConfigUpdate\
 use Magento\MagentoCloud\Config\ConfigMerger;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
+use Magento\MagentoCloud\Package\UndefinedPackageException;
 use Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\Amqp\Config;
 use Magento\MagentoCloud\Service\RabbitMq;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -26,24 +27,24 @@ class ConfigTest extends TestCase
     protected $config;
 
     /**
-     * @var RabbitMq|Mock
+     * @var RabbitMq|MockObject
      */
     protected $rabbitMq;
 
     /**
-     * @var DeployInterface|Mock
+     * @var DeployInterface|MockObject
      */
     private $stageConfigMock;
 
     /**
-     * @var MagentoVersion|Mock
+     * @var MagentoVersion|MockObject
      */
     private $magentoVersionMock;
 
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->rabbitMq = $this->createMock(RabbitMq::class);
         $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
@@ -62,18 +63,20 @@ class ConfigTest extends TestCase
      * @param array $amqpServiceConfig
      * @param bool $isGreaterOrEqualReturns
      * @param bool $consumersWaitMaxMessages
+     * @param int $countCallGetConfig
      * @param array $expectedQueueConfig
+     * @throws UndefinedPackageException
+     *
      * @dataProvider getDataProvider
-     * @return void
      */
     public function testGet(
-        $customQueueConfig,
-        $amqpServiceConfig,
-        $isGreaterOrEqualReturns,
-        $consumersWaitMaxMessages,
-        $countCallGetConfig,
-        $expectedQueueConfig
-    ) {
+        array $customQueueConfig,
+        array $amqpServiceConfig,
+        bool $isGreaterOrEqualReturns,
+        bool $consumersWaitMaxMessages,
+        int $countCallGetConfig,
+        array $expectedQueueConfig
+    ): void {
         $this->stageConfigMock->expects($this->exactly($countCallGetConfig))
             ->method('get')
             ->withConsecutive(
@@ -94,6 +97,7 @@ class ConfigTest extends TestCase
 
     /**
      * @return array
+     *
      * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
     public function getDataProvider(): array

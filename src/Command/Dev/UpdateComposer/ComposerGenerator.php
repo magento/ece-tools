@@ -9,6 +9,7 @@ namespace Magento\MagentoCloud\Command\Dev\UpdateComposer;
 
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Package\MagentoVersion;
 
 /**
@@ -16,8 +17,6 @@ use Magento\MagentoCloud\Package\MagentoVersion;
  */
 class ComposerGenerator
 {
-    const REPO_TYPE_SINGLE_PACKAGE = 'single-package';
-
     /**
      * @var DirectoryList
      */
@@ -34,18 +33,26 @@ class ComposerGenerator
     private $file;
 
     /**
+     * @var string
+     */
+    private $excludeRepoPathsPattern;
+
+    /**
      * @param DirectoryList $directoryList
      * @param MagentoVersion $magentoVersion
      * @param File $file
+     * @param string $excludeRepoPathsPattern
      */
     public function __construct(
         DirectoryList $directoryList,
         MagentoVersion $magentoVersion,
-        File $file
+        File $file,
+        $excludeRepoPathsPattern = '/^((?!test|Test|dev).)*$/'
     ) {
         $this->directoryList = $directoryList;
         $this->magentoVersion = $magentoVersion;
         $this->file = $file;
+        $this->excludeRepoPathsPattern = $excludeRepoPathsPattern;
     }
 
     /**
@@ -53,6 +60,7 @@ class ComposerGenerator
      *
      * @param array $repoOptions
      * @return array
+     * @throws FileSystemException
      * @codeCoverageIgnore
      */
     public function generate(array $repoOptions): array
@@ -68,26 +76,38 @@ class ComposerGenerator
             $composer['require'] += ['magento/ece-tools' => '2002.0.*'];
         }
 
-        foreach (array_keys($repoOptions) as $repoName) {
-            $repoComposerJsonPath = $this->directoryList->getMagentoRoot() . '/' . $repoName . '/composer.json';
-            if (!$this->file->isExists($repoComposerJsonPath)) {
-                continue;
+        $preparePackagesScripts = [];
+        foreach (array_keys($repoOptions) as $repoDir) {
+            $baseRepoFolder = $this->directoryList->getMagentoRoot() . '/' . $repoDir;
+
+            $dirComposerJson = $baseRepoFolder . '/composer.json';
+            if ($this->file->isExists($dirComposerJson)) {
+                $dirPackageInfo = json_decode($this->file->fileGetContents($dirComposerJson), true);
+                if (isset($dirPackageInfo['type']) && $dirPackageInfo['type'] == 'project') {
+                    $composer['require'] = array_merge($composer['require'], $dirPackageInfo['require']);
+                }
             }
 
-            $repoComposer = $this->file->fileGetContents($repoComposerJsonPath);
-            $composer['require'] = array_merge(
-                $composer['require'],
-                json_decode($repoComposer, true)['require']
+            $repoPackages = $this->findPackages($baseRepoFolder);
+            foreach ($repoPackages as $packageName => $packagePath) {
+                $composer['repositories'][$packageName] = [
+                    'type' => 'path',
+                    'url' => $repoDir . '/' . $packagePath,
+                    'options' => [
+                        'symlink' => false,
+                    ]
+                ];
+                $composer['require'][$packageName] = '*@dev';
+            }
+            $excludeRepoStr = empty($repoPackages) ? '' : "--exclude='" . join("' --exclude='", $repoPackages) . "' ";
+            $preparePackagesScripts[] = sprintf(
+                "rsync -azhm --stats $excludeRepoStr--exclude='dev/tests' --exclude='.git' " .
+                "--exclude='composer.json' --exclude='composer.lock' ./%s/ ./",
+                $repoDir
             );
         }
-
-        foreach (array_keys($composer['require']) as $packageName) {
-            if (preg_match('/magento\/framework|magento\/module/', $packageName)) {
-                $composer['require'][$packageName] = '*';
-            }
-        }
-
-        $composer = $this->addModules($repoOptions, $composer);
+        $composer['scripts']['prepare-packages'] = $preparePackagesScripts;
+        $composer['scripts']['post-install-cmd'] = ['@prepare-packages'];
 
         return $composer;
     }
@@ -102,13 +122,14 @@ class ComposerGenerator
         $installFromGitScripts[] = 'rm -rf ' . implode(' ', array_keys($repoOptions));
 
         foreach ($repoOptions as $repoName => $gitOption) {
-            $gitCloneCommand = 'git clone -b %s --single-branch --depth 1 %s %s';
-
+            $gitRef = $gitOption['ref'] ?? $gitOption['branch'];
             $installFromGitScripts[] = sprintf(
-                $gitCloneCommand,
-                $gitOption['branch'],
+                'git clone %s "%s" && git --git-dir="%s/.git" --work-tree="%s" checkout %s',
                 $gitOption['repo'],
-                $repoName
+                $repoName,
+                $repoName,
+                $repoName,
+                $gitRef
             );
         }
 
@@ -124,21 +145,6 @@ class ComposerGenerator
     private function getBaseComposer(array $repoOptions): array
     {
         $installFromGitScripts = $this->getInstallFromGitScripts($repoOptions);
-
-        $preparePackagesScripts = [];
-
-        foreach ($repoOptions as $repoName => $gitOption) {
-            if ($this->isSinglePackage($gitOption)) {
-                continue;
-            }
-
-            $preparePackagesScripts[] = sprintf(
-                "rsync -azh --stats --exclude='app/code/Magento/' --exclude='app/i18n/' --exclude='app/design/' "
-                . "--exclude='dev/tests' --exclude='lib/internal/Magento' --exclude='.git' ./%s/ ./",
-                $repoName
-            );
-        }
-
         $composer = [
             'name' => 'magento/cloud-dev',
             'description' => 'eCommerce Platform for Growth',
@@ -151,16 +157,6 @@ class ComposerGenerator
                 'ce/bin/magento',
             ],
             'repositories' => [
-                'magento/framework' => [
-                    'type' => 'path',
-                    'url' => './ce/lib/internal/Magento/Framework/',
-                    'transport-options' => [
-                        'symlink' => false,
-                    ],
-                    'options' => [
-                        'symlink' => false,
-                    ],
-                ],
             ],
             'require' => [
             ],
@@ -181,15 +177,11 @@ class ComposerGenerator
             ],
             'scripts' => [
                 'install-from-git' => $installFromGitScripts,
-                'prepare-packages' => $preparePackagesScripts,
                 'pre-install-cmd' => [
                     '@install-from-git',
                 ],
                 'pre-update-cmd' => [
                     '@install-from-git',
-                ],
-                'post-install-cmd' => [
-                    '@prepare-packages',
                 ],
             ],
         ];
@@ -198,63 +190,31 @@ class ComposerGenerator
     }
 
     /**
-     * Adds modules and repositories to composer.json.
+     * Find Composer packages in the folder (recursively)
      *
-     * @param array $repoOptions
-     * @param array $composer
+     * @param string $path
      * @return array
-     * @codeCoverageIgnore
+     * @throws FileSystemException
      */
-    private function addModules(array $repoOptions, array $composer): array
+    private function findPackages(string $path)
     {
-        $add = function ($dir, $version = null) use (&$composer) {
-            if (!$this->file->isExists($dir . '/composer.json')) {
-                return 0;
-            }
+        $path = rtrim($path, '\\/');
+        $packageTypes = ['magento2-module', 'magento2-theme', 'magento2-language', 'magento2-library'];
+        $pathLength = strlen($path . '/');
 
-            $dirComposer = json_decode($this->file->fileGetContents($dir . '/composer.json'), true);
-            $composer['repositories'][$dirComposer['name']] = [
-                'type' => 'path',
-                'url' => ltrim(str_replace($this->directoryList->getMagentoRoot(), '', $dir), '/'),
-                'options' => [
-                    'symlink' => false,
-                ],
-            ];
-            $composer['require'][$dirComposer['name']] = $version ?? $dirComposer['version'] ?? '*';
-        };
-
-        foreach ($repoOptions as $repoName => $gitOption) {
-            $baseRepoFolder = $this->directoryList->getMagentoRoot() . '/' . $repoName;
-            if ($this->isSinglePackage($gitOption)) {
-                $add($baseRepoFolder, '*');
-                continue;
-            }
-
-            foreach (glob($baseRepoFolder . '/app/code/Magento/*') as $dir) {
-                $add($dir);
-            }
-            foreach (glob($baseRepoFolder . '/app/design/*/Magento/*/') as $dir) {
-                $add($dir);
-            }
-            foreach (glob($baseRepoFolder . '/app/design/*/Magento/*/') as $dir) {
-                $add($dir);
-            }
-            if ($this->file->isDirectory($baseRepoFolder . '/lib/internal/Magento/Framework/')) {
-                foreach (glob($baseRepoFolder . '/lib/internal/Magento/Framework/*') as $dir) {
-                    $add($dir);
-                }
+        $dirIterator = $this->file->getRecursiveFileIterator(
+            $path,
+            '/composer.json$/',
+            $this->excludeRepoPathsPattern
+        );
+        $packages = [];
+        foreach ($dirIterator as $currentFileInfo) {
+            $packageInfo = json_decode($this->file->fileGetContents($currentFileInfo->getPathName()), true);
+            if (isset($packageInfo['type']) && in_array($packageInfo['type'], $packageTypes)) {
+                $packages[$packageInfo['name']] = substr($currentFileInfo->getPath(), $pathLength);
             }
         }
 
-        return $composer;
-    }
-
-    /**
-     * @param array $repoOptions
-     * @return bool
-     */
-    private function isSinglePackage(array $repoOptions): bool
-    {
-        return isset($repoOptions['type']) && $repoOptions['type'] == self::REPO_TYPE_SINGLE_PACKAGE;
+        return $packages;
     }
 }

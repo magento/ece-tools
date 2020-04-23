@@ -7,7 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Config;
 
-use Magento\MagentoCloud\Config\Environment\Reader as EnvironmentReader;
+use Magento\MagentoCloud\Config\Environment\ReaderInterface as EnvironmentReader;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Symfony\Component\Yaml\Exception\ParseException;
 
@@ -56,7 +56,7 @@ class GlobalSection implements StageConfigInterface
         try {
             return $this->mergeConfig()[$name];
         } catch (\Exception $exception) {
-            throw new \RuntimeException(
+            throw new ConfigException(
                 $exception->getMessage(),
                 $exception->getCode(),
                 $exception

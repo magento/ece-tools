@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Config\Stage;
 
+use Magento\MagentoCloud\Config\ConfigException;
 use Magento\MagentoCloud\Config\Schema;
 use Magento\MagentoCloud\Config\Stage\Deploy;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
@@ -54,8 +55,10 @@ class DeployTest extends TestCase
      * @param array $mergedConfig
      * @param array|null $schema
      * @dataProvider getDataProvider
+     *
+     * @throws ConfigException
      */
-    public function testGet(string $name, $expectedValue, array $mergedConfig, array $schema = null)
+    public function testGet(string $name, $expectedValue, array $mergedConfig, array $schema = null): void
     {
         $this->mergedConfigMock->expects($this->once())
             ->method('get')
@@ -63,11 +66,11 @@ class DeployTest extends TestCase
 
         if ($schema !== null) {
             $this->schemaMock->expects($this->once())
-                ->method('getSchema')
+                ->method('getVariables')
                 ->willReturn($schema);
         } else {
             $this->schemaMock->expects($this->never())
-                ->method('getSchema');
+                ->method('getVariables');
         }
 
         $this->assertEquals($expectedValue, $this->deployConfig->get($name));
@@ -75,7 +78,6 @@ class DeployTest extends TestCase
 
     /**
      * @return array
-     * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
     public function getDataProvider(): array
     {
@@ -163,11 +165,13 @@ class DeployTest extends TestCase
     }
 
     /**
-     * @expectedExceptionMessage Config NO_EXISTS_CONFIG was not defined
-     * @expectedException \RuntimeException
+     * @throws ConfigException
      */
-    public function testGetConfigNotDefined()
+    public function testGetConfigNotDefined(): void
     {
+        $this->expectException(ConfigException::class);
+        $this->expectExceptionMessage('Config NO_EXISTS_CONFIG was not defined');
+
         $this->mergedConfigMock->expects($this->once())
             ->method('get')
             ->willReturn([]);
@@ -176,14 +180,16 @@ class DeployTest extends TestCase
     }
 
     /**
-     * @expectedExceptionMessage Some error
-     * @expectedException \RuntimeException
+     * @throws ConfigException
      */
-    public function testGetWithMergedConfigException()
+    public function testGetWithMergedConfigException(): void
     {
+        $this->expectException(ConfigException::class);
+        $this->expectExceptionMessage('Some error');
+
         $this->mergedConfigMock->expects($this->once())
             ->method('get')
-            ->willThrowException(new \RuntimeException('Some error'));
+            ->willThrowException(new ConfigException('Some error'));
 
         $this->deployConfig->get(Deploy::VAR_SCD_STRATEGY);
     }

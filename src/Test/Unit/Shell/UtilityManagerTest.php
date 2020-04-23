@@ -8,10 +8,12 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit\Shell;
 
 use Magento\MagentoCloud\Shell\ProcessInterface;
+use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Shell\ShellInterface;
+use Magento\MagentoCloud\Shell\UtilityException;
 use Magento\MagentoCloud\Shell\UtilityManager;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -24,14 +26,14 @@ class UtilityManagerTest extends TestCase
     private $utilityManager;
 
     /**
-     * @var ShellInterface|Mock
+     * @var ShellInterface|MockObject
      */
     private $shellMock;
 
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->shellMock = $this->getMockForAbstractClass(ShellInterface::class);
 
@@ -40,7 +42,7 @@ class UtilityManagerTest extends TestCase
         );
     }
 
-    public function testGet()
+    public function testGet(): void
     {
         $processMock1 = $this->getMockForAbstractClass(ProcessInterface::class);
         $processMock1->expects($this->once())
@@ -53,22 +55,21 @@ class UtilityManagerTest extends TestCase
         $this->shellMock->expects($this->any())
             ->method('execute')
             ->willReturnMap([
-                ['which ' . UtilityManager::UTILITY_BASH, [], $processMock1],
+                ['which ' . UtilityManager::UTILITY_SHELL, [], $processMock1],
                 ['which ' . UtilityManager::UTILITY_TIMEOUT, [], $processMock2],
             ]);
 
         $this->assertSame(
             '/usr/bash',
-            $this->utilityManager->get(UtilityManager::UTILITY_BASH)
+            $this->utilityManager->get(UtilityManager::UTILITY_SHELL)
         );
     }
 
-    /**
-     * @expectedException \RuntimeException
-     * @expectedExceptionMessage Utility some_util not found
-     */
-    public function testGetWithException()
+    public function testGetWithException(): void
     {
+        $this->expectException(UtilityException::class);
+        $this->expectExceptionMessage('Utility some_util not found');
+
         $processMock1 = $this->getMockForAbstractClass(ProcessInterface::class);
         $processMock1->expects($this->once())
             ->method('getOutput')
@@ -77,10 +78,9 @@ class UtilityManagerTest extends TestCase
         $processMock2->expects($this->once())
             ->method('getOutput')
             ->willReturn('/usr/timeout');
-        $this->shellMock->expects($this->any())
-            ->method('execute')
+        $this->shellMock->method('execute')
             ->willReturnMap([
-                ['which ' . UtilityManager::UTILITY_BASH, [], $processMock1],
+                ['which ' . UtilityManager::UTILITY_SHELL, [], $processMock1],
                 ['which ' . UtilityManager::UTILITY_TIMEOUT, [], $processMock2],
             ]);
 
@@ -91,14 +91,15 @@ class UtilityManagerTest extends TestCase
     }
 
     /**
-     * @expectedException \RuntimeException
-     * @expectedExceptionMessage Required utility timeout was not found
+     * @throws UtilityException
      */
-    public function testGetRequiredWithException()
+    public function testGetRequiredWithException(): void
     {
-        $this->shellMock->expects($this->any())
-            ->method('execute')
-            ->willThrowException(new \Exception('Shell error'));
+        $this->expectException(UtilityException::class);
+        $this->expectExceptionMessage('Required utility timeout was not found');
+
+        $this->shellMock->method('execute')
+            ->willThrowException(new ShellException('Shell error'));
 
         $this->assertSame(
             '/usr/bash',

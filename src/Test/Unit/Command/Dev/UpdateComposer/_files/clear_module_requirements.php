@@ -1,24 +1,30 @@
 <?php
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+declare(strict_types=1);
+
 $repos = array (
-  'repo1' => 
+  'package1' => 
   array (
-    'branch' => '1.2',
-    'repo' => 'https://token@repo1.com',
+    'type' => 'path',
+    'url' => 'repo1/app/code/package1',
   ),
-  'repo2' => 
+  'package2' => 
   array (
-    'branch' => '2.2',
-    'repo' => 'https://token@repo2.com',
+    'type' => 'path',
+    'url' => 'repo1/app/code/package2',
   ),
-  'repo3' => 
+  'package6' => 
   array (
-    'branch' => '2.3',
-    'repo' => 'https://token@repo2.com',
-    'type' => 'single-package',
+    'type' => 'path',
+    'url' => 'repo2/app/code/package6',
   ),
 );
+$packages = var_export(array_keys($repos), true);
 
-function clearRequirements($dir) {
+function clearRequirements($dir, $packages) {
     if (!file_exists($dir . '/composer.json')) {
         return;
     }
@@ -26,8 +32,8 @@ function clearRequirements($dir) {
     $composerJson = json_decode(file_get_contents($dir . '/composer.json'), true);
 
     foreach ($composerJson['require'] as $requireName => $requireVersion) {
-        if (preg_match('{^(magento\/|elasticsearch\/)}i', $requireName)) {
-            unset($composerJson['require'][$requireName]);
+        if (in_array($requireName, $packages)) {
+            $composerJson['require'][$requireName] = '*@dev';
         }
     }
 
@@ -38,14 +44,6 @@ function clearRequirements($dir) {
 }
 
 foreach ($repos as $repoName => $repoOptions) {
-    $repoDir = __DIR__ .'/' . $repoName;
-
-    if (isset($repoOptions['type']) && $repoOptions['type'] == 'single-package') {
-        clearRequirements($repoDir);
-        continue;
-    }
-
-    foreach (glob($repoDir . '/app/code/Magento/*') as $moduleDir) {
-        clearRequirements($moduleDir);
-    }
+    $repoDir = __DIR__ .'/' . $repoOptions['url'];
+    clearRequirements($repoDir, $packages);
 }

@@ -7,13 +7,14 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Step\Deploy\PreDeploy;
 
-use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Service\Adapter\CredisFactory;
 use Magento\MagentoCloud\Step\Deploy\PreDeploy\CleanRedisCache;
-use Magento\MagentoCloud\Shell\ShellInterface;
-use Magento\MagentoCloud\Config\Factory\Cache as СacheConfig;
+use Magento\MagentoCloud\Config\Factory\Cache as CacheConfig;
+use Magento\MagentoCloud\Step\StepException;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Psr\Log\LoggerInterface;
+use Credis_Client;
 
 /**
  * @inheritdoc
@@ -21,48 +22,46 @@ use Psr\Log\LoggerInterface;
 class CleanRedisCacheTest extends TestCase
 {
     /**
-     * @var ShellInterface|Mock
-     */
-    private $shellMock;
-
-    /**
-     * @var Environment|Mock
-     */
-    private $environmentMock;
-
-    /**
-     * @var LoggerInterface|Mock
-     */
-    private $loggerMock;
-
-    /**
-     * @var СacheConfig|Mock
-     */
-    private $cacheConfigMock;
-
-    /**
      * @var CleanRedisCache
      */
     private $step;
 
+    /**
+     * @var LoggerInterface|MockObject
+     */
+    private $loggerMock;
+
+    /**
+     * @var CacheConfig|MockObject
+     */
+    private $cacheConfigMock;
+
+    /**
+     * @var CredisFactory|MockObject
+     */
+    private $credisFactoryMock;
+
+    /**
+     * @inheritDoc
+     */
     protected function setUp()
     {
-        $this->shellMock = $this->getMockBuilder(ShellInterface::class)
-            ->getMockForAbstractClass();
         $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
             ->getMockForAbstractClass();
-        $this->environmentMock = $this->createMock(Environment::class);
-        $this->cacheConfigMock = $this->createMock(СacheConfig::class);
+        $this->cacheConfigMock = $this->createMock(CacheConfig::class);
+        $this->credisFactoryMock = $this->createMock(CredisFactory::class);
 
         $this->step = new CleanRedisCache(
             $this->loggerMock,
-            $this->shellMock,
-            $this->environmentMock,
-            $this->cacheConfigMock
+            $this->cacheConfigMock,
+            $this->credisFactoryMock
         );
     }
 
-    public function testExecute()
+    /**
+     * @throws StepException
+     */
+    public function testExecute(): void
     {
         $this->cacheConfigMock->expects($this->once())
             ->method('get')
@@ -115,28 +114,114 @@ class CleanRedisCacheTest extends TestCase
                 ['Clearing redis cache: some_type1'],
                 ['Clearing redis cache: some_type2']
             );
-        $this->shellMock->expects($this->exactly(5))
-            ->method('execute')
+
+        /** @var Credis_Client|MockObject $credisClient */
+        $credisClient = $this->getMockBuilder(Credis_Client::class)
+            ->setMethods(['connect', 'flushDb'])
+            ->getMock();
+        $this->credisFactoryMock->expects($this->exactly(5))
+            ->method('create')
             ->withConsecutive(
-                ['redis-cli -h localhost -p 1234 -n 0 flushdb'],
-                ['redis-cli -p 1234 -n 1 flushdb'],
-                ['redis-cli -h localhost -n 2 flushdb'],
-                ['redis-cli -h localhost -p 1234 flushdb'],
-                ['redis-cli flushdb']
-            );
+                ['localhost', '1234', 0],
+                ['127.0.0.1', 1234, 1],
+                ['localhost', 6379, 2],
+                ['localhost', 1234, 0],
+                ['127.0.0.1', 6379, 0]
+            )->willReturn($credisClient);
+
+        $credisClient->expects($this->exactly(5))
+            ->method('connect');
+        $credisClient->expects($this->exactly(5))
+            ->method('flushDb');
 
         $this->step->execute();
     }
 
-    public function testExecuteWithoutRedis()
+    /**
+     * @throws StepException
+     */
+    public function testExecuteWithError(): void
+    {
+        $this->expectException(StepException::class);
+        $this->expectExceptionMessage('Some error');
+
+        $this->cacheConfigMock->expects($this->once())
+            ->method('get')
+            ->willReturn([
+                'frontend' => [
+                    'default' => [
+                        'backend' => 'Cm_Cache_Backend_Redis',
+                        'backend_options' => [
+                            'server' => 'localhost',
+                            'port' => 1234,
+                            'database' => 0
+                        ]
+                    ],
+                    'page_cache' => [
+                        'backend' => 'Cm_Cache_Backend_Redis',
+                        'backend_options' => [
+                            'port' => 1234,
+                            'database' => 1
+                        ]
+                    ],
+                    'some_type0' => [
+                        'backend' => 'Cm_Cache_Backend_Redis',
+                        'backend_options' => [
+                            'server' => 'localhost',
+                            'database' => 2
+                        ]
+                    ],
+                    'some_type1' => [
+                        'backend' => 'Cm_Cache_Backend_Redis',
+                        'backend_options' => [
+                            'server' => 'localhost',
+                            'port' => 1234,
+                        ]
+                    ],
+                    'some_type2' => [
+                        'backend' => 'Cm_Cache_Backend_Redis',
+                        'backend_options' => []
+                    ],
+                    'some_type3' => [
+                        'backend' => 'SomeClase',
+                    ]
+                ]
+            ]);
+        $this->loggerMock->expects($this->once())
+            ->method('info')
+            ->withConsecutive(
+                ['Clearing redis cache: default']
+            );
+
+        /** @var Credis_Client|MockObject $credisClient */
+        $credisClient = $this->getMockBuilder(Credis_Client::class)
+            ->setMethods(['connect', 'flushDb'])
+            ->getMock();
+        $this->credisFactoryMock->expects($this->once())
+            ->method('create')
+            ->withConsecutive(
+                ['localhost', '1234', 0]
+            )->willReturn($credisClient);
+
+        $credisClient->method('connect')
+            ->willThrowException(new \CredisException('Some error'));
+
+        $this->step->execute();
+    }
+
+    /**
+     * @throws StepException
+     */
+    public function testExecuteWithoutRedis(): void
     {
         $this->cacheConfigMock->expects($this->once())
             ->method('get')
             ->willReturn([]);
         $this->loggerMock->expects($this->never())
             ->method('info');
-        $this->shellMock->expects($this->never())
-            ->method('execute');
+        $this->credisFactoryMock->expects($this->never())
+            ->method('create');
+
         $this->step->execute();
     }
 }

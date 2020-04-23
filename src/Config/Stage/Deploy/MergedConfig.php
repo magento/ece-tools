@@ -7,7 +7,8 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Config\Stage\Deploy;
 
-use Magento\MagentoCloud\Config\Environment\Reader as EnvironmentReader;
+use Magento\MagentoCloud\Config\ConfigException;
+use Magento\MagentoCloud\Config\Environment\ReaderInterface as EnvironmentReader;
 use Magento\MagentoCloud\Config\Schema;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Config\StageConfigInterface;
@@ -56,7 +57,7 @@ class MergedConfig
      * Returns all merged configuration for deploy stage.
      *
      * @return array
-     * @throws \RuntimeException If the configuration file can't be read or can't be parsed
+     * @throws ConfigException If the configuration file can't be read or can't be parsed
      */
     public function get(): array
     {
@@ -74,7 +75,7 @@ class MergedConfig
 
             return $this->mergedConfig;
         } catch (\Exception $exception) {
-            throw new \RuntimeException(
+            throw new ConfigException(
                 $exception->getMessage(),
                 $exception->getCode(),
                 $exception

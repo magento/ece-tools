@@ -7,8 +7,11 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Config;
 
-use Magento\MagentoCloud\Config\ConfigInterface;
+use Magento\MagentoCloud\Config\Magento\Shared\ReaderInterface;
+use Magento\MagentoCloud\Config\Magento\Shared\WriterInterface;
 use Magento\MagentoCloud\Config\Module;
+use Magento\MagentoCloud\Config\Stage\BuildInterface;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Shell\MagentoShell;
 use Magento\MagentoCloud\Shell\ShellFactory;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -25,9 +28,14 @@ class ModuleTest extends TestCase
     private $module;
 
     /**
-     * @var ConfigInterface|MockObject
+     * @var ReaderInterface|MockObject
      */
-    private $configMock;
+    private $readerMock;
+
+    /**
+     * @var WriterInterface|MockObject
+     */
+    private $writerMock;
 
     /**
      * @var MagentoShell|MockObject
@@ -35,12 +43,20 @@ class ModuleTest extends TestCase
     private $magentoShellMock;
 
     /**
+     * @var BuildInterface|MockObject
+     */
+    private $stageConfigMock;
+
+    /**
      * @inheritdoc
      */
     protected function setUp()
     {
-        $this->configMock = $this->getMockForAbstractClass(ConfigInterface::class);
+        $this->readerMock = $this->getMockForAbstractClass(ReaderInterface::class);
+        $this->writerMock = $this->getMockForAbstractClass(WriterInterface::class);
+        $this->stageConfigMock = $this->createMock(BuildInterface::class);
         $this->magentoShellMock = $this->createMock(MagentoShell::class);
+
         /** @var ShellFactory|MockObject $shellFactoryMock */
         $shellFactoryMock = $this->createMock(ShellFactory::class);
         $shellFactoryMock->expects($this->once())
@@ -48,30 +64,38 @@ class ModuleTest extends TestCase
             ->willReturn($this->magentoShellMock);
 
         $this->module = new Module(
-            $this->configMock,
+            $this->readerMock,
+            $this->writerMock,
+            $this->stageConfigMock,
             $shellFactoryMock
         );
     }
 
-    public function testRefreshWithMissingModuleConfig()
+    /**
+     * @throws FileSystemException
+     */
+    public function testRefreshWithMissingModuleConfig(): void
     {
-        $this->configMock->expects($this->exactly(2))
-            ->method('get')
-            ->with('modules')
+        $this->stageConfigMock->method('get')
+            ->with(BuildInterface::VAR_VERBOSE_COMMANDS)
+            ->willReturn('-vv');
+        $this->readerMock->expects($this->exactly(2))
+            ->method('read')
             ->willReturnOnConsecutiveCalls(
-                null,
+                [],
                 [
-                    'Magento_Module1' => 1,
-                    'Magento_Module2' => 1,
+                    'modules' => [
+                        'Magento_Module1' => 1,
+                        'Magento_Module2' => 1,
+                    ]
                 ]
             );
-        $this->configMock->expects($this->once())
-            ->method('reset');
         $this->magentoShellMock->expects($this->once())
             ->method('execute')
-            ->with('module:enable --all');
-        $this->configMock->expects($this->never())
-            ->method('update');
+            ->with('module:enable --all', ['-vv']);
+        $this->writerMock->expects($this->once())
+            ->method('update')
+            ->with(['modules' => []]);
 
         $this->assertEquals(
             [
@@ -82,37 +106,51 @@ class ModuleTest extends TestCase
         );
     }
 
-    public function testRefreshWithNewModules()
+    /**
+     * @throws FileSystemException
+     */
+    public function testRefreshWithNewModules(): void
     {
-        $this->configMock->expects($this->exactly(2))
-            ->method('get')
-            ->with('modules')
+        $this->stageConfigMock->method('get')
+            ->with(BuildInterface::VAR_VERBOSE_COMMANDS)
+            ->willReturn('');
+        $this->readerMock->expects($this->exactly(2))
+            ->method('read')
             ->willReturnOnConsecutiveCalls(
                 [
-                    'Magento_Module1' => 1,
-                    'Magento_Module2' => 0,
-                    'Magento_Module3' => 1,
+                    'modules' => [
+                        'Magento_Module1' => 1,
+                        'Magento_Module2' => 0,
+                        'Magento_Module3' => 1,
+                    ],
                 ],
                 [
-                    'Magento_Module1' => 1,
-                    'Magento_Module2' => 1,
-                    'Magento_Module3' => 1,
-                    'Magento_Module4' => 1,
-                    'Magento_Module5' => 1,
+                    'modules' => [
+                        'Magento_Module1' => 1,
+                        'Magento_Module2' => 1,
+                        'Magento_Module3' => 1,
+                        'Magento_Module4' => 1,
+                        'Magento_Module5' => 1,
+                    ],
                 ]
             );
         $this->magentoShellMock->expects($this->once())
             ->method('execute')
-            ->with('module:enable --all');
-        $this->configMock->expects($this->once())
-            ->method('reset');
-        $this->configMock->expects($this->once())
+            ->with('module:enable --all', ['']);
+        $this->writerMock->expects($this->exactly(2))
             ->method('update')
-            ->with(['modules' => [
-                'Magento_Module1' => 1,
-                'Magento_Module2' => 0,
-                'Magento_Module3' => 1,
-            ]]);
+            ->withConsecutive(
+                [['modules' => []]],
+                [
+                    [
+                        'modules' => [
+                            'Magento_Module1' => 1,
+                            'Magento_Module2' => 0,
+                            'Magento_Module3' => 1,
+                        ]
+                    ]
+                ]
+            );
 
         $this->assertEquals(
             [

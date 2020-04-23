@@ -40,6 +40,10 @@ class SanitizerTest extends TestCase
                 'some message with admin password --admin-password=\'******\'',
             ],
             [
+                'some message with admin password --admin-password="Ks81bUSl13Osd"',
+                'some message with admin password --admin-password=\'******\'',
+            ],
+            [
                 'some message with db password --db-password=\'Ks81bUSl13Osd\'',
                 'some message with db password --db-password=\'******\'',
             ],
@@ -49,6 +53,10 @@ class SanitizerTest extends TestCase
             ],
             [
                 'some text --admin-password=\'Ks81bUSl13Osd\' some text',
+                'some text --admin-password=\'******\' some text',
+            ],
+            [
+                'some text --admin-password="Ks81bUSl13Osd" some text',
                 'some text --admin-password=\'******\' some text',
             ],
             [

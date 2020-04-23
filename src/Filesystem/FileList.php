@@ -113,4 +113,38 @@ class FileList extends ConfigFileList
     {
         return $this->directoryList->getMagentoRoot() . '/.magento/services.yaml';
     }
+
+    /**
+     * Return the path to the service EOL configuration file.
+     *
+     * @return string
+     */
+    public function getServiceEolsConfig(): string
+    {
+        return $this->directoryList->getRoot() . '/config/eol.yaml';
+    }
+
+    /**
+     * @return string
+     */
+    public function getEnvDistConfig(): string
+    {
+        return $this->directoryList->getMagentoRoot() . '/.magento.env.md';
+    }
+
+    /**
+     * @return string
+     */
+    public function getLogDistConfig(): string
+    {
+        return $this->directoryList->getRoot() . '/dist/.log.env.md';
+    }
+
+    /**
+     * @return string
+     */
+    public function getFrontStaticDist(): string
+    {
+        return $this->directoryList->getRoot() . '/dist/front-static.php.dist';
+    }
 }

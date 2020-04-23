@@ -7,14 +7,14 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\StaticContent\Deploy;
 
-use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\AdminDataInterface;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\DB\Connection;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\StaticContent\Deploy\Option;
 use Magento\MagentoCloud\StaticContent\ThreadCountOptimizer;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -27,43 +27,43 @@ class OptionTest extends TestCase
     private $option;
 
     /**
-     * @var MagentoVersion|Mock
+     * @var MagentoVersion|MockObject
      */
     private $magentoVersionMock;
 
     /**
-     * @var Environment|Mock
+     * @var AdminDataInterface|MockObject
      */
-    private $environmentMock;
+    private $adminDataMock;
 
     /**
-     * @var Connection|Mock
+     * @var Connection|MockObject
      */
     private $connectionMock;
 
     /**
-     * @var ThreadCountOptimizer|Mock
+     * @var ThreadCountOptimizer|MockObject
      */
     private $threadCountOptimizerMock;
 
     /**
-     * @var DeployInterface|Mock
+     * @var DeployInterface|MockObject
      */
     private $stageConfigMock;
 
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
         $this->connectionMock = $this->createMock(Connection::class);
-        $this->environmentMock = $this->createMock(Environment::class);
+        $this->adminDataMock = $this->getMockForAbstractClass(AdminDataInterface::class);
         $this->threadCountOptimizerMock = $this->createMock(ThreadCountOptimizer::class);
         $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
 
         $this->option = new Option(
-            $this->environmentMock,
+            $this->adminDataMock,
             $this->connectionMock,
             $this->magentoVersionMock,
             $this->threadCountOptimizerMock,
@@ -71,7 +71,7 @@ class OptionTest extends TestCase
         );
     }
 
-    public function testGetThreadCount()
+    public function testGetThreadCount(): void
     {
         $this->stageConfigMock->expects($this->exactly(2))
             ->method('get')
@@ -88,48 +88,9 @@ class OptionTest extends TestCase
     }
 
     /**
-     * @param $themes
-     * @param $expected
-     * @dataProvider excludedThemesDataProvider
-     */
-    public function testGetExcludedThemes($themes, $expected)
-    {
-        $this->stageConfigMock->expects($this->once())
-            ->method('get')
-            ->with(DeployInterface::VAR_SCD_EXCLUDE_THEMES)
-            ->willReturn($themes);
-
-        $this->assertEquals(
-            $expected,
-            $this->option->getExcludedThemes()
-        );
-    }
-
-    /**
-     * @return array
-     */
-    public function excludedThemesDataProvider(): array
-    {
-        return [
-            [
-                '',
-                [],
-            ],
-            [
-                'theme1, theme2 ,,  theme3 ',
-                ['theme1', 'theme2', 'theme3'],
-            ],
-            [
-                'theme3,,theme4,,,,theme5',
-                ['theme3', 'theme4', 'theme5'],
-            ],
-        ];
-    }
-
-    /**
      * Test getting the SCD strategy from the strategy checker.
      */
-    public function testGetStrategy()
+    public function testGetStrategy(): void
     {
         $this->stageConfigMock->expects($this->once())
             ->method('get')
@@ -144,7 +105,7 @@ class OptionTest extends TestCase
         $this->assertEquals('strategy', $this->option->getStrategy());
     }
 
-    public function testIsForce()
+    public function testIsForce(): void
     {
         $this->magentoVersionMock->expects($this->once())
             ->method('isGreaterOrEqual')
@@ -154,7 +115,7 @@ class OptionTest extends TestCase
         $this->assertTrue($this->option->isForce());
     }
 
-    public function testGetLocales()
+    public function testGetLocales(): void
     {
         $this->connectionMock->expects($this->once())
             ->method('select')
@@ -169,8 +130,8 @@ class OptionTest extends TestCase
         $this->connectionMock->expects($this->exactly(2))
             ->method('getTableName')
             ->willReturnArgument(0);
-        $this->environmentMock->expects($this->exactly(2))
-            ->method('getAdminLocale')
+        $this->adminDataMock->expects($this->exactly(2))
+            ->method('getLocale')
             ->willReturn('en_US');
 
         $this->assertEquals(
@@ -183,7 +144,7 @@ class OptionTest extends TestCase
         );
     }
 
-    public function testGetLocalesWithExistsAdminLocale()
+    public function testGetLocalesWithExistsAdminLocale(): void
     {
         $this->connectionMock->expects($this->once())
             ->method('select')
@@ -198,8 +159,8 @@ class OptionTest extends TestCase
         $this->connectionMock->expects($this->exactly(2))
             ->method('getTableName')
             ->willReturnArgument(0);
-        $this->environmentMock->expects($this->exactly(1))
-            ->method('getAdminLocale')
+        $this->adminDataMock->expects($this->exactly(1))
+            ->method('getLocale')
             ->willReturn('fr_FR');
 
         $this->assertEquals(
@@ -211,7 +172,7 @@ class OptionTest extends TestCase
         );
     }
 
-    public function testGetVerbosityLevel()
+    public function testGetVerbosityLevel(): void
     {
         $this->stageConfigMock->expects($this->once())
             ->method('get')
@@ -219,5 +180,17 @@ class OptionTest extends TestCase
             ->willReturn('-vv');
 
         $this->assertEquals('-vv', $this->option->getVerbosityLevel());
+    }
+
+    public function testGetMaxExecutionTime(): void
+    {
+        $this->stageConfigMock->method('get')
+            ->with(DeployInterface::VAR_SCD_MAX_EXEC_TIME)
+            ->willReturn(10);
+
+        $this->assertSame(
+            10,
+            $this->option->getMaxExecutionTime()
+        );
     }
 }

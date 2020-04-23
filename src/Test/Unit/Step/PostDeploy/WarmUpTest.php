@@ -10,12 +10,13 @@ namespace Magento\MagentoCloud\Test\Unit\Step\PostDeploy;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Pool;
 use GuzzleHttp\Promise\PromiseInterface;
+use Magento\MagentoCloud\Config\Stage\PostDeployInterface;
 use Magento\MagentoCloud\Http\PoolFactory;
 use Magento\MagentoCloud\Step\PostDeploy\WarmUp;
 use Magento\MagentoCloud\Step\StepException;
-use PHPUnit\Framework\TestCase;
+use Magento\MagentoCloud\WarmUp\Urls;
 use PHPUnit\Framework\MockObject\MockObject;
-use Psr\Http\Message\RequestInterface;
+use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
 
@@ -40,9 +41,14 @@ class WarmUpTest extends TestCase
     private $poolMock;
 
     /**
-     * @var WarmUp\Urls|Mock
+     * @var Urls|MockObject
      */
     private $urlsMock;
+
+    /**
+     * @var PostDeployInterface|MockObject
+     */
+    private $postDeployMock;
 
     /**
      * @var LoggerInterface|MockObject
@@ -63,7 +69,8 @@ class WarmUpTest extends TestCase
         $this->poolMock = $this->createMock(Pool::class);
         $this->promiseMock = $this->createMock(PromiseInterface::class);
         $this->loggerMock = $this->createMock(LoggerInterface::class);
-        $this->urlsMock = $this->createMock(WarmUp\Urls::class);
+        $this->urlsMock = $this->createMock(Urls::class);
+        $this->postDeployMock = $this->createMock(PostDeployInterface::class);
 
         $this->poolMock->method('promise')
             ->willReturn($this->promiseMock);
@@ -71,19 +78,27 @@ class WarmUpTest extends TestCase
         $this->step = new WarmUp(
             $this->poolFactoryMock,
             $this->loggerMock,
-            $this->urlsMock
+            $this->urlsMock,
+            $this->postDeployMock
         );
     }
 
+    /**
+     * @throws StepException
+     */
     public function testExecute()
     {
         $urls = [
             'http://base-url.com/index.php',
             'http://base-url.com/index.php/customer/account/create'
         ];
+        $concurrency = 0;
 
         $this->urlsMock->method('getAll')
             ->willReturn($urls);
+        $this->postDeployMock->method('get')
+            ->with(PostDeployInterface::VAR_WARM_UP_CONCURRENCY)
+            ->willReturn($concurrency);
 
         $mockResponse = $this->createMock(ResponseInterface::class);
         $mockException = $this->createMock(RequestException::class);
@@ -102,6 +117,7 @@ class WarmUpTest extends TestCase
                 $this->callBack(function (array $subject) use ($mockResponse, $mockException) {
                     if (array_key_exists('fulfilled', $subject) && array_key_exists('rejected', $subject)
                         && is_callable($subject['fulfilled']) && is_callable($subject['rejected'])
+                        && array_key_exists('concurrency', $subject) === false
                     ) {
                         $subject['fulfilled']($mockResponse, 0);
                         $subject['rejected']($mockException, 1);
@@ -124,16 +140,24 @@ class WarmUpTest extends TestCase
         $this->step->execute();
     }
 
+    /**
+     * @throws StepException
+     */
     public function testExecuteWithPromiseException()
     {
         $urls = [
             'http://base-url.com/index.php',
             'http://base-url.com/index.php/customer/account/create'
         ];
+        $concurrency = 0;
 
         $this->urlsMock->expects($this->any())
             ->method('getAll')
             ->willReturn($urls);
+        $this->postDeployMock->method('get')
+            ->with(PostDeployInterface::VAR_WARM_UP_CONCURRENCY)
+            ->willReturn($concurrency);
+
         $this->poolFactoryMock->expects($this->once())
             ->method('create')
             ->with($this->equalTo($urls), $this->isType('array'))
@@ -144,6 +168,37 @@ class WarmUpTest extends TestCase
 
         $this->expectException(StepException::class);
         $this->expectExceptionMessage('some error');
+
+        $this->step->execute();
+    }
+
+    /**
+     * @throws StepException
+     */
+    public function testExecuteWithConcurrency()
+    {
+        $urls = [
+            'http://base-url.com/index.php',
+            'http://base-url.com/index.php/customer/account/create'
+        ];
+        $concurrency = 2;
+
+        $this->urlsMock->method('getAll')
+            ->willReturn($urls);
+        $this->postDeployMock->method('get')
+            ->with(PostDeployInterface::VAR_WARM_UP_CONCURRENCY)
+            ->willReturn($concurrency);
+
+        $this->poolFactoryMock->expects($this->once())
+            ->method('create')
+            ->with(
+                $this->equalTo($urls),
+                $this->callBack(function (array $subject) use ($concurrency) {
+                    return array_key_exists('concurrency', $subject) && $subject['concurrency'] === $concurrency;
+                })
+            )->willReturn($this->poolMock);
+        $this->promiseMock->expects($this->once())
+            ->method('wait');
 
         $this->step->execute();
     }

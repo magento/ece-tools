@@ -10,6 +10,7 @@ namespace Magento\MagentoCloud\Test\Unit\Step\Deploy\DeployStaticContent;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Step\Deploy\DeployStaticContent\Generate;
 use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Shell\ShellInterface;
@@ -57,7 +58,7 @@ class GenerateTest extends TestCase
     /**
      * @var Option|MockObject
      */
-    private $deployOption;
+    private $deployOptionMock;
 
     /**
      * @var DeployInterface|MockObject
@@ -67,14 +68,14 @@ class GenerateTest extends TestCase
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->shellMock = $this->getMockForAbstractClass(ShellInterface::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->fileMock = $this->createMock(File::class);
         $this->directoryListMock = $this->createMock(DirectoryList::class);
         $this->commandFactoryMock = $this->createMock(CommandFactory::class);
-        $this->deployOption = $this->createMock(Option::class);
+        $this->deployOptionMock = $this->createMock(Option::class);
         $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
 
         $this->step = new Generate(
@@ -83,7 +84,7 @@ class GenerateTest extends TestCase
             $this->fileMock,
             $this->directoryListMock,
             $this->commandFactoryMock,
-            $this->deployOption,
+            $this->deployOptionMock,
             $this->stageConfigMock
         );
     }
@@ -91,7 +92,7 @@ class GenerateTest extends TestCase
     /**
      * @throws StepException
      */
-    public function testExecute()
+    public function testExecute(): void
     {
         $this->directoryListMock->method('getMagentoRoot')
             ->willReturn('magento_root');
@@ -99,10 +100,10 @@ class GenerateTest extends TestCase
             ->method('touch')
             ->with('magento_root/pub/static/deployed_version.txt')
             ->willReturn(true);
-        $this->loggerMock->method('notice')
+        $this->loggerMock->method('info')
             ->withConsecutive(
                 ['Extracting locales'],
-                ['Generating static content for locales: en_GB fr_FR']
+                ['Generating static content']
             );
         $this->commandFactoryMock->expects($this->once())
             ->method('matrix')
@@ -122,12 +123,85 @@ class GenerateTest extends TestCase
     }
 
     /**
-     * @expectedException \Magento\MagentoCloud\Step\StepException
-     * @expectedExceptionMessage Cannot update deployed version.
      * @throws StepException
      */
-    public function testExecuteWithFlagSetError()
+    public function testExecuteWithLocales(): void
     {
+        $this->deployOptionMock->expects($this->exactly(2))
+            ->method('getLocales')
+            ->willReturn(['en_GB']);
+        $this->directoryListMock->method('getMagentoRoot')
+            ->willReturn('magento_root');
+        $this->fileMock->expects($this->once())
+            ->method('touch')
+            ->with('magento_root/pub/static/deployed_version.txt')
+            ->willReturn(true);
+        $this->loggerMock->method('info')
+            ->withConsecutive(
+                ['Extracting locales'],
+                ['Generating static content for locales: en_GB']
+            );
+        $this->commandFactoryMock->expects($this->once())
+            ->method('matrix')
+            ->willReturn([
+                'php ./bin/magento static:content:deploy:command --ansi --no-interaction',
+            ]);
+        $this->shellMock->expects($this->once())
+            ->method('execute')
+            ->with('php ./bin/magento static:content:deploy:command --ansi --no-interaction');
+        $this->stageConfigMock->method('get')
+            ->willReturnMap([
+                [DeployInterface::VAR_VERBOSE_COMMANDS, '-vvv'],
+                [DeployInterface::VAR_SCD_MATRIX, []],
+            ]);
+
+        $this->step->execute();
+    }
+
+    /**
+     * @throws StepException
+     */
+    public function testExecuteWitError(): void
+    {
+        $this->expectException(StepException::class);
+        $this->expectExceptionMessage('Some error');
+
+        $this->directoryListMock->method('getMagentoRoot')
+            ->willReturn('magento_root');
+        $this->fileMock->expects($this->once())
+            ->method('touch')
+            ->with('magento_root/pub/static/deployed_version.txt')
+            ->willReturn(true);
+        $this->loggerMock->method('notice')
+            ->withConsecutive(
+                ['Extracting locales'],
+                ['Generating static content for locales: en_GB fr_FR']
+            );
+        $this->commandFactoryMock->expects($this->once())
+            ->method('matrix')
+            ->willReturn([
+                'php ./bin/magento static:content:deploy:command --ansi --no-interaction',
+            ]);
+        $this->shellMock->expects($this->once())
+            ->method('execute')
+            ->willThrowException(new ShellException('Some error'));
+        $this->stageConfigMock->method('get')
+            ->willReturnMap([
+                [DeployInterface::VAR_VERBOSE_COMMANDS, '-vvv'],
+                [DeployInterface::VAR_SCD_MATRIX, []],
+            ]);
+
+        $this->step->execute();
+    }
+
+    /**
+     * @throws StepException
+     */
+    public function testExecuteWithFlagSetError(): void
+    {
+        $this->expectException(StepException::class);
+        $this->expectExceptionMessage('Cannot update deployed version.');
+
         $this->directoryListMock->method('getMagentoRoot')
             ->willReturn('magento_root');
         $this->fileMock->expects($this->once())

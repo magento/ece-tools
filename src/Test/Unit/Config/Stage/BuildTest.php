@@ -7,13 +7,14 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Config\Stage;
 
+use Magento\MagentoCloud\Config\ConfigException;
 use Magento\MagentoCloud\Config\Schema;
 use Magento\MagentoCloud\Config\Stage\Build;
 use Magento\MagentoCloud\Config\Stage\BuildInterface;
 use Magento\MagentoCloud\Config\StageConfigInterface;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Magento\MagentoCloud\Config\Environment\Reader as EnvironmentReader;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -26,31 +27,29 @@ class BuildTest extends TestCase
     private $config;
 
     /**
-     * @var EnvironmentReader|Mock
+     * @var EnvironmentReader|MockObject
      */
     private $environmentReaderMock;
 
     /**
-     * @var Schema|Mock
+     * @var Schema|MockObject
      */
     private $schemaMock;
 
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->environmentReaderMock = $this->createMock(EnvironmentReader::class);
         $this->schemaMock = $this->createMock(Schema::class);
-        $this->schemaMock->expects($this->any())
-            ->method('getDefaults')
+        $this->schemaMock->method('getDefaults')
             ->with(StageConfigInterface::STAGE_BUILD)
             ->willReturn([
                 BuildInterface::VAR_SCD_STRATEGY => '',
                 BuildInterface::VAR_SKIP_SCD => false,
                 BuildInterface::VAR_SCD_COMPRESSION_LEVEL => 6,
                 BuildInterface::VAR_SCD_THREADS => 1,
-                BuildInterface::VAR_SCD_EXCLUDE_THEMES => '',
                 BuildInterface::VAR_VERBOSE_COMMANDS => '',
                 BuildInterface::VAR_SCD_MATRIX => [],
             ]);
@@ -66,8 +65,10 @@ class BuildTest extends TestCase
      * @param array $envConfig
      * @param mixed $expectedValue
      * @dataProvider getDataProvider
+     *
+     * @throws ConfigException
      */
-    public function testGet(string $name, array $envConfig, $expectedValue)
+    public function testGet(string $name, array $envConfig, $expectedValue): void
     {
         $this->environmentReaderMock->expects($this->once())
             ->method('read')
@@ -78,6 +79,7 @@ class BuildTest extends TestCase
 
     /**
      * @return array
+     *
      * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
     public function getDataProvider(): array
@@ -110,39 +112,6 @@ class BuildTest extends TestCase
             ],
             'default strategy with parameter' => [
                 Build::VAR_SCD_STRATEGY,
-                [
-                    StageConfigInterface::STAGE_GLOBAL => [],
-                    StageConfigInterface::STAGE_BUILD => [],
-                ],
-                '',
-            ],
-            'default exclude_themes' => [
-                Build::VAR_SCD_EXCLUDE_THEMES,
-                [],
-                '',
-            ],
-            'env configured exclude_themes' => [
-                Build::VAR_SCD_EXCLUDE_THEMES,
-                [
-                    StageConfigInterface::STAGE_GLOBAL => [],
-                    StageConfigInterface::STAGE_BUILD => [
-                        Build::VAR_SCD_EXCLUDE_THEMES => 'luma',
-                    ],
-                ],
-                'luma',
-            ],
-            'global env exclude_themes' => [
-                Build::VAR_SCD_EXCLUDE_THEMES,
-                [
-                    StageConfigInterface::STAGE_GLOBAL => [
-                        Build::VAR_SCD_EXCLUDE_THEMES => 'luma',
-                    ],
-                    StageConfigInterface::STAGE_BUILD => [],
-                ],
-                'luma',
-            ],
-            'default exclude_themes with parameter' => [
-                Build::VAR_SCD_EXCLUDE_THEMES,
                 [
                     StageConfigInterface::STAGE_GLOBAL => [],
                     StageConfigInterface::STAGE_BUILD => [],
@@ -290,13 +259,14 @@ class BuildTest extends TestCase
     }
 
     /**
-     * @expectedException \RuntimeException
-     * @expectedExceptionMessage Config NOT_EXISTS_VALUE was not defined.
+     * @throws ConfigException
      */
-    public function testNotExists()
+    public function testNotExists(): void
     {
-        $this->environmentReaderMock->expects($this->any())
-            ->method('read')
+        $this->expectException(ConfigException::class);
+        $this->expectExceptionMessage('Config NOT_EXISTS_VALUE was not defined.');
+
+        $this->environmentReaderMock->method('read')
             ->willReturn([]);
 
         $this->config->get('NOT_EXISTS_VALUE');

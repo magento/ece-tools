@@ -8,6 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit\Scenario;
 
 use Magento\MagentoCloud\Package\Manager;
+use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
 use Magento\MagentoCloud\Scenario\Exception\ProcessorException;
 use Magento\MagentoCloud\Scenario\Merger;
@@ -110,11 +111,12 @@ class ProcessorTest extends TestCase
 
     /**
      * @throws ProcessorException
-     * @expectedException \Magento\MagentoCloud\Scenario\Exception\ProcessorException
-     * @expectedExceptionMessage Some error
      */
-    public function testExeceuteWithException(): void
+    public function testExecuteWithException(): void
     {
+        $this->expectException(ProcessorException::class);
+        $this->expectExceptionMessage('Some error');
+
         $scenarios = [
             'some/scenario.xml'
         ];
@@ -123,7 +125,7 @@ class ProcessorTest extends TestCase
 
         $step1->expects($this->once())
             ->method('execute')
-            ->willThrowException(new ProcessorException('Some error'));
+            ->willThrowException(new StepException('Some error'));
 
         $steps = [
             'step1' => $step1
@@ -151,6 +153,54 @@ class ProcessorTest extends TestCase
             );
         $this->loggerMock->method('error')
             ->withConsecutive(['Some error']);
+
+        $this->processor->execute($scenarios);
+    }
+
+    /**
+     * @throws ProcessorException
+     */
+    public function testExecuteWithRuntimeException(): void
+    {
+        $this->expectException(ProcessorException::class);
+        $this->expectExceptionMessage('Unhandled error: Some error');
+
+        $scenarios = [
+            'some/scenario.xml'
+        ];
+
+        $step1 = $this->getMockForAbstractClass(StepInterface::class);
+
+        $step1->expects($this->once())
+            ->method('execute')
+            ->willThrowException(new \RuntimeException('Some error'));
+
+        $steps = [
+            'step1' => $step1
+        ];
+
+        $this->packageManagerMock->expects($this->once())
+            ->method('getPrettyInfo')
+            ->willReturn('1.0.0');
+        $this->mergerMock->expects($this->once())
+            ->method('merge')
+            ->with($scenarios)
+            ->willReturn($steps);
+        $this->loggerMock->method('info')
+            ->withConsecutive(
+                [
+                    sprintf(
+                        'Starting scenario(s): %s 1.0.0',
+                        implode(', ', $scenarios)
+                    )
+                ]
+            );
+        $this->loggerMock->method('debug')
+            ->withConsecutive(
+                ['Running step: step1']
+            );
+        $this->loggerMock->method('error')
+            ->withConsecutive(['Unhandled error: Some error']);
 
         $this->processor->execute($scenarios);
     }

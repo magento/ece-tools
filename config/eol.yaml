@@ -1,0 +1,44 @@
+# Service EOLs (YYYY-MM-DD).
+php:
+  - version: '7.0'
+    eol: 2019-01-10
+  - version: '7.1'
+    eol: 2019-12-01
+  - version: '7.2'
+    eol: 2020-11-30
+  - version: '7.3'
+    eol: 2021-12-06
+mariadb:
+  - version: '10.0'
+    eol: 2019-03-31
+  - version: '10.1'
+    eol: 2020-10-17
+  - version: '10.2'
+    eol: 2022-05-23
+elasticsearch:
+  - version: '1.7'
+    eol: 2017-01-16
+  - version: '2.4'
+    eol: 2018-02-28
+  - version: '5.2'
+    eol: 2018-07-31
+  - version: '6.5'
+    eol: 2020-05-14
+  - version: '7.5'
+    eol: 2021-06-02    
+rabbitmq:
+  - version: '3.5'
+    eol: 2016-10-31
+  - version: '3.7'
+    eol: 2020-03-31
+  - version: '3.8'
+    eol:
+redis:
+  - version: '3.2'
+    eol: 2018-10-17
+  - version: '4.0'
+    eol:
+  - version: '5.0'
+    eol:
+  - version: '5.2'
+    eol:

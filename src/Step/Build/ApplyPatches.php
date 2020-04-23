@@ -7,11 +7,10 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Step\Build;
 
-use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Patch\Manager;
+use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
-use Psr\Log\LoggerInterface;
 
 /**
  * @inheritdoc
@@ -19,39 +18,27 @@ use Psr\Log\LoggerInterface;
 class ApplyPatches implements StepInterface
 {
     /**
-     * @var LoggerInterface
-     */
-    private $logger;
-
-    /**
      * @var Manager
      */
     private $manager;
 
     /**
-     * @param LoggerInterface $logger
      * @param Manager $manager
      */
-    public function __construct(
-        LoggerInterface $logger,
-        Manager $manager
-    ) {
-        $this->logger = $logger;
+    public function __construct(Manager $manager)
+    {
         $this->manager = $manager;
     }
 
     /**
      * @inheritdoc
      */
-    public function execute()
+    public function execute(): void
     {
-        $this->logger->notice('Applying patches.');
-
         try {
-            $this->manager->applyAll();
-        } catch (GenericException $exception) {
+            $this->manager->apply();
+        } catch (ShellException $exception) {
             throw new StepException($exception->getMessage(), $exception->getCode(), $exception);
         }
-        $this->logger->notice('End of applying patches.');
     }
 }

@@ -12,8 +12,8 @@ use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Config\Validator;
 use Magento\MagentoCloud\Config\Validator\Deploy\MagentoCloudVariables;
 use Magento\MagentoCloud\Config\Validator\ResultInterface;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -26,19 +26,19 @@ class MagentoCloudVariablesTest extends TestCase
     private $validator;
 
     /**
-     * @var Environment|Mock
+     * @var Environment|MockObject
      */
     private $environmentMock;
 
     /**
-     * @var Validator\ResultFactory|Mock
+     * @var Validator\ResultFactory|MockObject
      */
     private $resultFactoryMock;
 
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->environmentMock = $this->createMock(Environment::class);
         $this->resultFactoryMock = $this->createMock(Validator\ResultFactory::class);
@@ -53,13 +53,14 @@ class MagentoCloudVariablesTest extends TestCase
      * @param array $magentoCloudVariables
      * @param string $expectedResultType
      * @param string|null $suggestionMessage
+     *
      * @dataProvider validateDataProvider
      */
     public function testValidate(
         array $magentoCloudVariables,
         string $expectedResultType,
         string $suggestionMessage = null
-    ) {
+    ): void {
         $this->environmentMock->expects($this->once())
             ->method('getVariables')
             ->willReturn($magentoCloudVariables);
@@ -75,23 +76,12 @@ class MagentoCloudVariablesTest extends TestCase
 
     /**
      * @return array
+     *
      * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
     public function validateDataProvider(): array
     {
         return [
-            [
-                [DeployInterface::VAR_STATIC_CONTENT_THREADS => '3'],
-                ResultInterface::SUCCESS
-            ],
-            [
-                [DeployInterface::VAR_STATIC_CONTENT_THREADS => 3],
-                ResultInterface::SUCCESS
-            ],
-            [
-                [DeployInterface::VAR_STATIC_CONTENT_THREADS => '3a'],
-                ResultInterface::ERROR
-            ],
             [
                 [DeployInterface::VAR_SCD_COMPRESSION_LEVEL => '3'],
                 ResultInterface::SUCCESS
@@ -153,11 +143,6 @@ class MagentoCloudVariablesTest extends TestCase
                 'The variable CLEAN_STATIC_FILES has wrong value: "1" and will be ignored, use only disabled or enabled'
             ],
             [
-                [DeployInterface::VAR_STATIC_CONTENT_SYMLINK => '1'],
-                ResultInterface::ERROR,
-                'The variable STATIC_CONTENT_SYMLINK has wrong value: "1" and will be ignored'
-            ],
-            [
                 [DeployInterface::VAR_UPDATE_URLS => '1'],
                 ResultInterface::ERROR,
                 'The variable UPDATE_URLS has wrong value: "1" and will be ignored, use only disabled or enabled'
@@ -169,17 +154,7 @@ class MagentoCloudVariablesTest extends TestCase
                 ' use only disabled or enabled'
             ],
             [
-                [DeployInterface::VAR_DO_DEPLOY_STATIC_CONTENT => '1'],
-                ResultInterface::ERROR,
-                'The variable DO_DEPLOY_STATIC_CONTENT has wrong value: "1" and will be ignored,' .
-                ' use only disabled or enable'
-            ],
-            [
                 [DeployInterface::VAR_CLEAN_STATIC_FILES => 'enabled'],
-                ResultInterface::SUCCESS,
-            ],
-            [
-                [DeployInterface::VAR_STATIC_CONTENT_SYMLINK => 'enabled'],
                 ResultInterface::SUCCESS,
             ],
             [
@@ -188,10 +163,6 @@ class MagentoCloudVariablesTest extends TestCase
             ],
             [
                 [DeployInterface::VAR_GENERATED_CODE_SYMLINK => 'enabled'],
-                ResultInterface::SUCCESS,
-            ],
-            [
-                [DeployInterface::VAR_DO_DEPLOY_STATIC_CONTENT => 'enabled'],
                 ResultInterface::SUCCESS,
             ],
             [

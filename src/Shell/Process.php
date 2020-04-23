@@ -11,6 +11,7 @@ use Symfony\Component\Process\Exception\ProcessFailedException;
 
 /**
  * Runs console commands.
+ *
  * @codeCoverageIgnore
  */
 class Process extends \Symfony\Component\Process\Process implements ProcessInterface
@@ -20,7 +21,7 @@ class Process extends \Symfony\Component\Process\Process implements ProcessInter
      *
      * {@inheritdoc}
      */
-    public function getOutput()
+    public function getOutput(): string
     {
         return trim(parent::getOutput(), PHP_EOL);
     }
@@ -28,17 +29,17 @@ class Process extends \Symfony\Component\Process\Process implements ProcessInter
     /**
      * @inheritdoc
      */
-    public function execute()
+    public function execute(): void
     {
         try {
-            parent::mustRun();
+            $this->mustRun();
         } catch (ProcessFailedException $e) {
             $process = $e->getProcess();
 
             $error = sprintf(
                 'The command "%s" failed. %s',
                 $process->getCommandLine(),
-                trim($process->getErrorOutput(), "\n")
+                trim($process->getErrorOutput() ?: $process->getOutput(), "\n")
             );
 
             throw new ProcessException($error, $process->getExitCode());

@@ -7,10 +7,9 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\StaticContent\Build;
 
-use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\AdminDataInterface;
 use Magento\MagentoCloud\Config\Stage\BuildInterface;
-use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Filesystem\Resolver\SharedConfig;
+use Magento\MagentoCloud\Config\Magento\Shared\Resolver;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\StaticContent\OptionInterface;
 use Magento\MagentoCloud\StaticContent\ThreadCountOptimizer;
@@ -22,9 +21,9 @@ use Magento\MagentoCloud\Util\ArrayManager;
 class Option implements OptionInterface
 {
     /**
-     * @var Environment
+     * @var AdminDataInterface
      */
-    private $environment;
+    private $adminData;
 
     /**
      * @var MagentoVersion
@@ -47,40 +46,32 @@ class Option implements OptionInterface
     private $stageConfig;
 
     /**
-     * @var SharedConfig
+     * @var Resolver
      */
-    private $configResolver;
+    private $resolver;
 
     /**
-     * @var File
-     */
-    private $file;
-
-    /**
-     * @param Environment $environment
+     * @param AdminDataInterface $adminData
      * @param ArrayManager $arrayManager
      * @param MagentoVersion $magentoVersion
      * @param ThreadCountOptimizer $threadCountOptimizer
      * @param BuildInterface $stageConfig
-     * @param SharedConfig $configResolver
-     * @param File $file
+     * @param Resolver $resolver
      */
     public function __construct(
-        Environment $environment,
+        AdminDataInterface $adminData,
         ArrayManager $arrayManager,
         MagentoVersion $magentoVersion,
         ThreadCountOptimizer $threadCountOptimizer,
         BuildInterface $stageConfig,
-        SharedConfig $configResolver,
-        File $file
+        Resolver $resolver
     ) {
-        $this->environment = $environment;
+        $this->adminData = $adminData;
         $this->magentoVersion = $magentoVersion;
         $this->arrayManager = $arrayManager;
         $this->threadCountOptimizer = $threadCountOptimizer;
         $this->stageConfig = $stageConfig;
-        $this->configResolver = $configResolver;
-        $this->file = $file;
+        $this->resolver = $resolver;
     }
 
     /**
@@ -92,16 +83,6 @@ class Option implements OptionInterface
             (int)$this->stageConfig->get(BuildInterface::VAR_SCD_THREADS),
             $this->getStrategy()
         );
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function getExcludedThemes(): array
-    {
-        $themes = preg_split('/[,]+/', $this->stageConfig->get(BuildInterface::VAR_SCD_EXCLUDE_THEMES));
-
-        return array_filter(array_map('trim', $themes));
     }
 
     /**
@@ -125,11 +106,10 @@ class Option implements OptionInterface
      */
     public function getLocales(): array
     {
-        $configPath = $this->configResolver->resolve();
-        $configuration = $this->file->isExists($configPath) ? $this->file->requireFile($configPath) : [];
-        $flattenedConfig = $this->arrayManager->flatten($configuration);
+        $config = $this->resolver->read();
+        $flattenedConfig = $this->arrayManager->flatten($config);
 
-        $locales = [$this->environment->getAdminLocale()];
+        $locales = [$this->adminData->getLocale()];
         $locales = array_merge($locales, $this->arrayManager->filter($flattenedConfig, 'general/locale/code'));
         $locales = array_merge(
             $locales,

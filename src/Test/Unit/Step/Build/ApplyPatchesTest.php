@@ -9,9 +9,9 @@ namespace Magento\MagentoCloud\Test\Unit\Step\Build;
 
 use Magento\MagentoCloud\Patch\Manager;
 use Magento\MagentoCloud\Step\Build\ApplyPatches;
+use Magento\MagentoCloud\Step\StepException;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Psr\Log\LoggerInterface;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -24,12 +24,7 @@ class ApplyPatchesTest extends TestCase
     private $step;
 
     /**
-     * @var LoggerInterface|Mock
-     */
-    private $loggerMock;
-
-    /**
-     * @var Manager|Mock
+     * @var Manager|MockObject
      */
     private $managerMock;
 
@@ -38,28 +33,18 @@ class ApplyPatchesTest extends TestCase
      */
     protected function setUp()
     {
-        $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
-            ->getMockForAbstractClass();
         $this->managerMock = $this->createMock(Manager::class);
 
-        $this->step = new ApplyPatches(
-            $this->loggerMock,
-            $this->managerMock
-        );
-
-        parent::setUp();
+        $this->step = new ApplyPatches($this->managerMock);
     }
 
-    public function testExecute()
+    /**
+     * @throws StepException
+     */
+    public function testExecute(): void
     {
-        $this->loggerMock->expects($this->exactly(2))
-            ->method('notice')
-            ->withConsecutive(
-                ['Applying patches.'],
-                ['End of applying patches.']
-            );
         $this->managerMock->expects($this->once())
-            ->method('applyAll');
+            ->method('apply');
 
         $this->step->execute();
     }

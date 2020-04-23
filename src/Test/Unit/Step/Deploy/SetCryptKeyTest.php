@@ -7,10 +7,12 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Step\Deploy;
 
-use Magento\MagentoCloud\Config\Deploy\Reader as ConfigReader;
-use Magento\MagentoCloud\Config\Deploy\Writer as ConfigWriter;
+use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface as ConfigReader;
+use Magento\MagentoCloud\Config\Magento\Env\WriterInterface as ConfigWriter;
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Step\Deploy\SetCryptKey;
+use Magento\MagentoCloud\Step\StepException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -45,6 +47,9 @@ class SetCryptKeyTest extends TestCase
      */
     private $step;
 
+    /**
+     * @inheritDoc
+     */
     public function setUp()
     {
         $this->environmentMock = $this->createMock(Environment::class);
@@ -61,7 +66,10 @@ class SetCryptKeyTest extends TestCase
         );
     }
 
-    public function testConfigUpdated()
+    /**
+     * @throws StepException
+     */
+    public function testConfigUpdate(): void
     {
         $this->configReaderMock->expects($this->once())
             ->method('read')
@@ -69,6 +77,12 @@ class SetCryptKeyTest extends TestCase
         $this->environmentMock->expects($this->once())
             ->method('getCryptKey')
             ->willReturn('TWFnZW50byBSb3g=');
+        $this->loggerMock->expects($this->never())
+            ->method('error')
+            ->with(
+                'Crypt key missing. Add the crypt key to the "app/etc/env.php" file, or set the "CRYPT_KEY" '
+                . 'environment variable in the Cloud Project web UI.'
+            );
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Setting encryption key');
@@ -79,7 +93,41 @@ class SetCryptKeyTest extends TestCase
         $this->step->execute();
     }
 
-    public function testEnvironmentVariableNotSet()
+    /**
+     * @throws StepException
+     */
+    public function testConfigUpdateWithError(): void
+    {
+        $this->expectException(StepException::class);
+        $this->expectExceptionMessage('Some error');
+
+        $this->configReaderMock->expects($this->once())
+            ->method('read')
+            ->willReturn([]);
+        $this->environmentMock->expects($this->once())
+            ->method('getCryptKey')
+            ->willReturn('TWFnZW50byBSb3g=');
+        $this->loggerMock->expects($this->never())
+            ->method('error')
+            ->with(
+                'Crypt key missing. Add the crypt key to the "app/etc/env.php" file, or set the "CRYPT_KEY" '
+                . 'environment variable in the Cloud Project web UI.'
+            );
+        $this->loggerMock->expects($this->once())
+            ->method('info')
+            ->with('Setting encryption key');
+        $this->configWriterMock->expects($this->once())
+            ->method('update')
+            ->with(['crypt' => ['key' => 'TWFnZW50byBSb3g=']])
+            ->willThrowException(new FileSystemException('Some error'));
+
+        $this->step->execute();
+    }
+
+    /**
+     * @throws StepException
+     */
+    public function testEnvironmentVariableNotSet(): void
     {
         $this->configReaderMock->expects($this->once())
             ->method('read')
@@ -87,6 +135,12 @@ class SetCryptKeyTest extends TestCase
         $this->environmentMock->expects($this->once())
             ->method('getCryptKey')
             ->willReturn('');
+        $this->loggerMock->expects($this->once())
+            ->method('notice')
+            ->with(
+                'Crypt key missing. Add the crypt key to the "app/etc/env.php" file, or set the "CRYPT_KEY" '
+                . 'environment variable in the Cloud Project web UI.'
+            );
         $this->loggerMock->expects($this->never())
             ->method('info');
         $this->configWriterMock->expects($this->never())
@@ -95,13 +149,22 @@ class SetCryptKeyTest extends TestCase
         $this->step->execute();
     }
 
-    public function testKeyAlreadySet()
+    /**
+     * @throws StepException
+     */
+    public function testKeyAlreadySet(): void
     {
         $this->configReaderMock->expects($this->once())
             ->method('read')
             ->willReturn(['crypt' => ['key' => 'QmVuIHd1eiBoZXJl']]);
         $this->environmentMock->expects($this->never())
             ->method('getCryptKey');
+        $this->loggerMock->expects($this->never())
+            ->method('notice')
+            ->with(
+                'Crypt key missing. Add the crypt key to the "app/etc/env.php" file, or set the "CRYPT_KEY" '
+                . 'environment variable in the Cloud Project web UI.'
+            );
         $this->loggerMock->expects($this->never())
             ->method('info');
         $this->configWriterMock->expects($this->never())

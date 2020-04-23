@@ -58,7 +58,6 @@ class Application extends \Symfony\Component\Console\Application
             $this->container->create(Command\ConfigDump::class),
             $this->container->create(Command\DbDump::class),
             $this->container->create(Command\PostDeploy::class),
-            $this->container->create(Command\CronUnlock::class),
             $this->container->create(Command\BackupRestore::class),
             $this->container->create(Command\BackupList::class),
             $this->container->create(Command\ApplyPatches::class),
@@ -69,9 +68,14 @@ class Application extends \Symfony\Component\Console\Application
             $this->container->create(Command\ModuleRefresh::class),
             $this->container->create(Command\Wizard\IdealState::class),
             $this->container->create(Command\Wizard\MasterSlave::class),
+            $this->container->create(Command\Wizard\SplitDbState::class),
+            $this->container->create(Command\CronDisable::class),
+            $this->container->create(Command\CronEnable::class),
             $this->container->create(Command\CronKill::class),
+            $this->container->create(Command\CronUnlock::class),
             $this->container->create(Command\ConfigShow::class),
             $this->container->create(Command\RunCommand::class),
+            $this->container->create(Command\GenerateSchema::class)
         ]);
     }
 }

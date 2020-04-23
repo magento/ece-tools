@@ -7,11 +7,12 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Scenario;
 
-use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Package\Manager;
+use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
 use Magento\MagentoCloud\Scenario\Exception\ProcessorException;
 use Psr\Log\LoggerInterface;
+use Throwable;
 
 /**
  * Process given scenarios.
@@ -49,7 +50,7 @@ class Processor
      * @param array $scenarios
      * @throws ProcessorException
      */
-    public function execute(array $scenarios)
+    public function execute(array $scenarios): void
     {
         $this->logger->info(sprintf(
             'Starting scenario(s): %s %s',
@@ -67,11 +68,21 @@ class Processor
 
                 $this->logger->debug(sprintf('Step "%s" finished', $name));
             });
-        } catch (GenericException $exception) {
+        } catch (StepException $exception) {
             $this->logger->error($exception->getMessage());
 
             throw new ProcessorException(
                 $exception->getMessage(),
+                $exception->getCode(),
+                $exception
+            );
+        } catch (Throwable $exception) {
+            $message = 'Unhandled error: ' . $exception->getMessage();
+
+            $this->logger->error($message);
+
+            throw new ProcessorException(
+                $message,
                 $exception->getCode(),
                 $exception
             );

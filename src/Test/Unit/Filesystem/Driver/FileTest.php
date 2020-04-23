@@ -8,6 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit\Filesystem\Driver;
 
 use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use phpmock\phpunit\PHPMock;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -36,7 +37,7 @@ class FileTest extends TestCase
     {
         $this->shellMock = $this->getFunctionMock(
             'Magento\MagentoCloud\Filesystem\Driver',
-            'shell_exec'
+            'exec'
         );
 
         $this->driver = new File();
@@ -46,15 +47,51 @@ class FileTest extends TestCase
      * @param string $source
      * @param string $destination
      * @dataProvider copyDirectoryDataProvider
+     *
+     * @throws FileSystemException
      */
-    public function testCopyDirectory(string $source, string $destination)
+    public function testCopyDirectory(string $source, string $destination): void
     {
+
+        $execCommand = "/bin/bash -c 'shopt -s dotglob; cp -R '\''source'\''/* '\''destination'\''/'";
+
         $this->shellMock->expects($this->once())
-            ->with(sprintf(
-                "/bin/bash -c 'shopt -s dotglob; cp -R '\''%s'\''/* '\''%s'\''/'",
-                $source,
-                $destination
-            ));
+            ->willReturnCallback(function ($cmd, &$output, &$status) use ($execCommand) {
+                $this->assertSame($execCommand, $cmd);
+                $status = 0;
+                $output = null;
+
+                return '';
+            });
+
+        $this->driver->copyDirectory(
+            $source,
+            $destination
+        );
+    }
+
+    /**
+     * @param string $source
+     * @param string $destination
+     * @dataProvider copyDirectoryDataProvider
+     *
+     * @throws FileSystemException
+     */
+    public function testCopyDirectoryWithError(string $source, string $destination): void
+    {
+        $this->expectExceptionMessage('The content of path "source" cannot be copied to "destination"');
+        $this->expectException(FileSystemException::class);
+
+        $execCommand = "/bin/bash -c 'shopt -s dotglob; cp -R '\''source'\''/* '\''destination'\''/'";
+
+        $this->shellMock->expects($this->once())
+            ->willReturnCallback(function ($cmd, &$output, &$status) use ($execCommand) {
+                $this->assertSame($execCommand, $cmd);
+                $status = 2;
+                $output = null;
+
+                return '';
+            });
 
         $this->driver->copyDirectory(
             $source,
@@ -72,7 +109,7 @@ class FileTest extends TestCase
         ];
     }
 
-    public function testIsExists()
+    public function testIsExists(): void
     {
         $fileExistsMock = $this->getFunctionMock(
             'Magento\MagentoCloud\Filesystem\Driver',
@@ -84,7 +121,10 @@ class FileTest extends TestCase
         $this->driver->isExists('test');
     }
 
-    public function testIsLink()
+    /**
+     * @throws FileSystemException
+     */
+    public function testIsLink(): void
     {
         $isLinkMock = $this->getFunctionMock(
             'Magento\MagentoCloud\Filesystem\Driver',
@@ -96,7 +136,7 @@ class FileTest extends TestCase
         $this->driver->isLink('test');
     }
 
-    public function testIsDirectory()
+    public function testIsDirectory(): void
     {
         $isDirMock = $this->getFunctionMock(
             'Magento\MagentoCloud\Filesystem\Driver',
@@ -108,7 +148,10 @@ class FileTest extends TestCase
         $this->driver->isDirectory('test');
     }
 
-    public function testUnLink()
+    /**
+     * @throws FileSystemException
+     */
+    public function testUnLink(): void
     {
         $unlinkMock = $this->getFunctionMock(
             'Magento\MagentoCloud\Filesystem\Driver',
@@ -120,7 +163,10 @@ class FileTest extends TestCase
         $this->driver->unLink('test');
     }
 
-    public function testParseIni()
+    /**
+     * @throws FileSystemException
+     */
+    public function testParseIni(): void
     {
         $parseIniFileMock = $this->getFunctionMock(
             'Magento\MagentoCloud\Filesystem\Driver',
@@ -144,7 +190,10 @@ class FileTest extends TestCase
         $this->driver->createDirectory('test');
     }
 
-    public function testRename()
+    /**
+     * @throws FileSystemException
+     */
+    public function testRename(): void
     {
         $renameMock = $this->getFunctionMock(
             'Magento\MagentoCloud\Filesystem\Driver',
@@ -156,7 +205,7 @@ class FileTest extends TestCase
         $this->driver->rename('test', 'testnewpath');
     }
 
-    public function testCopy()
+    public function testCopy(): void
     {
         $copyMock = $this->getFunctionMock(
             'Magento\MagentoCloud\Filesystem\Driver',
@@ -168,7 +217,7 @@ class FileTest extends TestCase
         $this->driver->copy('source', 'destination');
     }
 
-    public function testIsEmptyDirectory()
+    public function testIsEmptyDirectory(): void
     {
         $scanDirMock = $this->getFunctionMock(
             'Magento\MagentoCloud\Filesystem\Driver',
@@ -187,7 +236,7 @@ class FileTest extends TestCase
         $this->driver->isEmptyDirectory('test');
     }
 
-    public function testSymlink()
+    public function testSymlink(): void
     {
         $symLinkMock = $this->getFunctionMock(
             'Magento\MagentoCloud\Filesystem\Driver',
@@ -199,7 +248,7 @@ class FileTest extends TestCase
         $this->driver->symlink('source', 'destination');
     }
 
-    public function testDeleteFile()
+    public function testDeleteFile(): void
     {
         $unlinkMock = $this->getFunctionMock(
             'Magento\MagentoCloud\Filesystem\Driver',
@@ -211,7 +260,7 @@ class FileTest extends TestCase
         $this->driver->deleteFile('test');
     }
 
-    public function testTouch()
+    public function testTouch(): void
     {
         $touchMock = $this->getFunctionMock(
             'Magento\MagentoCloud\Filesystem\Driver',
@@ -224,10 +273,12 @@ class FileTest extends TestCase
     }
 
     /**
-     * @expectedException \Magento\MagentoCloud\Filesystem\FileSystemException
+     * @throws FileSystemException
      */
-    public function testFilePutContents()
+    public function testFilePutContents(): void
     {
+        $this->expectException(FileSystemException::class);
+
         $filePutContentsMock = $this->getFunctionMock(
             'Magento\MagentoCloud\Filesystem\Driver',
             'file_put_contents'
@@ -238,7 +289,7 @@ class FileTest extends TestCase
         $this->driver->filePutContents('test', 'test');
     }
 
-    public function testGetRealPath()
+    public function testGetRealPath(): void
     {
         $realpathMock = $this->getFunctionMock(
             'Magento\MagentoCloud\Filesystem\Driver',
@@ -250,7 +301,7 @@ class FileTest extends TestCase
         $this->driver->getRealPath('test');
     }
 
-    public function testScanDir()
+    public function testScanDir(): void
     {
         $scandirMock = $this->getFunctionMock(
             'Magento\MagentoCloud\Filesystem\Driver',
@@ -262,7 +313,7 @@ class FileTest extends TestCase
         $this->driver->scanDir('test');
     }
 
-    public function testFileGetContents()
+    public function testFileGetContents(): void
     {
         $fileGetContentsMock = $this->getFunctionMock(
             'Magento\MagentoCloud\Filesystem\Driver',

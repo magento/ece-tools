@@ -10,10 +10,10 @@ namespace Magento\MagentoCloud\Test\Unit\Command;
 use Magento\MagentoCloud\Command\CronUnlock;
 use Magento\MagentoCloud\Cron\JobUnlocker;
 use Magento\MagentoCloud\Package\MagentoVersion;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Tester\CommandTester;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -21,17 +21,17 @@ use PHPUnit_Framework_MockObject_MockObject as Mock;
 class CronUnlockTest extends TestCase
 {
     /**
-     * @var LoggerInterface|Mock
+     * @var LoggerInterface|MockObject
      */
     private $loggerMock;
 
     /**
-     * @var JobUnlocker|Mock
+     * @var JobUnlocker|MockObject
      */
     private $jobUnlockerMock;
 
     /**
-     * @var MagentoVersion|Mock
+     * @var MagentoVersion|MockObject
      */
     private $magentoVersionMock;
 
@@ -43,7 +43,7 @@ class CronUnlockTest extends TestCase
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->jobUnlockerMock = $this->createMock(JobUnlocker::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
@@ -56,7 +56,7 @@ class CronUnlockTest extends TestCase
         );
     }
 
-    public function testExecute()
+    public function testExecute(): void
     {
         $this->loggerMock->expects($this->exactly(3))
             ->method('info')
@@ -79,7 +79,7 @@ class CronUnlockTest extends TestCase
         $this->assertSame(0, $tester->getStatusCode());
     }
 
-    public function testExecuteWithJobCode()
+    public function testExecuteWithJobCode(): void
     {
         $this->loggerMock->expects($this->exactly(4))
             ->method('info')
@@ -108,12 +108,11 @@ class CronUnlockTest extends TestCase
         $this->assertSame(0, $tester->getStatusCode());
     }
 
-    /**
-     * @expectedException \Exception
-     * @expectedExceptionMessage Some error
-     */
-    public function testExecuteWithException()
+    public function testExecuteWithException(): void
     {
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Some error');
+
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Starting unlocking.');

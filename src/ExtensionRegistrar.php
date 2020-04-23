@@ -7,8 +7,12 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud;
 
+use LogicException;
+
 /**
  * Provides ability to statically register extensions for ece-tools.
+ *
+ * @codeCoverageIgnore
  */
 class ExtensionRegistrar
 {
@@ -22,21 +26,21 @@ class ExtensionRegistrar
      *
      * @param string $componentName Fully-qualified component name
      * @param string $path Absolute file path to the component
-     * @throws \LogicException
      * @return void
+     * @throws LogicException
      */
     public static function register($componentName, $path): void
     {
         if (isset(self::$paths[$componentName])) {
-            throw new \LogicException(sprintf(
-                "%s from %s has been already defined in %s",
+            throw new LogicException(sprintf(
+                '%s from %s has been already defined in %s',
                 $componentName,
                 $path,
                 self::$paths[$componentName]
             ));
-        } else {
-            self::$paths[$componentName] = str_replace('\\', '/', $path);
         }
+
+        self::$paths[$componentName] = str_replace('\\', '/', $path);
     }
 
     /**

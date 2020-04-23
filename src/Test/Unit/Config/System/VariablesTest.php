@@ -5,15 +5,16 @@
  */
 declare(strict_types=1);
 
-namespace Magento\MagentoCloud\Test\Unit\Config\Stage;
+namespace Magento\MagentoCloud\Test\Unit\Config\System;
 
+use Magento\MagentoCloud\Config\ConfigException;
 use Magento\MagentoCloud\Config\Schema;
 use Magento\MagentoCloud\Config\SystemConfigInterface;
 use Magento\MagentoCloud\Config\System\Variables;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Magento\MagentoCloud\Config\Environment\Reader as EnvironmentReader;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -26,12 +27,12 @@ class VariablesTest extends TestCase
     private $config;
 
     /**
-     * @var EnvironmentReader|Mock
+     * @var EnvironmentReader|MockObject
      */
     private $environmentReaderMock;
 
     /**
-     * @var Schema|Mock
+     * @var Schema|MockObject
      */
     private $schemaMock;
 
@@ -42,8 +43,7 @@ class VariablesTest extends TestCase
     {
         $this->environmentReaderMock = $this->createMock(EnvironmentReader::class);
         $this->schemaMock = $this->createMock(Schema::class);
-        $this->schemaMock->expects($this->any())
-            ->method('getDefaults')
+        $this->schemaMock->method('getDefaults')
             ->with(SystemConfigInterface::SYSTEM_VARIABLES)
             ->willReturn([
                 SystemConfigInterface::VAR_ENV_RELATIONSHIPS => 'MAGENTO_CLOUD_RELATIONSHIPS',
@@ -62,11 +62,12 @@ class VariablesTest extends TestCase
     /**
      * @param string $name
      * @param array $envConfig
-     * @param array $buildConfig
      * @param mixed $expectedValue
      * @dataProvider getDataProvider
+     *
+     * @throws ConfigException
      */
-    public function testGet(string $name, array $envConfig, $expectedValue)
+    public function testGet(string $name, array $envConfig, $expectedValue): void
     {
         $this->environmentReaderMock->expects($this->once())
             ->method('read')
@@ -77,7 +78,6 @@ class VariablesTest extends TestCase
 
     /**
      * @return array
-     * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
     public function getDataProvider(): array
     {
@@ -111,26 +111,28 @@ class VariablesTest extends TestCase
     }
 
     /**
-     * @expectedException \RuntimeException
-     * @expectedExceptionMessage Config NOT_EXISTS_VALUE was not defined.
+     * @throws ConfigException
      */
-    public function testNotExists()
+    public function testNotExists(): void
     {
-        $this->environmentReaderMock->expects($this->any())
-            ->method('read')
+        $this->expectException(ConfigException::class);
+        $this->expectExceptionMessage('Config NOT_EXISTS_VALUE was not defined.');
+
+        $this->environmentReaderMock->method('read')
             ->willReturn([]);
 
         $this->config->get('NOT_EXISTS_VALUE');
     }
 
     /**
-     * @expectedException \RuntimeException
-     * @expectedExceptionMessage some error message
+     * @throws ConfigException
      */
-    public function testGetWithFileSystemException()
+    public function testGetWithFileSystemException(): void
     {
-        $this->environmentReaderMock->expects($this->any())
-            ->method('read')
+        $this->expectException(ConfigException::class);
+        $this->expectExceptionMessage('some error message');
+
+        $this->environmentReaderMock->method('read')
             ->willThrowException(new FileSystemException('some error message'));
 
         $this->config->get(SystemConfigInterface::VAR_ENV_ROUTES);

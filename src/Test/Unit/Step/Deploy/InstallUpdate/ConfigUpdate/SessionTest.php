@@ -7,13 +7,13 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Step\Deploy\InstallUpdate\ConfigUpdate;
 
-use Magento\CloudPatches\Config\Config;
 use Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\Session;
+use Magento\MagentoCloud\Step\StepException;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Magento\MagentoCloud\Config\Deploy\Writer as ConfigWriter;
-use Magento\MagentoCloud\Config\Deploy\Reader as ConfigReader;
+use Magento\MagentoCloud\Config\Magento\Env\WriterInterface as ConfigWriter;
+use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface as ConfigReader;
 use Psr\Log\LoggerInterface;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -26,29 +26,29 @@ class SessionTest extends TestCase
     private $step;
 
     /**
-     * @var LoggerInterface|Mock
+     * @var LoggerInterface|MockObject
      */
     private $loggerMock;
 
     /**
-     * @var ConfigWriter|Mock
+     * @var ConfigWriter|MockObject
      */
     private $configWriterMock;
 
     /**
-     * @var ConfigReader|Mock
+     * @var ConfigReader|MockObject
      */
     private $configReaderMock;
 
     /**
-     * @var Session\Config|Mock
+     * @var Session\Config|MockObject
      */
     private $sessionConfigMock;
 
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->configWriterMock = $this->createMock(ConfigWriter::class);
@@ -63,7 +63,10 @@ class SessionTest extends TestCase
         );
     }
 
-    public function testExecute()
+    /**
+     * @throws StepException
+     */
+    public function testExecute(): void
     {
         $this->configReaderMock->expects($this->once())
             ->method('read')
@@ -78,12 +81,14 @@ class SessionTest extends TestCase
             ]);
         $this->configWriterMock->expects($this->once())
             ->method('create')
-            ->with(['session' => [
-                'save' => 'redis',
-                'redis' => [
-                    'host' => 'redis_host'
+            ->with([
+                'session' => [
+                    'save' => 'redis',
+                    'redis' => [
+                        'host' => 'redis_host'
+                    ]
                 ]
-            ]]);
+            ]);
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Updating session configuration.');
@@ -91,7 +96,10 @@ class SessionTest extends TestCase
         $this->step->execute();
     }
 
-    public function testExecuteEmptyConfig()
+    /**
+     * @throws StepException
+     */
+    public function testExecuteEmptyConfig(): void
     {
         $this->configReaderMock->expects($this->once())
             ->method('read')

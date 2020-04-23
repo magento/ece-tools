@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Step\Build\DeployStaticContent;
 
+use Magento\MagentoCloud\Config\ConfigException;
 use Magento\MagentoCloud\Config\Stage\BuildInterface;
 use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
@@ -70,17 +71,12 @@ class Generate implements StepInterface
     /**
      * @inheritdoc
      */
-    public function execute()
+    public function execute(): void
     {
         $locales = $this->buildOption->getLocales();
-        $excludeThemes = $this->buildOption->getExcludedThemes();
         $threadCount = $this->buildOption->getThreadCount();
 
         $logMessage = 'Generating static content for locales: ' . implode(' ', $locales);
-
-        if (count($excludeThemes)) {
-            $logMessage .= PHP_EOL . 'Excluding Themes: ' . implode(' ', $excludeThemes);
-        }
 
         if ($threadCount) {
             $logMessage .= PHP_EOL . 'Using ' . $threadCount . ' Threads';
@@ -88,16 +84,16 @@ class Generate implements StepInterface
 
         $this->logger->info($logMessage);
 
-        $commands = $this->commandFactory->matrix(
-            $this->buildOption,
-            $this->buildConfig->get(BuildInterface::VAR_SCD_MATRIX)
-        );
-
         try {
+            $commands = $this->commandFactory->matrix(
+                $this->buildOption,
+                $this->buildConfig->get(BuildInterface::VAR_SCD_MATRIX)
+            );
+
             foreach ($commands as $command) {
                 $this->shell->execute($command);
             }
-        } catch (ShellException $exception) {
+        } catch (ConfigException|ShellException $exception) {
             throw new StepException($exception->getMessage(), $exception->getCode(), $exception);
         }
     }

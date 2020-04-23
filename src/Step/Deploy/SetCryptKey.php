@@ -7,8 +7,8 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Step\Deploy;
 
-use Magento\MagentoCloud\Config\Deploy\Reader as ConfigReader;
-use Magento\MagentoCloud\Config\Deploy\Writer as ConfigWriter;
+use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface as ConfigReader;
+use Magento\MagentoCloud\Config\Magento\Env\WriterInterface as ConfigWriter;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Step\StepException;
@@ -64,7 +64,7 @@ class SetCryptKey implements StepInterface
      *
      * {@inheritdoc}
      */
-    public function execute()
+    public function execute(): void
     {
         if (!empty($this->configReader->read()['crypt']['key'])) {
             return;
@@ -73,6 +73,11 @@ class SetCryptKey implements StepInterface
         $key = $this->environment->getCryptKey();
 
         if (empty($key)) {
+            $this->logger->notice(
+                'Crypt key missing. Add the crypt key to the "app/etc/env.php" file, or set the "CRYPT_KEY" '
+                . 'environment variable in the Cloud Project web UI.'
+            );
+
             return;
         }
 

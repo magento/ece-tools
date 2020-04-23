@@ -7,8 +7,6 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 
-use Magento\MagentoCloud\Test\Functional\Codeception\Docker;
-
 /**
  * This test runs on the latest version of PHP
  */
@@ -16,30 +14,22 @@ class DatabaseConfigurationCest extends AbstractCest
 {
     /**
      * @param \CliTester $I
-     * @throws \Robo\Exception\TaskException
-     */
-    public function _before(\CliTester $I)
-    {
-        parent::_before($I);
-        $I->cloneTemplate();
-        $I->addEceComposerRepo();
-    }
-
-    /**
-     * @param \CliTester $I
      * @param \Codeception\Example $data
      * @throws \Robo\Exception\TaskException
      * @dataProvider databaseConfigurationDataProvider
      */
-    public function databaseConfiguration(\CliTester $I, \Codeception\Example $data)
+    public function databaseConfiguration(\CliTester $I, \Codeception\Example $data): void
     {
-        $I->assertTrue($I->runEceToolsCommand('build', Docker::BUILD_CONTAINER));
+        $I->runEceDockerCommand(
+            sprintf(
+                'build:compose --mode=production --env-vars="%s"',
+                $this->convertEnvFromArrayToJson($data['variables'])
+            )
+        );
+        $I->runDockerComposeCommand('run build cloud-build');
         $I->startEnvironment();
-        $I->assertTrue($I->runEceToolsCommand(
-            'deploy',
-            Docker::DEPLOY_CONTAINER,
-            $data['cloudVariables']
-        ));
+        $I->runDockerComposeCommand('run deploy cloud-deploy');
+
         $file = $I->grabFileContent('/app/etc/env.php');
         $I->assertContains($data['mergedConfig'], $file);
         $I->assertContains($data['defaultConfig'], $file);
@@ -52,16 +42,16 @@ class DatabaseConfigurationCest extends AbstractCest
     {
         return [
             'singleConfig' => [
-                'cloudVariables' => [
+                'variables' => [
                     'MAGENTO_CLOUD_VARIABLES' => [
                         'DATABASE_CONFIGURATION'=>['some_config' => 'value', '_merge' => true],
                     ],
                 ],
                 'mergedConfig' => 'some_config',
-                'defaultConfig' => 'db.magento2.docker',
+                'defaultConfig' => 'db',
             ],
             'multiConfig' => [
-                'cloudVariables' => [
+                'variables' => [
                     'MAGENTO_CLOUD_VARIABLES' => [
                         'DATABASE_CONFIGURATION'=>[
                             'connection' => [
@@ -84,8 +74,52 @@ class DatabaseConfigurationCest extends AbstractCest
                     ],
                 ],
                 'mergedConfig' => '1001',
-                'defaultConfig' => 'db.magento2.docker',
+                'defaultConfig' => 'db',
             ],
         ];
+    }
+
+    /**
+     * Check that magento can be installed and updated with configured table prefixes
+     *
+     * @param \CliTester $I
+     * @throws \Robo\Exception\TaskException
+     */
+    public function installAndRedeployWithTablePrefix(\CliTester $I)
+    {
+        $checkResult = function (\CliTester $I) {
+            $file = $I->grabFileContent('/app/etc/env.php');
+            $I->assertContains("'table_prefix' => 'ece_'", $file, 'Wrong table prefix in app/etc/env.php');
+            $I->amOnPage('/');
+            $I->see('Home page');
+            $I->see('CMS homepage content goes here.');
+        };
+
+        $I->runEceDockerCommand(
+            sprintf(
+                'build:compose --mode=production --env-vars="%s"',
+                $this->convertEnvFromArrayToJson([
+                    'MAGENTO_CLOUD_VARIABLES' => [
+                        'DATABASE_CONFIGURATION'=>[
+                            'table_prefix' => 'ece_',
+                            '_merge' => true,
+                        ],
+                    ],
+                ])
+            )
+        );
+
+        $I->assertTrue($I->runDockerComposeCommand('run build cloud-build'));
+        $I->assertTrue($I->startEnvironment());
+        $I->assertTrue(
+            $I->runDockerComposeCommand('run deploy cloud-deploy'),
+            'Installation with table prefixes failed'
+        );
+        $I->runDockerComposeCommand('run deploy cloud-post-deploy');
+        $checkResult($I);
+
+        $I->assertTrue($I->runDockerComposeCommand('run deploy cloud-deploy'), 'Re-deployment failed');
+        $I->runDockerComposeCommand('run deploy cloud-post-deploy');
+        $checkResult($I);
     }
 }

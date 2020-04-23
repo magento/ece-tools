@@ -7,7 +7,9 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Step;
 
+use Magento\MagentoCloud\App\Logger;
 use Magento\MagentoCloud\Config\Validator\Result\Error;
+use Magento\MagentoCloud\Config\ValidatorException;
 use Magento\MagentoCloud\Config\ValidatorInterface;
 use Psr\Log\LoggerInterface;
 
@@ -41,7 +43,7 @@ class ValidateConfiguration implements StepInterface
     /**
      * @inheritdoc
      */
-    public function execute()
+    public function execute(): void
     {
         $this->logger->notice('Validating configuration');
 
@@ -64,9 +66,13 @@ class ValidateConfiguration implements StepInterface
     }
 
     /**
-     * Returns all validation messages grouped by validation level
+     * Returns all validation messages grouped by validation level.
+     * Converts validation level to integer value.
      *
      * @return array
+     *
+     * @throws StepException
+     * @see Logger::toMonologLevel()
      */
     private function collectMessages(): array
     {
@@ -74,19 +80,24 @@ class ValidateConfiguration implements StepInterface
 
         /* @var $validators ValidatorInterface[] */
         foreach ($this->validators as $level => $validators) {
+            $level = Logger::toMonologLevel($level);
             foreach ($validators as $name => $validator) {
                 if (!$validator instanceof ValidatorInterface) {
                     $this->logger->info(sprintf('Validator "%s" was skipped', $name));
                     continue;
                 }
 
-                $result = $validator->validate();
+                try {
+                    $result = $validator->validate();
+                } catch (ValidatorException $exception) {
+                    throw new StepException($exception->getMessage(), $exception->getCode(), $exception);
+                }
 
                 if ($result instanceof Error) {
                     $messages[$level][] = '- ' . $result->getError();
                     if ($suggestion = $result->getSuggestion()) {
                         $messages[$level][] = implode(PHP_EOL, array_map(
-                            function ($line) {
+                            static function ($line) {
                                 return '  ' . $line;
                             },
                             explode(PHP_EOL, $suggestion)
