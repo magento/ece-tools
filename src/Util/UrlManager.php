@@ -18,10 +18,10 @@ use Psr\Log\LoggerInterface;
  */
 class UrlManager
 {
-    const MAGIC_ROUTE = '{default}';
+    private const MAGIC_ROUTE = '{default}';
 
-    const PREFIX_SECURE = 'https://';
-    const PREFIX_UNSECURE = 'http://';
+    private const PREFIX_SECURE = 'https://';
+    private const PREFIX_UNSECURE = 'http://';
 
     /**
      * @var Environment
@@ -84,7 +84,7 @@ class UrlManager
             }
 
             $host = parse_url($val['original_url'], PHP_URL_HOST);
-            $originalUrlRegEx = sprintf('/(www)?\.?%s/', preg_quote(self::MAGIC_ROUTE));
+            $originalUrlRegEx = sprintf('/(www)?\.?%s/', preg_quote(self::MAGIC_ROUTE, '/'));
             $originalUrl = preg_replace($originalUrlRegEx, '', $host);
 
             if (strpos($key, self::PREFIX_UNSECURE) === 0) {
@@ -112,7 +112,7 @@ class UrlManager
             return $this->urls;
         }
 
-        $this->logger->info('Initializing routes.');
+        $this->logger->debug('Initializing routes.');
 
         $urls = $this->parseRoutes($this->environment->getRoutes());
 

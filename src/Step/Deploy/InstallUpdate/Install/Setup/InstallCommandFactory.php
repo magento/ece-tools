@@ -19,12 +19,13 @@ use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Package\UndefinedPackageException;
 use Magento\MagentoCloud\Service\ElasticSearch;
 use Magento\MagentoCloud\Service\ServiceException;
-use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Util\UrlManager;
 use Magento\MagentoCloud\Util\PasswordGenerator;
 
 /**
  * Generates command for magento installation
+ *
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class InstallCommandFactory
 {
@@ -135,7 +136,7 @@ class InstallCommandFactory
         foreach ($options as $option => $value) {
             $command .= ($value === null)
                 ? (' ' . $option)
-                : (' ' . $option . '=' . $value);
+                : (' ' . $option . '=' . escapeshellarg($value));
         }
 
         return $command;
@@ -156,29 +157,29 @@ class InstallCommandFactory
 
         $options = [
             '-n' => null,
-            '--session-save' => 'db',
-            '--cleanup-database' => null,
-            '--use-secure-admin' => '1',
-            '--use-rewrites' => '1',
             '--ansi' => null,
             '--no-interaction' => null,
-            '--currency' => escapeshellarg($this->adminData->getDefaultCurrency()),
-            '--base-url' => escapeshellarg($urlUnSecure),
-            '--base-url-secure' => escapeshellarg($urlSecure),
-            '--backend-frontname' => escapeshellarg($adminUrl),
-            '--language' => escapeshellarg($this->adminData->getLocale()),
+            '--cleanup-database' => null,
+            '--session-save' => 'db',
+            '--use-secure-admin' => '1',
+            '--use-rewrites' => '1',
+            '--currency' => $this->adminData->getDefaultCurrency(),
+            '--base-url' => $urlUnSecure,
+            '--base-url-secure' => $urlSecure,
+            '--backend-frontname' => $adminUrl,
+            '--language' => $this->adminData->getLocale(),
             '--timezone' => 'America/Los_Angeles',
-            '--db-host' => escapeshellarg($this->getConnectionData()->getHost()),
-            '--db-name' => escapeshellarg($this->getConnectionData()->getDbName()),
-            '--db-user' => escapeshellarg($this->getConnectionData()->getUser()),
+            '--db-host' => $this->getConnectionData()->getHost(),
+            '--db-name' => $this->getConnectionData()->getDbName(),
+            '--db-user' => $this->getConnectionData()->getUser(),
         ];
 
         if ($dbPassword = $this->getConnectionData()->getPassword()) {
-            $options['--db-password'] = escapeshellarg($dbPassword);
+            $options['--db-password'] = $dbPassword;
         }
 
         if ($tablePrefix = $this->dbConfig->get()['table_prefix'] ?? '') {
-            $options['--db-prefix'] = escapeshellarg($tablePrefix);
+            $options['--db-prefix'] = $tablePrefix;
         }
 
         return $options;
@@ -191,15 +192,15 @@ class InstallCommandFactory
     {
         if ($this->adminData->getEmail()) {
             return [
-                '--admin-user' => escapeshellarg($this->adminData->getUsername()
-                    ?: AdminDataInterface::DEFAULT_ADMIN_NAME),
-                '--admin-firstname' => escapeshellarg($this->adminData->getFirstName()
-                    ?: AdminDataInterface::DEFAULT_ADMIN_FIRST_NAME),
-                '--admin-lastname' => escapeshellarg($this->adminData->getLastName()
-                    ?: AdminDataInterface::DEFAULT_ADMIN_LAST_NAME),
-                '--admin-email' => escapeshellarg($this->adminData->getEmail()),
-                '--admin-password' => escapeshellarg($this->adminData->getPassword()
-                    ?: $this->passwordGenerator->generateRandomPassword()),
+                '--admin-user' => $this->adminData->getUsername()
+                    ?: AdminDataInterface::DEFAULT_ADMIN_NAME,
+                '--admin-firstname' => $this->adminData->getFirstName()
+                    ?: AdminDataInterface::DEFAULT_ADMIN_FIRST_NAME,
+                '--admin-lastname' => $this->adminData->getLastName()
+                    ?: AdminDataInterface::DEFAULT_ADMIN_LAST_NAME,
+                '--admin-email' => $this->adminData->getEmail(),
+                '--admin-password' => $this->adminData->getPassword()
+                    ?: $this->passwordGenerator->generateRandomPassword(),
             ];
         }
 
@@ -232,7 +233,7 @@ class InstallCommandFactory
          * Hack to prevent ElasticSuite from throwing exception.
          */
         if ($this->elasticSuite->isAvailable() && $this->elasticSuite->getServers()) {
-            $options['--es-hosts'] = escapeshellarg($this->elasticSuite->getServers());
+            $options['--es-hosts'] = $this->elasticSuite->getServers();
         }
 
         return $options;

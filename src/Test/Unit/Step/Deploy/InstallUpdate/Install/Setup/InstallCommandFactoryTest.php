@@ -164,29 +164,21 @@ class InstallCommandFactoryTest extends TestCase
         $this->connectionDataMock->expects($this->once())
             ->method('getUser')
             ->willReturn('user');
-        $this->adminDataMock->expects($this->any())
-            ->method('getLocale')
+        $this->adminDataMock->method('getLocale')
             ->willReturn('fr_FR');
-        $this->adminDataMock->expects($this->any())
-            ->method('getUrl')
+        $this->adminDataMock->method('getUrl')
             ->willReturn($adminUrl);
-        $this->adminDataMock->expects($this->any())
-            ->method('getFirstName')
+        $this->adminDataMock->method('getFirstName')
             ->willReturn($adminFirstname);
-        $this->adminDataMock->expects($this->any())
-            ->method('getLastName')
+        $this->adminDataMock->method('getLastName')
             ->willReturn($adminLastname);
-        $this->adminDataMock->expects($this->any())
-            ->method('getEmail')
+        $this->adminDataMock->method('getEmail')
             ->willReturn($adminEmail);
-        $this->adminDataMock->expects($this->any())
-            ->method('getPassword')
+        $this->adminDataMock->method('getPassword')
             ->willReturn($adminPassword);
-        $this->adminDataMock->expects($this->any())
-            ->method('getUsername')
+        $this->adminDataMock->method('getUsername')
             ->willReturn($adminName);
-        $this->adminDataMock->expects($this->any())
-            ->method('getDefaultCurrency')
+        $this->adminDataMock->method('getDefaultCurrency')
             ->willReturn('USD');
         $this->dbConfigMock->expects($this->once())
             ->method('get')
@@ -216,12 +208,12 @@ class InstallCommandFactoryTest extends TestCase
         $dbPrefix = isset($mergedConfig['table_prefix']) ? " --db-prefix='" . $mergedConfig['table_prefix'] . "'" : '';
 
         $expectedCommand =
-            'php ./bin/magento setup:install -v -n --session-save=db --cleanup-database'
-            . ' --use-secure-admin=1 --use-rewrites=1 --ansi --no-interaction --currency=\'USD\''
+            'php ./bin/magento setup:install -v -n --ansi --no-interaction --cleanup-database --session-save=\'db\''
+            . ' --use-secure-admin=\'1\' --use-rewrites=\'1\' --currency=\'USD\''
             . ' --base-url=\'http://unsecure.url\' --base-url-secure=\'https://secure.url\''
             . ' --backend-frontname=\'' . $adminUrlExpected . '\''
             . ' --language=\'fr_FR\''
-            . ' --timezone=America/Los_Angeles --db-host=\'localhost\' --db-name=\'magento\' --db-user=\'user\''
+            . ' --timezone=\'America/Los_Angeles\' --db-host=\'localhost\' --db-name=\'magento\' --db-user=\'user\''
             . ' --db-password=\'password\''
             . $dbPrefix
             . $adminCredential

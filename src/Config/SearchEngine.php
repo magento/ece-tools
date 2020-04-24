@@ -7,12 +7,12 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Config;
 
-use Composer\Semver\Semver;
 use Magento\MagentoCloud\Config\SearchEngine\ElasticSuite;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Package\UndefinedPackageException;
 use Magento\MagentoCloud\Service\ElasticSearch;
+use Magento\MagentoCloud\Service\ServiceException;
 
 /**
  * Returns search configuration.
@@ -138,6 +138,7 @@ class SearchEngine
      * @return array
      *
      * @throws UndefinedPackageException
+     * @throws ServiceException
      */
     private function getSearchConfig(): array
     {
@@ -176,6 +177,8 @@ class SearchEngine
      *
      * @param array $config Elasticsearch connection configuration
      * @return array
+     *
+     * @throws ServiceException
      */
     private function getElasticSearchConfiguration(array $config): array
     {
