@@ -139,7 +139,6 @@ class EnvironmentData implements EnvironmentDataInterface
         $application = $this->getEnvVar(SystemConfigInterface::VAR_ENV_APPLICATION, []);
 
         if (!$application) {
-            // Try to read from .magento.app.yaml
             try {
                 $application = Yaml::parse(
                     $this->file->fileGetContents($this->fileList->getAppConfig())
