@@ -112,11 +112,11 @@ class ElasticSearchVersion implements ValidatorInterface
      */
     public function validate(): Validator\ResultInterface
     {
-        $esServiceVersion = $this->elasticSearch->getVersion();
-
-        if ($esServiceVersion === '0') {
+        if (!$this->elasticSearch->isInstalled()) {
             return $this->resultFactory->success();
         }
+
+        $esServiceVersion = $this->elasticSearch->getVersion();
 
         if (!$this->searchEngine->isESFamily()) {
             return $this->resultFactory->success();
