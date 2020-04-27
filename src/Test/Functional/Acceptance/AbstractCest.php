@@ -36,8 +36,8 @@ abstract class AbstractCest
      */
     public function _after(\CliTester $I): void
     {
-//        $I->stopEnvironment();
-//        $I->removeWorkDir();
+        $I->stopEnvironment();
+        $I->removeWorkDir();
     }
 
     /**

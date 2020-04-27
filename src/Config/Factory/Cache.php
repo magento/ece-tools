@@ -131,7 +131,7 @@ class Cache
             $redisCache = $this->getOldConfigStructure($envCacheBackendModel, $redisConfig);
             $slaveConnection = $this->getSlaveConnection($envCacheConfiguration, $redisConfig);
             if ($slaveConnection) {
-                $redisCache['frontend_options']['write'] = false;
+                $redisCache['frontend_options']['write_control'] = false;
                 $redisCache['backend_options'] = array_merge(
                     $redisCache['backend_options'],
                     $slaveConnection
@@ -224,18 +224,19 @@ class Cache
             $port = $envCacheConfig['frontend']['default']['backend_options']['remote_backend_options']['port']
                 ?? null;
 
-            if ($host !== $redisConfig['host'] || $port !== $redisConfig['port']) {
+            if (($host !== null && $host !== $redisConfig['host'])
+                || ($port !== null&& $port !== $redisConfig['port'])) {
                 return false;
             }
-        }
+        } else {
+            foreach (['default', 'page_cache'] as $type) {
+                $host = $envCacheConfig['frontend'][$type]['backend_options']['server'] ?? null;
+                $port = $envCacheConfig['frontend'][$type]['backend_options']['port'] ?? null;
 
-
-        foreach (['default', 'page_cache'] as $type) {
-            $host = $envCacheConfig['frontend'][$type]['backend_options']['server'] ?? null;
-            $port = $envCacheConfig['frontend'][$type]['backend_options']['port'] ?? null;
-
-            if ($host !== $redisConfig['host'] || $port !== $redisConfig['port']) {
-                return false;
+                if (($host !== null && $host !== $redisConfig['host'])
+                    || ($port !== null&& $port !== $redisConfig['port'])) {
+                    return false;
+                }
             }
         }
 

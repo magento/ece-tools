@@ -13,7 +13,9 @@ use Magento\MagentoCloud\Config\Validator;
 use Magento\MagentoCloud\Config\ValidatorInterface;
 use Magento\MagentoCloud\Config\Factory\Cache;
 
-
+/**
+ * Validates configuration for Redis Backend model
+ */
 class RedisBackend implements ValidatorInterface
 {
     /**

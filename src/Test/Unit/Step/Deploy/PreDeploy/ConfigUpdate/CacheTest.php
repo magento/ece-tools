@@ -94,21 +94,21 @@ class CacheTest extends TestCase
         );
     }
 
-    public function testExecute()
+    /**
+     * @param array $config
+     * @dataProvider executeDataProvider
+     */
+    public function testExecute(array $config)
     {
         $this->configReaderMock->expects($this->once())
             ->method('read')
             ->willReturn([]);
         $this->cacheConfigMock->expects($this->once())
             ->method('get')
-            ->willReturn([
-                'frontend' => ['frontName' => ['backend' => 'cacheDriver']],
-            ]);
+            ->willReturn($config);
         $this->configWriterMock->expects($this->once())
             ->method('create')
-            ->with(['cache' => [
-                'frontend' => ['frontName' => ['backend' => 'cacheDriver']],
-            ]]);
+            ->with(['cache' => $config]);
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Updating cache configuration.');
@@ -118,6 +118,29 @@ class CacheTest extends TestCase
         $this->socketCloseMock->expects($this->never());
 
         $this->step->execute();
+    }
+
+    public function executeDataProvider(): array
+    {
+        return [
+            'backend model without remote_backend_options' => [
+                'config' => [
+                    'frontend' => ['frontName' => ['backend' => 'cacheDriver', 'backend_options' => 'some options']]
+                ]
+            ],
+            'backend model with remote_backend_options' => [
+                'config' => [
+                    'frontend' => [
+                        'frontName' => [
+                            'backend' => CacheFactory::REDIS_BACKEND_REMOTE_SYNHRONIZED_CACHE,
+                            'backend_options' => [
+                                'remote_backend_options' => 'some options'
+                            ]
+                        ]
+                    ]
+                ]
+            ]
+        ];
     }
 
     public function testExecuteEmptyConfig()
@@ -229,7 +252,8 @@ class CacheTest extends TestCase
                         'backend_options' => ['server' => 'redis.server', 'port' => 6379],
                     ],
                     'frontName2' => [
-                        'backend' => 'cacheDriver'
+                        'backend' => 'cacheDriver',
+                        'backend_options' => ['some config'],
                     ]
                 ],
             ]);
@@ -248,6 +272,7 @@ class CacheTest extends TestCase
             ->with(['cache' => [
                 'frontend' => ['frontName2' => [
                     'backend' => 'cacheDriver',
+                    'backend_options' => ['some config'],
                 ]],
             ]]);
         $this->loggerMock->expects($this->once())
