@@ -64,16 +64,13 @@ class ElasticSearchTest extends TestCase
      */
     public function testGetVersionElasticSearchNotExistInRelationships(): void
     {
-        $this->expectException(ServiceException::class);
-        $this->expectExceptionMessage('ES service is not installed');
-
         $this->environmentMock->expects($this->once())
             ->method('getRelationship')
             ->willReturn([]);
         $this->clientFactoryMock->expects($this->never())
             ->method('create');
 
-        $this->assertEquals(0, $this->elasticSearch->getVersion());
+        $this->assertEquals('0', $this->elasticSearch->getVersion());
     }
 
     /**
