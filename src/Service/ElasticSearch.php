@@ -88,7 +88,7 @@ class ElasticSearch implements ServiceInterface
     public function getVersion(): string
     {
         if (!$this->isInstalled()) {
-            throw new ServiceException('ES service is not installed');
+            throw new ServiceException('ES service is not installed1');
         }
 
         if ($this->version === null) {
@@ -117,7 +117,7 @@ class ElasticSearch implements ServiceInterface
     public function getHost(): string
     {
         if (!$this->isInstalled()) {
-            throw new ServiceException('ES service is not installed');
+            throw new ServiceException('ES service is not installed2');
         }
 
         return (string)$this->getConfiguration()['host'];
@@ -132,7 +132,7 @@ class ElasticSearch implements ServiceInterface
     public function getPort(): string
     {
         if (!$this->isInstalled()) {
-            throw new ServiceException('ES service is not installed');
+            throw new ServiceException('ES service is not installed3');
         }
 
         return (string)$this->getConfiguration()['port'];
