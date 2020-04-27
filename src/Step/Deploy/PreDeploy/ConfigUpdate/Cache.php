@@ -67,8 +67,13 @@ class Cache implements StepInterface
 
         if (isset($cacheConfig['frontend'])) {
             $cacheConfig['frontend'] = array_filter($cacheConfig['frontend'], function ($cacheFrontend) {
-                return $cacheFrontend['backend'] !== 'Cm_Cache_Backend_Redis'
-                    || $this->testRedisConnection($cacheFrontend['backend_options']);
+                $backend = stripslashes($cacheFrontend['backend']);
+                $backendOptions = ($backend === CacheFactory::REDIS_BACKEND_REMOTE_SYNHRONIZED_CACHE)
+                    ? $cacheFrontend['backend_options']['remote_backend_options']
+                    : $cacheFrontend['backend_options'];
+
+                return !in_array($backend, CacheFactory::AVAILABLE_REDIS_BACKEND, true)
+                    || $this->testRedisConnection($backendOptions);
             });
         }
 
