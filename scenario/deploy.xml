@@ -44,6 +44,7 @@
                     <item name="json-format-variable " xsi:type="object">Magento\MagentoCloud\Config\Validator\Deploy\JsonFormatVariable</item>
                     <item name="service-version" xsi:type="object">Magento\MagentoCloud\Config\Validator\Deploy\ServiceVersion</item>
                     <item name="service-eol-warning" xsi:type="object">ServiceEol.Warnings</item>
+                    <item name="deprecated-search-engine" xsi:type="object">Magento\MagentoCloud\Config\Validator\Deploy\DeprecatedSearchEngine</item>
                 </item>
                 <item name="notice" xsi:type="array">
                     <item name="service-eol-notice" xsi:type="object">ServiceEol.Notices</item>
