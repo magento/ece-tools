@@ -11,15 +11,19 @@ use Composer\Semver\Comparator;
 use Composer\Semver\Semver;
 use Magento\MagentoCloud\Config\SearchEngine;
 use Magento\MagentoCloud\Config\Validator;
+use Magento\MagentoCloud\Config\ValidatorException;
 use Magento\MagentoCloud\Config\ValidatorInterface;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Package\Manager;
 use Magento\MagentoCloud\Package\UndefinedPackageException;
 use Magento\MagentoCloud\Service\ElasticSearch;
+use Magento\MagentoCloud\Service\ServiceException;
 use Psr\Log\LoggerInterface;
 
 /**
  * Validates compatibility of elasticsearch and magento versions.
+ *
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class ElasticSearchVersion implements ValidatorInterface
 {
@@ -108,7 +112,7 @@ class ElasticSearchVersion implements ValidatorInterface
      * according to version mapping.
      * Skips validation if elasticsearch service is not installed or another search engine configured.
      *
-     * @return Validator\ResultInterface
+     * {@inheritDoc}
      */
     public function validate(): Validator\ResultInterface
     {
@@ -116,7 +120,11 @@ class ElasticSearchVersion implements ValidatorInterface
             return $this->resultFactory->success();
         }
 
-        $esServiceVersion = $this->elasticSearch->getVersion();
+        try {
+            $esServiceVersion = $this->elasticSearch->getVersion();
+        } catch (ServiceException $exception) {
+            throw new ValidatorException($exception->getMessage(), $exception->getCode(), $exception);
+        }
 
         if (!$this->searchEngine->isESFamily()) {
             return $this->resultFactory->success();

@@ -62,7 +62,7 @@ class ElasticSearchTest extends TestCase
     /**
      * @throws ServiceException
      */
-    public function testGetVersionElasticSearchNotExistInRelationShips(): void
+    public function testGetVersionElasticSearchNotExistInRelationships(): void
     {
         $this->expectException(ServiceException::class);
         $this->expectExceptionMessage('ES service is not installed');

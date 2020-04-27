@@ -134,9 +134,7 @@ class InstallCommandFactory
         }
 
         foreach ($options as $option => $value) {
-            $command .= ($value === null)
-                ? (' ' . $option)
-                : (' ' . $option . '=' . escapeshellarg($value));
+            $command .= sprintf(' %s%s', $option, $value === null ? '' : '=' . escapeshellarg($value));
         }
 
         return $command;
