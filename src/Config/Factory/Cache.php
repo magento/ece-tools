@@ -212,6 +212,7 @@ class Cache
      * @param array $redisConfig
      * @return bool
      * @throws \Magento\MagentoCloud\Config\ConfigException
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      */
     private function isConfigurationCompatibleWithSlaveConnection(
         array $envCacheConfig,
@@ -225,7 +226,7 @@ class Cache
                 ?? null;
 
             if (($host !== null && $host !== $redisConfig['host'])
-                || ($port !== null&& $port !== $redisConfig['port'])) {
+                || ($port !== null && $port !== $redisConfig['port'])) {
                 return false;
             }
         } else {
@@ -234,7 +235,7 @@ class Cache
                 $port = $envCacheConfig['frontend'][$type]['backend_options']['port'] ?? null;
 
                 if (($host !== null && $host !== $redisConfig['host'])
-                    || ($port !== null&& $port !== $redisConfig['port'])) {
+                    || ($port !== null && $port !== $redisConfig['port'])) {
                     return false;
                 }
             }
