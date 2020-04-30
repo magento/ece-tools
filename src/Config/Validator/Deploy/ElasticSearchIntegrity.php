@@ -17,7 +17,7 @@ use Magento\MagentoCloud\Service\ElasticSearch;
 /**
  * Verifies if Elasticsearch service present for Magento 2.4.0 and above
  */
-class ElasticsearchIntegrity implements ValidatorInterface
+class ElasticSearchIntegrity implements ValidatorInterface
 {
     /**
      * @var MagentoVersion

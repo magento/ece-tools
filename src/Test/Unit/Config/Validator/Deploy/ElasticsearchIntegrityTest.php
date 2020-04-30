@@ -7,7 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Config\Validator\Deploy;
 
-use Magento\MagentoCloud\Config\Validator\Deploy\ElasticsearchIntegrity;
+use Magento\MagentoCloud\Config\Validator\Deploy\ElasticSearchIntegrity;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
 use Magento\MagentoCloud\Config\ValidatorException;
 use Magento\MagentoCloud\Package\MagentoVersion;
@@ -16,12 +16,12 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @see ElasticsearchIntegrity
+ * @see ElasticSearchIntegrity
  */
 class ElasticsearchIntegrityTest extends TestCase
 {
     /**
-     * @var ElasticsearchIntegrity
+     * @var ElasticSearchIntegrity
      */
     private $validator;
 
@@ -49,7 +49,7 @@ class ElasticsearchIntegrityTest extends TestCase
         $this->resultFactoryMock = $this->createMock(ResultFactory::class);
         $this->elasticSearchMock = $this->createMock(ElasticSearch::class);
 
-        $this->validator = new ElasticsearchIntegrity(
+        $this->validator = new ElasticSearchIntegrity(
             $this->magentoVersionMock,
             $this->resultFactoryMock,
             $this->elasticSearchMock
@@ -74,7 +74,7 @@ class ElasticsearchIntegrityTest extends TestCase
     /**
      * @throws ValidatorException
      */
-    public function testValidateNoEs(): void
+    public function testValidateNoElasticSearch(): void
     {
         $this->magentoVersionMock->expects($this->once())
             ->method('isGreaterOrEqual')
@@ -92,7 +92,7 @@ class ElasticsearchIntegrityTest extends TestCase
     /**
      * @throws ValidatorException
      */
-    public function testValidateWithEs(): void
+    public function testValidateWithElasticSearch(): void
     {
         $this->magentoVersionMock->expects($this->once())
             ->method('isGreaterOrEqual')
