@@ -20,6 +20,7 @@ jobs:
           extensions: sockets
       - name: Remove secure repositories
         run: |
+          composer config --unset repositories.repo.magento.com
           composer remove --no-update magento/magento-cloud-components
           composer remove --no-update magento/magento-cloud-docker
           composer remove --no-update magento/magento-cloud-patches
