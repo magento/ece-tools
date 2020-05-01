@@ -7,10 +7,12 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Config\Stage;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\ConfigException;
 use Magento\MagentoCloud\Config\Environment\ReaderInterface as EnvironmentReader;
 use Magento\MagentoCloud\Config\Schema;
 use Magento\MagentoCloud\Config\StageConfigInterface;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 
 /**
  * @inheritdoc
@@ -34,6 +36,7 @@ class PostDeploy implements PostDeployInterface
 
     /**
      * @param EnvironmentReader $environmentReader
+     * @param Schema $schema
      */
     public function __construct(EnvironmentReader $environmentReader, Schema $schema)
     {
@@ -47,10 +50,10 @@ class PostDeploy implements PostDeployInterface
     public function get(string $name)
     {
         if (!array_key_exists($name, $this->schema->getDefaults(StageConfigInterface::STAGE_POST_DEPLOY))) {
-            throw new ConfigException(sprintf(
-                'Config %s was not defined.',
-                $name
-            ));
+            throw new ConfigException(
+                sprintf('Config %s was not defined.', $name),
+                Error::PD_CONFIG_NOT_DEFINED
+            );
         }
 
         try {
@@ -66,7 +69,7 @@ class PostDeploy implements PostDeployInterface
 
     /**
      * @return array
-     * @throws \Magento\MagentoCloud\Filesystem\FileSystemException
+     * @throws FileSystemException
      */
     private function mergeConfig(): array
     {

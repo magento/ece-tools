@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Step\Deploy\PreDeploy;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\Factory\Cache as CacheConfig;
 use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
@@ -80,7 +81,7 @@ class CleanRedisCache implements StepInterface
                 $client->connect();
                 $client->flushDb();
             } catch (CredisException $exception) {
-                throw new StepException($exception->getMessage(), $exception->getCode(), $exception);
+                throw new StepException($exception->getMessage(), Error::DEPLOY_REDIS_CACHE_CLEAN_FAILED, $exception);
             }
         }
     }

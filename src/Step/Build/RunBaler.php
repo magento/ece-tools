@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Step\Build;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\Stage\BuildInterface;
 use Magento\MagentoCloud\Config\ValidatorInterface;
 use Magento\MagentoCloud\Config\Validator\Result;
@@ -99,7 +100,7 @@ class RunBaler implements StepInterface
         try {
             $this->shell->execute('baler');
         } catch (ShellException $exception) {
-            throw new StepException($exception->getMessage(), $exception->getCode(), $exception);
+            throw new StepException($exception->getMessage(), Error::BUILD_BALER_NOT_FOUND, $exception);
         }
 
         $this->logger->info('Baler JS bundling complete.');

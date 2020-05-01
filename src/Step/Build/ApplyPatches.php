@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Step\Build;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Patch\Manager;
 use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Step\StepException;
@@ -38,7 +39,7 @@ class ApplyPatches implements StepInterface
         try {
             $this->manager->apply();
         } catch (ShellException $exception) {
-            throw new StepException($exception->getMessage(), $exception->getCode(), $exception);
+            throw new StepException($exception->getMessage(), Error::BUILD_PATCH_APPLYING_FAILED, $exception);
         }
     }
 }

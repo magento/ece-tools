@@ -7,7 +7,9 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Step\Build;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\Module;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
 use Psr\Log\LoggerInterface;
@@ -53,9 +55,12 @@ class RefreshModules implements StepInterface
                     'The following modules have been enabled:' . PHP_EOL . implode(PHP_EOL, $enabledModules) :
                     'No modules were changed.'
             );
+        } catch (FileSystemException $exception) {
+            throw new StepException($exception->getMessage(), Error::BUILD_CONFIG_PHP_IS_NOT_WRITABLE, $exception);
         } catch (\Exception $exception) {
-            throw new StepException($exception->getMessage(), $exception->getCode(), $exception);
+            throw new StepException($exception->getMessage(), Error::BUILD_MODULE_ENABLE_COMMAND_FAILED, $exception);
         }
+
         $this->logger->notice('End of reconciling modules.');
     }
 }

@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Step\Build;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
 use Magento\MagentoCloud\Shell\MagentoShell;
@@ -66,7 +67,7 @@ class CompileDi implements StepInterface
                 ]
             );
         } catch (ShellException $exception) {
-            throw new StepException($exception->getMessage(), $exception->getCode(), $exception);
+            throw new StepException($exception->getMessage(), Error::BUILD_DI_COMPILATION_FAILED, $exception);
         }
         $this->logger->notice('End of running DI compilation');
     }

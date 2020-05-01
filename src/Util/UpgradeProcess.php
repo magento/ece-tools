@@ -13,6 +13,7 @@ use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Package\UndefinedPackageException;
 use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Shell\ShellInterface;
+use Magento\MagentoCloud\Shell\UtilityException;
 use Magento\MagentoCloud\Shell\UtilityManager;
 use Psr\Log\LoggerInterface;
 
@@ -71,6 +72,7 @@ class UpgradeProcess
      * @throws ConfigException
      * @throws UndefinedPackageException
      * @throws ShellException
+     * @throws UtilityException
      */
     public function execute(): void
     {

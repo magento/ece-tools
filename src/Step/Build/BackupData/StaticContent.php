@@ -7,10 +7,12 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Step\Build\BackupData;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
+use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
 use Psr\Log\LoggerInterface;
 
@@ -91,10 +93,26 @@ class StaticContent implements StepInterface
             $this->logger->info('Recreating pub/static directory');
             $this->file->createDirectory($originalPubStatic);
         } catch (FileSystemException $e) {
+            $this->copyStaticContent($originalPubStatic, $initPubStatic);
+        }
+    }
+
+    /**
+     * Copy static content to init directory.
+     *
+     * @param string $originalPubStatic
+     * @param string $initPubStatic
+     * @throws StepException
+     */
+    private function copyStaticContent(string $originalPubStatic, string $initPubStatic): void
+    {
+        try {
             $this->logger->notice(
                 'Can\'t move static content. Copying static content to init directory'
             );
             $this->file->copyDirectory($originalPubStatic, $initPubStatic);
+        } catch (FileSystemException $e) {
+            throw new StepException($e->getMessage(), Error::BUILD_SCD_COPYING_FAILED, $e);
         }
     }
 }

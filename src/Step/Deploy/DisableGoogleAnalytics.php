@@ -65,6 +65,10 @@ class DisableGoogleAnalytics implements StepInterface
         if (!$this->environment->isMasterBranch() &&
             !$this->deployConfig->get(DeployInterface::VAR_ENABLE_GOOGLE_ANALYTICS)
         ) {
+            var_dump(sprintf(
+                "UPDATE `%s` SET `value` = 0 WHERE `path` = 'google/analytics/active'",
+                $this->connection->getTableName('core_config_data')
+            ));exit;
             $this->logger->info('Disabling Google Analytics');
             $this->connection->affectingQuery(sprintf(
                 "UPDATE `%s` SET `value` = 0 WHERE `path` = 'google/analytics/active'",

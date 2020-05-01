@@ -7,11 +7,15 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Step\Deploy;
 
+use Magento\MagentoCloud\App\Error;
+use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Config\ConfigException;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Filesystem\Flag\ConfigurationMismatchException;
 use Magento\MagentoCloud\Package\UndefinedPackageException;
 use Magento\MagentoCloud\Shell\MagentoShell;
+use Magento\MagentoCloud\Shell\ShellException;
+use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
 use Magento\MagentoCloud\Util\UpgradeProcess;
 use Psr\Log\LoggerInterface;
@@ -194,23 +198,28 @@ class SplitDbConnection implements StepInterface
      *
      * @param array $types
      * @param array $dbConfig
-     * @throws ConfigException
-     * @throws UndefinedPackageException
+     * @throws StepException
      */
     private function enableSplitConnections(array $types, array $dbConfig)
     {
-        $splitTypeMap = array_flip(self::SPLIT_CONNECTION_MAP);
-        foreach ($types as $type) {
-            $connectionConfig = $dbConfig[DbConfig::KEY_CONNECTION][$splitTypeMap[$type]];
-            $cmd = $this->buildSplitDbCommand($type, $connectionConfig);
-            $this->magentoShell->execute($cmd);
-            $this->logger->info(sprintf(
-                '%s tables were split to DB %s in %s',
-                ucfirst($type),
-                $connectionConfig['dbname'],
-                $connectionConfig['host']
-            ));
-            $this->upgradeProcess->execute();
+        try {
+            $splitTypeMap = array_flip(self::SPLIT_CONNECTION_MAP);
+            foreach ($types as $type) {
+                $connectionConfig = $dbConfig[DbConfig::KEY_CONNECTION][$splitTypeMap[$type]];
+                $cmd = $this->buildSplitDbCommand($type, $connectionConfig);
+                $this->magentoShell->execute($cmd);
+                $this->logger->info(sprintf(
+                    '%s tables were split to DB %s in %s',
+                    ucfirst($type),
+                    $connectionConfig['dbname'],
+                    $connectionConfig['host']
+                ));
+                $this->upgradeProcess->execute();
+            }
+        } catch (ShellException $e) {
+            throw new StepException($e->getMessage(), Error::DEPLOY_SPLIT_DB_COMMAND_FAILED, $e);
+        } catch (GenericException $e) {
+            throw new StepException($e->getMessage(), $e->getCode(), $e);
         }
     }
 

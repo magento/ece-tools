@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Config\Validator\Build;
 
+use Magento\MagentoCloud\App\Error as AppError;
 use Magento\MagentoCloud\Config\Schema\Validator;
 use Magento\MagentoCloud\Config\StageConfigInterface;
 use Magento\MagentoCloud\Config\Validator\Result\Error;
@@ -73,11 +74,11 @@ class StageConfig implements ValidatorInterface
         }
 
         if ($errors) {
-            return $this->resultFactory->create(Error::ERROR, [
-                'error' => 'Environment configuration is not valid. ' .
-                    'Correct the following items in your .magento.env.yaml file:',
-                'suggestion' => implode(PHP_EOL, $errors),
-            ]);
+            return $this->resultFactory->error(
+                'Environment configuration is not valid. Correct the following items in your .magento.env.yaml file:',
+                 implode(PHP_EOL, $errors),
+                 AppError::BUILD_WRONG_CONFIGURATION_MAGENTO_ENV_YAML
+            );
         }
 
         return $this->resultFactory->create(Success::SUCCESS);

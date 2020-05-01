@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Config\Stage;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\ConfigException;
 use Magento\MagentoCloud\Config\Environment\ReaderInterface as EnvironmentReader;
 use Magento\MagentoCloud\Config\Schema;
@@ -52,10 +53,10 @@ class Build implements BuildInterface
     public function get(string $name)
     {
         if (!array_key_exists($name, $this->schema->getDefaults(StageConfigInterface::STAGE_BUILD))) {
-            throw new ConfigException(sprintf(
-                'Config %s was not defined.',
-                $name
-            ));
+            throw new ConfigException(
+                sprintf('Config %s was not defined.', $name),
+                Error::BUILD_CONFIG_NOT_DEFINED
+            );
         }
 
         try {

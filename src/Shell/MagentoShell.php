@@ -26,7 +26,7 @@ class MagentoShell implements ShellInterface
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public function execute(string $command, array $args = []): ProcessInterface
     {
