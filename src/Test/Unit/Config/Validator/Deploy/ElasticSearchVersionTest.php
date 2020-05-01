@@ -13,16 +13,20 @@ use Magento\MagentoCloud\Config\Validator\Deploy\ElasticSearchVersion;
 use Magento\MagentoCloud\Config\Validator\Result\Error;
 use Magento\MagentoCloud\Config\Validator\Result\Success;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
+use Magento\MagentoCloud\Config\ValidatorException;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Package\Manager;
 use Magento\MagentoCloud\Package\UndefinedPackageException;
 use Magento\MagentoCloud\Service\ElasticSearch;
+use Magento\MagentoCloud\Service\ServiceException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
 /**
- * @inheritdoc
+ * @see ElasticSearchVersion
+ *
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class ElasticSearchVersionTest extends TestCase
 {
@@ -86,8 +90,10 @@ class ElasticSearchVersionTest extends TestCase
     public function testValidateElasticSearchServiceNotExists(): void
     {
         $this->elasticSearchMock->expects($this->once())
-            ->method('getVersion')
-            ->willReturn('0');
+            ->method('isInstalled')
+            ->willReturn(false);
+        $this->elasticSearchMock->expects($this->never())
+            ->method('getVersion');
         $this->managerMock->expects($this->never())
             ->method('get');
         $this->searchEngineMock->expects($this->never())
@@ -100,6 +106,21 @@ class ElasticSearchVersionTest extends TestCase
         $this->assertInstanceOf(Success::class, $this->validator->validate());
     }
 
+    public function testValidateWithException(): void
+    {
+        $this->expectException(ValidatorException::class);
+        $this->expectExceptionMessage('Some error');
+
+        $this->elasticSearchMock->expects($this->once())
+            ->method('isInstalled')
+            ->willReturn(true);
+        $this->elasticSearchMock->expects($this->once())
+            ->method('getVersion')
+            ->willThrowException(new ServiceException('Some error'));
+
+        $this->assertInstanceOf(Success::class, $this->validator->validate());
+    }
+
     public function testValidatePackageNotExists(): void
     {
         $this->searchEngineMock->expects($this->once())
@@ -108,6 +129,9 @@ class ElasticSearchVersionTest extends TestCase
         $this->elasticSearchMock->expects($this->once())
             ->method('getVersion')
             ->willReturn(2);
+        $this->elasticSearchMock->expects($this->once())
+            ->method('isInstalled')
+            ->willReturn(true);
         $this->managerMock->expects($this->once())
             ->method('get')
             ->with('elasticsearch/elasticsearch')
@@ -123,6 +147,9 @@ class ElasticSearchVersionTest extends TestCase
 
     public function testValidateElasticSearchServiceExistsAndNotConfigured(): void
     {
+        $this->elasticSearchMock->expects($this->once())
+            ->method('isInstalled')
+            ->willReturn(true);
         $this->searchEngineMock->expects($this->once())
             ->method('isESFamily')
             ->willReturn(false);
@@ -156,6 +183,9 @@ class ElasticSearchVersionTest extends TestCase
         string $errorMessage = '',
         string $errorSuggestion = ''
     ): void {
+        $this->elasticSearchMock->expects($this->once())
+            ->method('isInstalled')
+            ->willReturn(true);
         $this->magentoVersionMock->expects($this->any())
             ->method('getVersion')
             ->willReturn($magentoVersion);
