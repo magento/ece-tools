@@ -81,7 +81,12 @@ class EnvironmentDataTest extends TestCase
         $this->fileListMock = $this->createMock(FileList::class);
         $this->fileMock = $this->createMock(File::class);
 
-        $this->environmentData = new EnvironmentData($this->variable, $this->decoderMock, $this->fileListMock, $this->fileMock);
+        $this->environmentData = new EnvironmentData(
+            $this->variable,
+            $this->decoderMock,
+            $this->fileListMock,
+            $this->fileMock
+        );
     }
 
     public function testGetEnv(): void

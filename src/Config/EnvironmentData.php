@@ -163,4 +163,3 @@ class EnvironmentData implements EnvironmentDataInterface
         return $this->getEnv($envVarName) ? (string) $this->getEnv($envVarName) : '';
     }
 }
-
