@@ -18,7 +18,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @inheritdoc
+ * @see SearchEngine
  */
 class SearchEngineTest extends TestCase
 {
@@ -55,13 +55,16 @@ class SearchEngineTest extends TestCase
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->environmentMock = $this->createMock(Environment::class);
         $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
         $this->elasticSearchMock = $this->createMock(ElasticSearch::class);
         $this->elasticSuiteMock = $this->createMock(ElasticSuite::class);
+
+        $this->elasticSearchMock->method('getFullVersion')
+            ->willReturn('elasticsearch');
 
         $this->config = new SearchEngine(
             $this->environmentMock,
@@ -78,7 +81,7 @@ class SearchEngineTest extends TestCase
      * @return void
      * @dataProvider getWhenCustomConfigValidWithoutMergeDataProvider
      */
-    public function testGetWhenCustomConfigValidWithoutMerge(array $envSearchConfig)
+    public function testGetWhenCustomConfigValidWithoutMerge(array $envSearchConfig): void
     {
         $expectedConfig = ['system' => ['default' => ['catalog' => ['search' => ['engine' => 'some_engine']]]]];
 
@@ -107,18 +110,16 @@ class SearchEngineTest extends TestCase
 
     /**
      * @param array $customSearchConfig
-     * @param string $version
      * @param array $esServiceConfig
      * @param array $expected
-     * @throws \Magento\MagentoCloud\Package\UndefinedPackageException
+     *
      * @dataProvider testGetWithElasticSearchDataProvider
      */
     public function testGetWithElasticSearch(
         array $customSearchConfig,
-        string $version,
         array $esServiceConfig,
         array $expected
-    ) {
+    ): void {
         $this->stageConfigMock->expects($this->once())
             ->method('get')
             ->with(DeployInterface::VAR_SEARCH_CONFIGURATION)
@@ -126,9 +127,6 @@ class SearchEngineTest extends TestCase
         $this->elasticSearchMock->expects($this->once())
             ->method('getConfiguration')
             ->willReturn($esServiceConfig);
-        $this->elasticSearchMock->expects($this->once())
-            ->method('getVersion')
-            ->willReturn($version);
 
         $expected = ['system' => ['default' => ['catalog' => ['search' => $expected]]]];
 
@@ -142,10 +140,9 @@ class SearchEngineTest extends TestCase
      */
     public function testGetWithElasticSearchDataProvider(): array
     {
-        $generateDataForVersionChecking = static function ($version, $engine) {
+        $generateDataForVersionChecking = static function ($engine) {
             return [
                 'customSearchConfig' => [],
-                'version' => $version,
                 'relationship' => [
                     'host' => 'localhost',
                     'port' => 1234,
@@ -161,7 +158,6 @@ class SearchEngineTest extends TestCase
         return [
             [
                 'customSearchConfig' => ['some_key' => 'some_value'],
-                'version' => '2.4',
                 'esServiceConfig' => [
                     'host' => 'localhost',
                     'port' => 1234,
@@ -181,7 +177,6 @@ class SearchEngineTest extends TestCase
                     'elasticsearch_index_prefix' => 'prefix',
                     '_merge' => true,
                 ],
-                'version' => '2.4',
                 'esServiceConfig' => [
                     'host' => 'localhost',
                     'port' => 1234,
@@ -199,7 +194,6 @@ class SearchEngineTest extends TestCase
                     'elasticsearch_index_prefix' => 'new_prefix',
                     '_merge' => true,
                 ],
-                'version' => '2.4',
                 'esServiceConfig' => [
                     'host' => 'localhost',
                     'port' => 1234,
@@ -215,7 +209,6 @@ class SearchEngineTest extends TestCase
                 'customSearchConfig' => [
                     '_merge' => true,
                 ],
-                'version' => '2.4',
                 'esServiceConfig' => [
                     'host' => 'localhost',
                     'port' => 1234,
@@ -226,64 +219,23 @@ class SearchEngineTest extends TestCase
                     'elasticsearch_server_port' => 1234,
                 ],
             ],
-            [
-                'customSearchConfig' => [],
-                'version' => '5',
-                'esServiceConfig' => [
-                    'host' => 'localhost',
-                    'port' => 1234,
-                    'query' => ['index' => 'stg'],
-                ],
-                'expected' => [
-                    'engine' => 'elasticsearch5',
-                    'elasticsearch5_server_hostname' => 'localhost',
-                    'elasticsearch5_server_port' => 1234,
-                    'elasticsearch5_index_prefix' => 'stg',
-                ],
-            ],
-            [
-                'customSearchConfig' => [
-                    'engine' => 'elasticsearch5',
-                    'elasticsearch5_server_hostname' => 'some_host',
-                    'elasticsearch5_index_prefix' => 'prefix',
-                    '_merge' => true,
-                ],
-                'version' => '5.1',
-                'esServiceConfig' => [
-                    'host' => 'localhost',
-                    'port' => 1234,
-                ],
-                'expected' => [
-                    'engine' => 'elasticsearch5',
-                    'elasticsearch5_server_hostname' => 'some_host',
-                    'elasticsearch5_server_port' => 1234,
-                    'elasticsearch5_index_prefix' => 'prefix',
-                ],
-            ],
-            $generateDataForVersionChecking('1.7', 'elasticsearch'),
-            $generateDataForVersionChecking('2.4', 'elasticsearch'),
-            $generateDataForVersionChecking('5.0', 'elasticsearch5'),
-            $generateDataForVersionChecking('5.2', 'elasticsearch5'),
-            $generateDataForVersionChecking('6.0', 'elasticsearch6'),
-            $generateDataForVersionChecking('6.2', 'elasticsearch6'),
-            $generateDataForVersionChecking('7.2', 'elasticsearch7'),
+            $generateDataForVersionChecking('elasticsearch'),
+            $generateDataForVersionChecking('elasticsearch'),
         ];
     }
 
     /**
      * @param array $customSearchConfig
-     * @param string $version
      * @param array $esServiceConfig
      * @param array $expected
-     * @throws \Magento\MagentoCloud\Package\UndefinedPackageException
+     *
      * @dataProvider testGetWithElasticSuiteDataProvider
      */
     public function testGetWithElasticSuite(
         array $customSearchConfig,
-        string $version,
         array $esServiceConfig,
         array $expected
-    ) {
+    ): void {
         $this->stageConfigMock->expects($this->once())
             ->method('get')
             ->with(DeployInterface::VAR_SEARCH_CONFIGURATION)
@@ -291,9 +243,6 @@ class SearchEngineTest extends TestCase
         $this->elasticSearchMock->expects($this->once())
             ->method('getConfiguration')
             ->willReturn($esServiceConfig);
-        $this->elasticSearchMock->expects($this->once())
-            ->method('getVersion')
-            ->willReturn($version);
         $this->elasticSuiteMock->expects($this->once())
             ->method('isInstalled')
             ->willReturn(true);
@@ -318,7 +267,6 @@ class SearchEngineTest extends TestCase
         return [
             [
                 'customSearchConfig' => ['some_key' => 'some_value'],
-                'version' => '2.4',
                 'esServiceConfig' => [
                     'host' => 'localhost',
                     'port' => 1234,
@@ -344,7 +292,7 @@ class SearchEngineTest extends TestCase
     /**
      * @return void
      */
-    public function testGetWithSolr()
+    public function testGetWithSolr(): void
     {
         $expected = [
             'engine' => 'solr',
@@ -377,7 +325,7 @@ class SearchEngineTest extends TestCase
         $this->assertEquals($expected, $this->config->getConfig());
     }
 
-    public function testGetName()
+    public function testGetName(): void
     {
         $this->assertSame('mysql', $this->config->getName());
     }
@@ -388,7 +336,7 @@ class SearchEngineTest extends TestCase
      *
      * @dataProvider isEsFamilyDataProvider
      */
-    public function testIsEsFamily(array $searchConfig, bool $expected)
+    public function testIsEsFamily(array $searchConfig, bool $expected): void
     {
         $this->stageConfigMock->expects($this->once())
             ->method('get')
