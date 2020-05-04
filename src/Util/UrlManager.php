@@ -77,6 +77,7 @@ class UrlManager
     private function parseRoutes(array $routes): array
     {
         $urls = ['secure' => [], 'unsecure' => []];
+        $primaryUrls = [];
 
         foreach ($routes as $key => $val) {
             if ($val['type'] !== 'upstream') {
@@ -89,16 +90,22 @@ class UrlManager
 
             if (strpos($key, self::PREFIX_UNSECURE) === 0) {
                 $urls['unsecure'][$originalUrl] = $key;
+                if (!empty($val['primary'])) {
+                    $primaryUrls['unsecure'][$originalUrl] = $key;
+                }
                 continue;
             }
 
             if (strpos($key, self::PREFIX_SECURE) === 0) {
                 $urls['secure'][$originalUrl] = $key;
+                if (!empty($val['primary'])) {
+                    $primaryUrls['secure'][$originalUrl] = $key;
+                }
                 continue;
             }
         }
 
-        return $urls;
+        return $primaryUrls ?: $urls;
     }
 
     /**
