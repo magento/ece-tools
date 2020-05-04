@@ -12,6 +12,7 @@ use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
@@ -94,8 +95,10 @@ class CleanStaticContent implements StepInterface
             $magentoRoot = $this->directoryList->getMagentoRoot();
             $this->logger->info('Clearing pub/static');
             $this->file->backgroundClearDirectory($magentoRoot . '/pub/static');
-        } catch (GenericException $e) {
+        } catch (FileSystemException $e) {
             throw new StepException($e->getMessage(), Error::DEPLOY_SCD_CLEAN_FAILED, $e);
+        } catch (GenericException $e) {
+            throw new StepException($e->getMessage(), $e->getCode(), $e);
         }
     }
 }

@@ -7,9 +7,8 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Step\PostDeploy;
 
-use Magento\MagentoCloud\App\Error;
-use Magento\MagentoCloud\Config\Stage\DeployInterface;
-use Magento\MagentoCloud\Config\Stage\PostDeployInterface;
+use Magento\MagentoCloud\Config\ConfigException;
+use Magento\MagentoCloud\Config\StageConfigInterface;
 use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
 use Magento\MagentoCloud\Shell\ShellException;
@@ -27,20 +26,28 @@ class CleanCache implements StepInterface
     private $magentoShell;
 
     /**
-     * @var DeployInterface
+     * @var StageConfigInterface
      */
     private $stageConfig;
 
     /**
+     * @var int
+     */
+    private $errorCode;
+
+    /**
      * @param ShellFactory $shellFactory
-     * @param DeployInterface $stageConfig
+     * @param StageConfigInterface $stageConfig
+     * @param int $errorCode
      */
     public function __construct(
         ShellFactory $shellFactory,
-        DeployInterface $stageConfig
+        StageConfigInterface $stageConfig,
+        int $errorCode
     ) {
         $this->magentoShell = $shellFactory->createMagento();
         $this->stageConfig = $stageConfig;
+        $this->errorCode = $errorCode;
     }
 
     /**
@@ -51,10 +58,12 @@ class CleanCache implements StepInterface
         try {
             $this->magentoShell->execute(
                 'cache:flush',
-                [$this->stageConfig->get(PostDeployInterface::VAR_VERBOSE_COMMANDS)]
+                [$this->stageConfig->get(StageConfigInterface::VAR_VERBOSE_COMMANDS)]
             );
         } catch (ShellException $e) {
-            throw new StepException($e->getMessage(), Error::PD_CACHE_FLUSH_COMMAND_FAILED, $e);
+            throw new StepException($e->getMessage(), $this->errorCode, $e);
+        } catch (ConfigException $e) {
+            throw new StepException($e->getMessage(), $e->getCode(), $e);
         }
     }
 }

@@ -10,6 +10,7 @@ namespace Magento\MagentoCloud\Step\Deploy\PreDeploy;
 use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Config\GlobalSection as GlobalConfig;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
 use Magento\MagentoCloud\Filesystem\Driver\File;
@@ -76,8 +77,10 @@ class CleanViewPreprocessed implements StepInterface
             $this->logger->info('Clearing ./var/view_preprocessed');
             $viewPreprocessedPath = $this->directoryList->getPath(DirectoryList::DIR_VIEW_PREPROCESSED);
             $this->file->backgroundClearDirectory($viewPreprocessedPath);
-        } catch (GenericException $e) {
+        } catch (FileSystemException $e) {
             throw new StepException($e->getMessage(), Error::DEPLOY_VIEW_PREPROCESSED_CLEAN_FAILED, $e);
+        } catch (GenericException $e) {
+            throw new StepException($e->getMessage(), $e->getCode(), $e);
         }
     }
 }

@@ -94,12 +94,10 @@ class Generate implements StepInterface
             foreach ($commands as $command) {
                 $this->shell->execute($command);
             }
-        } catch (ConfigException|ShellException $exception) {
-            throw new StepException(
-                $exception->getMessage(),
-                Error::BUILD_SCD_FAILED,
-                $exception
-            );
+        } catch (ShellException $e) {
+            throw new StepException($e->getMessage(), Error::BUILD_SCD_FAILED, $e);
+        } catch (ConfigException $e) {
+            throw new StepException($e->getMessage(), $e->getCode(), $e);
         }
     }
 }

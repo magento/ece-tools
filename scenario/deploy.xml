@@ -115,7 +115,7 @@
             <argument name="steps" xsi:type="array">
                 <item name="enable-cron" xsi:type="object" priority="100">Magento\MagentoCloud\Step\PostDeploy\EnableCron</item>
                 <item name="backup" xsi:type="object" priority="200">Magento\MagentoCloud\Step\PostDeploy\Backup</item>
-                <item name="clean-cache" xsi:type="object" priority="300">Magento\MagentoCloud\Step\PostDeploy\CleanCache</item>
+                <item name="clean-cache" xsi:type="object" priority="300">CleanCache.Deploy</item>
             </argument>
         </arguments>
     </step>
