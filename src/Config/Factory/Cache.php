@@ -244,6 +244,13 @@ class Cache
         return true;
     }
 
+    /**
+     * Returns backend config for old implementation.
+     *
+     * @param string $envCacheBackendModel
+     * @param array $redisConfig
+     * @return array
+     */
     private function getOldConfigStructure(string $envCacheBackendModel, array $redisConfig): array
     {
         return [
@@ -255,6 +262,13 @@ class Cache
         ];
     }
 
+    /**
+     * Returns backend config for new implementation.
+     *
+     * @param string $envCacheBackendModel
+     * @param array $redisConfig
+     * @return array
+     */
     private function getNewConfigStructure(string $envCacheBackendModel, array $redisConfig): array
     {
         return [

@@ -63,12 +63,12 @@ class CacheTest extends TestCase
             ->willReturnMap([
                 [
                     DeployInterface::VAR_CACHE_CONFIGURATION,
-                    ['frontend' => ['cache_option' => 'value']]
+                    ['frontend' => ['cache_option' => 'value']],
                 ],
                 [
                     DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION,
-                    false
-                ]
+                    false,
+                ],
             ]);
         $this->redisMock->expects($this->never())
             ->method('getConfiguration');
@@ -89,12 +89,12 @@ class CacheTest extends TestCase
             ->willReturnMap([
                 [
                     DeployInterface::VAR_CACHE_CONFIGURATION,
-                    ['frontend' => ['cache_option' => 'value']]
+                    ['frontend' => ['cache_option' => 'value']],
                 ],
                 [
                     DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION,
-                    true
-                ]
+                    true,
+                ],
             ]);
         $this->redisMock->expects($this->never())
             ->method('getConfiguration');
@@ -149,16 +149,16 @@ class CacheTest extends TestCase
             ->willReturnMap([
                 [
                     DeployInterface::VAR_CACHE_CONFIGURATION,
-                    $envCacheConfig
+                    $envCacheConfig,
                 ],
                 [
                     DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION,
-                    $useSlave
+                    $useSlave,
                 ],
                 [
                     DeployInterface::VAR_CACHE_REDIS_BACKEND,
-                    $backendModel
-                ]
+                    $backendModel,
+                ],
             ]);
         $this->redisMock->expects($this->once())
             ->method('getConfiguration')
@@ -206,7 +206,7 @@ class CacheTest extends TestCase
                     'backend_options' => [
                         'server' => 'master.host',
                         'port' => 'master.port',
-                        'database' => Cache::REDIS_DATABASE_DEFAULT
+                        'database' => Cache::REDIS_DATABASE_DEFAULT,
                     ],
                 ],
                 'page_cache' => [
@@ -214,10 +214,10 @@ class CacheTest extends TestCase
                     'backend_options' => [
                         'server' => 'master.host',
                         'port' => 'master.port',
-                        'database' => Cache::REDIS_DATABASE_PAGE_CACHE
+                        'database' => Cache::REDIS_DATABASE_PAGE_CACHE,
                     ],
                 ],
-            ]
+            ],
         ];
         $resultMasterOnlyConnectionRedisCache = $resultMasterOnlyConnection;
         $resultMasterOnlyConnectionRedisCache['frontend']['default']['backend'] = addslashes(
@@ -242,13 +242,13 @@ class CacheTest extends TestCase
                         ],
                         'local_backend' => 'Cm_Cache_Backend_File',
                         'local_backend_options' => [
-                            'cache_dir' => '/dev/shm/'
-                        ]
+                            'cache_dir' => '/dev/shm/',
+                        ],
                     ],
                     'frontend_options' => [
                         'write_control' => false,
-                    ]
-                ]
+                    ],
+                ],
             ],
             'type' => [
                 'default' => ['frontend' => 'default'],
@@ -268,7 +268,7 @@ class CacheTest extends TestCase
             'backend_options' => $backendOptions,
             'frontend_options' => [
                 'write_control' => false,
-            ]
+            ],
         ];
 
         $slaveConfigurationSyncCache = [
@@ -328,11 +328,11 @@ class CacheTest extends TestCase
                     'backend_options' => [
                         'remote_backend_options' => [
                             'value' => 'key',
-                            'server' => 'new.host'
-                        ]
-                    ]
-                ]
-            ]
+                            'server' => 'new.host',
+                        ],
+                    ],
+                ],
+            ],
         ];
         $resultMasterSlaveConnectionWithDiffHostSyncCache = array_replace_recursive(
             $resultMasterSlaveConnectionWithDiffHostSyncCache,
@@ -347,7 +347,7 @@ class CacheTest extends TestCase
                 false,
                 Cache::REDIS_BACKEND_CM_CACHE,
                 4,
-                $resultMasterOnlyConnection
+                $resultMasterOnlyConnection,
             ],
             [
                 [],
@@ -356,7 +356,7 @@ class CacheTest extends TestCase
                 false,
                 Cache::REDIS_BACKEND_CM_CACHE,
                 4,
-                $resultMasterOnlyConnection
+                $resultMasterOnlyConnection,
             ],
             [
                 [],
@@ -365,7 +365,7 @@ class CacheTest extends TestCase
                 true,
                 Cache::REDIS_BACKEND_CM_CACHE,
                 4,
-                $resultMasterOnlyConnection
+                $resultMasterOnlyConnection,
             ],
             [
                 [],
@@ -374,98 +374,25 @@ class CacheTest extends TestCase
                 true,
                 Cache::REDIS_BACKEND_CM_CACHE,
                 5,
-                $resultMasterSlaveConnection
+                $resultMasterSlaveConnection,
             ],
             [
                 [
                     'frontend' => [
                         'default' => [
                             'backend_options' => [
-                                'value' => 'key'
-                            ]
-                        ]
+                                'value' => 'key',
+                            ],
+                        ],
                     ],
-                    StageConfigInterface::OPTION_MERGE => true
+                    StageConfigInterface::OPTION_MERGE => true,
                 ],
                 $redisConfiguration,
                 $redisSlaveConfiguration,
                 true,
                 Cache::REDIS_BACKEND_CM_CACHE,
                 5,
-                $resultMasterSlaveConnectionWithMergedValue
-            ],
-            [
-                [
-                    'frontend' => [
-                        'default' => [
-                            'backend_options' => [
-                                'server' => 'new.host',
-                                'value' => 'key'
-                            ]
-                        ]
-                    ],
-                    StageConfigInterface::OPTION_MERGE => true
-                ],
-                $redisConfiguration,
-                $redisSlaveConfiguration,
-                true,
-                Cache::REDIS_BACKEND_CM_CACHE,
-                5,
-                $resultMasterSlaveConnectionWithDiffHost
-            ],
-            [
-                [],
-                $redisConfiguration,
-                [],
-                false,
-                Cache::REDIS_BACKEND_REDIS_CACHE,
-                4,
-                $resultMasterOnlyConnectionRedisCache
-            ],
-            [
-                [],
-                $redisConfiguration,
-                $redisSlaveConfiguration,
-                false,
-                Cache::REDIS_BACKEND_REDIS_CACHE,
-                4,
-                $resultMasterOnlyConnectionRedisCache
-            ],
-            [
-                [],
-                $redisConfiguration,
-                [],
-                true,
-                Cache::REDIS_BACKEND_REDIS_CACHE,
-                4,
-                $resultMasterOnlyConnectionRedisCache
-            ],
-            [
-                [],
-                $redisConfiguration,
-                $redisSlaveConfiguration,
-                true,
-                Cache::REDIS_BACKEND_REDIS_CACHE,
-                5,
-                $resultMasterSlaveConnectionRedisCache
-            ],
-            [
-                [
-                    'frontend' => [
-                        'default' => [
-                            'backend_options' => [
-                                'value' => 'key'
-                            ]
-                        ]
-                    ],
-                    StageConfigInterface::OPTION_MERGE => true
-                ],
-                $redisConfiguration,
-                $redisSlaveConfiguration,
-                true,
-                Cache::REDIS_BACKEND_REDIS_CACHE,
-                5,
-                $resultMasterSlaveConnectionWithMergedValueRedisCache
+                $resultMasterSlaveConnectionWithMergedValue,
             ],
             [
                 [
@@ -473,72 +400,145 @@ class CacheTest extends TestCase
                         'default' => [
                             'backend_options' => [
                                 'server' => 'new.host',
-                                'value' => 'key'
-                            ]
-                        ]
+                                'value' => 'key',
+                            ],
+                        ],
                     ],
-                    StageConfigInterface::OPTION_MERGE => true
+                    StageConfigInterface::OPTION_MERGE => true,
                 ],
+                $redisConfiguration,
+                $redisSlaveConfiguration,
+                true,
+                Cache::REDIS_BACKEND_CM_CACHE,
+                5,
+                $resultMasterSlaveConnectionWithDiffHost,
+            ],
+            [
+                [],
+                $redisConfiguration,
+                [],
+                false,
+                Cache::REDIS_BACKEND_REDIS_CACHE,
+                4,
+                $resultMasterOnlyConnectionRedisCache,
+            ],
+            [
+                [],
+                $redisConfiguration,
+                $redisSlaveConfiguration,
+                false,
+                Cache::REDIS_BACKEND_REDIS_CACHE,
+                4,
+                $resultMasterOnlyConnectionRedisCache,
+            ],
+            [
+                [],
+                $redisConfiguration,
+                [],
+                true,
+                Cache::REDIS_BACKEND_REDIS_CACHE,
+                4,
+                $resultMasterOnlyConnectionRedisCache,
+            ],
+            [
+                [],
                 $redisConfiguration,
                 $redisSlaveConfiguration,
                 true,
                 Cache::REDIS_BACKEND_REDIS_CACHE,
                 5,
-                $resultMasterSlaveConnectionWithDiffHostRedisCache
-            ],
-            [
-                [],
-                $redisConfiguration,
-                [],
-                false,
-                Cache::REDIS_BACKEND_REMOTE_SYNHRONIZED_CACHE,
-                4,
-                $resultMasterOnlyConnectionSyncCache
-            ],
-            [
-                [],
-                $redisConfiguration,
-                $redisSlaveConfiguration,
-                false,
-                Cache::REDIS_BACKEND_REMOTE_SYNHRONIZED_CACHE,
-                4,
-                $resultMasterOnlyConnectionSyncCache
-            ],
-            [
-                [],
-                $redisConfiguration,
-                [],
-                true,
-                Cache::REDIS_BACKEND_REMOTE_SYNHRONIZED_CACHE,
-                4,
-                $resultMasterOnlyConnectionSyncCache
-            ],
-            [
-                [],
-                $redisConfiguration,
-                $redisSlaveConfiguration,
-                true,
-                Cache::REDIS_BACKEND_REMOTE_SYNHRONIZED_CACHE,
-                5,
-                $resultMasterSlaveConnectionSyncCache
+                $resultMasterSlaveConnectionRedisCache,
             ],
             [
                 [
                     'frontend' => [
                         'default' => [
                             'backend_options' => [
-                                'value' => 'key'
-                            ]
-                        ]
+                                'value' => 'key',
+                            ],
+                        ],
                     ],
-                    StageConfigInterface::OPTION_MERGE => true
+                    StageConfigInterface::OPTION_MERGE => true,
+                ],
+                $redisConfiguration,
+                $redisSlaveConfiguration,
+                true,
+                Cache::REDIS_BACKEND_REDIS_CACHE,
+                5,
+                $resultMasterSlaveConnectionWithMergedValueRedisCache,
+            ],
+            [
+                [
+                    'frontend' => [
+                        'default' => [
+                            'backend_options' => [
+                                'server' => 'new.host',
+                                'value' => 'key',
+                            ],
+                        ],
+                    ],
+                    StageConfigInterface::OPTION_MERGE => true,
+                ],
+                $redisConfiguration,
+                $redisSlaveConfiguration,
+                true,
+                Cache::REDIS_BACKEND_REDIS_CACHE,
+                5,
+                $resultMasterSlaveConnectionWithDiffHostRedisCache,
+            ],
+            [
+                [],
+                $redisConfiguration,
+                [],
+                false,
+                Cache::REDIS_BACKEND_REMOTE_SYNHRONIZED_CACHE,
+                4,
+                $resultMasterOnlyConnectionSyncCache,
+            ],
+            [
+                [],
+                $redisConfiguration,
+                $redisSlaveConfiguration,
+                false,
+                Cache::REDIS_BACKEND_REMOTE_SYNHRONIZED_CACHE,
+                4,
+                $resultMasterOnlyConnectionSyncCache,
+            ],
+            [
+                [],
+                $redisConfiguration,
+                [],
+                true,
+                Cache::REDIS_BACKEND_REMOTE_SYNHRONIZED_CACHE,
+                4,
+                $resultMasterOnlyConnectionSyncCache,
+            ],
+            [
+                [],
+                $redisConfiguration,
+                $redisSlaveConfiguration,
+                true,
+                Cache::REDIS_BACKEND_REMOTE_SYNHRONIZED_CACHE,
+                5,
+                $resultMasterSlaveConnectionSyncCache,
+            ],
+            [
+                [
+                    'frontend' => [
+                        'default' => [
+                            'backend_options' => [
+                                'value' => 'key',
+                            ],
+                        ],
+                    ],
+                    StageConfigInterface::OPTION_MERGE => true,
                 ],
                 $redisConfiguration,
                 $redisSlaveConfiguration,
                 true,
                 Cache::REDIS_BACKEND_REMOTE_SYNHRONIZED_CACHE,
                 5,
-                $resultMasterSlaveConnectionWithMergedValueSyncCache
+                $resultMasterSlaveConnectionWithMergedValueSyncCache,
             ],
             [
                 [
@@ -547,19 +547,19 @@ class CacheTest extends TestCase
                             'backend_options' => [
                                 'remote_backend_options' => [
                                     'server' => 'new.host',
-                                    'value' => 'key'
-                                ]
-                            ]
-                        ]
+                                    'value' => 'key',
+                                ],
+                            ],
+                        ],
                     ],
-                    StageConfigInterface::OPTION_MERGE => true
+                    StageConfigInterface::OPTION_MERGE => true,
                 ],
                 $redisConfiguration,
                 $redisSlaveConfiguration,
                 true,
                 Cache::REDIS_BACKEND_REMOTE_SYNHRONIZED_CACHE,
                 5,
-                $resultMasterSlaveConnectionWithDiffHostSyncCache
+                $resultMasterSlaveConnectionWithDiffHostSyncCache,
             ],
         ];
     }
@@ -580,16 +580,16 @@ class CacheTest extends TestCase
             ->willReturnMap([
                 [
                     DeployInterface::VAR_CACHE_CONFIGURATION,
-                    $envCacheConfiguration
+                    $envCacheConfiguration,
                 ],
                 [
                     DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION,
-                    false
+                    false,
                 ],
                 [
                     DeployInterface::VAR_CACHE_REDIS_BACKEND,
-                    'Cm_Cache_Backend_Redis'
-                ]
+                    'Cm_Cache_Backend_Redis',
+                ],
             ]);
         $this->redisMock->expects($this->any())
             ->method('getConfiguration')
@@ -623,7 +623,7 @@ class CacheTest extends TestCase
                     'backend_options' => [
                         'server' => 'master.host',
                         'port' => 'master.port',
-                        'database' => Cache::REDIS_DATABASE_DEFAULT
+                        'database' => Cache::REDIS_DATABASE_DEFAULT,
                     ],
                 ],
                 'page_cache' => [
@@ -631,10 +631,10 @@ class CacheTest extends TestCase
                     'backend_options' => [
                         'server' => 'master.host',
                         'port' => 'master.port',
-                        'database' => Cache::REDIS_DATABASE_PAGE_CACHE
+                        'database' => Cache::REDIS_DATABASE_PAGE_CACHE,
                     ],
                 ],
-            ]
+            ],
         ];
 
         $resultWithMergedKey = $result;
@@ -672,7 +672,7 @@ class CacheTest extends TestCase
                             'backend_options' => [
                                 'server' => 'merged.server',
                                 'port' => 'merged.port',
-                                'database' => 10
+                                'database' => 10,
                             ],
                         ],
                     ],
@@ -688,7 +688,7 @@ class CacheTest extends TestCase
                             'backend_options' => [
                                 'server' => 'merged.server',
                                 'port' => 'merged.port',
-                                'database' => 10
+                                'database' => 10,
                             ],
                         ],
                     ],
@@ -700,7 +700,7 @@ class CacheTest extends TestCase
                             'backend_options' => [
                                 'server' => 'merged.server',
                                 'port' => 'merged.port',
-                                'database' => 10
+                                'database' => 10,
                             ],
                         ],
                     ],

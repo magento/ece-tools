@@ -125,7 +125,12 @@ class CacheTest extends TestCase
         return [
             'backend model without remote_backend_options' => [
                 'config' => [
-                    'frontend' => ['frontName' => ['backend' => 'cacheDriver', 'backend_options' => 'some options']]
+                    'frontend' => [
+                        'frontName' => [
+                            'backend' => 'cacheDriver',
+                            'backend_options' => 'some options'
+                        ]
+                    ]
                 ]
             ],
             'backend model with remote_backend_options' => [
