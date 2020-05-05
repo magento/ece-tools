@@ -25,7 +25,7 @@ class Error implements ResultInterface
     private $suggestion;
 
     /**
-     * @var int|null
+     * @var integer|null
      */
     private $code;
 
@@ -60,7 +60,7 @@ class Error implements ResultInterface
     }
 
     /**
-     * @return int|null
+     * @return integer|null
      */
     public function getErrorCode(): ?int
     {

@@ -28,7 +28,7 @@ class ResultFactory
             return $this->error(
                 $arguments['error'],
                 $arguments['suggestion'] ?? '',
-                $arguments['error'] ?? null
+                $arguments['errorCode'] ?? null
             );
         }
 

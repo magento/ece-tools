@@ -43,6 +43,15 @@ class FileList extends ConfigFileList
      * @return string
      * @throws UndefinedPackageException
      */
+    public function getCloudErrorLog(): string
+    {
+        return $this->directoryList->getLog() . '/cloud.error.log';
+    }
+
+    /**
+     * @return string
+     * @throws UndefinedPackageException
+     */
     public function getTtfbLog(): string
     {
         return $this->directoryList->getLog() . '/ttfb_results.json';
@@ -55,6 +64,15 @@ class FileList extends ConfigFileList
     public function getInitCloudLog(): string
     {
         return $this->directoryList->getInit() . '/var/log/cloud.log';
+    }
+
+    /**
+     * @return string
+     * @throws UndefinedPackageException
+     */
+    public function getInitErrorCloudLog(): string
+    {
+        return $this->directoryList->getInit() . '/var/log/cloud.error.log';
     }
 
     /**
@@ -146,5 +164,15 @@ class FileList extends ConfigFileList
     public function getFrontStaticDist(): string
     {
         return $this->directoryList->getRoot() . '/dist/front-static.php.dist';
+    }
+
+    /**
+     * Returns path to schema.error.yaml file
+     *
+     * @return string
+     */
+    public function getErrorSchema(): string
+    {
+        return $this->directoryList->getRoot() . '/config/schema.error.yaml';
     }
 }

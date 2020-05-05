@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\App\Logger;
 
+use Illuminate\Contracts\Config\Repository;
 use Magento\MagentoCloud\App\Logger\Gelf\HandlerFactory as GelfHandlerFactory;
 use Magento\MagentoCloud\Config\GlobalSection;
 use Magento\MagentoCloud\Config\Log as LogConfig;
@@ -24,6 +25,7 @@ class HandlerFactory
 {
     const HANDLER_STREAM = 'stream';
     const HANDLER_FILE = 'file';
+    const HANDLER_FILE_ERROR = 'file_errors';
     const HANDLER_EMAIL = 'email';
     const HANDLER_SLACK = 'slack';
     const HANDLER_GELF = 'gelf';
@@ -70,13 +72,13 @@ class HandlerFactory
 
     /**
      * @param string $handler
+     * @param Repository|null $configuration
      * @return HandlerInterface
-     * @throws \Exception
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      */
-    public function create(string $handler): HandlerInterface
+    public function create(string $handler, Repository $configuration = null): HandlerInterface
     {
-        $configuration = $this->logConfig->get($handler);
+        $configuration = $configuration ?? $this->logConfig->get($handler);
         $levelOverride = $this->globalConfig->get(GlobalSection::VAR_MIN_LOGGING_LEVEL);
         $defaultLevel = $levelOverride ?: LogConfig::LEVEL_NOTICE;
         $minLevel = $this->levelResolver->resolve($configuration->get('min_level', $defaultLevel));
@@ -86,6 +88,12 @@ class HandlerFactory
                 $handlerInstance = new StreamHandler(
                     $configuration->get('file'),
                     $this->levelResolver->resolve($configuration->get('min_level', LogConfig::LEVEL_DEBUG))
+                );
+                break;
+            case static::HANDLER_FILE_ERROR:
+                $handlerInstance = new StreamHandler(
+                    $configuration->get('file'),
+                    $this->levelResolver->resolve($configuration->get('min_level', LogConfig::LEVEL_WARNING))
                 );
                 break;
             case static::HANDLER_STREAM:

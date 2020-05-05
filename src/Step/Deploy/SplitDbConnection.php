@@ -9,21 +9,17 @@ namespace Magento\MagentoCloud\Step\Deploy;
 
 use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\App\GenericException;
-use Magento\MagentoCloud\Config\ConfigException;
-use Magento\MagentoCloud\Filesystem\FileSystemException;
-use Magento\MagentoCloud\Filesystem\Flag\ConfigurationMismatchException;
-use Magento\MagentoCloud\Package\UndefinedPackageException;
+use Magento\MagentoCloud\Config\Database\DbConfig;
+use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface as ConfigReader;
+use Magento\MagentoCloud\Config\Stage\DeployInterface;
+use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Shell\MagentoShell;
 use Magento\MagentoCloud\Shell\ShellException;
+use Magento\MagentoCloud\Step\Deploy\SplitDbConnection\SlaveConnection;
 use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
 use Magento\MagentoCloud\Util\UpgradeProcess;
 use Psr\Log\LoggerInterface;
-use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
-use Magento\MagentoCloud\Config\Stage\DeployInterface;
-use Magento\MagentoCloud\Config\Database\DbConfig;
-use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface as ConfigReader;
-use Magento\MagentoCloud\Step\Deploy\SplitDbConnection\SlaveConnection;
 
 /**
  * Enables split database
@@ -111,11 +107,6 @@ class SplitDbConnection implements StepInterface
     /**
      * Starts the database splitting process
      * Updates the configuration of slave connections for split connections
-     *
-     * @throws ConfigException
-     * @throws FileSystemException
-     * @throws ConfigurationMismatchException
-     * @throws UndefinedPackageException
      */
     public function execute()
     {

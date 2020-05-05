@@ -60,6 +60,7 @@ class ValidateConfigurationTest extends TestCase
     {
         $this->expectException(StepException::class);
         $this->expectExceptionMessage('Fix configuration with given suggestions');
+        $this->expectExceptionCode(127);
 
         $warningValidator = $this->getMockForAbstractClass(ValidatorInterface::class);
         $warningValidator->expects($this->once())
@@ -75,7 +76,7 @@ class ValidateConfigurationTest extends TestCase
             $this->loggerMock,
             [
                 ValidatorInterface::LEVEL_CRITICAL => [
-                    $this->createValidatorWithError('some error', 'some  suggestion'),
+                    $this->createValidatorWithError('some error', 'some  suggestion', 127),
                 ],
                 ValidatorInterface::LEVEL_WARNING => [
                     $warningValidator,
@@ -122,6 +123,7 @@ class ValidateConfigurationTest extends TestCase
     {
         $this->expectException(StepException::class);
         $this->expectExceptionMessage('Fix configuration with given suggestions');
+        $this->expectExceptionCode(1);
 
         $this->loggerMock->expects($this->once())
             ->method('notice')
@@ -141,7 +143,7 @@ class ValidateConfigurationTest extends TestCase
             $this->loggerMock,
             [
                 ValidatorInterface::LEVEL_CRITICAL => [
-                    $this->createValidatorWithError('Critical error', 'some critical suggestion'),
+                    $this->createValidatorWithError('Critical error', 'some critical suggestion', 1),
                 ],
                 ValidatorInterface::LEVEL_WARNING => [
                     $this->createValidatorWithError('some warning', 'some warning suggestion'),
@@ -159,6 +161,7 @@ class ValidateConfigurationTest extends TestCase
     {
         $this->expectException(StepException::class);
         $this->expectExceptionMessage('Fix configuration with given suggestions');
+        $this->expectExceptionCode(10);
 
         $this->loggerMock->expects($this->once())
             ->method('notice')
@@ -184,7 +187,7 @@ class ValidateConfigurationTest extends TestCase
             $this->loggerMock,
             [
                 'critical' => [
-                    $this->createValidatorWithError('Critical error', 'some critical suggestion'),
+                    $this->createValidatorWithError('Critical error', 'some critical suggestion', 10),
                 ],
                 'warning' => [
                     $this->createValidatorWithError('some warning', 'some warning suggestion'),
@@ -200,9 +203,11 @@ class ValidateConfigurationTest extends TestCase
     /**
      * @param string $error
      * @param string $suggestion
+     * @param int|null $errorCode
      * @return MockObject|ValidatorInterface
+     * @throws \ReflectionException
      */
-    private function createValidatorWithError(string $error, string $suggestion): MockObject
+    private function createValidatorWithError(string $error, string $suggestion, int $errorCode = null): MockObject
     {
         $warningValidator = $this->getMockForAbstractClass(ValidatorInterface::class);
         $warningResultMock = $this->createMock(Result\Error::class);
@@ -213,6 +218,11 @@ class ValidateConfigurationTest extends TestCase
         $warningResultMock->expects($this->once())
             ->method('getSuggestion')
             ->willReturn($suggestion);
+        if ($errorCode !== null) {
+            $warningResultMock->expects($this->any())
+                ->method('getErrorCode')
+                ->willReturn($errorCode);
+        }
         $warningValidator->expects($this->once())
             ->method('validate')
             ->willReturn($warningResultMock);

@@ -65,6 +65,5 @@ class DisableCron implements StepInterface
         } catch (FileSystemException $e) {
             throw new StepException($e->getMessage(), Error::DEPLOY_ENV_PHP_IS_NOT_WRITABLE);
         }
-
     }
 }

@@ -31,7 +31,7 @@ class CleanCache implements StepInterface
     private $stageConfig;
 
     /**
-     * @var int
+     * @var integer
      */
     private $errorCode;
 

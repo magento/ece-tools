@@ -76,8 +76,8 @@ class StageConfig implements ValidatorInterface
         if ($errors) {
             return $this->resultFactory->error(
                 'Environment configuration is not valid. Correct the following items in your .magento.env.yaml file:',
-                 implode(PHP_EOL, $errors),
-                 AppError::BUILD_WRONG_CONFIGURATION_MAGENTO_ENV_YAML
+                implode(PHP_EOL, $errors),
+                AppError::BUILD_WRONG_CONFIGURATION_MAGENTO_ENV_YAML
             );
         }
 

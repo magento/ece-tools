@@ -99,6 +99,10 @@ class Log
                 [
                     HandlerFactory::HANDLER_STREAM => ['stream' => 'php://stdout'],
                     HandlerFactory::HANDLER_FILE => ['file' => $this->fileList->getCloudLog()],
+                    HandlerFactory::HANDLER_FILE_ERROR => [
+                        'file' => $this->fileList->getCloudErrorLog(),
+                        'min_level' => self::LEVEL_WARNING
+                    ],
                 ],
                 $this->reader->read()[static::SECTION_CONFIG] ?? []
             );
