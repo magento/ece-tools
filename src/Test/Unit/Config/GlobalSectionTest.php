@@ -169,7 +169,7 @@ class GlobalSectionTest extends TestCase
      */
     public function testNotExists(): void
     {
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(ConfigException::class);
         $this->expectExceptionMessage('Config NOT_EXISTS_VALUE was not defined.');
 
         $this->environmentReaderMock->expects($this->never())

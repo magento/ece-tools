@@ -72,8 +72,7 @@ class StageConfigTest extends TestCase
             ->method('validate')
             ->willReturn(new Validator\Result\Success());
         $this->resultFactoryMock->expects($this->once())
-            ->method('create')
-            ->with(Validator\Result\Success::SUCCESS)
+            ->method('success')
             ->willReturn(new Validator\Result\Success());
 
         $this->assertInstanceOf(Validator\Result\Success::class, $this->validator->validate());
@@ -94,8 +93,7 @@ class StageConfigTest extends TestCase
             ->method('validate')
             ->willReturn(new Validator\Result\Error('Some error'));
         $this->resultFactoryMock->expects($this->once())
-            ->method('create')
-            ->with(Validator\Result\Error::ERROR)
+            ->method('error')
             ->willReturn(new Validator\Result\Error('Some error'));
 
         $this->assertInstanceOf(Validator\Result\Error::class, $this->validator->validate());

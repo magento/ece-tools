@@ -11,7 +11,6 @@ use Magento\MagentoCloud\App\Error as AppError;
 use Magento\MagentoCloud\Config\Schema\Validator;
 use Magento\MagentoCloud\Config\StageConfigInterface;
 use Magento\MagentoCloud\Config\Validator\Result\Error;
-use Magento\MagentoCloud\Config\Validator\Result\Success;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
 use Magento\MagentoCloud\Config\Validator\ResultInterface;
 use Magento\MagentoCloud\Config\ValidatorInterface;
@@ -81,6 +80,6 @@ class StageConfig implements ValidatorInterface
             );
         }
 
-        return $this->resultFactory->create(Success::SUCCESS);
+        return $this->resultFactory->success();
     }
 }

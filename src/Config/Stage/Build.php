@@ -62,7 +62,7 @@ class Build implements BuildInterface
         try {
             return $this->mergeConfig()[$name];
         } catch (\Exception $exception) {
-            throw new \RuntimeException(
+            throw new ConfigException(
                 $exception->getMessage(),
                 $exception->getCode(),
                 $exception

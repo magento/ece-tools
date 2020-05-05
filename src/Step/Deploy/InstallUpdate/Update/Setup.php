@@ -9,7 +9,6 @@ namespace Magento\MagentoCloud\Step\Deploy\InstallUpdate\Update;
 
 use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\App\GenericException;
-use Magento\MagentoCloud\Filesystem\Flag\ConfigurationMismatchException;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Shell\UtilityException;
@@ -47,14 +46,14 @@ class Setup implements StepInterface
     /**
      * @inheritdoc
      *
-     * @throws ConfigurationMismatchException
      * @throws StepException
      */
     public function execute()
     {
-        $this->flagManager->delete(FlagManager::FLAG_REGENERATE);
         try {
+            $this->flagManager->delete(FlagManager::FLAG_REGENERATE);
             $this->upgradeProcess->execute();
+            $this->flagManager->delete(FlagManager::FLAG_REGENERATE);
         } catch (ShellException $e) {
             throw new StepException($e->getMessage(), Error::DEPLOY_UPGRADE_COMMAND_FAILED, $e);
         } catch (UtilityException $e) {
@@ -62,6 +61,5 @@ class Setup implements StepInterface
         } catch (GenericException $e) {
             throw new StepException($e->getMessage(), $e->getCode(), $e);
         }
-        $this->flagManager->delete(FlagManager::FLAG_REGENERATE);
     }
 }
