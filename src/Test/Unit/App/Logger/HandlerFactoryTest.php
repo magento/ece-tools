@@ -210,6 +210,17 @@ class HandlerFactoryTest extends TestCase
                 'expectedClass' => StreamHandler::class,
                 'expectedLevel' => Logger::DEBUG,
             ],
+            'file error handler default' => [
+                'handler' => HandlerFactory::HANDLER_FILE_ERROR,
+                'repositoryMockReturnMap' => [
+                    ['file', null, 'var/log/cloud.error.log'],
+                    ['min_level', LogConfig::LEVEL_NOTICE, LogConfig::LEVEL_NOTICE],
+                    ['min_level', LogConfig::LEVEL_WARNING, LogConfig::LEVEL_WARNING],
+                ],
+                'minLevelOverride' => '',
+                'expectedClass' => StreamHandler::class,
+                'expectedLevel' => Logger::WARNING,
+            ],
             'file handler min_level overwritten' => [
                 'handler' => HandlerFactory::HANDLER_FILE,
                 'repositoryMockReturnMap' => [
