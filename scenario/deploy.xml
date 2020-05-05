@@ -26,6 +26,7 @@
                     <item name="search-configuration" xsi:type="object">Magento\MagentoCloud\Config\Validator\Deploy\SearchConfiguration</item>
                     <item name="resource-configuration" xsi:type="object">Magento\MagentoCloud\Config\Validator\Deploy\ResourceConfiguration</item>
                     <item name="session-configuration" xsi:type="object">Magento\MagentoCloud\Config\Validator\Deploy\SessionConfiguration</item>
+                    <item name="elasticsearch-integrity" xsi:type="object">Magento\MagentoCloud\Config\Validator\Deploy\ElasticSearchIntegrity</item>
                     <item name="elasticsuite-integrity" xsi:type="object">Magento\MagentoCloud\Config\Validator\Deploy\ElasticSuiteIntegrity</item>
                     <item name="redis-backend-configuration" xsi:type="object">Magento\MagentoCloud\Config\Validator\Deploy\RedisBackend</item>
                 </item>
