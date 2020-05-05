@@ -7,7 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Config\Validator\Build;
 
-use Composer\Package\PackageInterface;
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\Validator\Build\ComposerFile;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
 use Magento\MagentoCloud\Filesystem\Driver\File;
@@ -121,7 +121,8 @@ class ComposerFileTest extends TestCase
                 'Required configuration is missed in autoload section of composer.json file.',
                 'Add ("Laminas\Mvc\Controller\: "setup/src/Zend/Mvc/Controller/") to autoload -> psr-4 ' .
                 'section and re-run "composer update" command locally. Then commit new composer.json ' .
-                'and composer.lock files.'
+                'and composer.lock files.',
+                Error::BUILD_COMPOSER_MISSED_REQUIRED_AUTOLOAD
             );
         $this->managerMock->expects($this->once())
             ->method('has')
@@ -162,7 +163,11 @@ class ComposerFileTest extends TestCase
             ->willReturn(__DIR__ . '/_files/file_not_exists.json');
         $this->resultFactoryMock->expects($this->once())
             ->method('error')
-            ->with($this->stringStartsWith('Can\'t read composer.json file: Cannot read contents from file'));
+            ->with(
+                $this->stringStartsWith('Can\'t read composer.json file: Cannot read contents from file'),
+                '',
+                Error::BUILD_CANT_READ_COMPOSER_JSON
+            );
 
         $this->validator->validate();
     }
@@ -179,7 +184,11 @@ class ComposerFileTest extends TestCase
             ->method('getMagentoComposer');
         $this->resultFactoryMock->expects($this->once())
             ->method('error')
-            ->with($this->stringStartsWith('Can\'t get magento version: some error'));
+            ->with(
+                $this->stringStartsWith('Can\'t get magento version: some error'),
+                '',
+                Error::BUILD_COMPOSER_PACKAGE_NOT_FOUND
+            );
 
         $this->validator->validate();
     }

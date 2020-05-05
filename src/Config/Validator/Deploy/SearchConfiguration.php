@@ -63,7 +63,7 @@ class SearchConfiguration implements ValidatorInterface
 
         if (!isset($searchConfig['engine'])) {
             return $this->resultFactory->error(
-                sprintf('Variable "%s" is not configured properly', DeployInterface::VAR_SEARCH_CONFIGURATION),
+                sprintf('Variable %s is not configured properly', DeployInterface::VAR_SEARCH_CONFIGURATION),
                 'At least engine option must be configured',
                 Error::DEPLOY_WRONG_CONFIGURATION_SEARCH
             );

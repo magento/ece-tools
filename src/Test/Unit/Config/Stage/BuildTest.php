@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Config\Stage;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\ConfigException;
 use Magento\MagentoCloud\Config\Schema;
 use Magento\MagentoCloud\Config\Stage\Build;
@@ -265,6 +266,7 @@ class BuildTest extends TestCase
     {
         $this->expectException(ConfigException::class);
         $this->expectExceptionMessage('Config NOT_EXISTS_VALUE was not defined.');
+        $this->expectExceptionCode(Error::BUILD_CONFIG_NOT_DEFINED);
 
         $this->environmentReaderMock->method('read')
             ->willReturn([]);

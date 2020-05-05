@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Config\Validator\Build;
 
+use Magento\MagentoCloud\App\Error as AppError;
 use Magento\MagentoCloud\Config\Validator\Build\StageConfig;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -94,6 +95,11 @@ class StageConfigTest extends TestCase
             ->willReturn(new Validator\Result\Error('Some error'));
         $this->resultFactoryMock->expects($this->once())
             ->method('error')
+            ->with(
+                'Environment configuration is not valid. Correct the following items in your .magento.env.yaml file:',
+                'Some error',
+                AppError::BUILD_WRONG_CONFIGURATION_MAGENTO_ENV_YAML
+            )
             ->willReturn(new Validator\Result\Error('Some error'));
 
         $this->assertInstanceOf(Validator\Result\Error::class, $this->validator->validate());
