@@ -8,6 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Step\Build;
 
 use Magento\MagentoCloud\App\Error;
+use Magento\MagentoCloud\Config\ConfigException;
 use Magento\MagentoCloud\Patch\Manager;
 use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Step\StepException;
@@ -38,8 +39,10 @@ class ApplyPatches implements StepInterface
     {
         try {
             $this->manager->apply();
-        } catch (ShellException $exception) {
-            throw new StepException($exception->getMessage(), Error::BUILD_PATCH_APPLYING_FAILED, $exception);
+        } catch (ConfigException $e) {
+            throw new StepException($e->getMessage(), Error::BUILD_CONFIG_NOT_DEFINED, $e);
+        } catch (ShellException $e) {
+            throw new StepException($e->getMessage(), Error::BUILD_PATCH_APPLYING_FAILED, $e);
         }
     }
 }

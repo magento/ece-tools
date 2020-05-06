@@ -80,8 +80,8 @@ class CleanRedisCache implements StepInterface
             try {
                 $client->connect();
                 $client->flushDb();
-            } catch (CredisException $exception) {
-                throw new StepException($exception->getMessage(), Error::DEPLOY_REDIS_CACHE_CLEAN_FAILED, $exception);
+            } catch (CredisException $e) {
+                throw new StepException($e->getMessage(), Error::DEPLOY_REDIS_CACHE_CLEAN_FAILED, $e);
             }
         }
     }

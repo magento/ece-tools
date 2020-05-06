@@ -50,8 +50,8 @@ class SetProductionMode implements StepInterface
 
         try {
             $this->writer->update(['MAGE_MODE' => 'production']);
-        } catch (FileSystemException $exception) {
-            throw new StepException($exception->getMessage(), Error::BUILD_ENV_PHP_IS_NOT_WRITABLE, $exception);
+        } catch (FileSystemException $e) {
+            throw new StepException($e->getMessage(), Error::BUILD_ENV_PHP_IS_NOT_WRITABLE, $e);
         }
     }
 }

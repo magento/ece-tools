@@ -99,8 +99,8 @@ class RunBaler implements StepInterface
 
         try {
             $this->shell->execute('baler');
-        } catch (ShellException $exception) {
-            throw new StepException($exception->getMessage(), Error::BUILD_BALER_NOT_FOUND, $exception);
+        } catch (ShellException $e) {
+            throw new StepException($e->getMessage(), Error::BUILD_BALER_NOT_FOUND, $e);
         }
 
         $this->logger->info('Baler JS bundling complete.');

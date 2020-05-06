@@ -70,7 +70,7 @@ class FileList extends ConfigFileList
      * @return string
      * @throws UndefinedPackageException
      */
-    public function getInitErrorCloudLog(): string
+    public function getInitCloudErrorLog(): string
     {
         return $this->directoryList->getInit() . '/var/log/cloud.error.log';
     }

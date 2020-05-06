@@ -58,8 +58,9 @@ class Error
     public const DEPLOY_UPGRADE_COMMAND_FAILED = 123;
     public const DEPLOY_CACHE_FLUSH_COMMAND_FAILED = 124;
     public const DEPLOY_MAINTENANCE_MODE_DISABLING_FAILED = 125;
+    public const DEPLOY_UNABLE_TO_READ_RESET_PASSWORD_TMPL = 126;
 
-    public const PD_DEPLOY_ID_FAILED = 201;
+    public const PD_DEPLOY_IS_FAILED = 201;
     public const PD_ENV_PHP_IS_NOT_WRITABLE = 202;
     public const PD_CONFIG_NOT_DEFINED = 203;
     public const PD_DURING_PAGE_WARM_UP = 204;

@@ -36,7 +36,7 @@ class DeployFailed implements StepInterface
     public function execute()
     {
         if ($this->flagManager->exists(Manager::FLAG_DEPLOY_HOOK_IS_FAILED)) {
-            throw new StepException('Post-deploy is skipped because deploy was failed.', Error::PD_DEPLOY_ID_FAILED);
+            throw new StepException('Post-deploy is skipped because deploy was failed.', Error::PD_DEPLOY_IS_FAILED);
         }
     }
 }

@@ -61,7 +61,7 @@ class ErrorLogFile
             $this->file->createDirectory($this->directoryList->getLog());
 
             $deployErrorLogPath = $this->fileList->getCloudErrorLog();
-            $buildPhaseErrorLogPath = $this->fileList->getInitErrorCloudLog();
+            $buildPhaseErrorLogPath = $this->fileList->getInitCloudErrorLog();
             if ($this->isNeedToCopyBuildErrorLogFile($deployErrorLogPath, $buildPhaseErrorLogPath)) {
                 $this->file->copy($buildPhaseErrorLogPath, $deployErrorLogPath);
             }

@@ -60,8 +60,7 @@ class SessionConfigurationTest extends TestCase
         $this->stageConfigMock->expects($this->once())
             ->method('get')
             ->with(DeployInterface::VAR_SESSION_CONFIGURATION)
-            ->willReturn(['key' => 'value']
-            );
+            ->willReturn(['key' => 'value']);
         $this->resultFactoryMock->expects($this->once())
             ->method('error')
             ->with(

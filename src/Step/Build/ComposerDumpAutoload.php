@@ -38,8 +38,8 @@ class ComposerDumpAutoload implements StepInterface
     {
         try {
             $this->shell->execute('composer dump-autoload -o --ansi --no-interaction');
-        } catch (ShellException $exception) {
-            throw new StepException($exception->getMessage(), Error::BUILD_COMPOSER_DUMP_AUTOLOAD_FAILED, $exception);
+        } catch (ShellException $e) {
+            throw new StepException($e->getMessage(), Error::BUILD_COMPOSER_DUMP_AUTOLOAD_FAILED, $e);
         }
     }
 }

@@ -69,7 +69,7 @@ class SetAdminUrl implements StepInterface
         try {
             $this->configWriter->update($config);
         } catch (FileSystemException $e) {
-            throw new StepException($e->getMessage(), Error::BUILD_ENV_PHP_IS_NOT_WRITABLE, $e);
+            throw new StepException($e->getMessage(), Error::DEPLOY_ENV_PHP_IS_NOT_WRITABLE, $e);
         }
     }
 }

@@ -79,6 +79,8 @@ class ConfigImport implements StepInterface
             );
         } catch (ShellException $e) {
             throw new StepException($e->getMessage(), Error::DEPLOY_CONFIG_IMPORT_COMMAND_FAILED, $e);
+        } catch (\Exception $e) {
+            throw new StepException($e->getMessage(), $e->getCode(), $e);
         }
     }
 }

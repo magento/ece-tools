@@ -8,13 +8,14 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Step\Build;
 
 use Magento\MagentoCloud\App\Error;
+use Magento\MagentoCloud\Config\Stage\BuildInterface;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
+use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Shell\UtilityException;
 use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
-use Psr\Log\LoggerInterface;
 use Magento\MagentoCloud\Util\StaticContentCompressor;
-use Magento\MagentoCloud\Config\Stage\BuildInterface;
+use Psr\Log\LoggerInterface;
 
 /**
  * Compress static content at build time.
@@ -79,24 +80,26 @@ class CompressStaticContent implements StepInterface
      */
     public function execute()
     {
-        if (!$this->flagManager->exists(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)) {
-            $this->logger->info(
-                'Skipping build-time static content compression because static content deployment has not happened.'
-            );
-
-            return;
-        }
-
         try {
+            if (!$this->flagManager->exists(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)) {
+                $this->logger->info(
+                    'Skipping build-time static content compression because static content deployment has not happened.'
+                );
+
+                return;
+            }
+
             $this->compressor->process(
                 $this->stageConfig->get(BuildInterface::VAR_SCD_COMPRESSION_LEVEL),
                 $this->stageConfig->get(BuildInterface::VAR_SCD_COMPRESSION_TIMEOUT),
                 $this->stageConfig->get(BuildInterface::VAR_VERBOSE_COMMANDS)
             );
+        } catch (ShellException $e) {
+            throw new StepException($e->getMessage(), Error::BUILD_SCD_COMPRESSION_FAILED, $e);
         } catch (UtilityException $e) {
             throw new StepException($e->getMessage(), Error::BUILD_UTILITY_NOT_FOUND, $e);
         } catch (\Exception $e) {
-            throw new StepException($e->getMessage(), Error::BUILD_SCD_COMPRESSION_FAILED, $e);
+            throw new StepException($e->getMessage(), $e->getCode(), $e);
         }
     }
 }

@@ -16,6 +16,9 @@ use Magento\MagentoCloud\Package\UndefinedPackageException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * @inheritDoc
+ */
 class ErrorLogFileTest extends TestCase
 {
     /**
@@ -141,7 +144,7 @@ class ErrorLogFileTest extends TestCase
             ->method('getCloudErrorLog')
             ->willReturn('/var/log/cloud.error.log');
         $this->fileListMock->expects($this->once())
-            ->method('getInitErrorCloudLog')
+            ->method('getInitCloudErrorLog')
             ->willReturn('/init/var/log/cloud.error.log');
     }
 }
