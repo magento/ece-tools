@@ -19,7 +19,7 @@ use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
 /**
- * @inheritdoc
+ * @see UrlManager
  */
 class UrlManagerTest extends TestCase
 {
@@ -46,7 +46,7 @@ class UrlManagerTest extends TestCase
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->environmentMock = $this->createMock(Environment::class);
@@ -68,7 +68,7 @@ class UrlManagerTest extends TestCase
      * @param array $routes
      * @dataProvider secureRouteDataProvider
      */
-    public function testParseRoutesSecure(array $routes)
+    public function testParseRoutesSecure(array $routes): void
     {
         $this->environmentMock->expects($this->once())
             ->method('getRoutes')
@@ -81,7 +81,7 @@ class UrlManagerTest extends TestCase
      * @param array $routes
      * @dataProvider unsecureRouteDataProvider
      */
-    public function testParseRoutesUnsecure(array $routes)
+    public function testParseRoutesUnsecure(array $routes): void
     {
         $this->environmentMock->expects($this->once())
             ->method('getRoutes')
@@ -95,7 +95,7 @@ class UrlManagerTest extends TestCase
      * @param string $expectedUrl
      * @dataProvider secureRouteDataProvider
      */
-    public function testGetSecureUrlMethod(array $secureRoute, string $expectedUrl)
+    public function testGetSecureUrlMethod(array $secureRoute, string $expectedUrl): void
     {
         $this->environmentMock->expects($this->once())
             ->method('getRoutes')
@@ -109,7 +109,7 @@ class UrlManagerTest extends TestCase
      * @param string $expectedUrl
      * @dataProvider unsecureRouteDataProvider
      */
-    public function testGetUnsecureUrlMethod(array $unsecureRoute, string $expectedUrl)
+    public function testGetUnsecureUrlMethod(array $unsecureRoute, string $expectedUrl): void
     {
         $this->environmentMock->expects($this->once())
             ->method('getRoutes')
@@ -125,7 +125,7 @@ class UrlManagerTest extends TestCase
      * @param $expectedUrl
      * @dataProvider noSecureRouteUrlDataProvider
      */
-    public function testNoSecure(array $unsecureRoute, array $expectedUrl)
+    public function testNoSecure(array $unsecureRoute, array $expectedUrl): void
     {
         $this->environmentMock->expects($this->once())
             ->method('getRoutes')
@@ -138,7 +138,7 @@ class UrlManagerTest extends TestCase
      * @param array $secureRoute
      * @dataProvider secureRouteUrlDataProvider
      */
-    public function testGetSecureUrl(array $secureRoute)
+    public function testGetSecureUrl(array $secureRoute): void
     {
         $this->environmentMock->expects($this->once())
             ->method('getRoutes')
@@ -153,7 +153,7 @@ class UrlManagerTest extends TestCase
      * @param array $expectedResult
      * @dataProvider getUrlsDataProvider
      */
-    public function testGetUrls(array $routes, array $expectedResult)
+    public function testGetUrls(array $routes, array $expectedResult): void
     {
         $this->environmentMock->expects($this->once())
             ->method('getRoutes')
@@ -164,15 +164,18 @@ class UrlManagerTest extends TestCase
         $this->assertEquals($expectedResult, $this->manager->getUrls());
     }
 
-    public function testGetUrlsException()
+    public function testGetUrlsException(): void
     {
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('Expected at least one valid unsecure or secure route. None found.');
 
-        // No Mock so we get an exception indicating no URLS present.
+        // No Mock so we get an exception indicating no URLs present.
         $this->manager->getUrls();
     }
 
+    /**
+     * @return array
+     */
     public function allRoutesDataProvider(): array
     {
         return [
@@ -183,6 +186,9 @@ class UrlManagerTest extends TestCase
         ];
     }
 
+    /**
+     * @return array
+     */
     public function noSecureRouteUrlDataProvider(): array
     {
         return [
@@ -195,6 +201,9 @@ class UrlManagerTest extends TestCase
         ];
     }
 
+    /**
+     * @return array
+     */
     public function secureRouteDataProvider(): array
     {
         return [
@@ -205,6 +214,9 @@ class UrlManagerTest extends TestCase
         ];
     }
 
+    /**
+     * @return array
+     */
     public function unsecureRouteDataProvider(): array
     {
         return [
@@ -215,6 +227,9 @@ class UrlManagerTest extends TestCase
         ];
     }
 
+    /**
+     * @return array
+     */
     public function secureRouteUrlDataProvider(): array
     {
         return [
@@ -224,6 +239,9 @@ class UrlManagerTest extends TestCase
         ];
     }
 
+    /**
+     * @return array
+     */
     public function unsecureRouteUrlDataProvider(): array
     {
         return [
@@ -368,7 +386,7 @@ class UrlManagerTest extends TestCase
         ];
     }
 
-    public function testGetBaseUrl()
+    public function testGetBaseUrl(): void
     {
         $processMock = $this->getMockForAbstractClass(ProcessInterface::class);
         $processMock->expects($this->once())
@@ -379,17 +397,15 @@ class UrlManagerTest extends TestCase
             ->method('execute')
             ->with('config:show:default-url')
             ->willReturn($processMock);
-
         $this->environmentMock->expects($this->never())
             ->method('getRoutes');
-
         $this->assertEquals(
             'https://example.com/',
             $this->manager->getBaseUrl()
         );
     }
 
-    public function testExpandUrl()
+    public function testExpandUrl(): void
     {
         $processMock = $this->createMock(ProcessInterface::class);
         $processMock->expects($this->once())
@@ -406,7 +422,7 @@ class UrlManagerTest extends TestCase
         $this->assertSame('https://example2.com/catalog', $this->manager->expandUrl('https://example2.com/catalog'));
     }
 
-    public function testIsRelatedDomain()
+    public function testIsRelatedDomain(): void
     {
         $processMock = $this->createMock(ProcessInterface::class);
         $processMock->expects($this->once())
@@ -429,7 +445,7 @@ class UrlManagerTest extends TestCase
         $this->assertFalse($this->manager->isRelatedDomain('https://example4.com'));
     }
 
-    public function testIsUrlValid()
+    public function testIsUrlValid(): void
     {
         $processMock = $this->createMock(ProcessInterface::class);
         $processMock->expects($this->once())
@@ -454,7 +470,7 @@ class UrlManagerTest extends TestCase
         $this->assertFalse($this->manager->isUrlValid('https://example4.com/some/more/path'));
     }
 
-    public function testGetBaseUrlWithEmptyStoreUrls()
+    public function testGetBaseUrlWithEmptyStoreUrls(): void
     {
         $processMock = $this->getMockForAbstractClass(ProcessInterface::class);
         $processMock->expects($this->never())
@@ -464,7 +480,6 @@ class UrlManagerTest extends TestCase
             ->method('execute')
             ->with('config:show:default-url')
             ->willThrowException(new ShellException('some error'));
-
         $this->environmentMock->expects($this->once())
             ->method('getRoutes')
             ->willReturn(['http://example.com/' => ['original_url' => 'https://{default}', 'type' => 'upstream']]);
@@ -474,10 +489,11 @@ class UrlManagerTest extends TestCase
                 'Cannot fetch base URL using the config:show:default-url command. ' .
                 'Instead, using the URL from the MAGENTO_CLOUD_ROUTES variable.'
             );
-        $this->loggerMock->expects($this->exactly(2))
+        $this->loggerMock->expects($this->exactly(3))
             ->method('debug')
             ->withConsecutive(
                 ['some error'],
+                ['Initializing routes.'],
                 [$this->anything()]
             );
 
@@ -492,7 +508,7 @@ class UrlManagerTest extends TestCase
      * @param string $expectedUrl
      * @dataProvider getBaseUrlDataProvider
      */
-    public function testGetBaseUrlWithErrorFromDefaultUrlCommand(array $routes, string $expectedUrl)
+    public function testGetBaseUrlWithErrorFromDefaultUrlCommand(array $routes, string $expectedUrl): void
     {
         $processMock = $this->getMockForAbstractClass(ProcessInterface::class);
         $processMock->expects($this->never())
@@ -547,7 +563,7 @@ class UrlManagerTest extends TestCase
         ];
     }
 
-    public function testGetBaseUrls()
+    public function testGetBaseUrls(): void
     {
         $processMock = $this->getMockForAbstractClass(ProcessInterface::class);
         $processMock->expects($this->once())
