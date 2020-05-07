@@ -7,17 +7,25 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Step\Deploy\InstallUpdate\Install\Setup;
 
+use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Config\AdminDataInterface;
+use Magento\MagentoCloud\Config\ConfigException;
 use Magento\MagentoCloud\Config\Database\DbConfig;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\DB\Data\ConnectionFactory;
 use Magento\MagentoCloud\DB\Data\ConnectionInterface;
 use Magento\MagentoCloud\Config\SearchEngine\ElasticSuite;
+use Magento\MagentoCloud\Package\MagentoVersion;
+use Magento\MagentoCloud\Package\UndefinedPackageException;
+use Magento\MagentoCloud\Service\ElasticSearch;
+use Magento\MagentoCloud\Service\ServiceException;
 use Magento\MagentoCloud\Util\UrlManager;
 use Magento\MagentoCloud\Util\PasswordGenerator;
 
 /**
  * Generates command for magento installation
+ *
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class InstallCommandFactory
 {
@@ -61,6 +69,16 @@ class InstallCommandFactory
     private $dbConfig;
 
     /**
+     * @var MagentoVersion
+     */
+    private $magentoVersion;
+
+    /**
+     * @var ElasticSearch
+     */
+    private $elasticSearch;
+
+    /**
      * @param UrlManager $urlManager
      * @param AdminDataInterface $adminData
      * @param ConnectionFactory $connectionFactory
@@ -68,6 +86,8 @@ class InstallCommandFactory
      * @param DeployInterface $stageConfig
      * @param ElasticSuite $elasticSuite
      * @param DbConfig $dbConfig
+     * @param MagentoVersion $magentoVersion
+     * @param ElasticSearch $elasticSearch
      */
     public function __construct(
         UrlManager $urlManager,
@@ -76,7 +96,9 @@ class InstallCommandFactory
         PasswordGenerator $passwordGenerator,
         DeployInterface $stageConfig,
         ElasticSuite $elasticSuite,
-        DbConfig $dbConfig
+        DbConfig $dbConfig,
+        MagentoVersion $magentoVersion,
+        ElasticSearch $elasticSearch
     ) {
         $this->urlManager = $urlManager;
         $this->adminData = $adminData;
@@ -85,30 +107,34 @@ class InstallCommandFactory
         $this->stageConfig = $stageConfig;
         $this->elasticSuite = $elasticSuite;
         $this->dbConfig = $dbConfig;
+        $this->magentoVersion = $magentoVersion;
+        $this->elasticSearch = $elasticSearch;
     }
 
     /**
-     * Creates magento install command according to configured variables
-     *
      * @return string
+     * @throws ConfigException
      */
     public function create(): string
     {
-        $command = $this->getBaseCommand();
-
-        /**
-         * Hack to prevent ElasticSuite from throwing exception.
-         */
-        if ($this->elasticSuite->isAvailable()) {
-            $host = $this->elasticSuite->get()['es_client']['servers'] ?? null;
-
-            if ($host) {
-                $command .= ' --es-hosts=' . escapeshellarg($host);
-            }
-        }
+        $command = 'php ./bin/magento setup:install';
 
         if ($this->stageConfig->get(DeployInterface::VAR_VERBOSE_COMMANDS)) {
             $command .= ' ' . $this->stageConfig->get(DeployInterface::VAR_VERBOSE_COMMANDS);
+        }
+
+        try {
+            $options = array_replace(
+                $this->getBaseOptions(),
+                $this->getAdminOptions(),
+                $this->getEsOptions()
+            );
+        } catch (GenericException $exception) {
+            throw new ConfigException($exception->getMessage(), $exception->getCode(), $exception);
+        }
+
+        foreach ($options as $option => $value) {
+            $command .= sprintf(' %s%s', $option, $value === null ? '' : '=' . escapeshellarg($value));
         }
 
         return $command;
@@ -117,65 +143,105 @@ class InstallCommandFactory
     /**
      * Return base part of install command
      *
-     * @return string
+     * @return array
+     *
+     * @throws ConfigException
      */
-    private function getBaseCommand(): string
+    private function getBaseOptions(): array
     {
         $urlUnSecure = $this->urlManager->getUnSecureUrls()[''];
         $urlSecure = $this->urlManager->getSecureUrls()[''];
         $adminUrl = $this->adminData->getUrl() ?: AdminDataInterface::DEFAULT_ADMIN_URL;
 
-        $command = 'php ./bin/magento setup:install'
-            . ' -n --session-save=db --cleanup-database'
-            . ' --use-secure-admin=1 --use-rewrites=1 --ansi --no-interaction'
-            . ' --currency=' . escapeshellarg($this->adminData->getDefaultCurrency())
-            . ' --base-url=' . escapeshellarg($urlUnSecure)
-            . ' --base-url-secure=' . escapeshellarg($urlSecure)
-            . ' --backend-frontname=' . escapeshellarg($adminUrl)
-            . ' --language=' . escapeshellarg($this->adminData->getLocale())
-            . ' --timezone=America/Los_Angeles'
-            . ' --db-host=' . escapeshellarg($this->getConnectionData()->getHost())
-            . ' --db-name=' . escapeshellarg($this->getConnectionData()->getDbName())
-            . ' --db-user=' . escapeshellarg($this->getConnectionData()->getUser());
+        $options = [
+            '-n' => null,
+            '--ansi' => null,
+            '--no-interaction' => null,
+            '--cleanup-database' => null,
+            '--session-save' => 'db',
+            '--use-secure-admin' => '1',
+            '--use-rewrites' => '1',
+            '--currency' => $this->adminData->getDefaultCurrency(),
+            '--base-url' => $urlUnSecure,
+            '--base-url-secure' => $urlSecure,
+            '--backend-frontname' => $adminUrl,
+            '--language' => $this->adminData->getLocale(),
+            '--timezone' => 'America/Los_Angeles',
+            '--db-host' => $this->getConnectionData()->getHost(),
+            '--db-name' => $this->getConnectionData()->getDbName(),
+            '--db-user' => $this->getConnectionData()->getUser(),
+        ];
 
-        $dbPassword = $this->getConnectionData()->getPassword();
-        if (!empty($dbPassword)) {
-            $command .= ' --db-password=' . escapeshellarg($dbPassword);
+        if ($dbPassword = $this->getConnectionData()->getPassword()) {
+            $options['--db-password'] = $dbPassword;
         }
 
-        if ($table_prefix = $this->dbConfig->get()['table_prefix'] ?? '') {
-            $command .= ' --db-prefix=' . escapeshellarg($table_prefix);
+        if ($tablePrefix = $this->dbConfig->get()['table_prefix'] ?? '') {
+            $options['--db-prefix'] = $tablePrefix;
         }
 
-        if ($this->adminData->getEmail()) {
-            $command .= $this->getAdminCredentials();
-        }
-
-        return $command;
+        return $options;
     }
 
     /**
-     * Returns part with admin credentials for install command
-     *
-     * @return string
+     * @return array
      */
-    private function getAdminCredentials(): string
+    private function getAdminOptions(): array
     {
-        return ' --admin-user=' . escapeshellarg($this->adminData->getUsername()
-                ?: AdminDataInterface::DEFAULT_ADMIN_NAME)
-            . ' --admin-firstname=' . escapeshellarg($this->adminData->getFirstName()
-                ?: AdminDataInterface::DEFAULT_ADMIN_FIRST_NAME)
-            . ' --admin-lastname=' . escapeshellarg($this->adminData->getLastName()
-                ?: AdminDataInterface::DEFAULT_ADMIN_LAST_NAME)
-            . ' --admin-email=' . escapeshellarg($this->adminData->getEmail())
-            . ' --admin-password=' . escapeshellarg($this->adminData->getPassword()
-                ?: $this->passwordGenerator->generateRandomPassword());
+        if ($this->adminData->getEmail()) {
+            return [
+                '--admin-user' => $this->adminData->getUsername()
+                    ?: AdminDataInterface::DEFAULT_ADMIN_NAME,
+                '--admin-firstname' => $this->adminData->getFirstName()
+                    ?: AdminDataInterface::DEFAULT_ADMIN_FIRST_NAME,
+                '--admin-lastname' => $this->adminData->getLastName()
+                    ?: AdminDataInterface::DEFAULT_ADMIN_LAST_NAME,
+                '--admin-email' => $this->adminData->getEmail(),
+                '--admin-password' => $this->adminData->getPassword()
+                    ?: $this->passwordGenerator->generateRandomPassword(),
+            ];
+        }
+
+        return [];
+    }
+
+    /**
+     * Resolves Elasticsearch additional config options.
+     *
+     * @return array
+     * @throws UndefinedPackageException
+     * @throws ConfigException
+     * @throws ServiceException
+     */
+    private function getEsOptions(): array
+    {
+        $options = [];
+
+        if ($this->magentoVersion->isGreaterOrEqual('2.4.0')) {
+            if (!$this->elasticSearch->isInstalled()) {
+                throw new ConfigException('Elasticsearch service is required');
+            }
+
+            $options['--search-engine'] = $this->elasticSearch->getFullVersion();
+            $options['--elasticsearch-host'] = $this->elasticSearch->getHost();
+            $options['--elasticsearch-port'] = $this->elasticSearch->getPort();
+        }
+
+        /**
+         * Hack to prevent ElasticSuite from throwing exception.
+         */
+        if ($this->elasticSuite->isAvailable() && $this->elasticSuite->getServers()) {
+            $options['--es-hosts'] = $this->elasticSuite->getServers();
+        }
+
+        return $options;
     }
 
     /**
      * Returns instance of ConnectionInterface
      *
      * @return ConnectionInterface
+     * @throws ConfigException
      */
     private function getConnectionData(): ConnectionInterface
     {

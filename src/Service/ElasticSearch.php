@@ -7,17 +7,19 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Service;
 
+use Composer\Semver\Semver;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Http\ClientFactory;
 use Psr\Log\LoggerInterface;
+use Throwable;
 
 /**
  * Returns ElasticSearch service configurations.
  */
 class ElasticSearch implements ServiceInterface
 {
-    const RELATIONSHIP_KEY = 'elasticsearch';
-    const ENGINE_NAME = 'elasticsearch';
+    private const RELATIONSHIP_KEY = 'elasticsearch';
+    public const ENGINE_NAME = 'elasticsearch';
 
     /**
      * @var ClientFactory
@@ -80,31 +82,77 @@ class ElasticSearch implements ServiceInterface
      *   elasticsearch doesn't exist in relationships.
      *
      * @return string
+     *
+     * @throws ServiceException
      */
     public function getVersion(): string
     {
+        if (!$this->isInstalled()) {
+            return '0';
+        }
+
         if ($this->version === null) {
-            $this->version = '0';
-
-            $config = $this->getConfiguration();
-            if (!$config) {
-                return $this->version;
-            }
-
             try {
                 $esConfiguration = $this->call(sprintf(
                     '%s:%s',
-                    $config['host'],
-                    $config['port']
+                    $this->getHost(),
+                    $this->getPort()
                 ));
 
                 $this->version = $esConfiguration['version']['number'];
-            } catch (\Exception $exception) {
-                $this->logger->warning('Can\'t get version of elasticsearch: ' . $exception->getMessage());
+            } catch (Throwable $exception) {
+                throw new ServiceException('Can\'t get version of elasticsearch: ' . $exception->getMessage());
             }
         }
 
         return $this->version;
+    }
+
+    /**
+     * Retrieve host.
+     *
+     * @return string
+     * @throws ServiceException
+     */
+    public function getHost(): string
+    {
+        if (!$this->isInstalled()) {
+            throw new ServiceException('ES service is not installed');
+        }
+
+        return (string)$this->getConfiguration()['host'];
+    }
+
+    /**
+     * Retrieve port.
+     *
+     * @return string
+     * @throws ServiceException
+     */
+    public function getPort(): string
+    {
+        if (!$this->isInstalled()) {
+            throw new ServiceException('ES service is not installed');
+        }
+
+        return (string)$this->getConfiguration()['port'];
+    }
+
+    /**
+     * Return full version with engine name.
+     *
+     * @return string
+     * @throws ServiceException
+     */
+    public function getFullVersion(): string
+    {
+        $version = $this->getVersion();
+
+        if (Semver::satisfies($version, '>= 5')) {
+            return self::ENGINE_NAME . (int)$version;
+        }
+
+        return self::ENGINE_NAME;
     }
 
     /**

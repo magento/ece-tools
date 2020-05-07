@@ -97,23 +97,23 @@ class BackupDbCest extends AbstractCest
         // Running database dump command with unavailable database label
         $I->runDockerComposeCommand('run deploy cloud-deploy');
 
-        $I->runDockerComposeCommand('run deploy ece-command db-dump quote');
+        $I->runDockerComposeCommand('run deploy ece-command db-dump -n quote');
         $I->seeInOutput(
             'CRITICAL: Environment does not have connection `checkout` associated with database `quote`'
         );
 
-        $I->runDockerComposeCommand('run deploy ece-command db-dump sales');
+        $I->runDockerComposeCommand('run deploy ece-command db-dump -n sales');
         $I->seeInOutput(
             'CRITICAL: Environment does not have connection `sales` associated with database `sales`'
         );
 
-        $I->runDockerComposeCommand('run deploy ece-command db-dump quote sales');
+        $I->runDockerComposeCommand('run deploy ece-command db-dump -n quote sales');
         $I->seeInOutput(
             'CRITICAL: Environment does not have connection `checkout` associated with database `quote`'
         );
 
         // Running database dump command without database label (by default)
-        $I->runDockerComposeCommand('run deploy ece-command db-dump');
+        $I->runDockerComposeCommand('run deploy ece-command db-dump -n');
         $I->seeInOutput(array_merge(
             $this->expectedLogs,
             [
@@ -148,7 +148,7 @@ class BackupDbCest extends AbstractCest
         $I->runDockerComposeCommand('run deploy cloud-deploy');
 
         // Running database dump command without database labels (by default)
-        $I->runDockerComposeCommand('run deploy ece-command db-dump');
+        $I->runDockerComposeCommand('run deploy ece-command db-dump -n');
         $I->seeInOutput(array_merge(
             $this->expectedLogs,
             [
@@ -162,7 +162,7 @@ class BackupDbCest extends AbstractCest
         ));
 
         // Running database dump command with database labels
-        $I->runDockerComposeCommand('run deploy ece-command db-dump quote sales');
+        $I->runDockerComposeCommand('run deploy ece-command db-dump -n quote sales');
         $I->seeInOutput(array_merge(
             $this->expectedLogs,
             [
