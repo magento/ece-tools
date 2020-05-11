@@ -164,6 +164,20 @@ class UrlManagerTest extends TestCase
         $this->assertEquals($expectedResult, $this->manager->getUrls());
     }
 
+    /**
+     * @param array $routes
+     * @param array $expectedResult
+     * @dataProvider getPrimaryUrlsDataProvider
+     */
+    public function testGetPrimaryUrls(array $routes, array $expectedResult): void
+    {
+        $this->environmentMock->expects($this->once())
+            ->method('getRoutes')
+            ->willReturn($routes);
+
+        $this->assertEquals($expectedResult, $this->manager->getUrls());
+    }
+
     public function testGetUrlsException(): void
     {
         $this->expectException(\RuntimeException::class);
@@ -295,6 +309,10 @@ class UrlManagerTest extends TestCase
         ];
     }
 
+    /**
+     * DataProvider for testGetUrls
+     * @return array
+     */
     public function getUrlsDataProvider(): array
     {
         return [
@@ -380,6 +398,103 @@ class UrlManagerTest extends TestCase
                         '' => 'http://example.com/',
                         '*' => 'http://*.example.com/',
                         'french' => 'http://french.example.com/',
+                    ],
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * DataProvider for testGetPrimaryUrls
+     * @return array
+     */
+    public function getPrimaryUrlsDataProvider(): array
+    {
+        return [
+            'with unsecure primary' => [
+                'routes' => [
+                    'http://example.com/' => [
+                        'original_url' => 'http://{default}/',
+                        'type' => 'upstream',
+                        'primary' => false,
+                    ],
+                    'http://www.custom.example.com/' => [
+                        'original_url' => 'http://{all}/',
+                        'type' => 'upstream',
+                        'primary' => false,
+                    ],
+                    'http://custom.example.com/' => [
+                        'original_url' => 'http://{default}/',
+                        'type' => 'upstream',
+                        'primary' => true,
+                    ],
+                    'https://french.example.com/' => [
+                        'original_url' => 'https://french.{default}/',
+                        'type' => 'upstream',
+                        'primary' => false,
+                    ],
+                ],
+                'expectedResult' => [
+                    'secure' => [
+                        '' => 'https://custom.example.com/',
+                    ],
+                    'unsecure' => [
+                        '' => 'http://custom.example.com/',
+                    ],
+                ],
+            ],
+            'secure primary' => [
+                'routes' => [
+                    'http://example.com/' => [
+                        'original_url' => 'http://{default}/',
+                        'type' => 'upstream',
+                        'primary' => false,
+                    ],
+                    'http://www.example.com/' => [
+                        'original_url' => 'http://{all}/',
+                        'type' => 'upstream',
+                        'primary' => false,
+                    ],
+                    'https://custom.example.com/' => [
+                        'original_url' => 'http://{default}/',
+                        'type' => 'upstream',
+                        'primary' => true,
+                    ],
+                ],
+                'expectedResult' => [
+                    'secure' => [
+                        '' => 'https://custom.example.com/',
+                    ],
+                    'unsecure' => [
+                        '' => 'https://custom.example.com/',
+                    ],
+                ],
+            ],
+            'all primary false and one secure' => [
+                'routes' => [
+                    'http://example.com/' => [
+                        'original_url' => 'http://{default}/',
+                        'type' => 'upstream',
+                        'primary' => false,
+                    ],
+                    'http://www.example.com/' => [
+                        'original_url' => 'http://{all}/',
+                        'type' => 'upstream',
+                        'primary' => false,
+                    ],
+                    'https://www.example.com/' => [
+                        'original_url' => 'http://{all}/',
+                        'type' => 'upstream',
+                        'primary' => false,
+                    ],
+                ],
+                'expectedResult' => [
+                    'secure' => [
+                        '{all}' => 'https://www.example.com/',
+                    ],
+                    'unsecure' => [
+                        '' => 'http://example.com/',
+                        '{all}' => 'http://www.example.com/',
                     ],
                 ],
             ],
