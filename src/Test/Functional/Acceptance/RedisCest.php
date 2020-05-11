@@ -228,6 +228,7 @@ class RedisCest extends AbstractCest
 
     /**
      * @return array
+     * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
     protected function goodConfigurationDataProvider(): array
     {
