@@ -113,7 +113,7 @@ class Cache
             return [];
         }
 
-        if ($this->isNewConfigStructure()) {
+        if ($this->isSynchronizedConfigStructure()) {
             $redisCache = $this->getSynchronizedConfigStructure($envCacheBackendModel, $redisConfig);
             $redisCache['backend_options']['remote_backend_options'] = array_merge(
                 $redisCache['backend_options']['remote_backend_options'],
@@ -218,7 +218,7 @@ class Cache
         array $envCacheConfig,
         array $redisConfig
     ): bool {
-        if ($this->isNewConfigStructure()) {
+        if ($this->isSynchronizedConfigStructure()) {
             $host = $envCacheConfig['frontend']['default']['backend_options']['remote_backend_options']['server']
                 ?? null;
 
@@ -295,10 +295,12 @@ class Cache
     }
 
     /**
+     * Checks that config contains synchronized cache model and need to use synchronized config structure.
+     *
      * @return bool
      * @throws \Magento\MagentoCloud\Config\ConfigException
      */
-    private function isNewConfigStructure(): bool
+    private function isSynchronizedConfigStructure(): bool
     {
         $model = (string)$this->stageConfig->get(DeployInterface::VAR_CACHE_REDIS_BACKEND);
         return $model === self::REDIS_BACKEND_REMOTE_SYNHRONIZED_CACHE;
