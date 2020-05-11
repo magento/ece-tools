@@ -13,6 +13,7 @@ use Magento\MagentoCloud\Config\Factory\Cache as CacheFactory;
 use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
 use Psr\Log\LoggerInterface;
+use Magento\MagentoCloud\Package\MagentoVersion;
 
 /**
  * Processes cache configuration.
@@ -40,21 +41,29 @@ class Cache implements StepInterface
     private $cacheConfig;
 
     /**
+     * @var MagentoVersion
+     */
+    private $magentoVersion;
+
+    /**
      * @param ConfigReader $configReader
      * @param ConfigWriter $configWriter
      * @param LoggerInterface $logger
      * @param CacheFactory $cacheConfig
+     * @param MagentoVersion $magentoVersion
      */
     public function __construct(
         ConfigReader $configReader,
         ConfigWriter $configWriter,
         LoggerInterface $logger,
-        CacheFactory $cacheConfig
+        CacheFactory $cacheConfig,
+        MagentoVersion $magentoVersion
     ) {
         $this->configReader = $configReader;
         $this->configWriter = $configWriter;
         $this->logger = $logger;
         $this->cacheConfig = $cacheConfig;
+        $this->magentoVersion = $magentoVersion;
     }
 
     /**
@@ -72,8 +81,10 @@ class Cache implements StepInterface
                     ? $cacheFrontend['backend_options']['remote_backend_options']
                     : $cacheFrontend['backend_options'];
 
-                return !in_array($backend, CacheFactory::AVAILABLE_REDIS_BACKEND, true)
-                    || $this->testRedisConnection($backendOptions);
+                $this->checkBackendModel($backend);
+
+                return in_array($backend, CacheFactory::AVAILABLE_REDIS_BACKEND, true)
+                    && $this->testRedisConnection($backendOptions);
             });
         }
 
@@ -91,6 +102,26 @@ class Cache implements StepInterface
         }
 
         $this->configWriter->create($config);
+    }
+
+    /**
+     * Checks that configured backend model can be used with installed magento version.
+     *
+     * @param string $backend
+     * @throws StepException
+     * @throws \Magento\MagentoCloud\Package\UndefinedPackageException
+     */
+    private function checkBackendModel(string $backend): void
+    {
+        if ($backend !== CacheFactory::REDIS_BACKEND_CM_CACHE && !$this->magentoVersion->isGreaterOrEqual('2.3.5')) {
+            throw new StepException(
+                sprintf(
+                    'Magento version \'%s\' does not support Redis backend model \'%s\'',
+                    $this->magentoVersion->getVersion(),
+                    $backend
+                )
+            );
+        }
     }
 
     /**

@@ -28,7 +28,6 @@
                     <item name="session-configuration" xsi:type="object">Magento\MagentoCloud\Config\Validator\Deploy\SessionConfiguration</item>
                     <item name="elasticsearch-integrity" xsi:type="object">Magento\MagentoCloud\Config\Validator\Deploy\ElasticSearchIntegrity</item>
                     <item name="elasticsuite-integrity" xsi:type="object">Magento\MagentoCloud\Config\Validator\Deploy\ElasticSuiteIntegrity</item>
-                    <item name="redis-backend-configuration" xsi:type="object">Magento\MagentoCloud\Config\Validator\Deploy\RedisBackend</item>
                 </item>
                 <item name="warning" xsi:type="array">
                     <item name="database-split-connection" xsi:type="object">Magento\MagentoCloud\Config\Validator\Deploy\DatabaseSplitConnection</item>

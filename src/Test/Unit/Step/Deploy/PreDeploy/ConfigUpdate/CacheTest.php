@@ -15,6 +15,7 @@ use phpmock\phpunit\PHPMock;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
+use Magento\MagentoCloud\Package\MagentoVersion;
 
 /**
  * @inheritdoc
@@ -64,6 +65,11 @@ class CacheTest extends TestCase
     private $socketCloseMock;
 
     /**
+     * @var MagentoVersion|MockObject
+     */
+    private $magentoVersion;
+
+    /**
      * @inheritdoc
      */
     protected function setUp()
@@ -72,12 +78,14 @@ class CacheTest extends TestCase
         $this->configWriterMock = $this->createMock(ConfigWriter::class);
         $this->configReaderMock = $this->createMock(ConfigReader::class);
         $this->cacheConfigMock = $this->createMock(CacheFactory::class);
+        $this->magentoVersion = $this->createMock(MagentoVersion::class);
 
         $this->step = new Cache(
             $this->configReaderMock,
             $this->configWriterMock,
             $this->loggerMock,
-            $this->cacheConfigMock
+            $this->cacheConfigMock,
+            $this->magentoVersion
         );
 
         $this->socketCreateMock = $this->getFunctionMock(
@@ -98,8 +106,12 @@ class CacheTest extends TestCase
      * @param array $config
      * @dataProvider executeDataProvider
      */
-    public function testExecute(array $config)
+    public function testExecute(array $config, bool $isGreaterOrEqual)
     {
+        $this->magentoVersion->expects($this->any())
+            ->method('isGreaterOrEqual')
+            ->with('2.3.5')
+            ->willReturn($isGreaterOrEqual);
         $this->configReaderMock->expects($this->once())
             ->method('read')
             ->willReturn([]);
@@ -113,9 +125,10 @@ class CacheTest extends TestCase
             ->method('info')
             ->with('Updating cache configuration.');
 
-        $this->socketCreateMock->expects($this->never());
-        $this->socketConnectMock->expects($this->never());
-        $this->socketCloseMock->expects($this->never());
+        $this->socketCreateMock->expects($this->once());
+        $this->socketConnectMock->expects($this->once())
+            ->willReturn(true);
+        $this->socketCloseMock->expects($this->once());
 
         $this->step->execute();
     }
@@ -127,24 +140,32 @@ class CacheTest extends TestCase
                 'config' => [
                     'frontend' => [
                         'frontName' => [
-                            'backend' => 'cacheDriver',
-                            'backend_options' => 'some options'
-                        ]
-                    ]
-                ]
+                            'backend' => CacheFactory::REDIS_BACKEND_CM_CACHE,
+                            'backend_options' => [
+                                'server' => 'localhost',
+                                'port' => 6370,
+                            ],
+                        ],
+                    ],
+                ],
+                'isGreaterOrEqual' => false,
             ],
             'backend model with remote_backend_options' => [
                 'config' => [
                     'frontend' => [
                         'frontName' => [
-                            'backend' => CacheFactory::REDIS_BACKEND_REMOTE_SYNHRONIZED_CACHE,
+                            'backend' => addslashes(CacheFactory::REDIS_BACKEND_REMOTE_SYNHRONIZED_CACHE),
                             'backend_options' => [
-                                'remote_backend_options' => 'some options'
-                            ]
-                        ]
-                    ]
-                ]
-            ]
+                                'remote_backend_options' => [
+                                    'server' => 'localhost',
+                                    'port' => 6370,
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+                'isGreaterOrEqual' => true,
+            ],
         ];
     }
 
@@ -253,32 +274,56 @@ class CacheTest extends TestCase
             ->willReturn([
                 'frontend' => [
                     'frontName1' => [
-                        'backend' => 'Cm_Cache_Backend_Redis',
+                        'backend' => CacheFactory::REDIS_BACKEND_CM_CACHE,
                         'backend_options' => ['server' => 'redis.server', 'port' => 6379],
                     ],
                     'frontName2' => [
-                        'backend' => 'cacheDriver',
-                        'backend_options' => ['some config'],
-                    ]
+                        'backend' => addslashes(CacheFactory::REDIS_BACKEND_REDIS_CACHE),
+                        'backend_options' => ['server' => 'redis.server', 'port' => 6379],
+                    ],
+                    'frontName3' => [
+                        'backend' => addslashes(CacheFactory::REDIS_BACKEND_REMOTE_SYNHRONIZED_CACHE),
+                        'backend_options' => [
+                            'remote_backend_options' => ['server' => 'redis.server', 'port' => 6379],],
+                    ],
+                    'frontName4' => [
+                        'backend' => 'WrongModel',
+                        'backend_options' => ['server' => 'redis.server', 'port' => 6379],
+                    ],
                 ],
             ]);
 
-        $this->socketCreateMock->expects($this->once())
+        $this->magentoVersion->expects($this->exactly(3))
+            ->method('isGreaterOrEqual')
+            ->with('2.3.5')
+            ->willReturn(true);
+        $this->socketCreateMock->expects($this->exactly(3))
             ->with(AF_INET, SOCK_STREAM, SOL_TCP)
             ->willReturn('socket resource');
-        $this->socketConnectMock->expects($this->once())
+        $this->socketConnectMock->expects($this->exactly(3))
             ->with('socket resource', 'redis.server', 6379)
-            ->willReturn(false);
-        $this->socketCloseMock->expects($this->once())
+            ->willReturn(true);
+        $this->socketCloseMock->expects($this->exactly(3))
             ->with('socket resource');
 
         $this->configWriterMock->expects($this->once())
             ->method('create')
             ->with(['cache' => [
-                'frontend' => ['frontName2' => [
-                    'backend' => 'cacheDriver',
-                    'backend_options' => ['some config'],
-                ]],
+                'frontend' => [
+                    'frontName2' => [
+                        'backend' => addslashes(CacheFactory::REDIS_BACKEND_REDIS_CACHE),
+                        'backend_options' => ['server' => 'redis.server', 'port' => 6379],
+                    ],
+                    'frontName1' => [
+                        'backend' => CacheFactory::REDIS_BACKEND_CM_CACHE,
+                        'backend_options' => ['server' => 'redis.server', 'port' => 6379],
+                    ],
+                    'frontName3' => [
+                        'backend' => addslashes(CacheFactory::REDIS_BACKEND_REMOTE_SYNHRONIZED_CACHE),
+                        'backend_options' => [
+                            'remote_backend_options' => ['server' => 'redis.server', 'port' => 6379],],
+                    ],
+                ],
             ]]);
         $this->loggerMock->expects($this->once())
             ->method('info')
