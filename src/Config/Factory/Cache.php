@@ -114,7 +114,7 @@ class Cache
         }
 
         if ($this->isNewConfigStructure()) {
-            $redisCache = $this->getNewConfigStructure($envCacheBackendModel, $redisConfig);
+            $redisCache = $this->getSynchronizedConfigStructure($envCacheBackendModel, $redisConfig);
             $redisCache['backend_options']['remote_backend_options'] = array_merge(
                 $redisCache['backend_options']['remote_backend_options'],
                 $this->getSlaveConnection($envCacheConfiguration, $redisConfig)
@@ -128,7 +128,7 @@ class Cache
                 ],
             ];
         } else {
-            $redisCache = $this->getOldConfigStructure($envCacheBackendModel, $redisConfig);
+            $redisCache = $this->getUnsyncedConfigStructure($envCacheBackendModel, $redisConfig);
             $slaveConnection = $this->getSlaveConnection($envCacheConfiguration, $redisConfig);
             if ($slaveConnection) {
                 $redisCache['frontend_options']['write_control'] = false;
@@ -245,13 +245,13 @@ class Cache
     }
 
     /**
-     * Returns backend config for old implementation.
+     * Returns backend config for unsynced cache implementation.
      *
      * @param string $envCacheBackendModel
      * @param array $redisConfig
      * @return array
      */
-    private function getOldConfigStructure(string $envCacheBackendModel, array $redisConfig): array
+    private function getUnsyncedConfigStructure(string $envCacheBackendModel, array $redisConfig): array
     {
         return [
             'backend' => addslashes($envCacheBackendModel),
@@ -263,13 +263,13 @@ class Cache
     }
 
     /**
-     * Returns backend config for new implementation.
+     * Returns backend config for synchronized cache implementation.
      *
      * @param string $envCacheBackendModel
      * @param array $redisConfig
      * @return array
      */
-    private function getNewConfigStructure(string $envCacheBackendModel, array $redisConfig): array
+    private function getSynchronizedConfigStructure(string $envCacheBackendModel, array $redisConfig): array
     {
         return [
             'backend' => addslashes($envCacheBackendModel),
