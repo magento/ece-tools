@@ -72,13 +72,12 @@ class HandlerFactory
 
     /**
      * @param string $handler
-     * @param Repository|null $configuration
      * @return HandlerInterface
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      */
-    public function create(string $handler, Repository $configuration = null): HandlerInterface
+    public function create(string $handler): HandlerInterface
     {
-        $configuration = $configuration ?? $this->logConfig->get($handler);
+        $configuration = $this->logConfig->get($handler);
         $levelOverride = $this->globalConfig->get(GlobalSection::VAR_MIN_LOGGING_LEVEL);
         $defaultLevel = $levelOverride ?: LogConfig::LEVEL_NOTICE;
         $minLevel = $this->levelResolver->resolve($configuration->get('min_level', $defaultLevel));

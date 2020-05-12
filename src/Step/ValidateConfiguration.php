@@ -50,6 +50,7 @@ class ValidateConfiguration implements StepInterface
         $errors = $this->collectErrors();
 
         ksort($errors);
+        /** @var Error[] $levelErrors */
         foreach ($errors as $level => $levelErrors) {
             $message = $this->createErrorMessage($levelErrors);
 
