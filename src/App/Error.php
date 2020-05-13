@@ -12,7 +12,6 @@ namespace Magento\MagentoCloud\App;
  */
 class Error
 {
-    public const BUILD_COMPOSER_PACKAGE_NOT_FOUND = 1;
     public const BUILD_ENV_PHP_IS_NOT_WRITABLE = 2;
     public const BUILD_CONFIG_NOT_DEFINED = 3;
     public const BUILD_CONFIG_PHP_IS_NOT_WRITABLE = 4;
@@ -32,6 +31,7 @@ class Error
     public const BUILD_SCD_COPYING_FAILED = 18;
     public const BUILD_WRITABLE_DIRECTORY_COPYING_FAILED = 19;
     public const BUILD_UNABLE_TO_CREATE_LOGGER = 20;
+    public const BUILD_COMPOSER_PACKAGE_NOT_FOUND = 21;
 
     public const DEPLOY_WRONG_CACHE_CONFIGURATION = 101;
     public const DEPLOY_ENV_PHP_IS_NOT_WRITABLE = 102;

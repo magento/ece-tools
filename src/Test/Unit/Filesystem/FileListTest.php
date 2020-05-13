@@ -88,6 +88,11 @@ class FileListTest extends TestCase
      */
     public function testGetInitCloudErrorLog(): void
     {
+        $this->directoryListMock->expects($this->once())
+            ->method('getPath')
+            ->with(DirectoryList::DIR_LOG, true)
+            ->willReturn('var/log');
+
         $this->assertSame('magento_root/init/var/log/cloud.error.log', $this->fileList->getInitCloudErrorLog());
     }
 

@@ -72,7 +72,11 @@ class FileList extends ConfigFileList
      */
     public function getInitCloudErrorLog(): string
     {
-        return $this->directoryList->getInit() . '/var/log/cloud.error.log';
+        return sprintf(
+            '%s/%s/cloud.error.log',
+            $this->directoryList->getInit(),
+            $this->directoryList->getPath(DirectoryList::DIR_LOG, true)
+        );
     }
 
     /**
