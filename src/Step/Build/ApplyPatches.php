@@ -40,7 +40,7 @@ class ApplyPatches implements StepInterface
         try {
             $this->manager->apply();
         } catch (ConfigException $e) {
-            throw new StepException($e->getMessage(), Error::BUILD_CONFIG_NOT_DEFINED, $e);
+            throw new StepException($e->getMessage(), $e->getCode(), $e);
         } catch (ShellException $e) {
             throw new StepException($e->getMessage(), Error::BUILD_PATCH_APPLYING_FAILED, $e);
         }

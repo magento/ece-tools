@@ -59,7 +59,7 @@ class ApplyPatchesTest extends TestCase
     {
         $this->managerMock->expects($this->once())
             ->method('apply')
-            ->willThrowException(new ConfigException('config not found'));
+            ->willThrowException(new ConfigException('config not found', Error::BUILD_CONFIG_NOT_DEFINED));
 
         $this->expectException(StepException::class);
         $this->expectExceptionMessage('config not found');

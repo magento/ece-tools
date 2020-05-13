@@ -95,7 +95,7 @@ class CompileDiTest extends TestCase
         $this->stageConfigMock->expects($this->once())
             ->method('get')
             ->with(BuildInterface::VAR_VERBOSE_COMMANDS)
-            ->willThrowException(new ConfigException('some error'));
+            ->willThrowException(new ConfigException('some error', Error::BUILD_CONFIG_NOT_DEFINED));
 
         $this->expectExceptionCode(Error::BUILD_CONFIG_NOT_DEFINED);
         $this->expectException(StepException::class);
