@@ -382,9 +382,14 @@ class DbConnection implements StepInterface
      */
     private function getMageSplitConnectionsConfig(): array
     {
-        return array_intersect_key(
-            $this->getMageConfigData()[DbConfig::KEY_DB][DbConfig::KEY_CONNECTION],
-            array_flip(DbConfig::SPLIT_CONNECTIONS)
-        );
+        $existedSplitConnections = [];
+        $mageConfig = $this->getMageConfigData();
+        if (isset($mageConfig[DbConfig::KEY_DB][DbConfig::KEY_CONNECTION])) {
+            $existedSplitConnections = array_intersect_key(
+                $mageConfig[DbConfig::KEY_DB][DbConfig::KEY_CONNECTION],
+                array_flip(DbConfig::SPLIT_CONNECTIONS)
+            );
+        }
+        return $existedSplitConnections;
     }
 }
