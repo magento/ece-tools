@@ -77,40 +77,46 @@ class WritableDirectories implements StepInterface
      */
     public function execute()
     {
-        $magentoRoot = $this->directoryList->getMagentoRoot() . '/';
-        $rootInitDir = $this->directoryList->getPath(DirectoryList::DIR_INIT) . '/';
-        $viewPreprocessedDir = $this->directoryList->getPath(DirectoryList::DIR_VIEW_PREPROCESSED, true);
-        $logDir = $this->directoryList->getPath(DirectoryList::DIR_LOG, true);
-        $writableDirectories = $this->directoryList->getWritableDirectories();
+        try {
+            $magentoRoot = $this->directoryList->getMagentoRoot() . '/';
+            $rootInitDir = $this->directoryList->getPath(DirectoryList::DIR_INIT) . '/';
+            $viewPreprocessedDir = $this->directoryList->getPath(DirectoryList::DIR_VIEW_PREPROCESSED, true);
+            $logDir = $this->directoryList->getPath(DirectoryList::DIR_LOG, true);
+            $writableDirectories = $this->directoryList->getWritableDirectories();
 
-        $this->logger->info(sprintf('Copying writable directories to %s directory.', $rootInitDir));
+            $this->logger->info(sprintf('Copying writable directories to %s directory.', $rootInitDir));
 
-        foreach ($writableDirectories as $dir) {
-            if ($dir === $logDir) {
-                continue;
+            foreach ($writableDirectories as $dir) {
+                if ($dir === $logDir) {
+                    continue;
+                }
+
+                $originalDir = $magentoRoot . $dir;
+
+                if (!$this->file->isExists($originalDir)) {
+                    $this->logger->notice(sprintf('Directory %s does not exist.', $originalDir));
+                    continue;
+                }
+
+                $initDir = $rootInitDir . $dir;
+
+                if (($dir === $viewPreprocessedDir)
+                    && $this->globalConfig->get(GlobalConfig::VAR_SKIP_HTML_MINIFICATION)
+                ) {
+                    $this->logger->notice(sprintf('Skip copying %s->%s', $originalDir, $initDir));
+                    continue;
+                }
+
+                $this->logger->debug(sprintf('Copying %s->%s', $originalDir, $initDir));
+                $this->backupDir($originalDir, $initDir);
             }
 
-            $originalDir = $magentoRoot . $dir;
-
-            if (!$this->file->isExists($originalDir)) {
-                $this->logger->notice(sprintf('Directory %s does not exist.', $originalDir));
-                continue;
-            }
-
-            $initDir = $rootInitDir . $dir;
-
-            if (($dir === $viewPreprocessedDir)
-                && $this->globalConfig->get(GlobalConfig::VAR_SKIP_HTML_MINIFICATION)
-            ) {
-                $this->logger->notice(sprintf('Skip copying %s->%s', $originalDir, $initDir));
-                continue;
-            }
-
-            $this->logger->debug(sprintf('Copying %s->%s', $originalDir, $initDir));
-            $this->backupDir($originalDir, $initDir);
+            $this->backupLogDir($magentoRoot . $logDir, $rootInitDir . $logDir);
+        } catch (StepException $e) {
+            throw $e;
+        } catch (\Exception $e) {
+            new StepException($e->getMessage(), $e->getCode(), $e);
         }
-
-        $this->backupLogDir($magentoRoot . $logDir, $rootInitDir . $logDir);
     }
 
     /**

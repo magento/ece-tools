@@ -314,4 +314,34 @@ class StaticContentTest extends TestCase
             ->with($this->originalPubStaticPath, $this->initPubStaticPath)
             ->willThrowException(new FileSystemException('Some error'));
     }
+
+    /**
+     * @throws StepException
+     */
+    public function testClearingDirectoryWithFileSystemException()
+    {
+        $this->expectException(StepException::class);
+        $this->expectExceptionMessage('some error');
+        $this->expectExceptionCode(Error::BUILD_CLEAN_INIT_PUB_STATIC_FAILED);
+
+        $this->flagManagerMock->expects($this->once())
+            ->method('exists')
+            ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)
+            ->willReturn(true);
+        $this->directoryListMock->expects($this->exactly(2))
+            ->method('getPath')
+            ->willReturnMap([
+                [DirectoryList::DIR_STATIC, false, $this->originalPubStaticPath],
+                [DirectoryList::DIR_INIT, false, $this->rootInitDir]
+            ]);
+        $this->fileMock->expects($this->once())
+            ->method('isExists')
+            ->willReturn(true);
+        $this->fileMock->expects($this->once())
+            ->method('backgroundClearDirectory')
+            ->with($this->initPubStaticPath)
+            ->willThrowException(new FileSystemException('some error'));
+
+        $this->step->execute();
+    }
 }

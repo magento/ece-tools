@@ -35,6 +35,7 @@ class Error
     public const BUILD_SCD_COPYING_FAILED = 21;
     public const BUILD_WRITABLE_DIRECTORY_COPYING_FAILED = 22;
     public const BUILD_UNABLE_TO_CREATE_LOGGER = 23;
+    public const BUILD_CLEAN_INIT_PUB_STATIC_FAILED = 24;
 
     public const DEPLOY_WRONG_CACHE_CONFIGURATION = 101;
     public const DEPLOY_ENV_PHP_IS_NOT_WRITABLE = 102;
