@@ -231,7 +231,8 @@ class CacheTest extends TestCase
                 'default' => [
                     'backend' => addslashes(Cache::REDIS_BACKEND_REMOTE_SYNHRONIZED_CACHE),
                     'backend_options' => [
-                        'remote_backend' => addslashes('\Magento\Framework\Cache\Backend\Redis'),
+                        'use_stale_cache' => true,
+                        'remote_backend' => addslashes(Cache::REDIS_BACKEND_REDIS_CACHE),
                         'remote_backend_options' => [
                             'server' => 'master.host',
                             'port' => 'master.port',
