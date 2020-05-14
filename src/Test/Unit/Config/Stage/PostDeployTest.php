@@ -13,9 +13,11 @@ use Magento\MagentoCloud\Config\Schema;
 use Magento\MagentoCloud\Config\Stage\PostDeploy;
 use Magento\MagentoCloud\Config\Stage\PostDeployInterface;
 use Magento\MagentoCloud\Config\StageConfigInterface;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Magento\MagentoCloud\Config\Environment\Reader as EnvironmentReader;
+use Symfony\Component\Yaml\Exception\ParseException;
 
 /**
  * @inheritdoc
@@ -120,14 +122,47 @@ class PostDeployTest extends TestCase
     /**
      * @throws ConfigException
      */
-    public function testCannotMerge(): void
+    public function testUnableToReadMagentoEnvYAml(): void
     {
         $this->expectException(ConfigException::class);
         $this->expectExceptionMessage('Some error');
+        $this->expectExceptionCode(Error::PD_CONFIG_UNABLE_TO_READ);
 
         $this->environmentReaderMock->expects($this->once())
             ->method('read')
-            ->willThrowException(new \Exception('Some error'));
+            ->willThrowException(new FileSystemException('Some error'));
+
+        $this->config->get(PostDeploy::VAR_WARM_UP_PAGES);
+    }
+
+    /**
+     * @throws ConfigException
+     */
+    public function testUnableToParseMagentoEnvYaml(): void
+    {
+        $this->expectException(ConfigException::class);
+        $this->expectExceptionMessage('Some error');
+        $this->expectExceptionCode(Error::PD_CONFIG_PARSE_FAILED);
+
+        $this->environmentReaderMock->expects($this->once())
+            ->method('read')
+            ->willThrowException(new ParseException('Some error'));
+
+        $this->config->get(PostDeploy::VAR_WARM_UP_PAGES);
+    }
+
+    /**
+     * @throws ConfigException
+     */
+    public function testUnableToReadSchemaFile(): void
+    {
+        $this->expectException(ConfigException::class);
+        $this->expectExceptionMessage('Some error');
+        $this->expectExceptionCode(Error::PD_CONFIG_UNABLE_TO_READ_SCHEMA_YAML);
+
+        $this->schemaMock->expects($this->once())
+            ->method('getDefaults')
+            ->willThrowException(new FileSystemException('Some error'));
 
         $this->config->get(PostDeploy::VAR_WARM_UP_PAGES);
     }
