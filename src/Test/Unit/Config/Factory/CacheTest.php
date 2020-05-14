@@ -231,7 +231,6 @@ class CacheTest extends TestCase
                 'default' => [
                     'backend' => addslashes(Cache::REDIS_BACKEND_REMOTE_SYNHRONIZED_CACHE),
                     'backend_options' => [
-                        'use_stale_cache' => true,
                         'remote_backend' => addslashes(Cache::REDIS_BACKEND_REDIS_CACHE),
                         'remote_backend_options' => [
                             'server' => 'master.host',

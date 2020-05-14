@@ -281,7 +281,6 @@ class RedisCest extends AbstractCest
                 'expectedBackend' => '\\\Magento\\\Framework\\\Cache\\\Backend\\\RemoteSynchronizedCache',
                 'expectedConfig' => [
                     'backend_options' => [
-                        'use_stale_cache' => true,
                         'remote_backend' => '\\\Magento\\\Framework\\\Cache\\\Backend\\\Redis',
                         'remote_backend_options' => [
                             'persistent' => 0,
@@ -328,7 +327,6 @@ class RedisCest extends AbstractCest
                 'expectedBackend' => '\\\Magento\\\Framework\\\Cache\\\Backend\\\RemoteSynchronizedCache',
                 'expectedConfig' => [
                     'backend_options' => [
-                        'use_stale_cache' => true,
                         'remote_backend' => '\\\Magento\\\Framework\\\Cache\\\Backend\\\Redis',
                         'remote_backend_options' => [
                             'persistent' => 0,
