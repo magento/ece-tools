@@ -77,14 +77,18 @@ class Cache implements StepInterface
         if (isset($cacheConfig['frontend'])) {
             $cacheConfig['frontend'] = array_filter($cacheConfig['frontend'], function ($cacheFrontend) {
                 $backend = stripslashes($cacheFrontend['backend']);
-                $backendOptions = ($backend === CacheFactory::REDIS_BACKEND_REMOTE_SYNHRONIZED_CACHE)
-                    ? $cacheFrontend['backend_options']['remote_backend_options']
-                    : $cacheFrontend['backend_options'];
-
                 $this->checkBackendModel($backend);
 
-                return in_array($backend, CacheFactory::AVAILABLE_REDIS_BACKEND, true)
-                    && $this->testRedisConnection($backendOptions);
+                if (!in_array($backend, CacheFactory::AVAILABLE_REDIS_BACKEND, true)) {
+                    return true;
+                }
+
+                $backendOptions = ($backend === CacheFactory::REDIS_BACKEND_REMOTE_SYNHRONIZED_CACHE)
+                        ? $cacheFrontend['backend_options']['remote_backend_options']
+                        : $cacheFrontend['backend_options'];
+
+                return !in_array($backend, CacheFactory::AVAILABLE_REDIS_BACKEND, true)
+                    || $this->testRedisConnection($backendOptions);
             });
         }
 
@@ -113,7 +117,11 @@ class Cache implements StepInterface
      */
     private function checkBackendModel(string $backend): void
     {
-        if ($backend !== CacheFactory::REDIS_BACKEND_CM_CACHE && !$this->magentoVersion->isGreaterOrEqual('2.3.5')) {
+        $notAllowedBackend = [
+            CacheFactory::REDIS_BACKEND_REDIS_CACHE,
+            CacheFactory::REDIS_BACKEND_REMOTE_SYNHRONIZED_CACHE
+        ];
+        if (in_array($backend, $notAllowedBackend, true) && !$this->magentoVersion->isGreaterOrEqual('2.3.5')) {
             throw new StepException(
                 sprintf(
                     'Magento version \'%s\' does not support Redis backend model \'%s\'',

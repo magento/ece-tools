@@ -287,13 +287,12 @@ class CacheTest extends TestCase
                             'remote_backend_options' => ['server' => 'redis.server', 'port' => 6379],],
                     ],
                     'frontName4' => [
-                        'backend' => 'WrongModel',
-                        'backend_options' => ['server' => 'redis.server', 'port' => 6379],
+                        'backend' => 'SomeModel',
                     ],
                 ],
             ]);
 
-        $this->magentoVersion->expects($this->exactly(3))
+        $this->magentoVersion->expects($this->exactly(2))
             ->method('isGreaterOrEqual')
             ->with('2.3.5')
             ->willReturn(true);
@@ -322,6 +321,9 @@ class CacheTest extends TestCase
                         'backend' => addslashes(CacheFactory::REDIS_BACKEND_REMOTE_SYNHRONIZED_CACHE),
                         'backend_options' => [
                             'remote_backend_options' => ['server' => 'redis.server', 'port' => 6379],],
+                    ],
+                    'frontName4' => [
+                        'backend' => 'SomeModel',
                     ],
                 ],
             ]]);
