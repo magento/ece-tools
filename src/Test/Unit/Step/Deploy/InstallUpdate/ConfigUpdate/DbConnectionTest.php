@@ -178,31 +178,28 @@ class DbConnectionTest extends TestCase
 
     /**
      * Case when slave connections and split database are not used
+     *
+     * @param $mageConfig array
+     * @param $envConfig array
+     * @param $expectedResult array
+     * @dataProvider executeWithoutSplitAndSlaveConfigDataProvider
      */
-    public function testExecuteWithoutSplitAndSlaveConfig()
+    public function testExecuteWithoutSplitAndSlaveConfig(array $mageConfig, array $envConfig, array $expectedResult)
     {
         $resourceConfig = [
             'default_setup' => self::RESOURCE_DEFAULT_SETUP,
         ];
+        $expectedResult['resource'] = $resourceConfig;
 
-        $dbConfig = [
-            'connection' => [
-                'default' => self::DEFAULT_CONNECTION,
-                'indexer' => self::DEFAULT_CONNECTION,
-            ]
-        ];
         $this->dbConfigMock->expects($this->once())
             ->method('get')
-            ->willReturn($dbConfig);
+            ->willReturn($envConfig);
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Updating env.php DB connection configuration.');
         $this->configReaderMock->expects($this->once())
             ->method('read')
-            ->willReturn([
-                'db' => $dbConfig,
-                'resource' => $resourceConfig
-            ]);
+            ->willReturn($mageConfig);
         $this->resourceConfigMock->expects($this->once())
             ->method('get')
             ->willReturn($resourceConfig);
@@ -212,14 +209,49 @@ class DbConnectionTest extends TestCase
             ->willReturnOnConsecutiveCalls(false, []);
         $this->configWriterMock->expects($this->once())
             ->method('create')
-            ->with([
-                'db' => $dbConfig,
-                'resource' => $resourceConfig
-            ]);
+            ->with($expectedResult);
         $this->flagManagerMock->expects($this->never())
             ->method('set');
 
         $this->step->execute();
+    }
+
+    /**
+     * @return array
+     */
+    public function executeWithoutSplitAndSlaveConfigDataProvider()
+    {
+        $dbConfig = [
+            'connection' => [
+                'default' => self::DEFAULT_CONNECTION,
+                'indexer' => self::DEFAULT_CONNECTION,
+            ]
+        ];
+        $newConnection = array_merge(self::DEFAULT_CONNECTION, ['host' => 'host2']);
+        $newBbConfig = [
+            'connection' => [
+                'default' => $newConnection,
+                'indexer' => $newConnection,
+            ]
+        ];
+
+        return [
+            [
+                ['db' => $dbConfig],
+                $dbConfig,
+                ['db' => $dbConfig],
+            ],
+            'changed connection' => [
+                ['db' => $dbConfig],
+                $newBbConfig,
+                ['db' => $newBbConfig],
+            ],
+            'no data before' => [
+                [],
+                $dbConfig,
+                ['db' => $dbConfig],
+            ],
+        ];
     }
 
     /**
