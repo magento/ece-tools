@@ -40,7 +40,7 @@ class SkipAction implements ActionInterface
      *
      * @return void
      */
-    public function execute()
+    public function execute(): void
     {
         $this->logger->info(sprintf('Step "%s" was skipped', $this->actionName));
     }

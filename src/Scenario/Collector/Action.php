@@ -7,8 +7,6 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Scenario\Collector;
 
-use Magento\MagentoCloud\Scenario\Exception\ValidationException;
-
 /**
  * Collects action data
  */
@@ -25,7 +23,7 @@ class Action
         $actionData = [
             'name' => $action['@name'],
             'type' => $action['@type'] ?? '',
-            'skip' => isset($action['@skip']) && $action['@skip'] === 'true'
+            'skip' => isset($action['@skip']) && $action['@skip'] === 'true',
         ];
 
         if (isset($action['@priority'])) {
