@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Scenario;
 
+use Magento\MagentoCloud\OnFail\Action\ActionInterface;
 use Magento\MagentoCloud\Package\Manager;
 use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
@@ -60,6 +61,7 @@ class ProcessorTest extends TestCase
 
     /**
      * @throws ProcessorException
+     * @throws \ReflectionException
      */
     public function testExecute(): void
     {
@@ -80,13 +82,17 @@ class ProcessorTest extends TestCase
             'step2' => $step2
         ];
 
+        $action = $this->getMockForAbstractClass(ActionInterface::class);
+        $action->expects($this->never())
+            ->method('execute');
+
         $this->packageManagerMock->expects($this->once())
             ->method('getPrettyInfo')
             ->willReturn('1.0.0');
         $this->mergerMock->expects($this->once())
             ->method('merge')
             ->with($scenarios)
-            ->willReturn($steps);
+            ->willReturn(['steps' => $steps, 'actions' => [$action]]);
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
             ->withConsecutive(
@@ -111,6 +117,7 @@ class ProcessorTest extends TestCase
 
     /**
      * @throws ProcessorException
+     * @throws \ReflectionException
      */
     public function testExecuteWithException(): void
     {
@@ -131,13 +138,17 @@ class ProcessorTest extends TestCase
             'step1' => $step1
         ];
 
+        $action = $this->getMockForAbstractClass(ActionInterface::class);
+        $action->expects($this->once())
+            ->method('execute');
+
         $this->packageManagerMock->expects($this->once())
             ->method('getPrettyInfo')
             ->willReturn('1.0.0');
         $this->mergerMock->expects($this->once())
             ->method('merge')
             ->with($scenarios)
-            ->willReturn($steps);
+            ->willReturn(['steps' => $steps, 'actions' => ['on-fail' => $action]]);
         $this->loggerMock->method('info')
             ->withConsecutive(
                 [
@@ -149,7 +160,9 @@ class ProcessorTest extends TestCase
             );
         $this->loggerMock->method('debug')
             ->withConsecutive(
-                ['Running step: step1']
+                ['Running step: step1'],
+                ['Running on fail action: on-fail'],
+                ['On fail action "on-fail" finished']
             );
         $this->loggerMock->method('error')
             ->withConsecutive(['Some error']);
@@ -159,6 +172,7 @@ class ProcessorTest extends TestCase
 
     /**
      * @throws ProcessorException
+     * @throws \ReflectionException
      */
     public function testExecuteWithRuntimeException(): void
     {
@@ -179,13 +193,17 @@ class ProcessorTest extends TestCase
             'step1' => $step1
         ];
 
+        $action = $this->getMockForAbstractClass(ActionInterface::class);
+        $action->expects($this->once())
+            ->method('execute');
+
         $this->packageManagerMock->expects($this->once())
             ->method('getPrettyInfo')
             ->willReturn('1.0.0');
         $this->mergerMock->expects($this->once())
             ->method('merge')
             ->with($scenarios)
-            ->willReturn($steps);
+            ->willReturn(['steps' => $steps, 'actions' => ['on-fail' => $action]]);
         $this->loggerMock->method('info')
             ->withConsecutive(
                 [
@@ -197,7 +215,9 @@ class ProcessorTest extends TestCase
             );
         $this->loggerMock->method('debug')
             ->withConsecutive(
-                ['Running step: step1']
+                ['Running step: step1'],
+                ['Running on fail action: on-fail'],
+                ['On fail action "on-fail" finished']
             );
         $this->loggerMock->method('error')
             ->withConsecutive(['Unhandled error: Some error']);

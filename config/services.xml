@@ -50,6 +50,7 @@
         <service id="Magento\MagentoCloud\Step\StepException" autowire="false" />
         <service id="Magento\MagentoCloud\Step\ValidateConfiguration" autowire="false" />
         <service id="Magento\MagentoCloud\Step\Build\BackupData" autowire="false" />
+        <service id="Magento\MagentoCloud\OnFail\Action\SkipAction" autowire="false" />
         <service id="Magento\MagentoCloud\Service\ServiceMismatchException" autowire="false" />
         <service id="Magento\MagentoCloud\Shell\Process" autowire="false" />
         <service id="Magento\MagentoCloud\Shell\ProcessException" autowire="false" />

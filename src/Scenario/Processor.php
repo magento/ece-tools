@@ -10,6 +10,7 @@ namespace Magento\MagentoCloud\Scenario;
 use Magento\MagentoCloud\Package\Manager;
 use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
+use Magento\MagentoCloud\OnFail\Action\ActionInterface;
 use Magento\MagentoCloud\Scenario\Exception\ProcessorException;
 use Psr\Log\LoggerInterface;
 use Throwable;
@@ -33,6 +34,11 @@ class Processor
      * @var Manager
      */
     private $packageManager;
+
+    /**
+     * @var array
+     */
+    private $mergedScenarios = [];
 
     /**
      * @param Merger $merger
@@ -59,7 +65,8 @@ class Processor
         ));
 
         try {
-            $steps = $this->merger->merge($scenarios);
+            $this->mergedScenarios = $this->merger->merge($scenarios);
+            $steps = $this->mergedScenarios['steps'];
 
             array_walk($steps, function (StepInterface $step, string $name) {
                 $this->logger->debug('Running step: ' . $name);
@@ -68,18 +75,18 @@ class Processor
 
                 $this->logger->debug(sprintf('Step "%s" finished', $name));
             });
-        } catch (StepException $exception) {
-            $this->logger->error($exception->getMessage());
-
-            throw new ProcessorException(
-                $exception->getMessage(),
-                $exception->getCode(),
-                $exception
-            );
         } catch (Throwable $exception) {
-            $message = 'Unhandled error: ' . $exception->getMessage();
-
+            $message = ($exception instanceof StepException ? '': 'Unhandled error: ') . $exception->getMessage();
             $this->logger->error($message);
+            $actions = $this->mergedScenarios['actions'];
+
+            array_walk($actions, function (ActionInterface $action, string $name) {
+                $this->logger->debug('Running on fail action: ' . $name);
+
+                $action->execute();
+
+                $this->logger->debug(sprintf('On fail action "%s" finished', $name));
+            });
 
             throw new ProcessorException(
                 $message,
