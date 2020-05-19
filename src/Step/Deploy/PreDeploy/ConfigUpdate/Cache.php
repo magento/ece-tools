@@ -87,8 +87,7 @@ class Cache implements StepInterface
                         ? $cacheFrontend['backend_options']['remote_backend_options']
                         : $cacheFrontend['backend_options'];
 
-                return !in_array($backend, CacheFactory::AVAILABLE_REDIS_BACKEND, true)
-                    || $this->testRedisConnection($backendOptions);
+                return $this->testRedisConnection($backendOptions);
             });
         }
 
@@ -113,7 +112,6 @@ class Cache implements StepInterface
      *
      * @param string $backend
      * @throws StepException
-     * @throws \Magento\MagentoCloud\Package\UndefinedPackageException
      */
     private function checkBackendModel(string $backend): void
     {
@@ -121,13 +119,22 @@ class Cache implements StepInterface
             CacheFactory::REDIS_BACKEND_REDIS_CACHE,
             CacheFactory::REDIS_BACKEND_REMOTE_SYNHRONIZED_CACHE
         ];
-        if (in_array($backend, $notAllowedBackend, true) && !$this->magentoVersion->isGreaterOrEqual('2.3.5')) {
+
+        try {
+            if (in_array($backend, $notAllowedBackend, true) && !$this->magentoVersion->isGreaterOrEqual('2.3.5')) {
+                throw new StepException(
+                    sprintf(
+                        'Magento version \'%s\' does not support Redis backend model \'%s\'',
+                        $this->magentoVersion->getVersion(),
+                        $backend
+                    )
+                );
+            }
+        } catch (\Magento\MagentoCloud\Package\UndefinedPackageException $exception) {
             throw new StepException(
-                sprintf(
-                    'Magento version \'%s\' does not support Redis backend model \'%s\'',
-                    $this->magentoVersion->getVersion(),
-                    $backend
-                )
+                $exception->getMessage(),
+                $exception->getCode(),
+                $exception
             );
         }
     }
