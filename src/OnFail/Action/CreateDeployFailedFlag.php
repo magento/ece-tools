@@ -8,6 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\OnFail\Action;
 
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
+use Magento\MagentoCloud\Filesystem\Flag\ConfigurationMismatchException;
 
 /**
  * Creates deploy_is_failed flag if deploy is failed.
@@ -25,7 +26,7 @@ class CreateDeployFailedFlag implements ActionInterface
     }
 
     /**
-     * @throws \Magento\MagentoCloud\Filesystem\Flag\ConfigurationMismatchException
+     * @throws ConfigurationMismatchException
      */
     public function execute(): void
     {

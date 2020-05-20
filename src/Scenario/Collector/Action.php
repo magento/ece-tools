@@ -27,7 +27,7 @@ class Action
         ];
 
         if (isset($action['@priority'])) {
-            $actionData['priority'] = (int) $action['@priority'];
+            $actionData['priority'] = (int)$action['@priority'];
         }
 
         return $actionData;

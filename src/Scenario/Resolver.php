@@ -15,6 +15,7 @@ use Magento\MagentoCloud\Step\SkipStep;
 use Magento\MagentoCloud\Step\StepInterface;
 use Magento\MagentoCloud\Scenario\Exception\ValidationException;
 use Psr\Log\LoggerInterface;
+use Magento\MagentoCloud\App\ContainerException;
 
 /**
  * Resolve step arguments.
@@ -47,7 +48,7 @@ class Resolver
      * @param array $scenarios
      * @return array
      * @throws ValidationException
-     * @throws \Magento\MagentoCloud\App\ContainerException
+     * @throws ContainerException
      */
     public function resolve(array $scenarios): array
     {
@@ -66,7 +67,7 @@ class Resolver
      * @param array $actions
      * @return array
      * @throws ValidationException
-     * @throws \Magento\MagentoCloud\App\ContainerException
+     * @throws ContainerException
      */
     private function createActionInstances(array $actions): array
     {
@@ -101,7 +102,7 @@ class Resolver
      * @param array $steps
      * @return array
      * @throws ValidationException
-     * @throws \Magento\MagentoCloud\App\ContainerException
+     * @throws ContainerException
      */
     private function createStepInstances(array $steps): array
     {
@@ -140,6 +141,7 @@ class Resolver
      * @param string $stepName
      * @return array
      * @throws ValidationException
+     * @throws ContainerException
      */
     private function resolveParams(array $data, string $stepName): array
     {

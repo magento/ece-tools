@@ -118,6 +118,9 @@ class Merger
     /**
      * Normalizes items list.
      *
+     * The xml parser can return a list of items or one single item from a xml file.
+     * This method checks the data and make the list of one item if the parser returned only one item.
+     *
      * @param array $items
      * @return array
      */
@@ -140,7 +143,7 @@ class Merger
 
         if ($missedArgs = array_diff($requiredAttributes, array_keys($item))) {
             throw new ValidationException(sprintf(
-                'Argument(s) "%s" are missed from step',
+                'Argument(s) "%s" are missed from item',
                 implode(', ', $missedArgs)
             ));
         }

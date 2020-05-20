@@ -178,7 +178,7 @@ class MergerTest extends TestCase
     public function testMissedArgumentPriorityException()
     {
         $this->expectException(ValidationException::class);
-        $this->expectExceptionMessage('Argument(s) "@priority" are missed from step');
+        $this->expectExceptionMessage('Argument(s) "@priority" are missed from item');
 
         $this->scenarioCollectorMock->expects($this->once())
             ->method('collect')
@@ -202,7 +202,7 @@ class MergerTest extends TestCase
     public function testMissedArgumentNameException()
     {
         $this->expectException(ValidationException::class);
-        $this->expectExceptionMessage('Argument(s) "@name" are missed from step');
+        $this->expectExceptionMessage('Argument(s) "@name" are missed from item');
 
         $this->scenarioCollectorMock->expects($this->once())
             ->method('collect')

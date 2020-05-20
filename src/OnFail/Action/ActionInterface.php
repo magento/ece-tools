@@ -17,5 +17,5 @@ interface ActionInterface
      *
      * @return void
      */
-    public function execute(); // The :void return type declaration that should be here would cause a BC issue
+    public function execute(): void;
 }
