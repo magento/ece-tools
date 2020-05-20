@@ -63,11 +63,16 @@ class CleanRedisCache implements StepInterface
         }
 
         foreach ($cacheConfigs['frontend'] as $cacheType => $cacheConfig) {
-            if ($cacheConfig['backend'] !== 'Cm_Cache_Backend_Redis') {
+            $backend = stripslashes($cacheConfig['backend']);
+
+            if (!in_array($backend, CacheConfig::AVAILABLE_REDIS_BACKEND, true)) {
                 continue;
             }
 
-            $redisConfig = $cacheConfig['backend_options'];
+            $redisConfig = ($backend === CacheConfig::REDIS_BACKEND_REMOTE_SYNHRONIZED_CACHE)
+                ? $cacheConfig['backend_options']['remote_backend_options']
+                : $cacheConfig['backend_options'];
+
             $this->logger->info('Clearing redis cache: ' . $cacheType);
 
             $client = $this->credisFactory->create(
