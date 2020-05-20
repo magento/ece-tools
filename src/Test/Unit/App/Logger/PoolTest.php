@@ -7,14 +7,17 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\App\Logger;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\App\Logger\Pool;
 use Magento\MagentoCloud\App\Logger\LineFormatterFactory;
+use Magento\MagentoCloud\App\LoggerException;
 use Monolog\Formatter\LineFormatter;
 use Magento\MagentoCloud\App\Logger\HandlerFactory;
 use Monolog\Handler\HandlerInterface;
 use Magento\MagentoCloud\Config\Log as LogConfig;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Yaml\Exception\ParseException;
 
 /**
  * @inheritdoc
@@ -92,6 +95,19 @@ class PoolTest extends TestCase
 
         $this->pool->getHandlers();
         // Lazy load.
+        $this->pool->getHandlers();
+    }
+
+    public function testWithParseException()
+    {
+        $this->expectExceptionMessage('some error');
+        $this->expectExceptionCode(Error::BUILD_CONFIG_PARSE_FAILED);
+        $this->expectException(LoggerException::class);
+
+        $this->logConfigMock->expects($this->once())
+            ->method('getHandlers')
+            ->willThrowException(new ParseException('some error'));
+
         $this->pool->getHandlers();
     }
 }
