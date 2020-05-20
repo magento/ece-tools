@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Scenario;
 
+use Magento\MagentoCloud\OnFail\Action\ActionException;
 use Magento\MagentoCloud\Package\Manager;
 use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
@@ -75,26 +76,44 @@ class Processor
 
                 $this->logger->debug(sprintf('Step "%s" finished', $name));
             });
+        } catch (StepException $stepException) {
+            try {
+                $actions = $this->mergedScenarios['actions'];
+
+                array_walk($actions, function (ActionInterface $action, string $name) {
+                    $this->logger->debug('Running on fail action: ' . $name);
+
+                    $action->execute();
+
+                    $this->logger->debug(sprintf('On fail action "%s" finished', $name));
+                });
+            } catch (ActionException $actionException) {
+                $this->logger->error($actionException->getMessage());
+            }
+            $this->handleException($stepException);
         } catch (Throwable $exception) {
-            $message = ($exception instanceof StepException ? '': 'Unhandled error: ') . $exception->getMessage();
-            $this->logger->error($message);
-            $actions = $this->mergedScenarios['actions'];
-
-            array_walk($actions, function (ActionInterface $action, string $name) {
-                $this->logger->debug('Running on fail action: ' . $name);
-
-                $action->execute();
-
-                $this->logger->debug(sprintf('On fail action "%s" finished', $name));
-            });
-
-            throw new ProcessorException(
-                $message,
-                $exception->getCode(),
-                $exception
-            );
+            $this->handleException($exception, 'Unhandled error: ' . $exception->getMessage());
         }
 
         $this->logger->info('Scenario(s) finished');
+    }
+
+    /**
+     * Logs error message and throws ProcessorException
+     *
+     * @param Throwable $exception
+     * @param string $customMessage
+     * @throws ProcessorException
+     */
+    private function handleException(Throwable $exception, string $customMessage = ''): void
+    {
+        $message = $customMessage ?: $exception->getMessage();
+        $this->logger->error($message);
+
+        throw new ProcessorException(
+            $message,
+            $exception->getCode(),
+            $exception
+        );
     }
 }

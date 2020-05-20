@@ -8,7 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\OnFail\Action;
 
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
-use Magento\MagentoCloud\Filesystem\Flag\ConfigurationMismatchException;
+use Throwable;
 
 /**
  * Creates deploy_is_failed flag if deploy is failed.
@@ -26,10 +26,20 @@ class CreateDeployFailedFlag implements ActionInterface
     }
 
     /**
-     * @throws ConfigurationMismatchException
+     * Creates .deploy_is_failed flag.
+     *
+     * {@inheritDoc}
      */
     public function execute(): void
     {
-        $this->flagManager->set(FlagManager::FLAG_DEPLOY_HOOK_IS_FAILED);
+        try {
+            $this->flagManager->set(FlagManager::FLAG_DEPLOY_HOOK_IS_FAILED);
+        } catch (Throwable $exception) {
+            throw new ActionException(
+                $exception->getMessage(),
+                $exception->getCode(),
+                $exception
+            );
+        }
     }
 }

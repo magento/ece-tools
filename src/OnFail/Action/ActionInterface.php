@@ -8,7 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\OnFail\Action;
 
 /**
- * Action represent small action on fail such us create some flags, etc
+ * Action represent small scenario action on fail such us create some flags, etc
  */
 interface ActionInterface
 {
@@ -16,6 +16,7 @@ interface ActionInterface
      * Executes the action.
      *
      * @return void
+     * @throws ActionException
      */
     public function execute(): void;
 }

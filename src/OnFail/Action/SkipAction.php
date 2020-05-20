@@ -11,7 +11,7 @@ use Psr\Log\LoggerInterface;
 
 /**
  * Class for skipped actions.
- * Logs the information about skipped tests.
+ * Logs the information about skipped actions.
  */
 class SkipAction implements ActionInterface
 {
@@ -38,10 +38,10 @@ class SkipAction implements ActionInterface
     /**
      * Logs the information about action skipping
      *
-     * @return void
+     * {@inheritDoc}
      */
     public function execute(): void
     {
-        $this->logger->info(sprintf('Step "%s" was skipped', $this->actionName));
+        $this->logger->info(sprintf('Action "%s" was skipped', $this->actionName));
     }
 }
