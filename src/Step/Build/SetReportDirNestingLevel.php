@@ -8,6 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Step\Build;
 
 use Magento\MagentoCloud\App\Error;
+use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Config\Stage\BuildInterface;
 use Magento\MagentoCloud\Filesystem\ConfigFileList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
@@ -100,7 +101,7 @@ XML
             );
         } catch (FileSystemException $e) {
             throw new StepException($e->getMessage(), Error::BUILD_FILE_LOCAL_XML_IS_NOT_WRITABLE, $e);
-        } catch (\Exception $e) {
+        } catch (GenericException $e) {
             throw new StepException($e->getMessage(), $e->getCode(), $e);
         }
     }

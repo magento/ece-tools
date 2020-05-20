@@ -8,6 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Step\Deploy\InstallUpdate\Install;
 
 use Magento\MagentoCloud\App\Error;
+use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Shell\ShellException;
@@ -79,7 +80,7 @@ class ConfigImport implements StepInterface
             );
         } catch (ShellException $e) {
             throw new StepException($e->getMessage(), Error::DEPLOY_CONFIG_IMPORT_COMMAND_FAILED, $e);
-        } catch (\Exception $e) {
+        } catch (GenericException $e) {
             throw new StepException($e->getMessage(), $e->getCode(), $e);
         }
     }

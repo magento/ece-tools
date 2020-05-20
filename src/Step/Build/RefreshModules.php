@@ -8,6 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Step\Build;
 
 use Magento\MagentoCloud\App\Error;
+use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Config\Module;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Shell\ShellException;
@@ -60,7 +61,7 @@ class RefreshModules implements StepInterface
             throw new StepException($e->getMessage(), Error::BUILD_CONFIG_PHP_IS_NOT_WRITABLE, $e);
         } catch (ShellException $e) {
             throw new StepException($e->getMessage(), Error::BUILD_MODULE_ENABLE_COMMAND_FAILED, $e);
-        } catch (\Exception $e) {
+        } catch (GenericException $e) {
             throw new StepException($e->getMessage(), $e->getCode(), $e);
         }
 

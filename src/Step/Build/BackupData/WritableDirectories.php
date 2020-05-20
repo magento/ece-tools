@@ -8,6 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Step\Build\BackupData;
 
 use Magento\MagentoCloud\App\Error;
+use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\App\Logger\Pool as LoggerPool;
 use Magento\MagentoCloud\App\LoggerException;
 use Magento\MagentoCloud\Config\GlobalSection as GlobalConfig;
@@ -114,7 +115,7 @@ class WritableDirectories implements StepInterface
             $this->backupLogDir($magentoRoot . $logDir, $rootInitDir . $logDir);
         } catch (StepException $e) {
             throw $e;
-        } catch (\Exception $e) {
+        } catch (GenericException $e) {
             new StepException($e->getMessage(), $e->getCode(), $e);
         }
     }

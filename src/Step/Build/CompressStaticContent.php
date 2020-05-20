@@ -8,6 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Step\Build;
 
 use Magento\MagentoCloud\App\Error;
+use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Config\Stage\BuildInterface;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Shell\ShellException;
@@ -98,7 +99,7 @@ class CompressStaticContent implements StepInterface
             throw new StepException($e->getMessage(), Error::BUILD_SCD_COMPRESSION_FAILED, $e);
         } catch (UtilityException $e) {
             throw new StepException($e->getMessage(), Error::BUILD_UTILITY_NOT_FOUND, $e);
-        } catch (\Exception $e) {
+        } catch (GenericException $e) {
             throw new StepException($e->getMessage(), $e->getCode(), $e);
         }
     }

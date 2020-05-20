@@ -8,6 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Step\Build\BackupData;
 
 use Magento\MagentoCloud\App\Error;
+use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
@@ -80,7 +81,7 @@ class StaticContent implements StepInterface
             $this->moveStaticContent($originalPubStatic, $initPubStatic);
         } catch (StepException $e) {
             throw $e;
-        } catch (\Exception $e) {
+        } catch (GenericException $e) {
             throw new StepException($e->getMessage(), $e->getCode(), $e);
         }
     }
