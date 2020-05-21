@@ -127,8 +127,7 @@ class InstallUpdateTest extends TestCase
             ->with('Magento state indicated as installed'
                 . ' but configuration file app/etc/env.php was empty or did not exist.'
                 . ' Required data will be restored from environment configurations'
-                . ' and from .magento.env.yaml file.'
-            );
+                . ' and from .magento.env.yaml file.');
 
         $this->step->execute();
     }
