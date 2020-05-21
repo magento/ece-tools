@@ -404,6 +404,21 @@ variables:
               mq:
                 host: mq.host
                 port: 1234
+  REDIS_BACKEND:
+    description: "Configuration the backend model for redis cache."
+    type: string
+    allowed:
+      - 'Cm_Cache_Backend_Redis'
+      - '\Magento\Framework\Cache\Backend\Redis'
+      - '\Magento\Framework\Cache\Backend\RemoteSynchronizedCache'
+    stages:
+      - deploy
+    default:
+      deploy: 'Cm_Cache_Backend_Redis'
+    examples:
+      - stage:
+          deploy:
+            REDIS_BACKEND: '\Magento\Framework\Cache\Backend\Redis'
   CACHE_CONFIGURATION:
     description: "Replace or modify the Magento cache configuration generated during the deployment process.
       To replace the existing configuration, specify values for each configuration option required for your environment.
