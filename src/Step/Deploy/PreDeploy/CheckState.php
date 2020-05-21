@@ -57,7 +57,7 @@ class CheckState implements StepInterface
 
         //workaround when Magento creates empty env.php with one cache_type
         if (empty($config) || (count($config) == 1 && isset($config['cache_type']))) {
-            $this->logger->info(sprintf('Set "%" flag', FlagManager::FLAG_ENV_FILE_ABSENCE));
+            $this->logger->info(sprintf('Set "%s" flag', FlagManager::FLAG_ENV_FILE_ABSENCE));
             $this->flagManager->set(FlagManager::FLAG_ENV_FILE_ABSENCE);
         }
     }

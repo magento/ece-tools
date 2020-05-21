@@ -69,7 +69,7 @@ class CheckStateTest extends TestCase
 
         $this->loggerMock->expects($this->once())
             ->method('info')
-            ->with(sprintf('Set "%" flag', FlagManager::FLAG_ENV_FILE_ABSENCE));
+            ->with(sprintf('Set "%s" flag', FlagManager::FLAG_ENV_FILE_ABSENCE));
         $this->flagManagerMock->expects($this->once())
             ->method('set')
             ->with(FlagManager::FLAG_ENV_FILE_ABSENCE);
