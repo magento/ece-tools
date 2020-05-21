@@ -110,7 +110,7 @@ class CheckStateTest extends TestCase
         $this->checkState->execute();
     }
 
-    public function executeWithFullOfDataFileDataProvider ()
+    public function executeWithFullOfDataFileDataProvider()
     {
         return [
             [
