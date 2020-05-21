@@ -140,7 +140,7 @@ class StateTest extends TestCase
     /**
      * @throws GenericException
      */
-    public function testIsInstalledConfigFileIsNotExistsOrEmpty(): void
+    public function testInstalledDbAndEmptyFile(): void
     {
         $this->expectException(GenericException::class);
         $this->expectExceptionMessage('Missing crypt key for upgrading Magento');
@@ -160,7 +160,7 @@ class StateTest extends TestCase
     /**
      * @throws GenericException
      */
-    public function testIsInstalledConfigFileIsNotExistsOrEmpty2(): void
+    public function testInstalledDbAndFileWithoutDate(): void
     {
         $date = 'Wed, 13 Sep 2017 13:41:32 +0000';
         $config['install']['date'] = $date;
@@ -168,7 +168,7 @@ class StateTest extends TestCase
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Checking if db exists and has tables');
-        $this->mockForTablesExist(['crypt' => ['key' => 'crupt_key_value']]);
+        $this->mockForTablesExist(['crypt' => ['key' => 'crypt_key_value']]);
         $this->writerMock->expects($this->once())
             ->method('update')
             ->with($config);
@@ -184,7 +184,31 @@ class StateTest extends TestCase
     /**
      * @throws GenericException
      */
-    public function testIsInstalledConfigFileWithDate(): void
+    public function testInstalledWithCryptKeyOnlyInEnvironmentVar(): void
+    {
+        $date = 'Wed, 12 Sep 2017 10:40:30 +0000';
+        $config = ['install' => ['date' => $date]];
+
+        $this->loggerMock->expects($this->exactly(2))
+            ->method('info')
+            ->withConsecutive(
+                ['Checking if db exists and has tables'],
+                ['Magento was installed on ' . $date]
+            );
+        $this->mockForTablesExist($config);
+        $this->environmentMock->expects($this->once())
+            ->method('getCryptKey')
+            ->willReturn('crypt_key_value');
+        $this->writerMock->expects($this->never())
+            ->method('update');
+
+        $this->assertTrue($this->state->isInstalled());
+    }
+
+    /**
+     * @throws GenericException
+     */
+    public function testIsInstalledWithFullData(): void
     {
         $date = 'Wed, 12 Sep 2017 10:40:30 +0000';
         $config = [
