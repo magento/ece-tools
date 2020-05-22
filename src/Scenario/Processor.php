@@ -68,24 +68,15 @@ class Processor
 
                 $this->logger->debug(sprintf('Step "%s" finished', $name));
             });
-        } catch (StepException $exception) {
-            $this->logger->error($exception->getMessage());
+        } catch (StepException $e) {
+            $this->logger->error(sprintf('[%d] %s', $e->getCode(), $e->getMessage()));
 
-            throw new ProcessorException(
-                $exception->getMessage(),
-                $exception->getCode(),
-                $exception
-            );
-        } catch (Throwable $exception) {
-            $message = 'Unhandled error: ' . $exception->getMessage();
-
+            throw new ProcessorException($e->getMessage(), $e->getCode(), $e);
+        } catch (Throwable $e) {
+            $message = sprintf('Unhandled error: [%d] %s', $e->getCode(), $e->getMessage());
             $this->logger->error($message);
 
-            throw new ProcessorException(
-                $message,
-                $exception->getCode(),
-                $exception
-            );
+            throw new ProcessorException($message, $e->getCode(), $e);
         }
 
         $this->logger->info('Scenario(s) finished');

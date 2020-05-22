@@ -11,6 +11,7 @@ use Magento\MagentoCloud\Scenario\Collector\Scenario;
 use Magento\MagentoCloud\Scenario\Collector\Step;
 use Magento\MagentoCloud\Scenario\Collector\Step as StepCollector;
 use Magento\MagentoCloud\Scenario\Exception\ValidationException;
+use Magento\MagentoCloud\Step\StepInterface;
 
 /**
  * Merge given scenarios.
@@ -57,7 +58,7 @@ class Merger
      * Merge an array of scenarios
      *
      * @param array $scenarios
-     * @return array
+     * @return StepInterface[]
      * @throws ValidationException
      */
     public function merge(array $scenarios): array

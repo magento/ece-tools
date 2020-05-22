@@ -125,7 +125,7 @@ class ProcessorTest extends TestCase
 
         $step1->expects($this->once())
             ->method('execute')
-            ->willThrowException(new StepException('Some error'));
+            ->willThrowException(new StepException('Some error', 201));
 
         $steps = [
             'step1' => $step1
@@ -152,7 +152,7 @@ class ProcessorTest extends TestCase
                 ['Running step: step1']
             );
         $this->loggerMock->method('error')
-            ->withConsecutive(['Some error']);
+            ->withConsecutive(['[201] Some error']);
 
         $this->processor->execute($scenarios);
     }
@@ -163,7 +163,7 @@ class ProcessorTest extends TestCase
     public function testExecuteWithRuntimeException(): void
     {
         $this->expectException(ProcessorException::class);
-        $this->expectExceptionMessage('Unhandled error: Some error');
+        $this->expectExceptionMessage('Unhandled error: [10] Some error');
 
         $scenarios = [
             'some/scenario.xml'
@@ -173,7 +173,7 @@ class ProcessorTest extends TestCase
 
         $step1->expects($this->once())
             ->method('execute')
-            ->willThrowException(new \RuntimeException('Some error'));
+            ->willThrowException(new \RuntimeException('Some error', 10));
 
         $steps = [
             'step1' => $step1
@@ -200,7 +200,7 @@ class ProcessorTest extends TestCase
                 ['Running step: step1']
             );
         $this->loggerMock->method('error')
-            ->withConsecutive(['Unhandled error: Some error']);
+            ->withConsecutive(['Unhandled error: [10] Some error']);
 
         $this->processor->execute($scenarios);
     }
