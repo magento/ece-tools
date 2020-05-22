@@ -24,13 +24,15 @@ class Sorter
         };
 
         foreach ($scenarios as &$scenario) {
-            foreach ($scenario['arguments'] as &$argument) {
-                if ($argument['name'] === 'steps') {
-                    uasort($argument['items'], $sort);
-                }
-                if ($argument['name'] === 'validators') {
-                    foreach ($argument['items'] as &$validatorLevel) {
-                        uasort($validatorLevel['items'], $sort);
+            if (isset($scenario['arguments'])) {
+                foreach ($scenario['arguments'] as &$argument) {
+                    if ($argument['name'] === 'steps') {
+                        uasort($argument['items'], $sort);
+                    }
+                    if ($argument['name'] === 'validators') {
+                        foreach ($argument['items'] as &$validatorLevel) {
+                            uasort($validatorLevel['items'], $sort);
+                        }
                     }
                 }
             }
