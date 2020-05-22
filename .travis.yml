@@ -24,6 +24,7 @@ env:
   - TEST_SUITE=functional-ee FUNCTIONAL_INDEX=3
   - TEST_SUITE=functional-ee FUNCTIONAL_INDEX=4
   - TEST_SUITE=functional-ee FUNCTIONAL_INDEX=5
+  - TEST_SUITE=functional-ee FUNCTIONAL_INDEX=6
 
 stages:
   - test
@@ -40,6 +41,8 @@ jobs:
       env: TEST_SUITE=functional-ee FUNCTIONAL_INDEX=4
     - php: '7.1'
       env: TEST_SUITE=functional-ee FUNCTIONAL_INDEX=5
+    - php: '7.1'
+      env: TEST_SUITE=functional-ee FUNCTIONAL_INDEX=6
 
     - php: '7.2'
       env: TEST_SUITE=functional-ee
