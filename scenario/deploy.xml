@@ -81,7 +81,6 @@
             <argument name="updateSteps" xsi:type="array">
                 <!-- Config update start -->
                 <item name="prepare-config" xsi:type="object" priority="100">Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\PrepareConfig</item>
-                <item name="cache-type" xsi:type="object" priority="150">Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\CacheType</item>
                 <item name="cron-consumer-runner" xsi:type="object" priority="200">Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\CronConsumersRunner</item>
                 <item name="db-connection" xsi:type="object" priority="300">Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\DbConnection</item>
                 <item name="amqp" xsi:type="object" priority="400">Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\Amqp</item>
@@ -94,6 +93,7 @@
                 <item name="set-admin-url" xsi:type="object" priority="1000">Magento\MagentoCloud\Step\Deploy\InstallUpdate\Update\SetAdminUrl</item>
                 <item name="setup" xsi:type="object" priority="1100">Magento\MagentoCloud\Step\Deploy\InstallUpdate\Update\Setup</item>
                 <item name="split-db" xsi:type="object" priority="1200">Magento\MagentoCloud\Step\Deploy\SplitDbConnection</item>
+                <item name="cache-type" xsi:type="object" priority="1300">Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\CacheType</item>
             </argument>
         </arguments>
     </step>
