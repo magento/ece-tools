@@ -121,4 +121,7 @@
         </arguments>
     </step>
     <step name="disable-maintenance-mode" type="Magento\MagentoCloud\Step\DisableMaintenanceMode" priority="1300"/>
+    <onFail>
+        <action name="create-deploy-failed-flag" type="Magento\MagentoCloud\OnFail\Action\CreateDeployFailedFlag" priority="100"/>
+    </onFail>
 </scenario>
