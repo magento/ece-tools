@@ -154,7 +154,7 @@ class CacheTest extends TestCase
                 'config' => [
                     'frontend' => [
                         'frontName' => [
-                            'backend' => addslashes(CacheFactory::REDIS_BACKEND_REMOTE_SYNHRONIZED_CACHE),
+                            'backend' => addslashes(CacheFactory::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE),
                             'backend_options' => [
                                 'remote_backend_options' => [
                                     'server' => 'localhost',
@@ -282,7 +282,7 @@ class CacheTest extends TestCase
                         'backend_options' => ['server' => 'redis.server', 'port' => 6379],
                     ],
                     'frontName3' => [
-                        'backend' => addslashes(CacheFactory::REDIS_BACKEND_REMOTE_SYNHRONIZED_CACHE),
+                        'backend' => addslashes(CacheFactory::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE),
                         'backend_options' => [
                             'remote_backend_options' => ['server' => 'redis.server', 'port' => 6379],],
                     ],
@@ -318,7 +318,7 @@ class CacheTest extends TestCase
                         'backend_options' => ['server' => 'redis.server', 'port' => 6379],
                     ],
                     'frontName3' => [
-                        'backend' => addslashes(CacheFactory::REDIS_BACKEND_REMOTE_SYNHRONIZED_CACHE),
+                        'backend' => addslashes(CacheFactory::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE),
                         'backend_options' => [
                             'remote_backend_options' => ['server' => 'redis.server', 'port' => 6379],],
                     ],

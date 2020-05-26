@@ -69,7 +69,7 @@ class CleanRedisCache implements StepInterface
                 continue;
             }
 
-            $redisConfig = ($backend === CacheConfig::REDIS_BACKEND_REMOTE_SYNHRONIZED_CACHE)
+            $redisConfig = ($backend === CacheConfig::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE)
                 ? $cacheConfig['backend_options']['remote_backend_options']
                 : $cacheConfig['backend_options'];
 

@@ -29,12 +29,12 @@ class Cache
 
     const REDIS_BACKEND_CM_CACHE = 'Cm_Cache_Backend_Redis';
     const REDIS_BACKEND_REDIS_CACHE = '\Magento\Framework\Cache\Backend\Redis';
-    const REDIS_BACKEND_REMOTE_SYNHRONIZED_CACHE = '\Magento\Framework\Cache\Backend\RemoteSynchronizedCache';
+    const REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE = '\Magento\Framework\Cache\Backend\RemoteSynchronizedCache';
 
     const AVAILABLE_REDIS_BACKEND = [
         self::REDIS_BACKEND_CM_CACHE,
         self::REDIS_BACKEND_REDIS_CACHE,
-        self::REDIS_BACKEND_REMOTE_SYNHRONIZED_CACHE
+        self::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE
     ];
 
     /**
@@ -303,6 +303,6 @@ class Cache
     private function isSynchronizedConfigStructure(): bool
     {
         $model = (string)$this->stageConfig->get(DeployInterface::VAR_CACHE_REDIS_BACKEND);
-        return $model === self::REDIS_BACKEND_REMOTE_SYNHRONIZED_CACHE;
+        return $model === self::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE;
     }
 }

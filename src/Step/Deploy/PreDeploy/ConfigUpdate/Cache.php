@@ -83,7 +83,7 @@ class Cache implements StepInterface
                     return true;
                 }
 
-                $backendOptions = ($backend === CacheFactory::REDIS_BACKEND_REMOTE_SYNHRONIZED_CACHE)
+                $backendOptions = ($backend === CacheFactory::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE)
                         ? $cacheFrontend['backend_options']['remote_backend_options']
                         : $cacheFrontend['backend_options'];
 
@@ -117,7 +117,7 @@ class Cache implements StepInterface
     {
         $notAllowedBackend = [
             CacheFactory::REDIS_BACKEND_REDIS_CACHE,
-            CacheFactory::REDIS_BACKEND_REMOTE_SYNHRONIZED_CACHE
+            CacheFactory::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE
         ];
 
         try {
