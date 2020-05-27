@@ -7,7 +7,11 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Step\Deploy\PreDeploy;
 
+use Magento\MagentoCloud\App\Error;
+use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Config\GlobalSection as GlobalConfig;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
+use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
@@ -64,13 +68,19 @@ class CleanViewPreprocessed implements StepInterface
      */
     public function execute()
     {
-        if (!$this->globalConfig->get(GlobalConfig::VAR_SKIP_HTML_MINIFICATION)) {
-            return;
-        }
+        try {
+            if (!$this->globalConfig->get(GlobalConfig::VAR_SKIP_HTML_MINIFICATION)) {
+                return;
+            }
 
-        $this->logger->info('Skip copying directory ./var/view_preprocessed.');
-        $this->logger->info('Clearing ./var/view_preprocessed');
-        $viewPreprocessedPath = $this->directoryList->getPath(DirectoryList::DIR_VIEW_PREPROCESSED);
-        $this->file->backgroundClearDirectory($viewPreprocessedPath);
+            $this->logger->info('Skip copying directory ./var/view_preprocessed.');
+            $this->logger->info('Clearing ./var/view_preprocessed');
+            $viewPreprocessedPath = $this->directoryList->getPath(DirectoryList::DIR_VIEW_PREPROCESSED);
+            $this->file->backgroundClearDirectory($viewPreprocessedPath);
+        } catch (FileSystemException $e) {
+            throw new StepException($e->getMessage(), Error::DEPLOY_VIEW_PREPROCESSED_CLEAN_FAILED, $e);
+        } catch (GenericException $e) {
+            throw new StepException($e->getMessage(), $e->getCode(), $e);
+        }
     }
 }

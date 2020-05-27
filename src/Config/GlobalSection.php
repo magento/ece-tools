@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Config;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\Environment\ReaderInterface as EnvironmentReader;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Symfony\Component\Yaml\Exception\ParseException;
@@ -46,40 +47,43 @@ class GlobalSection implements StageConfigInterface
      */
     public function get(string $name)
     {
-        if (!array_key_exists($name, $this->schema->getDefaults(StageConfigInterface::STAGE_GLOBAL))) {
-            throw new \RuntimeException(sprintf(
-                'Config %s was not defined.',
-                $name
-            ));
-        }
-
         try {
-            return $this->mergeConfig()[$name];
-        } catch (\Exception $exception) {
-            throw new ConfigException(
-                $exception->getMessage(),
-                $exception->getCode(),
-                $exception
-            );
+            $defaults = $this->schema->getDefaults(StageConfigInterface::STAGE_GLOBAL);
+            if (!array_key_exists($name, $defaults)) {
+                throw new ConfigException(
+                    sprintf('Config %s was not defined.', $name),
+                    Error::GLOBAL_CONFIG_NOT_DEFINED
+                );
+            }
+
+            return $this->mergeConfig($defaults)[$name];
+        } catch (FileSystemException $e) {
+            throw new ConfigException($e->getMessage(), Error::GLOBAL_CONFIG_UNABLE_TO_READ_SCHEMA_YAML, $e);
         }
     }
 
     /**
+     * @param array $defaults
      * @return array
-     * @throws ParseException;
-     * @throws FileSystemException;
+     * @throws ConfigException
      */
-    private function mergeConfig(): array
+    private function mergeConfig(array $defaults): array
     {
-        if (null === $this->mergedConfig) {
-            $envConfig = $this->environmentReader->read()[self::SECTION_STAGE] ?? [];
+        try {
+            if (null === $this->mergedConfig) {
+                $envConfig = $this->environmentReader->read()[self::SECTION_STAGE] ?? [];
 
-            $this->mergedConfig = array_replace(
-                $this->schema->getDefaults(StageConfigInterface::STAGE_GLOBAL),
-                $envConfig[self::STAGE_GLOBAL] ?? []
-            );
+                $this->mergedConfig = array_replace(
+                    $defaults,
+                    $envConfig[self::STAGE_GLOBAL] ?? []
+                );
+            }
+
+            return $this->mergedConfig;
+        } catch (ParseException $e) {
+            throw new ConfigException($e->getMessage(), Error::GLOBAL_CONFIG_PARSE_FAILED, $e);
+        } catch (FileSystemException $e) {
+            throw new ConfigException($e->getMessage(), Error::GLOBAL_CONFIG_UNABLE_TO_READ, $e);
         }
-
-        return $this->mergedConfig;
     }
 }

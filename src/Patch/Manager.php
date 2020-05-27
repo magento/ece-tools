@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Patch;
 
+use Magento\MagentoCloud\Config\ConfigException;
 use Magento\MagentoCloud\Config\GlobalSection;
 use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Shell\ShellInterface;
@@ -51,6 +52,7 @@ class Manager
      * Applies all needed patches.
      *
      * @throws ShellException
+     * @throws ConfigException
      */
     public function apply(): void
     {
@@ -66,7 +68,7 @@ class Manager
             $this->shell->execute($command);
         } catch (ShellException $exception) {
             $this->logger->error($exception->getMessage());
-            throw  $exception;
+            throw $exception;
         }
 
         $this->logger->notice('End of applying patches');

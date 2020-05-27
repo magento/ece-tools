@@ -8,6 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit\App;
 
 use Magento\MagentoCloud\App\Logger;
+use Magento\MagentoCloud\App\Logger\Prepare\ErrorLogFile;
 use Magento\MagentoCloud\App\LoggerException;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\FileList;
@@ -48,6 +49,11 @@ class LoggerTest extends TestCase
     private $sanitizeProcessorMock;
 
     /**
+     * @var ErrorLogFile|MockObject
+     */
+    private $errorLogFileMock;
+
+    /**
      * @inheritdoc
      */
     protected function setUp()
@@ -57,6 +63,7 @@ class LoggerTest extends TestCase
         $this->fileListMock = $this->createMock(FileList::class);
         $this->poolMock = $this->createMock(Pool::class);
         $this->sanitizeProcessorMock = $this->createMock(SanitizeProcessor::class);
+        $this->errorLogFileMock = $this->createMock(ErrorLogFile::class);
     }
 
     /**
@@ -124,7 +131,8 @@ class LoggerTest extends TestCase
             $this->directoryListMock,
             $this->fileListMock,
             $this->poolMock,
-            $this->sanitizeProcessorMock
+            $this->sanitizeProcessorMock,
+            $this->errorLogFileMock
         );
     }
 

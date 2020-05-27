@@ -7,6 +7,8 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Step\Deploy;
 
+use Magento\MagentoCloud\App\Error;
+use Magento\MagentoCloud\Config\ConfigException;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\DB\ConnectionInterface;
 use Magento\MagentoCloud\Step\Deploy\DisableGoogleAnalytics;
@@ -125,6 +127,22 @@ class DisableGoogleAnalyticsTest extends TestCase
             ->method('affectingQuery');
         $this->loggerMock->expects($this->never())
             ->method('info');
+
+        $this->step->execute();
+    }
+
+    /**
+     * @throws StepException
+     */
+    public function testExecuteWithConfigException()
+    {
+        $this->expectException(StepException::class);
+        $this->expectExceptionCode(Error::DEPLOY_CONFIG_NOT_DEFINED);
+        $this->expectExceptionMessage('some error');
+
+        $this->deployConfigMock->expects($this->once())
+            ->method('get')
+            ->willThrowException(new ConfigException('some error', Error::DEPLOY_CONFIG_NOT_DEFINED));
 
         $this->step->execute();
     }

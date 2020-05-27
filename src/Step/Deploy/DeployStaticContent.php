@@ -7,9 +7,11 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Step\Deploy;
 
+use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Config\GlobalSection as GlobalConfig;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
+use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
 use Psr\Log\LoggerInterface;
 use Magento\MagentoCloud\Util\StaticContentCleaner;
@@ -82,29 +84,33 @@ class DeployStaticContent implements StepInterface
      */
     public function execute()
     {
-        if ($this->globalConfig->get(DeployInterface::VAR_SCD_ON_DEMAND)) {
-            $this->logger->notice('Skipping static content deploy. SCD on demand is enabled.');
-            $this->staticContentCleaner->clean();
+        try {
+            if ($this->globalConfig->get(DeployInterface::VAR_SCD_ON_DEMAND)) {
+                $this->logger->notice('Skipping static content deploy. SCD on demand is enabled.');
+                $this->staticContentCleaner->clean();
 
-            return;
+                return;
+            }
+
+            if ($this->stageConfig->get(DeployInterface::VAR_SKIP_SCD)
+                || $this->flagManager->exists(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)
+            ) {
+                return;
+            }
+
+            if ($this->stageConfig->get(DeployInterface::VAR_CLEAN_STATIC_FILES)) {
+                $this->staticContentCleaner->clean();
+            }
+
+            $this->logger->notice('Generating fresh static content');
+
+            foreach ($this->steps as $step) {
+                $step->execute();
+            }
+
+            $this->logger->notice('End of generating fresh static content');
+        } catch (GenericException $e) {
+            throw new StepException($e->getMessage(), $e->getCode(), $e);
         }
-
-        if ($this->stageConfig->get(DeployInterface::VAR_SKIP_SCD)
-            || $this->flagManager->exists(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)
-        ) {
-            return;
-        }
-
-        if ($this->stageConfig->get(DeployInterface::VAR_CLEAN_STATIC_FILES)) {
-            $this->staticContentCleaner->clean();
-        }
-
-        $this->logger->notice('Generating fresh static content');
-
-        foreach ($this->steps as $step) {
-            $step->execute();
-        }
-
-        $this->logger->notice('End of generating fresh static content');
     }
 }

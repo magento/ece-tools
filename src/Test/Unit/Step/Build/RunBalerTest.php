@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Step\Build;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\Stage\BuildInterface;
 use Magento\MagentoCloud\Config\ValidatorInterface;
 use Magento\MagentoCloud\Config\Validator\Result;
@@ -30,27 +31,27 @@ class RunBalerTest extends TestCase
     private $step;
 
     /**
-     * @var BuildInterface|MockOject
+     * @var BuildInterface|MockObject
      */
     private $buildConfigMock;
 
     /**
-     * @var Flag\Manager|MockOject
+     * @var Flag\Manager|MockObject
      */
     private $flagManagerMock;
 
     /**
-     * @var LoggerInterface|MockOject
+     * @var LoggerInterface|MockObject
      */
     private $loggerMock;
 
     /**
-     * @var ShellInterface|MockOject
+     * @var ShellInterface|MockObject
      */
     private $shellMock;
 
     /**
-     * @var ValidatorInterface|MockOject
+     * @var ValidatorInterface|MockObject
      */
     private $validatorMock;
 
@@ -162,7 +163,7 @@ class RunBalerTest extends TestCase
 
         $this->expectException(StepException::class);
         $this->expectExceptionMessage('Baler failed for some reason');
-        $this->expectExceptionCode(255);
+        $this->expectExceptionCode(Error::BUILD_BALER_NOT_FOUND);
 
         $this->step->execute();
     }

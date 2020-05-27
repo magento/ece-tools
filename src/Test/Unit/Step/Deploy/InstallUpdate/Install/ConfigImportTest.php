@@ -7,11 +7,15 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Step\Deploy\InstallUpdate\Install;
 
+use Magento\MagentoCloud\App\Error;
+use Magento\MagentoCloud\Config\ConfigException;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Package\MagentoVersion;
+use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Step\Deploy\InstallUpdate\Install\ConfigImport;
 use Magento\MagentoCloud\Shell\MagentoShell;
 use Magento\MagentoCloud\Shell\ShellFactory;
+use Magento\MagentoCloud\Step\StepException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -95,6 +99,38 @@ class ConfigImportTest extends TestCase
             ->method('info');
         $this->magentoShellMock->expects($this->never())
             ->method('execute');
+
+        $this->step->execute();
+    }
+
+    public function testExecuteWithShellException()
+    {
+        $this->stageConfigMock->method('get')
+            ->with(DeployInterface::VAR_VERBOSE_COMMANDS)
+            ->willReturn('-vvv');
+        $this->magentoVersionMock->method('isGreaterOrEqual')
+            ->willReturn(true);
+        $this->magentoShellMock->expects($this->once())
+            ->method('execute')
+            ->willThrowException(new ShellException('some error'));
+
+        $this->expectException(StepException::class);
+        $this->expectExceptionCode(Error::DEPLOY_CONFIG_IMPORT_COMMAND_FAILED);
+        $this->expectExceptionMessage('some error');
+
+        $this->step->execute();
+    }
+
+    public function testExecuteWithConfigException()
+    {
+        $this->magentoVersionMock->method('isGreaterOrEqual')
+            ->willReturn(true);
+        $this->stageConfigMock->method('get')
+            ->willThrowException(new ConfigException('some error', 10));
+
+        $this->expectException(StepException::class);
+        $this->expectExceptionCode(10);
+        $this->expectExceptionMessage('some error');
 
         $this->step->execute();
     }
