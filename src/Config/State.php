@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Config;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface;
 use Magento\MagentoCloud\Config\Magento\Env\WriterInterface;
@@ -92,7 +93,7 @@ class State
 
         $data = $this->reader->read();
         if (empty($data['crypt']['key']) && empty($this->environment->getCryptKey())) {
-            throw new GenericException('Missing crypt key for upgrading Magento');
+            throw new GenericException('Missing crypt key for upgrading Magento', Error::DEPLOY_CRYPT_KEY_IS_ABSENT);
         }
 
         if (isset($data['install']['date'])) {

@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Config;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface;
@@ -144,6 +145,7 @@ class StateTest extends TestCase
     {
         $this->expectException(GenericException::class);
         $this->expectExceptionMessage('Missing crypt key for upgrading Magento');
+        $this->expectExceptionCode(Error::DEPLOY_CRYPT_KEY_IS_ABSENT);
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Checking if db exists and has tables');

@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
@@ -76,8 +77,7 @@ class CacheType implements StepInterface
                 );
             }
         } catch (ShellException $exception) {
-            //code will be changed after merging PR with error reporting
-            throw new StepException($exception->getMessage(), $exception->getCode(), $exception);
+            throw new StepException($exception->getMessage(), Error::DEPLOY_CACHE_ENABLE_FAILED, $exception);
         } catch (GenericException $exception) {
             throw new StepException($exception->getMessage(), $exception->getCode(), $exception);
         }

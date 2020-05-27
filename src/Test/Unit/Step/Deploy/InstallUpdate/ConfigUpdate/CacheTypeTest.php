@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Step\Deploy\InstallUpdate\ConfigUpdate;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Filesystem\Flag\ConfigurationMismatchException;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
@@ -121,7 +122,7 @@ class CacheTypeTest extends TestCase
         $exceptionMsg = 'Exception message';
         $exception = new ShellException($exceptionMsg, $exceptionCode);
 
-        $this->expectExceptionObject(new StepException($exceptionMsg, $exceptionCode, $exception));
+        $this->expectExceptionObject(new StepException($exceptionMsg, Error::DEPLOY_CACHE_ENABLE_FAILED, $exception));
 
         $this->flagManagerMock->expects($this->once())
             ->method('exists')

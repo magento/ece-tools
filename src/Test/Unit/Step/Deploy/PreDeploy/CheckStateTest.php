@@ -7,9 +7,11 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Step\Deploy\PreDeploy;
 
+use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface as ConfigReader;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Step\Deploy\PreDeploy\CheckState;
+use Magento\MagentoCloud\Step\StepException;
 use PHPUnit\Framework\MockObject\MockObject;
 use Psr\Log\LoggerInterface;
 use PHPUnit\Framework\TestCase;
@@ -106,6 +108,24 @@ class CheckStateTest extends TestCase
             ->method('info');
         $this->flagManagerMock->expects($this->never())
             ->method('set');
+
+        $this->checkState->execute();
+    }
+
+    /**
+     * Checks that method throws only StepException
+     *
+     * @throws StepException
+     */
+    public function testExecuteWithException()
+    {
+        $eCode = 111;
+        $eMessage = 'Exception message';
+        $exception = new GenericException($eMessage, $eCode);
+        $this->expectExceptionObject(new StepException($eMessage, $eCode, $exception));
+        $this->configReaderMock->expects($this->once())
+            ->method('read')
+            ->willThrowException($exception);
 
         $this->checkState->execute();
     }

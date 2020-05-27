@@ -7,8 +7,10 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Step\Deploy\PreDeploy;
 
+use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface as ConfigReader;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
+use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
 use Psr\Log\LoggerInterface;
 
@@ -53,12 +55,16 @@ class CheckState implements StepInterface
      */
     public function execute()
     {
-        $config = $this->configReader->read();
+        try {
+            $config = $this->configReader->read();
 
-        //workaround when Magento creates empty env.php with one cache_type
-        if (empty($config) || (count($config) == 1 && isset($config['cache_type']))) {
-            $this->logger->info(sprintf('Set "%s" flag', FlagManager::FLAG_ENV_FILE_ABSENCE));
-            $this->flagManager->set(FlagManager::FLAG_ENV_FILE_ABSENCE);
+            //workaround when Magento creates empty env.php with one cache_type
+            if (empty($config) || (count($config) == 1 && isset($config['cache_type']))) {
+                $this->logger->info(sprintf('Set "%s" flag', FlagManager::FLAG_ENV_FILE_ABSENCE));
+                $this->flagManager->set(FlagManager::FLAG_ENV_FILE_ABSENCE);
+            }
+        } catch (GenericException $e) {
+            throw new StepException($e->getMessage(), $e->getCode(), $e);
         }
     }
 }
