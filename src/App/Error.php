@@ -57,7 +57,7 @@ class Error
     public const DEPLOY_UTILITY_NOT_FOUND = 118;
     public const DEPLOY_SCD_FAILED = 119;
     public const DEPLOY_SCD_COMPRESSION_FAILED = 120;
-    public const DEPLOY_SCD_UNABLE_UPDATE_VERSION = 121;
+    public const DEPLOY_SCD_CANNOT_UPDATE_VERSION = 121;
     public const DEPLOY_SCD_CLEAN_FAILED = 122;
     public const DEPLOY_SPLIT_DB_COMMAND_FAILED = 123;
     public const DEPLOY_VIEW_PREPROCESSED_CLEAN_FAILED = 124;

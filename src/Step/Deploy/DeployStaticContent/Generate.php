@@ -92,7 +92,7 @@ class Generate implements StepInterface
     public function execute()
     {
         if (!$this->file->touch($this->directoryList->getMagentoRoot() . '/pub/static/deployed_version.txt')) {
-            throw new StepException('Cannot update deployed version.', Error::DEPLOY_SCD_UNABLE_UPDATE_VERSION);
+            throw new StepException('Cannot update deployed version.', Error::DEPLOY_SCD_CANNOT_UPDATE_VERSION);
         }
 
         $this->logger->info('Extracting locales');
