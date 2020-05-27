@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Config\Stage;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\ConfigException;
 use Magento\MagentoCloud\Config\Schema;
 use Magento\MagentoCloud\Config\Stage\Deploy;
@@ -171,6 +172,7 @@ class DeployTest extends TestCase
     {
         $this->expectException(ConfigException::class);
         $this->expectExceptionMessage('Config NO_EXISTS_CONFIG was not defined');
+        $this->expectExceptionCode(Error::DEPLOY_CONFIG_NOT_DEFINED);
 
         $this->mergedConfigMock->expects($this->once())
             ->method('get')

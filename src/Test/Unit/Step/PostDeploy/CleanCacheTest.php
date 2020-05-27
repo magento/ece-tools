@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Step\PostDeploy;
 
+use Magento\MagentoCloud\Config\ConfigException;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Step\PostDeploy\CleanCache;
 use Magento\MagentoCloud\Step\StepException;
@@ -51,7 +52,8 @@ class CleanCacheTest extends TestCase
 
         $this->step = new CleanCache(
             $shellFactoryMock,
-            $this->stageConfig
+            $this->stageConfig,
+            117
         );
     }
 
@@ -74,10 +76,11 @@ class CleanCacheTest extends TestCase
     /**
      * @throws StepException
      */
-    public function testExecuteWithException()
+    public function testExecuteWithShellException()
     {
         $this->expectException(StepException::class);
         $this->expectExceptionMessage('Some error');
+        $this->expectExceptionCode(117);
 
         $this->stageConfig->expects($this->once())
             ->method('get')
@@ -86,6 +89,22 @@ class CleanCacheTest extends TestCase
         $this->magentoShellMock->expects($this->once())
             ->method('execute')
             ->willThrowException(new ShellException('Some error'));
+
+        $this->step->execute();
+    }
+
+    /**
+     * @throws StepException
+     */
+    public function testExecuteWithConfigException()
+    {
+        $this->expectException(StepException::class);
+        $this->expectExceptionMessage('Some error');
+        $this->expectExceptionCode(15);
+
+        $this->stageConfig->expects($this->once())
+            ->method('get')
+            ->willThrowException(new ConfigException('Some error', 15));
 
         $this->step->execute();
     }

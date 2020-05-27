@@ -7,13 +7,14 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Config\Validator\Deploy;
 
-use Magento\MagentoCloud\Config\Validator\Deploy\ResourceConfiguration as ResourceConfigurationValidator;
-use Magento\MagentoCloud\Config\Validator\ResultFactory;
-use Magento\MagentoCloud\Config\Validator\Result;
+use Magento\MagentoCloud\App\Error as AppError;
 use Magento\MagentoCloud\Config\Database\ResourceConfig;
+use Magento\MagentoCloud\Config\Validator\Deploy\ResourceConfiguration as ResourceConfigurationValidator;
+use Magento\MagentoCloud\Config\Validator\Result;
+use Magento\MagentoCloud\Config\Validator\ResultFactory;
+use PHPUnit\Framework\MockObject\Matcher\InvokedCount as InvokedCountMatcher;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit\Framework\MockObject\Matcher\InvokedCount as InvokedCountMatcher;
 
 /**
  * @inheritdoc
@@ -43,6 +44,22 @@ class ResourceConfigurationTest extends TestCase
         $this->resultFactoryMock = $this->createMock(ResultFactory::class);
         $this->resourceConfigMock = $this->createMock(ResourceConfig::class);
         $this->validator = new ResourceConfigurationValidator($this->resultFactoryMock, $this->resourceConfigMock);
+    }
+
+    public function testErrorCode()
+    {
+        $this->resourceConfigMock->expects($this->once())
+            ->method('get')
+            ->willReturn(['resource1' => ['key' => 'value']]);
+        $this->resultFactoryMock->expects($this->once())
+            ->method('error')
+            ->with(
+                'Variable RESOURCE_CONFIGURATION is not configured properly',
+                'Add connection information to the following resources: resource1',
+                AppError::DEPLOY_WRONG_CONFIGURATION_RESOURCE
+            );
+
+        $this->validator->validate();
     }
 
     /**

@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Step\Deploy\PreDeploy;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Service\Adapter\CredisFactory;
 use Magento\MagentoCloud\Step\Deploy\PreDeploy\CleanRedisCache;
 use Magento\MagentoCloud\Config\Factory\Cache as CacheConfig;
@@ -221,6 +222,42 @@ class CleanRedisCacheTest extends TestCase
             ->method('info');
         $this->credisFactoryMock->expects($this->never())
             ->method('create');
+
+        $this->step->execute();
+    }
+
+    /**
+     * @throws StepException
+     */
+    public function testExecuteWithCredisException()
+    {
+        $this->expectException(StepException::class);
+        $this->expectExceptionCode(Error::DEPLOY_REDIS_CACHE_CLEAN_FAILED);
+        $this->expectExceptionMessage('connection error');
+
+        $this->cacheConfigMock->expects($this->once())
+            ->method('get')
+            ->willReturn([
+                'frontend' => [
+                    'default' => [
+                        'backend' => 'Cm_Cache_Backend_Redis',
+                        'backend_options' => [
+                            'server' => 'localhost',
+                            'port' => 1234,
+                            'database' => 0
+                        ]
+                    ],
+                ]
+            ]);
+        $credisClientMock = $this->getMockBuilder(Credis_Client::class)
+            ->setMethods(['connect', 'flushDb'])
+            ->getMock();
+        $this->credisFactoryMock->expects($this->once())
+            ->method('create')
+            ->willReturn($credisClientMock);
+        $credisClientMock->expects($this->once())
+            ->method('connect')
+            ->willThrowException(new \CredisException('connection error'));
 
         $this->step->execute();
     }

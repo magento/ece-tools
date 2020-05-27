@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Step\Build;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Step\Build\ComposerDumpAutoload;
 use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Shell\ShellInterface;
@@ -61,6 +62,7 @@ class ComposerDumpAutoloadTest extends TestCase
     {
         $this->expectException(StepException::class);
         $this->expectExceptionMessage('something went wrong');
+        $this->expectExceptionCode(Error::BUILD_COMPOSER_DUMP_AUTOLOAD_FAILED);
 
         $this->shell->expects($this->once())
             ->method('execute')

@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Config\Validator\Build;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\Validator;
 use Magento\MagentoCloud\Config\ValidatorInterface;
 use Magento\MagentoCloud\Filesystem\Driver\File;
@@ -79,8 +80,6 @@ class ComposerFile implements ValidatorInterface
      * Validates that composer.json has all required configuration for correct deployment.
      *
      * @return Validator\ResultInterface
-     *
-     * @throws UndefinedPackageException
      */
     public function validate(): Validator\ResultInterface
     {
@@ -92,9 +91,17 @@ class ComposerFile implements ValidatorInterface
             $composerJson = json_decode($this->file->fileGetContents($this->fileList->getMagentoComposer()), true);
             $autoloadPsr4 = $composerJson['autoload']['psr-4'] ?? [];
         } catch (UndefinedPackageException $e) {
-            return $this->resultFactory->error('Can\'t get magento version: ' . $e->getMessage());
+            return $this->resultFactory->error(
+                'Can\'t get magento version: ' . $e->getMessage(),
+                '',
+                Error::BUILD_COMPOSER_PACKAGE_NOT_FOUND
+            );
         } catch (FileSystemException $e) {
-            return $this->resultFactory->error('Can\'t read composer.json file: ' . $e->getMessage());
+            return $this->resultFactory->error(
+                'Can\'t read composer.json file: ' . $e->getMessage(),
+                '',
+                Error::BUILD_CANT_READ_COMPOSER_JSON
+            );
         }
 
         if (array_intersect_key(($autoloadPsr4), array_flip(self::$map))) {
@@ -111,7 +118,8 @@ class ComposerFile implements ValidatorInterface
                         'Then commit new composer.json and composer.lock files.',
                         $namespace,
                         'setup/src/Zend/Mvc/Controller/'
-                    )
+                    ),
+                    Error::BUILD_COMPOSER_MISSED_REQUIRED_AUTOLOAD
                 );
             }
         }

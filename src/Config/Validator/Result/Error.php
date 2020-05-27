@@ -25,13 +25,20 @@ class Error implements ResultInterface
     private $suggestion;
 
     /**
+     * @var integer|null
+     */
+    private $code;
+
+    /**
      * @param string $message
      * @param string $suggestion
+     * @param int|null $code
      */
-    public function __construct(string $message, string $suggestion = '')
+    public function __construct(string $message, string $suggestion = '', int $code = null)
     {
         $this->message = $message;
         $this->suggestion = $suggestion;
+        $this->code = $code;
     }
 
     /**
@@ -50,6 +57,14 @@ class Error implements ResultInterface
     public function getSuggestion(): string
     {
         return $this->suggestion;
+    }
+
+    /**
+     * @return integer|null
+     */
+    public function getErrorCode(): ?int
+    {
+        return $this->code;
     }
 
     /**
