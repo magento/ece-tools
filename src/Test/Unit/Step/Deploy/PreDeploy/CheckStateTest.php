@@ -87,8 +87,8 @@ class CheckStateTest extends TestCase
     {
         return [
             [[]],
-            [['cache_type' => '', ]],
-            [['cache_type' => ['type_1' => 1], ]],
+            [['cache_types' => '', ]],
+            [['cache_types' => ['type_1' => 1], ]],
         ];
     }
 
@@ -134,7 +134,7 @@ class CheckStateTest extends TestCase
     {
         return [
             [
-                ['cache_type' => '', 'other_data' => []]
+                ['cache_types' => '', 'other_data' => []]
             ],
             [
                 ['other_data' => []]
