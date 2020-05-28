@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Step\Build\DeployStaticContent;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\ConfigException;
 use Magento\MagentoCloud\Config\Stage\BuildInterface;
 use Magento\MagentoCloud\Step\StepException;
@@ -93,8 +94,10 @@ class Generate implements StepInterface
             foreach ($commands as $command) {
                 $this->shell->execute($command);
             }
-        } catch (ConfigException|ShellException $exception) {
-            throw new StepException($exception->getMessage(), $exception->getCode(), $exception);
+        } catch (ShellException $e) {
+            throw new StepException($e->getMessage(), Error::BUILD_SCD_FAILED, $e);
+        } catch (ConfigException $e) {
+            throw new StepException($e->getMessage(), $e->getCode(), $e);
         }
     }
 }

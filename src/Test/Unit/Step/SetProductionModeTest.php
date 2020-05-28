@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Step;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\Magento\Env\WriterInterface;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Step\SetProductionMode;
@@ -71,6 +72,7 @@ class SetProductionModeTest extends TestCase
     {
         $this->expectException(StepException::class);
         $this->expectExceptionMessage('can\'t update file');
+        $this->expectExceptionCode(Error::BUILD_ENV_PHP_IS_NOT_WRITABLE);
 
         $this->loggerMock->expects($this->once())
             ->method('info')

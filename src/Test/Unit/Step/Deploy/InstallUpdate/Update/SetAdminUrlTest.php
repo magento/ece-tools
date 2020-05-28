@@ -7,9 +7,12 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Step\Deploy\InstallUpdate\Update;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\AdminDataInterface;
 use Magento\MagentoCloud\Config\Magento\Env\WriterInterface;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Step\Deploy\InstallUpdate\Update\SetAdminUrl;
+use Magento\MagentoCloud\Step\StepException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -57,7 +60,7 @@ class SetAdminUrlTest extends TestCase
     }
 
     /**
-     * @return void
+     * @throws StepException
      */
     public function testExecute()
     {
@@ -76,7 +79,7 @@ class SetAdminUrlTest extends TestCase
     }
 
     /**
-     * @return void
+     * @throws StepException
      */
     public function testExecuteNoChange()
     {
@@ -88,6 +91,25 @@ class SetAdminUrlTest extends TestCase
             ->with('Not updating env.php backend front name. (ADMIN_URL not set)');
         $this->configWriterMock->expects($this->never())
             ->method('update');
+
+        $this->setAdminUrl->execute();
+    }
+
+    /**
+     * @throws StepException
+     */
+    public function testExecuteWithException()
+    {
+        $this->expectException(StepException::class);
+        $this->expectExceptionCode(Error::DEPLOY_ENV_PHP_IS_NOT_WRITABLE);
+        $this->expectExceptionMessage('some error');
+
+        $this->adminDataMock->expects($this->once())
+            ->method('getUrl')
+            ->willReturn('admin');
+        $this->configWriterMock->expects($this->once())
+            ->method('update')
+            ->willThrowException(new FileSystemException('some error'));
 
         $this->setAdminUrl->execute();
     }

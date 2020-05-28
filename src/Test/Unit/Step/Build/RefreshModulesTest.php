@@ -7,7 +7,10 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Step\Build;
 
+use Magento\MagentoCloud\App\Error;
+use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Config\Module;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Step\Build\RefreshModules;
 use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
@@ -90,10 +93,37 @@ class RefreshModulesTest extends TestCase
     {
         $this->expectException(StepException::class);
         $this->expectExceptionMessage('some error');
+        $this->expectExceptionCode(10);
+
+        $this->configMock->expects($this->once())
+            ->method('refresh')
+            ->willThrowException(new GenericException('some error', 10));
+
+        $this->step->execute();
+    }
+
+    public function testExecuteWithShellException()
+    {
+        $this->expectException(StepException::class);
+        $this->expectExceptionMessage('some error');
+        $this->expectExceptionCode(Error::BUILD_MODULE_ENABLE_COMMAND_FAILED);
 
         $this->configMock->expects($this->once())
             ->method('refresh')
             ->willThrowException(new ShellException('some error'));
+
+        $this->step->execute();
+    }
+
+    public function testExecuteWithFileSystemException()
+    {
+        $this->expectException(StepException::class);
+        $this->expectExceptionMessage('some error');
+        $this->expectExceptionCode(Error::BUILD_CONFIG_PHP_IS_NOT_WRITABLE);
+
+        $this->configMock->expects($this->once())
+            ->method('refresh')
+            ->willThrowException(new FileSystemException('some error'));
 
         $this->step->execute();
     }

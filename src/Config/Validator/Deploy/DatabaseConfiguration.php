@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Config\Validator\Deploy;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Config\StageConfigInterface;
 use Magento\MagentoCloud\Config\Validator;
@@ -58,7 +59,8 @@ class DatabaseConfiguration implements ValidatorInterface
         )) {
             return $this->resultFactory->error(
                 sprintf('Variable %s is not configured properly', DeployInterface::VAR_DATABASE_CONFIGURATION),
-                'At least host, dbname, username and password options must be configured for default connection'
+                'At least host, dbname, username and password options must be configured for default connection',
+                Error::DEPLOY_WRONG_CONFIGURATION_DB
             );
         }
 

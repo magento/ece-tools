@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Config\Validator\Deploy;
 
+use Magento\MagentoCloud\App\Error as AppError;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Config\Validator\Deploy\DatabaseConfiguration;
 use Magento\MagentoCloud\Config\Validator\Result\Error;
@@ -50,6 +51,23 @@ class DatabaseConfigurationTest extends TestCase
             $this->resultFactoryMock,
             $this->stageConfigMock
         );
+    }
+
+    public function testErrorCode()
+    {
+        $this->stageConfigMock->expects($this->once())
+            ->method('get')
+            ->with(DeployInterface::VAR_DATABASE_CONFIGURATION)
+            ->willReturn(['wrong config']);
+        $this->resultFactoryMock->expects($this->once())
+            ->method('error')
+            ->with(
+                'Variable DATABASE_CONFIGURATION is not configured properly',
+                'At least host, dbname, username and password options must be configured for default connection',
+                AppError::DEPLOY_WRONG_CONFIGURATION_DB
+            );
+
+        $this->validator->validate();
     }
 
     /**

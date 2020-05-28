@@ -27,7 +27,8 @@ class ResultFactory
         if ($type === ResultInterface::ERROR) {
             return $this->error(
                 $arguments['error'],
-                $arguments['suggestion'] ?? ''
+                $arguments['suggestion'] ?? '',
+                $arguments['errorCode'] ?? null
             );
         }
 
@@ -45,10 +46,11 @@ class ResultFactory
     /**
      * @param string $message
      * @param string $suggestion
+     * @param int|null $code
      * @return Error
      */
-    public function error(string $message, string $suggestion = ''): Error
+    public function error(string $message, string $suggestion = '', int $code = null): Error
     {
-        return new Error($message, $suggestion);
+        return new Error($message, $suggestion, $code);
     }
 }

@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Step;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Util\MaintenanceModeSwitcher;
 
@@ -35,8 +36,8 @@ class EnableMaintenanceMode implements StepInterface
     {
         try {
             $this->switcher->enable();
-        } catch (GenericException $exception) {
-            throw new StepException($exception->getMessage(), $exception->getCode(), $exception);
+        } catch (GenericException $e) {
+            throw new StepException($e->getMessage(), Error::DEPLOY_MAINTENANCE_MODE_ENABLING_FAILED, $e);
         }
     }
 }

@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Step\Deploy\DeployStaticContent;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
@@ -91,7 +92,7 @@ class Generate implements StepInterface
     public function execute()
     {
         if (!$this->file->touch($this->directoryList->getMagentoRoot() . '/pub/static/deployed_version.txt')) {
-            throw new StepException('Cannot update deployed version.');
+            throw new StepException('Cannot update deployed version.', Error::DEPLOY_SCD_CANNOT_UPDATE_VERSION);
         }
 
         $this->logger->info('Extracting locales');
@@ -111,8 +112,8 @@ class Generate implements StepInterface
             foreach ($commands as $command) {
                 $this->shell->execute($command);
             }
-        } catch (ShellException $exception) {
-            throw new StepException($exception->getMessage(), $exception->getCode(), $exception);
+        } catch (ShellException $e) {
+            throw new StepException($e->getMessage(), Error::DEPLOY_SCD_FAILED, $e);
         }
     }
 }

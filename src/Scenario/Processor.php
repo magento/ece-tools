@@ -8,10 +8,10 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Scenario;
 
 use Magento\MagentoCloud\OnFail\Action\ActionException;
+use Magento\MagentoCloud\OnFail\Action\ActionInterface;
 use Magento\MagentoCloud\Package\Manager;
 use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
-use Magento\MagentoCloud\OnFail\Action\ActionInterface;
 use Magento\MagentoCloud\Scenario\Exception\ProcessorException;
 use Psr\Log\LoggerInterface;
 use Throwable;
@@ -92,7 +92,10 @@ class Processor
             }
             $this->handleException($stepException);
         } catch (Throwable $exception) {
-            $this->handleException($exception, 'Unhandled error: ' . $exception->getMessage());
+            $this->handleException(
+                $exception,
+                sprintf('Unhandled error: [%d] %s', $exception->getCode(), $exception->getMessage())
+            );
         }
 
         $this->logger->info('Scenario(s) finished');
@@ -102,12 +105,14 @@ class Processor
      * Logs error message and throws ProcessorException
      *
      * @param Throwable $exception
-     * @param string $customMessage
+     * @param string $message
      * @throws ProcessorException
      */
-    private function handleException(Throwable $exception, string $customMessage = ''): void
+    private function handleException(Throwable $exception, string $message = ''): void
     {
-        $message = $customMessage ?: $exception->getMessage();
+        if (empty($message)) {
+            $message = sprintf('[%d] %s', $exception->getCode(), $exception->getMessage());
+        }
         $this->logger->error($message);
 
         throw new ProcessorException(
