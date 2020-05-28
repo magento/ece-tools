@@ -229,7 +229,7 @@ class CacheTest extends TestCase
         $resultMasterOnlyConnectionSyncCache = [
             'frontend' => [
                 'default' => [
-                    'backend' => addslashes(Cache::REDIS_BACKEND_REMOTE_SYNHRONIZED_CACHE),
+                    'backend' => addslashes(Cache::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE),
                     'backend_options' => [
                         'remote_backend' => addslashes(Cache::REDIS_BACKEND_REDIS_CACHE),
                         'remote_backend_options' => [
@@ -491,7 +491,7 @@ class CacheTest extends TestCase
                 $redisConfiguration,
                 [],
                 false,
-                Cache::REDIS_BACKEND_REMOTE_SYNHRONIZED_CACHE,
+                Cache::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE,
                 4,
                 $resultMasterOnlyConnectionSyncCache,
             ],
@@ -500,7 +500,7 @@ class CacheTest extends TestCase
                 $redisConfiguration,
                 $redisSlaveConfiguration,
                 false,
-                Cache::REDIS_BACKEND_REMOTE_SYNHRONIZED_CACHE,
+                Cache::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE,
                 4,
                 $resultMasterOnlyConnectionSyncCache,
             ],
@@ -509,7 +509,7 @@ class CacheTest extends TestCase
                 $redisConfiguration,
                 [],
                 true,
-                Cache::REDIS_BACKEND_REMOTE_SYNHRONIZED_CACHE,
+                Cache::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE,
                 4,
                 $resultMasterOnlyConnectionSyncCache,
             ],
@@ -518,7 +518,7 @@ class CacheTest extends TestCase
                 $redisConfiguration,
                 $redisSlaveConfiguration,
                 true,
-                Cache::REDIS_BACKEND_REMOTE_SYNHRONIZED_CACHE,
+                Cache::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE,
                 5,
                 $resultMasterSlaveConnectionSyncCache,
             ],
@@ -536,7 +536,7 @@ class CacheTest extends TestCase
                 $redisConfiguration,
                 $redisSlaveConfiguration,
                 true,
-                Cache::REDIS_BACKEND_REMOTE_SYNHRONIZED_CACHE,
+                Cache::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE,
                 5,
                 $resultMasterSlaveConnectionWithMergedValueSyncCache,
             ],
@@ -557,7 +557,7 @@ class CacheTest extends TestCase
                 $redisConfiguration,
                 $redisSlaveConfiguration,
                 true,
-                Cache::REDIS_BACKEND_REMOTE_SYNHRONIZED_CACHE,
+                Cache::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE,
                 5,
                 $resultMasterSlaveConnectionWithDiffHostSyncCache,
             ],
