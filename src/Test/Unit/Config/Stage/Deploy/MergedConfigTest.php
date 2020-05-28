@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Config\Stage\Deploy;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\ConfigException;
 use Magento\MagentoCloud\Config\Environment\Reader as EnvironmentReader;
 use Magento\MagentoCloud\Config\Schema;
@@ -182,6 +183,7 @@ class MergedConfigTest extends TestCase
     {
         $this->expectException(ConfigException::class);
         $this->expectExceptionMessage('File system error');
+        $this->expectExceptionCode(Error::DEPLOY_CONFIG_UNABLE_TO_READ);
 
         $this->environmentReaderMock->expects($this->once())
             ->method('read')
@@ -197,10 +199,27 @@ class MergedConfigTest extends TestCase
     {
         $this->expectException(ConfigException::class);
         $this->expectExceptionMessage('File system error');
+        $this->expectExceptionCode(Error::DEPLOY_CONFIG_PARSE_FAILED);
 
         $this->environmentReaderMock->expects($this->once())
             ->method('read')
             ->willThrowException(new ParseException('File system error'));
+
+        $this->mergedConfig->get();
+    }
+
+    /**
+     * @throws ConfigException
+     */
+    public function testGetWithSchemaReadException(): void
+    {
+        $this->expectException(ConfigException::class);
+        $this->expectExceptionMessage('File system error');
+        $this->expectExceptionCode(Error::DEPLOY_CONFIG_UNABLE_TO_READ_SCHEMA_YAML);
+
+        $this->schemaMock->expects($this->once())
+            ->method('getDefaults')
+            ->willThrowException(new FileSystemException('File system error'));
 
         $this->mergedConfig->get();
     }

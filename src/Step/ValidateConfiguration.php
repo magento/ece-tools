@@ -47,19 +47,21 @@ class ValidateConfiguration implements StepInterface
     {
         $this->logger->notice('Validating configuration');
 
-        $messages = $this->collectMessages();
+        $errors = $this->collectErrors();
 
-        ksort($messages);
-        foreach ($messages as $level => $levelMessages) {
-            $error = 'Fix configuration with given suggestions:' . PHP_EOL . implode(PHP_EOL, $levelMessages);
+        ksort($errors);
+        /** @var Error[] $levelErrors */
+        foreach ($errors as $level => $levelErrors) {
+            $message = $this->createErrorMessage($levelErrors);
 
             if ($level >= ValidatorInterface::LEVEL_CRITICAL) {
                 throw new StepException(
-                    $error
+                    $message,
+                    array_values($levelErrors)[0]->getErrorCode()
                 );
             }
 
-            $this->logger->log($level, $error);
+            $this->logger->log($level, $message);
         }
 
         $this->logger->notice('End of validation');
@@ -74,9 +76,9 @@ class ValidateConfiguration implements StepInterface
      * @throws StepException
      * @see Logger::toMonologLevel()
      */
-    private function collectMessages(): array
+    private function collectErrors(): array
     {
-        $messages = [];
+        $errors = [];
 
         /* @var $validators ValidatorInterface[] */
         foreach ($this->validators as $level => $validators) {
@@ -94,19 +96,35 @@ class ValidateConfiguration implements StepInterface
                 }
 
                 if ($result instanceof Error) {
-                    $messages[$level][] = '- ' . $result->getError();
-                    if ($suggestion = $result->getSuggestion()) {
-                        $messages[$level][] = implode(PHP_EOL, array_map(
-                            static function ($line) {
-                                return '  ' . $line;
-                            },
-                            explode(PHP_EOL, $suggestion)
-                        ));
-                    }
+                    $errors[$level][] = $result;
                 }
             }
         }
 
-        return $messages;
+        return $errors;
+    }
+
+    /**
+     * Convert array of Errors to string message
+     *
+     * @param array $errors
+     * @return string
+     */
+    private function createErrorMessage(array $errors): string
+    {
+        $messages = [];
+        foreach ($errors as $error) {
+            $messages[] = '- ' . $error->getError();
+            if ($suggestion = $error->getSuggestion()) {
+                $messages[] = implode(PHP_EOL, array_map(
+                    static function ($line) {
+                        return '  ' . $line;
+                    },
+                    explode(PHP_EOL, $suggestion)
+                ));
+            }
+        }
+
+        return 'Fix configuration with given suggestions:' . PHP_EOL . implode(PHP_EOL, $messages);
     }
 }

@@ -12,6 +12,7 @@ use Composer\Package\Locker;
 use Composer\Package\PackageInterface;
 use Composer\Repository\RepositoryInterface;
 use Composer\Package\Link;
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Package\Manager;
 use Magento\MagentoCloud\Package\UndefinedPackageException;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -149,6 +150,7 @@ class ManagerTest extends TestCase
     {
         $this->expectException(UndefinedPackageException::class);
         $this->expectExceptionMessage('Package some_package:* was not found');
+        $this->expectExceptionCode(Error::BUILD_COMPOSER_PACKAGE_NOT_FOUND);
 
         $this->repositoryMock->method('findPackage')
             ->with('some_package', '*')

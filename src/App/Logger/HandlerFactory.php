@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\App\Logger;
 
+use Illuminate\Contracts\Config\Repository;
 use Magento\MagentoCloud\App\Logger\Gelf\HandlerFactory as GelfHandlerFactory;
 use Magento\MagentoCloud\Config\GlobalSection;
 use Magento\MagentoCloud\Config\Log as LogConfig;
@@ -24,6 +25,7 @@ class HandlerFactory
 {
     const HANDLER_STREAM = 'stream';
     const HANDLER_FILE = 'file';
+    const HANDLER_FILE_ERROR = 'file_errors';
     const HANDLER_EMAIL = 'email';
     const HANDLER_SLACK = 'slack';
     const HANDLER_GELF = 'gelf';
@@ -71,7 +73,6 @@ class HandlerFactory
     /**
      * @param string $handler
      * @return HandlerInterface
-     * @throws \Exception
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      */
     public function create(string $handler): HandlerInterface
@@ -86,6 +87,12 @@ class HandlerFactory
                 $handlerInstance = new StreamHandler(
                     $configuration->get('file'),
                     $this->levelResolver->resolve($configuration->get('min_level', LogConfig::LEVEL_DEBUG))
+                );
+                break;
+            case static::HANDLER_FILE_ERROR:
+                $handlerInstance = new StreamHandler(
+                    $configuration->get('file'),
+                    $this->levelResolver->resolve($configuration->get('min_level', LogConfig::LEVEL_WARNING))
                 );
                 break;
             case static::HANDLER_STREAM:

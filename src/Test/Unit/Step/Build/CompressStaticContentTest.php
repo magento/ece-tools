@@ -7,14 +7,18 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Step\Build;
 
+use Magento\MagentoCloud\App\Error;
+use Magento\MagentoCloud\Config\Stage\BuildInterface;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
+use Magento\MagentoCloud\Package\UndefinedPackageException;
+use Magento\MagentoCloud\Shell\ShellException;
+use Magento\MagentoCloud\Shell\UtilityException;
 use Magento\MagentoCloud\Step\Build\CompressStaticContent;
 use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Util\StaticContentCompressor;
-use Magento\MagentoCloud\Config\Stage\BuildInterface;
 use PHPUnit\Framework\MockObject\MockObject;
-use Psr\Log\LoggerInterface;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
 
 /**
  * Unit test for build-time static content compressor.
@@ -71,17 +75,7 @@ class CompressStaticContentTest extends TestCase
      */
     public function testExecute()
     {
-        $this->flagManagerMock->expects($this->once())
-            ->method('exists')
-            ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)
-            ->willReturn(true);
-        $this->stageConfigMock->expects($this->exactly(3))
-            ->method('get')
-            ->willReturnMap([
-                [BuildInterface::VAR_SCD_COMPRESSION_LEVEL, 6],
-                [BuildInterface::VAR_SCD_COMPRESSION_TIMEOUT, 500],
-                [BuildInterface::VAR_VERBOSE_COMMANDS, ''],
-            ]);
+        $this->prepareConfig();
         $this->compressorMock
             ->expects($this->once())
             ->method('process')
@@ -113,5 +107,71 @@ class CompressStaticContentTest extends TestCase
             ->method('process');
 
         $this->step->execute();
+    }
+
+    /**
+     * @throws StepException
+     */
+    public function testExecuteWithException()
+    {
+        $this->prepareConfig();
+        $this->compressorMock->expects($this->once())
+            ->method('process')
+            ->willThrowException(new UndefinedPackageException('some error', 10));
+
+        $this->expectExceptionCode(10);
+        $this->expectException(StepException::class);
+        $this->expectExceptionMessage('some error');
+
+        $this->step->execute();
+    }
+
+    /**
+     * @throws StepException
+     */
+    public function testExecuteWithShellException()
+    {
+        $this->prepareConfig();
+        $this->compressorMock->expects($this->once())
+            ->method('process')
+            ->willThrowException(new ShellException('some error'));
+
+        $this->expectExceptionCode(Error::BUILD_SCD_COMPRESSION_FAILED);
+        $this->expectException(StepException::class);
+        $this->expectExceptionMessage('some error');
+
+        $this->step->execute();
+    }
+
+    /**
+     * @throws StepException
+     */
+    public function testExecuteWithUtilityException()
+    {
+        $this->prepareConfig();
+        $this->compressorMock->expects($this->once())
+            ->method('process')
+            ->willThrowException(new UtilityException('some error'));
+
+        $this->expectExceptionCode(Error::BUILD_UTILITY_NOT_FOUND);
+        $this->expectException(StepException::class);
+        $this->expectExceptionMessage('some error');
+
+        $this->step->execute();
+    }
+
+    public function prepareConfig(): void
+    {
+        $this->flagManagerMock->expects($this->once())
+            ->method('exists')
+            ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)
+            ->willReturn(true);
+        $this->stageConfigMock->expects($this->exactly(3))
+            ->method('get')
+            ->willReturnMap([
+                [BuildInterface::VAR_SCD_COMPRESSION_LEVEL, 6],
+                [BuildInterface::VAR_SCD_COMPRESSION_TIMEOUT, 500],
+                [BuildInterface::VAR_VERBOSE_COMMANDS, ''],
+            ]);
     }
 }

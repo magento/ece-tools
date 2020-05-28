@@ -328,6 +328,7 @@ class File
      * @param array $excludes
      * @return void
      * @codeCoverageIgnore
+     * @throws FileSystemException
      */
     public function backgroundClearDirectory(string $path, array $excludes = [])
     {

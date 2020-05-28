@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Step\Build\DeployStaticContent;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\Stage\BuildInterface;
 use Magento\MagentoCloud\Step\Build\DeployStaticContent\Generate;
 use Magento\MagentoCloud\Step\StepException;
@@ -117,6 +118,7 @@ class GenerateTest extends TestCase
     {
         $this->expectException(StepException::class);
         $this->expectExceptionMessage('Some error');
+        $this->expectExceptionCode(Error::BUILD_SCD_FAILED);
 
         $commands = [
             'setup:static-content:deploy with locales'

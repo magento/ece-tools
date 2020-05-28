@@ -10,6 +10,7 @@ namespace Magento\MagentoCloud\Package;
 use Composer\Composer;
 use Composer\Package\PackageInterface;
 use Composer\Repository\RepositoryInterface;
+use Magento\MagentoCloud\App\Error;
 
 /**
  * Composer packages repository manager.
@@ -70,11 +71,14 @@ class Manager
         $package = $this->repository->findPackage($packageName, $version);
 
         if (!$package instanceof PackageInterface) {
-            throw new UndefinedPackageException(sprintf(
-                'Package %s:%s was not found',
-                $packageName,
-                $version
-            ));
+            throw new UndefinedPackageException(
+                sprintf(
+                    'Package %s:%s was not found',
+                    $packageName,
+                    $version
+                ),
+                Error::BUILD_COMPOSER_PACKAGE_NOT_FOUND
+            );
         }
 
         return $package;
