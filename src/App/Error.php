@@ -66,6 +66,8 @@ class Error
     public const DEPLOY_CACHE_FLUSH_COMMAND_FAILED = 127;
     public const DEPLOY_MAINTENANCE_MODE_DISABLING_FAILED = 128;
     public const DEPLOY_UNABLE_TO_READ_RESET_PASSWORD_TMPL = 129;
+    public const DEPLOY_CACHE_ENABLE_FAILED = 130;
+    public const DEPLOY_CRYPT_KEY_IS_ABSENT = 131;
 
     public const PD_DEPLOY_IS_FAILED = 201;
     public const PD_ENV_PHP_IS_NOT_WRITABLE = 202;

@@ -35,5 +35,6 @@ class RemoveDeployFailedFlag implements StepInterface
     {
         $this->manager->delete(Manager::FLAG_DEPLOY_HOOK_IS_FAILED);
         $this->manager->delete(Manager::FLAG_IGNORE_SPLIT_DB);
+        $this->manager->delete(Manager::FLAG_ENV_FILE_ABSENCE);
     }
 }
