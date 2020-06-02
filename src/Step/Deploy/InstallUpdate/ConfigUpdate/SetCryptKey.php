@@ -5,7 +5,7 @@
  */
 declare(strict_types=1);
 
-namespace Magento\MagentoCloud\Step\Deploy;
+namespace Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate;
 
 use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface as ConfigReader;
 use Magento\MagentoCloud\Config\Magento\Env\WriterInterface as ConfigWriter;
@@ -73,11 +73,6 @@ class SetCryptKey implements StepInterface
         $key = $this->environment->getCryptKey();
 
         if (empty($key)) {
-            $this->logger->notice(
-                'Crypt key missing. Add the crypt key to the "app/etc/env.php" file, or set the "CRYPT_KEY" '
-                . 'environment variable in the Cloud Project web UI.'
-            );
-
             return;
         }
 

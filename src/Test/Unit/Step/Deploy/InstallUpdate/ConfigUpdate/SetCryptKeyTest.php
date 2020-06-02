@@ -5,13 +5,13 @@
  */
 declare(strict_types=1);
 
-namespace Magento\MagentoCloud\Test\Unit\Step\Deploy;
+namespace Magento\MagentoCloud\Test\Unit\Step\Deploy\InstallUpdate\ConfigUpdate;
 
 use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface as ConfigReader;
 use Magento\MagentoCloud\Config\Magento\Env\WriterInterface as ConfigWriter;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
-use Magento\MagentoCloud\Step\Deploy\SetCryptKey;
+use Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\SetCryptKey;
 use Magento\MagentoCloud\Step\StepException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -77,12 +77,6 @@ class SetCryptKeyTest extends TestCase
         $this->environmentMock->expects($this->once())
             ->method('getCryptKey')
             ->willReturn('TWFnZW50byBSb3g=');
-        $this->loggerMock->expects($this->never())
-            ->method('error')
-            ->with(
-                'Crypt key missing. Add the crypt key to the "app/etc/env.php" file, or set the "CRYPT_KEY" '
-                . 'environment variable in the Cloud Project web UI.'
-            );
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Setting encryption key');
@@ -107,12 +101,6 @@ class SetCryptKeyTest extends TestCase
         $this->environmentMock->expects($this->once())
             ->method('getCryptKey')
             ->willReturn('TWFnZW50byBSb3g=');
-        $this->loggerMock->expects($this->never())
-            ->method('error')
-            ->with(
-                'Crypt key missing. Add the crypt key to the "app/etc/env.php" file, or set the "CRYPT_KEY" '
-                . 'environment variable in the Cloud Project web UI.'
-            );
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Setting encryption key');
@@ -135,12 +123,6 @@ class SetCryptKeyTest extends TestCase
         $this->environmentMock->expects($this->once())
             ->method('getCryptKey')
             ->willReturn('');
-        $this->loggerMock->expects($this->once())
-            ->method('notice')
-            ->with(
-                'Crypt key missing. Add the crypt key to the "app/etc/env.php" file, or set the "CRYPT_KEY" '
-                . 'environment variable in the Cloud Project web UI.'
-            );
         $this->loggerMock->expects($this->never())
             ->method('info');
         $this->configWriterMock->expects($this->never())
@@ -159,12 +141,6 @@ class SetCryptKeyTest extends TestCase
             ->willReturn(['crypt' => ['key' => 'QmVuIHd1eiBoZXJl']]);
         $this->environmentMock->expects($this->never())
             ->method('getCryptKey');
-        $this->loggerMock->expects($this->never())
-            ->method('notice')
-            ->with(
-                'Crypt key missing. Add the crypt key to the "app/etc/env.php" file, or set the "CRYPT_KEY" '
-                . 'environment variable in the Cloud Project web UI.'
-            );
         $this->loggerMock->expects($this->never())
             ->method('info');
         $this->configWriterMock->expects($this->never())
