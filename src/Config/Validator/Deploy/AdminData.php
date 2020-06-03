@@ -78,8 +78,8 @@ class AdminData implements ValidatorInterface
 
                 if (!$this->adminData->getEmail() && $data) {
                     return $this->resultFactory->error(
-                        'The following admin data was ignored and an admin was not created because admin email is not set: '
-                        . implode(', ', $data),
+                        'The following admin data was ignored and an admin was not created '
+                        . 'because admin email is not set: ' . implode(', ', $data),
                         'Create an admin user via ssh manually: bin/magento admin:user:create'
                     );
                 }
