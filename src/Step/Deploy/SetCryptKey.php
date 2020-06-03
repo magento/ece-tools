@@ -5,7 +5,7 @@
  */
 declare(strict_types=1);
 
-namespace Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate;
+namespace Magento\MagentoCloud\Step\Deploy;
 
 use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface as ConfigReader;
 use Magento\MagentoCloud\Config\Magento\Env\WriterInterface as ConfigWriter;
@@ -66,6 +66,8 @@ class SetCryptKey implements StepInterface
      */
     public function execute(): void
     {
+        $this->logger->info('Checking existence of encryption key');
+
         if (!empty($this->configReader->read()['crypt']['key'])) {
             return;
         }
@@ -76,7 +78,7 @@ class SetCryptKey implements StepInterface
             return;
         }
 
-        $this->logger->info('Setting encryption key');
+        $this->logger->info(sprintf('Setting encryption key from %s', Environment::VARIABLE_CRYPT_KEY));
 
         $config['crypt']['key'] = $key;
 

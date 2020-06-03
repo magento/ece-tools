@@ -22,6 +22,7 @@ class Environment
 
     public const VAL_ENABLED = 'enabled';
     public const VAL_DISABLED = 'disabled';
+    public const VARIABLE_CRYPT_KEY = 'CRYPT_KEY';
 
     /**
      * The environment variable for controlling the directory nesting level for error reporting
@@ -134,7 +135,7 @@ class Environment
      */
     public function getCryptKey(): string
     {
-        return $this->getVariable('CRYPT_KEY', '');
+        return $this->getVariable(self::VARIABLE_CRYPT_KEY, '');
     }
 
     /**
