@@ -65,26 +65,31 @@ class AdminData implements ValidatorInterface
      */
     public function validate(): ResultInterface
     {
-        $data = $this->getAdminData();
+        try {
+            $data = $this->getAdminData();
 
-        if ($this->databaseConfiguration->validate() instanceof Success) {
-            if ($this->state->isInstalled() && $data) {
-                return $this->resultFactory->error(
-                    'The following admin data is required to create an admin user during initial installation'
-                    . ' only and is ignored during upgrade process: ' . implode(', ', $data)
-                );
+            if ($this->databaseConfiguration->validate() instanceof Success) {
+                if ($this->state->isInstalled() && $data) {
+                    return $this->resultFactory->error(
+                        'The following admin data is required to create an admin user during initial installation'
+                        . ' only and is ignored during upgrade process: ' . implode(', ', $data)
+                    );
+                }
+
+                if (!$this->adminData->getEmail() && $data) {
+                    return $this->resultFactory->error(
+                        'The following admin data was ignored and an admin was not created '
+                        . 'because admin email is not set: ' . implode(', ', $data),
+                        'Create an admin user via ssh manually: bin/magento admin:user:create'
+                    );
+                }
             }
 
-            if (!$this->adminData->getEmail() && $data) {
-                return $this->resultFactory->error(
-                    'The following admin data was ignored and an admin was not created because admin email is not set: '
-                    . implode(', ', $data),
-                    'Create an admin user via ssh manually: bin/magento admin:user:create'
-                );
-            }
+            return $this->resultFactory->success();
+        } catch (\Exception $e) {
+            // Exception on this step is not critical and can be only logged without interraption of the process
+            return $this->resultFactory->error($e->getMessage());
         }
-
-        return $this->resultFactory->success();
     }
 
     /**
