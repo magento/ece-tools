@@ -14,7 +14,7 @@ use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
 
 /**
- * Removes flags which set during the deploy phase.
+ * Removes flags and files which could be set during the previous deploy phase.
  */
 class RemoveDeployFailedFlag implements StepInterface
 {
