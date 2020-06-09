@@ -371,7 +371,18 @@ class File
             }
             $this->rename($src, $dst);
         }
-        shell_exec('nohup rm -rf ' . escapeshellarg($tempDir) . ' 1>/dev/null 2>&1 &');
+        exec(
+            'nohup rm -rf ' . escapeshellarg($tempDir) ,
+            $output,
+            $status
+        );
+
+        if ($status !== 0) {
+            $this->fileSystemException(
+                'Error occurred during removing "%1" directory. %2',
+                [$tempDir, $output]
+            );
+        }
     }
 
     /**
