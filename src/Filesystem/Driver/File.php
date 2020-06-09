@@ -372,7 +372,7 @@ class File
             $this->rename($src, $dst);
         }
         exec(
-            'nohup rm -rf ' . escapeshellarg($tempDir) ,
+            'nohup rm -rf ' . escapeshellarg($tempDir),
             $output,
             $status
         );
