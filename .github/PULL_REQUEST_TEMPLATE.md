@@ -44,5 +44,5 @@ Add link to Magento DevDocs PR or Issue, if needed.
 
 ### Contribution checklist
  - [ ] Pull request has a meaningful description of its purpose
- - [ ] Pull request introduces user-facing changes and includes meaningful release notes and documentation
+ - [ ] Pull request introduces user-facing changes and includes meaningful updates for any required release notes and documentation changes
  - [ ] All commits are accompanied by meaningful commit messages
