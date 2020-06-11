@@ -12,6 +12,8 @@
 <!---
     Please provide a description of the changes proposed in the pull request.
     Letting us know what has changed and why it needed changing will help us validate this pull request.
+
+    If this PR was initiated by an internal JIRA ticket, copy the description from the ticket here so that the information is visible to contributors from the Magento Cloud Community.
 -->
 
 ### Fixed Issues (if relevant)
