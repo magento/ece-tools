@@ -19,6 +19,6 @@ class LineFormatterFactory
      */
     public function create(): LineFormatter
     {
-        return new LineFormatter("[%datetime%] %level_name%: %message% %context% %extra%\n", null, true, true);
+        return new LineFormatter("[%datetime%] %level_name%: %message% %extra%\n", null, true, true);
     }
 }

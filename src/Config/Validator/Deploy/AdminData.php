@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Config\Validator\Deploy;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\AdminDataInterface;
 use Magento\MagentoCloud\Config\State;
 use Magento\MagentoCloud\Config\ValidatorInterface;
@@ -72,7 +73,9 @@ class AdminData implements ValidatorInterface
                 if ($this->state->isInstalled() && $data) {
                     return $this->resultFactory->error(
                         'The following admin data is required to create an admin user during initial installation'
-                        . ' only and is ignored during upgrade process: ' . implode(', ', $data)
+                        . ' only and is ignored during upgrade process: ' . implode(', ', $data),
+                        '',
+                        Error::WARN_ADMIN_DATA_IGNORED
                     );
                 }
 
@@ -80,14 +83,15 @@ class AdminData implements ValidatorInterface
                     return $this->resultFactory->error(
                         'The following admin data was ignored and an admin was not created '
                         . 'because admin email is not set: ' . implode(', ', $data),
-                        'Create an admin user via ssh manually: bin/magento admin:user:create'
+                        'Create an admin user via ssh manually: bin/magento admin:user:create',
+                        Error::WARN_ADMIN_EMAIL_NOT_SET
                     );
                 }
             }
 
             return $this->resultFactory->success();
         } catch (\Exception $e) {
-            // Exception on this step is not critical and can be only logged without interraption of the process
+            // Exception on this step is not critical and can be only logged without interruption of the process
             return $this->resultFactory->error($e->getMessage());
         }
     }

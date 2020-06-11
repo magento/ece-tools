@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Config\Validator\Deploy;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\ConfigException;
 use Magento\MagentoCloud\Config\Database\DbConfig;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
@@ -69,7 +70,8 @@ class DatabaseSplitConnection implements ValidatorInterface
             . 'Magento Cloud does not support a custom split database configuration,'
             . ' such configurations will be ignored',
             DeployInterface::VAR_DATABASE_CONFIGURATION,
-            implode(PHP_EOL, $messageItem)
+            implode(PHP_EOL, $messageItem),
+            Error::WARN_WRONG_SPLIT_DB_CONFIG
         ));
     }
 }

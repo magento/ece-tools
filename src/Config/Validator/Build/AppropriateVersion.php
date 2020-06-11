@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Config\Validator\Build;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\Stage\BuildInterface;
 use Magento\MagentoCloud\Config\StageConfigInterface;
 use Magento\MagentoCloud\Config\Validator;
@@ -69,7 +70,8 @@ class AppropriateVersion implements ValidatorInterface
         if ($errors) {
             return $this->resultFactory->error(
                 'The current configuration is not compatible with this version of Magento',
-                implode(PHP_EOL, $errors)
+                implode(PHP_EOL, $errors),
+                Error::WARN_CONFIGURATION_VERSION_MISMATCH
             );
         }
 

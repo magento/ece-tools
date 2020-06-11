@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Config\Validator\Deploy;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\Validator;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Service\EolValidator as EOLValidator;
@@ -65,7 +66,8 @@ class ServiceEol implements ValidatorInterface
                     'Some services are approaching EOL.';
                 return $this->resultFactory->error(
                     $message,
-                    implode(PHP_EOL, $errors[$this->errorLevel])
+                    implode(PHP_EOL, $errors[$this->errorLevel]),
+                    $this->errorLevel == ValidatorInterface::LEVEL_WARNING ? Error::WARN_SERVICE_PASSED_EOL : null
                 );
             }
         } catch (ServiceMismatchException $e) {

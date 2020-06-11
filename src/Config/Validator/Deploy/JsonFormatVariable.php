@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Config\Validator\Deploy;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\Schema;
 use Magento\MagentoCloud\Config\Stage\Deploy\MergedConfig;
 use Magento\MagentoCloud\Config\StageConfigInterface;
@@ -74,7 +75,11 @@ class JsonFormatVariable implements ValidatorInterface
             }
 
             if ($errors) {
-                return $this->resultFactory->error('Next variables can\'t be decoded: ' . implode(', ', $errors));
+                return $this->resultFactory->error(
+                    'Next variables can\'t be decoded: ' . implode(', ', $errors),
+                    '',
+                    Error::WARN_CONFIG_WRONG_JSON_FORMAT
+                );
             }
         } catch (\Exception $e) {
             return $this->resultFactory->error('Can\'t read merged configuration: ' . $e->getMessage());

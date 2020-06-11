@@ -53,7 +53,11 @@ class IdealState implements CompositeValidator
                 return $suggestion . PHP_EOL;
             }, '');
 
-            return $this->resultFactory->error('The configured state is not ideal', trim($suggestion));
+            return $this->resultFactory->error(
+                'The configured state is not ideal',
+                trim($suggestion),
+                \Magento\MagentoCloud\App\Error::WARN_CONFIGURATION_STATE_NOT_IDEAL
+            );
         }
 
         return $this->resultFactory->success();

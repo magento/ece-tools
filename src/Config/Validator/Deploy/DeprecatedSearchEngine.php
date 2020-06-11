@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Config\Validator\Deploy;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\SearchEngine;
 use Magento\MagentoCloud\Config\Validator;
 use Magento\MagentoCloud\Config\ValidatorInterface;
@@ -43,7 +44,9 @@ class DeprecatedSearchEngine implements ValidatorInterface
     {
         if (SearchEngine::ENGINE_MYSQL === $this->searchEngine->getName()) {
             return $this->resultFactory->error(
-                'The MySQL search configuration option is deprecated. Use Elasticsearch instead.'
+                'The MySQL search configuration option is deprecated. Use Elasticsearch instead.',
+                '',
+                Error::WARN_DEPRECATED_MYSQL_SEARCH_ENGINE
             );
         }
 

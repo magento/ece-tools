@@ -84,6 +84,7 @@ class SearchEngine
      * Returns search engine configuration. At least contains 'engine' option.
      *
      * @return array
+     * @throws ServiceException
      */
     public function getConfig(): array
     {
@@ -115,6 +116,7 @@ class SearchEngine
 
     /**
      * @return string
+     * @throws ServiceException
      */
     public function getName(): string
     {
@@ -125,6 +127,7 @@ class SearchEngine
      * Checks if search engine is a prt of ElasticSearch family (i.e. ElasticSuite).
      *
      * @return bool
+     * @throws ServiceException
      */
     public function isESFamily(): bool
     {

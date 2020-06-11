@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Config\Validator\Deploy;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Config\Validator;
@@ -63,7 +64,8 @@ class MagentoCloudVariables implements ValidatorInterface
         if ($errors) {
             return $this->resultFactory->error(
                 'Environment configuration is not valid',
-                implode(PHP_EOL, $errors)
+                implode(PHP_EOL, $errors),
+                Error::WARN_ENVIRONMENT_CONFIG_NOT_VALID
             );
         }
 

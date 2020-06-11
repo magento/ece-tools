@@ -52,7 +52,7 @@ class ValidateConfiguration implements StepInterface
         ksort($errors);
         /** @var Error[] $levelErrors */
         foreach ($errors as $level => $levelErrors) {
-            $message = $this->createErrorMessage($levelErrors);
+            $message = $this->createErrorMessage($levelErrors, $level);
 
             if ($level >= ValidatorInterface::LEVEL_CRITICAL) {
                 throw new StepException(
@@ -108,13 +108,21 @@ class ValidateConfiguration implements StepInterface
      * Convert array of Errors to string message
      *
      * @param array $errors
+     * @param int $level
      * @return string
      */
-    private function createErrorMessage(array $errors): string
+    private function createErrorMessage(array $errors, int $level): string
     {
         $messages = [];
+        /** @var Error $error */
         foreach ($errors as $error) {
-            $messages[] = '- ' . $error->getError();
+            $message = '- ';
+            if ($level == ValidatorInterface::LEVEL_WARNING && $error->getErrorCode()) {
+                $message .= '[' . $error->getErrorCode() . '] ';
+            }
+            $message .= $error->getError();
+            $messages[] = $message;
+
             if ($suggestion = $error->getSuggestion()) {
                 $messages[] = implode(PHP_EOL, array_map(
                     static function ($line) {
