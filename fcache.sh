@@ -1,0 +1,1 @@
+docker exec -d ece-tools_varnish_1 varnishadm 'ban req.url ~ .' && docker exec -d ece-tools_fpm_1 bin/magento  rm -rf var/cache/* var/page_cache/* generated/* && docker exec -d ece-tools_redis_1 redis-cli flushall 

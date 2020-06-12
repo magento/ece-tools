@@ -1,0 +1,14 @@
+version: '2'
+services:
+
+#  db:
+#     image: percona:5.7
+#     environment:
+#       - MYSQL_ROOT_PASSWORD=magento
+#       - MYSQL_DATABASE=magento
+#       - MYSQL_USER=magento
+#       - MYSQL_PASSWORD=magento
+
+  web:
+    volumes:
+      - ./magento-sync:/app
