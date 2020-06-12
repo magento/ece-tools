@@ -1,0 +1,133 @@
+version: '2'
+services:
+  db:
+    image: mariadb:10.1
+    environment:
+      - MYSQL_ROOT_PASSWORD=magento2
+      - MYSQL_DATABASE=magento2
+      - MYSQL_USER=magento2
+      - MYSQL_PASSWORD=magento2
+    hostname: db.magento2.docker
+    ports:
+      - 3306
+    networks:
+      magento:
+        aliases:
+          - db.magento2.docker
+    volumes:
+      - 'magento-db:/var/lib/mysql'
+      - ./.docker/mysql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+  redis:
+    image: 'redis:5.0'
+    volumes:
+      - /data
+    ports:
+      - 6379
+    networks:
+      - magento
+  elasticsearch:
+    image: magento/magento-cloud-docker-elasticsearch:7.5-1.1
+    networks:
+      - magento
+    depends_on:
+      - db
+  fpm:
+    build: .docker/PHP/
+  #    context: .docker/PHP/
+    extends: generic
+    ports:
+      - 9000
+    depends_on:
+      - db
+    volumes:
+      - ./magento-sync:/app
+    networks:
+      - magento
+  build:
+    image: magento/magento-cloud-docker-php:7.2-cli
+    extends: generic
+    hostname: build.magento2.docker
+    depends_on:
+      - db
+      - redis
+      - elasticsearch
+    volumes:
+      - 'magento-sync:/app:nocopy'
+      - ~/.composer/cache:/root/.composer/cache:delegated
+    networks:
+      magento-build:
+        aliases:
+          - build.magento2.docker
+  deploy:
+    image: magento/magento-cloud-docker-php:7.2-fpm
+    extends: generic
+    hostname: deploy.magento2.docker
+    depends_on:
+      - db
+      - redis
+      - elasticsearch
+    volumes:
+      - 'magento-sync:/app:nocopy'
+      - ~/.composer/cache:/root/.composer/cache:delegated
+    networks:
+      magento:
+        aliases:
+          - deploy.magento2.docker
+  web:
+    image: magento/magento-cloud-docker-nginx
+    extends: generic
+    hostname: web.magento2.docker
+    depends_on:
+      - fpm
+    volumes:
+      - ./magento-sync:/app
+    networks:
+      magento:
+        aliases:
+          - web.magento2.docker
+  varnish:
+    image: magento/magento-cloud-docker-varnish:latest-1.0
+    environment:
+      - VIRTUAL_HOST=magento2.docker
+      - VIRTUAL_PORT=80
+      - HTTPS_METHOD=noredirect
+    ports:
+      - '80:80'
+    depends_on:
+      - web
+    networks:
+      magento:
+        aliases:
+          - magento2.docker
+  tls:
+    image: magento/magento-cloud-docker-tls:latest-1.0
+    ports:
+      - '443:443'
+    external_links:
+      - 'varnish:varnish'
+    depends_on:
+      - varnish
+    networks:
+      - magento
+  generic:
+    image: alpine
+    environment:
+      - PHP_MEMORY_LIMIT=2048M
+      - UPLOAD_MAX_FILESIZE=64M
+      - MAGENTO_ROOT=/app
+      - PHP_IDE_CONFIG=serverName=magento_cloud_docker
+      - XDEBUG_CONFIG=remote_host=host.docker.internal
+      - MAGENTO_CLOUD_RELATIONSHIPS=eyJkYXRhYmFzZSI6W3siaG9zdCI6ImRiIiwicGF0aCI6Im1hZ2VudG8yIiwicGFzc3dvcmQiOiJtYWdlbnRvMiIsInVzZXJuYW1lIjoibWFnZW50bzIiLCJwb3J0IjoiMzMwNiJ9XSwicmVkaXMiOlt7Imhvc3QiOiJyZWRpcyIsInBvcnQiOiI2Mzc5In1dLCJlbGFzdGljc2VhcmNoIjpbeyJob3N0IjoiZWxhc3RpY3NlYXJjaCIsInBvcnQiOiI5MjAwIn1dfQ==
+      - MAGENTO_CLOUD_ROUTES=eyJodHRwOlwvXC9tYWdlbnRvMi5kb2NrZXJcLyI6eyJ0eXBlIjoidXBzdHJlYW0iLCJvcmlnaW5hbF91cmwiOiJodHRwOlwvXC97ZGVmYXVsdH0ifSwiaHR0cHM6XC9cL21hZ2VudG8yLmRvY2tlclwvIjp7InR5cGUiOiJ1cHN0cmVhbSIsIm9yaWdpbmFsX3VybCI6Imh0dHBzOlwvXC97ZGVmYXVsdH0ifX0=
+      - MAGENTO_CLOUD_VARIABLES=eyJBRE1JTl9FTUFJTCI6ImFkbWluQGV4YW1wbGUuY29tIiwiQURNSU5fUEFTU1dPUkQiOiIxMjMxMjNxIiwiQURNSU5fVVJMIjoiYWRtaW4ifQ==
+      - MAGENTO_RUN_MODE=developer
+      - 'PHP_EXTENSIONS=bcmath bz2 calendar exif gd gettext intl mysqli pcntl pdo_mysql soap sockets sysvmsg sysvsem sysvshm opcache zip redis xsl sodium xdebug'
+volumes:
+  magento-sync:
+    external: true
+  magento-db: {  }
+networks:
+  magento:
+    driver: bridge
+  magento-build:
+    driver: bridge
