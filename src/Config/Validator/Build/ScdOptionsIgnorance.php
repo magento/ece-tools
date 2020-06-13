@@ -71,13 +71,16 @@ class ScdOptionsIgnorance implements ValidatorInterface
             }
 
             if (count($configuredScdVariables)) {
-                return $this->resultFactory->error(sprintf(
-                    'When %s, static content deployment does not run during the build phase ' .
-                    'and the following variables are ignored: %s',
-                    $scdOnBuildResult->getError(),
-                    implode(', ', $configuredScdVariables),
+                return $this->resultFactory->error(
+                    sprintf(
+                        'When %s, static content deployment does not run during the build phase ' .
+                        'and the following variables are ignored: %s',
+                        $scdOnBuildResult->getError(),
+                        implode(', ', $configuredScdVariables)
+                    ),
+                    '',
                     Error::WARN_SCD_OPTIONS_IGNORANCE
-                ));
+                );
             }
         }
 
