@@ -1,0 +1,543 @@
+2:
+    title: 'Cannot write to the `./app/etc/env.php` file'
+    suggestion: 'Deployment script cannot make required changes to the `/app/etc/env.php` file. Check your filesystem permissions.'
+    stage: build
+    type: critical
+3:
+    title: 'Configuration isn''t defined in the `schema.yaml` file'
+    suggestion: 'Configuration isn''t defined in the `./vendor/magento/ece-tools/config/schema.yaml` file. Check that the config variable name is correct, and that it defined.'
+    stage: build
+    type: critical
+4:
+    title: 'Failed to parse the `.magento.env.yaml` file'
+    suggestion: 'The `./.magento.env.yaml` file format is invalid. Use a YAML parser to check the syntax and fix any errors.'
+    stage: build
+    type: critical
+5:
+    title: 'Unable to read the `.magento.env.yaml` file'
+    suggestion: 'Unable to read the `./.magento.env.yaml` file. Check file permissions.'
+    stage: build
+    type: critical
+6:
+    title: 'Unable to read the `.schema.yaml` file'
+    suggestion: ''
+    stage: build
+    type: critical
+7:
+    step: refresh-modules
+    title: 'Cannot write to the `./app/etc/config.php` file'
+    suggestion: 'Deployment script cannot make required changes to the `/app/etc/config.php` file. Check your filesystem permissions.'
+    stage: build
+    type: critical
+8:
+    step: validate-config
+    title: 'Cannot read the `composer.json` file'
+    suggestion: 'Unable to read the `./composer.json` file. Check file permissions.'
+    stage: build
+    type: critical
+9:
+    step: validate-config
+    title: 'Composer.json is missing required autoload section'
+    suggestion: 'Required `autoload` section is missing from the `composer.json` file. Compare the autoload section from the Magento `composer.json` file template, and add the missing configuration.'
+    stage: build
+    type: critical
+10:
+    step: validate-config
+    title: 'The file `.magento.env.yaml` contains an option which isn''t declared in the schema, or has an invalid value or stage'
+    suggestion: 'The `./.magento.env.yaml` file contains invalid configuration. Check the error log for detailed info.'
+    stage: build
+    type: critical
+11:
+    step: refresh-modules
+    title: 'Command `/bin/magento module:enable --all` failed'
+    suggestion: 'Check the `cloud.log` for more information. Add `VERBOSE_COMMANDS: ''-vvv''` into `.magento.env.yaml` for more detailed command output.'
+    stage: build
+    type: critical
+12:
+    step: apply-patches
+    title: 'Failed to apply patch'
+    suggestion: ''
+    stage: build
+    type: critical
+13:
+    step: set-report-dir-nesting-level
+    title: 'Cannot write to the file `/pub/errors/local.xml`'
+    suggestion: ''
+    stage: build
+    type: critical
+14:
+    step: copy-sample-data
+    title: 'Failed to copy sample data files'
+    suggestion: ''
+    stage: build
+    type: critical
+15:
+    step: compile-di
+    title: 'Command `/bin/magento setup:di:compile` failed'
+    suggestion: 'Check the `cloud.log` for more information. Add `VERBOSE_COMMANDS: ''-vvv''` into `.magento.env.yaml` for more detailed command output.'
+    stage: build
+    type: critical
+16:
+    step: dump-autoload
+    title: 'Command `composer dump-autoload` failed'
+    suggestion: 'The `composer dump-autoload` command failed. Check the `cloud.log` for more information.'
+    stage: build
+    type: critical
+17:
+    step: run-baler
+    title: 'The command to run `Baler` for Javascript bundling failed'
+    suggestion: 'Check the `SCD_USE_BALER` environment variable to verify that the Baler module is configured and enabled for JS bundling. If you don''t need the Baler module, set `SCD_USE_BALER: false`.'
+    stage: build
+    type: critical
+18:
+    step: compress-static-content
+    title: 'Required utility wasn''t found (timeout, bash)'
+    suggestion: ''
+    stage: build
+    type: critical
+19:
+    step: deploy-static-content
+    title: 'Command `/bin/magento setup:static-content:deploy` failed'
+    suggestion: 'Check the `cloud.log` for more information. Add `VERBOSE_COMMANDS: ''-vvv''` into `.magento.env.yaml` for more detailed command output.'
+    stage: build
+    type: critical
+20:
+    step: compress-static-content
+    title: 'Static content compression failed'
+    suggestion: 'Check the `cloud.log` for more information.'
+    stage: build
+    type: critical
+21:
+    step: 'backup-data: static-content'
+    title: 'Failed to copy static content into the `init` directory'
+    suggestion: 'Check the `cloud.log` for more information.'
+    stage: build
+    type: critical
+22:
+    step: 'backup-data: writable-dirs'
+    title: 'Failed to copy some writable directories into the `init` directory'
+    suggestion: 'Failed to copy writable directories into the `./init` folder. Check your filesystem permissions.'
+    stage: build
+    type: critical
+23:
+    title: 'Unable to create a logger object'
+    suggestion: ''
+    stage: build
+    type: critical
+24:
+    step: 'backup-data: static-content'
+    title: 'Failed to clean the `./init/pub/static/` directory'
+    suggestion: 'Failed to clean `./init/pub/static` folder. Check your filesystem permissions.'
+    stage: build
+    type: critical
+25:
+    title: 'Cannot find the Composer package'
+    suggestion: 'If you installed the Magento application version directly from the Magento git repository, verify that the `DEPLOYED_MAGENTO_VERSION_FROM_GIT` environment variable is configured.'
+    stage: build
+    type: critical
+101:
+    step: 'pre-deploy: cache'
+    title: 'Incorrect cache configuration (missing port or host)'
+    suggestion: 'Cache configuration is missing required parameters `server` or `port`. Check the `cloud.log` for more information.'
+    stage: deploy
+    type: critical
+102:
+    title: 'Cannot write to the `./app/etc/env.php` file'
+    suggestion: 'Deployment script cannot make required changes to the `/app/etc/env.php` file. Check your filesystem permissions.'
+    stage: deploy
+    type: critical
+103:
+    title: 'Configuration isn''t defined in the `schema.yaml` file'
+    suggestion: 'Configuration isn''t defined in the `./vendor/magento/ece-tools/config/schema.yaml` file. Check that the config variable name is correct, and that it defined.'
+    stage: deploy
+    type: critical
+104:
+    title: 'Failed to parse the `.magento.env.yaml` file'
+    suggestion: 'Configuration isn''t defined in the `./vendor/magento/ece-tools/config/schema.yaml` file. Check that the config variable name is correct, and that it defined.'
+    stage: deploy
+    type: critical
+105:
+    title: 'Unable to read the `.magento.env.yaml` file'
+    suggestion: 'Unable to read the `./.magento.env.yaml` file. Check file permissions.'
+    stage: deploy
+    type: critical
+106:
+    title: 'Unable to read the `.schema.yaml` file'
+    suggestion: ''
+    stage: deploy
+    type: critical
+108:
+    step: 'pre-deploy: set-production-mode'
+    title: 'Command `/bin/magento maintenance:enable` failed'
+    suggestion: 'Check the `cloud.log` for more information. Add `VERBOSE_COMMANDS: ''-vvv''` into `.magento.env.yaml` for more detailed command output.'
+    stage: deploy
+    type: critical
+109:
+    step: validate-config
+    title: 'Incorrect database configuration'
+    suggestion: 'Check that the the `DATABASE_CONFIGURATION` environment variable is configured correctly.'
+    stage: deploy
+    type: critical
+110:
+    step: validate-config
+    title: 'Incorrect session configuration'
+    suggestion: 'Check that the `SESSION_CONFIGURATION` environment variable is configured correctly. The configuration must contain at least the `save` parameter.'
+    stage: deploy
+    type: critical
+111:
+    step: validate-config
+    title: 'Incorrect search configuration'
+    suggestion: 'Check that the `SEARCH_CONFIGURATION` environment variable is configured correctly.. The configuration must contain at least the `engine` parameter.'
+    stage: deploy
+    type: critical
+112:
+    step: validate-config
+    title: 'Incorrect resource configuration'
+    suggestion: 'Check that the `RESOURCE_CONFIGURATION` environment variable is configured correctly. The configuration must contain at least `connection` parameter.'
+    stage: deploy
+    type: critical
+113:
+    step: 'validate-config:elasticsuite-integrity'
+    title: 'ElasticSuite is installed, but the ElasticSearch service is not available'
+    suggestion: 'ElasticSuite is installed, but the Elasticsearch service is not available. Check that the `SEARCH_CONFIGURATION` environment variable is configured correctly, and verify that the Elasticsearch service is available.'
+    stage: deploy
+    type: critical
+114:
+    step: 'validate-config:elasticsuite-integrity'
+    title: 'ElasticSuite is installed, but another search engine is used'
+    suggestion: 'ElasticSuite is installed but another search engine is configured. Update the `SEARCH_CONFIGURATION` environment variable to enable Elasticsearch and verify the Elasticsearch service configuration in the `services.yaml` file.'
+    stage: deploy
+    type: critical
+115:
+    title: 'Database query execution failed'
+    suggestion: ''
+    stage: deploy
+    type: critical
+116:
+    step: 'install-update: setup'
+    title: 'Command `/bin/magento setup:install` failed'
+    suggestion: 'Check the `cloud.log` and `install_upgrade.log` for more information. Add `VERBOSE_COMMANDS: ''-vvv''` into `.magento.env.yaml` for more detailed command output.'
+    stage: deploy
+    type: critical
+117:
+    step: 'install-update: config-import'
+    title: 'Command `app:config:import` failed'
+    suggestion: 'Check the `cloud.log` for more information. Add `VERBOSE_COMMANDS: ''-vvv''` into `.magento.env.yaml` for more detailed command output.'
+    stage: deploy
+    type: critical
+118:
+    title: 'Required utility wasn''t found (timeout, bash)'
+    suggestion: ''
+    stage: deploy
+    type: critical
+119:
+    step: 'install-update: deploy-static-content'
+    title: 'Command `/bin/magento setup:static-content:deploy` failed'
+    suggestion: 'Check the `cloud.log` for more information. Add `VERBOSE_COMMANDS: ''-vvv''` into `.magento.env.yaml` for more detailed command output.'
+    stage: deploy
+    type: critical
+120:
+    step: compress-static-content
+    title: 'Static content compression failed'
+    suggestion: 'Check the `cloud.log` for more information.'
+    stage: deploy
+    type: critical
+121:
+    step: 'deploy-static-content:generate'
+    title: 'Cannot update the deployed version'
+    suggestion: 'Cannot update `./pub/static/deployed_version.txt` file. Check your filesystem permissions.'
+    stage: deploy
+    type: critical
+122:
+    step: clean-static-content
+    title: 'Failed to clean static content files'
+    suggestion: ''
+    stage: deploy
+    type: critical
+123:
+    step: 'install-update: split-db'
+    title: 'Command `/bin/magento setup:db-schema:split` failed'
+    suggestion: 'Check the `cloud.log` for more information. Add `VERBOSE_COMMANDS: ''-vvv''` into `.magento.env.yaml` for more detailed command output.'
+    stage: deploy
+    type: critical
+124:
+    step: clean-view-preprocessed
+    title: 'Failed to clean the `var/view_preprocessed` folder'
+    suggestion: 'Unable to clean the `./var/view_preprocessed` folder. Check your filesystem permissions.'
+    stage: deploy
+    type: critical
+125:
+    step: 'install-update: reset-password'
+    title: 'Failed to update the `/var/credentials_email.txt` file'
+    suggestion: 'Failed to update the `/var/credentials_email.txt` file. Check your filesystem permissions.'
+    stage: deploy
+    type: critical
+126:
+    step: 'install-update: update'
+    title: 'Command `/bin/magento setup:upgrade` failed'
+    suggestion: 'Check the `cloud.log` and `install_upgrade.log` for more information. Add `VERBOSE_COMMANDS: ''-vvv''` into `.magento.env.yaml` for more detailed command output.'
+    stage: deploy
+    type: critical
+127:
+    step: clean-cache
+    title: 'Command `/bin/magento cache:flush` failed'
+    suggestion: 'Check the `cloud.log` for more information. Add `VERBOSE_COMMANDS: ''-vvv''` into `.magento.env.yaml` for more detailed command output.'
+    stage: deploy
+    type: critical
+128:
+    step: disable-maintenance-mode
+    title: 'Command `/bin/magento maintenance:disable` failed'
+    suggestion: 'Check the `cloud.log` for more information. Add `VERBOSE_COMMANDS: ''-vvv''` into `.magento.env.yaml` for more detailed command output.'
+    stage: deploy
+    type: critical
+129:
+    step: 'install-update: reset-password'
+    title: 'Enable to read reset password template'
+    suggestion: ''
+    stage: deploy
+    type: critical
+130:
+    step: 'install-update: cache_type'
+    title: 'Command `php ./bin/magento cache:enable` failed.'
+    suggestion: 'Command `php ./bin/magento cache:enable` runs only when Magento was installed but `./app/etc/env.php` file was absent or empty at the beginning of the deployment. Check the `cloud.log` for more information. Add `VERBOSE_COMMANDS: ''-vvv''` into `.magento.env.yaml` for more detailed command output.'
+    stage: deploy
+    type: critical
+131:
+    step: install-update
+    title: 'The `crypt/key`  key value does not exist in the `./app/etc/env.php` file or the `CRYPT_KEY` cloud environment variable'
+    suggestion: "This error occurs if the `./app/etc/env.php` file is not present when Magento deployment begins, or if the `crypt/key` value is undefined.\nIf you migrated the database from another environment, retrieve the crypt key value from that environment and add the value to the [CRYPT_KEY](https://devdocs.magento.com/cloud/env/variables-deploy.html#crypt_key) cloud environment variable in your current environment, see [Add the Magento encryption key](https://devdocs.magento.com/cloud/setup/first-time-setup-import-import.html#encryption-key).\nIf you accidentally removed the `./app/etc/env.php` file, use the following command to restore it from the backup files created from a previous deployment: `./vendor/bin/ece-tools backup:restore` CLI command .\""
+    stage: deploy
+    type: critical
+201:
+    step: is-deploy-failed
+    title: 'Deploy stage failed'
+    suggestion: ''
+    stage: post-deploy
+    type: critical
+202:
+    title: 'The `./app/etc/env.php` file is not writable'
+    suggestion: 'Deployment script cannot make required changes to the `/app/etc/env.php` file. Check your filesystem permissions.'
+    stage: post-deploy
+    type: critical
+203:
+    title: 'Configuration isn''t defined in the `schema.yaml` file'
+    suggestion: 'Configuration isn''t defined in the `./vendor/magento/ece-tools/config/schema.yaml` file. Check that the config variable name is correct, and that it defined.'
+    stage: post-deploy
+    type: critical
+204:
+    title: 'Failed to parse the `.magento.env.yaml` file'
+    suggestion: 'The `./.magento.env.yaml` file format is invalid. Use a YAML parser to check the syntax and fix any errors.'
+    stage: post-deploy
+    type: critical
+205:
+    title: 'Unable to read the `.magento.env.yaml` file'
+    suggestion: 'Unable to read the `./.magento.env.yaml` file. Check file permissions.'
+    stage: post-deploy
+    type: critical
+206:
+    title: 'Unable to read the `.schema.yaml` file'
+    suggestion: ''
+    stage: post-deploy
+    type: critical
+207:
+    step: warm-up
+    title: 'Failed to warm-up some pages'
+    suggestion: ''
+    stage: post-deploy
+    type: critical
+208:
+    step: time-to-firs-byte
+    title: 'Failed to test time to first byte (TTFB)'
+    suggestion: ''
+    stage: post-deploy
+    type: critical
+227:
+    step: clean-cache
+    title: 'Command `/bin/magento cache:flush` failed'
+    suggestion: 'Check the `cloud.log` for more information. Add `VERBOSE_COMMANDS: ''-vvv''` into `.magento.env.yaml` for more detailed command output.'
+    stage: post-deploy
+    type: critical
+243:
+    title: 'Configuration isn''t defined in the `schema.yaml` file'
+    suggestion: 'Configuration isn''t defined in the `./vendor/magento/ece-tools/config/schema.yaml` file. Check that the config variable name is correct, and that it defined.'
+    stage: general
+    type: critical
+244:
+    title: 'Failed to parse the `.magento.env.yaml` file'
+    suggestion: 'The `./.magento.env.yaml` file format is invalid. Use a YAML parser to check the syntax and fix any errors.'
+    stage: general
+    type: critical
+245:
+    title: 'Unable to read the `.magento.env.yaml` file'
+    suggestion: 'Unable to read the `./.magento.env.yaml` file. Check file permissions.'
+    stage: general
+    type: critical
+246:
+    title: 'Unable to read the `.schema.yaml` file'
+    suggestion: ''
+    stage: general
+    type: critical
+1001:
+    title: 'File app/etc/config.php does not exist'
+    stage: build
+    step: validate-config
+    type: warning
+1002:
+    title: 'The ./build_options.ini file is no longer supported'
+    stage: build
+    step: validate-config
+    type: warning
+1003:
+    title: 'The modules section is missing from the shared config file'
+    stage: build
+    step: validate-config
+    type: warning
+1004:
+    title: 'Configuration is not compatible with this version of Magento'
+    stage: build
+    step: validate-config
+    type: warning
+1005:
+    title: 'Scd options ignored'
+    stage: build
+    step: validate-config
+    type: warning
+1006:
+    title: 'The configured state is not ideal'
+    stage: build
+    step: validate-config
+    type: warning
+1007:
+    title: 'Baler JS bundling cannot be used'
+    stage: build
+    step: run-baler
+    type: warning
+2001:
+    title: 'Cache is configured for a Redis service that is not available. Configuration will be ignored.'
+    stage: deploy
+    step: 'pre-deploy:cache'
+    type: warning
+2002:
+    title: 'The configured state is not ideal'
+    stage: deploy
+    step: validate-config
+    type: warning
+2003:
+    title: 'The directory nesting level value for error reporting has not been configured'
+    stage: deploy
+    step: validate-config
+    type: warning
+2004:
+    title: 'Invalid file config ./pub/errors/local.xml'
+    stage: deploy
+    step: validate-config
+    type: warning
+2005:
+    title: 'Admin data is ignored during update process'
+    stage: deploy
+    step: validate-config
+    type: warning
+2006:
+    title: 'Admin user was not created as admin email was not set'
+    stage: deploy
+    step: validate-config
+    type: warning
+2007:
+    title: 'Update php version to recommended'
+    stage: deploy
+    step: validate-config
+    type: warning
+2008:
+    title: 'Solr support has been deprecated in Magento 2.1.'
+    stage: deploy
+    step: validate-config
+    type: warning
+2009:
+    title: 'Solr is no longer supported by Magento 2.2 or later.'
+    stage: deploy
+    step: validate-config
+    type: warning
+2010:
+    title: 'Elasticsearch service is installed at infrastructure layer but is not used as a search engine.'
+    suggestion: 'Consider removing elasticsearch service from infrastructure layer for optimized resource usage.'
+    stage: deploy
+    step: validate-config
+    type: warning
+2011:
+    title: 'Elasticsearch service version on infrastructure layer is not compatible with current version of elasticsearch/elasticsearch module, used by your Magento application.'
+    stage: deploy
+    step: validate-config
+    type: warning
+2012:
+    title: 'The current configuration is not compatible with this version of Magento'
+    stage: deploy
+    step: validate-config
+    type: warning
+2013:
+    title: 'Scd options ignored as deploy didn''t run on the build phase'
+    stage: deploy
+    step: validate-config
+    type: warning
+2014:
+    title: 'The configuration contains deprecated variables or values'
+    stage: deploy
+    step: validate-config
+    type: warning
+2015:
+    title: 'Environment configuration is not valid'
+    stage: deploy
+    step: validate-config
+    type: warning
+2016:
+    title: 'Json type configuration can''t be decoded'
+    stage: deploy
+    step: validate-config
+    type: warning
+2017:
+    title: 'The current configuration is not compatible with this version of Magento'
+    stage: deploy
+    step: validate-config
+    type: warning
+2018:
+    title: 'Some services have passed EOL'
+    stage: deploy
+    step: validate-config
+    type: warning
+2019:
+    title: 'The MySQL search configuration option is deprecated'
+    suggestion: 'Use Elasticsearch instead'
+    stage: deploy
+    step: validate-config
+    type: warning
+2020:
+    title: 'Magento state indicated as installed but configuration file app/etc/env.php was empty or did not exist.'
+    suggestion: 'Required data will be restored from environment configurations and from .magento.env.yaml file.'
+    stage: deploy
+    step: install-update
+    type: warning
+2021:
+    title: 'For split databases used custom connections'
+    stage: deploy
+    step: 'install-update:db-connection'
+    type: warning
+2022:
+    title: 'You have changed db configuration that not compatible with slave connection.'
+    stage: deploy
+    step: 'install-update:db-connection'
+    type: warning
+2023:
+    title: 'Variable SPLIT_DB does not have data which were already split.'
+    stage: deploy
+    step: 'install-update:split-db'
+    type: warning
+2024:
+    title: 'Slave connection not set.'
+    stage: deploy
+    step: 'install-update:split-db'
+    type: warning
+3001:
+    title: 'Debug logging is enabled in Magento'
+    suggestion: 'To save space in Magento Cloud debug logging should not be enabled for your production environments.'
+    stage: post-deploy
+    step: validate-config
+    type: warning
