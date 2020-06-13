@@ -5,14 +5,14 @@
  */
 declare(strict_types=1);
 
-namespace Magento\MagentoCloud\App\Logger;
+namespace Magento\MagentoCloud\App\Logger\Formatter;
 
 use Magento\MagentoCloud\App\ContainerInterface;
 use Magento\MagentoCloud\App\ErrorInfo;
-use Monolog\Formatter\LineFormatter;
+use Monolog\Formatter\JsonFormatter;
 
 /**
- * The factory for LineFormatter.
+ * The factory for JsonErrorFormatter.
  */
 class ErrorFormatterFactory
 {
@@ -30,14 +30,12 @@ class ErrorFormatterFactory
     }
 
     /**
-     * @return LineFormatter
+     * @return JsonErrorFormatter
      */
-    public function create(): LineFormatter
+    public function create(): JsonErrorFormatter
     {
-        return new ErrorLineFormatter(
-            ErrorLineFormatter::FORMAT_BASE,
-            null,
-            true,
+        return new JsonErrorFormatter(
+            JsonFormatter::BATCH_MODE_JSON,
             true,
             $this->container->get(ErrorInfo::class)
         );

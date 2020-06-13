@@ -113,7 +113,7 @@ class Processor
         if (empty($message)) {
             $message = sprintf('[%d] %s', $exception->getCode(), $exception->getMessage());
         }
-        $this->logger->error($message);
+        $this->logger->error($message, ['errorCode' => $exception->getCode()]);
 
         throw new ProcessorException(
             $message,

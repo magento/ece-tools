@@ -11,19 +11,27 @@ use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileList;
 use Symfony\Component\Yaml\Yaml;
 
+/**
+ * Returns info about errors from ./config/schema.error.yaml file
+ */
 class ErrorInfo
 {
+    /**
+     * @var array
+     */
+    private $errors = [];
+
     /**
      * @var File
      */
     private $file;
+
     /**
      * @var FileList
      */
     private $fileList;
 
     /**
-     *
      * @param File $file
      * @param FileList $fileList
      */
@@ -34,17 +42,31 @@ class ErrorInfo
     }
 
     /**
+     * Returns info about error based on passed error code
+     *
      * @param int $errorCode
      * @return array
      * @throws \Magento\MagentoCloud\Filesystem\FileSystemException
      */
     public function get(int $errorCode): array
     {
-        $errors = Yaml::parse(
-            $this->file->fileGetContents($this->fileList->getErrorSchema()),
-            Yaml::PARSE_CONSTANT
-        );
+        $this->loadErrors();
 
-        return $errors[$errorCode] ?? [];
+        return $this->errors[$errorCode] ?? [];
+    }
+
+    /**
+     * Fetches all errors from schema.error.yaml file and caches them
+     *
+     * @throws \Magento\MagentoCloud\Filesystem\FileSystemException
+     */
+    private function loadErrors(): void
+    {
+        if (empty($this->errors)) {
+            $this->errors = Yaml::parse(
+                $this->file->fileGetContents($this->fileList->getErrorSchema()),
+                Yaml::PARSE_CONSTANT
+            );
+        }
     }
 }

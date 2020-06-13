@@ -18,6 +18,8 @@
     suggestion: ''
     stage: general
     type: critical
+
+
 !php/const Magento\MagentoCloud\App\Error::WARN_CONFIG_PHP_NOT_EXISTS:
      title: 'File app/etc/config.php does not exist'
      stage: build
@@ -48,7 +50,17 @@
     stage: build
     step: validate-config
     type: warning
+!php/const Magento\MagentoCloud\App\Error::WARN_BALER_CAN_NOT_BE_USED:
+    title: 'Baler JS bundling cannot be used'
+    stage: build
+    step: run-baler
+    type: warning
 
+!php/const Magento\MagentoCloud\App\Error::WARN_REDIS_SERVICE_NOT_AVAILABLE:
+    title: 'Cache is configured for a Redis service that is not available. Configuration will be ignored.'
+    stage: deploy
+    step: pre-deploy:cache
+    type: warning
 !php/const Magento\MagentoCloud\App\Error::WARN_WRONG_SPLIT_DB_CONFIG:
     title: 'The configured state is not ideal'
     stage: deploy
@@ -140,6 +152,32 @@
     suggestion: 'Use Elasticsearch instead'
     stage: deploy
     step: validate-config
+    type: warning
+!php/const Magento\MagentoCloud\App\Error::WARN_ENV_PHP_MISSED:
+    title: 'Magento state indicated as installed but configuration file app/etc/env.php was empty or did not exist.'
+    suggestion: 'Required data will be restored from environment configurations and from .magento.env.yaml file.'
+    stage: deploy
+    step: install-update
+    type: warning
+!php/const Magento\MagentoCloud\App\Error::WARN_SPLIT_DB_CUSTOM_CONNECTION_USED:
+    title: 'For split databases used custom connections'
+    stage: deploy
+    step: install-update:db-connection
+    type: warning
+!php/const Magento\MagentoCloud\App\Error::WARN_DB_CONFIG_NOT_COMPATIBLE_WITH_SLAVE:
+    title: 'You have changed db configuration that not compatible with slave connection.'
+    stage: deploy
+    step: install-update:db-connection
+    type: warning
+!php/const Magento\MagentoCloud\App\Error::WARN_NOT_ENOUGH_DATA_SPLIT_DB_VAR:
+    title: 'Variable SPLIT_DB does not have data which were already split.'
+    stage: deploy
+    step: install-update:split-db
+    type: warning
+!php/const Magento\MagentoCloud\App\Error::WARN_SLAVE_CONNECTION_NOT_SET:
+    title: 'Slave connection not set.'
+    stage: deploy
+    step: install-update:split-db
     type: warning
 
 !php/const Magento\MagentoCloud\App\Error::WARN_DEBUG_LOG_ENABLED:

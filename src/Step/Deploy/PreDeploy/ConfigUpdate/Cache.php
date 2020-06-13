@@ -99,7 +99,8 @@ class Cache implements StepInterface
                 unset($config['cache']);
             } elseif (empty($cacheConfig['frontend'])) {
                 $this->logger->warning(
-                    'Cache is configured for a Redis service that is not available. Configuration will be ignored.'
+                    'Cache is configured for a Redis service that is not available. Configuration will be ignored.',
+                    ['errorCode' => Error::WARN_REDIS_SERVICE_NOT_AVAILABLE]
                 );
                 unset($config['cache']);
             } else {

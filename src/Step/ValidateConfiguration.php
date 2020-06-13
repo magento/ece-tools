@@ -52,7 +52,9 @@ class ValidateConfiguration implements StepInterface
         ksort($errors);
         /** @var Error[] $levelErrors */
         foreach ($errors as $level => $levelErrors) {
-            $message = $this->createErrorMessage($levelErrors, $level);
+            $this->addToErrorLog($level, $levelErrors);
+
+            $message = $this->createErrorMessage($levelErrors);
 
             if ($level >= ValidatorInterface::LEVEL_CRITICAL) {
                 throw new StepException(
@@ -107,21 +109,14 @@ class ValidateConfiguration implements StepInterface
     /**
      * Convert array of Errors to string message
      *
-     * @param array $errors
-     * @param int $level
+     * @param Error[] $errors
      * @return string
      */
-    private function createErrorMessage(array $errors, int $level): string
+    private function createErrorMessage(array $errors): string
     {
         $messages = [];
-        /** @var Error $error */
         foreach ($errors as $error) {
-            $message = '- ';
-            if ($level == ValidatorInterface::LEVEL_WARNING && $error->getErrorCode()) {
-                $message .= '[' . $error->getErrorCode() . '] ';
-            }
-            $message .= $error->getError();
-            $messages[] = $message;
+            $messages[] = sprintf('- [%d] %s', $error->getErrorCode(), $error->getError());
 
             if ($suggestion = $error->getSuggestion()) {
                 $messages[] = implode(PHP_EOL, array_map(
@@ -134,5 +129,20 @@ class ValidateConfiguration implements StepInterface
         }
 
         return 'Fix configuration with given suggestions:' . PHP_EOL . implode(PHP_EOL, $messages);
+    }
+
+    /**
+     * Logs all errors with errorCode in context and an empty message to save them in cloud.error.log
+     *
+     * @param int $level
+     * @param array $levelErrors
+     */
+    private function addToErrorLog(int $level, array $levelErrors): void
+    {
+        foreach ($levelErrors as $error) {
+            if ($error->getErrorCode()) {
+                $this->logger->log($level, '', ['errorCode' => $error->getErrorCode()]);
+            }
+        }
     }
 }

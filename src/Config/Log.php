@@ -8,7 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Config;
 
 use Illuminate\Contracts\Config\Repository;
-use Magento\MagentoCloud\App\Logger\ErrorFormatterFactory;
+use Magento\MagentoCloud\App\Logger\Formatter\ErrorFormatterFactory;
 use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Config\Environment\ReaderInterface;
 use Magento\MagentoCloud\App\Logger\HandlerFactory;

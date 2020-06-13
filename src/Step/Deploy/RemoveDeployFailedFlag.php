@@ -43,7 +43,6 @@ class RemoveDeployFailedFlag implements StepInterface
         File $fileDriver,
         FileList $fileList
     ) {
-
         $this->manager = $manager;
         $this->fileDriver = $fileDriver;
         $this->fileList = $fileList;

@@ -148,7 +148,8 @@ class SplitDbConnection implements StepInterface
         if (!empty($missedSplitTypes)) {
             $this->logger->warning(
                 'Variable SPLIT_DB does not have data which were already split types: '
-                . implode(', ', $missedSplitTypes)
+                . implode(', ', $missedSplitTypes),
+                ['errorCode' => Error::WARN_NOT_ENOUGH_DATA_SPLIT_DB_VAR]
             );
             return;
         }
