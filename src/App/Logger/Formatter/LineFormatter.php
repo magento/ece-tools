@@ -18,35 +18,26 @@ class LineFormatter extends \Monolog\Formatter\LineFormatter
     public const FORMAT_BASE_ERROR = "[%datetime%] %level_name%: [%context.errorCode%] %message% %extra%\n";
 
     /**
-     * @param string $format The format of the message
-     * @param string $dateFormat The format of the timestamp: one supported by DateTime::format
-     * @param bool $allowInlineLineBreaks Whether to allow inline line breaks in log entries
-     * @param bool $ignoreEmptyContextAndExtra
-     */
-    public function __construct(
-        $format = null,
-        $dateFormat = null,
-        $allowInlineLineBreaks = false,
-        $ignoreEmptyContextAndExtra = false
-    ) {
-        parent::__construct($format, $dateFormat, $allowInlineLineBreaks, $ignoreEmptyContextAndExtra);
-    }
-
-    /**
      * @inheritDoc
      */
     public function format(array $record)
     {
-        if (empty($record['message'])) {
-            return false;
-        }
+        $errorLevels = [
+            Logger::getLevelName(Logger::WARNING),
+            Logger::getLevelName(Logger::ERROR),
+            Logger::getLevelName(Logger::CRITICAL),
+        ];
 
-        if ($record['level_name'] == Logger::getLevelName(Logger::WARNING)
+        if (in_array($record['level_name'], $errorLevels)
             && !empty($record['context']['errorCode'])
         ) {
             $this->format = self::FORMAT_BASE_ERROR;
         } else {
             $this->format = self::FORMAT_BASE;
+        }
+
+        if (!empty($record['context']['suggestion'])) {
+            $record['message'] .= PHP_EOL . $record['context']['suggestion'];
         }
 
         return parent::format($record);

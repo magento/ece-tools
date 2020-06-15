@@ -8,6 +8,8 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\App\Logger\Formatter;
 
 use Magento\MagentoCloud\App\ErrorInfo;
+use Magento\MagentoCloud\App\Logger\Error\ReaderInterface;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Monolog\Formatter\JsonFormatter;
 
 /**
@@ -21,18 +23,26 @@ class JsonErrorFormatter extends JsonFormatter
     private $errorInfo;
 
     /**
+     * @var ReaderInterface
+     */
+    private $reader;
+
+    /**
      * @param int $batchMode
      * @param bool $appendNewline
      * @param ErrorInfo|null $errorInfo
+     * @param ReaderInterface $reader
      */
     public function __construct(
         $batchMode = self::BATCH_MODE_JSON,
         $appendNewline = true,
-        ErrorInfo $errorInfo = null
+        ErrorInfo $errorInfo = null,
+        ReaderInterface $reader
     ) {
         parent::__construct($batchMode, $appendNewline);
 
         $this->errorInfo = $errorInfo;
+        $this->reader = $reader;
     }
 
     /**
@@ -42,11 +52,21 @@ class JsonErrorFormatter extends JsonFormatter
      */
     public function format(array $record)
     {
-        if (!isset($record['context']['errorCode'])) {
+        try {
+            if (!isset($record['context']['errorCode'])) {
+                return false;
+            }
+
+            $loggedErrors = $this->reader->read();
+
+            if (isset($loggedErrors[$record['context']['errorCode']])) {
+                return false;
+            }
+
+            return parent::format($this->formatLog($record));
+        } catch (\Exception $e) {
             return false;
         }
-
-        return parent::format($this->formatLog($record));
     }
 
     /**
@@ -54,7 +74,7 @@ class JsonErrorFormatter extends JsonFormatter
      *
      * @param array $record
      * @return array
-     * @throws \Magento\MagentoCloud\Filesystem\FileSystemException
+     * @throws FileSystemException
      */
     private function formatLog(array $record): array
     {
@@ -71,6 +91,10 @@ class JsonErrorFormatter extends JsonFormatter
             if (!empty($record['message'])) {
                 $errorInfo['title'] = $record['message'];
             }
+        }
+
+        if (!empty($record['context']['suggestion'])) {
+            $errorInfo['suggestion'] = $record['context']['suggestion'];
         }
 
         ksort($errorInfo);

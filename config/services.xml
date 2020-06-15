@@ -113,6 +113,7 @@
         <service id="Magento\MagentoCloud\Config\EnvironmentDataInterface" alias="Magento\MagentoCloud\Config\EnvironmentData" />
         <service id="Magento\MagentoCloud\Config\Environment\ReaderInterface" alias="Magento\MagentoCloud\Config\Environment\Reader" />
         <service id="Magento\MagentoCloud\Config\Magento\Env\ReaderInterface" alias="Magento\MagentoCloud\Config\Magento\Env\Reader" />
+        <service id="Magento\MagentoCloud\App\Logger\Error\ReaderInterface" alias="Magento\MagentoCloud\App\Logger\Error\Reader" />
         <service id="Magento\MagentoCloud\Config\Magento\Env\WriterInterface" alias="Magento\MagentoCloud\Config\Magento\Env\Writer" />
         <service id="Magento\MagentoCloud\Config\Magento\Shared\ReaderInterface" alias="Magento\MagentoCloud\Config\Magento\Shared\Reader" />
         <service id="Magento\MagentoCloud\Config\Magento\Shared\WriterInterface" alias="Magento\MagentoCloud\Config\Magento\Shared\Writer" />

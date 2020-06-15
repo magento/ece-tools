@@ -49,21 +49,29 @@ class ValidateConfiguration implements StepInterface
 
         $errors = $this->collectErrors();
 
+        if (empty($errors)) {
+            return;
+        }
+
         ksort($errors);
+
+        $this->logger->notice('Fix configuration with given suggestions:');
+
         /** @var Error[] $levelErrors */
         foreach ($errors as $level => $levelErrors) {
-            $this->addToErrorLog($level, $levelErrors);
-
-            $message = $this->createErrorMessage($levelErrors);
-
-            if ($level >= ValidatorInterface::LEVEL_CRITICAL) {
-                throw new StepException(
-                    $message,
-                    array_values($levelErrors)[0]->getErrorCode()
-                );
+            foreach ($levelErrors as $error) {
+                if ($error->getErrorCode()) {
+                    $this->logger->log($level, $error->getError(), [
+                        'errorCode' => $error->getErrorCode(),
+                        'suggestion' => $error->getSuggestion()
+                    ]);
+                }
             }
 
-            $this->logger->log($level, $message);
+            if ($level >= ValidatorInterface::LEVEL_CRITICAL) {
+                $error = array_values($levelErrors)[0];
+                throw new StepException($error->getError(), $error->getErrorCode());
+            }
         }
 
         $this->logger->notice('End of validation');
@@ -104,45 +112,5 @@ class ValidateConfiguration implements StepInterface
         }
 
         return $errors;
-    }
-
-    /**
-     * Convert array of Errors to string message
-     *
-     * @param Error[] $errors
-     * @return string
-     */
-    private function createErrorMessage(array $errors): string
-    {
-        $messages = [];
-        foreach ($errors as $error) {
-            $messages[] = sprintf('- [%d] %s', $error->getErrorCode(), $error->getError());
-
-            if ($suggestion = $error->getSuggestion()) {
-                $messages[] = implode(PHP_EOL, array_map(
-                    static function ($line) {
-                        return '  ' . $line;
-                    },
-                    explode(PHP_EOL, $suggestion)
-                ));
-            }
-        }
-
-        return 'Fix configuration with given suggestions:' . PHP_EOL . implode(PHP_EOL, $messages);
-    }
-
-    /**
-     * Logs all errors with errorCode in context and an empty message to save them in cloud.error.log
-     *
-     * @param int $level
-     * @param array $levelErrors
-     */
-    private function addToErrorLog(int $level, array $levelErrors): void
-    {
-        foreach ($levelErrors as $error) {
-            if ($error->getErrorCode()) {
-                $this->logger->log($level, '', ['errorCode' => $error->getErrorCode()]);
-            }
-        }
     }
 }
