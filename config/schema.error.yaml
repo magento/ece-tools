@@ -526,11 +526,16 @@
     step: 'install-update:db-connection'
     type: warning
 2023:
-    title: 'Variable SPLIT_DB does not have data which were already split.'
+    title: 'Enabling a split database will be skipped.'
     stage: deploy
     step: 'install-update:split-db'
     type: warning
 2024:
+    title: 'Variable SPLIT_DB does not have data which were already split.'
+    stage: deploy
+    step: 'install-update:split-db'
+    type: warning
+2025:
     title: 'Slave connection not set.'
     stage: deploy
     step: 'install-update:split-db'
@@ -540,4 +545,17 @@
     suggestion: 'To save space in Magento Cloud debug logging should not be enabled for your production environments.'
     stage: post-deploy
     step: validate-config
+    type: warning
+3002:
+    title: 'Can''t fetch store urls'
+    stage: post-deploy
+    step: warm-up
+    type: warning
+3003:
+    title: 'Can''t fetch store url'
+    stage: post-deploy
+    step: warm-up
+    type: warning
+4001:
+    title: 'Can''t get system processor count:'
     type: warning

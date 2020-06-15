@@ -169,6 +169,11 @@
     stage: deploy
     step: install-update:db-connection
     type: warning
+!php/const Magento\MagentoCloud\App\Error::WARN_SPLIT_DB_ENABLING_SKIPPED:
+    title: 'Enabling a split database will be skipped.'
+    stage: deploy
+    step: install-update:split-db
+    type: warning
 !php/const Magento\MagentoCloud\App\Error::WARN_NOT_ENOUGH_DATA_SPLIT_DB_VAR:
     title: 'Variable SPLIT_DB does not have data which were already split.'
     stage: deploy
@@ -185,4 +190,18 @@
     suggestion: 'To save space in Magento Cloud debug logging should not be enabled for your production environments.'
     stage: post-deploy
     step: validate-config
+    type: warning
+!php/const Magento\MagentoCloud\App\Error::WARN_CAN_NOT_FETCH_STORE_URLS:
+    title: 'Can''t fetch store urls'
+    stage: post-deploy
+    step: warm-up
+    type: warning
+!php/const Magento\MagentoCloud\App\Error::WARN_CAN_NOT_FETCH_STORE_URL:
+    title: 'Can''t fetch store url'
+    stage: post-deploy
+    step: warm-up
+    type: warning
+
+!php/const Magento\MagentoCloud\App\Error::WARN_CAN_NOT_GET_PROC_COUNT:
+    title: 'Can''t get system processor count:'
     type: warning

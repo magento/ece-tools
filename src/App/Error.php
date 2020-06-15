@@ -115,8 +115,13 @@ class Error
     public const WARN_ENV_PHP_MISSED = 2020;
     public const WARN_SPLIT_DB_CUSTOM_CONNECTION_USED = 2021;
     public const WARN_DB_CONFIG_NOT_COMPATIBLE_WITH_SLAVE = 2022;
-    public const WARN_NOT_ENOUGH_DATA_SPLIT_DB_VAR = 2023;
-    public const WARN_SLAVE_CONNECTION_NOT_SET = 2024;
+    public const WARN_SPLIT_DB_ENABLING_SKIPPED = 2023;
+    public const WARN_NOT_ENOUGH_DATA_SPLIT_DB_VAR = 2024;
+    public const WARN_SLAVE_CONNECTION_NOT_SET = 2025;
 
     public const WARN_DEBUG_LOG_ENABLED = 3001;
+    public const WARN_CAN_NOT_FETCH_STORE_URLS = 3002;
+    public const WARN_CAN_NOT_FETCH_STORE_URL = 3003;
+
+    public const WARN_CAN_NOT_GET_PROC_COUNT = 4001;
 }
