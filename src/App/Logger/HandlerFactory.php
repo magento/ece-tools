@@ -105,7 +105,7 @@ class HandlerFactory
             case static::HANDLER_EMAIL:
                 $handlerInstance = new NativeMailerHandler(
                     $configuration->get('to'),
-                    $configuration->get('subject', 'Log form Magento Cloud'),
+                    $configuration->get('subject', 'Log from Magento Cloud'),
                     $configuration->get('from'),
                     $minLevel
                 );
