@@ -8,6 +8,8 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit\Config;
 
 use Illuminate\Contracts\Config\Repository;
+use Magento\MagentoCloud\App\Logger\Formatter\ErrorFormatterFactory;
+use Magento\MagentoCloud\App\Logger\Formatter\JsonErrorFormatter;
 use Magento\MagentoCloud\Config\Log as LogConfig;
 use Magento\MagentoCloud\Config\RepositoryFactory;
 use Magento\MagentoCloud\Filesystem\FileList;
@@ -47,6 +49,15 @@ class LogTest extends TestCase
     private $repositoryMock;
 
     /**
+     * @var ErrorFormatterFactory|MockObject
+     */
+    private $errorFormatterFactoryMock;
+    /**
+     * @var JsonErrorFormatter|MockObject
+     */
+    private $errorFormatterMock;
+
+    /**
      * @inheritdoc
      */
     protected function setUp()
@@ -55,15 +66,21 @@ class LogTest extends TestCase
         $this->readerMock = $this->createMock(Reader::class);
         $this->repositoryFactoryMock = $this->createMock(RepositoryFactory::class);
         $this->repositoryMock = $this->createMock(Repository::class);
+        $this->errorFormatterFactoryMock = $this->createMock(ErrorFormatterFactory::class);
+        $this->errorFormatterMock = $this->createMock(JsonErrorFormatter::class);
 
         $this->repositoryFactoryMock->expects($this->any())
             ->method('create')
             ->willReturn($this->repositoryMock);
+        $this->errorFormatterFactoryMock->expects($this->any())
+            ->method('create')
+            ->willReturn($this->errorFormatterMock);
 
         $this->logConfig = new LogConfig(
             $this->fileListMock,
             $this->readerMock,
-            $this->repositoryFactoryMock
+            $this->repositoryFactoryMock,
+            $this->errorFormatterFactoryMock
         );
     }
 
@@ -84,6 +101,8 @@ class LogTest extends TestCase
             ->method('read')
             ->willReturn($config);
 
+        $expectedResult[HandlerFactory::HANDLER_FILE_ERROR]['formatter'] = $this->errorFormatterMock;
+
         $this->assertSame($expectedResult, $this->logConfig->getHandlers());
     }
 
@@ -98,7 +117,10 @@ class LogTest extends TestCase
                 'expectedResult' => [
                     HandlerFactory::HANDLER_STREAM => ['stream' => 'php://stdout'],
                     HandlerFactory::HANDLER_FILE => ['file' => 'somePath'],
-                    HandlerFactory::HANDLER_FILE_ERROR => ['file' => 'somePathErrorLog', 'min_level' => 'warning'],
+                    HandlerFactory::HANDLER_FILE_ERROR => [
+                        'file' => 'somePathErrorLog',
+                        'min_level' => 'warning',
+                    ],
                 ]
             ],
             [

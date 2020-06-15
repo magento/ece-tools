@@ -14,6 +14,7 @@ use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\App\Logger\Pool;
+use Magento\MagentoCloud\Package\UndefinedPackageException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Magento\MagentoCloud\App\Logger\Processor\SanitizeProcessor;
@@ -179,5 +180,27 @@ class LoggerTest extends TestCase
                 'fileMockCopyExpects' => 0,
             ],
         ];
+    }
+
+    /**
+     * @throws LoggerException
+     */
+    public function testWithLoggerException()
+    {
+        $this->expectException(LoggerException::class);
+        $this->expectExceptionMessage('some error');
+
+        $this->fileListMock->expects($this->once())
+            ->method('getCloudLog')
+            ->willThrowException(new UndefinedPackageException('some error'));
+
+        new Logger(
+            $this->fileMock,
+            $this->directoryListMock,
+            $this->fileListMock,
+            $this->poolMock,
+            $this->sanitizeProcessorMock,
+            $this->errorLogFileMock
+        );
     }
 }

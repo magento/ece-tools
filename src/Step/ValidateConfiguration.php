@@ -49,28 +49,24 @@ class ValidateConfiguration implements StepInterface
 
         $errors = $this->collectErrors();
 
-        if (empty($errors)) {
-            return;
-        }
+        if (!empty($errors)) {
+            ksort($errors);
 
-        ksort($errors);
+            $this->logger->notice('Fix configuration with given suggestions:');
 
-        $this->logger->notice('Fix configuration with given suggestions:');
-
-        /** @var Error[] $levelErrors */
-        foreach ($errors as $level => $levelErrors) {
-            foreach ($levelErrors as $error) {
-                if ($error->getErrorCode()) {
+            /** @var Error[] $levelErrors */
+            foreach ($errors as $level => $levelErrors) {
+                foreach ($levelErrors as $error) {
                     $this->logger->log($level, $error->getError(), [
                         'errorCode' => $error->getErrorCode(),
                         'suggestion' => $error->getSuggestion()
                     ]);
                 }
-            }
 
-            if ($level >= ValidatorInterface::LEVEL_CRITICAL) {
-                $error = array_values($levelErrors)[0];
-                throw new StepException($error->getError(), $error->getErrorCode());
+                if ($level >= ValidatorInterface::LEVEL_CRITICAL) {
+                    $error = array_values($levelErrors)[0];
+                    throw new StepException($error->getError(), $error->getErrorCode());
+                }
             }
         }
 

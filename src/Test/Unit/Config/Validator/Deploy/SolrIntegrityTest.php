@@ -112,6 +112,7 @@ class SolrIntegrityTest extends TestCase
                     'error' => 'Configuration for Solr was found in .magento.app.yaml.',
                     'suggestion' => 'Solr support has been deprecated in Magento 2.1. ' .
                         'Update your search engine to Elasticsearch and remove this relationship.',
+                    'errorCode' => \Magento\MagentoCloud\App\Error::WARN_SOLR_DEPRECATED
                 ]
             )->willReturn($this->createMock(Error::class));
 
@@ -149,6 +150,7 @@ class SolrIntegrityTest extends TestCase
                     'error' => 'Configuration for Solr was found in .magento.app.yaml.',
                     'suggestion' => 'Solr is no longer supported by Magento 2.2 or later. ' .
                         'Remove this relationship and use Elasticsearch.',
+                    'errorCode' => \Magento\MagentoCloud\App\Error::WARN_SOLR_NOT_SUPPORTED
                 ]
             )->willReturn($this->createMock(Error::class));
 

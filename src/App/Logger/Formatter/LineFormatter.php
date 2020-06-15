@@ -14,8 +14,8 @@ use Monolog\Logger;
  */
 class LineFormatter extends \Monolog\Formatter\LineFormatter
 {
-    public const FORMAT_BASE = "[%datetime%] %level_name%: %message% %extra%\n";
-    public const FORMAT_BASE_ERROR = "[%datetime%] %level_name%: [%context.errorCode%] %message% %extra%\n";
+    public const FORMAT_BASE = "[%datetime%] %level_name%: %message%\n";
+    public const FORMAT_BASE_ERROR = "[%datetime%] %level_name%: [%context.errorCode%] %message%\n";
 
     /**
      * @inheritDoc

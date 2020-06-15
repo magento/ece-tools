@@ -1,0 +1,3 @@
+{"errorCode":2007,"stage":"deploy","step":"validate-config","suggestion":"warning suggestion","title":"warning message","type":"warning"}
+{"errorCode":109,"stage":"deploy","step":"validate-config","suggestion":"critical suggestion 1","title":"critical message 1","type":"critical"}
+{"errorCode":111,"stage":"deploy","step":"validate-config","suggestion":"critical suggestion 2","title":"critical message 2","type":"critical"}

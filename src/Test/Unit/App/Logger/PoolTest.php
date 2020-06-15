@@ -8,10 +8,11 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit\App\Logger;
 
 use Magento\MagentoCloud\App\Error;
+use Magento\MagentoCloud\App\Logger\Formatter\JsonErrorFormatter;
 use Magento\MagentoCloud\App\Logger\Pool;
 use Magento\MagentoCloud\App\Logger\LineFormatterFactory;
 use Magento\MagentoCloud\App\LoggerException;
-use Monolog\Formatter\LineFormatter;
+use Magento\MagentoCloud\App\Logger\Formatter\LineFormatter;
 use Magento\MagentoCloud\App\Logger\HandlerFactory;
 use Monolog\Handler\HandlerInterface;
 use Magento\MagentoCloud\Config\Log as LogConfig;
@@ -61,12 +62,14 @@ class PoolTest extends TestCase
      */
     public function testGetHandlers()
     {
+        $jsonErrorFormatterMock = $this->createMock(JsonErrorFormatter::class);
         $this->logConfigMock->expects($this->once())
             ->method('getHandlers')
             ->willReturn([
                 'slack' => [],
                 'email' => ['use_default_formatter' => false],
-                'syslog' => ['use_default_formatter' => true]
+                'syslog' => ['use_default_formatter' => true],
+                'error-logger' => ['formatter' => $jsonErrorFormatterMock]
             ]);
 
         $formatterMock = $this->createMock(LineFormatter::class);
@@ -87,11 +90,16 @@ class PoolTest extends TestCase
         $syslogHandler = $this->getMockForAbstractClass(HandlerInterface::class);
         $syslogHandler->expects($this->never())
             ->method('setFormatter');
+        $errorHandler = $this->getMockForAbstractClass(HandlerInterface::class);
+        $errorHandler->expects($this->once())
+            ->method('setFormatter')
+            ->with($jsonErrorFormatterMock)
+            ->willReturnSelf();
 
-        $this->handlerFactoryMock->expects($this->exactly(3))
+        $this->handlerFactoryMock->expects($this->exactly(4))
             ->method('create')
-            ->withConsecutive(['slack'], ['email'], ['syslog'])
-            ->willReturnOnConsecutiveCalls($slackHandlerMock, $emailHandlerMock, $syslogHandler);
+            ->withConsecutive(['slack'], ['email'], ['syslog'], ['error-logger'])
+            ->willReturnOnConsecutiveCalls($slackHandlerMock, $emailHandlerMock, $syslogHandler, $errorHandler);
 
         $this->pool->getHandlers();
         // Lazy load.
@@ -107,6 +115,19 @@ class PoolTest extends TestCase
         $this->logConfigMock->expects($this->once())
             ->method('getHandlers')
             ->willThrowException(new ParseException('some error'));
+
+        $this->pool->getHandlers();
+    }
+
+    public function testWithException()
+    {
+        $this->expectExceptionMessage('some error');
+        $this->expectExceptionCode(101);
+        $this->expectException(LoggerException::class);
+
+        $this->logConfigMock->expects($this->once())
+            ->method('getHandlers')
+            ->willThrowException(new \Exception('some error', 101));
 
         $this->pool->getHandlers();
     }

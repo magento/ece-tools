@@ -88,17 +88,15 @@ class ConfigFileExistsTest extends TestCase
             ->willReturn(false);
         $resultMock = $this->createMock(Error::class);
         $this->resultFactoryMock->expects($this->once())
-            ->method('create')
+            ->method('error')
             ->with(
-                ResultInterface::ERROR,
-                [
-                    'error' => 'File app/etc/config.php does not exist',
-                    'suggestion' => 'Please run the following commands:' . PHP_EOL
-                        . '1. bin/magento module:enable --all' . PHP_EOL
-                        . '2. git add -f app/etc/config.php' . PHP_EOL
-                        . '3. git commit -m \'Adding config.php\'' . PHP_EOL
-                        . '4. git push'
-                ]
+                'File app/etc/config.php does not exist',
+                'Please run the following commands:' . PHP_EOL
+                . '1. bin/magento module:enable --all' . PHP_EOL
+                . '2. git add -f app/etc/config.php' . PHP_EOL
+                . '3. git commit -m \'Adding config.php\'' . PHP_EOL
+                . '4. git push',
+                \Magento\MagentoCloud\App\Error::WARN_CONFIG_PHP_NOT_EXISTS
             )
             ->willReturn($resultMock);
 

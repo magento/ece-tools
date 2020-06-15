@@ -1,0 +1,10 @@
+2:
+  title: 'Critical error'
+  suggestion: 'Critical error suggestion'
+  stage: build
+  type: critical
+1001:
+  title: 'Warning error'
+  suggestion: 'Warning error suggestion'
+  stage: build
+  type: warning

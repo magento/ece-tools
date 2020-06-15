@@ -28,16 +28,16 @@ class JsonErrorFormatter extends JsonFormatter
     private $reader;
 
     /**
+     * @param ErrorInfo $errorInfo
+     * @param ReaderInterface $reader
      * @param int $batchMode
      * @param bool $appendNewline
-     * @param ErrorInfo|null $errorInfo
-     * @param ReaderInterface $reader
      */
     public function __construct(
+        ErrorInfo $errorInfo,
+        ReaderInterface $reader,
         $batchMode = self::BATCH_MODE_JSON,
-        $appendNewline = true,
-        ErrorInfo $errorInfo = null,
-        ReaderInterface $reader
+        $appendNewline = true
     ) {
         parent::__construct($batchMode, $appendNewline);
 

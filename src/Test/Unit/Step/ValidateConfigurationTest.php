@@ -59,18 +59,22 @@ class ValidateConfigurationTest extends TestCase
     public function testExecuteWithCriticalError(): void
     {
         $this->expectException(StepException::class);
-        $this->expectExceptionMessage('Fix configuration with given suggestions');
+        $this->expectExceptionMessage('some error');
         $this->expectExceptionCode(127);
 
         $warningValidator = $this->getMockForAbstractClass(ValidatorInterface::class);
         $warningValidator->expects($this->once())
             ->method('validate');
 
-        $this->loggerMock->expects($this->once())
+        $this->loggerMock->expects($this->exactly(2))
             ->method('notice')
-            ->with('Validating configuration');
-        $this->loggerMock->expects($this->never())
-            ->method('log');
+            ->withConsecutive(
+                ['Validating configuration'],
+                ['Fix configuration with given suggestions:']
+            );
+        $this->loggerMock->expects($this->once())
+            ->method('log')
+            ->with(ValidatorInterface::LEVEL_CRITICAL, 'some error');
 
         $step = new ValidateConfiguration(
             $this->loggerMock,
@@ -91,25 +95,29 @@ class ValidateConfigurationTest extends TestCase
      */
     public function testExecuteWithWarningMessage(): void
     {
-        $this->loggerMock->expects($this->exactly(2))
+        $this->loggerMock->expects($this->exactly(3))
             ->method('notice')
             ->withConsecutive(
                 ['Validating configuration'],
+                ['Fix configuration with given suggestions:'],
                 ['End of validation']
             );
         $this->loggerMock->expects($this->once())
             ->method('log')
             ->with(
                 ValidatorInterface::LEVEL_WARNING,
-                'Fix configuration with given suggestions:'
-                . PHP_EOL . "- some warning\n  some warning suggestion"
+                'some warning',
+                [
+                    'suggestion' => 'some warning suggestion',
+                    'errorCode' => 1001
+                ]
             );
 
         $step = new ValidateConfiguration(
             $this->loggerMock,
             [
                 ValidatorInterface::LEVEL_WARNING => [
-                    $this->createValidatorWithError('some warning', 'some warning suggestion'),
+                    $this->createValidatorWithError('some warning', 'some warning suggestion', 1001),
                 ],
             ]
         );
@@ -122,21 +130,42 @@ class ValidateConfigurationTest extends TestCase
     public function testExecuteWithWarningAndCriticalMessage(): void
     {
         $this->expectException(StepException::class);
-        $this->expectExceptionMessage('Fix configuration with given suggestions');
+        $this->expectExceptionMessage('Critical error');
         $this->expectExceptionCode(1);
 
-        $this->loggerMock->expects($this->once())
+        $this->loggerMock->expects($this->exactly(2))
             ->method('notice')
-            ->with('Validating configuration');
-        $this->loggerMock->expects($this->once())
+            ->withConsecutive(
+                ['Validating configuration'],
+                ['Fix configuration with given suggestions:']
+            );
+        $this->loggerMock->expects($this->exactly(3))
             ->method('log')
-            ->with(
-                Logger::WARNING,
-                'Fix configuration with given suggestions:'
-                . PHP_EOL . '- some warning'
-                . PHP_EOL . '  some warning suggestion'
-                . PHP_EOL . '- some warning 2'
-                . PHP_EOL . '  some warning suggestion 2'
+            ->withConsecutive(
+                [
+                    Logger::WARNING,
+                    'some warning',
+                    [
+                        'suggestion' => 'some warning suggestion',
+                        'errorCode' => 2001
+                    ],
+                ],
+                [
+                    Logger::WARNING,
+                    'some warning 2',
+                    [
+                        'suggestion' => 'some warning suggestion 2',
+                        'errorCode' => 2002
+                    ],
+                ],
+                [
+                    Logger::CRITICAL,
+                    'Critical error',
+                    [
+                        'suggestion' => 'some critical suggestion',
+                        'errorCode' => 1
+                    ],
+                ]
             );
 
         $step = new ValidateConfiguration(
@@ -146,11 +175,12 @@ class ValidateConfigurationTest extends TestCase
                     $this->createValidatorWithError('Critical error', 'some critical suggestion', 1),
                 ],
                 ValidatorInterface::LEVEL_WARNING => [
-                    $this->createValidatorWithError('some warning', 'some warning suggestion'),
-                    $this->createValidatorWithError('some warning 2', 'some warning suggestion 2'),
+                    $this->createValidatorWithError('some warning', 'some warning suggestion', 2001),
+                    $this->createValidatorWithError('some warning 2', 'some warning suggestion 2', 2002),
                 ],
             ]
         );
+
         $step->execute();
     }
 
@@ -160,26 +190,41 @@ class ValidateConfigurationTest extends TestCase
     public function testExecuteTypeStringLevel(): void
     {
         $this->expectException(StepException::class);
-        $this->expectExceptionMessage('Fix configuration with given suggestions');
+        $this->expectExceptionMessage('Critical error');
         $this->expectExceptionCode(10);
 
-        $this->loggerMock->expects($this->once())
-            ->method('notice')
-            ->with('Validating configuration');
         $this->loggerMock->expects($this->exactly(2))
+            ->method('notice')
+            ->withConsecutive(
+                ['Validating configuration'],
+                ['Fix configuration with given suggestions:']
+            );
+        $this->loggerMock->expects($this->exactly(3))
             ->method('log')
             ->withConsecutive(
                 [
                     Logger::NOTICE,
-                    'Fix configuration with given suggestions:'
-                    . PHP_EOL . '- some notice'
-                    . PHP_EOL . '  some notice suggestion'
+                    'some notice',
+                    [
+                        'suggestion' => 'some notice suggestion',
+                        'errorCode' => null
+                    ]
                 ],
                 [
                     Logger::WARNING,
-                    'Fix configuration with given suggestions:'
-                    . PHP_EOL . '- some warning'
-                    . PHP_EOL . '  some warning suggestion'
+                    'some warning',
+                    [
+                        'suggestion' => 'some warning suggestion',
+                        'errorCode' => 1001
+                    ]
+                ],
+                [
+                    Logger::CRITICAL,
+                    'Critical error',
+                    [
+                        'suggestion' => 'some critical suggestion',
+                        'errorCode' => 10
+                    ]
                 ]
             );
 
@@ -190,7 +235,7 @@ class ValidateConfigurationTest extends TestCase
                     $this->createValidatorWithError('Critical error', 'some critical suggestion', 10),
                 ],
                 'warning' => [
-                    $this->createValidatorWithError('some warning', 'some warning suggestion'),
+                    $this->createValidatorWithError('some warning', 'some warning suggestion', 1001),
                 ],
                 'notice' => [
                     $this->createValidatorWithError('some notice', 'some notice suggestion'),
@@ -212,7 +257,7 @@ class ValidateConfigurationTest extends TestCase
         $warningValidator = $this->getMockForAbstractClass(ValidatorInterface::class);
         $warningResultMock = $this->createMock(Result\Error::class);
 
-        $warningResultMock->expects($this->once())
+        $warningResultMock->expects($this->any())
             ->method('getError')
             ->willReturn($error);
         $warningResultMock->expects($this->once())

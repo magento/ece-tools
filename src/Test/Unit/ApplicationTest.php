@@ -68,6 +68,7 @@ class ApplicationTest extends TestCase
         Command\BackupList::NAME => Command\BackupList::class,
         Command\ApplyPatches::NAME => Command\ApplyPatches::class,
         Command\Dev\UpdateComposer::NAME => Command\Dev\UpdateComposer::class,
+        Command\Dev\GenerateSchemaError::NAME => Command\Dev\GenerateSchemaError::class,
         Command\Wizard\ScdOnBuild::NAME => Command\Wizard\ScdOnBuild::class,
         Command\Wizard\ScdOnDeploy::NAME => Command\Wizard\ScdOnDeploy::class,
         Command\Wizard\ScdOnDemand::NAME => Command\Wizard\ScdOnDemand::class,

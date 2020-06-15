@@ -36,10 +36,10 @@ class ErrorFormatterFactory
     public function create(): JsonErrorFormatter
     {
         return new JsonErrorFormatter(
-            JsonFormatter::BATCH_MODE_JSON,
-            true,
             $this->container->get(ErrorInfo::class),
-            $this->container->get(ReaderInterface::class)
+            $this->container->get(ReaderInterface::class),
+            JsonFormatter::BATCH_MODE_JSON,
+            true
         );
     }
 }
