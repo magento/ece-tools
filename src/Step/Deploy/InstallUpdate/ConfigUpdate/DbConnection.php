@@ -25,6 +25,8 @@ use Psr\Log\LoggerInterface;
 
 /**
  * Updates DB connection configuration.
+ *
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class DbConnection implements StepInterface
 {

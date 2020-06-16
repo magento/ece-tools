@@ -327,8 +327,10 @@ class File
      * @param string $path Path to flush
      * @param array $excludes
      * @return void
-     * @codeCoverageIgnore
      * @throws FileSystemException
+     *
+     * @codeCoverageIgnore
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      */
     public function backgroundClearDirectory(string $path, array $excludes = [])
     {
