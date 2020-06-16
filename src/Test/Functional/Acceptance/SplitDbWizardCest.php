@@ -43,7 +43,7 @@ class SplitDbWizardCest extends AbstractCest
         $I->runDockerComposeCommand('run deploy ece-command wizard:split-db-state');
         $I->seeInOutput([
             'DB is not split',
-            'DB cannot be split on this environment'
+            '- DB cannot be split on this environment'
         ]);
 
         $I->stopEnvironment(true);
