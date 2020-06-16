@@ -327,10 +327,8 @@ class File
      * @param string $path Path to flush
      * @param array $excludes
      * @return void
-     * @throws FileSystemException
-     *
      * @codeCoverageIgnore
-     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+     * @throws FileSystemException
      */
     public function backgroundClearDirectory(string $path, array $excludes = [])
     {
@@ -373,18 +371,7 @@ class File
             }
             $this->rename($src, $dst);
         }
-        exec(
-            'nohup rm -rf ' . escapeshellarg($tempDir),
-            $output,
-            $status
-        );
-
-        if ($status !== 0) {
-            $this->fileSystemException(
-                'Error occurred during removing "%1" directory. %2',
-                [$tempDir, $output]
-            );
-        }
+        shell_exec('nohup rm -rf ' . escapeshellarg($tempDir) . ' 1>/dev/null 2>&1 &');
     }
 
     /**
