@@ -116,7 +116,7 @@ class SplitDbCest extends AbstractCest
             'Deploy \'Split Db\' with the wrong Split Db type' => [
                 'messages' => [
                     'Fix configuration with given suggestions:',
-                    '- Environment configuration is not valid.',
+                    'Environment configuration is not valid.',
                     'Correct the following items in your .magento.env.yaml file:',
                     'The SPLIT_DB variable contains an invalid value of type string. Use the following type: array.',
                 ],
@@ -125,7 +125,7 @@ class SplitDbCest extends AbstractCest
             'Deploy \'Split Db\' with the invalid Split Db label' => [
                 'messages' => [
                     'Fix configuration with given suggestions:',
-                    '- Environment configuration is not valid.',
+                    'Environment configuration is not valid.',
                     'Correct the following items in your .magento.env.yaml file:',
                     'The SPLIT_DB variable contains the invalid value.',
                     'It should be array with next available values: [quote, sales].'
@@ -135,7 +135,7 @@ class SplitDbCest extends AbstractCest
             'Deploy \'Split Db\' with the invalid and valid Split Db labels' => [
                 'messages' => [
                     'Fix configuration with given suggestions:',
-                    '- Environment configuration is not valid.',
+                    'Environment configuration is not valid.',
                     'Correct the following items in your .magento.env.yaml file:',
                     'The SPLIT_DB variable contains the invalid value.',
                     'It should be array with next available values: [quote, sales].',

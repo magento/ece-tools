@@ -163,7 +163,7 @@ class ReportDirNestingLevelCest extends AbstractCest
             $log
         );
         $I->assertContains(
-            '- The directory nesting level value for error reporting has not been configured.',
+            'The directory nesting level value for error reporting has not been configured.',
             $log
         );
         $I->assertContains(
