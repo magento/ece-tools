@@ -128,7 +128,7 @@ class SplitDbConnection implements StepInterface
         );
 
         if (!empty($notAvailableSplitTypes)) {
-            $this->logger->error(
+            $this->logger->warning(
                 sprintf(
                     'Enabling a split database will be skipped.'
                     . ' Relationship do not have configuration for next types: %s',

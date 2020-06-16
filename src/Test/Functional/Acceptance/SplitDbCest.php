@@ -51,7 +51,7 @@ class SplitDbCest extends AbstractCest
         $this->setSplitDbTypesIntoMagentoEnvYaml($I, ['quote', 'sales']);
         $this->runDeploy($I);
         $I->seeInOutput(
-            'ERROR: Enabling a split database will be skipped.'
+            'Enabling a split database will be skipped.'
             . ' Relationship do not have configuration for next types: sales, quote'
         );
         $this->checkEnvPhpConfig($I, [], ['checkout', 'sales']);
