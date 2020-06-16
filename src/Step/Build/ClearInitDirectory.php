@@ -8,6 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Step\Build;
 
 use Magento\MagentoCloud\Filesystem\FileList;
+use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
@@ -61,16 +62,20 @@ class ClearInitDirectory implements StepInterface
      */
     public function execute()
     {
-        $envPhpPath = $this->fileList->getEnv();
-        $initPath = $this->directoryList->getInit();
-        $this->logger->info('Clearing temporary directory.');
+        try {
+            $envPhpPath = $this->fileList->getEnv();
+            $initPath = $this->directoryList->getInit();
+            $this->logger->info('Clearing temporary directory.');
 
-        if ($this->file->isExists($initPath)) {
-            $this->file->clearDirectory($initPath);
-        }
-        // app/etc/env.php appears after running bin/magento on Build phase, so we need to remove it
-        if ($this->file->isExists($envPhpPath)) {
-            $this->file->deleteFile($envPhpPath);
+            if ($this->file->isExists($initPath)) {
+                $this->file->clearDirectory($initPath);
+            }
+            // app/etc/env.php appears after running bin/magento on Build phase, so we need to remove it
+            if ($this->file->isExists($envPhpPath)) {
+                $this->file->deleteFile($envPhpPath);
+            }
+        } catch (\Exception $e) {
+            throw new StepException($e->getMessage(), $e->getCode(), $e);
         }
     }
 }

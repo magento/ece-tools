@@ -101,7 +101,7 @@ XML
             );
         } catch (FileSystemException $e) {
             throw new StepException($e->getMessage(), Error::BUILD_FILE_LOCAL_XML_IS_NOT_WRITABLE, $e);
-        } catch (GenericException $e) {
+        } catch (\Exception $e) {
             throw new StepException($e->getMessage(), $e->getCode(), $e);
         }
     }

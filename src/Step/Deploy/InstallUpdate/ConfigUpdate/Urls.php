@@ -7,10 +7,12 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate;
 
+use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\Urls\Database;
 use Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\Urls\Environment as EnvironmentUrl;
+use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
 use Psr\Log\LoggerInterface;
 
@@ -70,28 +72,32 @@ class Urls implements StepInterface
      * Always run if FORCE_UPDATE_URLS set to true
      * Skip url updates if master branch is detected or UPDATE_URLS set to false
      *
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function execute()
     {
-        if (!$this->stageConfig->get(DeployInterface::VAR_FORCE_UPDATE_URLS)) {
-            if ($this->environment->isMasterBranch()) {
-                $this->logger->info(
-                    'Skipping URL updates because we are deploying to a Production or Staging environment.'
-                    . ' You can override this behavior by setting the FORCE_URL_UPDATES variable to true.'
-                );
-                return;
+        try {
+            if (!$this->stageConfig->get(DeployInterface::VAR_FORCE_UPDATE_URLS)) {
+                if ($this->environment->isMasterBranch()) {
+                    $this->logger->info(
+                        'Skipping URL updates because we are deploying to a Production or Staging environment.'
+                        . ' You can override this behavior by setting the FORCE_URL_UPDATES variable to true.'
+                    );
+                    return;
+                }
+
+                if (!$this->stageConfig->get(DeployInterface::VAR_UPDATE_URLS)) {
+                    $this->logger->info('Skipping URL updates because the URL_UPDATES variable is set to false.');
+                    return;
+                }
             }
 
-            if (!$this->stageConfig->get(DeployInterface::VAR_UPDATE_URLS)) {
-                $this->logger->info('Skipping URL updates because the URL_UPDATES variable is set to false.');
-                return;
-            }
+            $this->logger->info('Updating secure and unsecure URLs');
+
+            $this->databaseUrl->execute();
+            $this->environmentUrl->execute();
+        } catch (GenericException $e) {
+            throw new StepException($e->getMessage(), $e->getCode(), $e);
         }
-
-        $this->logger->info('Updating secure and unsecure URLs');
-
-        $this->databaseUrl->execute();
-        $this->environmentUrl->execute();
     }
 }

@@ -68,7 +68,13 @@ class Processor
         try {
             $this->mergedScenarios = $this->merger->merge($scenarios);
             $steps = $this->mergedScenarios['steps'];
-
+        } catch (\Throwable $exception) {
+            $this->handleException(
+                $exception,
+                sprintf('Unhandled error: [%d] %s', $exception->getCode(), $exception->getMessage())
+            );
+        }
+        try {
             array_walk($steps, function (StepInterface $step, string $name) {
                 $this->logger->debug('Running step: ' . $name);
 
@@ -76,7 +82,7 @@ class Processor
 
                 $this->logger->debug(sprintf('Step "%s" finished', $name));
             });
-        } catch (StepException $stepException) {
+        } catch (\Exception $stepException) {
             try {
                 $actions = $this->mergedScenarios['actions'];
 
@@ -91,11 +97,6 @@ class Processor
                 $this->logger->error($actionException->getMessage());
             }
             $this->handleException($stepException);
-        } catch (Throwable $exception) {
-            $this->handleException(
-                $exception,
-                sprintf('Unhandled error: [%d] %s', $exception->getCode(), $exception->getMessage())
-            );
         }
 
         $this->logger->info('Scenario(s) finished');

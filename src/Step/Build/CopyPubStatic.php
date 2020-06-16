@@ -10,6 +10,7 @@ namespace Magento\MagentoCloud\Step\Build;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileList;
+use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
 use Psr\Log\LoggerInterface;
 
@@ -61,12 +62,16 @@ class CopyPubStatic implements StepInterface
      */
     public function execute(): void
     {
-        $magentoRoot = $this->directoryList->getMagentoRoot();
+        try {
+            $magentoRoot = $this->directoryList->getMagentoRoot();
 
-        $this->file->copy(
-            $this->fileList->getFrontStaticDist(),
-            $magentoRoot . '/pub/front-static.php'
-        );
-        $this->logger->info('File "front-static.php" was copied');
+            $this->file->copy(
+                $this->fileList->getFrontStaticDist(),
+                $magentoRoot . '/pub/front-static.php'
+            );
+            $this->logger->info('File "front-static.php" was copied');
+        }  catch (\Exception $e) {
+            throw new StepException($e->getMessage(), $e->getCode(), $e);
+        }
     }
 }

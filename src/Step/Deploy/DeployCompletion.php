@@ -7,7 +7,9 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Step\Deploy;
 
+use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Config\Application\HookChecker;
+use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
 use Psr\Log\LoggerInterface;
 
@@ -51,17 +53,23 @@ class DeployCompletion implements StepInterface
      */
     public function execute()
     {
-        if ($this->hookChecker->isPostDeployHookEnabled()) {
-            $this->logger->info(
-                'Post-deploy hook enabled. Cron enabling, cache cleaning and pre-warming operations ' .
-                'are postponed to post-deploy stage.'
-            );
+        try {
+            if ($this->hookChecker->isPostDeployHookEnabled()) {
+                $this->logger->info(
+                    'Post-deploy hook enabled. Cron enabling, cache cleaning and pre-warming operations ' .
+                    'are postponed to post-deploy stage.'
+                );
 
-            return;
-        }
+                return;
+            }
 
-        foreach ($this->steps as $step) {
-            $step->execute();
+            foreach ($this->steps as $step) {
+                $step->execute();
+            }
+        } catch (StepException $e) {
+            throw $e;
+        } catch (GenericException $e) {
+            throw new StepException($e->getMessage(), $e->getCode(), $e);
         }
     }
 }

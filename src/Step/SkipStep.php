@@ -39,9 +39,14 @@ class SkipStep implements StepInterface
      * Logs the information about step skipping.
      *
      * @return void
+     * @throws StepException
      */
     public function execute()
     {
-        $this->logger->info(sprintf('Step "%s" was skipped', $this->stepName));
+        try {
+            $this->logger->info(sprintf('Step "%s" was skipped', $this->stepName));
+        } catch (\Exception $e) {
+            throw new StepException($e->getMessage());
+        }
     }
 }

@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Step\Build;
 
+use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
 use Psr\Log\LoggerInterface;
 
@@ -42,12 +43,18 @@ class BackupData implements StepInterface
      */
     public function execute()
     {
-        $this->logger->notice('Copying data to the ./init directory');
+        try {
+            $this->logger->notice('Copying data to the ./init directory');
 
-        foreach ($this->steps as $step) {
-            $step->execute();
+            foreach ($this->steps as $step) {
+                $step->execute();
+            }
+
+            $this->logger->notice('End of copying data to the ./init directory');
+        } catch (StepException $e) {
+            throw $e;
+        } catch (\Exception $e) {
+            throw new StepException($e->getMessage(), $e->getCode(), $e);
         }
-
-        $this->logger->notice('End of copying data to the ./init directory');
     }
 }

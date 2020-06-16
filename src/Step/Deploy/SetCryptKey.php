@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Step\Deploy;
 
+use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface as ConfigReader;
 use Magento\MagentoCloud\Config\Magento\Env\WriterInterface as ConfigWriter;
 use Magento\MagentoCloud\Config\Environment;
@@ -66,26 +67,29 @@ class SetCryptKey implements StepInterface
      */
     public function execute(): void
     {
-        $this->logger->info('Checking existence of encryption key');
-
-        if (!empty($this->configReader->read()['crypt']['key'])) {
-            return;
-        }
-
-        $key = $this->environment->getCryptKey();
-
-        if (empty($key)) {
-            return;
-        }
-
-        $this->logger->info(sprintf('Setting encryption key from %s', Environment::VARIABLE_CRYPT_KEY));
-
-        $config['crypt']['key'] = $key;
-
         try {
+            $this->logger->info('Checking existence of encryption key');
+
+            if (!empty($this->configReader->read()['crypt']['key'])) {
+                return;
+            }
+
+            $key = $this->environment->getCryptKey();
+
+            if (empty($key)) {
+                return;
+            }
+
+            $this->logger->info(sprintf('Setting encryption key from %s', Environment::VARIABLE_CRYPT_KEY));
+
+            $config['crypt']['key'] = $key;
+
             $this->configWriter->update($config);
         } catch (FileSystemException $exception) {
+            // Set specific error code
             throw new StepException($exception->getMessage(), $exception->getCode(), $exception);
+        } catch (GenericException $e) {
+            throw new StepException($e->getMessage(), $e->getCode(), $e);
         }
     }
 }

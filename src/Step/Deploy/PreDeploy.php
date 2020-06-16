@@ -7,6 +7,8 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Step\Deploy;
 
+use Magento\MagentoCloud\App\GenericException;
+use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
 use Psr\Log\LoggerInterface;
 
@@ -48,12 +50,18 @@ class PreDeploy implements StepInterface
      */
     public function execute()
     {
-        $this->logger->notice('Starting pre-deploy.');
+        try {
+            $this->logger->notice('Starting pre-deploy.');
 
-        foreach ($this->steps as $step) {
-            $step->execute();
+            foreach ($this->steps as $step) {
+                $step->execute();
+            }
+
+            $this->logger->notice('End of pre-deploy.');
+        } catch (StepException $e) {
+            throw $e;
+        } catch (GenericException $e) {
+            throw new StepException($e->getMessage(), $e->getCode(), $e);
         }
-
-        $this->logger->notice('End of pre-deploy.');
     }
 }

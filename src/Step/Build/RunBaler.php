@@ -71,38 +71,42 @@ class RunBaler implements StepInterface
      */
     public function execute()
     {
-        if (!$this->buildConfig->get(BuildInterface::VAR_SCD_USE_BALER)) {
-            $this->logger->debug('Baler JS bundling is disabled.');
+        try {
+            if (!$this->buildConfig->get(BuildInterface::VAR_SCD_USE_BALER)) {
+                $this->logger->debug('Baler JS bundling is disabled.');
 
-            return;
-        }
-
-        if (!$this->flagManager->exists(Flag\Manager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)) {
-            $this->logger->notice('Cannot run baler because static content has not been deployed.');
-
-            return;
-        }
-
-        $result = $this->validator->validate();
-
-        if ($result instanceof Result\Error) {
-            $this->logger->warning($result->getError());
-
-            foreach (explode(PHP_EOL, $result->getSuggestion()) as $detail) {
-                $this->logger->warning(' - ' . $detail);
+                return;
             }
 
-            return;
+            if (!$this->flagManager->exists(Flag\Manager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)) {
+                $this->logger->notice('Cannot run baler because static content has not been deployed.');
+
+                return;
+            }
+
+            $result = $this->validator->validate();
+
+            if ($result instanceof Result\Error) {
+                $this->logger->warning($result->getError());
+
+                foreach (explode(PHP_EOL, $result->getSuggestion()) as $detail) {
+                    $this->logger->warning(' - ' . $detail);
+                }
+
+                return;
+            }
+
+            $this->logger->info('Running Baler JS bundler.');
+
+            try {
+                $this->shell->execute('baler');
+            } catch (ShellException $e) {
+                throw new StepException($e->getMessage(), Error::BUILD_BALER_NOT_FOUND, $e);
+            }
+
+            $this->logger->info('Baler JS bundling complete.');
+        }  catch (\Exception $e) {
+            throw new StepException($e->getMessage(), $e->getCode(), $e);
         }
-
-        $this->logger->info('Running Baler JS bundler.');
-
-        try {
-            $this->shell->execute('baler');
-        } catch (ShellException $e) {
-            throw new StepException($e->getMessage(), Error::BUILD_BALER_NOT_FOUND, $e);
-        }
-
-        $this->logger->info('Baler JS bundling complete.');
     }
 }
