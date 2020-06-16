@@ -52,7 +52,6 @@ class GenerateSchemaError extends Command
     protected function configure(): void
     {
         $this->setName(static::NAME)
-            ->setHidden(true)
             ->setDescription('Generate schema.error.yaml file')
             ->addArgument(
                 'doc-error-path',
