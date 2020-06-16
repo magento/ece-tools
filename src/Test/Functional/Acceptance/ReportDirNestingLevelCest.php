@@ -200,7 +200,7 @@ class ReportDirNestingLevelCest extends AbstractCest
             $log
         );
         $I->assertContains(
-            "- Config of the file {$this->expectedPathLocalXml} is invalid.",
+            "Config of the file {$this->expectedPathLocalXml} is invalid.",
             $log
         );
         $I->assertContains(

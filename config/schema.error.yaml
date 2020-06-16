@@ -559,3 +559,4 @@
 4001:
     title: 'Can''t get system processor count:'
     type: warning
+    stage: general
