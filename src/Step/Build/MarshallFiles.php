@@ -70,9 +70,9 @@ class MarshallFiles implements StepInterface
             if ($this->file->isExists($varCache)) {
                 $this->file->deleteDirectory($varCache);
             }
-                if ($this->magentoVersion->isGreaterOrEqual('2.2')) {
-                    return;
-                }
+            if ($this->magentoVersion->isGreaterOrEqual('2.2')) {
+                return;
+            }
 
             $this->file->copy(
                 $magentoRoot . '/app/etc/di.xml',
