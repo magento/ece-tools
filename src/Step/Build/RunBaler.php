@@ -105,7 +105,7 @@ class RunBaler implements StepInterface
             }
 
             $this->logger->info('Baler JS bundling complete.');
-        }  catch (\Exception $e) {
+        } catch (\Exception $e) {
             throw new StepException($e->getMessage(), $e->getCode(), $e);
         }
     }

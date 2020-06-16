@@ -70,7 +70,7 @@ class CopyPubStatic implements StepInterface
                 $magentoRoot . '/pub/front-static.php'
             );
             $this->logger->info('File "front-static.php" was copied');
-        }  catch (\Exception $e) {
+        } catch (\Exception $e) {
             throw new StepException($e->getMessage(), $e->getCode(), $e);
         }
     }
