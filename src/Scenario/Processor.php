@@ -64,6 +64,7 @@ class Processor
             implode(', ', $scenarios),
             $this->packageManager->getPrettyInfo()
         ));
+        $steps = [];
 
         try {
             $this->mergedScenarios = $this->merger->merge($scenarios);
