@@ -7,9 +7,11 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Step\Deploy\InstallUpdate\ConfigUpdate;
 
+use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\Urls;
+use Magento\MagentoCloud\Step\StepException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -150,6 +152,29 @@ class UrlsTest extends TestCase
             ->method('execute');
         $this->environmentUrlMock->expects($this->never())
             ->method('execute');
+
+        $this->step->execute();
+    }
+
+    /**
+     * @throws StepException
+     */
+    public function testExecuteWithException()
+    {
+        $exceptionMsg = 'Error';
+        $exceptionCode = 111;
+
+        $this->expectException(StepException::class);
+        $this->expectExceptionMessage($exceptionMsg);
+        $this->expectExceptionCode($exceptionCode);
+
+        $this->stageConfigMock->expects($this->once())
+            ->method('get')
+            ->with(DeployInterface::VAR_FORCE_UPDATE_URLS)
+            ->willReturn(true);
+        $this->databaseUrlMock->expects($this->once())
+            ->method('execute')
+            ->willThrowException(new GenericException($exceptionMsg, $exceptionCode));
 
         $this->step->execute();
     }

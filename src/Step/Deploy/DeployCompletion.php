@@ -7,9 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Step\Deploy;
 
-use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Config\Application\HookChecker;
-use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
 use Psr\Log\LoggerInterface;
 

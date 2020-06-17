@@ -8,7 +8,6 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate;
 
 use Magento\MagentoCloud\App\GenericException;
-use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
 use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface as ConfigReader;

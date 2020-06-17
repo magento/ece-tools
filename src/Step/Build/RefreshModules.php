@@ -48,6 +48,8 @@ class RefreshModules implements StepInterface
      */
     public function execute()
     {
+        $this->logger->notice('Reconciling installed modules with shared config.');
+
         try {
             $this->logger->notice('Reconciling installed modules with shared config.');
 
@@ -66,5 +68,7 @@ class RefreshModules implements StepInterface
         } catch (GenericException $e) {
             throw new StepException($e->getMessage(), $e->getCode(), $e);
         }
+
+        $this->logger->notice('End of reconciling modules.');
     }
 }

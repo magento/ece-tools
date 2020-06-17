@@ -106,4 +106,47 @@ class DeployStaticContentTest extends TestCase
 
         $this->step->execute();
     }
+
+    public function testExecuteWithException()
+    {
+        $exceptionMsg = 'Error';
+        $exceptionCode = 102;
+
+        $this->expectException(StepException::class);
+        $this->expectExceptionMessage($exceptionMsg);
+        $this->expectExceptionCode($exceptionCode);
+
+        $this->flagManagerMock->expects($this->once())
+            ->method('delete')
+            ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD);
+        $this->scdOnBuildMock->expects($this->once())
+            ->method('validate')
+            ->willThrowException(new \Exception($exceptionMsg, $exceptionCode));
+
+        $this->step->execute();
+    }
+
+    /**
+     * @throws StepException
+     */
+    public function testExecuteWithStepException()
+    {
+        $e = new StepException('Error Message', 111);
+        $this->expectExceptionObject($e);
+
+        $this->flagManagerMock->expects($this->once())
+            ->method('delete')
+            ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD);
+        $this->scdOnBuildMock->expects($this->once())
+            ->method('validate')
+            ->willReturn(new Result\Success());
+        $this->loggerMock->expects($this->once())
+            ->method('notice')
+            ->with('Generating fresh static content');
+        $this->stepMock->expects($this->once())
+            ->method('execute')
+            ->willThrowException($e);
+
+        $this->step->execute();
+    }
 }

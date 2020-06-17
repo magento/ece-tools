@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Step\Deploy\InstallUpdate\ConfigUpdate;
 
+use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface as ConfigReader;
 use Magento\MagentoCloud\Config\Magento\Env\WriterInterface as ConfigWriter;
 use Magento\MagentoCloud\Config\Environment;
@@ -262,6 +263,25 @@ class CronConsumersRunnerTest extends TestCase
             ->method('get');
         $this->configWriterMock->expects($this->never())
             ->method('create');
+
+        $this->cronConsumersRunner->execute();
+    }
+
+    /**
+     * @throws StepException
+     */
+    public function testExecuteWithException()
+    {
+        $exceptionMsg = 'Error';
+        $exceptionCode = 111;
+
+        $this->expectException(StepException::class);
+        $this->expectExceptionMessage($exceptionMsg);
+        $this->expectExceptionCode($exceptionCode);
+
+        $this->magentoVersionMock->expects($this->once())
+            ->method('isGreaterOrEqual')
+            ->willThrowException(new GenericException($exceptionMsg, $exceptionCode));
 
         $this->cronConsumersRunner->execute();
     }
