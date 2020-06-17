@@ -308,6 +308,11 @@
     suggestion: "This error occurs if the `./app/etc/env.php` file is not present when Magento deployment begins, or if the `crypt/key` value is undefined.\nIf you migrated the database from another environment, retrieve the crypt key value from that environment and add the value to the [CRYPT_KEY](https://devdocs.magento.com/cloud/env/variables-deploy.html#crypt_key) cloud environment variable in your current environment, see [Add the Magento encryption key](https://devdocs.magento.com/cloud/setup/first-time-setup-import-import.html#encryption-key).\nIf you accidentally removed the `./app/etc/env.php` file, use the following command to restore it from the backup files created from a previous deployment: `./vendor/bin/ece-tools backup:restore` CLI command .\""
     stage: deploy
     type: critical
+132:
+    title: 'Can''t get version of elasticsearch service'
+    suggestion: 'Check that credentials for elasticsearch are correct and service is running'
+    stage: deploy
+    type: critical
 201:
     step: is-deploy-failed
     title: 'Deploy stage failed'

@@ -1,3 +1,9 @@
+!php/const Magento\MagentoCloud\App\Error::DEPLOY_ES_CAN_NOT_CONNECT:
+    title: 'Can''t get version of elasticsearch service'
+    suggestion: 'Check that credentials for elasticsearch are correct and service is running'
+    stage: deploy
+    type: critical
+
 !php/const Magento\MagentoCloud\App\Error::GLOBAL_CONFIG_NOT_DEFINED:
     title: 'Configuration isn''t defined in the `schema.yaml` file'
     suggestion: 'Configuration isn''t defined in the `./vendor/magento/ece-tools/config/schema.yaml` file. Check that the config variable name is correct, and that it defined.'

@@ -58,13 +58,13 @@ class GenerateSchemaError extends Command
                 InputArgument::OPTIONAL,
                 'Path to documentation md file',
                 'https://raw.githubusercontent.com/magento/devdocs/' .
-                'Cloud-Docker-1.1.0/src/cloud/reference/error-codes.md'
+                'Cloud-2002.1.1/src/cloud/reference/error-codes.md'
             )->addArgument(
                 'doc-error-suggestion-path',
                 InputArgument::OPTIONAL,
                 'Path to suggestion md file',
                 'https://raw.githubusercontent.com/magento/devdocs/' .
-                'Cloud-Docker-1.1.0/src/_data/cloud-error-messages.yml'
+                'Cloud-2002.1.1/src/_data/codebase/cloud/cloud-error-messages.yml'
             );
 
         parent::configure();
@@ -111,6 +111,7 @@ class GenerateSchemaError extends Command
 
         $errors = array_replace_recursive($errors, $otherErrors);
 
+        ksort($errors);
         $this->file->filePutContents($this->fileList->getErrorSchema(), Yaml::dump($errors));
 
         $output->writeln(sprintf('File %s was generated', $this->fileList->getErrorSchema()));
