@@ -12,7 +12,7 @@ use Magento\MagentoCloud\Config\Validator\Result;
 use Magento\MagentoCloud\Config\ValidatorInterface;
 use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\ValidateConfiguration;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
@@ -22,7 +22,7 @@ use Psr\Log\LoggerInterface;
 class ValidateConfigurationTest extends TestCase
 {
     /**
-     * @var LoggerInterface|Mock
+     * @var LoggerInterface|MockObject
      */
     private $loggerMock;
 
@@ -32,9 +32,9 @@ class ValidateConfigurationTest extends TestCase
     }
 
     /**
-     * @throws \Magento\MagentoCloud\Step\StepException
+     * @throws StepException
      */
-    public function testExecuteWithoutValidators()
+    public function testExecuteWithoutValidators(): void
     {
         $step = new ValidateConfiguration(
             $this->loggerMock,
@@ -53,10 +53,14 @@ class ValidateConfigurationTest extends TestCase
         $step->execute();
     }
 
-    public function testExecuteWithCriticalError()
+    /**
+     * @throws StepException
+     */
+    public function testExecuteWithCriticalError(): void
     {
         $this->expectException(StepException::class);
         $this->expectExceptionMessage('Fix configuration with given suggestions');
+        $this->expectExceptionCode(127);
 
         $warningValidator = $this->getMockForAbstractClass(ValidatorInterface::class);
         $warningValidator->expects($this->once())
@@ -72,7 +76,7 @@ class ValidateConfigurationTest extends TestCase
             $this->loggerMock,
             [
                 ValidatorInterface::LEVEL_CRITICAL => [
-                    $this->createValidatorWithError('some error', 'some  suggestion'),
+                    $this->createValidatorWithError('some error', 'some  suggestion', 127),
                 ],
                 ValidatorInterface::LEVEL_WARNING => [
                     $warningValidator,
@@ -83,9 +87,9 @@ class ValidateConfigurationTest extends TestCase
     }
 
     /**
-     * @throws \Magento\MagentoCloud\Step\StepException
+     * @throws StepException
      */
-    public function testExecuteWithWarningMessage()
+    public function testExecuteWithWarningMessage(): void
     {
         $this->loggerMock->expects($this->exactly(2))
             ->method('notice')
@@ -112,10 +116,14 @@ class ValidateConfigurationTest extends TestCase
         $step->execute();
     }
 
-    public function testExecuteWithWarningAndCriticalMessage()
+    /**
+     * @throws StepException
+     */
+    public function testExecuteWithWarningAndCriticalMessage(): void
     {
         $this->expectException(StepException::class);
         $this->expectExceptionMessage('Fix configuration with given suggestions');
+        $this->expectExceptionCode(1);
 
         $this->loggerMock->expects($this->once())
             ->method('notice')
@@ -135,7 +143,7 @@ class ValidateConfigurationTest extends TestCase
             $this->loggerMock,
             [
                 ValidatorInterface::LEVEL_CRITICAL => [
-                    $this->createValidatorWithError('Critical error', 'some critical suggestion'),
+                    $this->createValidatorWithError('Critical error', 'some critical suggestion', 1),
                 ],
                 ValidatorInterface::LEVEL_WARNING => [
                     $this->createValidatorWithError('some warning', 'some warning suggestion'),
@@ -146,10 +154,14 @@ class ValidateConfigurationTest extends TestCase
         $step->execute();
     }
 
-    public function testExecuteTypeStringLevel()
+    /**
+     * @throws StepException
+     */
+    public function testExecuteTypeStringLevel(): void
     {
         $this->expectException(StepException::class);
         $this->expectExceptionMessage('Fix configuration with given suggestions');
+        $this->expectExceptionCode(10);
 
         $this->loggerMock->expects($this->once())
             ->method('notice')
@@ -175,7 +187,7 @@ class ValidateConfigurationTest extends TestCase
             $this->loggerMock,
             [
                 'critical' => [
-                    $this->createValidatorWithError('Critical error', 'some critical suggestion'),
+                    $this->createValidatorWithError('Critical error', 'some critical suggestion', 10),
                 ],
                 'warning' => [
                     $this->createValidatorWithError('some warning', 'some warning suggestion'),
@@ -191,9 +203,11 @@ class ValidateConfigurationTest extends TestCase
     /**
      * @param string $error
      * @param string $suggestion
-     * @return \PHPUnit\Framework\MockObject\MockObject|ValidatorInterface
+     * @param int|null $errorCode
+     * @return MockObject|ValidatorInterface
+     * @throws \ReflectionException
      */
-    private function createValidatorWithError(string $error, string $suggestion)
+    private function createValidatorWithError(string $error, string $suggestion, int $errorCode = null): MockObject
     {
         $warningValidator = $this->getMockForAbstractClass(ValidatorInterface::class);
         $warningResultMock = $this->createMock(Result\Error::class);
@@ -204,6 +218,11 @@ class ValidateConfigurationTest extends TestCase
         $warningResultMock->expects($this->once())
             ->method('getSuggestion')
             ->willReturn($suggestion);
+        if ($errorCode !== null) {
+            $warningResultMock->expects($this->any())
+                ->method('getErrorCode')
+                ->willReturn($errorCode);
+        }
         $warningValidator->expects($this->once())
             ->method('validate')
             ->willReturn($warningResultMock);

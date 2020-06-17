@@ -13,8 +13,8 @@ use Magento\MagentoCloud\Config\RepositoryFactory;
 use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Config\Environment\Reader;
 use Magento\MagentoCloud\App\Logger\HandlerFactory;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -22,27 +22,27 @@ use PHPUnit_Framework_MockObject_MockObject as Mock;
 class LogTest extends TestCase
 {
     /**
-     * @var FileList|Mock
-     */
-    private $fileListMock;
-
-    /**
-     * @var Reader|Mock
-     */
-    private $readerMock;
-
-    /**
      * @var LogConfig
      */
     private $logConfig;
 
     /**
-     * @var RepositoryFactory|Mock
+     * @var FileList|MockObject
+     */
+    private $fileListMock;
+
+    /**
+     * @var Reader|MockObject
+     */
+    private $readerMock;
+
+    /**
+     * @var RepositoryFactory|MockObject
      */
     private $repositoryFactoryMock;
 
     /**
-     * @var Repository|Mock
+     * @var Repository|MockObject
      */
     private $repositoryMock;
 
@@ -72,11 +72,14 @@ class LogTest extends TestCase
      * @param array $expectedResult
      * @dataProvider getHandlersDataProvider
      */
-    public function testGetHandlers(array $config, array $expectedResult)
+    public function testGetHandlers(array $config, array $expectedResult): void
     {
         $this->fileListMock->expects($this->once())
             ->method('getCloudLog')
             ->willReturn('somePath');
+        $this->fileListMock->expects($this->once())
+            ->method('getCloudErrorLog')
+            ->willReturn('somePathErrorLog');
         $this->readerMock->expects($this->once())
             ->method('read')
             ->willReturn($config);
@@ -87,28 +90,31 @@ class LogTest extends TestCase
     /**
      * @return array
      */
-    public function getHandlersDataProvider()
+    public function getHandlersDataProvider(): array
     {
         return [
             [
                 'config' => [],
                 'expectedResult' => [
                     HandlerFactory::HANDLER_STREAM => ['stream' => 'php://stdout'],
-                    HandlerFactory::HANDLER_FILE => ['file' => 'somePath']
+                    HandlerFactory::HANDLER_FILE => ['file' => 'somePath'],
+                    HandlerFactory::HANDLER_FILE_ERROR => ['file' => 'somePathErrorLog', 'min_level' => 'warning'],
                 ]
             ],
             [
                 'config' => ['someConfig' => ['someConfig']],
                 'expectedResult' => [
                     HandlerFactory::HANDLER_STREAM => ['stream' => 'php://stdout'],
-                    HandlerFactory::HANDLER_FILE => ['file' => 'somePath']
+                    HandlerFactory::HANDLER_FILE => ['file' => 'somePath'],
+                    HandlerFactory::HANDLER_FILE_ERROR => ['file' => 'somePathErrorLog', 'min_level' => 'warning'],
                 ],
             ],
             [
                 'config' => ['log' => []],
                 'expectedResult' => [
                     HandlerFactory::HANDLER_STREAM => ['stream' => 'php://stdout'],
-                    HandlerFactory::HANDLER_FILE => ['file' => 'somePath']
+                    HandlerFactory::HANDLER_FILE => ['file' => 'somePath'],
+                    HandlerFactory::HANDLER_FILE_ERROR => ['file' => 'somePathErrorLog', 'min_level' => 'warning'],
                 ],
             ],
             [
@@ -116,7 +122,8 @@ class LogTest extends TestCase
                 'expectedResult' => [
                     HandlerFactory::HANDLER_STREAM => ['stream' => 'php://stdout'],
                     HandlerFactory::HANDLER_FILE => ['file' => 'somePath'],
-                    'SomeHandler' => ['SomeConfig']
+                    HandlerFactory::HANDLER_FILE_ERROR => ['file' => 'somePathErrorLog', 'min_level' => 'warning'],
+                    'SomeHandler' => ['SomeConfig'],
                 ],
             ],
             [
@@ -124,13 +131,14 @@ class LogTest extends TestCase
                 'expectedResult' => [
                     HandlerFactory::HANDLER_STREAM => ['stream' => 'php://stdout'],
                     HandlerFactory::HANDLER_FILE => ['file' => 'somePath'],
-                    'SomeHandler' => ['SomeConfig']
+                    HandlerFactory::HANDLER_FILE_ERROR => ['file' => 'somePathErrorLog', 'min_level' => 'warning'],
+                    'SomeHandler' => ['SomeConfig'],
                 ],
             ],
         ];
     }
 
-    public function testGet()
+    public function testGet(): void
     {
         $config = ['log' => ['SomeHandler' => ['SomeConfig']], 'someConfig' => ['someConfig']];
         $logPath = 'var/log/cloud.log';
@@ -155,7 +163,7 @@ class LogTest extends TestCase
         );
     }
 
-    public function testGetWithException()
+    public function testGetWithException(): void
     {
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage('Configuration for SomeHandler is not found');

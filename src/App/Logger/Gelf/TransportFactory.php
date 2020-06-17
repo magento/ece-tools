@@ -11,21 +11,23 @@ use Gelf\Transport\AbstractTransport;
 use Gelf\Transport\HttpTransport;
 use Gelf\Transport\TcpTransport;
 use Gelf\Transport\UdpTransport;
+use Magento\MagentoCloud\App\LoggerException;
 
 /**
  * Factory for creating gelf transport instances.
  */
 class TransportFactory
 {
-    const TRANSPORT_HTTP = 'http';
-    const TRANSPORT_UDP = 'udp';
-    const TRANSPORT_TCP = 'tcp';
+    public const TRANSPORT_HTTP = 'http';
+    public const TRANSPORT_UDP = 'udp';
+    public const TRANSPORT_TCP = 'tcp';
 
     /**
      * @param string $type
      * @param array $config
      * @return AbstractTransport
-     * @throws \Exception
+     *
+     * @throws LoggerException
      */
     public function create(string $type, array $config): AbstractTransport
     {
@@ -57,7 +59,7 @@ class TransportFactory
                 );
                 break;
             default:
-                throw new \Exception('Unknown transport type: ' . $type);
+                throw new LoggerException('Unknown transport type: ' . $type);
         }
 
         return $transport;

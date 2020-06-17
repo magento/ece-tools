@@ -7,12 +7,14 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Config\Validator\Build;
 
+use Magento\MagentoCloud\App\Error as AppError;
 use Magento\MagentoCloud\Config\Validator\Build\StageConfig;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Magento\MagentoCloud\Config\StageConfigInterface;
 use Magento\MagentoCloud\Config\Validator;
 use Magento\MagentoCloud\Config\Environment\Reader as EnvironmentReader;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
+use Magento\MagentoCloud\Config\Schema\Validator as SchemaValidator;
 
 /**
  * @inheritdoc
@@ -25,17 +27,17 @@ class StageConfigTest extends TestCase
     private $validator;
 
     /**
-     * @var EnvironmentReader|Mock
+     * @var EnvironmentReader|MockObject
      */
     private $environmentReaderMock;
 
     /**
-     * @var Validator\ResultFactory|Mock
+     * @var Validator\ResultFactory|MockObject
      */
     private $resultFactoryMock;
 
     /**
-     * @var Validator\SchemaValidator|Mock
+     * @var SchemaValidator|MockObject
      */
     private $schemaValidatorMock;
 
@@ -46,7 +48,7 @@ class StageConfigTest extends TestCase
     {
         $this->environmentReaderMock = $this->createMock(EnvironmentReader::class);
         $this->resultFactoryMock = $this->createMock(Validator\ResultFactory::class);
-        $this->schemaValidatorMock = $this->createMock(Validator\SchemaValidator::class);
+        $this->schemaValidatorMock = $this->createMock(\Magento\MagentoCloud\Config\Schema\Validator::class);
 
         $this->validator = new StageConfig(
             $this->environmentReaderMock,
@@ -55,7 +57,7 @@ class StageConfigTest extends TestCase
         );
     }
 
-    public function testValidate()
+    public function testValidate(): void
     {
         $this->environmentReaderMock->expects($this->once())
             ->method('read')
@@ -69,16 +71,15 @@ class StageConfigTest extends TestCase
             ]);
         $this->schemaValidatorMock->expects($this->once())
             ->method('validate')
-            ->willReturn(null);
+            ->willReturn(new Validator\Result\Success());
         $this->resultFactoryMock->expects($this->once())
-            ->method('create')
-            ->with(Validator\Result\Success::SUCCESS)
+            ->method('success')
             ->willReturn(new Validator\Result\Success());
 
         $this->assertInstanceOf(Validator\Result\Success::class, $this->validator->validate());
     }
 
-    public function testValidateWithError()
+    public function testValidateWithError(): void
     {
         $this->environmentReaderMock->expects($this->once())
             ->method('read')
@@ -91,10 +92,14 @@ class StageConfigTest extends TestCase
             ]);
         $this->schemaValidatorMock->expects($this->once())
             ->method('validate')
-            ->willReturn('Some error');
+            ->willReturn(new Validator\Result\Error('Some error'));
         $this->resultFactoryMock->expects($this->once())
-            ->method('create')
-            ->with(Validator\Result\Error::ERROR)
+            ->method('error')
+            ->with(
+                'Environment configuration is not valid. Correct the following items in your .magento.env.yaml file:',
+                'Some error',
+                AppError::BUILD_WRONG_CONFIGURATION_MAGENTO_ENV_YAML
+            )
             ->willReturn(new Validator\Result\Error('Some error'));
 
         $this->assertInstanceOf(Validator\Result\Error::class, $this->validator->validate());

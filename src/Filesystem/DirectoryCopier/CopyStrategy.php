@@ -30,10 +30,8 @@ class CopyStrategy implements StrategyInterface
      * @param File $file
      * @param LoggerInterface $logger
      */
-    public function __construct(
-        File $file,
-        LoggerInterface $logger
-    ) {
+    public function __construct(File $file, LoggerInterface $logger)
+    {
         $this->file = $file;
         $this->logger = $logger;
     }
@@ -50,7 +48,7 @@ class CopyStrategy implements StrategyInterface
         }
 
         if ($this->file->isEmptyDirectory($fromDirectory)) {
-            $this->logger->info(sprintf("%s is empty. Nothing to restore", $fromDirectory));
+            $this->logger->info(sprintf('%s is empty. Nothing to restore', $fromDirectory));
 
             return false;
         }

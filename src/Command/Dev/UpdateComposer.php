@@ -9,9 +9,12 @@ namespace Magento\MagentoCloud\Command\Dev;
 
 use Magento\MagentoCloud\Command\Dev\UpdateComposer\ClearModuleRequirements;
 use Magento\MagentoCloud\Command\Dev\UpdateComposer\ComposerGenerator;
+use Magento\MagentoCloud\Config\ConfigException;
 use Magento\MagentoCloud\Config\GlobalSection;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileList;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
+use Magento\MagentoCloud\Package\UndefinedPackageException;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -24,7 +27,7 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class UpdateComposer extends Command
 {
-    const NAME = 'dev:git:update-composer';
+    public const NAME = 'dev:git:update-composer';
 
     /**
      * @var ComposerGenerator
@@ -85,7 +88,7 @@ class UpdateComposer extends Command
     /**
      * @inheritdoc
      */
-    protected function configure()
+    protected function configure(): void
     {
         $this->setName(static::NAME)
             ->setDescription('Updates composer for deployment from git.');
@@ -95,6 +98,10 @@ class UpdateComposer extends Command
 
     /**
      * {@inheritdoc}
+     *
+     * @throws ConfigException
+     * @throws FileSystemException
+     * @throws UndefinedPackageException
      *
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
@@ -110,13 +117,13 @@ class UpdateComposer extends Command
         $composer = $this->composerGenerator->generate($gitOptions['repositories']);
 
         if (!empty($gitOptions['clear_magento_module_requirements'])) {
-            $this->clearModuleRequirements->generate($gitOptions['repositories']);
-            $composer['scripts']['install-from-git'][] = 'php ' . ClearModuleRequirements::SCRIPT_PATH;
+            $clearRequirementsScript = $this->clearModuleRequirements->generate();
+            $composer['scripts']['install-from-git'][] = 'php ' . $clearRequirementsScript;
         }
 
         $this->file->filePutContents(
             $this->fileList->getMagentoComposer(),
-            json_encode($composer, JSON_PRETTY_PRINT)
+            json_encode($composer, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
         );
 
         $output->writeln('Run composer update');

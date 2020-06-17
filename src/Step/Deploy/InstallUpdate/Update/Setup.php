@@ -7,109 +7,59 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Step\Deploy\InstallUpdate\Update;
 
-use Magento\MagentoCloud\Config\Environment;
-use Magento\MagentoCloud\Config\Stage\DeployInterface;
-use Magento\MagentoCloud\Filesystem\DirectoryList;
+use Magento\MagentoCloud\App\Error;
+use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
-use Magento\MagentoCloud\Step\StepException;
+use Magento\MagentoCloud\Shell\ShellException;
+use Magento\MagentoCloud\Shell\UtilityException;
 use Magento\MagentoCloud\Step\StepInterface;
-use Magento\MagentoCloud\Shell\ShellInterface;
-use Magento\MagentoCloud\Filesystem\FileList;
-use Psr\Log\LoggerInterface;
+use Magento\MagentoCloud\Util\UpgradeProcess;
+use Magento\MagentoCloud\Step\StepException;
 
 /**
- * Copyright © Magento, Inc. All rights reserved.
- * See COPYING.txt for license details.
+ * @inheritdoc
  */
 class Setup implements StepInterface
 {
     /**
-     * @var LoggerInterface
-     */
-    private $logger;
-
-    /**
-     * @var Environment
-     */
-    private $environment;
-
-    /**
-     * @var ShellInterface
-     */
-    private $shell;
-
-    /**
      * @var FlagManager
      */
-
     private $flagManager;
 
     /**
-     * @var FileList
+     * @var UpgradeProcess
      */
-    private $fileList;
+    private $upgradeProcess;
 
     /**
-     * @var DirectoryList
-     */
-    private $directoryList;
-
-    /**
-     * @var DeployInterface
-     */
-    private $stageConfig;
-
-    /**
-     * @param LoggerInterface $logger
-     * @param Environment $environment
-     * @param ShellInterface $shell
-     * @param DirectoryList $directoryList
-     * @param FileList $fileList
      * @param FlagManager $flagManager
-     * @param DeployInterface $stageConfig
+     * @param UpgradeProcess $upgradeProcess
      */
     public function __construct(
-        LoggerInterface $logger,
-        Environment $environment,
-        ShellInterface $shell,
-        DirectoryList $directoryList,
-        FileList $fileList,
         FlagManager $flagManager,
-        DeployInterface $stageConfig
+        UpgradeProcess $upgradeProcess
     ) {
-        $this->logger = $logger;
-        $this->environment = $environment;
-        $this->shell = $shell;
-        $this->directoryList = $directoryList;
-        $this->fileList = $fileList;
         $this->flagManager = $flagManager;
-        $this->stageConfig = $stageConfig;
+        $this->upgradeProcess = $upgradeProcess;
     }
 
     /**
      * @inheritdoc
+     *
+     * @throws StepException
      */
     public function execute()
     {
-        $this->flagManager->delete(FlagManager::FLAG_REGENERATE);
-
         try {
-            $verbosityLevel = $this->stageConfig->get(DeployInterface::VAR_VERBOSE_COMMANDS);
-            $installUpgradeLog = $this->fileList->getInstallUpgradeLog();
-
-            $this->logger->info('Running setup upgrade.');
-
-            $this->shell->execute('echo \'Updating time: \'$(date) | tee -a ' . $installUpgradeLog);
-            $this->shell->execute(sprintf(
-                '/bin/bash -c "set -o pipefail; %s | tee -a %s"',
-                'php ./bin/magento setup:upgrade --keep-generated --ansi --no-interaction ' . $verbosityLevel,
-                $installUpgradeLog
-            ));
-        } catch (\RuntimeException $exception) {
-            //Rollback required by database
-            throw new StepException($exception->getMessage(), 6, $exception);
+            $this->flagManager->delete(FlagManager::FLAG_REGENERATE);
+            $this->upgradeProcess->execute();
+            $this->flagManager->delete(FlagManager::FLAG_REGENERATE);
+        } catch (ShellException $e) {
+            throw new StepException($e->getMessage(), Error::DEPLOY_UPGRADE_COMMAND_FAILED, $e);
+        } catch (UtilityException $e) {
+            throw new StepException($e->getMessage(), Error::DEPLOY_UTILITY_NOT_FOUND, $e);
+        } catch (GenericException $e) {
+            throw new StepException($e->getMessage(), $e->getCode(), $e);
         }
-
-        $this->flagManager->delete(FlagManager::FLAG_REGENERATE);
     }
 }

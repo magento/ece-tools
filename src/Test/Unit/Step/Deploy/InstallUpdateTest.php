@@ -9,6 +9,7 @@ namespace Magento\MagentoCloud\Test\Unit\Step\Deploy;
 
 use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Config\State;
+use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Step\Deploy\InstallUpdate;
 use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
@@ -37,6 +38,11 @@ class InstallUpdateTest extends TestCase
     private $stateMock;
 
     /**
+     * @var FlagManager|MockObject
+     */
+    private $flagManagerMock;
+
+    /**
      * @var StepInterface|MockObject
      */
     private $stepInstallMock;
@@ -53,12 +59,14 @@ class InstallUpdateTest extends TestCase
     {
         $this->stateMock = $this->createMock(State::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->flagManagerMock = $this->createMock(FlagManager::class);
         $this->stepInstallMock = $this->getMockForAbstractClass(StepInterface::class);
         $this->stepUpdateMock = $this->getMockForAbstractClass(StepInterface::class);
 
         $this->step = new InstallUpdate(
             $this->loggerMock,
             $this->stateMock,
+            $this->flagManagerMock,
             [$this->stepInstallMock],
             [$this->stepUpdateMock]
         );
@@ -83,6 +91,9 @@ class InstallUpdateTest extends TestCase
             ->method('execute');
         $this->stepUpdateMock->expects($this->never())
             ->method('execute');
+        $this->flagManagerMock->expects($this->once())
+            ->method('delete')
+            ->with(FlagManager::FLAG_ENV_FILE_ABSENCE);
 
         $this->step->execute();
     }
@@ -91,6 +102,40 @@ class InstallUpdateTest extends TestCase
      * @throws StepException
      */
     public function testExecuteUpdate()
+    {
+        $this->mainExpectsForUpdate();
+        $this->flagManagerMock->expects($this->once())
+            ->method('exists')
+            ->with(FlagManager::FLAG_ENV_FILE_ABSENCE)
+            ->willReturn(false);
+
+        $this->step->execute();
+    }
+
+    /**
+     * @throws StepException
+     */
+    public function testExecuteUpdateWhenFileIsAbsent()
+    {
+        $this->mainExpectsForUpdate();
+        $this->flagManagerMock->expects($this->once())
+            ->method('exists')
+            ->with(FlagManager::FLAG_ENV_FILE_ABSENCE)
+            ->willReturn(true);
+        $this->loggerMock->expects($this->once())
+            ->method('warning')
+            ->with('Magento state indicated as installed'
+                . ' but configuration file app/etc/env.php was empty or did not exist.'
+                . ' Required data will be restored from environment configurations'
+                . ' and from .magento.env.yaml file.');
+
+        $this->step->execute();
+    }
+
+    /**
+     * Main mock expects for case with update steps
+     */
+    private function mainExpectsForUpdate(): void
     {
         $this->stateMock->expects($this->once())
             ->method('isInstalled')
@@ -105,8 +150,9 @@ class InstallUpdateTest extends TestCase
             ->method('execute');
         $this->stepUpdateMock->expects($this->once())
             ->method('execute');
-
-        $this->step->execute();
+        $this->flagManagerMock->expects($this->once())
+            ->method('delete')
+            ->with(FlagManager::FLAG_ENV_FILE_ABSENCE);
     }
 
     /**

@@ -13,15 +13,20 @@ use Magento\MagentoCloud\Config\Validator\Deploy\ElasticSearchVersion;
 use Magento\MagentoCloud\Config\Validator\Result\Error;
 use Magento\MagentoCloud\Config\Validator\Result\Success;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
+use Magento\MagentoCloud\Config\ValidatorException;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Package\Manager;
+use Magento\MagentoCloud\Package\UndefinedPackageException;
 use Magento\MagentoCloud\Service\ElasticSearch;
+use Magento\MagentoCloud\Service\ServiceException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
 /**
- * @inheritdoc
+ * @see ElasticSearchVersion
+ *
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class ElasticSearchVersionTest extends TestCase
 {
@@ -63,7 +68,7 @@ class ElasticSearchVersionTest extends TestCase
     /**
      * @inheritdoc
      */
-    public function setUp()
+    public function setUp(): void
     {
         $this->resultFactoryMock = $this->createMock(ResultFactory::class);
         $this->managerMock = $this->createMock(Manager::class);
@@ -82,11 +87,13 @@ class ElasticSearchVersionTest extends TestCase
         );
     }
 
-    public function testValidateElasticSearchServiceNotExists()
+    public function testValidateElasticSearchServiceNotExists(): void
     {
         $this->elasticSearchMock->expects($this->once())
-            ->method('getVersion')
-            ->willReturn('0');
+            ->method('isInstalled')
+            ->willReturn(false);
+        $this->elasticSearchMock->expects($this->never())
+            ->method('getVersion');
         $this->managerMock->expects($this->never())
             ->method('get');
         $this->searchEngineMock->expects($this->never())
@@ -99,7 +106,22 @@ class ElasticSearchVersionTest extends TestCase
         $this->assertInstanceOf(Success::class, $this->validator->validate());
     }
 
-    public function testValidatePackageNotExists()
+    public function testValidateWithException(): void
+    {
+        $this->expectException(ValidatorException::class);
+        $this->expectExceptionMessage('Some error');
+
+        $this->elasticSearchMock->expects($this->once())
+            ->method('isInstalled')
+            ->willReturn(true);
+        $this->elasticSearchMock->expects($this->once())
+            ->method('getVersion')
+            ->willThrowException(new ServiceException('Some error'));
+
+        $this->assertInstanceOf(Success::class, $this->validator->validate());
+    }
+
+    public function testValidatePackageNotExists(): void
     {
         $this->searchEngineMock->expects($this->once())
             ->method('isESFamily')
@@ -107,10 +129,13 @@ class ElasticSearchVersionTest extends TestCase
         $this->elasticSearchMock->expects($this->once())
             ->method('getVersion')
             ->willReturn(2);
+        $this->elasticSearchMock->expects($this->once())
+            ->method('isInstalled')
+            ->willReturn(true);
         $this->managerMock->expects($this->once())
             ->method('get')
             ->with('elasticsearch/elasticsearch')
-            ->willThrowException(new \Exception('package doesn\'t exist'));
+            ->willThrowException(new UndefinedPackageException('package doesn\'t exist'));
         $this->loggerMock->expects($this->once())
             ->method('warning')
             ->with('Can\'t validate version of elasticsearch: package doesn\'t exist');
@@ -120,8 +145,11 @@ class ElasticSearchVersionTest extends TestCase
         $this->assertInstanceOf(Success::class, $this->validator->validate());
     }
 
-    public function testValidateElasticSearchServiceExistsAndNotConfigured()
+    public function testValidateElasticSearchServiceExistsAndNotConfigured(): void
     {
+        $this->elasticSearchMock->expects($this->once())
+            ->method('isInstalled')
+            ->willReturn(true);
         $this->searchEngineMock->expects($this->once())
             ->method('isESFamily')
             ->willReturn(false);
@@ -154,7 +182,10 @@ class ElasticSearchVersionTest extends TestCase
         string $magentoVersion = '2.2',
         string $errorMessage = '',
         string $errorSuggestion = ''
-    ) {
+    ): void {
+        $this->elasticSearchMock->expects($this->once())
+            ->method('isInstalled')
+            ->willReturn(true);
         $this->magentoVersionMock->expects($this->any())
             ->method('getVersion')
             ->willReturn($magentoVersion);
@@ -186,6 +217,8 @@ class ElasticSearchVersionTest extends TestCase
 
     /**
      * @return array
+     *
+     * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
     public function validateDataProvider(): array
     {
@@ -202,6 +235,15 @@ class ElasticSearchVersionTest extends TestCase
             ['1.7', '2.9', Success::class],
             ['5.1', '5.0', Success::class],
             ['5.2', '5.1', Success::class],
+            ['7.0', '7.1', Success::class],
+            ['7.1', '7.0', Success::class],
+            ['7.2', '7.3', Success::class],
+            ['7.3', '7.2', Success::class],
+            ['7.4', '7.6', Success::class],
+            ['7.6', '7.4', Success::class],
+            ['7.4', '7.5', Success::class],
+            ['7.5', '7.4', Success::class],
+            ['7.4', '7.2', Error::class],
             ['6.1', '2.0', Error::class],
             [
                 '6.2',
@@ -210,7 +252,7 @@ class ElasticSearchVersionTest extends TestCase
                 '2.3.0',
                 'Elasticsearch service version 6.2 on infrastructure layer is not compatible with current version of ' .
                 'elasticsearch/elasticsearch module (5.0), used by your Magento application.',
-                'You can fix this issue by upgrading the Elasticsearch service on your ' .
+                'You can fix this issue by downgrading the Elasticsearch service on your ' .
                 'Magento Cloud infrastructure to version 5.x.'
             ],
             [
@@ -231,7 +273,7 @@ class ElasticSearchVersionTest extends TestCase
                 '2.1.4',
                 'Elasticsearch service version 5.0 on infrastructure layer is not compatible with current version of ' .
                 'elasticsearch/elasticsearch module (2.0), used by your Magento application.',
-                'You can fix this issue by upgrading the Elasticsearch service on your ' .
+                'You can fix this issue by downgrading the Elasticsearch service on your ' .
                 'Magento Cloud infrastructure to version 1.x or 2.x.'
             ],
             [
@@ -279,6 +321,16 @@ class ElasticSearchVersionTest extends TestCase
                 'elasticsearch/elasticsearch module (5.1), used by your Magento application.',
                 'You can fix this issue by upgrading the Elasticsearch service on your ' .
                 'Magento Cloud infrastructure to version 5.x.'
+            ],
+            [
+                '7.4',
+                '6.2',
+                Error::class,
+                '2.4.0',
+                'Elasticsearch service version 7.4 on infrastructure layer is not compatible with current version of ' .
+                'elasticsearch/elasticsearch module (6.2), used by your Magento application.',
+                'You can fix this issue by downgrading the Elasticsearch service on your ' .
+                'Magento Cloud infrastructure to version 6.x.'
             ],
         ];
     }

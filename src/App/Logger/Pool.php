@@ -7,8 +7,12 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\App\Logger;
 
+use Magento\MagentoCloud\App\Error;
+use Magento\MagentoCloud\App\LoggerException;
 use Monolog\Handler\HandlerInterface;
 use Magento\MagentoCloud\Config\Log as LogConfig;
+use Exception;
+use Symfony\Component\Yaml\Exception\ParseException;
 
 /**
  * The pool of handlers.
@@ -52,7 +56,7 @@ class Pool
 
     /**
      * @return HandlerInterface[]
-     * @throws \Exception If can't create handlers from config.
+     * @throws LoggerException If can't create handlers from config.
      */
     public function getHandlers(): array
     {
@@ -62,14 +66,20 @@ class Pool
 
         $this->handlers = [];
 
-        foreach ($this->logConfig->getHandlers() as $handlerName => $handlerConfig) {
-            $handler = $this->handlerFactory->create($handlerName);
+        try {
+            foreach ($this->logConfig->getHandlers() as $handlerName => $handlerConfig) {
+                $handler = $this->handlerFactory->create($handlerName);
 
-            if (empty($handlerConfig['use_default_formatter'])) {
-                $handler->setFormatter($this->lineFormatterFactory->create());
+                if (empty($handlerConfig['use_default_formatter'])) {
+                    $handler->setFormatter($this->lineFormatterFactory->create());
+                }
+
+                $this->handlers[] = $handler;
             }
-
-            $this->handlers[] = $handler;
+        } catch (ParseException $e) {
+            throw new LoggerException($e->getMessage(), Error::BUILD_CONFIG_PARSE_FAILED, $e);
+        } catch (Exception $e) {
+            throw new LoggerException($e->getMessage(), $e->getCode(), $e);
         }
 
         return $this->handlers;

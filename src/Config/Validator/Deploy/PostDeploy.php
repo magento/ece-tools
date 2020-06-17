@@ -49,7 +49,7 @@ class PostDeploy implements ValidatorInterface
                 'In order to minimize downtime, add the following to ".magento.app.yaml":' . PHP_EOL .
                 'hooks:' . PHP_EOL .
                 '    post_deploy: |' . PHP_EOL .
-                '        php ./vendor/bin/ece-tools post-deploy'
+                '        php ./vendor/bin/ece-tools run scenario/post-deploy.xml'
             );
         }
 

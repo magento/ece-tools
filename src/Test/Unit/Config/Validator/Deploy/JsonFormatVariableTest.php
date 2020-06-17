@@ -61,18 +61,18 @@ class JsonFormatVariableTest extends TestCase
     public function testValidateSuccess()
     {
         $this->schemaMock->expects($this->once())
-            ->method('getSchema')
+            ->method('getVariables')
             ->willReturn([
                 DeployInterface::VAR_CLEAN_STATIC_FILES => [
                     Schema::SCHEMA_TYPE => ['boolean'],
-                    Schema::SCHEMA_STAGE => [
+                    Schema::SCHEMA_STAGES => [
                         StageConfigInterface::STAGE_GLOBAL,
                         StageConfigInterface::STAGE_DEPLOY
                     ],
                 ],
                 DeployInterface::VAR_SEARCH_CONFIGURATION => [
                     Schema::SCHEMA_TYPE => ['array'],
-                    Schema::SCHEMA_STAGE => [
+                    Schema::SCHEMA_STAGES => [
                         StageConfigInterface::STAGE_GLOBAL,
                         StageConfigInterface::STAGE_DEPLOY
                     ],
@@ -93,39 +93,39 @@ class JsonFormatVariableTest extends TestCase
     public function testValidateErrors()
     {
         $this->schemaMock->expects($this->once())
-            ->method('getSchema')
+            ->method('getVariables')
             ->willReturn([
                 DeployInterface::VAR_CLEAN_STATIC_FILES => [
                     Schema::SCHEMA_TYPE => ['boolean'],
-                    Schema::SCHEMA_STAGE => [
+                    Schema::SCHEMA_STAGES => [
                         StageConfigInterface::STAGE_GLOBAL,
                         StageConfigInterface::STAGE_DEPLOY
                     ],
                 ],
                 DeployInterface::VAR_SEARCH_CONFIGURATION => [
                     Schema::SCHEMA_TYPE => ['array'],
-                    Schema::SCHEMA_STAGE => [
+                    Schema::SCHEMA_STAGES => [
                         StageConfigInterface::STAGE_GLOBAL,
                         StageConfigInterface::STAGE_DEPLOY
                     ],
                 ],
                 DeployInterface::VAR_CACHE_CONFIGURATION => [
                     Schema::SCHEMA_TYPE => ['array'],
-                    Schema::SCHEMA_STAGE => [
+                    Schema::SCHEMA_STAGES => [
                         StageConfigInterface::STAGE_GLOBAL,
                         StageConfigInterface::STAGE_DEPLOY
                     ],
                 ],
                 DeployInterface::VAR_SESSION_CONFIGURATION => [
                     Schema::SCHEMA_TYPE => ['array'],
-                    Schema::SCHEMA_STAGE => [
+                    Schema::SCHEMA_STAGES => [
                         StageConfigInterface::STAGE_GLOBAL,
                         StageConfigInterface::STAGE_DEPLOY
                     ],
                 ],
                 DeployInterface::VAR_CRON_CONSUMERS_RUNNER => [
                     Schema::SCHEMA_TYPE => ['array'],
-                    Schema::SCHEMA_STAGE => [
+                    Schema::SCHEMA_STAGES => [
                         StageConfigInterface::STAGE_GLOBAL,
                         StageConfigInterface::STAGE_DEPLOY
                     ],
@@ -153,11 +153,11 @@ class JsonFormatVariableTest extends TestCase
     public function testValidateErrorsWithException()
     {
         $this->schemaMock->expects($this->once())
-            ->method('getSchema')
+            ->method('getVariables')
             ->willReturn([
                 DeployInterface::VAR_CRON_CONSUMERS_RUNNER => [
                     Schema::SCHEMA_TYPE => ['array'],
-                    Schema::SCHEMA_STAGE => [
+                    Schema::SCHEMA_STAGES => [
                         StageConfigInterface::STAGE_GLOBAL,
                         StageConfigInterface::STAGE_DEPLOY
                     ],

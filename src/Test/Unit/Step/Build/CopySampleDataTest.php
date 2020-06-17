@@ -7,9 +7,13 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Step\Build;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Step\Build\CopySampleData;
+use Magento\MagentoCloud\Step\StepException;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
@@ -24,17 +28,17 @@ class CopySampleDataTest extends TestCase
     private $step;
 
     /**
-     * @var LoggerInterface|\PHPUnit_Framework_MockObject_MockObject
+     * @var LoggerInterface|MockObject
      */
     private $loggerMock;
 
     /**
-     * @var File|\PHPUnit_Framework_MockObject_MockObject
+     * @var File|MockObject
      */
     private $fileMock;
 
     /**
-     * @var DirectoryList|\PHPUnit_Framework_MockObject_MockObject
+     * @var DirectoryList|MockObject
      */
     private $directoryListMock;
 
@@ -63,7 +67,10 @@ class CopySampleDataTest extends TestCase
         );
     }
 
-    public function testExecute()
+    /**
+     * @throws StepException
+     */
+    public function testExecute(): void
     {
         $this->fileMock->expects($this->once())
             ->method('isExists')
@@ -79,7 +86,10 @@ class CopySampleDataTest extends TestCase
         $this->step->execute();
     }
 
-    public function testExecuteNoSampleData()
+    /**
+     * @throws StepException
+     */
+    public function testExecuteNoSampleData(): void
     {
         $this->fileMock->expects($this->once())
             ->method('isExists')
@@ -90,6 +100,26 @@ class CopySampleDataTest extends TestCase
             ->with('Sample data media was not found. Skipping.');
         $this->fileMock->expects($this->never())
             ->method('copyDirectory');
+
+        $this->step->execute();
+    }
+
+    /**
+     * @throws StepException
+     */
+    public function testExecuteWithException(): void
+    {
+        $this->fileMock->expects($this->once())
+            ->method('isExists')
+            ->with('magento_root/vendor/magento/sample-data-media')
+            ->willReturn(true);
+        $this->fileMock->expects($this->once())
+            ->method('copyDirectory')
+            ->willThrowException(new FileSystemException('some error'));
+
+        $this->expectExceptionCode(Error::BUILD_FAILED_COPY_SAMPLE_DATA);
+        $this->expectException(StepException::class);
+        $this->expectExceptionMessage('some error');
 
         $this->step->execute();
     }

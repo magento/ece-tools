@@ -8,13 +8,15 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit\App;
 
 use Magento\MagentoCloud\App\Logger;
+use Magento\MagentoCloud\App\Logger\Prepare\ErrorLogFile;
+use Magento\MagentoCloud\App\LoggerException;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\App\Logger\Pool;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Magento\MagentoCloud\App\Logger\Processor\SanitizeProcessor;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -22,29 +24,34 @@ use PHPUnit_Framework_MockObject_MockObject as Mock;
 class LoggerTest extends TestCase
 {
     /**
-     * @var File|Mock
+     * @var File|MockObject
      */
     private $fileMock;
 
     /**
-     * @var DirectoryList|Mock
+     * @var DirectoryList|MockObject
      */
     private $directoryListMock;
 
     /**
-     * @var FileList|Mock
+     * @var FileList|MockObject
      */
     private $fileListMock;
 
     /**
-     * @var Pool|Mock
+     * @var Pool|MockObject
      */
     private $poolMock;
 
     /**
-     * @var SanitizeProcessor|Mock
+     * @var SanitizeProcessor|MockObject
      */
     private $sanitizeProcessorMock;
+
+    /**
+     * @var ErrorLogFile|MockObject
+     */
+    private $errorLogFileMock;
 
     /**
      * @inheritdoc
@@ -56,6 +63,7 @@ class LoggerTest extends TestCase
         $this->fileListMock = $this->createMock(FileList::class);
         $this->poolMock = $this->createMock(Pool::class);
         $this->sanitizeProcessorMock = $this->createMock(SanitizeProcessor::class);
+        $this->errorLogFileMock = $this->createMock(ErrorLogFile::class);
     }
 
     /**
@@ -67,6 +75,8 @@ class LoggerTest extends TestCase
      * @param int $fileMockFilePutContentsExpects
      * @param int $fileMockCopyExpects
      * @dataProvider executeDataProvider
+     *
+     * @throws LoggerException
      */
     public function testExecute(
         $fileMockFileGetContentsExpects,
@@ -76,7 +86,7 @@ class LoggerTest extends TestCase
         $deployLogFileExists,
         $fileMockFilePutContentsExpects,
         $fileMockCopyExpects
-    ) {
+    ): void {
         $magentoRoot = 'magento_root';
         $deployLogPath = $magentoRoot . '/var/log/cloud.log';
         $buildPhaseLogPath = $magentoRoot . '/init/var/log/cloud.log';
@@ -121,7 +131,8 @@ class LoggerTest extends TestCase
             $this->directoryListMock,
             $this->fileListMock,
             $this->poolMock,
-            $this->sanitizeProcessorMock
+            $this->sanitizeProcessorMock,
+            $this->errorLogFileMock
         );
     }
 

@@ -18,10 +18,10 @@ use Psr\Log\LoggerInterface;
  */
 class UrlManager
 {
-    const MAGIC_ROUTE = '{default}';
+    private const MAGIC_ROUTE = '{default}';
 
-    const PREFIX_SECURE = 'https://';
-    const PREFIX_UNSECURE = 'http://';
+    private const PREFIX_SECURE = 'https://';
+    private const PREFIX_UNSECURE = 'http://';
 
     /**
      * @var Environment
@@ -77,6 +77,7 @@ class UrlManager
     private function parseRoutes(array $routes): array
     {
         $urls = ['secure' => [], 'unsecure' => []];
+        $primaryUrls = [];
 
         foreach ($routes as $key => $val) {
             if ($val['type'] !== 'upstream') {
@@ -84,21 +85,27 @@ class UrlManager
             }
 
             $host = parse_url($val['original_url'], PHP_URL_HOST);
-            $originalUrlRegEx = sprintf('/(www)?\.?%s/', preg_quote(self::MAGIC_ROUTE));
+            $originalUrlRegEx = sprintf('/(www)?\.?%s/', preg_quote(self::MAGIC_ROUTE, '/'));
             $originalUrl = preg_replace($originalUrlRegEx, '', $host);
 
             if (strpos($key, self::PREFIX_UNSECURE) === 0) {
                 $urls['unsecure'][$originalUrl] = $key;
+                if (!empty($val['primary'])) {
+                    $primaryUrls['unsecure'][$originalUrl] = $key;
+                }
                 continue;
             }
 
             if (strpos($key, self::PREFIX_SECURE) === 0) {
                 $urls['secure'][$originalUrl] = $key;
+                if (!empty($val['primary'])) {
+                    $primaryUrls['secure'][$originalUrl] = $key;
+                }
                 continue;
             }
         }
 
-        return $urls;
+        return $primaryUrls ?: $urls;
     }
 
     /**
@@ -112,18 +119,18 @@ class UrlManager
             return $this->urls;
         }
 
-        $this->logger->info('Initializing routes.');
+        $this->logger->debug('Initializing routes.');
 
         $urls = $this->parseRoutes($this->environment->getRoutes());
 
-        if (0 === count($urls['unsecure']) && 0 === count($urls['secure'])) {
+        if (empty($urls['unsecure']) && empty($urls['secure'])) {
             throw new \RuntimeException('Expected at least one valid unsecure or secure route. None found.');
         }
-        if (0 === count($urls['unsecure'])) {
+        if (empty($urls['unsecure'])) {
             $urls['unsecure'] = $urls['secure'];
         }
 
-        if (0 === count($urls['secure'])) {
+        if (empty($urls['secure'])) {
             $urls['secure'] = substr_replace($urls['unsecure'], self::PREFIX_SECURE, 0, strlen(self::PREFIX_UNSECURE));
         }
 

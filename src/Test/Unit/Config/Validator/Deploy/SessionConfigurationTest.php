@@ -7,14 +7,15 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Config\Validator\Deploy;
 
+use Magento\MagentoCloud\App\Error as AppError;
 use Magento\MagentoCloud\Config\ConfigMerger;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Config\Validator\Deploy\SessionConfiguration;
 use Magento\MagentoCloud\Config\Validator\Result\Error;
 use Magento\MagentoCloud\Config\Validator\Result\Success;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -27,19 +28,19 @@ class SessionConfigurationTest extends TestCase
     private $validator;
 
     /**
-     * @var ResultFactory|Mock
+     * @var ResultFactory|MockObject
      */
     private $resultFactoryMock;
 
     /**
-     * @var DeployInterface|Mock
+     * @var DeployInterface|MockObject
      */
     private $stageConfigMock;
 
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->resultFactoryMock = $this->createConfiguredMock(ResultFactory::class, [
             'success' => $this->createMock(Success::class),
@@ -54,12 +55,29 @@ class SessionConfigurationTest extends TestCase
         );
     }
 
+    public function testErrorCode()
+    {
+        $this->stageConfigMock->expects($this->once())
+            ->method('get')
+            ->with(DeployInterface::VAR_SESSION_CONFIGURATION)
+            ->willReturn(['key' => 'value']);
+        $this->resultFactoryMock->expects($this->once())
+            ->method('error')
+            ->with(
+                'The SESSION_CONFIGURATION variable is not configured properly',
+                'At least "save" option must be configured for session configuration.',
+                AppError::DEPLOY_WRONG_CONFIGURATION_SESSION
+            );
+
+        $this->validator->validate();
+    }
+
     /**
      * @param array $sessionConfiguration
      * @param string $expectedResultClass
      * @dataProvider validateDataProvider
      */
-    public function testValidate(array $sessionConfiguration, string $expectedResultClass)
+    public function testValidate(array $sessionConfiguration, string $expectedResultClass): void
     {
         $this->stageConfigMock->expects($this->once())
             ->method('get')

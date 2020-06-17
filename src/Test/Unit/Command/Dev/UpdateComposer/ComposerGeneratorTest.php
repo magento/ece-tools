@@ -11,8 +11,8 @@ use Magento\MagentoCloud\Command\Dev\UpdateComposer\ComposerGenerator;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Package\MagentoVersion;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -29,27 +29,25 @@ class ComposerGeneratorTest extends TestCase
         ],
         'repo2' => [
             'repo' => 'path_to_repo2',
-            'branch' => '1.0.0',
+            'branch' => '2.0.0',
         ],
         'repo3' => [
             'repo' => 'path_to_repo3',
             'branch' => '3.0.0',
-            'type' => 'single-package'
         ],
+        'repo4' => [
+            'repo' => 'path_to_repo4',
+            'branch' => '4.0.0',
+        ]
     ];
 
     /**
-     * @var DirectoryList|Mock
+     * @var DirectoryList|MockObject
      */
     private $directoryListMock;
 
     /**
-     * @var File|Mock
-     */
-    private $fileMock;
-
-    /**
-     * @var MagentoVersion|Mock
+     * @var MagentoVersion|MockObject
      */
     private $magentoVersionMock;
 
@@ -64,13 +62,19 @@ class ComposerGeneratorTest extends TestCase
     protected function setUp()
     {
         $this->directoryListMock = $this->createMock(DirectoryList::class);
+        $this->directoryListMock->expects($this->any())
+            ->method('getMagentoRoot')
+            ->willReturn(__DIR__ . '/_files/app');
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
-        $this->fileMock = $this->createMock(File::class);
+        $this->magentoVersionMock->expects($this->any())
+            ->method('getVersion')
+            ->willReturn('2.2');
 
         $this->composerGenerator = new ComposerGenerator(
             $this->directoryListMock,
             $this->magentoVersionMock,
-            $this->fileMock
+            new File(),
+            '/^((?!exclude).)*$/'
         );
     }
 
@@ -79,62 +83,15 @@ class ComposerGeneratorTest extends TestCase
         $this->assertInstallFromGitScripts($this->composerGenerator->getInstallFromGitScripts($this->repoOptions));
     }
 
-    public function testGenerate()
+    public function testGenerate(): void
     {
-        $rootDir = '/root';
-        $this->directoryListMock->expects($this->any())
-            ->method('getMagentoRoot')
-            ->willReturn($rootDir);
-        $this->magentoVersionMock->expects($this->once())
-            ->method('getVersion')
-            ->willReturn('2.2');
-        $this->fileMock->expects($this->exactly(5))
-            ->method('isExists')
-            ->willReturn(true);
-        $this->fileMock->expects($this->exactly(5))
-            ->method('fileGetContents')
-            ->willReturnOnConsecutiveCalls(
-                '{"require": {"package": "*"}, "repositories": {"repo": {"type": "git", "url": "url"}}}',
-                '{"name": "repo1", "require": {"package/require1": "*"}, "repositories": ' .
-                '{"repo1": {"type": "git", "url": "url"}}}',
-                '{"name": "repo2", "require": {"package/require2": "*", "magento/module-test": ">102.0.0"}, ' .
-                '"repositories": {"repo2": {"type": "git", "url": "url"}}}',
-                '{"name": "repo3", "require": {"package/require3": "*", "magento/framework": ">100.1.1"}, ' .
-                '"repositories": {"repo3": {"type": "git", "url": "url"}}}',
-                '{"name": "repo3", "require": {"package/require3": "*", "magento/framework": ">100.1.1"}, ' .
-                '"repositories": {"repo3": {"type": "git", "url": "url"}}}'
-            );
-
         $composer = $this->composerGenerator->generate($this->repoOptions);
 
-        $this->assertArrayHasKey('version', $composer);
-        $this->assertEquals('2.2', $composer['version']);
-
-        $this->assertArrayHasKey('scripts', $composer);
-        $this->assertArrayHasKey('install-from-git', $composer['scripts']);
-        $this->assertEquals(
-            [
-                "rsync -azh --stats --exclude='app/code/Magento/' --exclude='app/i18n/' --exclude='app/design/'"
-                . " --exclude='dev/tests' --exclude='lib/internal/Magento' --exclude='.git' ./repo1/ ./",
-                "rsync -azh --stats --exclude='app/code/Magento/' --exclude='app/i18n/' --exclude='app/design/'"
-                . " --exclude='dev/tests' --exclude='lib/internal/Magento' --exclude='.git' ./repo2/ ./",
-            ],
-            $composer['scripts']['prepare-packages']
-        );
-        $this->assertInstallFromGitScripts($composer['scripts']['install-from-git']);
-
-        $this->assertArrayHasKey('require', $composer);
-        $this->assertArrayHasKey('package/require1', $composer['require']);
-        $this->assertArrayHasKey('package/require2', $composer['require']);
-        $this->assertArrayHasKey('package/require3', $composer['require']);
-        $this->assertArrayHasKey('magento/framework', $composer['require']);
-        $this->assertArrayHasKey('magento/module-test', $composer['require']);
-
-        $this->assertEquals('*', $composer['require']['magento/framework']);
-        $this->assertEquals('*', $composer['require']['magento/module-test']);
-
-        $this->assertArrayHasKey('repositories', $composer);
-        $this->assertArrayHasKey('repo3', $composer['repositories']);
+        $expected = include(__DIR__ . '/_files/expected_composer.php');
+        foreach ($expected as $key => $value) {
+            $this->assertArrayHasKey($key, $composer);
+            $this->assertEquals($value, $composer[$key]);
+        }
     }
 
     /**
@@ -142,15 +99,16 @@ class ComposerGeneratorTest extends TestCase
      *
      * @return void
      */
-    private function assertInstallFromGitScripts(array $actual)
+    private function assertInstallFromGitScripts(array $actual): void
     {
         $this->assertEquals(
             [
                 'php -r"@mkdir(__DIR__ . \'/app/etc\', 0777, true);"',
-                'rm -rf repo1 repo2 repo3',
-                'git clone -b 1.0.0 --single-branch --depth 1 path_to_repo1 repo1',
-                'git clone -b 1.0.0 --single-branch --depth 1 path_to_repo2 repo2',
-                'git clone -b 3.0.0 --single-branch --depth 1 path_to_repo3 repo3',
+                'rm -rf repo1 repo2 repo3 repo4',
+                'git clone path_to_repo1 "repo1" && git --git-dir="repo1/.git" --work-tree="repo1" checkout 1.0.0',
+                'git clone path_to_repo2 "repo2" && git --git-dir="repo2/.git" --work-tree="repo2" checkout 2.0.0',
+                'git clone path_to_repo3 "repo3" && git --git-dir="repo3/.git" --work-tree="repo3" checkout 3.0.0',
+                'git clone path_to_repo4 "repo4" && git --git-dir="repo4/.git" --work-tree="repo4" checkout 4.0.0',
             ],
             $actual
         );

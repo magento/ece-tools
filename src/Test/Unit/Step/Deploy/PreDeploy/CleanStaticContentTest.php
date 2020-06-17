@@ -7,15 +7,18 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Step\Deploy\PreDeploy;
 
-use Magento\MagentoCloud\Command\Deploy;
+use Magento\MagentoCloud\App\Error;
+use Magento\MagentoCloud\Config\ConfigException;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
-use Magento\MagentoCloud\Step\Deploy\PreDeploy\CleanStaticContent;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
+use Magento\MagentoCloud\Step\Deploy\PreDeploy\CleanStaticContent;
+use Magento\MagentoCloud\Step\StepException;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -24,41 +27,44 @@ use Psr\Log\LoggerInterface;
 class CleanStaticContentTest extends TestCase
 {
     /**
-     * @var LoggerInterface|Mock
-     */
-    private $loggerMock;
-
-    /**
-     * @var Environment|Mock
-     */
-    private $environmentMock;
-
-    /**
-     * @var DirectoryList|Mock
-     */
-    private $directoryListMock;
-
-    /**
-     * @var File|Mock
-     */
-    private $fileMock;
-
-    /**
-     * @var FlagManager|Mock
-     */
-    private $flagManagerMock;
-
-    /**
-     * @var DeployInterface|Mock
-     */
-    private $stageConfigMock;
-
-    /**
      * @var CleanStaticContent
      */
     private $step;
 
-    protected function setUp()
+    /**
+     * @var LoggerInterface|MockObject
+     */
+    private $loggerMock;
+
+    /**
+     * @var Environment|MockObject
+     */
+    private $environmentMock;
+
+    /**
+     * @var DirectoryList|MockObject
+     */
+    private $directoryListMock;
+
+    /**
+     * @var File|MockObject
+     */
+    private $fileMock;
+
+    /**
+     * @var FlagManager|MockObject
+     */
+    private $flagManagerMock;
+
+    /**
+     * @var DeployInterface|MockObject
+     */
+    private $stageConfigMock;
+
+    /**
+     * @inheritDoc
+     */
+    protected function setUp(): void
     {
         $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
             ->getMockForAbstractClass();
@@ -78,7 +84,10 @@ class CleanStaticContentTest extends TestCase
         );
     }
 
-    public function testExecute()
+    /**
+     * @throws StepException
+     */
+    public function testExecute(): void
     {
         $this->flagManagerMock->expects($this->once())
             ->method('exists')
@@ -104,7 +113,10 @@ class CleanStaticContentTest extends TestCase
         $this->step->execute();
     }
 
-    public function testExecuteWithoutDeployInBuild()
+    /**
+     * @throws StepException
+     */
+    public function testExecuteWithoutDeployInBuild(): void
     {
         $this->flagManagerMock->expects($this->once())
             ->method('exists')
@@ -122,7 +134,10 @@ class CleanStaticContentTest extends TestCase
         $this->step->execute();
     }
 
-    public function testExecuteWithDeployInBuildNoClean()
+    /**
+     * @throws StepException
+     */
+    public function testExecuteWithDeployInBuildNoClean(): void
     {
         $this->flagManagerMock->expects($this->once())
             ->method('exists')
@@ -138,6 +153,50 @@ class CleanStaticContentTest extends TestCase
         $this->fileMock->expects($this->never())
             ->method('backgroundClearDirectory')
             ->with('magento_root/pub/static');
+
+        $this->step->execute();
+    }
+
+    /**
+     * @throws StepException
+     */
+    public function testExecuteWithFileSystemException()
+    {
+        $this->expectExceptionCode(Error::DEPLOY_SCD_CLEAN_FAILED);
+        $this->expectException(StepException::class);
+        $this->expectExceptionMessage('some error');
+
+        $this->flagManagerMock->expects($this->once())
+            ->method('exists')
+            ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)
+            ->willReturn(true);
+        $this->stageConfigMock->expects($this->once())
+            ->method('get')
+            ->with(DeployInterface::VAR_CLEAN_STATIC_FILES)
+            ->willReturn(true);
+        $this->fileMock->expects($this->once())
+            ->method('backgroundClearDirectory')
+            ->willThrowException(new FileSystemException('some error'));
+
+        $this->step->execute();
+    }
+
+    /**
+     * @throws StepException
+     */
+    public function testExecuteWithGenericException()
+    {
+        $this->expectExceptionCode(10);
+        $this->expectException(StepException::class);
+        $this->expectExceptionMessage('some error');
+
+        $this->flagManagerMock->expects($this->once())
+            ->method('exists')
+            ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)
+            ->willReturn(true);
+        $this->stageConfigMock->expects($this->once())
+            ->method('get')
+            ->willThrowException(new ConfigException('some error', 10));
 
         $this->step->execute();
     }

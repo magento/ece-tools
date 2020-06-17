@@ -13,9 +13,9 @@ use Magento\MagentoCloud\Config\Validator\Build\ConfigFileStructure;
 use Magento\MagentoCloud\Config\Validator\GlobalStage\ScdOnBuild;
 use Magento\MagentoCloud\Config\Validator\Result;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Magento\MagentoCloud\Config\Stage\Build as BuildConfig;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -28,22 +28,22 @@ class ScdOnBuildTest extends TestCase
     private $scdOnBuild;
 
     /**
-     * @var GlobalSection|Mock
+     * @var GlobalSection|MockObject
      */
     private $globalConfigMock;
 
     /**
-     * @var BuildConfig|Mock
+     * @var BuildConfig|MockObject
      */
     private $buildConfigMock;
 
     /**
-     * @var ConfigFileStructure|Mock
+     * @var ConfigFileStructure|MockObject
      */
     private $configFileStructureMock;
 
     /**
-     * @var ResultFactory|Mock
+     * @var ResultFactory|MockObject
      */
     private $resultFactoryMock;
 
@@ -65,7 +65,7 @@ class ScdOnBuildTest extends TestCase
         );
     }
 
-    public function testExecute()
+    public function testExecute(): void
     {
         $this->globalConfigMock->expects($this->once())
             ->method('get')
@@ -83,7 +83,7 @@ class ScdOnBuildTest extends TestCase
         $this->scdOnBuild->validate();
     }
 
-    public function testExecuteWithNotValidConfig()
+    public function testExecuteWithNotValidConfig(): void
     {
         $resultMock = $this->createMock(Result\Error::class);
         $this->configFileStructureMock->expects($this->once())

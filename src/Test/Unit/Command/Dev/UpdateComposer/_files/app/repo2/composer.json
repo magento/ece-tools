@@ -1,0 +1,13 @@
+{
+  "name": "repo2",
+  "require": {
+    "package/require2": "*",
+    "magento/module-test": ">102.0.0"
+  },
+  "repositories": {
+    "repo2": {
+      "type": "git",
+      "url": "url"
+    }
+  }
+}

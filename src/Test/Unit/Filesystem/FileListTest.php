@@ -10,6 +10,7 @@ namespace Magento\MagentoCloud\Test\Unit\Filesystem;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Filesystem\SystemList;
+use Magento\MagentoCloud\Package\UndefinedPackageException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -36,7 +37,7 @@ class FileListTest extends TestCase
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->directoryListMock = $this->createMock(DirectoryList::class);
         $this->systemListMock = $this->createMock(SystemList::class);
@@ -47,11 +48,9 @@ class FileListTest extends TestCase
         $this->directoryListMock->expects($this->any())
             ->method('getRoot')
             ->willReturn('root');
-        $this->directoryListMock->expects($this->any())
-            ->method('getLog')
+        $this->directoryListMock->method('getLog')
             ->willReturn('magento_root/var/log');
-        $this->directoryListMock->expects($this->any())
-            ->method('getInit')
+        $this->directoryListMock->method('getInit')
             ->willReturn('magento_root/init');
 
         $this->fileList = new FileList(
@@ -60,53 +59,111 @@ class FileListTest extends TestCase
         );
     }
 
-    public function testGetCloudLog()
+    /**
+     * @throws UndefinedPackageException
+     */
+    public function testGetCloudLog(): void
     {
         $this->assertSame('magento_root/var/log/cloud.log', $this->fileList->getCloudLog());
     }
 
-    public function testGetInitCloudLog()
+    /**
+     * @throws UndefinedPackageException
+     */
+    public function testGetCloudErrorLog(): void
+    {
+        $this->assertSame('magento_root/var/log/cloud.error.log', $this->fileList->getCloudErrorLog());
+    }
+
+    /**
+     * @throws UndefinedPackageException
+     */
+    public function testGetInitCloudLog(): void
     {
         $this->assertSame('magento_root/init/var/log/cloud.log', $this->fileList->getInitCloudLog());
     }
 
-    public function testGetPatches()
+    /**
+     * @throws UndefinedPackageException
+     */
+    public function testGetInitCloudErrorLog(): void
+    {
+        $this->directoryListMock->expects($this->once())
+            ->method('getPath')
+            ->with(DirectoryList::DIR_LOG, true)
+            ->willReturn('var/log');
+
+        $this->assertSame('magento_root/init/var/log/cloud.error.log', $this->fileList->getInitCloudErrorLog());
+    }
+
+    public function testGetPatches(): void
     {
         $this->assertSame('root/patches.json', $this->fileList->getPatches());
     }
 
-    public function testGetInstallUpgradeLog()
+    /**
+     * @throws UndefinedPackageException
+     */
+    public function testGetInstallUpgradeLog(): void
     {
         $this->assertSame('magento_root/var/log/install_upgrade.log', $this->fileList->getInstallUpgradeLog());
     }
 
-    public function testGetMagentoComposer()
+    public function testGetMagentoComposer(): void
     {
         $this->assertSame('magento_root/composer.json', $this->fileList->getMagentoComposer());
     }
 
-    public function testGetMagentoDockerCompose()
+    public function testGetMagentoDockerCompose(): void
     {
         $this->assertSame('magento_root/docker-compose.yml', $this->fileList->getMagentoDockerCompose());
     }
 
-    public function testGetToolsDockerCompose()
+    public function testGetToolsDockerCompose(): void
     {
         $this->assertSame('root/docker-compose.yml', $this->fileList->getToolsDockerCompose());
     }
 
-    public function testGetAppConfig()
+    public function testGetAppConfig(): void
     {
         $this->assertSame('magento_root/.magento.app.yaml', $this->fileList->getAppConfig());
     }
 
-    public function testGetServicesConfig()
+    public function testGetServicesConfig(): void
     {
         $this->assertSame('magento_root/.magento/services.yaml', $this->fileList->getServicesConfig());
     }
 
-    public function testGetTtfbLog()
+    /**
+     * @throws UndefinedPackageException
+     */
+    public function testGetTtfbLog(): void
     {
         $this->assertSame('magento_root/var/log/ttfb_results.json', $this->fileList->getTtfbLog());
+    }
+
+    public function testGetEnvDistConfig(): void
+    {
+        $this->assertSame('magento_root/.magento.env.md', $this->fileList->getEnvDistConfig());
+    }
+
+    public function testGetServiceEolsConfig(): void
+    {
+        $this->assertSame('root/config/eol.yaml', $this->fileList->getServiceEolsConfig());
+    }
+
+    public function testGetFrontStaticDist(): void
+    {
+        $this->assertSame('root/dist/front-static.php.dist', $this->fileList->getFrontStaticDist());
+    }
+
+    public function testGetLogDistConfig(): void
+    {
+        $this->assertSame('root/dist/.log.env.md', $this->fileList->getLogDistConfig());
+    }
+
+    public function testGetErrorSchema(): void
+    {
+        $this->assertSame('root/config/schema.error.yaml', $this->fileList->getErrorSchema());
     }
 }

@@ -7,10 +7,11 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\DB;
 
+use Magento\MagentoCloud\App\GenericException;
+use Magento\MagentoCloud\DB\Data\ConnectionInterface;
 use Magento\MagentoCloud\DB\DumpGenerator;
 use Magento\MagentoCloud\DB\DumpInterface;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
-use Magento\MagentoCloud\Shell\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -24,6 +25,13 @@ class DumpGeneratorTest extends TestCase
     use \phpmock\phpunit\PHPMock;
 
     /**
+     * Mock time() function which is used as part of file name
+     *
+     * @var integer
+     */
+    private $time = 123456;
+
+    /**
      * @var DumpGenerator
      */
     private $dumpGenerator;
@@ -31,7 +39,7 @@ class DumpGeneratorTest extends TestCase
     /**
      * @var DumpInterface|MockObject
      */
-    private $dbDumpMock;
+    private $dumpMock;
 
     /**
      * @var LoggerInterface|MockObject
@@ -49,45 +57,40 @@ class DumpGeneratorTest extends TestCase
     private $directoryListMock;
 
     /**
-     * Dump file path
-     *
-     * @var string
-     */
-    private $dumpFilePath;
-
-    /**
      * @var string
      */
     private $tmpDir;
+
+    /**
+     * @var ConnectionInterface|MockObject
+     */
+    private $connectionDataMock;
 
     /**
      * Setup the test environment.
      */
     protected function setUp()
     {
-        $this->dbDumpMock = $this->getMockForAbstractClass(DumpInterface::class);
+        $this->dumpMock = $this->getMockForAbstractClass(DumpInterface::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->shellMock = $this->getMockForAbstractClass(ShellInterface::class);
         $this->directoryListMock = $this->createMock(DirectoryList::class);
+        $this->connectionDataMock = $this->createMock(ConnectionInterface::class);
 
         $this->tmpDir = sys_get_temp_dir();
-        $this->directoryListMock->expects($this->once())
+        $this->directoryListMock->expects($this->any())
             ->method('getVar')
             ->willReturn($this->tmpDir);
 
-        // Mock time() function which is used as part of file name
-        $time = 123456;
-        $this->dumpFilePath = $this->tmpDir . '/dump-' . $time . '.sql.gz';
-
         $timeMock = $this->getFunctionMock('Magento\MagentoCloud\DB', 'time');
-        $timeMock->expects($this->once())
-            ->willReturn($time);
+        $timeMock->expects($this->any())
+            ->willReturn($this->time);
 
         self::defineFunctionMock('Magento\MagentoCloud\DB', 'fopen');
         self::defineFunctionMock('Magento\MagentoCloud\DB', 'flock');
 
         $this->dumpGenerator = new DumpGenerator(
-            $this->dbDumpMock,
+            $this->dumpMock,
             $this->loggerMock,
             $this->shellMock,
             $this->directoryListMock
@@ -104,50 +107,32 @@ class DumpGeneratorTest extends TestCase
 
     /**
      * @param bool $removeDefiners
-     * @return string
-     */
-    private function getCommand(bool $removeDefiners = false): string
-    {
-        $command = 'mysqldump -h localhost';
-        $this->dbDumpMock->expects($this->once())
-            ->method('getCommand')
-            ->willReturn($command);
-
-        $fullCommand = 'bash -c "set -o pipefail; timeout 3600 ' . $command;
-        if ($removeDefiners) {
-            $fullCommand .= ' | sed -e \'s/DEFINER[ ]*=[ ]*[^*]*\*/\*/\'';
-        }
-
-        return $fullCommand . ' | gzip > ' . $this->dumpFilePath . '"';
-    }
-
-    /**
-     * @param bool $removeDefiners
-     * @throws \Magento\MagentoCloud\Package\UndefinedPackageException
+     * @throws GenericException
      * @dataProvider getCreateDataProvider
      */
     public function testCreate(bool $removeDefiners)
     {
+        $dumpFilePath = $this->getDumpFilePath('main');
         $this->loggerMock->expects($this->exactly(3))
             ->method('info')
             ->withConsecutive(
                 ['Waiting for lock on db dump.'],
-                ['Start creation DB dump...'],
-                ['Finished DB dump, it can be found here: ' . $this->dumpFilePath]
+                ['Start creation DB dump for main database...'],
+                ['Finished DB dump for main database, it can be found here: ' . $dumpFilePath]
             );
-
-        $command = $this->getCommand($removeDefiners);
-
-        $processMock = $this->getMockForAbstractClass(ProcessInterface::class);
-        $processMock->expects($this->once())
-            ->method('getExitCode')
-            ->willReturn(0);
+        $dumpCommand = $this->getDumpCommand('main');
+        $this->dumpMock->expects($this->once())
+            ->method('getCommand')
+            ->with($this->connectionDataMock)
+            ->willReturn($dumpCommand);
         $this->shellMock->expects($this->once())
             ->method('execute')
-            ->with($command)
-            ->willReturn($processMock);
-
-        $this->dumpGenerator->create($removeDefiners);
+            ->with($this->addWrapperToRun(
+                $dumpCommand,
+                $dumpFilePath,
+                $removeDefiners
+            ));
+        $this->dumpGenerator->create('main', $this->connectionDataMock, $removeDefiners);
     }
 
     /**
@@ -162,28 +147,33 @@ class DumpGeneratorTest extends TestCase
     }
 
     /**
-     * @throws \Magento\MagentoCloud\Step\StepException
+     * @throws GenericException
      */
     public function testCreateWithException()
     {
-        $errorMessage = 'Some error';
+        $dumpCommand = $this->getDumpCommand('main');
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
             ->withConsecutive(
                 ['Waiting for lock on db dump.'],
-                ['Start creation DB dump...']
+                ['Start creation DB dump for main database...']
             );
-        $this->loggerMock->expects($this->once())
-            ->method('error')
-            ->with($errorMessage);
-
-        $this->getCommand();
-
+        $this->dumpMock->expects($this->once())
+            ->method('getCommand')
+            ->with($this->connectionDataMock)
+            ->willReturn($dumpCommand);
+        $errorMessage = 'Some error';
+        $exception = new \Exception($errorMessage);
         $this->shellMock->expects($this->once())
             ->method('execute')
-            ->willThrowException(new \Exception($errorMessage));
-
-        $this->dumpGenerator->create(false);
+            ->with($this->addWrapperToRun(
+                $dumpCommand,
+                $this->getDumpFilePath('main'),
+                false
+            ))
+            ->willThrowException($exception);
+        $this->expectExceptionObject($exception);
+        $this->dumpGenerator->create('main', $this->connectionDataMock, false);
     }
 
     public function testFailedCreationLockFile()
@@ -192,19 +182,15 @@ class DumpGeneratorTest extends TestCase
         $fopenMock = $this->getFunctionMock('Magento\MagentoCloud\DB', 'fopen');
         $fopenMock->expects($this->once())
             ->willReturn(false);
-
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Waiting for lock on db dump.');
-
         $this->loggerMock->expects($this->once())
             ->method('error')
             ->with('Could not get the lock file!');
-
         $this->shellMock->expects($this->never())
             ->method('execute');
-
-        $this->dumpGenerator->create(false);
+        $this->dumpGenerator->create('main', $this->connectionDataMock, false);
     }
 
     public function testLockedFile()
@@ -213,53 +199,33 @@ class DumpGeneratorTest extends TestCase
         $fopenMock = $this->getFunctionMock('Magento\MagentoCloud\DB', 'flock');
         $fopenMock->expects($this->once())
             ->willReturn(false);
-
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
             ->withConsecutive(
                 ['Waiting for lock on db dump.'],
                 ['Dump process is locked!']
             );
-
         $this->shellMock->expects($this->never())
             ->method('execute');
-
-        $this->dumpGenerator->create(false);
+        $this->dumpGenerator->create('main', $this->connectionDataMock, false);
     }
 
-    /**
-     * @throws \Magento\MagentoCloud\Step\StepException
-     */
-    public function testCreateWithErrors()
+    private function getDumpFilePath(string $type): string
     {
-        $this->loggerMock->expects($this->exactly(2))
-            ->method('info')
-            ->withConsecutive(
-                ['Waiting for lock on db dump.'],
-                ['Start creation DB dump...']
-            );
-        $this->loggerMock->expects($this->once())
-            ->method('error')
-            ->with('Error has occurred during mysqldump');
+        return $this->tmpDir . '/dump-' . $type . '-' . $this->time . '.sql.gz';
+    }
 
-        $command = $this->getCommand();
+    private function getDumpCommand(string $type): string
+    {
+        return 'cli command for dump db by ' . $type . ' connection';
+    }
 
-        $processMock1 = $this->getMockForAbstractClass(ProcessInterface::class);
-        $processMock1->expects($this->once())
-            ->method('getExitCode')
-            ->willReturn(128);
-        $processMock2 = $this->getMockForAbstractClass(ProcessInterface::class);
-
-        $this->shellMock->expects($this->exactly(2))
-            ->method('execute')
-            ->withConsecutive(
-                [$command],
-                ['rm ' . $this->dumpFilePath]
-            )->willReturnMap([
-                [$command, [], $processMock1],
-                ['rm ' . $this->dumpFilePath, [], $processMock2],
-            ]);
-
-        $this->dumpGenerator->create(false);
+    private function addWrapperToRun(string $command, string $dumpFilePath, $removeDefiners = false): string
+    {
+        $command = 'bash -c "set -o pipefail; timeout 3600 ' . $command;
+        if ($removeDefiners) {
+            $command .= ' | sed -e \'s/DEFINER[ ]*=[ ]*[^*]*\*/\*/\'';
+        }
+        return $command . ' | gzip > ' . $dumpFilePath . '"';
     }
 }

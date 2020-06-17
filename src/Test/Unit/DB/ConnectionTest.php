@@ -7,7 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\DB;
 
-use Magento\MagentoCloud\Config\Database\MergedConfig;
+use Magento\MagentoCloud\Config\Database\DbConfig;
 use Magento\MagentoCloud\DB\Connection;
 use Magento\MagentoCloud\DB\Data\ConnectionFactory;
 use Magento\MagentoCloud\DB\Data\ConnectionInterface;
@@ -47,9 +47,9 @@ class ConnectionTest extends TestCase
     private $connectionDataMock;
 
     /**
-     * @var MergedConfig|MockObject
+     * @var DbConfig|MockObject
      */
-    private $mergedConfigMock;
+    private $dbConfigMock;
 
     /**
      * {@inheritdoc}
@@ -60,7 +60,7 @@ class ConnectionTest extends TestCase
     {
         $this->pdoMock = $this->createMock(\PDO::class);
         $this->statementMock = $this->createMock(\PDOStatement::class);
-        $this->mergedConfigMock = $this->createMock(MergedConfig::class);
+        $this->dbConfigMock = $this->createMock(DbConfig::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->connectionDataMock = $this->getMockForAbstractClass(ConnectionInterface::class);
 
@@ -76,7 +76,7 @@ class ConnectionTest extends TestCase
         $this->connection = new Connection(
             $this->loggerMock,
             $connectionFactoryMock,
-            $this->mergedConfigMock
+            $this->dbConfigMock
         );
 
         $reflection = new \ReflectionClass(get_class($this->connection));
@@ -213,7 +213,7 @@ class ConnectionTest extends TestCase
      */
     public function testGetTableName(array $mergedConfig, string $tableName, string $expectedTableName)
     {
-        $this->mergedConfigMock->expects($this->once())
+        $this->dbConfigMock->expects($this->once())
             ->method('get')
             ->willReturn($mergedConfig);
 

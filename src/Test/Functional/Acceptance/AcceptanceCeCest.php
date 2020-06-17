@@ -7,7 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 
-use Magento\MagentoCloud\Test\Functional\Codeception\Docker;
+use Magento\CloudDocker\Test\Functional\Codeception\Docker;
 use Robo\Exception\TaskException;
 use CliTester;
 
@@ -16,9 +16,16 @@ use CliTester;
  *
  * @group edition-ce
  */
-class AcceptanceCeCest extends AbstractInstallCest
+class AcceptanceCeCest extends AbstractCest
 {
-    public const EDITION = 'CE';
+    public function _before(\CliTester $I): void
+    {
+        parent::_before($I);
+
+        $I->removeDependencyFromComposer('magento/magento-cloud-metapackage');
+        $I->addDependencyToComposer('magento/product-community-edition', '@stable');
+        $I->composerUpdate();
+    }
 
     /**
      * @param CliTester $I
@@ -27,11 +34,10 @@ class AcceptanceCeCest extends AbstractInstallCest
      */
     public function testWithSplitBuildCommand(\CliTester $I): void
     {
-        $I->assertTrue($I->runEceToolsCommand('build:generate', Docker::BUILD_CONTAINER));
-        $I->assertTrue($I->runEceToolsCommand('build:transfer', Docker::BUILD_CONTAINER));
+        $I->runEceDockerCommand('build:compose --mode=production');
         $I->startEnvironment();
-        $I->assertTrue($I->runEceToolsCommand('deploy', Docker::DEPLOY_CONTAINER));
-        $I->assertTrue($I->runEceToolsCommand('post-deploy', Docker::DEPLOY_CONTAINER));
+        $I->runDockerComposeCommand('run build cloud-build');
+        $I->runDockerComposeCommand('run deploy cloud-deploy');
         $I->amOnPage('/');
         $I->see('Home page');
         $I->see('CMS homepage content goes here.');

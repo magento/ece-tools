@@ -18,10 +18,11 @@ class Environment
      *   master - is for integration environment;
      *   production and staging are for production and staging environments respectively.
      */
-    private const GIT_MASTER_BRANCH_RE = '/^(master|production|staging)(?:-[a-z0-9]+)?$/i';
+    private const GIT_MASTER_BRANCH_RE = '/^(master|production|staging)/i';
 
     public const VAL_ENABLED = 'enabled';
     public const VAL_DISABLED = 'disabled';
+    public const VARIABLE_CRYPT_KEY = 'CRYPT_KEY';
 
     /**
      * The environment variable for controlling the directory nesting level for error reporting
@@ -134,7 +135,7 @@ class Environment
      */
     public function getCryptKey(): string
     {
-        return $this->getVariable('CRYPT_KEY', '');
+        return $this->getVariable(self::VARIABLE_CRYPT_KEY, '');
     }
 
     /**

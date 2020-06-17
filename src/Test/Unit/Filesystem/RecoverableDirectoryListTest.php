@@ -14,8 +14,8 @@ use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Filesystem\RecoverableDirectoryList;
 use Magento\MagentoCloud\Package\MagentoVersion;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Magento\MagentoCloud\Config\GlobalSection as GlobalConfig;
 
 /**
@@ -29,32 +29,32 @@ class RecoverableDirectoryListTest extends TestCase
     private $recoverableDirectoryList;
 
     /**
-     * @var Environment|Mock
+     * @var Environment|MockObject
      */
     private $environmentMock;
 
     /**
-     * @var FlagManager|Mock
+     * @var FlagManager|MockObject
      */
     private $flagManagerMock;
 
     /**
-     * @var DeployInterface|Mock
+     * @var DeployInterface|MockObject
      */
     private $stageConfigMock;
 
     /**
-     * @var MagentoVersion|Mock
+     * @var MagentoVersion|MockObject
      */
     private $magentoVersionMock;
 
     /**
-     * @var DirectoryList|Mock
+     * @var DirectoryList|MockObject
      */
     private $directoryListMock;
 
     /**
-     * @var GlobalConfig|Mock
+     * @var GlobalConfig|MockObject
      */
     private $globalConfigMock;
 
@@ -66,7 +66,7 @@ class RecoverableDirectoryListTest extends TestCase
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->environmentMock = $this->createMock(Environment::class);
         $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
@@ -104,7 +104,7 @@ class RecoverableDirectoryListTest extends TestCase
         bool $isStaticInBuild,
         bool $isStaticCleanFiles,
         array $expected
-    ) {
+    ): void {
         $this->stageConfigMock->expects($this->any())
             ->method('get')
             ->willReturnMap([
@@ -211,7 +211,7 @@ class RecoverableDirectoryListTest extends TestCase
         bool $isStaticInBuild,
         bool $isStaticCleanFiles,
         array $expected
-    ) {
+    ): void {
         $this->stageConfigMock->expects($this->any())
             ->method('get')
             ->willReturnMap([
@@ -241,6 +241,7 @@ class RecoverableDirectoryListTest extends TestCase
 
     /**
      * @return array
+     *
      * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
     public function getListDataProvider21(): array
@@ -336,7 +337,7 @@ class RecoverableDirectoryListTest extends TestCase
         bool $skipCopyingViewPreprocessed,
         bool $isStaticCleanFiles,
         array $expected
-    ) {
+    ): void {
         $this->stageConfigMock->expects($this->any())
             ->method('get')
             ->willReturnMap([
@@ -373,7 +374,7 @@ class RecoverableDirectoryListTest extends TestCase
     /**
      * @return array
      */
-    public function getListSkipCopyingVarViewPreprocessedDataProvider() : array
+    public function getListSkipCopyingVarViewPreprocessedDataProvider(): array
     {
         return [
             'copying view preprocessed dir' => [

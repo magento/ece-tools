@@ -8,9 +8,10 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit\Step\Deploy\InstallUpdate\ConfigUpdate\Urls;
 
 use Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\Urls\Database;
+use Magento\MagentoCloud\Step\StepException;
 use PHPUnit\Framework\MockObject\Matcher\InvokedCount;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\DB\ConnectionInterface;
 use Psr\Log\LoggerInterface;
@@ -27,29 +28,29 @@ class DatabaseTest extends TestCase
     private $step;
 
     /**
-     * @var Environment|Mock
+     * @var Environment|MockObject
      */
     private $environmentMock;
 
     /**
-     * @var ConnectionInterface|Mock
+     * @var ConnectionInterface|MockObject
      */
     private $connectionMock;
 
     /**
-     * @var LoggerInterface|Mock
+     * @var LoggerInterface|MockObject
      */
     private $loggerMock;
 
     /**
-     * @var UrlManager|Mock
+     * @var UrlManager|MockObject
      */
     private $urlManagerMock;
 
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->environmentMock = $this->createMock(Environment::class);
         $this->connectionMock = $this->getMockForAbstractClass(ConnectionInterface::class);
@@ -68,13 +69,16 @@ class DatabaseTest extends TestCase
      * @param InvokedCount $loggerInfoExpects
      * @param array $urlManagerGetUrlsWillReturn
      * @param InvokedCount $connectionExpectsAffectingQuery
+     *
+     * @throws StepException
+     *
      * @dataProvider executeDataProvider
      */
     public function testExecute(
         InvokedCount $loggerInfoExpects,
         array $urlManagerGetUrlsWillReturn,
         InvokedCount $connectionExpectsAffectingQuery
-    ) {
+    ): void {
         $this->loggerMock->expects($loggerInfoExpects)
             ->method('info')
             ->withConsecutive(

@@ -19,6 +19,8 @@ class Pool
         Manager::FLAG_REGENERATE => 'var/.regenerate',
         Manager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD => '.static_content_deploy',
         Manager::FLAG_DEPLOY_HOOK_IS_FAILED => 'var/.deploy_is_failed',
+        Manager::FLAG_IGNORE_SPLIT_DB => 'var/.ignore_split_db',
+        Manager::FLAG_ENV_FILE_ABSENCE => 'var/.env_file_absence',
     ];
 
     /**

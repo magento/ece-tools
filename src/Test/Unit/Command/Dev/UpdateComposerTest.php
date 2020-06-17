@@ -12,8 +12,8 @@ use Magento\MagentoCloud\Config\GlobalSection;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Shell\ShellInterface;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Symfony\Component\Console\Tester\CommandTester;
 
 /**
@@ -22,40 +22,43 @@ use Symfony\Component\Console\Tester\CommandTester;
 class UpdateComposerTest extends TestCase
 {
     /**
-     * @var UpdateComposer\ComposerGenerator|Mock
-     */
-    private $composerGeneratorMock;
-
-    /**
-     * @var UpdateComposer\ClearModuleRequirements|Mock
-     */
-    private $clearModuleRequirementsMock;
-
-    /**
-     * @var ShellInterface|Mock
-     */
-    private $shellMock;
-
-    /**
-     * @var GlobalSection|Mock
-     */
-    private $globalSectionMock;
-
-    /**
-     * @var FileList|Mock
-     */
-    private $fileListMock;
-
-    /**
-     * @var File|Mock
-     */
-    private $fileMock;
-
-    /**
      * @var UpdateComposer
      */
     private $updateComposerCommand;
 
+    /**
+     * @var UpdateComposer\ComposerGenerator|MockObject
+     */
+    private $composerGeneratorMock;
+
+    /**
+     * @var UpdateComposer\ClearModuleRequirements|MockObject
+     */
+    private $clearModuleRequirementsMock;
+
+    /**
+     * @var ShellInterface|MockObject
+     */
+    private $shellMock;
+
+    /**
+     * @var GlobalSection|MockObject
+     */
+    private $globalSectionMock;
+
+    /**
+     * @var FileList|MockObject
+     */
+    private $fileListMock;
+
+    /**
+     * @var File|MockObject
+     */
+    private $fileMock;
+
+    /**
+     * @inheritDoc
+     */
     protected function setUp()
     {
         $this->composerGeneratorMock = $this->createMock(UpdateComposer\ComposerGenerator::class);
@@ -75,7 +78,7 @@ class UpdateComposerTest extends TestCase
         );
     }
 
-    public function testExecute()
+    public function testExecute(): void
     {
         $gitOptions = [
             'clear_magento_module_requirements' => true,
@@ -106,7 +109,17 @@ class UpdateComposerTest extends TestCase
             ->method('generate')
             ->with($gitOptions['repositories'])
             ->willReturn([
-                'name' => 'magento/cloud'
+                'name' => 'magento/cloud',
+                'repositories' => [
+                    'vendor1/package1' => [
+                        'type' => 'path',
+                        'url' => 'repo1'
+                    ],
+                    'vendor2/package2' => [
+                        'type' => 'path',
+                        'url' => 'repo2'
+                    ],
+                ],
             ]);
         $this->shellMock->expects($this->exactly(3))
             ->method('execute')

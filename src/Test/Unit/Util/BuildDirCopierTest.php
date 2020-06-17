@@ -13,8 +13,8 @@ use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Util\BuildDirCopier;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -23,26 +23,29 @@ use Psr\Log\LoggerInterface;
 class BuildDirCopierTest extends TestCase
 {
     /**
-     * @var LoggerInterface|Mock
-     */
-    private $loggerMock;
-
-    /**
-     * @var DirectoryList|Mock
-     */
-    private $directoryListMock;
-
-    /**
-     * @var StrategyFactory|Mock
-     */
-    private $strategyFactory;
-
-    /**
      * @var BuildDirCopier
      */
     private $copier;
 
-    protected function setUp()
+    /**
+     * @var LoggerInterface|MockObject
+     */
+    private $loggerMock;
+
+    /**
+     * @var DirectoryList|MockObject
+     */
+    private $directoryListMock;
+
+    /**
+     * @var StrategyFactory|MockObject
+     */
+    private $strategyFactory;
+
+    /**
+     * @inheritDoc
+     */
+    protected function setUp(): void
     {
         $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
             ->getMockForAbstractClass();
@@ -63,7 +66,7 @@ class BuildDirCopierTest extends TestCase
      *
      * @dataProvider copyDataProvider
      */
-    public function testCopy($result, $logLevel, $logMessage)
+    public function testCopy($result, $logLevel, $logMessage): void
     {
         $strategy = 'copy';
         $rootDir = '/path/to/root';
@@ -97,7 +100,7 @@ class BuildDirCopierTest extends TestCase
     /**
      * @return array
      */
-    public function copyDataProvider()
+    public function copyDataProvider(): array
     {
         return [
             [
@@ -113,13 +116,14 @@ class BuildDirCopierTest extends TestCase
         ];
     }
 
-    public function testCopyMissingDestDirectory()
+    public function testCopyMissingDestDirectory(): void
     {
         $strategy = 'copy';
         $rootDir = '/path/to/root';
         $initDir = $rootDir . '/init';
         $dir = 'not-exist-dir';
         $rootInitDir = $initDir . '/' . $dir;
+        /** @var File|MockObject $fileMock */
         $fileMock = $this->createMock(File::class);
         $copyStrategy = new CopyStrategy($fileMock, $this->loggerMock);
 
@@ -160,7 +164,7 @@ class BuildDirCopierTest extends TestCase
         $this->copier->copy($dir, $strategy);
     }
 
-    public function testCopyWithFilesSystemException()
+    public function testCopyWithFilesSystemException(): void
     {
         $strategy = 'copy';
         $rootDir = '/path/to/root';

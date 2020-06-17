@@ -12,9 +12,11 @@ use Composer\Package\Locker;
 use Composer\Package\PackageInterface;
 use Composer\Repository\RepositoryInterface;
 use Composer\Package\Link;
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Package\Manager;
+use Magento\MagentoCloud\Package\UndefinedPackageException;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -27,24 +29,24 @@ class ManagerTest extends TestCase
     private $packageManager;
 
     /**
-     * @var Composer|Mock
+     * @var Composer|MockObject
      */
     private $composerMock;
 
     /**
-     * @var RepositoryInterface|Mock
+     * @var RepositoryInterface|MockObject
      */
     private $repositoryMock;
 
     /**
-     * @var PackageInterface|Mock
+     * @var PackageInterface|MockObject
      */
     private $packageMock;
 
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->composerMock = $this->createMock(Composer::class);
         $this->repositoryMock = $this->getMockBuilder(RepositoryInterface::class)
@@ -64,7 +66,7 @@ class ManagerTest extends TestCase
         );
     }
 
-    public function testGetPrettyInfo()
+    public function testGetPrettyInfo(): void
     {
         $packageOneMock = $this->getMockBuilder(PackageInterface::class)
             ->getMockForAbstractClass();
@@ -101,7 +103,7 @@ class ManagerTest extends TestCase
         );
     }
 
-    public function testGetPrettyInfoWithNotExistPackage()
+    public function testGetPrettyInfoWithNotExistPackage(): void
     {
         $packageOneMock = $this->getMockBuilder(PackageInterface::class)
             ->getMockForAbstractClass();
@@ -129,22 +131,26 @@ class ManagerTest extends TestCase
         );
     }
 
-    public function testGet()
+    /**
+     * @throws UndefinedPackageException
+     */
+    public function testGet(): void
     {
         $this->repositoryMock->method('findPackage')
             ->with('some_package', '*')
             ->willReturn($this->packageMock);
 
-        $this->assertInstanceOf(
-            PackageInterface::class,
-            $this->packageManager->get('some_package')
-        );
+        $this->packageManager->get('some_package');
     }
 
-    public function testGetWithException()
+    /**
+     * @throws UndefinedPackageException
+     */
+    public function testGetWithException(): void
     {
-        $this->expectException(\Exception::class);
+        $this->expectException(UndefinedPackageException::class);
         $this->expectExceptionMessage('Package some_package:* was not found');
+        $this->expectExceptionCode(Error::BUILD_COMPOSER_PACKAGE_NOT_FOUND);
 
         $this->repositoryMock->method('findPackage')
             ->with('some_package', '*')
@@ -153,7 +159,7 @@ class ManagerTest extends TestCase
         $this->packageManager->get('some_package');
     }
 
-    public function testHas()
+    public function testHas(): void
     {
         $this->repositoryMock->method('findPackage')
             ->withConsecutive(
@@ -165,11 +171,11 @@ class ManagerTest extends TestCase
                 null
             );
 
-        $this->assertSame(true, $this->packageManager->has('some_package'));
-        $this->assertSame(false, $this->packageManager->has('some_package', '0.1'));
+        $this->assertTrue($this->packageManager->has('some_package'));
+        $this->assertFalse($this->packageManager->has('some_package', '0.1'));
     }
 
-    public function testGetRequiredPackageNames()
+    public function testGetRequiredPackageNames(): void
     {
         $linkMock = $this->createMock(Link::class);
 

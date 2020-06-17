@@ -7,14 +7,18 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Step\Deploy;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
+use Magento\MagentoCloud\Shell\ShellException;
+use Magento\MagentoCloud\Shell\UtilityException;
 use Magento\MagentoCloud\Step\Deploy\CompressStaticContent;
+use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Util\StaticContentCompressor;
 use Magento\MagentoCloud\Config\GlobalSection as GlobalConfig;
+use PHPUnit\Framework\MockObject\MockObject;
 use Psr\Log\LoggerInterface;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * Unit test for deploy-time static content compressor.
@@ -27,34 +31,34 @@ class CompressStaticContentTest extends TestCase
     private $step;
 
     /**
-     * @var LoggerInterface|Mock
+     * @var LoggerInterface|MockObject
      */
     private $loggerMock;
 
     /**
-     * @var StaticContentCompressor|Mock
+     * @var StaticContentCompressor|MockObject
      */
     private $compressorMock;
 
     /**
-     * @var FlagManager|Mock
+     * @var FlagManager|MockObject
      */
     private $flagManagerMock;
 
     /**
-     * @var DeployInterface|Mock
+     * @var DeployInterface|MockObject
      */
     private $stageConfigMock;
 
     /**
-     * @var GlobalConfig|Mock
+     * @var GlobalConfig|MockObject
      */
     private $globalConfigMock;
 
     /**
-     * Setup the test environment.
+     * @inheritDoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->compressorMock = $this->createMock(StaticContentCompressor::class);
@@ -73,21 +77,12 @@ class CompressStaticContentTest extends TestCase
 
     /**
      * Test deploy-time compression.
+     *
+     * @throws StepException
      */
-    public function testExecute()
+    public function testExecute(): void
     {
-        $this->globalConfigMock->expects($this->once())
-            ->method('get')
-            ->with(GlobalConfig::VAR_SCD_ON_DEMAND)
-            ->willReturn(false);
-        $this->stageConfigMock->expects($this->exactly(4))
-            ->method('get')
-            ->willReturnMap([
-                [DeployInterface::VAR_SCD_COMPRESSION_LEVEL, 4],
-                [DeployInterface::VAR_SCD_COMPRESSION_TIMEOUT, 500],
-                [DeployInterface::VAR_SKIP_SCD, false],
-                [DeployInterface::VAR_VERBOSE_COMMANDS, ''],
-            ]);
+        $this->prepareConfig();
         $this->flagManagerMock
             ->expects($this->once())
             ->method('exists')
@@ -103,8 +98,10 @@ class CompressStaticContentTest extends TestCase
 
     /**
      * Test deploy-time compression is skipped.
+     *
+     * @throws StepException
      */
-    public function testExecuteSkipped()
+    public function testExecuteSkipped(): void
     {
         $this->globalConfigMock->expects($this->once())
             ->method('get')
@@ -126,8 +123,10 @@ class CompressStaticContentTest extends TestCase
 
     /**
      * Test that deploy-time compression will fail appropriately.
+     *
+     * @throws StepException
      */
-    public function testExecuteNoCompressByEnv()
+    public function testExecuteNoCompressByEnv(): void
     {
         $this->globalConfigMock->expects($this->once())
             ->method('get')
@@ -149,5 +148,55 @@ class CompressStaticContentTest extends TestCase
             ->method('process');
 
         $this->step->execute();
+    }
+
+    /**
+     * @throws StepException
+     */
+    public function testExecuteWithException()
+    {
+        $this->prepareConfig();
+        $this->compressorMock->expects($this->once())
+            ->method('process')
+            ->willThrowException(new ShellException('some error'));
+
+        $this->expectExceptionCode(Error::DEPLOY_SCD_COMPRESSION_FAILED);
+        $this->expectException(StepException::class);
+        $this->expectExceptionMessage('some error');
+
+        $this->step->execute();
+    }
+
+    /**
+     * @throws StepException
+     */
+    public function testExecuteWithUtilityException()
+    {
+        $this->prepareConfig();
+        $this->compressorMock->expects($this->once())
+            ->method('process')
+            ->willThrowException(new UtilityException('some error'));
+
+        $this->expectExceptionCode(Error::DEPLOY_UTILITY_NOT_FOUND);
+        $this->expectException(StepException::class);
+        $this->expectExceptionMessage('some error');
+
+        $this->step->execute();
+    }
+
+    public function prepareConfig(): void
+    {
+        $this->globalConfigMock->expects($this->once())
+            ->method('get')
+            ->with(GlobalConfig::VAR_SCD_ON_DEMAND)
+            ->willReturn(false);
+        $this->stageConfigMock->expects($this->exactly(4))
+            ->method('get')
+            ->willReturnMap([
+                [DeployInterface::VAR_SCD_COMPRESSION_LEVEL, 4],
+                [DeployInterface::VAR_SCD_COMPRESSION_TIMEOUT, 500],
+                [DeployInterface::VAR_SKIP_SCD, false],
+                [DeployInterface::VAR_VERBOSE_COMMANDS, ''],
+            ]);
     }
 }

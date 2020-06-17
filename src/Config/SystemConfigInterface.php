@@ -15,28 +15,28 @@ interface SystemConfigInterface
     /**
      * Section of configuration file.
      */
-    const SECTION_SYSTEM = 'system';
+    public const SECTION_SYSTEM = 'system';
 
     /**
      * System sections.
      */
-    const SYSTEM_VARIABLES = 'variables';
+    public const SYSTEM_VARIABLES = 'variables';
 
     /**
      * Environment variables.
      */
-    const VAR_ENV_RELATIONSHIPS = 'ENV_RELATIONSHIPS';
-    const VAR_ENV_ROUTES = 'ENV_ROUTES';
-    const VAR_ENV_VARIABLES = 'ENV_VARIABLES';
-    const VAR_ENV_APPLICATION = 'ENV_APPLICATION';
-    const VAR_ENV_ENVIRONMENT = 'ENV_ENVIRONMENT';
+    public const VAR_ENV_RELATIONSHIPS = 'ENV_RELATIONSHIPS';
+    public const VAR_ENV_ROUTES = 'ENV_ROUTES';
+    public const VAR_ENV_VARIABLES = 'ENV_VARIABLES';
+    public const VAR_ENV_APPLICATION = 'ENV_APPLICATION';
+    public const VAR_ENV_ENVIRONMENT = 'ENV_ENVIRONMENT';
 
     /**
      * Retrieves environment configuration per stage.
      *
      * @param string $name The config name
      * @return string|bool|array|int The config value
-     * @throws \RuntimeException If config value was not defined or can not be read
+     * @throws ConfigException If config value was not defined or can not be read
      */
     public function get(string $name);
 }

@@ -53,7 +53,7 @@ class CopySubFolderStrategy implements StrategyInterface
         }
 
         if ($this->file->isEmptyDirectory($fromDirectory)) {
-            $this->logger->info(sprintf("%s is empty. Nothing to restore", $fromDirectory));
+            $this->logger->info(sprintf('%s is empty. Nothing to restore', $fromDirectory));
 
             return false;
         }

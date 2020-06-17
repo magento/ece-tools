@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Config\Validator\Deploy;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\ConfigMerger;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Config\Validator;
@@ -62,8 +63,9 @@ class SearchConfiguration implements ValidatorInterface
 
         if (!isset($searchConfig['engine'])) {
             return $this->resultFactory->error(
-                sprintf('Variable "%s" is not configured properly', DeployInterface::VAR_SEARCH_CONFIGURATION),
-                'At least engine option must be configured'
+                sprintf('Variable %s is not configured properly', DeployInterface::VAR_SEARCH_CONFIGURATION),
+                'At least engine option must be configured',
+                Error::DEPLOY_WRONG_CONFIGURATION_SEARCH
             );
         }
 

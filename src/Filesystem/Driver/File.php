@@ -21,7 +21,7 @@ class File
     /**
      * This is the prefix we use for directories we are deleting in the background.
      */
-    const DELETING_PREFIX = 'DELETING_';
+    public const DELETING_PREFIX = 'DELETING_';
 
     /**
      * Returns last warning message string
@@ -187,20 +187,33 @@ class File
      *
      * @param string $source The path of source folder
      * @param string $destination The path of destination folder
+     * @return void
+     *
+     * @throws FileSystemException
      */
-    public function copyDirectory($source, $destination)
+    public function copyDirectory($source, $destination): void
     {
+        $command = sprintf(
+            'shopt -s dotglob; cp -R %s/* %s/',
+            escapeshellarg(rtrim($source, '/')),
+            escapeshellarg(rtrim($destination, '/'))
+        );
+
         /**
          * Use shell for best performance.
          */
-        shell_exec(sprintf(
-            '/bin/bash -c %s',
-            escapeshellarg(sprintf(
-                'shopt -s dotglob; cp -R %s/* %s/',
-                escapeshellarg(rtrim($source, '/')),
-                escapeshellarg(rtrim($destination, '/'))
-            ))
-        ));
+        exec(
+            '/bin/bash -c ' . escapeshellarg($command),
+            $output,
+            $status
+        );
+
+        if ($status !== 0) {
+            $this->fileSystemException(
+                'The content of path "%1" cannot be copied to "%2" %3',
+                [$source, $destination, $output]
+            );
+        }
     }
 
     /**
@@ -315,11 +328,13 @@ class File
      * @param array $excludes
      * @return void
      * @codeCoverageIgnore
+     * @throws FileSystemException
      */
     public function backgroundClearDirectory(string $path, array $excludes = [])
     {
         if ($this->isLink($path)) {
             $this->deleteFile($path);
+
             return;
         }
 
@@ -401,12 +416,12 @@ class File
      * @return void
      * @throws FileSystemException
      */
-    private function fileSystemException($message, $arguments = [])
+    private function fileSystemException($message, $arguments = []): void
     {
         if ($arguments) {
             $placeholders = array_map(
-                function ($key) {
-                    return '%' . (is_int($key) ? strval($key + 1) : $key);
+                static function ($key) {
+                    return '%' . (is_int($key) ? (string)($key + 1) : $key);
                 },
                 array_keys($arguments)
             );
@@ -469,6 +484,27 @@ class File
     public function getDirectoryIterator($path): \DirectoryIterator
     {
         return new \DirectoryIterator($path);
+    }
+
+    /**
+     * Returns recursive directory iterator for given path with given pattern for files to find
+     *
+     * @param string $dir
+     * @param string $filePattern File pattern to find
+     * @param string $excludePattern Path pattern to exclude
+     * @return \RegexIterator
+     */
+    public function getRecursiveFileIterator(
+        string $dir,
+        string $filePattern,
+        string $excludePattern = ''
+    ): \RegexIterator {
+        $dirIterator = new \RecursiveDirectoryIterator($dir);
+        $recursiveDirIterator = new \RecursiveIteratorIterator($dirIterator);
+        if ($excludePattern) {
+            $recursiveDirIterator = new \RegexIterator($recursiveDirIterator, $excludePattern, \RegexIterator::MATCH);
+        }
+        return new \RegexIterator($recursiveDirIterator, $filePattern, \RegexIterator::MATCH);
     }
 
     /**

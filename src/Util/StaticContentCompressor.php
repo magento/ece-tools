@@ -7,7 +7,10 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Util;
 
+use Magento\MagentoCloud\Package\UndefinedPackageException;
+use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Shell\ShellInterface;
+use Magento\MagentoCloud\Shell\UtilityException;
 use Magento\MagentoCloud\Shell\UtilityManager;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
@@ -28,12 +31,12 @@ class StaticContentCompressor
      * Compression level 4 is the default instead of compression level 1 as a
      * result.
      */
-    const DEFAULT_COMPRESSION_LEVEL = 4;
+    private const DEFAULT_COMPRESSION_LEVEL = 4;
 
     /**
      * Default timeout time in seconds for process static content compression.
      */
-    const DEFAULT_COMPRESSION_TIMEOUT = 600;
+    private const DEFAULT_COMPRESSION_TIMEOUT = 600;
 
     /**
      * @var LoggerInterface
@@ -80,6 +83,9 @@ class StaticContentCompressor
      * @param int $timeout
      * @param string $verbose
      * @return void
+     * @throws ShellException
+     * @throws UndefinedPackageException
+     * @throws UtilityException
      */
     public function process(
         int $compressionLevel = self::DEFAULT_COMPRESSION_LEVEL,
@@ -115,6 +121,8 @@ class StaticContentCompressor
      *
      * @param int $compressionLevel
      * @return string
+     *
+     * @throws UndefinedPackageException
      */
     private function innerCompressionCommand(int $compressionLevel): string
     {
@@ -135,12 +143,14 @@ class StaticContentCompressor
      * @param int $compressionLevel
      * @param int $timeout
      * @return string
+     *
+     * @throws UndefinedPackageException
+     * @throws UtilityException
      */
     private function getCompressionCommand(
         int $compressionLevel = self::DEFAULT_COMPRESSION_LEVEL,
         int $timeout = self::DEFAULT_COMPRESSION_TIMEOUT
     ): string {
-        $compressionLevel = (int)$compressionLevel;
         $compressionLevel = $compressionLevel > 0 && $compressionLevel <= 9
             ? $compressionLevel
             : static::DEFAULT_COMPRESSION_LEVEL;
@@ -149,7 +159,7 @@ class StaticContentCompressor
             '%s -k 30 %s %s -c %s',
             $this->utilityManager->get(UtilityManager::UTILITY_TIMEOUT),
             $timeout,
-            $this->utilityManager->get(UtilityManager::UTILITY_BASH),
+            $this->utilityManager->get(UtilityManager::UTILITY_SHELL),
             escapeshellarg($this->innerCompressionCommand($compressionLevel))
         );
     }

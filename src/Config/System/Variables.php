@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Config\System;
 
+use Magento\MagentoCloud\Config\ConfigException;
 use Magento\MagentoCloud\Config\Environment\ReaderInterface as EnvironmentReader;
 use Magento\MagentoCloud\Config\Schema;
 use Magento\MagentoCloud\Config\SystemConfigInterface;
@@ -48,7 +49,7 @@ class Variables implements SystemConfigInterface
     public function get(string $name)
     {
         if (!array_key_exists($name, $this->schema->getDefaults(SystemConfigInterface::SYSTEM_VARIABLES))) {
-            throw new \RuntimeException(sprintf(
+            throw new ConfigException(sprintf(
                 'Config %s was not defined.',
                 $name
             ));
@@ -57,7 +58,7 @@ class Variables implements SystemConfigInterface
         try {
             return $this->mergeConfig()[$name];
         } catch (\Exception $exception) {
-            throw new \RuntimeException(
+            throw new ConfigException(
                 $exception->getMessage(),
                 $exception->getCode(),
                 $exception

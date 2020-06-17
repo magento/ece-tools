@@ -7,7 +7,10 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Step\Build;
 
+use Magento\MagentoCloud\App\Error;
+use Magento\MagentoCloud\Config\ConfigException;
 use Magento\MagentoCloud\Patch\Manager;
+use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Step\Build\ApplyPatches;
 use Magento\MagentoCloud\Step\StepException;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -45,6 +48,38 @@ class ApplyPatchesTest extends TestCase
     {
         $this->managerMock->expects($this->once())
             ->method('apply');
+
+        $this->step->execute();
+    }
+
+    /**
+     * @throws StepException
+     */
+    public function testExecuteWithConfigException(): void
+    {
+        $this->managerMock->expects($this->once())
+            ->method('apply')
+            ->willThrowException(new ConfigException('config not found', Error::BUILD_CONFIG_NOT_DEFINED));
+
+        $this->expectException(StepException::class);
+        $this->expectExceptionMessage('config not found');
+        $this->expectExceptionCode(Error::BUILD_CONFIG_NOT_DEFINED);
+
+        $this->step->execute();
+    }
+
+    /**
+     * @throws StepException
+     */
+    public function testExecuteWithShellException(): void
+    {
+        $this->managerMock->expects($this->once())
+            ->method('apply')
+            ->willThrowException(new ShellException('command failed'));
+
+        $this->expectException(StepException::class);
+        $this->expectExceptionMessage('command failed');
+        $this->expectExceptionCode(Error::BUILD_PATCH_APPLYING_FAILED);
 
         $this->step->execute();
     }

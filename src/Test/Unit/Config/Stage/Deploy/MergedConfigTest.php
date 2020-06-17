@@ -7,6 +7,8 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Config\Stage\Deploy;
 
+use Magento\MagentoCloud\App\Error;
+use Magento\MagentoCloud\Config\ConfigException;
 use Magento\MagentoCloud\Config\Environment\Reader as EnvironmentReader;
 use Magento\MagentoCloud\Config\Schema;
 use Magento\MagentoCloud\Config\Stage\Deploy;
@@ -65,8 +67,10 @@ class MergedConfigTest extends TestCase
      * @param array $envVarConfig
      * @param array $expectedConfig
      * @dataProvider getDataProvider
+     *
+     * @throws ConfigException
      */
-    public function testGet(array $defaults, array $envConfig, array $envVarConfig, array $expectedConfig)
+    public function testGet(array $defaults, array $envConfig, array $envVarConfig, array $expectedConfig): void
     {
         $this->schemaMock->expects($this->once())
             ->method('getDefaults')
@@ -87,7 +91,6 @@ class MergedConfigTest extends TestCase
 
     /**
      * @return array
-     * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
     public function getDataProvider(): array
     {
@@ -173,10 +176,14 @@ class MergedConfigTest extends TestCase
         ];
     }
 
-    public function testGetWithFileSystemException()
+    /**
+     * @throws ConfigException
+     */
+    public function testGetWithFileSystemException(): void
     {
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(ConfigException::class);
         $this->expectExceptionMessage('File system error');
+        $this->expectExceptionCode(Error::DEPLOY_CONFIG_UNABLE_TO_READ);
 
         $this->environmentReaderMock->expects($this->once())
             ->method('read')
@@ -185,14 +192,34 @@ class MergedConfigTest extends TestCase
         $this->mergedConfig->get();
     }
 
-    public function testGetWithParseException()
+    /**
+     * @throws ConfigException
+     */
+    public function testGetWithParseException(): void
     {
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(ConfigException::class);
         $this->expectExceptionMessage('File system error');
+        $this->expectExceptionCode(Error::DEPLOY_CONFIG_PARSE_FAILED);
 
         $this->environmentReaderMock->expects($this->once())
             ->method('read')
             ->willThrowException(new ParseException('File system error'));
+
+        $this->mergedConfig->get();
+    }
+
+    /**
+     * @throws ConfigException
+     */
+    public function testGetWithSchemaReadException(): void
+    {
+        $this->expectException(ConfigException::class);
+        $this->expectExceptionMessage('File system error');
+        $this->expectExceptionCode(Error::DEPLOY_CONFIG_UNABLE_TO_READ_SCHEMA_YAML);
+
+        $this->schemaMock->expects($this->once())
+            ->method('getDefaults')
+            ->willThrowException(new FileSystemException('File system error'));
 
         $this->mergedConfig->get();
     }

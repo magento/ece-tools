@@ -7,12 +7,13 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Step;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\Magento\Env\WriterInterface;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Step\SetProductionMode;
 use Magento\MagentoCloud\Step\StepException;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -26,19 +27,19 @@ class SetProductionModeTest extends TestCase
     private $step;
 
     /**
-     * @var LoggerInterface|Mock
+     * @var LoggerInterface|MockObject
      */
     private $loggerMock;
 
     /**
-     * @var WriterInterface|Mock
+     * @var WriterInterface|MockObject
      */
     private $writer;
 
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->writer = $this->getMockForAbstractClass(WriterInterface::class);
@@ -49,7 +50,10 @@ class SetProductionModeTest extends TestCase
         );
     }
 
-    public function testExecute()
+    /**
+     * @throws StepException
+     */
+    public function testExecute(): void
     {
         $this->loggerMock->expects($this->once())
             ->method('info')
@@ -61,10 +65,14 @@ class SetProductionModeTest extends TestCase
         $this->step->execute();
     }
 
-    public function testExecuteWitException()
+    /**
+     * @throws StepException
+     */
+    public function testExecuteWitException(): void
     {
         $this->expectException(StepException::class);
         $this->expectExceptionMessage('can\'t update file');
+        $this->expectExceptionCode(Error::BUILD_ENV_PHP_IS_NOT_WRITABLE);
 
         $this->loggerMock->expects($this->once())
             ->method('info')

@@ -7,12 +7,14 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Config\Validator\Build;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\Validator;
 use Magento\MagentoCloud\Config\ValidatorInterface;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Package\MagentoVersion;
+use Magento\MagentoCloud\Package\Manager;
 use Magento\MagentoCloud\Package\UndefinedPackageException;
 
 /**
@@ -41,21 +43,37 @@ class ComposerFile implements ValidatorInterface
     private $file;
 
     /**
+     * @var Manager
+     */
+    private $manager;
+
+    /**
+     * @var array
+     */
+    private static $map = [
+        'laminas/laminas-mvc' => 'Laminas\\Mvc\\Controller\\',
+        'zendframework/zend-mvc' => 'Zend\\Mvc\\Controller\\',
+    ];
+
+    /**
      * @param FileList $fileList
      * @param File $file
      * @param MagentoVersion $magentoVersion
      * @param Validator\ResultFactory $resultFactory
+     * @param Manager $manager
      */
     public function __construct(
         FileList $fileList,
         File $file,
         MagentoVersion $magentoVersion,
-        Validator\ResultFactory $resultFactory
+        Validator\ResultFactory $resultFactory,
+        Manager $manager
     ) {
         $this->fileList = $fileList;
         $this->file = $file;
         $this->magentoVersion = $magentoVersion;
         $this->resultFactory = $resultFactory;
+        $this->manager = $manager;
     }
 
     /**
@@ -73,19 +91,42 @@ class ComposerFile implements ValidatorInterface
             $composerJson = json_decode($this->file->fileGetContents($this->fileList->getMagentoComposer()), true);
             $autoloadPsr4 = $composerJson['autoload']['psr-4'] ?? [];
         } catch (UndefinedPackageException $e) {
-            return $this->resultFactory->error('Can\'t get magento version: ' . $e->getMessage());
-        } catch (FileSystemException $e) {
-            return $this->resultFactory->error('Can\'t read composer.json file: ' . $e->getMessage());
-        }
-
-        if (!isset($autoloadPsr4['Zend\Mvc\Controller\\'])) {
             return $this->resultFactory->error(
-                'Required configuration is missed in autoload section of composer.json file.',
-                'Add ("Zend\\\\Mvc\\\\Controller\\\\": "setup/src/Zend/Mvc/Controller/") to autoload -> psr-4 section' .
-                ' and re-run "composer update" command locally. Then commit new composer.json and composer.lock files.'
+                'Can\'t get magento version: ' . $e->getMessage(),
+                '',
+                Error::BUILD_COMPOSER_PACKAGE_NOT_FOUND
+            );
+        } catch (FileSystemException $e) {
+            return $this->resultFactory->error(
+                'Can\'t read composer.json file: ' . $e->getMessage(),
+                '',
+                Error::BUILD_CANT_READ_COMPOSER_JSON
             );
         }
 
+        if (array_intersect_key(($autoloadPsr4), array_flip(self::$map))) {
+            return $this->resultFactory->success();
+        }
+
+        foreach (self::$map as $name => $namespace) {
+            if ($this->manager->has($name)) {
+                return $this->resultFactory->error(
+                    'Required configuration is missed in autoload section of composer.json file.',
+                    sprintf(
+                        'Add ("%s: "%s") to autoload -> psr-4 section ' .
+                        'and re-run "composer update" command locally. ' .
+                        'Then commit new composer.json and composer.lock files.',
+                        $namespace,
+                        'setup/src/Zend/Mvc/Controller/'
+                    ),
+                    Error::BUILD_COMPOSER_MISSED_REQUIRED_AUTOLOAD
+                );
+            }
+        }
+
+        /**
+         * Edge case when none of MVC packages installed.
+         */
         return $this->resultFactory->success();
     }
 }

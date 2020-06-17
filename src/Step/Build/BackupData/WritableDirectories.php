@@ -7,10 +7,14 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Step\Build\BackupData;
 
+use Magento\MagentoCloud\App\Error;
+use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\App\Logger\Pool as LoggerPool;
+use Magento\MagentoCloud\App\LoggerException;
 use Magento\MagentoCloud\Config\GlobalSection as GlobalConfig;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
 use Magento\MagentoCloud\App\Logger;
@@ -74,43 +78,45 @@ class WritableDirectories implements StepInterface
      */
     public function execute()
     {
-        $magentoRoot = $this->directoryList->getMagentoRoot() . '/';
-        $rootInitDir = $this->directoryList->getPath(DirectoryList::DIR_INIT) . '/';
-        $viewPreprocessedDir = $this->directoryList->getPath(DirectoryList::DIR_VIEW_PREPROCESSED, true);
-        $logDir = $this->directoryList->getPath(DirectoryList::DIR_LOG, true);
-        $writableDirectories = $this->directoryList->getWritableDirectories();
-
-        $this->logger->info(sprintf('Copying writable directories to %s directory.', $rootInitDir));
-
-        foreach ($writableDirectories as $dir) {
-            if ($dir === $logDir) {
-                continue;
-            }
-
-            $originalDir = $magentoRoot . $dir;
-
-            if (!$this->file->isExists($originalDir)) {
-                $this->logger->notice(sprintf('Directory %s does not exist.', $originalDir));
-                continue;
-            }
-
-            $initDir = $rootInitDir . $dir;
-
-            if (($dir === $viewPreprocessedDir)
-                && $this->globalConfig->get(GlobalConfig::VAR_SKIP_HTML_MINIFICATION)
-            ) {
-                $this->logger->notice(sprintf('Skip copying %s->%s', $originalDir, $initDir));
-                continue;
-            }
-
-            $this->logger->debug(sprintf('Copying %s->%s', $originalDir, $initDir));
-            $this->backupDir($originalDir, $initDir);
-        }
-
         try {
+            $magentoRoot = $this->directoryList->getMagentoRoot() . '/';
+            $rootInitDir = $this->directoryList->getPath(DirectoryList::DIR_INIT) . '/';
+            $viewPreprocessedDir = $this->directoryList->getPath(DirectoryList::DIR_VIEW_PREPROCESSED, true);
+            $logDir = $this->directoryList->getPath(DirectoryList::DIR_LOG, true);
+            $writableDirectories = $this->directoryList->getWritableDirectories();
+
+            $this->logger->info(sprintf('Copying writable directories to %s directory.', $rootInitDir));
+
+            foreach ($writableDirectories as $dir) {
+                if ($dir === $logDir) {
+                    continue;
+                }
+
+                $originalDir = $magentoRoot . $dir;
+
+                if (!$this->file->isExists($originalDir)) {
+                    $this->logger->notice(sprintf('Directory %s does not exist.', $originalDir));
+                    continue;
+                }
+
+                $initDir = $rootInitDir . $dir;
+
+                if (($dir === $viewPreprocessedDir)
+                    && $this->globalConfig->get(GlobalConfig::VAR_SKIP_HTML_MINIFICATION)
+                ) {
+                    $this->logger->notice(sprintf('Skip copying %s->%s', $originalDir, $initDir));
+                    continue;
+                }
+
+                $this->logger->debug(sprintf('Copying %s->%s', $originalDir, $initDir));
+                $this->backupDir($originalDir, $initDir);
+            }
+
             $this->backupLogDir($magentoRoot . $logDir, $rootInitDir . $logDir);
-        } catch (\Exception $exception) {
-            throw new StepException($exception->getMessage(), $exception->getCode(), $exception);
+        } catch (StepException $e) {
+            throw $e;
+        } catch (GenericException $e) {
+            new StepException($e->getMessage(), $e->getCode(), $e);
         }
     }
 
@@ -119,23 +125,32 @@ class WritableDirectories implements StepInterface
      *
      * @param string $originalLogDir
      * @param string $initLogDir
-     * @throws \Exception
+     * @throws StepException
      */
     private function backupLogDir(string $originalLogDir, string $initLogDir)
     {
-        $this->logger->debug(sprintf('Copying %s->%s', $originalLogDir, $initLogDir));
-        $this->logger->setHandlers([]);
-        $this->backupDir($originalLogDir, $initLogDir);
-        $this->logger->setHandlers($this->loggerPool->getHandlers());
+        try {
+            $this->logger->debug(sprintf('Copying %s->%s', $originalLogDir, $initLogDir));
+            $this->logger->setHandlers([]);
+            $this->backupDir($originalLogDir, $initLogDir);
+            $this->logger->setHandlers($this->loggerPool->getHandlers());
+        } catch (LoggerException $e) {
+            throw new StepException($e->getMessage(), Error::BUILD_UNABLE_TO_CREATE_LOGGER, $e);
+        }
     }
 
     /**
      * @param string $source
      * @param string $destination
+     * @throws StepException
      */
     private function backupDir(string $source, string $destination)
     {
-        $this->file->createDirectory($destination);
-        $this->file->copyDirectory($source, $destination);
+        try {
+            $this->file->createDirectory($destination);
+            $this->file->copyDirectory($source, $destination);
+        } catch (FileSystemException $e) {
+            throw new StepException($e->getMessage(), Error::BUILD_WRITABLE_DIRECTORY_COPYING_FAILED, $e);
+        }
     }
 }

@@ -7,11 +7,14 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Step\Deploy;
 
+use Magento\MagentoCloud\App\Error;
+use Magento\MagentoCloud\Config\ConfigException;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\DB\ConnectionInterface;
 use Magento\MagentoCloud\Step\Deploy\DisableGoogleAnalytics;
+use Magento\MagentoCloud\Step\StepException;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Psr\Log\LoggerInterface;
 use Magento\MagentoCloud\Config\Stage\Deploy as DeployConfig;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
@@ -27,22 +30,22 @@ class DisableGoogleAnalyticsTest extends TestCase
     private $step;
 
     /**
-     * @var Environment|Mock
+     * @var Environment|MockObject
      */
     private $environmentMock;
 
     /**
-     * @var LoggerInterface|Mock
+     * @var LoggerInterface|MockObject
      */
     private $loggerMock;
 
     /**
-     * @var ConnectionInterface|Mock
+     * @var ConnectionInterface|MockObject
      */
     private $connectionMock;
 
     /**
-     * @var DeployConfig
+     * @var DeployConfig|MockObject
      */
     private $deployConfigMock;
 
@@ -63,7 +66,10 @@ class DisableGoogleAnalyticsTest extends TestCase
         );
     }
 
-    public function testExecuteDisable()
+    /**
+     * @throws StepException
+     */
+    public function testExecuteDisable(): void
     {
         $this->environmentMock->expects($this->once())
             ->method('isMasterBranch')
@@ -86,7 +92,10 @@ class DisableGoogleAnalyticsTest extends TestCase
         $this->step->execute();
     }
 
-    public function testExecuteMaster()
+    /**
+     * @throws StepException
+     */
+    public function testExecuteMaster(): void
     {
         $this->environmentMock->expects($this->once())
             ->method('isMasterBranch')
@@ -102,7 +111,10 @@ class DisableGoogleAnalyticsTest extends TestCase
         $this->step->execute();
     }
 
-    public function testExecuteEnabled()
+    /**
+     * @throws StepException
+     */
+    public function testExecuteEnabled(): void
     {
         $this->environmentMock->expects($this->once())
             ->method('isMasterBranch')
@@ -115,6 +127,22 @@ class DisableGoogleAnalyticsTest extends TestCase
             ->method('affectingQuery');
         $this->loggerMock->expects($this->never())
             ->method('info');
+
+        $this->step->execute();
+    }
+
+    /**
+     * @throws StepException
+     */
+    public function testExecuteWithConfigException()
+    {
+        $this->expectException(StepException::class);
+        $this->expectExceptionCode(Error::DEPLOY_CONFIG_NOT_DEFINED);
+        $this->expectExceptionMessage('some error');
+
+        $this->deployConfigMock->expects($this->once())
+            ->method('get')
+            ->willThrowException(new ConfigException('some error', Error::DEPLOY_CONFIG_NOT_DEFINED));
 
         $this->step->execute();
     }

@@ -8,11 +8,11 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit\Command;
 
 use Magento\MagentoCloud\Command\BackupList;
+use PHPUnit\Framework\MockObject\MockObject;
 use Symfony\Component\Console\Tester\CommandTester;
 use PHPUnit\Framework\TestCase;
 use Magento\MagentoCloud\Command\Backup\FileList as BackupFilesList;
 use Psr\Log\LoggerInterface;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -20,12 +20,12 @@ use PHPUnit_Framework_MockObject_MockObject as Mock;
 class BackupListTest extends TestCase
 {
     /**
-     * @var BackupFilesList|Mock
+     * @var BackupFilesList|MockObject
      */
     private $backupFilesListMock;
 
     /**
-     * @var LoggerInterface|Mock
+     * @var LoggerInterface|MockObject
      */
     private $loggerMock;
 
@@ -51,7 +51,7 @@ class BackupListTest extends TestCase
      * @param string $output
      * @dataProvider executeDataProvider
      */
-    public function testExecute(array $backupList, string $output)
+    public function testExecute(array $backupList, string $output): void
     {
         $this->loggerMock->expects($this->never())
             ->method('critical');
@@ -83,7 +83,7 @@ class BackupListTest extends TestCase
         ];
     }
 
-    public function testExecuteWithException()
+    public function testExecuteWithException(): void
     {
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage('Sorry error');

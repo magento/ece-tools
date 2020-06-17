@@ -7,6 +7,8 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Step\Build\DeployStaticContent;
 
+use Magento\MagentoCloud\App\Error;
+use Magento\MagentoCloud\Config\ConfigException;
 use Magento\MagentoCloud\Config\Stage\BuildInterface;
 use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
@@ -70,7 +72,7 @@ class Generate implements StepInterface
     /**
      * @inheritdoc
      */
-    public function execute()
+    public function execute(): void
     {
         $locales = $this->buildOption->getLocales();
         $threadCount = $this->buildOption->getThreadCount();
@@ -83,17 +85,19 @@ class Generate implements StepInterface
 
         $this->logger->info($logMessage);
 
-        $commands = $this->commandFactory->matrix(
-            $this->buildOption,
-            $this->buildConfig->get(BuildInterface::VAR_SCD_MATRIX)
-        );
-
         try {
+            $commands = $this->commandFactory->matrix(
+                $this->buildOption,
+                $this->buildConfig->get(BuildInterface::VAR_SCD_MATRIX)
+            );
+
             foreach ($commands as $command) {
                 $this->shell->execute($command);
             }
-        } catch (ShellException $exception) {
-            throw new StepException($exception->getMessage(), $exception->getCode(), $exception);
+        } catch (ShellException $e) {
+            throw new StepException($e->getMessage(), Error::BUILD_SCD_FAILED, $e);
+        } catch (ConfigException $e) {
+            throw new StepException($e->getMessage(), $e->getCode(), $e);
         }
     }
 }

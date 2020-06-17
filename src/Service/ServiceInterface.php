@@ -34,6 +34,8 @@ interface ServiceInterface
      * Returns '0' in cases when can't retrieve service version.
      *
      * @return string
+     *
+     * @throws ServiceException
      */
     public function getVersion(): string;
 }

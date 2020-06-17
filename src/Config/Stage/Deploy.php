@@ -7,6 +7,8 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Config\Stage;
 
+use Magento\MagentoCloud\App\Error;
+use Magento\MagentoCloud\Config\ConfigException;
 use Magento\MagentoCloud\Config\Schema;
 use Magento\MagentoCloud\Config\Stage\Deploy\MergedConfig;
 use Magento\MagentoCloud\Config\StageConfigInterface;
@@ -51,7 +53,10 @@ class Deploy implements DeployInterface
         $mergedConfig = $this->mergedConfig->get();
 
         if (!array_key_exists($name, $mergedConfig)) {
-            throw new \RuntimeException(sprintf('Config %s was not defined.', $name));
+            throw new ConfigException(
+                sprintf('Config %s was not defined.', $name),
+                Error::DEPLOY_CONFIG_NOT_DEFINED
+            );
         }
 
         $value = $mergedConfig[$name];
@@ -67,7 +72,7 @@ class Deploy implements DeployInterface
 
         $value = $decodedValue !== null && json_last_error() === JSON_ERROR_NONE ? $decodedValue : $value;
 
-        $schemaDetails = $this->schema->getSchema()[$name];
+        $schemaDetails = $this->schema->getVariables()[$name];
 
         if ($schemaDetails[Schema::SCHEMA_TYPE] === ['array'] && !is_array($value)) {
             $value = $schemaDetails[Schema::SCHEMA_DEFAULT_VALUE][StageConfigInterface::STAGE_DEPLOY];
