@@ -53,23 +53,17 @@ class DeployCompletion implements StepInterface
      */
     public function execute()
     {
-        try {
-            if ($this->hookChecker->isPostDeployHookEnabled()) {
-                $this->logger->info(
-                    'Post-deploy hook enabled. Cron enabling, cache cleaning and pre-warming operations ' .
-                    'are postponed to post-deploy stage.'
-                );
+        if ($this->hookChecker->isPostDeployHookEnabled()) {
+            $this->logger->info(
+                'Post-deploy hook enabled. Cron enabling, cache cleaning and pre-warming operations ' .
+                'are postponed to post-deploy stage.'
+            );
 
-                return;
-            }
+            return;
+        }
 
-            foreach ($this->steps as $step) {
-                $step->execute();
-            }
-        } catch (StepException $e) {
-            throw $e;
-        } catch (GenericException $e) {
-            throw new StepException($e->getMessage(), $e->getCode(), $e);
+        foreach ($this->steps as $step) {
+            $step->execute();
         }
     }
 }

@@ -69,8 +69,6 @@ class CopySampleData implements StepInterface
             $this->file->copyDirectory($sampleDataDir, $magentoRoot . '/pub/media');
         } catch (FileSystemException $e) {
             throw new StepException($e->getMessage(), Error::BUILD_FAILED_COPY_SAMPLE_DATA, $e);
-        } catch (\Exception $e) {
-            throw new StepException($e->getMessage(), $e->getCode(), $e);
         }
     }
 }

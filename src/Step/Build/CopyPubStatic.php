@@ -62,16 +62,12 @@ class CopyPubStatic implements StepInterface
      */
     public function execute(): void
     {
-        try {
-            $magentoRoot = $this->directoryList->getMagentoRoot();
+        $magentoRoot = $this->directoryList->getMagentoRoot();
 
-            $this->file->copy(
-                $this->fileList->getFrontStaticDist(),
-                $magentoRoot . '/pub/front-static.php'
-            );
-            $this->logger->info('File "front-static.php" was copied');
-        } catch (\Exception $e) {
-            throw new StepException($e->getMessage(), $e->getCode(), $e);
-        }
+        $this->file->copy(
+            $this->fileList->getFrontStaticDist(),
+            $magentoRoot . '/pub/front-static.php'
+        );
+        $this->logger->info('File "front-static.php" was copied');
     }
 }

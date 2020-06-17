@@ -61,36 +61,36 @@ class MarshallFiles implements StepInterface
      */
     public function execute()
     {
+        $magentoRoot = $this->directoryList->getMagentoRoot();
+        $enterpriseFolder = $magentoRoot . '/app/enterprise';
+        $varCache = $magentoRoot . '/var/cache/';
+
+        if ($this->file->isExists($varCache)) {
+            $this->file->deleteDirectory($varCache);
+        }
 
         try {
-            $magentoRoot = $this->directoryList->getMagentoRoot();
-            $enterpriseFolder = $magentoRoot . '/app/enterprise';
-            $varCache = $magentoRoot . '/var/cache/';
-
-            if ($this->file->isExists($varCache)) {
-                $this->file->deleteDirectory($varCache);
-            }
             if ($this->magentoVersion->isGreaterOrEqual('2.2')) {
                 return;
             }
-
-            $this->file->copy(
-                $magentoRoot . '/app/etc/di.xml',
-                $magentoRoot . '/app/di.xml'
-            );
-
-            if (!$this->file->isExists($enterpriseFolder)) {
-                $this->file->createDirectory($enterpriseFolder, 0777);
-            }
-
-            if ($this->file->isExists($magentoRoot . '/app/etc/enterprise/di.xml')) {
-                $this->file->copy(
-                    $magentoRoot . '/app/etc/enterprise/di.xml',
-                    $magentoRoot . '/app/enterprise/di.xml'
-                );
-            }
-        } catch (\Exception $exception) {
+        } catch (UndefinedPackageException $exception) {
             throw new StepException($exception->getMessage(), $exception->getCode(), $exception);
+        }
+
+        $this->file->copy(
+            $magentoRoot . '/app/etc/di.xml',
+            $magentoRoot . '/app/di.xml'
+        );
+
+        if (!$this->file->isExists($enterpriseFolder)) {
+            $this->file->createDirectory($enterpriseFolder, 0777);
+        }
+
+        if ($this->file->isExists($magentoRoot . '/app/etc/enterprise/di.xml')) {
+            $this->file->copy(
+                $magentoRoot . '/app/etc/enterprise/di.xml',
+                $magentoRoot . '/app/enterprise/di.xml'
+            );
         }
     }
 }

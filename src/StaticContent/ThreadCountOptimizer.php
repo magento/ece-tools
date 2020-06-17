@@ -9,6 +9,7 @@ namespace Magento\MagentoCloud\StaticContent;
 
 use Magento\MagentoCloud\Config\StageConfigInterface;
 use Magento\MagentoCloud\Package\MagentoVersion;
+use Magento\MagentoCloud\Package\UndefinedPackageException;
 use Magento\MagentoCloud\Util\Cpu;
 use Psr\Log\LoggerInterface;
 
@@ -65,6 +66,7 @@ class ThreadCountOptimizer
      * @param int $threads
      * @param string $strategy
      * @return int
+     * @throws UndefinedPackageException
      */
     public function optimize(int $threads, string $strategy): int
     {

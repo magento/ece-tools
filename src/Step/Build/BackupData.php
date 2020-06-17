@@ -43,18 +43,12 @@ class BackupData implements StepInterface
      */
     public function execute()
     {
-        try {
-            $this->logger->notice('Copying data to the ./init directory');
+        $this->logger->notice('Copying data to the ./init directory');
 
-            foreach ($this->steps as $step) {
-                $step->execute();
-            }
-
-            $this->logger->notice('End of copying data to the ./init directory');
-        } catch (StepException $e) {
-            throw $e;
-        } catch (\Exception $e) {
-            throw new StepException($e->getMessage(), $e->getCode(), $e);
+        foreach ($this->steps as $step) {
+            $step->execute();
         }
+
+        $this->logger->notice('End of copying data to the ./init directory');
     }
 }

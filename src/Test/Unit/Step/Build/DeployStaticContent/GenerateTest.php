@@ -8,6 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit\Step\Build\DeployStaticContent;
 
 use Magento\MagentoCloud\App\Error;
+use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Config\Stage\BuildInterface;
 use Magento\MagentoCloud\Step\Build\DeployStaticContent\Generate;
 use Magento\MagentoCloud\Step\StepException;
@@ -114,7 +115,7 @@ class GenerateTest extends TestCase
     /**
      * @throws StepException
      */
-    public function testExecuteWithException()
+    public function testExecuteWithShellException()
     {
         $this->expectException(StepException::class);
         $this->expectExceptionMessage('Some error');
@@ -147,6 +148,26 @@ class GenerateTest extends TestCase
             ->with(BuildInterface::VAR_SCD_MATRIX)
             ->willReturn(['some_matrix']);
 
+        $this->step->execute();
+    }
+
+    /**
+     * @throws StepException
+     */
+    public function testExecuteWithGenericException()
+    {
+        $exceptionMessage = 'Some error';
+        $exceptionCode = 111;
+        $this->expectException(StepException::class);
+        $this->expectExceptionMessage($exceptionMessage);
+        $this->expectExceptionCode($exceptionCode);
+
+        $this->optionMock->expects($this->once())
+            ->method('getLocales')
+            ->willReturn(['ua_UA', 'fr_FR', 'es_ES', 'en_US']);
+        $this->optionMock->expects($this->once())
+            ->method('getThreadCount')
+            ->willThrowException(new GenericException($exceptionMessage, $exceptionCode));
         $this->step->execute();
     }
 }
