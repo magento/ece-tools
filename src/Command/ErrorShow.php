@@ -71,7 +71,7 @@ class ErrorShow extends Command
             if (empty($errorInfo)) {
                 $output->writeln(sprintf('Error with code %s is not registered in the error schema', $errorCode));
 
-                return;
+                return 1;
             }
             $errorInfo['errorCode'] = $errorCode;
             $errors = [$errorCode => $errorInfo];
@@ -80,7 +80,7 @@ class ErrorShow extends Command
             if (empty($errors)) {
                 $output->writeln('The error log is empty or doesn\'t exist');
 
-                return;
+                return 1;
             }
         }
 
