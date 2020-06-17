@@ -12,6 +12,7 @@ use Magento\MagentoCloud\App\Logger\Error\ReaderInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
@@ -22,6 +23,8 @@ class ErrorShow extends Command
     public const NAME = 'error:show';
 
     public const ARGUMENT_ERROR_CODE = 'error-code';
+
+    public const OPTION_JSON_FORMAT = 'json';
 
     /**
      * @var ErrorInfo
@@ -55,6 +58,12 @@ class ErrorShow extends Command
                 self::ARGUMENT_ERROR_CODE,
                 InputArgument::OPTIONAL,
                 'Error code, if not passed command display info about all errors from the last deployment'
+            )
+            ->addOption(
+                self::OPTION_JSON_FORMAT,
+                'j',
+                InputOption::VALUE_NONE,
+                'Used for getting result in JSON format'
             );
     }
 
@@ -84,11 +93,17 @@ class ErrorShow extends Command
             }
         }
 
+        if ($input->getOption(self::OPTION_JSON_FORMAT)) {
+            $output->writeln(json_encode($errors));
+
+            return 0;
+        }
+
         $errorCount = count($errors);
         $i = 0;
         foreach ($errors as $errorInfo) {
             $i++;
-            $output->writeln($this->formatMessage($errorInfo));
+            $output->write($this->formatMessage($errorInfo));
             if ($errorCount !== $i) {
                 $output->writeln(str_repeat('-', 15) . PHP_EOL);
             }

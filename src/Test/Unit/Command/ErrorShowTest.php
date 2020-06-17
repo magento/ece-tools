@@ -112,6 +112,36 @@ class ErrorShowTest extends TestCase
         $this->assertContains('errorCode: 12', $tester->getDisplay());
     }
 
+    public function testExecuteWithoutCodeJsonFormat()
+    {
+        $errors = [
+            [
+                'errorCode: 12',
+                'stage' => 'deploy',
+                'suggestion' => 'some suggestion',
+                'title' => 'some warning error',
+                'type' => 'warning'
+            ],
+            [
+                'errorCode' => '13',
+                'stage' => 'deploy',
+                'suggestion' => 'some suggestion',
+                'title' => 'some critical error',
+                'type' => 'critical'
+            ],
+        ];
+        $this->errorInfoMock->expects($this->never())
+            ->method('get');
+        $this->readerMock->expects($this->once())
+            ->method('read')
+            ->willReturn($errors);
+
+        $tester = new CommandTester($this->command);
+        $tester->execute(['--json' => true]);
+
+        $this->assertContains(json_encode($errors), $tester->getDisplay());
+    }
+
     public function testExecuteWithoutCodeEmptyLog()
     {
         $this->errorInfoMock->expects($this->never())
