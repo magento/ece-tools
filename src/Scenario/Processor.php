@@ -111,7 +111,6 @@ class Processor
         } catch (ActionException $actionException) {
             $this->logger->error($actionException->getMessage());
         }
-
     }
 
     /**
