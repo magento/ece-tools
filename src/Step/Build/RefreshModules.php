@@ -51,16 +51,12 @@ class RefreshModules implements StepInterface
         $this->logger->notice('Reconciling installed modules with shared config.');
 
         try {
-            $this->logger->notice('Reconciling installed modules with shared config.');
-
             $enabledModules = $this->config->refresh();
             $this->logger->info(
                 $enabledModules ?
                     'The following modules have been enabled:' . PHP_EOL . implode(PHP_EOL, $enabledModules) :
                     'No modules were changed.'
             );
-
-            $this->logger->notice('End of reconciling modules.');
         } catch (FileSystemException $e) {
             throw new StepException($e->getMessage(), Error::BUILD_CONFIG_PHP_IS_NOT_WRITABLE, $e);
         } catch (ShellException $e) {
