@@ -75,6 +75,7 @@ class Processor
                 sprintf('Unhandled error: [%d] %s', $exception->getCode(), $exception->getMessage())
             );
         }
+
         try {
             array_walk($steps, function (StepInterface $step, string $name) {
                 $this->logger->debug('Running step: ' . $name);
@@ -84,23 +85,33 @@ class Processor
                 $this->logger->debug(sprintf('Step "%s" finished', $name));
             });
         } catch (Throwable $stepException) {
-            try {
-                $actions = $this->mergedScenarios['actions'];
-
-                array_walk($actions, function (ActionInterface $action, string $name) {
-                    $this->logger->debug('Running on fail action: ' . $name);
-
-                    $action->execute();
-
-                    $this->logger->debug(sprintf('On fail action "%s" finished', $name));
-                });
-            } catch (ActionException $actionException) {
-                $this->logger->error($actionException->getMessage());
-            }
+            $this->runActions();
             $this->handleException($stepException);
         }
 
         $this->logger->info('Scenario(s) finished');
+    }
+
+    /**
+     * Run scenario actions.
+     * @return void
+     */
+    private function runActions(): void
+    {
+        try {
+            $actions = $this->mergedScenarios['actions'];
+
+            array_walk($actions, function (ActionInterface $action, string $name) {
+                $this->logger->debug('Running on fail action: ' . $name);
+
+                $action->execute();
+
+                $this->logger->debug(sprintf('On fail action "%s" finished', $name));
+            });
+        } catch (ActionException $actionException) {
+            $this->logger->error($actionException->getMessage());
+        }
+
     }
 
     /**
