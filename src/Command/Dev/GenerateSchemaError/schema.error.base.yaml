@@ -83,12 +83,14 @@
     step: validate-config
     type: warning
 !php/const Magento\MagentoCloud\App\Error::WARN_ADMIN_DATA_IGNORED:
-    title: 'Admin data is ignored during update process'
+    title: 'Admin data is used to create an admin user during initial installation only and is ignored during upgrade process'
+    suggestion: 'You can remove admin data from configuration'
     stage: deploy
     step: validate-config
     type: warning
 !php/const Magento\MagentoCloud\App\Error::WARN_ADMIN_EMAIL_NOT_SET:
     title: 'Admin user was not created as admin email was not set'
+    suggestion: 'Create an admin user via ssh manually: bin/magento admin:user:create'
     stage: deploy
     step: validate-config
     type: warning
