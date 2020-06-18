@@ -28,7 +28,8 @@ class LineFormatter extends \Monolog\Formatter\LineFormatter
             Logger::getLevelName(Logger::CRITICAL),
         ];
 
-        if (in_array($record['level_name'], $errorLevels)
+        if (isset($record['level_name'])
+            && in_array($record['level_name'], $errorLevels)
             && !empty($record['context']['errorCode'])
         ) {
             $this->format = self::FORMAT_BASE_ERROR;
@@ -36,7 +37,7 @@ class LineFormatter extends \Monolog\Formatter\LineFormatter
             $this->format = self::FORMAT_BASE;
         }
 
-        if (!empty($record['context']['suggestion'])) {
+        if (isset($record['message']) && !empty($record['context']['suggestion'])) {
             $record['message'] .= PHP_EOL . $record['context']['suggestion'];
         }
 

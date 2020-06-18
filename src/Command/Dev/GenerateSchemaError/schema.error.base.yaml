@@ -1,4 +1,4 @@
-!php/const Magento\MagentoCloud\App\Error::DEPLOY_ES_CAN_NOT_CONNECT:
+!php/const Magento\MagentoCloud\App\Error::DEPLOY_ES_CANNOT_CONNECT:
     title: 'Can''t get version of elasticsearch service'
     suggestion: 'Check that credentials for elasticsearch are correct and service is running'
     stage: deploy

@@ -84,7 +84,7 @@ class JsonErrorFormatter extends JsonFormatter
         if (empty($errorInfo)) {
             $errorInfo = [
                 'errorCode' => $errorCode,
-                'title' => $record['message']
+                'title' => $record['message'] ?? ''
             ];
         } else {
             $errorInfo['errorCode'] = $errorCode;
