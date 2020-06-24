@@ -10,7 +10,6 @@ namespace Magento\MagentoCloud\Command\Dev;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileList;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Yaml\Yaml;
@@ -52,20 +51,7 @@ class GenerateSchemaError extends Command
     protected function configure(): void
     {
         $this->setName(static::NAME)
-            ->setDescription('Generate schema.error.yaml file')
-            ->addArgument(
-                'doc-error-path',
-                InputArgument::OPTIONAL,
-                'Path to documentation md file',
-                'https://raw.githubusercontent.com/magento/devdocs/' .
-                'Cloud-2002.1.1/src/cloud/reference/error-codes.md'
-            )->addArgument(
-                'doc-error-suggestion-path',
-                InputArgument::OPTIONAL,
-                'Path to suggestion md file',
-                'https://raw.githubusercontent.com/magento/devdocs/' .
-                'Cloud-2002.1.1/src/_data/codebase/cloud/cloud-error-messages.yml'
-            );
+            ->setDescription('Generates dist/error-codes.md file from schema.error.yaml');
 
         parent::configure();
     }
@@ -78,92 +64,67 @@ class GenerateSchemaError extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $pathToErrorDoc = $input->getArgument('doc-error-path');
-        $pathToErrorSuggestionDoc = $input->getArgument('doc-error-suggestion-path');
-
-        $errors = $this->getErrorsFromDoc(file_get_contents($pathToErrorDoc));
-        $suggestions = $this->getSuggestionFromDoc(file_get_contents($pathToErrorSuggestionDoc));
-
-        foreach ($errors as &$errorData) {
-            unset($errorData['code']);
-
-            if (empty($errorData['step'])) {
-                unset($errorData['step']);
-            }
-
-            if (!empty($errorData['suggestion'])
-                && preg_match('/\.(?P<errorCode>\w+)}}$/', $errorData['suggestion'], $matches)
-            ) {
-                if (isset($suggestions[$matches['errorCode']])) {
-                    $errorData['suggestion'] = $suggestions[$matches['errorCode']];
-                } else {
-                    $errorData['suggestion'] = '';
-                }
-            }
-
-            $errorData['type'] = 'critical';
-        }
-
-        $otherErrors = Yaml::parse(
-            $this->file->fileGetContents(__DIR__ . '/GenerateSchemaError/schema.error.base.yaml'),
+        $errors = Yaml::parse(
+            $this->file->fileGetContents($this->fileList->getErrorSchema()),
             Yaml::PARSE_CONSTANT
         );
 
-        $errors = array_replace_recursive($errors, $otherErrors);
+        $errors = $this->groupErrors($errors);
 
-        ksort($errors);
-        $this->file->filePutContents($this->fileList->getErrorSchema(), Yaml::dump($errors));
+        $docs = $this->generateDocs($errors);
 
-        $output->writeln(sprintf('File %s was generated', $this->fileList->getErrorSchema()));
+        $this->file->filePutContents($this->fileList->getErrorDistConfig(), $docs);
+
+        $output->writeln(sprintf('File %s was generated', $this->fileList->getErrorDistConfig()));
     }
 
     /**
-     * Fetches list of errors from the documentation
+     * Groups errors by type and stage
      *
-     * @param string $documentation
+     * @param $errors
      * @return array
      */
-    private function getErrorsFromDoc(string $documentation): array
+    private function groupErrors(array $errors): array
     {
-        $result = [];
-        foreach (explode(PHP_EOL, $documentation) as $row) {
-            if (substr($row, 0, 2) === '##') {
-                $stage = strtolower(str_replace(' stage', '', substr($row, 3)));
-            }
-            if (!empty($stage) && substr_count($row, '|') == 5) {
-                $errorData = array_map('trim', explode('|', trim($row, '|')));
+        $groupedErrors = [];
 
-                if (in_array(substr($errorData[0], 0, 3), ['---', 'Err'])) {
-                    continue;
-                }
-
-                $errorData[] = $stage;
-                $result[$errorData[0]] = array_combine(['code', 'step', 'title', 'suggestion', 'stage'], $errorData);
-            }
+        foreach ($errors as $errorCode => $errorData) {
+            $groupedErrors[$errorData['type']][$errorData['stage']][$errorCode] = $errorData;
         }
 
-        return $result;
+        return $groupedErrors;
     }
 
     /**
-     * Fetches suggestion for ece-tools error
-     *
-     * @param string $documentation
-     * @return array
+     * @param array $errors
+     * @return string
      */
-    private function getSuggestionFromDoc(string $documentation): array
+    private function generateDocs(array $errors): string
     {
-        $result = [];
-        foreach (explode(PHP_EOL, $documentation) as $row) {
-            if (strpos($row, '#') === 0 || empty($row)) {
-                continue;
-            }
+        $result = '';
 
-            if (preg_match('/^(?P<code>\w+):\s(?P<suggestion>.*)/', $row, $matches)) {
-                $code = $matches['code'];
-                $result[$code] = trim($matches['suggestion'], ' "');
-            } elseif (isset($code)) {
-                $result[$code] .= PHP_EOL . $row;
+        foreach ($errors as $type => $typeErrors) {
+            $result .= sprintf("\n\n## %s Errors\n\n", ucfirst($type));
+
+            foreach ($typeErrors as $stage => $stageErrors) {
+                $result .= sprintf("\n### %s%s\n\n", ucfirst($stage), $stage === 'general' ? '' : ' stage');
+
+                $table = "{:.error-table}\n";
+                $table .= sprintf(
+                    "| Error code | %s step | Error description | Suggested action |\n",
+                    ucfirst($stage)
+                );
+                foreach ($stageErrors as $errorCode => $errorData) {
+                    $table .= sprintf(
+                        "| %d | %s | %s | %s |\n",
+                        $errorCode,
+                        $errorData['step'] ?? '',
+                        $errorData['title'] ?? '',
+                        $errorData['suggestion'] ?? ''
+                    );
+                }
+
+                $result .= $table;
             }
         }
 

@@ -85,6 +85,9 @@ class Error
     public const GLOBAL_CONFIG_UNABLE_TO_READ = 245;
     public const GLOBAL_CONFIG_UNABLE_TO_READ_SCHEMA_YAML = 246;
 
+    /**
+     * Build
+     */
     public const WARN_CONFIG_PHP_NOT_EXISTS = 1001;
     public const WARN_UNSUPPORTED_BUILDS_OPTION_INI = 1002;
     public const WARN_MISSED_MODULE_SECTION = 1003;
@@ -93,6 +96,9 @@ class Error
     public const WARN_CONFIGURATION_STATE_NOT_IDEAL = 1006;
     public const WARN_BALER_CAN_NOT_BE_USED = 1007;
 
+    /**
+     * Deploy
+     */
     public const WARN_REDIS_SERVICE_NOT_AVAILABLE = 2001;
     public const WARN_WRONG_SPLIT_DB_CONFIG = 2002;
     public const WARN_DIR_NESTING_LEVEL_NOT_CONFIGURED = 2003;
@@ -119,9 +125,15 @@ class Error
     public const WARN_NOT_ENOUGH_DATA_SPLIT_DB_VAR = 2024;
     public const WARN_SLAVE_CONNECTION_NOT_SET = 2025;
 
+    /**
+     * Post-deploy
+     */
     public const WARN_DEBUG_LOG_ENABLED = 3001;
     public const WARN_CAN_NOT_FETCH_STORE_URLS = 3002;
     public const WARN_CAN_NOT_FETCH_STORE_URL = 3003;
 
+    /**
+     * General
+     */
     public const WARN_CAN_NOT_GET_PROC_COUNT = 4001;
 }

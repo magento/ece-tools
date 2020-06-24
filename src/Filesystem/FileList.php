@@ -179,4 +179,14 @@ class FileList extends ConfigFileList
     {
         return $this->directoryList->getRoot() . '/config/schema.error.yaml';
     }
+
+    /**
+     * Returns path to doc file generated from schema.error.yaml
+     *
+     * @return string
+     */
+    public function getErrorDistConfig(): string
+    {
+        return $this->directoryList->getRoot() . '/dist/error-codes.md';
+    }
 }
