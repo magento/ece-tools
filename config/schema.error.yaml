@@ -20,7 +20,7 @@
     type: critical
 !php/const Magento\MagentoCloud\App\Error::BUILD_CONFIG_UNABLE_TO_READ_SCHEMA_YAML:
     title: 'Unable to read the `.schema.yaml` file'
-    suggestion: ''
+    suggestion: 'Unable to read the `./vendor/magento/ece-tools/config/magento.env.yaml` file. Check file permissions and run redeployment.'
     stage: build
     type: critical
 !php/const Magento\MagentoCloud\App\Error::BUILD_CONFIG_PHP_IS_NOT_WRITABLE:
@@ -38,7 +38,7 @@
 !php/const Magento\MagentoCloud\App\Error::BUILD_COMPOSER_MISSED_REQUIRED_AUTOLOAD:
     step: validate-config
     title: 'Composer.json is missing required autoload section'
-    suggestion: 'Required `autoload` section is missing from the `composer.json` file. Compare the autoload section from the Magento `composer.json` file template, and add the missing configuration.'
+    suggestion: 'Required `autoload` section is missing from the `composer.json` file. Compare the autoload section from the Magento Cloud template `composer.json` file template, and add the missing configuration.'
     stage: build
     type: critical
 !php/const Magento\MagentoCloud\App\Error::BUILD_WRONG_CONFIGURATION_MAGENTO_ENV_YAML:
@@ -50,7 +50,7 @@
 !php/const Magento\MagentoCloud\App\Error::BUILD_MODULE_ENABLE_COMMAND_FAILED:
     step: refresh-modules
     title: 'Command `/bin/magento module:enable --all` failed'
-    suggestion: 'Check the `cloud.log` for more information. Add `VERBOSE_COMMANDS: ''-vvv''` into `.magento.env.yaml` for more detailed command output.'
+    suggestion: 'Try to run `composer update` locally then commit and push updated `composer.lock` file, also check the `cloud.log` for more information. Add `VERBOSE_COMMANDS: ''-vvv''` into `.magento.env.yaml` for more detailed command output.'
     stage: build
     type: critical
 !php/const Magento\MagentoCloud\App\Error::BUILD_PATCH_APPLYING_FAILED:

@@ -61,6 +61,8 @@ class GenerateSchemaError extends Command
      * @param OutputInterface $output
      * @return int|void
      * @throws \Magento\MagentoCloud\Filesystem\FileSystemException
+     *
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
@@ -81,7 +83,7 @@ class GenerateSchemaError extends Command
     /**
      * Groups errors by type and stage
      *
-     * @param $errors
+     * @param array $errors
      * @return array
      */
     private function groupErrors(array $errors): array
