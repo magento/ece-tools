@@ -248,7 +248,7 @@
     suggestion: 'Check the `cloud.log` for more information.'
     stage: deploy
     type: critical
-!php/const Magento\MagentoCloud\App\Error::DEPLOY_SCD_CANNOT_UPDATE_VERSION:
+!php/const Magento\MagentoCloud\App\Error::DEPLOY_SCD_CAN_NOT_UPDATE_VERSION:
     step: 'deploy-static-content:generate'
     title: 'Cannot update the deployed version'
     suggestion: 'Cannot update the `./pub/static/deployed_version.txt` file. Check your filesystem permissions.'
@@ -314,7 +314,7 @@
     suggestion: "This error occurs if the `./app/etc/env.php` file is not present when Magento deployment begins, or if the `crypt/key` value is undefined. If you migrated the database from another environment, retrieve the crypt key value from that environment. Then, add the value to the [CRYPT_KEY](https://devdocs.magento.com/cloud/env/variables-deploy.html#crypt_key) cloud environment variable in your current environment. See [Add the Magento encryption key](https://devdocs.magento.com/cloud/setup/first-time-setup-import-import.html#encryption-key). If you accidentally removed the `./app/etc/env.php` file, use the following command to restore it from the backup files created from a previous deployment: `./vendor/bin/ece-tools backup:restore` CLI command .\""
     stage: deploy
     type: critical
-!php/const Magento\MagentoCloud\App\Error::DEPLOY_ES_CANNOT_CONNECT:
+!php/const Magento\MagentoCloud\App\Error::DEPLOY_ES_CAN_NOT_CONNECT:
     title: 'Can not connect to the Elasticsearch service'
     suggestion: 'Check that credentials for elasticsearch are correct and service is running'
     stage: deploy

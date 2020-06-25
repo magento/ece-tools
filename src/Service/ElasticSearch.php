@@ -104,7 +104,7 @@ class ElasticSearch implements ServiceInterface
             } catch (Throwable $exception) {
                 throw new ServiceException(
                     'Can\'t get version of elasticsearch: ' . $exception->getMessage(),
-                    Error::DEPLOY_ES_CANNOT_CONNECT
+                    Error::DEPLOY_ES_CAN_NOT_CONNECT
                 );
             }
         }
