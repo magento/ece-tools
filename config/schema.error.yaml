@@ -79,14 +79,14 @@
     type: critical
 !php/const Magento\MagentoCloud\App\Error::BUILD_COMPOSER_DUMP_AUTOLOAD_FAILED:
     step: dump-autoload
-    title: 'Command `composer dump-autoload` failed'
+    title: 'Command failed: `composer dump-autoload`'
     suggestion: 'The `composer dump-autoload` command failed. Check the `cloud.log` for more information.'
     stage: build
     type: critical
 !php/const Magento\MagentoCloud\App\Error::BUILD_BALER_NOT_FOUND:
     step: run-baler
     title: 'The command to run `Baler` for Javascript bundling failed'
-    suggestion: 'Check the `SCD_USE_BALER` environment variable to verify that the Baler module is configured and enabled for JS bundling. If you don''t need the Baler module, set `SCD_USE_BALER: false`.'
+    suggestion: 'Check the `SCD_USE_BALER` environment variable to verify that the Baler module is configured and enabled for JS bundling. If you do not need the Baler module, set `SCD_USE_BALER: false`.'
     stage: build
     type: critical
 !php/const Magento\MagentoCloud\App\Error::BUILD_UTILITY_NOT_FOUND:
@@ -98,7 +98,7 @@
 !php/const Magento\MagentoCloud\App\Error::BUILD_SCD_FAILED:
     step: deploy-static-content
     title: 'Command `/bin/magento setup:static-content:deploy` failed'
-    suggestion: 'Check the `cloud.log` for more information. Add `VERBOSE_COMMANDS: ''-vvv''` into `.magento.env.yaml` for more detailed command output.'
+    suggestion: 'Check the `cloud.log` for more information. For more detailed command output, add the `VERBOSE_COMMANDS: ''-vvv''` option to  the `.magento.env.yaml` file.'
     stage: build
     type: critical
 !php/const Magento\MagentoCloud\App\Error::BUILD_SCD_COMPRESSION_FAILED:
@@ -148,12 +148,12 @@
     type: critical
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_CONFIG_NOT_DEFINED:
     title: 'Configuration isn''t defined in the `schema.yaml` file'
-    suggestion: 'Configuration isn''t defined in the `./vendor/magento/ece-tools/config/schema.yaml` file. Check that the config variable name is correct, and that it defined.'
+    suggestion: 'Configuration is not defined in the `./vendor/magento/ece-tools/config/schema.yaml` file. Check that the config variable name is correct, and that it is defined.'
     stage: deploy
     type: critical
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_CONFIG_PARSE_FAILED:
     title: 'Failed to parse the `.magento.env.yaml` file'
-    suggestion: 'Configuration isn''t defined in the `./vendor/magento/ece-tools/config/schema.yaml` file. Check that the config variable name is correct, and that it defined.'
+    suggestion: 'Configuration is not defined in the `./vendor/magento/ece-tools/config/schema.yaml` file. Check that the config variable name is correct, and that it is defined.'
     stage: deploy
     type: critical
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_CONFIG_UNABLE_TO_READ:
@@ -175,7 +175,7 @@
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_MAINTENANCE_MODE_ENABLING_FAILED:
     step: 'pre-deploy: set-production-mode'
     title: 'Command `/bin/magento maintenance:enable` failed'
-    suggestion: 'Check the `cloud.log` for more information. Add `VERBOSE_COMMANDS: ''-vvv''` into `.magento.env.yaml` for more detailed command output.'
+    suggestion: 'Check the `cloud.log` for more information. For more detailed command output, add the `VERBOSE_COMMANDS: ''-vvv''` option to the `.magento.env.yaml` file.'
     stage: deploy
     type: critical
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_WRONG_CONFIGURATION_DB:
@@ -193,7 +193,7 @@
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_WRONG_CONFIGURATION_SEARCH:
     step: validate-config
     title: 'Incorrect search configuration'
-    suggestion: 'Check that the `SEARCH_CONFIGURATION` environment variable is configured correctly.. The configuration must contain at least the `engine` parameter.'
+    suggestion: 'Check that the `SEARCH_CONFIGURATION` environment variable is configured correctly. The configuration must contain at least the `engine` parameter.'
     stage: deploy
     type: critical
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_WRONG_CONFIGURATION_RESOURCE:
@@ -205,13 +205,13 @@
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_ELASTIC_SUITE_WITHOUT_ES:
     step: 'validate-config:elasticsuite-integrity'
     title: 'ElasticSuite is installed, but the ElasticSearch service is not available'
-    suggestion: 'ElasticSuite is installed, but the Elasticsearch service is not available. Check that the `SEARCH_CONFIGURATION` environment variable is configured correctly, and verify that the Elasticsearch service is available.'
+    suggestion: 'Check that the `SEARCH_CONFIGURATION` environment variable is configured correctly, and verify that the Elasticsearch service is available.'
     stage: deploy
     type: critical
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_ELASTIC_SUITE_WRONG_ENGINE:
     step: 'validate-config:elasticsuite-integrity'
     title: 'ElasticSuite is installed, but another search engine is used'
-    suggestion: 'ElasticSuite is installed but another search engine is configured. Update the `SEARCH_CONFIGURATION` environment variable to enable Elasticsearch and verify the Elasticsearch service configuration in the `services.yaml` file.'
+    suggestion: 'ElasticSuite is installed, but another search engine is configured. Update the `SEARCH_CONFIGURATION` environment variable to enable Elasticsearch, and verify the Elasticsearch service configuration in the `services.yaml` file.'
     stage: deploy
     type: critical
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_QUERY_EXECUTION_FAILED:
@@ -222,13 +222,14 @@
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_INSTALL_COMMAND_FAILED:
     step: 'install-update: setup'
     title: 'Command `/bin/magento setup:install` failed'
-    suggestion: 'Check the `cloud.log` and `install_upgrade.log` for more information. Add `VERBOSE_COMMANDS: ''-vvv''` into `.magento.env.yaml` for more detailed command output.'
+    suggestion: 'Check the `cloud.log` and `install_upgrade.log` for more information. For more detailed command output, add the `VERBOSE_COMMANDS: ''-vvv''` option to the `.magento.env.yaml` file.'
+'
     stage: deploy
     type: critical
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_CONFIG_IMPORT_COMMAND_FAILED:
     step: 'install-update: config-import'
     title: 'Command `app:config:import` failed'
-    suggestion: 'Check the `cloud.log` for more information. Add `VERBOSE_COMMANDS: ''-vvv''` into `.magento.env.yaml` for more detailed command output.'
+    suggestion: 'Check the `cloud.log` for more information. For more detailed command output, add the `VERBOSE_COMMANDS: ''-vvv''` option to the `.magento.env.yaml` file.'
     stage: deploy
     type: critical
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_UTILITY_NOT_FOUND:
@@ -239,7 +240,7 @@
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_SCD_FAILED:
     step: 'install-update: deploy-static-content'
     title: 'Command `/bin/magento setup:static-content:deploy` failed'
-    suggestion: 'Check the `cloud.log` for more information. Add `VERBOSE_COMMANDS: ''-vvv''` into `.magento.env.yaml` for more detailed command output.'
+    suggestion: 'Check the `cloud.log` for more information. For more detailed command output, add the `VERBOSE_COMMANDS: ''-vvv''` option to the `.magento.env.yaml` file.'
     stage: deploy
     type: critical
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_SCD_COMPRESSION_FAILED:
@@ -251,7 +252,7 @@
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_SCD_CANNOT_UPDATE_VERSION:
     step: 'deploy-static-content:generate'
     title: 'Cannot update the deployed version'
-    suggestion: 'Cannot update `./pub/static/deployed_version.txt` file. Check your filesystem permissions.'
+    suggestion: 'Cannot update the `./pub/static/deployed_version.txt` file. Check your filesystem permissions.'
     stage: deploy
     type: critical
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_SCD_CLEAN_FAILED:
@@ -263,7 +264,7 @@
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_SPLIT_DB_COMMAND_FAILED:
     step: 'install-update: split-db'
     title: 'Command `/bin/magento setup:db-schema:split` failed'
-    suggestion: 'Check the `cloud.log` for more information. Add `VERBOSE_COMMANDS: ''-vvv''` into `.magento.env.yaml` for more detailed command output.'
+    suggestion: 'Check the `cloud.log` for more information. For more detailed command output, add the `VERBOSE_COMMANDS: ''-vvv''` option to the `.magento.env.yaml` file.'
     stage: deploy
     type: critical
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_VIEW_PREPROCESSED_CLEAN_FAILED:
@@ -281,13 +282,13 @@
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_UPGRADE_COMMAND_FAILED:
     step: 'install-update: update'
     title: 'Command `/bin/magento setup:upgrade` failed'
-    suggestion: 'Check the `cloud.log` and `install_upgrade.log` for more information. Add `VERBOSE_COMMANDS: ''-vvv''` into `.magento.env.yaml` for more detailed command output.'
+    suggestion: 'Check the `cloud.log` and `install_upgrade.log` for more information. For more detailed command output, add the `VERBOSE_COMMANDS: ''-vvv''` option to the `.magento.env.yaml` file.'
     stage: deploy
     type: critical
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_CACHE_FLUSH_COMMAND_FAILED:
     step: clean-cache
     title: 'Command `/bin/magento cache:flush` failed'
-    suggestion: 'Check the `cloud.log` for more information. Add `VERBOSE_COMMANDS: ''-vvv''` into `.magento.env.yaml` for more detailed command output.'
+    suggestion: 'Check the `cloud.log` for more information. For more detailed command output, add the `VERBOSE_COMMANDS: ''-vvv''` option to the `.magento.env.yaml` file.'
     stage: deploy
     type: critical
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_MAINTENANCE_MODE_DISABLING_FAILED:
@@ -298,24 +299,24 @@
     type: critical
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_UNABLE_TO_READ_RESET_PASSWORD_TMPL:
     step: 'install-update: reset-password'
-    title: 'Enable to read reset password template'
+    title: 'Unable to read reset password template'
     suggestion: ''
     stage: deploy
     type: critical
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_CACHE_ENABLE_FAILED:
     step: 'install-update: cache_type'
-    title: 'Command `php ./bin/magento cache:enable` failed.'
+    title: 'Command failed: `php ./bin/magento cache:enable`'
     suggestion: 'Command `php ./bin/magento cache:enable` runs only when Magento was installed but `./app/etc/env.php` file was absent or empty at the beginning of the deployment. Check the `cloud.log` for more information. Add `VERBOSE_COMMANDS: ''-vvv''` into `.magento.env.yaml` for more detailed command output.'
     stage: deploy
     type: critical
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_CRYPT_KEY_IS_ABSENT:
     step: install-update
     title: 'The `crypt/key`  key value does not exist in the `./app/etc/env.php` file or the `CRYPT_KEY` cloud environment variable'
-    suggestion: "This error occurs if the `./app/etc/env.php` file is not present when Magento deployment begins, or if the `crypt/key` value is undefined.\nIf you migrated the database from another environment, retrieve the crypt key value from that environment and add the value to the [CRYPT_KEY](https://devdocs.magento.com/cloud/env/variables-deploy.html#crypt_key) cloud environment variable in your current environment, see [Add the Magento encryption key](https://devdocs.magento.com/cloud/setup/first-time-setup-import-import.html#encryption-key).\nIf you accidentally removed the `./app/etc/env.php` file, use the following command to restore it from the backup files created from a previous deployment: `./vendor/bin/ece-tools backup:restore` CLI command .\""
+    suggestion: "This error occurs if the `./app/etc/env.php` file is not present when Magento deployment begins, or if the `crypt/key` value is undefined.\nIf you migrated the database from another environment, retrieve the crypt key value from that environment. Then, add the value to the [CRYPT_KEY](https://devdocs.magento.com/cloud/env/variables-deploy.html#crypt_key) cloud environment variable in your current environment. See [Add the Magento encryption key](https://devdocs.magento.com/cloud/setup/first-time-setup-import-import.html#encryption-key).\nIf you accidentally removed the `./app/etc/env.php` file, use the following command to restore it from the backup files created from a previous deployment: `./vendor/bin/ece-tools backup:restore` CLI command .\""
     stage: deploy
     type: critical
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_ES_CANNOT_CONNECT:
-    title: 'Can''t get version of elasticsearch service'
+    title: 'Can not connect to the Elasticsearch service'
     suggestion: 'Check that credentials for elasticsearch are correct and service is running'
     stage: deploy
     type: critical
@@ -332,7 +333,7 @@
     type: critical
 !php/const Magento\MagentoCloud\App\Error::PD_CONFIG_NOT_DEFINED:
     title: 'Configuration isn''t defined in the `schema.yaml` file'
-    suggestion: 'Configuration isn''t defined in the `./vendor/magento/ece-tools/config/schema.yaml` file. Check that the config variable name is correct, and that it defined.'
+    suggestion: 'Configuration is not defined in the `./vendor/magento/ece-tools/config/schema.yaml` file. Check that the config variable name is correct, and that it is defined.'
     stage: post-deploy
     type: critical
 !php/const Magento\MagentoCloud\App\Error::PD_CONFIG_PARSE_FAILED:
@@ -342,7 +343,7 @@
     type: critical
 !php/const Magento\MagentoCloud\App\Error::PD_CONFIG_UNABLE_TO_READ:
     title: 'Unable to read the `.magento.env.yaml` file'
-    suggestion: 'Unable to read the `./.magento.env.yaml` file. Check file permissions.'
+    suggestion: 'Check file permissions.'
     stage: post-deploy
     type: critical
 !php/const Magento\MagentoCloud\App\Error::PD_CONFIG_UNABLE_TO_READ_SCHEMA_YAML:
@@ -369,8 +370,8 @@
     stage: post-deploy
     type: critical
 !php/const Magento\MagentoCloud\App\Error::GLOBAL_CONFIG_NOT_DEFINED:
-    title: 'Configuration isn''t defined in the `schema.yaml` file'
-    suggestion: 'Configuration isn''t defined in the `./vendor/magento/ece-tools/config/schema.yaml` file. Check that the config variable name is correct, and that it defined.'
+    title: 'Configuration is not defined in the `schema.yaml` file'
+    suggestion: 'Check that the config variable name is correct, and that it defined.'
     stage: general
     type: critical
 !php/const Magento\MagentoCloud\App\Error::GLOBAL_CONFIG_PARSE_FAILED:
@@ -404,12 +405,12 @@
     step: validate-config
     type: warning
 !php/const Magento\MagentoCloud\App\Error::WARN_CONFIGURATION_VERSION_MISMATCH:
-    title: 'Configuration is not compatible with this version of Magento'
+    title: 'The configuration is not compatible with this version of Magento'
     stage: build
     step: validate-config
     type: warning
 !php/const Magento\MagentoCloud\App\Error::WARN_SCD_OPTIONS_IGNORANCE:
-    title: 'Scd options ignored'
+    title: 'SCD options ignored'
     stage: build
     step: validate-config
     type: warning
@@ -444,19 +445,19 @@
     step: validate-config
     type: warning
 !php/const Magento\MagentoCloud\App\Error::WARN_ADMIN_DATA_IGNORED:
-    title: 'Admin data is used to create an admin user during initial installation only and is ignored during upgrade process'
-    suggestion: 'You can remove admin data from configuration'
+    title: 'Admin data is used to create an admin user during initial installation only. Any changes to Admin data are ignored during the upgrade process.'
+    suggestion: 'After the initial installation, you can remove admin data from the configuration.'
     stage: deploy
     step: validate-config
     type: warning
 !php/const Magento\MagentoCloud\App\Error::WARN_ADMIN_EMAIL_NOT_SET:
     title: 'Admin user was not created as admin email was not set'
-    suggestion: 'Create an admin user via ssh manually: bin/magento admin:user:create'
+    suggestion: `After installation, you can create an admin user manually:  Use ssh to connect to your environment. Then, run the `bin/magento admin:user:create` command.'
     stage: deploy
     step: validate-config
     type: warning
 !php/const Magento\MagentoCloud\App\Error::WARN_UPDATE_PHP_VERSION:
-    title: 'Update php version to recommended'
+    title: 'Update php version to recommended version'
     stage: deploy
     step: validate-config
     type: warning
@@ -471,13 +472,13 @@
     step: validate-config
     type: warning
 !php/const Magento\MagentoCloud\App\Error::WARN_ES_INSTALLED_BUT_NOT_USED:
-    title: 'Elasticsearch service is installed at infrastructure layer but is not used as a search engine.'
-    suggestion: 'Consider removing elasticsearch service from infrastructure layer for optimized resource usage.'
+    title: 'Elasticsearch service is installed at infrastructure layer, but it is not used as a search engine.'
+    suggestion: 'Consider removing the Elasticsearch service from the infrastructure layer to optimize resource usage.'
     stage: deploy
     step: validate-config
     type: warning
 !php/const Magento\MagentoCloud\App\Error::WARN_ES_VERSION_MISMATCH:
-    title: 'Elasticsearch service version on infrastructure layer is not compatible with current version of elasticsearch/elasticsearch module, used by your Magento application.'
+    title: 'Elasticsearch service version on infrastructure layer is not compatible with current version of the elasticsearch/elasticsearch module, used by your Magento application.'
     stage: deploy
     step: validate-config
     type: warning
@@ -487,7 +488,7 @@
     step: validate-config
     type: warning
 !php/const Magento\MagentoCloud\App\Error::WARN_DEPLOY_SCD_OPTIONS_IGNORANCE:
-    title: 'Scd options ignored as deploy didn''t run on the build phase'
+    title: 'SCD options ignored because the deploy process did not run on the build phase'
     stage: deploy
     step: validate-config
     type: warning
@@ -502,7 +503,7 @@
     step: validate-config
     type: warning
 !php/const Magento\MagentoCloud\App\Error::WARN_CONFIG_WRONG_JSON_FORMAT:
-    title: 'Json type configuration can''t be decoded'
+    title: 'JSON type configuration can not be decoded'
     stage: deploy
     step: validate-config
     type: warning
@@ -518,12 +519,12 @@
     type: warning
 !php/const Magento\MagentoCloud\App\Error::WARN_DEPRECATED_MYSQL_SEARCH_ENGINE:
     title: 'The MySQL search configuration option is deprecated'
-    suggestion: 'Use Elasticsearch instead'
+    suggestion: 'Use Elasticsearch instead.'
     stage: deploy
     step: validate-config
     type: warning
 !php/const Magento\MagentoCloud\App\Error::WARN_ENV_PHP_MISSED:
-    title: 'Magento state indicated as installed but configuration file app/etc/env.php was empty or did not exist.'
+    title: 'Magento installation completed, but the `app/etc/env.php` configuration file was missing or empty.'
     suggestion: 'Required data will be restored from environment configurations and from .magento.env.yaml file.'
     stage: deploy
     step: install-update
@@ -534,7 +535,7 @@
     step: 'install-update:db-connection'
     type: warning
 !php/const Magento\MagentoCloud\App\Error::WARN_DB_CONFIG_NOT_COMPATIBLE_WITH_SLAVE:
-    title: 'You have changed db configuration that not compatible with slave connection.'
+    title: 'You have changed to a database configuration that is not compatible with the slave connection.'
     stage: deploy
     step: 'install-update:db-connection'
     type: warning
@@ -544,7 +545,7 @@
     step: 'install-update:split-db'
     type: warning
 !php/const Magento\MagentoCloud\App\Error::WARN_NOT_ENOUGH_DATA_SPLIT_DB_VAR:
-    title: 'Variable SPLIT_DB does not have data which were already split.'
+    title: 'The SPLIT_DB variable does not have data which were already split.'
     stage: deploy
     step: 'install-update:split-db'
     type: warning
@@ -555,7 +556,7 @@
     type: warning
 !php/const Magento\MagentoCloud\App\Error::WARN_DEBUG_LOG_ENABLED:
     title: 'Debug logging is enabled in Magento'
-    suggestion: 'To save space in Magento Cloud debug logging should not be enabled for your production environments.'
+    suggestion: 'To save disk space, do not enable debug logging for your production environments.'
     stage: post-deploy
     step: validate-config
     type: warning
