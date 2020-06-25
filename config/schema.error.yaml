@@ -565,7 +565,7 @@
     step: warm-up
     type: warning
 !php/const Magento\MagentoCloud\App\Error::WARN_CAN_NOT_FETCH_STORE_URL:
-    title: 'Can''t fetch store url'
+    title: 'Can not fetch store url'
     stage: post-deploy
     step: warm-up
     type: warning
