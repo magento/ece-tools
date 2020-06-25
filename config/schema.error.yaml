@@ -38,7 +38,7 @@
 !php/const Magento\MagentoCloud\App\Error::BUILD_COMPOSER_MISSED_REQUIRED_AUTOLOAD:
     step: validate-config
     title: 'Composer.json is missing required autoload section'
-    suggestion: 'Required `autoload` section is missing from the `composer.json` file. Compare the autoload section from the Magento Cloud template `composer.json` file template, and add the missing configuration.'
+    suggestion: 'Required `autoload` section is missing from the `composer.json` file. Compare the autoload section to the `composer.json` file in the Magento Cloud template, and add the missing configuration.'
     stage: build
     type: critical
 !php/const Magento\MagentoCloud\App\Error::BUILD_WRONG_CONFIGURATION_MAGENTO_ENV_YAML:
