@@ -43,7 +43,7 @@
     type: critical
 !php/const Magento\MagentoCloud\App\Error::BUILD_WRONG_CONFIGURATION_MAGENTO_ENV_YAML:
     step: validate-config
-    title: 'The file `.magento.env.yaml` contains an option which isn''t declared in the schema, or has an invalid value or stage'
+    title: 'The file `.magento.env.yaml` contains an option that is not declared in the schema, or an option configured with an invalid value or stage`
     suggestion: 'The `./.magento.env.yaml` file contains invalid configuration. Check the error log for detailed info.'
     stage: build
     type: critical
