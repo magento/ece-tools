@@ -560,7 +560,7 @@
     step: validate-config
     type: warning
 !php/const Magento\MagentoCloud\App\Error::WARN_CAN_NOT_FETCH_STORE_URLS:
-    title: 'Can''t fetch store urls'
+    title: 'Can not fetch store urls'
     stage: post-deploy
     step: warm-up
     type: warning
