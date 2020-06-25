@@ -20,7 +20,7 @@
     type: critical
 !php/const Magento\MagentoCloud\App\Error::BUILD_CONFIG_UNABLE_TO_READ_SCHEMA_YAML:
     title: 'Unable to read the `.schema.yaml` file'
-    suggestion: 'Unable to read the `./vendor/magento/ece-tools/config/magento.env.yaml` file. Check file permissions and run redeployment.'
+    suggestion: 'Unable to read the `./vendor/magento/ece-tools/config/magento.env.yaml` file. Check file permissions and redeploy (`magento-cloud environment:redeploy`).'
     stage: build
     type: critical
 !php/const Magento\MagentoCloud\App\Error::BUILD_CONFIG_PHP_IS_NOT_WRITABLE:
