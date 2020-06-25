@@ -7,6 +7,7 @@
 
 {:.error-table}
 | Error code | Build step | Error description | Suggested action |
+| - | - | - | - |
 | 2 |  | Cannot write to the `./app/etc/env.php` file | Deployment script cannot make required changes to the `/app/etc/env.php` file. Check your filesystem permissions. |
 | 3 |  | Configuration isn't defined in the `schema.yaml` file | Configuration isn't defined in the `./vendor/magento/ece-tools/config/schema.yaml` file. Check that the config variable name is correct, and that it defined. |
 | 4 |  | Failed to parse the `.magento.env.yaml` file | The `./.magento.env.yaml` file format is invalid. Use a YAML parser to check the syntax and fix any errors. |
@@ -36,6 +37,7 @@
 
 {:.error-table}
 | Error code | Deploy step | Error description | Suggested action |
+| - | - | - | - |
 | 101 | pre-deploy: cache | Incorrect cache configuration (missing port or host) | Cache configuration is missing required parameters `server` or `port`. Check the `cloud.log` for more information. |
 | 102 |  | Cannot write to the `./app/etc/env.php` file | Deployment script cannot make required changes to the `/app/etc/env.php` file. Check your filesystem permissions. |
 | 103 |  | Configuration isn't defined in the `schema.yaml` file | Configuration isn't defined in the `./vendor/magento/ece-tools/config/schema.yaml` file. Check that the config variable name is correct, and that it defined. |
@@ -44,7 +46,6 @@
 | 106 |  | Unable to read the `.schema.yaml` file |  |
 | 107 | pre-deploy: clean-redis-cache | Failed to clean the Redis cache | Failed to clean the Redis cache. Check that the Redis cache configuration is correct and that the Redis service is available. See [Setup Redis service](https://devdocs.magento.com/cloud/project/project-conf-files_services-redis.html). |
 | 108 | pre-deploy: set-production-mode | Command `/bin/magento maintenance:enable` failed | Check the `cloud.log` for more information. Add `VERBOSE_COMMANDS: '-vvv'` into `.magento.env.yaml` for more detailed command output. |
-| 109 | validate-config | Incorrect database configuration | Check that the the `DATABASE_CONFIGURATION` environment variable is configured correctly. |
 | 109 | validate-config | Incorrect database configuration | Check that the the `DATABASE_CONFIGURATION` environment variable is configured correctly. |
 | 110 | validate-config | Incorrect session configuration | Check that the `SESSION_CONFIGURATION` environment variable is configured correctly. The configuration must contain at least the `save` parameter. |
 | 111 | validate-config | Incorrect search configuration | Check that the `SEARCH_CONFIGURATION` environment variable is configured correctly.. The configuration must contain at least the `engine` parameter. |
@@ -76,6 +77,7 @@ If you accidentally removed the `./app/etc/env.php` file, use the following comm
 
 {:.error-table}
 | Error code | Post-deploy step | Error description | Suggested action |
+| - | - | - | - |
 | 201 | is-deploy-failed | Deploy stage failed |  |
 | 202 |  | The `./app/etc/env.php` file is not writable | Deployment script cannot make required changes to the `/app/etc/env.php` file. Check your filesystem permissions. |
 | 203 |  | Configuration isn't defined in the `schema.yaml` file | Configuration isn't defined in the `./vendor/magento/ece-tools/config/schema.yaml` file. Check that the config variable name is correct, and that it defined. |
@@ -90,6 +92,7 @@ If you accidentally removed the `./app/etc/env.php` file, use the following comm
 
 {:.error-table}
 | Error code | General step | Error description | Suggested action |
+| - | - | - | - |
 | 243 |  | Configuration isn't defined in the `schema.yaml` file | Configuration isn't defined in the `./vendor/magento/ece-tools/config/schema.yaml` file. Check that the config variable name is correct, and that it defined. |
 | 244 |  | Failed to parse the `.magento.env.yaml` file | The `./.magento.env.yaml` file format is invalid. Use a YAML parser to check the syntax and fix any errors. |
 | 245 |  | Unable to read the `.magento.env.yaml` file | Unable to read the `./.magento.env.yaml` file. Check file permissions. |
@@ -103,6 +106,7 @@ If you accidentally removed the `./app/etc/env.php` file, use the following comm
 
 {:.error-table}
 | Error code | Build step | Error description | Suggested action |
+| - | - | - | - |
 | 1001 | validate-config | File app/etc/config.php does not exist |  |
 | 1002 | validate-config | The ./build_options.ini file is no longer supported |  |
 | 1003 | validate-config | The modules section is missing from the shared config file |  |
@@ -115,6 +119,7 @@ If you accidentally removed the `./app/etc/env.php` file, use the following comm
 
 {:.error-table}
 | Error code | Deploy step | Error description | Suggested action |
+| - | - | - | - |
 | 2001 | pre-deploy:cache | Cache is configured for a Redis service that is not available. Configuration will be ignored. |  |
 | 2002 | validate-config | The configured state is not ideal |  |
 | 2003 | validate-config | The directory nesting level value for error reporting has not been configured |  |
@@ -145,6 +150,7 @@ If you accidentally removed the `./app/etc/env.php` file, use the following comm
 
 {:.error-table}
 | Error code | Post-deploy step | Error description | Suggested action |
+| - | - | - | - |
 | 3001 | validate-config | Debug logging is enabled in Magento | To save space in Magento Cloud debug logging should not be enabled for your production environments. |
 | 3002 | warm-up | Can't fetch store urls |  |
 | 3003 | warm-up | Can't fetch store url |  |
@@ -153,4 +159,20 @@ If you accidentally removed the `./app/etc/env.php` file, use the following comm
 
 {:.error-table}
 | Error code | General step | Error description | Suggested action |
+| - | - | - | - |
 | 4001 |  | Can't get system processor count: |  |
+
+<!--Custom css-->
+
+<!--
+  This is a style declaration so that first column does not wrap
+-->
+
+<style>
+table.error-table td:nth-child(1) {
+  width: 100px;
+}
+table.error-table td:nth-child(2) {
+  width: 200px;
+}
+</style>
