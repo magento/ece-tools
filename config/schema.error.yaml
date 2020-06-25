@@ -5,7 +5,7 @@
     type: critical
 !php/const Magento\MagentoCloud\App\Error::BUILD_CONFIG_NOT_DEFINED:
     title: 'Configuration isn''t defined in the `schema.yaml` file'
-    suggestion: 'Configuration isn''t defined in the `./vendor/magento/ece-tools/config/schema.yaml` file. Check that the config variable name is correct, and that it defined.'
+    suggestion: 'Configuration is not defined in the `./vendor/magento/ece-tools/config/schema.yaml` file. Check that the config variable name is correct, and that it is defined.'
     stage: build
     type: critical
 !php/const Magento\MagentoCloud\App\Error::BUILD_CONFIG_PARSE_FAILED:
