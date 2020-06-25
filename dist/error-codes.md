@@ -9,23 +9,23 @@
 | Error code | Build step | Error description | Suggested action |
 | - | - | - | - |
 | 2 |  | Cannot write to the `./app/etc/env.php` file | Deployment script cannot make required changes to the `/app/etc/env.php` file. Check your filesystem permissions. |
-| 3 |  | Configuration isn't defined in the `schema.yaml` file | Configuration isn't defined in the `./vendor/magento/ece-tools/config/schema.yaml` file. Check that the config variable name is correct, and that it defined. |
+| 3 |  | Configuration isn't defined in the `schema.yaml` file | Configuration is not defined in the `./vendor/magento/ece-tools/config/schema.yaml` file. Check that the config variable name is correct, and that it is defined. |
 | 4 |  | Failed to parse the `.magento.env.yaml` file | The `./.magento.env.yaml` file format is invalid. Use a YAML parser to check the syntax and fix any errors. |
 | 5 |  | Unable to read the `.magento.env.yaml` file | Unable to read the `./.magento.env.yaml` file. Check file permissions. |
-| 6 |  | Unable to read the `.schema.yaml` file | Unable to read the `./vendor/magento/ece-tools/config/magento.env.yaml` file. Check file permissions and run redeployment. |
-| 7 | refresh-modules | Cannot write to the `./app/etc/config.php` file | Deployment script cannot make required changes to the `/app/etc/config.php` file. Check your filesystem permissions. |
+| 6 |  | Unable to read the `.schema.yaml` file | Unable to read the `./vendor/magento/ece-tools/config/magento.env.yaml` file. Check file permissions and redeploy (`magento-cloud environment:redeploy`). |
+| 7 | refresh-modules | Cannot write to the `./app/etc/config.php` file | The deployment script cannot make required changes to the `/app/etc/config.php` file. Check your filesystem permissions. |
 | 8 | validate-config | Cannot read the `composer.json` file | Unable to read the `./composer.json` file. Check file permissions. |
-| 9 | validate-config | Composer.json is missing required autoload section | Required `autoload` section is missing from the `composer.json` file. Compare the autoload section from the Magento Cloud template `composer.json` file template, and add the missing configuration. |
-| 10 | validate-config | The file `.magento.env.yaml` contains an option which isn't declared in the schema, or has an invalid value or stage | The `./.magento.env.yaml` file contains invalid configuration. Check the error log for detailed info. |
-| 11 | refresh-modules | Command `/bin/magento module:enable --all` failed | Try to run `composer update` locally then commit and push updated `composer.lock` file, also check the `cloud.log` for more information. Add `VERBOSE_COMMANDS: '-vvv'` into `.magento.env.yaml` for more detailed command output. |
+| 9 | validate-config | Composer.json is missing required autoload section | Required `autoload` section is missing from the `composer.json` file. Compare the autoload section to the `composer.json` file in the Magento Cloud template, and add the missing configuration. |
+| 10 | validate-config | The file `.magento.env.yaml` contains an option that is not declared in the schema, or an option configured with an invalid value or stage | The `./.magento.env.yaml` file contains invalid configuration. Check the error log for detailed info. |
+| 11 | refresh-modules | Command failed: `/bin/magento module:enable --all` | Try to run `composer update` locally. Then, commit and push the updated `composer.lock` file. Also check the `cloud.log` for more information. For more detailed command output, add the `VERBOSE_COMMANDS: '-vvv'` option to  the `.magento.env.yaml` file. |
 | 12 | apply-patches | Failed to apply patch |  |
 | 13 | set-report-dir-nesting-level | Cannot write to the file `/pub/errors/local.xml` |  |
 | 14 | copy-sample-data | Failed to copy sample data files |  |
-| 15 | compile-di | Command `/bin/magento setup:di:compile` failed | Check the `cloud.log` for more information. Add `VERBOSE_COMMANDS: '-vvv'` into `.magento.env.yaml` for more detailed command output. |
-| 16 | dump-autoload | Command `composer dump-autoload` failed | The `composer dump-autoload` command failed. Check the `cloud.log` for more information. |
-| 17 | run-baler | The command to run `Baler` for Javascript bundling failed | Check the `SCD_USE_BALER` environment variable to verify that the Baler module is configured and enabled for JS bundling. If you don't need the Baler module, set `SCD_USE_BALER: false`. |
+| 15 | compile-di | Command failed: `/bin/magento setup:di:compile` | Check the `cloud.log` for more information. Add `VERBOSE_COMMANDS: '-vvv'` into `.magento.env.yaml` for more detailed command output. |
+| 16 | dump-autoload | Command failed: `composer dump-autoload` | The `composer dump-autoload` command failed. Check the `cloud.log` for more information. |
+| 17 | run-baler | The command to run `Baler` for Javascript bundling failed | Check the `SCD_USE_BALER` environment variable to verify that the Baler module is configured and enabled for JS bundling. If you do not need the Baler module, set `SCD_USE_BALER: false`. |
 | 18 | compress-static-content | Required utility wasn't found (timeout, bash) |  |
-| 19 | deploy-static-content | Command `/bin/magento setup:static-content:deploy` failed | Check the `cloud.log` for more information. Add `VERBOSE_COMMANDS: '-vvv'` into `.magento.env.yaml` for more detailed command output. |
+| 19 | deploy-static-content | Command `/bin/magento setup:static-content:deploy` failed | Check the `cloud.log` for more information. For more detailed command output, add the `VERBOSE_COMMANDS: '-vvv'` option to  the `.magento.env.yaml` file. |
 | 20 | compress-static-content | Static content compression failed | Check the `cloud.log` for more information. |
 | 21 | backup-data: static-content | Failed to copy static content into the `init` directory | Check the `cloud.log` for more information. |
 | 22 | backup-data: writable-dirs | Failed to copy some writable directories into the `init` directory | Failed to copy writable directories into the `./init` folder. Check your filesystem permissions. |
@@ -40,38 +40,36 @@
 | - | - | - | - |
 | 101 | pre-deploy: cache | Incorrect cache configuration (missing port or host) | Cache configuration is missing required parameters `server` or `port`. Check the `cloud.log` for more information. |
 | 102 |  | Cannot write to the `./app/etc/env.php` file | Deployment script cannot make required changes to the `/app/etc/env.php` file. Check your filesystem permissions. |
-| 103 |  | Configuration isn't defined in the `schema.yaml` file | Configuration isn't defined in the `./vendor/magento/ece-tools/config/schema.yaml` file. Check that the config variable name is correct, and that it defined. |
-| 104 |  | Failed to parse the `.magento.env.yaml` file | Configuration isn't defined in the `./vendor/magento/ece-tools/config/schema.yaml` file. Check that the config variable name is correct, and that it defined. |
+| 103 |  | Configuration isn't defined in the `schema.yaml` file | Configuration is not defined in the `./vendor/magento/ece-tools/config/schema.yaml` file. Check that the config variable name is correct, and that it is defined. |
+| 104 |  | Failed to parse the `.magento.env.yaml` file | Configuration is not defined in the `./vendor/magento/ece-tools/config/schema.yaml` file. Check that the config variable name is correct, and that it is defined. |
 | 105 |  | Unable to read the `.magento.env.yaml` file | Unable to read the `./.magento.env.yaml` file. Check file permissions. |
 | 106 |  | Unable to read the `.schema.yaml` file |  |
 | 107 | pre-deploy: clean-redis-cache | Failed to clean the Redis cache | Failed to clean the Redis cache. Check that the Redis cache configuration is correct and that the Redis service is available. See [Setup Redis service](https://devdocs.magento.com/cloud/project/project-conf-files_services-redis.html). |
-| 108 | pre-deploy: set-production-mode | Command `/bin/magento maintenance:enable` failed | Check the `cloud.log` for more information. Add `VERBOSE_COMMANDS: '-vvv'` into `.magento.env.yaml` for more detailed command output. |
+| 108 | pre-deploy: set-production-mode | Command `/bin/magento maintenance:enable` failed | Check the `cloud.log` for more information. For more detailed command output, add the `VERBOSE_COMMANDS: '-vvv'` option to the `.magento.env.yaml` file. |
 | 109 | validate-config | Incorrect database configuration | Check that the the `DATABASE_CONFIGURATION` environment variable is configured correctly. |
 | 110 | validate-config | Incorrect session configuration | Check that the `SESSION_CONFIGURATION` environment variable is configured correctly. The configuration must contain at least the `save` parameter. |
-| 111 | validate-config | Incorrect search configuration | Check that the `SEARCH_CONFIGURATION` environment variable is configured correctly.. The configuration must contain at least the `engine` parameter. |
+| 111 | validate-config | Incorrect search configuration | Check that the `SEARCH_CONFIGURATION` environment variable is configured correctly. The configuration must contain at least the `engine` parameter. |
 | 112 | validate-config | Incorrect resource configuration | Check that the `RESOURCE_CONFIGURATION` environment variable is configured correctly. The configuration must contain at least `connection` parameter. |
-| 113 | validate-config:elasticsuite-integrity | ElasticSuite is installed, but the ElasticSearch service is not available | ElasticSuite is installed, but the Elasticsearch service is not available. Check that the `SEARCH_CONFIGURATION` environment variable is configured correctly, and verify that the Elasticsearch service is available. |
-| 114 | validate-config:elasticsuite-integrity | ElasticSuite is installed, but another search engine is used | ElasticSuite is installed but another search engine is configured. Update the `SEARCH_CONFIGURATION` environment variable to enable Elasticsearch and verify the Elasticsearch service configuration in the `services.yaml` file. |
+| 113 | validate-config:elasticsuite-integrity | ElasticSuite is installed, but the ElasticSearch service is not available | Check that the `SEARCH_CONFIGURATION` environment variable is configured correctly, and verify that the Elasticsearch service is available. |
+| 114 | validate-config:elasticsuite-integrity | ElasticSuite is installed, but another search engine is used | ElasticSuite is installed, but another search engine is configured. Update the `SEARCH_CONFIGURATION` environment variable to enable Elasticsearch, and verify the Elasticsearch service configuration in the `services.yaml` file. |
 | 115 |  | Database query execution failed |  |
-| 116 | install-update: setup | Command `/bin/magento setup:install` failed | Check the `cloud.log` and `install_upgrade.log` for more information. Add `VERBOSE_COMMANDS: '-vvv'` into `.magento.env.yaml` for more detailed command output. |
-| 117 | install-update: config-import | Command `app:config:import` failed | Check the `cloud.log` for more information. Add `VERBOSE_COMMANDS: '-vvv'` into `.magento.env.yaml` for more detailed command output. |
+| 116 | install-update: setup | Command `/bin/magento setup:install` failed | Check the `cloud.log` and `install_upgrade.log` for more information. For more detailed command output, add the `VERBOSE_COMMANDS: '-vvv'` option to the `.magento.env.yaml` file. |
+| 117 | install-update: config-import | Command `app:config:import` failed | Check the `cloud.log` for more information. For more detailed command output, add the `VERBOSE_COMMANDS: '-vvv'` option to the `.magento.env.yaml` file. |
 | 118 |  | Required utility wasn't found (timeout, bash) |  |
-| 119 | install-update: deploy-static-content | Command `/bin/magento setup:static-content:deploy` failed | Check the `cloud.log` for more information. Add `VERBOSE_COMMANDS: '-vvv'` into `.magento.env.yaml` for more detailed command output. |
+| 119 | install-update: deploy-static-content | Command `/bin/magento setup:static-content:deploy` failed | Check the `cloud.log` for more information. For more detailed command output, add the `VERBOSE_COMMANDS: '-vvv'` option to the `.magento.env.yaml` file. |
 | 120 | compress-static-content | Static content compression failed | Check the `cloud.log` for more information. |
-| 121 | deploy-static-content:generate | Cannot update the deployed version | Cannot update `./pub/static/deployed_version.txt` file. Check your filesystem permissions. |
+| 121 | deploy-static-content:generate | Cannot update the deployed version | Cannot update the `./pub/static/deployed_version.txt` file. Check your filesystem permissions. |
 | 122 | clean-static-content | Failed to clean static content files |  |
-| 123 | install-update: split-db | Command `/bin/magento setup:db-schema:split` failed | Check the `cloud.log` for more information. Add `VERBOSE_COMMANDS: '-vvv'` into `.magento.env.yaml` for more detailed command output. |
+| 123 | install-update: split-db | Command `/bin/magento setup:db-schema:split` failed | Check the `cloud.log` for more information. For more detailed command output, add the `VERBOSE_COMMANDS: '-vvv'` option to the `.magento.env.yaml` file. |
 | 124 | clean-view-preprocessed | Failed to clean the `var/view_preprocessed` folder | Unable to clean the `./var/view_preprocessed` folder. Check your filesystem permissions. |
 | 125 | install-update: reset-password | Failed to update the `/var/credentials_email.txt` file | Failed to update the `/var/credentials_email.txt` file. Check your filesystem permissions. |
-| 126 | install-update: update | Command `/bin/magento setup:upgrade` failed | Check the `cloud.log` and `install_upgrade.log` for more information. Add `VERBOSE_COMMANDS: '-vvv'` into `.magento.env.yaml` for more detailed command output. |
-| 127 | clean-cache | Command `/bin/magento cache:flush` failed | Check the `cloud.log` for more information. Add `VERBOSE_COMMANDS: '-vvv'` into `.magento.env.yaml` for more detailed command output. |
+| 126 | install-update: update | Command `/bin/magento setup:upgrade` failed | Check the `cloud.log` and `install_upgrade.log` for more information. For more detailed command output, add the `VERBOSE_COMMANDS: '-vvv'` option to the `.magento.env.yaml` file. |
+| 127 | clean-cache | Command `/bin/magento cache:flush` failed | Check the `cloud.log` for more information. For more detailed command output, add the `VERBOSE_COMMANDS: '-vvv'` option to the `.magento.env.yaml` file. |
 | 128 | disable-maintenance-mode | Command `/bin/magento maintenance:disable` failed | Check the `cloud.log` for more information. Add `VERBOSE_COMMANDS: '-vvv'` into `.magento.env.yaml` for more detailed command output. |
-| 129 | install-update: reset-password | Enable to read reset password template |  |
-| 130 | install-update: cache_type | Command `php ./bin/magento cache:enable` failed. | Command `php ./bin/magento cache:enable` runs only when Magento was installed but `./app/etc/env.php` file was absent or empty at the beginning of the deployment. Check the `cloud.log` for more information. Add `VERBOSE_COMMANDS: '-vvv'` into `.magento.env.yaml` for more detailed command output. |
-| 131 | install-update | The `crypt/key`  key value does not exist in the `./app/etc/env.php` file or the `CRYPT_KEY` cloud environment variable | This error occurs if the `./app/etc/env.php` file is not present when Magento deployment begins, or if the `crypt/key` value is undefined.
-If you migrated the database from another environment, retrieve the crypt key value from that environment and add the value to the [CRYPT_KEY](https://devdocs.magento.com/cloud/env/variables-deploy.html#crypt_key) cloud environment variable in your current environment, see [Add the Magento encryption key](https://devdocs.magento.com/cloud/setup/first-time-setup-import-import.html#encryption-key).
-If you accidentally removed the `./app/etc/env.php` file, use the following command to restore it from the backup files created from a previous deployment: `./vendor/bin/ece-tools backup:restore` CLI command ." |
-| 132 |  | Can't get version of elasticsearch service | Check that credentials for elasticsearch are correct and service is running |
+| 129 | install-update: reset-password | Unable to read reset password template |  |
+| 130 | install-update: cache_type | Command failed: `php ./bin/magento cache:enable` | Command `php ./bin/magento cache:enable` runs only when Magento was installed but `./app/etc/env.php` file was absent or empty at the beginning of the deployment. Check the `cloud.log` for more information. Add `VERBOSE_COMMANDS: '-vvv'` into `.magento.env.yaml` for more detailed command output. |
+| 131 | install-update | The `crypt/key`  key value does not exist in the `./app/etc/env.php` file or the `CRYPT_KEY` cloud environment variable | This error occurs if the `./app/etc/env.php` file is not present when Magento deployment begins, or if the `crypt/key` value is undefined. If you migrated the database from another environment, retrieve the crypt key value from that environment. Then, add the value to the [CRYPT_KEY](https://devdocs.magento.com/cloud/env/variables-deploy.html#crypt_key) cloud environment variable in your current environment. See [Add the Magento encryption key](https://devdocs.magento.com/cloud/setup/first-time-setup-import-import.html#encryption-key). If you accidentally removed the `./app/etc/env.php` file, use the following command to restore it from the backup files created from a previous deployment: `./vendor/bin/ece-tools backup:restore` CLI command ." |
+| 132 |  | Can not connect to the Elasticsearch service | Check that credentials for elasticsearch are correct and service is running |
 
 ### Post-deploy stage
 
@@ -80,9 +78,9 @@ If you accidentally removed the `./app/etc/env.php` file, use the following comm
 | - | - | - | - |
 | 201 | is-deploy-failed | Deploy stage failed |  |
 | 202 |  | The `./app/etc/env.php` file is not writable | Deployment script cannot make required changes to the `/app/etc/env.php` file. Check your filesystem permissions. |
-| 203 |  | Configuration isn't defined in the `schema.yaml` file | Configuration isn't defined in the `./vendor/magento/ece-tools/config/schema.yaml` file. Check that the config variable name is correct, and that it defined. |
+| 203 |  | Configuration isn't defined in the `schema.yaml` file | Configuration is not defined in the `./vendor/magento/ece-tools/config/schema.yaml` file. Check that the config variable name is correct, and that it is defined. |
 | 204 |  | Failed to parse the `.magento.env.yaml` file | The `./.magento.env.yaml` file format is invalid. Use a YAML parser to check the syntax and fix any errors. |
-| 205 |  | Unable to read the `.magento.env.yaml` file | Unable to read the `./.magento.env.yaml` file. Check file permissions. |
+| 205 |  | Unable to read the `.magento.env.yaml` file | Check file permissions. |
 | 206 |  | Unable to read the `.schema.yaml` file |  |
 | 207 | warm-up | Failed to warm-up some pages |  |
 | 208 | time-to-firs-byte | Failed to test time to first byte (TTFB) |  |
@@ -93,7 +91,7 @@ If you accidentally removed the `./app/etc/env.php` file, use the following comm
 {:.error-table}
 | Error code | General step | Error description | Suggested action |
 | - | - | - | - |
-| 243 |  | Configuration isn't defined in the `schema.yaml` file | Configuration isn't defined in the `./vendor/magento/ece-tools/config/schema.yaml` file. Check that the config variable name is correct, and that it defined. |
+| 243 |  | Configuration is not defined in the `schema.yaml` file | Check that the config variable name is correct, and that it defined. |
 | 244 |  | Failed to parse the `.magento.env.yaml` file | The `./.magento.env.yaml` file format is invalid. Use a YAML parser to check the syntax and fix any errors. |
 | 245 |  | Unable to read the `.magento.env.yaml` file | Unable to read the `./.magento.env.yaml` file. Check file permissions. |
 | 246 |  | Unable to read the `.schema.yaml` file |  |
@@ -110,8 +108,8 @@ If you accidentally removed the `./app/etc/env.php` file, use the following comm
 | 1001 | validate-config | File app/etc/config.php does not exist |  |
 | 1002 | validate-config | The ./build_options.ini file is no longer supported |  |
 | 1003 | validate-config | The modules section is missing from the shared config file |  |
-| 1004 | validate-config | Configuration is not compatible with this version of Magento |  |
-| 1005 | validate-config | Scd options ignored |  |
+| 1004 | validate-config | The configuration is not compatible with this version of Magento |  |
+| 1005 | validate-config | SCD options ignored |  |
 | 1006 | validate-config | The configured state is not ideal |  |
 | 1007 | run-baler | Baler JS bundling cannot be used |  |
 
@@ -124,26 +122,26 @@ If you accidentally removed the `./app/etc/env.php` file, use the following comm
 | 2002 | validate-config | The configured state is not ideal |  |
 | 2003 | validate-config | The directory nesting level value for error reporting has not been configured |  |
 | 2004 | validate-config | Invalid file config ./pub/errors/local.xml |  |
-| 2005 | validate-config | Admin data is used to create an admin user during initial installation only and is ignored during upgrade process | You can remove admin data from configuration |
-| 2006 | validate-config | Admin user was not created as admin email was not set | Create an admin user via ssh manually: bin/magento admin:user:create |
-| 2007 | validate-config | Update php version to recommended |  |
+| 2005 | validate-config | Admin data is used to create an admin user during initial installation only. Any changes to Admin data are ignored during the upgrade process. | After the initial installation, you can remove admin data from the configuration. |
+| 2006 | validate-config | Admin user was not created as admin email was not set | After installation, you can create an admin user manually:  Use ssh to connect to your environment. Then, run the `bin/magento admin:user:create` command. |
+| 2007 | validate-config | Update php version to recommended version |  |
 | 2008 | validate-config | Solr support has been deprecated in Magento 2.1. |  |
 | 2009 | validate-config | Solr is no longer supported by Magento 2.2 or later. |  |
-| 2010 | validate-config | Elasticsearch service is installed at infrastructure layer but is not used as a search engine. | Consider removing elasticsearch service from infrastructure layer for optimized resource usage. |
-| 2011 | validate-config | Elasticsearch service version on infrastructure layer is not compatible with current version of elasticsearch/elasticsearch module, used by your Magento application. |  |
+| 2010 | validate-config | Elasticsearch service is installed at infrastructure layer, but it is not used as a search engine. | Consider removing the Elasticsearch service from the infrastructure layer to optimize resource usage. |
+| 2011 | validate-config | Elasticsearch service version on infrastructure layer is not compatible with current version of the elasticsearch/elasticsearch module, used by your Magento application. |  |
 | 2012 | validate-config | The current configuration is not compatible with this version of Magento |  |
-| 2013 | validate-config | Scd options ignored as deploy didn't run on the build phase |  |
+| 2013 | validate-config | SCD options ignored because the deploy process did not run on the build phase |  |
 | 2014 | validate-config | The configuration contains deprecated variables or values |  |
 | 2015 | validate-config | Environment configuration is not valid |  |
-| 2016 | validate-config | Json type configuration can't be decoded |  |
+| 2016 | validate-config | JSON type configuration can not be decoded |  |
 | 2017 | validate-config | The current configuration is not compatible with this version of Magento |  |
 | 2018 | validate-config | Some services have passed EOL |  |
-| 2019 | validate-config | The MySQL search configuration option is deprecated | Use Elasticsearch instead |
-| 2020 | install-update | Magento state indicated as installed but configuration file app/etc/env.php was empty or did not exist. | Required data will be restored from environment configurations and from .magento.env.yaml file. |
+| 2019 | validate-config | The MySQL search configuration option is deprecated | Use Elasticsearch instead. |
+| 2020 | install-update | Magento installation completed, but the `app/etc/env.php` configuration file was missing or empty. | Required data will be restored from environment configurations and from .magento.env.yaml file. |
 | 2021 | install-update:db-connection | For split databases used custom connections |  |
-| 2022 | install-update:db-connection | You have changed db configuration that not compatible with slave connection. |  |
+| 2022 | install-update:db-connection | You have changed to a database configuration that is not compatible with the slave connection. |  |
 | 2023 | install-update:split-db | Enabling a split database will be skipped. |  |
-| 2024 | install-update:split-db | Variable SPLIT_DB does not have data which were already split. |  |
+| 2024 | install-update:split-db | The SPLIT_DB variable does not have data which were already split. |  |
 | 2025 | install-update:split-db | Slave connection not set. |  |
 
 ### Post-deploy stage
@@ -151,16 +149,16 @@ If you accidentally removed the `./app/etc/env.php` file, use the following comm
 {:.error-table}
 | Error code | Post-deploy step | Error description | Suggested action |
 | - | - | - | - |
-| 3001 | validate-config | Debug logging is enabled in Magento | To save space in Magento Cloud debug logging should not be enabled for your production environments. |
-| 3002 | warm-up | Can't fetch store urls |  |
-| 3003 | warm-up | Can't fetch store url |  |
+| 3001 | validate-config | Debug logging is enabled in Magento | To save disk space, do not enable debug logging for your production environments. |
+| 3002 | warm-up | Can not fetch store urls |  |
+| 3003 | warm-up | Can not fetch store url |  |
 
 ### General
 
 {:.error-table}
 | Error code | General step | Error description | Suggested action |
 | - | - | - | - |
-| 4001 |  | Can't get system processor count: |  |
+| 4001 |  | Can not get system processor count: |  |
 
 <!--Custom css-->
 

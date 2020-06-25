@@ -43,7 +43,7 @@
     type: critical
 !php/const Magento\MagentoCloud\App\Error::BUILD_WRONG_CONFIGURATION_MAGENTO_ENV_YAML:
     step: validate-config
-    title: 'The file `.magento.env.yaml` contains an option that is not declared in the schema, or an option configured with an invalid value or stage`
+    title: 'The file `.magento.env.yaml` contains an option that is not declared in the schema, or an option configured with an invalid value or stage'
     suggestion: 'The `./.magento.env.yaml` file contains invalid configuration. Check the error log for detailed info.'
     stage: build
     type: critical
@@ -223,7 +223,6 @@
     step: 'install-update: setup'
     title: 'Command `/bin/magento setup:install` failed'
     suggestion: 'Check the `cloud.log` and `install_upgrade.log` for more information. For more detailed command output, add the `VERBOSE_COMMANDS: ''-vvv''` option to the `.magento.env.yaml` file.'
-'
     stage: deploy
     type: critical
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_CONFIG_IMPORT_COMMAND_FAILED:
@@ -312,7 +311,7 @@
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_CRYPT_KEY_IS_ABSENT:
     step: install-update
     title: 'The `crypt/key`  key value does not exist in the `./app/etc/env.php` file or the `CRYPT_KEY` cloud environment variable'
-    suggestion: "This error occurs if the `./app/etc/env.php` file is not present when Magento deployment begins, or if the `crypt/key` value is undefined.\nIf you migrated the database from another environment, retrieve the crypt key value from that environment. Then, add the value to the [CRYPT_KEY](https://devdocs.magento.com/cloud/env/variables-deploy.html#crypt_key) cloud environment variable in your current environment. See [Add the Magento encryption key](https://devdocs.magento.com/cloud/setup/first-time-setup-import-import.html#encryption-key).\nIf you accidentally removed the `./app/etc/env.php` file, use the following command to restore it from the backup files created from a previous deployment: `./vendor/bin/ece-tools backup:restore` CLI command .\""
+    suggestion: "This error occurs if the `./app/etc/env.php` file is not present when Magento deployment begins, or if the `crypt/key` value is undefined. If you migrated the database from another environment, retrieve the crypt key value from that environment. Then, add the value to the [CRYPT_KEY](https://devdocs.magento.com/cloud/env/variables-deploy.html#crypt_key) cloud environment variable in your current environment. See [Add the Magento encryption key](https://devdocs.magento.com/cloud/setup/first-time-setup-import-import.html#encryption-key). If you accidentally removed the `./app/etc/env.php` file, use the following command to restore it from the backup files created from a previous deployment: `./vendor/bin/ece-tools backup:restore` CLI command .\""
     stage: deploy
     type: critical
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_ES_CANNOT_CONNECT:
@@ -452,7 +451,7 @@
     type: warning
 !php/const Magento\MagentoCloud\App\Error::WARN_ADMIN_EMAIL_NOT_SET:
     title: 'Admin user was not created as admin email was not set'
-    suggestion: `After installation, you can create an admin user manually:  Use ssh to connect to your environment. Then, run the `bin/magento admin:user:create` command.'
+    suggestion: 'After installation, you can create an admin user manually:  Use ssh to connect to your environment. Then, run the `bin/magento admin:user:create` command.'
     stage: deploy
     step: validate-config
     type: warning
