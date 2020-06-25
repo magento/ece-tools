@@ -73,7 +73,7 @@
     type: critical
 !php/const Magento\MagentoCloud\App\Error::BUILD_DI_COMPILATION_FAILED:
     step: compile-di
-    title: 'Command `/bin/magento setup:di:compile` failed'
+    title: 'Command failed: `/bin/magento setup:di:compile`'
     suggestion: 'Check the `cloud.log` for more information. Add `VERBOSE_COMMANDS: ''-vvv''` into `.magento.env.yaml` for more detailed command output.'
     stage: build
     type: critical
