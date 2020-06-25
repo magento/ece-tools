@@ -643,6 +643,20 @@ variables:
       - stage:
           global:
             X_FRAME_CONFIGURATION: SAMEORIGIN
+  QUALITY_PATCHES:
+    description: Specify a list of Magento quality patches that will be applied during deployment.
+    type: array
+    stages:
+      - build
+    default:
+      build: []
+    examples:
+      - stage:
+          build:
+            QUALITY_PATCHES:
+              - MC-31387
+              - MDVA-4567
+              - MC-45634
 
   # Environment variables
   ENV_RELATIONSHIPS:

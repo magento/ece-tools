@@ -58,19 +58,27 @@ class ManagerTest extends TestCase
     }
 
     /**
-     * @throws ShellException
+     * Tests patch applying.
+     *
+     * @param bool $deploymentFromGit
+     * @param string[] $qualityPatches
+     * @param string $expectedCommand
+     * @dataProvider applyDataProvider
      */
-    public function testApply(): void
-    {
+    public function testApply(
+        bool $deploymentFromGit,
+        array $qualityPatches,
+        string $expectedCommand
+    ): void {
         $this->globalSectionMock->expects($this->once())
             ->method('get')
             ->with(GlobalSection::VAR_DEPLOYED_MAGENTO_VERSION_FROM_GIT)
-            ->willReturn(false);
+            ->willReturn($deploymentFromGit);
 
         $processMock = $this->getMockForAbstractClass(ProcessInterface::class);
         $this->shellMock->expects($this->once())
             ->method('execute')
-            ->with('php ./vendor/bin/ece-patches apply')
+            ->with($expectedCommand)
             ->willReturn($processMock);
         $this->loggerMock->method('notice')
             ->withConsecutive(
@@ -78,7 +86,37 @@ class ManagerTest extends TestCase
                 ['End of applying patches']
             );
 
-        $this->manager->apply();
+        $this->manager->apply($qualityPatches);
+    }
+
+    /**
+     * @return array[]
+     */
+    public function applyDataProvider(): array
+    {
+        return [
+            [
+                'deploymentFromGit' => false,
+                'qualityPatches' => [],
+                'expectedCommand' => 'php ./vendor/bin/ece-patches apply --no-interaction'
+            ],
+            [
+                'deploymentFromGit' => true,
+                'qualityPatches' => [],
+                'expectedCommand' => 'php ./vendor/bin/ece-patches apply --git-installation 1 --no-interaction'
+            ],
+            [
+                'deploymentFromGit' => true,
+                'qualityPatches' => ['MC-11111', 'MC-22222'],
+                'expectedCommand' =>
+                    'php ./vendor/bin/ece-patches apply \'MC-11111\' \'MC-22222\' --git-installation 1 --no-interaction'
+            ],
+            [
+                'deploymentFromGit' => false,
+                'qualityPatches' => ['MC-32365'],
+                'expectedCommand' => 'php ./vendor/bin/ece-patches apply \'MC-32365\' --no-interaction'
+            ],
+        ];
     }
 
     /**
@@ -96,7 +134,7 @@ class ManagerTest extends TestCase
 
         $this->shellMock->expects($this->once())
             ->method('execute')
-            ->with('php ./vendor/bin/ece-patches apply')
+            ->with('php ./vendor/bin/ece-patches apply --no-interaction')
             ->willThrowException(new ShellException('Some error'));
         $this->loggerMock->method('notice')
             ->withConsecutive(
@@ -105,30 +143,6 @@ class ManagerTest extends TestCase
         $this->loggerMock->expects($this->once())
             ->method('error')
             ->with('Some error');
-
-        $this->manager->apply();
-    }
-
-    /**
-     * @throws ShellException
-     */
-    public function testApplyDeployedFromGitAndNoCopy(): void
-    {
-        $this->globalSectionMock->expects($this->once())
-            ->method('get')
-            ->with(GlobalSection::VAR_DEPLOYED_MAGENTO_VERSION_FROM_GIT)
-            ->willReturn(true);
-
-        $processMock = $this->getMockForAbstractClass(ProcessInterface::class);
-        $this->shellMock->expects($this->once())
-            ->method('execute')
-            ->with('php ./vendor/bin/ece-patches apply --git-installation 1')
-            ->willReturn($processMock);
-        $this->loggerMock->method('notice')
-            ->withConsecutive(
-                ['Applying patches'],
-                ['End of applying patches']
-            );
 
         $this->manager->apply();
     }
