@@ -50,7 +50,7 @@
 !php/const Magento\MagentoCloud\App\Error::BUILD_MODULE_ENABLE_COMMAND_FAILED:
     step: refresh-modules
     title: 'Command `/bin/magento module:enable --all` failed'
-    suggestion: 'Try to run `composer update` locally then commit and push updated `composer.lock` file, also check the `cloud.log` for more information. Add `VERBOSE_COMMANDS: ''-vvv''` into `.magento.env.yaml` for more detailed command output.'
+    suggestion: 'Try to run `composer update` locally. Then, commit and push the updated `composer.lock` file. Also check the `cloud.log` for more information. For more detailed command output, add the `VERBOSE_COMMANDS: ''-vvv''` option to  the `.magento.env.yaml` file.'
     stage: build
     type: critical
 !php/const Magento\MagentoCloud\App\Error::BUILD_PATCH_APPLYING_FAILED:
