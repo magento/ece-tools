@@ -81,7 +81,7 @@ class BalerSupport implements ValidatorInterface
             : $this->resultFactory->error(
                 'Baler JS bundling cannot be used because of the following issues:',
                 implode(PHP_EOL, $errors),
-                Error::WARN_BALER_CAN_NOT_BE_USED
+                Error::WARN_BALER_CANNOT_BE_USED
             );
     }
 }

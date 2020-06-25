@@ -57,7 +57,7 @@ class Error
     public const DEPLOY_UTILITY_NOT_FOUND = 118;
     public const DEPLOY_SCD_FAILED = 119;
     public const DEPLOY_SCD_COMPRESSION_FAILED = 120;
-    public const DEPLOY_SCD_CAN_NOT_UPDATE_VERSION = 121;
+    public const DEPLOY_SCD_CANNOT_UPDATE_VERSION = 121;
     public const DEPLOY_SCD_CLEAN_FAILED = 122;
     public const DEPLOY_SPLIT_DB_COMMAND_FAILED = 123;
     public const DEPLOY_VIEW_PREPROCESSED_CLEAN_FAILED = 124;
@@ -68,7 +68,7 @@ class Error
     public const DEPLOY_UNABLE_TO_READ_RESET_PASSWORD_TMPL = 129;
     public const DEPLOY_CACHE_ENABLE_FAILED = 130;
     public const DEPLOY_CRYPT_KEY_IS_ABSENT = 131;
-    public const DEPLOY_ES_CAN_NOT_CONNECT = 132;
+    public const DEPLOY_ES_CANNOT_CONNECT = 132;
 
     public const PD_DEPLOY_IS_FAILED = 201;
     public const PD_ENV_PHP_IS_NOT_WRITABLE = 202;
@@ -94,7 +94,7 @@ class Error
     public const WARN_CONFIGURATION_VERSION_MISMATCH = 1004;
     public const WARN_SCD_OPTIONS_IGNORANCE = 1005;
     public const WARN_CONFIGURATION_STATE_NOT_IDEAL = 1006;
-    public const WARN_BALER_CAN_NOT_BE_USED = 1007;
+    public const WARN_BALER_CANNOT_BE_USED = 1007;
 
     /**
      * Deploy
@@ -129,11 +129,11 @@ class Error
      * Post-deploy
      */
     public const WARN_DEBUG_LOG_ENABLED = 3001;
-    public const WARN_CAN_NOT_FETCH_STORE_URLS = 3002;
-    public const WARN_CAN_NOT_FETCH_STORE_URL = 3003;
+    public const WARN_CANNOT_FETCH_STORE_URLS = 3002;
+    public const WARN_CANNOT_FETCH_STORE_URL = 3003;
 
     /**
      * General
      */
-    public const WARN_CAN_NOT_GET_PROC_COUNT = 4001;
+    public const WARN_CANNOT_GET_PROC_COUNT = 4001;
 }

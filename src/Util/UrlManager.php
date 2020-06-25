@@ -212,7 +212,7 @@ class UrlManager
             } catch (ShellException $e) {
                 $this->logger->warning(
                     'Can\'t fetch store urls. ' . $e->getMessage(),
-                    ['errorCode' => Error::WARN_CAN_NOT_FETCH_STORE_URLS]
+                    ['errorCode' => Error::WARN_CANNOT_FETCH_STORE_URLS]
                 );
             }
         }
@@ -240,7 +240,7 @@ class UrlManager
         } catch (ShellException $e) {
             $this->logger->warning(
                 sprintf('Can\'t fetch store url with store code "%s". %s', $storeId, $e->getMessage()),
-                ['errorCode' => Error::WARN_CAN_NOT_FETCH_STORE_URL]
+                ['errorCode' => Error::WARN_CANNOT_FETCH_STORE_URL]
             );
 
             return null;

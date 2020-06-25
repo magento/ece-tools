@@ -51,7 +51,7 @@ class Cpu
         } catch (ShellException $e) {
             $this->logger->warning(
                 'Can\'t get system processor count: ' . $e->getMessage(),
-                ['errorCode' => Error::WARN_CAN_NOT_GET_PROC_COUNT]
+                ['errorCode' => Error::WARN_CANNOT_GET_PROC_COUNT]
             );
             $threadCount = 1;
         }
