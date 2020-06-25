@@ -570,6 +570,6 @@
     step: warm-up
     type: warning
 !php/const Magento\MagentoCloud\App\Error::WARN_CAN_NOT_GET_PROC_COUNT:
-    title: 'Can''t get system processor count:'
+    title: 'Can not get system processor count:'
     type: warning
     stage: general
