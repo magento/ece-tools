@@ -26,7 +26,7 @@
 !php/const Magento\MagentoCloud\App\Error::BUILD_CONFIG_PHP_IS_NOT_WRITABLE:
     step: refresh-modules
     title: 'Cannot write to the `./app/etc/config.php` file'
-    suggestion: 'Deployment script cannot make required changes to the `/app/etc/config.php` file. Check your filesystem permissions.'
+    suggestion: 'The deployment script cannot make required changes to the `/app/etc/config.php` file. Check your filesystem permissions.'
     stage: build
     type: critical
 !php/const Magento\MagentoCloud\App\Error::BUILD_CANT_READ_COMPOSER_JSON:
