@@ -127,7 +127,7 @@ class Cache implements StepInterface
         ];
 
         try {
-            if (in_array($backend, $notAllowedBackend, true) && !$this->magentoVersion->isGreaterOrEqual('2.3.5')) {
+            if (in_array($backend, $notAllowedBackend, true) && !$this->magentoVersion->isGreaterOrEqual('2.3.0')) {
                 throw new StepException(
                     sprintf(
                         'Magento version \'%s\' does not support Redis backend model \'%s\'',

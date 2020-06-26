@@ -113,7 +113,7 @@ class CacheTest extends TestCase
     {
         $this->magentoVersion->expects($this->any())
             ->method('isGreaterOrEqual')
-            ->with('2.3.5')
+            ->with('2.3.0')
             ->willReturn($isGreaterOrEqual);
         $this->configReaderMock->expects($this->once())
             ->method('read')
@@ -259,7 +259,7 @@ class CacheTest extends TestCase
 
         $this->magentoVersion->expects($this->exactly(2))
             ->method('isGreaterOrEqual')
-            ->with('2.3.5')
+            ->with('2.3.0')
             ->willReturn(true);
         $this->socketCreateMock->expects($this->exactly(3))
             ->with(AF_INET, SOCK_STREAM, SOL_TCP)

@@ -7,90 +7,11 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 
-use Magento\CloudDocker\Test\Functional\Codeception\Docker;
-
 /**
- * Checks Redis configuration
+ * @group php72
  */
-class RedisCest extends AbstractCest
+class RedisPhp72Cest extends RedisCest
 {
-    /**
-     * @inheritdoc
-     */
-    public function _before(\CliTester $I): void
-    {
-        //Do nothing...
-    }
-
-    /**
-     * @param \CliTester $I
-     * @return array
-     */
-    private function getConfig(\CliTester $I): array
-    {
-        $destination = sys_get_temp_dir() . '/app/etc/env.php';
-        $I->assertTrue($I->downloadFromContainer('/app/etc/env.php', $destination, Docker::DEPLOY_CONTAINER));
-        return require $destination;
-    }
-
-    /**
-     * @param \CliTester $I
-     * @param \Codeception\Example $data
-     * @throws \Robo\Exception\TaskException
-     * @dataProvider defaultConfigurationDataProvider
-     */
-    public function testDefaultConfiguration(\CliTester $I, \Codeception\Example $data): void
-    {
-        $this->prepareWorkplace($I, $data['version']);
-        $I->runEceDockerCommand(sprintf(
-            'build:compose --mode=production --expose-db-port=%s',
-            $I->getExposedPort()
-        ));
-
-        $I->assertTrue($I->runDockerComposeCommand('run build cloud-build'), 'Build phase was failed');
-        $I->assertTrue($I->startEnvironment(), 'Docker could not start');
-        $I->assertTrue($I->runDockerComposeCommand('run deploy cloud-deploy'), 'Deploy phase was failed');
-        $I->assertTrue($I->runDockerComposeCommand('run deploy cloud-post-deploy'), 'Post Deploy phase was failed');
-
-        $config = $this->getConfig($I);
-
-        $I->assertSame(
-            'Cm_Cache_Backend_Redis',
-            $config['cache']['frontend']['default']['backend'],
-            'Wrong backend model'
-        );
-        $I->assertArraySubset(
-            [
-                'backend_options' => [
-                    'server' => 'redis',
-                    'port' => '6379',
-                    'database' => 1,
-                ]
-            ],
-            $config['cache']['frontend']['default']
-        );
-        $I->assertSame(
-            'Cm_Cache_Backend_Redis',
-            $config['cache']['frontend']['page_cache']['backend'],
-            'Wrong backend model'
-        );
-        $I->assertArraySubset(
-            [
-                'backend_options' => [
-                    'server' => 'redis',
-                    'port' => '6379',
-                    'database' => 2,
-                ]
-            ],
-            $config['cache']['frontend']['page_cache']
-        );
-        $I->assertArrayNotHasKey('type', $config['cache']);
-
-        $I->amOnPage('/');
-        $I->see('Home page');
-        $I->see('CMS homepage content goes here.');
-    }
-
     /**
      * @return array
      */
@@ -106,42 +27,7 @@ class RedisCest extends AbstractCest
             [
                 'version' => '2.3.2',
             ],
-            [
-                'version' => '2.3.3',
-            ],
-            [
-                'version' => '2.3.4',
-            ],
-            [
-                'version' => '2.3.5',
-            ],
-            [
-                'version' => 'master',
-            ],
         ];
-    }
-
-    /**
-     * @param \CliTester $I
-     * @param \Codeception\Example $data
-     * @throws \Robo\Exception\TaskException
-     * @dataProvider wrongConfigurationDataProvider
-     */
-    public function testWrongConfiguration(\CliTester $I, \Codeception\Example $data): void
-    {
-        $this->prepareWorkplace($I, $data['version']);
-        $I->runEceDockerCommand(sprintf(
-            'build:compose --mode=production --expose-db-port=%s',
-            $I->getExposedPort()
-        ));
-
-        $I->writeEnvMagentoYaml($data['wrongConfiguration']);
-
-        $I->assertSame($data['buildSuccess'], $I->runDockerComposeCommand('run build cloud-build'));
-        $I->seeInOutput($data['errorBuildMessage']);
-
-        $I->assertSame($data['deploySuccess'], $I->runDockerComposeCommand('run build cloud-deploy'));
-        $I->seeInOutput($data['errorDeployMessage']);
     }
 
     /**
@@ -151,7 +37,7 @@ class RedisCest extends AbstractCest
     {
         return [
             [
-                'version' => 'master',
+                'version' => '2.3.0',
                 'wrongConfiguration' => [
                     'stage' => [
                         'deploy' => [
@@ -168,7 +54,7 @@ class RedisCest extends AbstractCest
                 'errorDeployMessage' => '',
             ],
             [
-                'version' => '2.3.3',
+                'version' => '2.3.2',
                 'wrongConfiguration' => [
                     'stage' => [
                         'deploy' => [
@@ -185,44 +71,6 @@ class RedisCest extends AbstractCest
                 'errorDeployMessage' => '',
             ],
         ];
-    }
-
-    /**
-     * @param \CliTester $I
-     * @param \Codeception\Example $data
-     * @throws \Robo\Exception\TaskException
-     * @dataProvider goodConfigurationDataProvider
-     */
-    public function testGoodConfiguration(\CliTester $I, \Codeception\Example $data): void
-    {
-        $this->prepareWorkplace($I, $data['version']);
-        $I->runEceDockerCommand(sprintf(
-            'build:compose --mode=production --expose-db-port=%s',
-            $I->getExposedPort()
-        ));
-
-        $I->writeEnvMagentoYaml($data['backendModel']);
-
-        $I->assertTrue($I->runDockerComposeCommand('run build cloud-build'), 'Build phase was failed');
-        $I->assertTrue($I->startEnvironment(), 'Docker could not start');
-        $I->assertTrue($I->runDockerComposeCommand('run deploy cloud-deploy'), 'Deploy phase was failed');
-        $I->assertTrue($I->runDockerComposeCommand('run deploy cloud-post-deploy'), 'Post Deploy phase was failed');
-
-        $config = $this->getConfig($I);
-        $I->assertSame(
-            $data['expectedBackend'],
-            $config['cache']['frontend']['default']['backend'],
-            'Wrong backend model'
-        );
-
-        $I->assertArraySubset(
-            $data['expectedConfig'],
-            $config['cache']['frontend']['default']
-        );
-
-        $I->amOnPage('/');
-        $I->see('Home page');
-        $I->see('CMS homepage content goes here.');
     }
 
     /**
@@ -233,7 +81,7 @@ class RedisCest extends AbstractCest
     {
         return [
             [
-                'version' => '2.3.4',
+                'version' => '2.3.0',
                 'backendModel' => [
                     'stage' => [
                         'deploy' => [
@@ -251,7 +99,7 @@ class RedisCest extends AbstractCest
                 ],
             ],
             [
-                'version' => '2.3.4',
+                'version' => '2.3.0',
                 'backendModel' => [
                     'stage' => [
                         'deploy' => [
@@ -269,25 +117,7 @@ class RedisCest extends AbstractCest
                 ],
             ],
             [
-                'version' => '2.3.3',
-                'backendModel' => [
-                    'stage' => [
-                        'deploy' => [
-                            'REDIS_BACKEND' => '\Magento\Framework\Cache\Backend\Redis',
-                        ],
-                    ],
-                ],
-                'expectedBackend' => '\\\Magento\\\Framework\\\Cache\\\Backend\\\Redis',
-                'expectedConfig' => [
-                    'backend_options' => [
-                        'server' => 'redis',
-                        'port' => '6379',
-                        'database' => 1,
-                    ],
-                ],
-            ],
-            [
-                'version' => '2.3.3',
+                'version' => '2.3.0',
                 'backendModel' => [
                     'stage' => [
                         'deploy' => [
@@ -315,7 +145,25 @@ class RedisCest extends AbstractCest
                 ],
             ],
             [
-                'version' => '2.3.4',
+                'version' => '2.3.1',
+                'backendModel' => [
+                    'stage' => [
+                        'deploy' => [
+                            'REDIS_BACKEND' => '\Magento\Framework\Cache\Backend\Redis',
+                        ],
+                    ],
+                ],
+                'expectedBackend' => '\\\Magento\\\Framework\\\Cache\\\Backend\\\Redis',
+                'expectedConfig' => [
+                    'backend_options' => [
+                        'server' => 'redis',
+                        'port' => '6379',
+                        'database' => 1,
+                    ],
+                ],
+            ],
+            [
+                'version' => '2.3.1',
                 'backendModel' => [
                     'stage' => [
                         'deploy' => [
@@ -343,7 +191,7 @@ class RedisCest extends AbstractCest
                 ],
             ],
             [
-                'version' => '2.3.5',
+                'version' => '2.3.2',
                 'backendModel' => [
                     'stage' => [
                         'deploy' => [
@@ -361,7 +209,7 @@ class RedisCest extends AbstractCest
                 ],
             ],
             [
-                'version' => '2.3.5',
+                'version' => '2.3.2',
                 'backendModel' => [
                     'stage' => [
                         'deploy' => [
@@ -386,52 +234,6 @@ class RedisCest extends AbstractCest
                             'cache_dir' => '/dev/shm/',
                         ]
                     ]
-                ],
-            ],
-            [
-                'version' => 'master',
-                'backendModel' => [
-                    'stage' => [
-                        'deploy' => [
-                            'REDIS_BACKEND' => '\Magento\Framework\Cache\Backend\Redis',
-                        ],
-                    ],
-                ],
-                'expectedBackend' => '\\\Magento\\\Framework\\\Cache\\\Backend\\\Redis',
-                'expectedConfig' => [
-                    'backend_options' => [
-                        'server' => 'redis',
-                        'port' => '6379',
-                        'database' => 1,
-                    ]
-                ],
-            ],
-            [
-                'version' => 'master',
-                'backendModel' => [
-                    'stage' => [
-                        'deploy' => [
-                            'REDIS_BACKEND' => '\Magento\Framework\Cache\Backend\RemoteSynchronizedCache',
-                        ],
-                    ],
-                ],
-                'expectedBackend' => '\\\Magento\\\Framework\\\Cache\\\Backend\\\RemoteSynchronizedCache',
-                'expectedConfig' => [
-                    'backend_options' => [
-                        'remote_backend' => '\\\Magento\\\Framework\\\Cache\\\Backend\\\Redis',
-                        'remote_backend_options' => [
-                            'persistent' => 0,
-                            'server' => 'redis',
-                            'database' => 1,
-                            'port' => '6379',
-                            'password' => '',
-                            'compress_data' => '1',
-                        ],
-                        'local_backend' => 'Cm_Cache_Backend_File',
-                        'local_backend_options' => [
-                            'cache_dir' => '/dev/shm/',
-                        ],
-                    ],
                 ],
             ],
         ];
