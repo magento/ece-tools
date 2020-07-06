@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Config\Validator\Deploy;
 
+use Magento\MagentoCloud\App\Error as AppError;
 use Magento\MagentoCloud\Config\ConfigMerger;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Config\Validator\Deploy\SearchConfiguration;
@@ -52,6 +53,23 @@ class SearchConfigurationTest extends TestCase
             $this->stageConfigMock,
             new ConfigMerger()
         );
+    }
+
+    public function testErrorCode()
+    {
+        $this->stageConfigMock->expects($this->once())
+            ->method('get')
+            ->with(DeployInterface::VAR_SEARCH_CONFIGURATION)
+            ->willReturn(['key' => 'value']);
+        $this->resultFactoryMock->expects($this->once())
+            ->method('error')
+            ->with(
+                'Variable SEARCH_CONFIGURATION is not configured properly',
+                'At least engine option must be configured',
+                AppError::DEPLOY_WRONG_CONFIGURATION_SEARCH
+            );
+
+        $this->validator->validate();
     }
 
     /**

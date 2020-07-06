@@ -7,14 +7,17 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Step\Deploy\PreDeploy;
 
+use Magento\MagentoCloud\App\Error;
+use Magento\MagentoCloud\Config\ConfigException;
+use Magento\MagentoCloud\Config\GlobalSection as GlobalConfig;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Step\Deploy\PreDeploy\CleanViewPreprocessed;
 use Magento\MagentoCloud\Step\StepException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
-use Magento\MagentoCloud\Config\GlobalSection as GlobalConfig;
 
 /**
  * @inheritdoc
@@ -103,6 +106,41 @@ class CleanViewPreprocessedTest extends TestCase
         $this->fileMock->expects($this->once())
             ->method('backgroundClearDirectory')
             ->with('magento_root/var/view_preprocessed');
+
+        $this->step->execute();
+    }
+
+    /**
+     * @throws StepException
+     */
+    public function testExecuteWithFileSystemException()
+    {
+        $this->expectExceptionCode(Error::DEPLOY_VIEW_PREPROCESSED_CLEAN_FAILED);
+        $this->expectException(StepException::class);
+        $this->expectExceptionMessage('some error');
+
+        $this->globalConfigMock->expects($this->once())
+            ->method('get')
+            ->willReturn(true);
+        $this->fileMock->expects($this->once())
+            ->method('backgroundClearDirectory')
+            ->willThrowException(new FileSystemException('some error'));
+
+        $this->step->execute();
+    }
+
+    /**
+     * @throws StepException
+     */
+    public function testExecuteWithGenericException()
+    {
+        $this->expectExceptionCode(Error::DEPLOY_CONFIG_NOT_DEFINED);
+        $this->expectException(StepException::class);
+        $this->expectExceptionMessage('some error');
+
+        $this->globalConfigMock->expects($this->once())
+            ->method('get')
+            ->willThrowException(new ConfigException('some error', Error::DEPLOY_CONFIG_NOT_DEFINED));
 
         $this->step->execute();
     }

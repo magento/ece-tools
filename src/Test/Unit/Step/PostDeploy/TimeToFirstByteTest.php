@@ -10,6 +10,7 @@ namespace Magento\MagentoCloud\Test\Unit\Step\PostDeploy;
 use GuzzleHttp\Pool;
 use GuzzleHttp\Promise\PromiseInterface;
 use GuzzleHttp\RequestOptions;
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\Stage\PostDeployInterface;
 use Magento\MagentoCloud\Http\PoolFactory;
 use Magento\MagentoCloud\Http\TransferStatsHandler;
@@ -134,6 +135,7 @@ class TimeToFirstByteTest extends TestCase
 
         $this->expectException(StepException::class);
         $this->expectExceptionMessage('Promise exception');
+        $this->expectExceptionCode(Error::PD_DURING_TIME_TO_FIRST_BYTE);
 
         $this->step->execute();
     }

@@ -8,11 +8,14 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Scenario;
 
 use Magento\MagentoCloud\App\ContainerInterface;
+use Magento\MagentoCloud\OnFail\Action\ActionInterface;
+use Magento\MagentoCloud\OnFail\Action\SkipAction;
 use Magento\MagentoCloud\Scenario\Collector\Step;
 use Magento\MagentoCloud\Step\SkipStep;
 use Magento\MagentoCloud\Step\StepInterface;
 use Magento\MagentoCloud\Scenario\Exception\ValidationException;
 use Psr\Log\LoggerInterface;
+use Magento\MagentoCloud\App\ContainerException;
 
 /**
  * Resolve step arguments.
@@ -43,16 +46,68 @@ class Resolver
      * Resolve scenarios by their step arguments
      *
      * @param array $scenarios
-     * @return StepInterface[]
+     * @return array
      * @throws ValidationException
+     * @throws ContainerException
      */
     public function resolve(array $scenarios): array
     {
+        $this->sorter->sortScenarios($scenarios['steps']);
+        $this->sorter->sortScenarios($scenarios['actions']);
+
+        return [
+            'steps' => $this->createStepInstances($scenarios['steps']),
+            'actions' => $this->createActionInstances($scenarios['actions']),
+        ];
+    }
+
+    /**
+     * Creates Action instances
+     *
+     * @param array $actions
+     * @return array
+     * @throws ValidationException
+     * @throws ContainerException
+     */
+    private function createActionInstances(array $actions): array
+    {
         $instances = [];
+        foreach ($actions as $action) {
+            if ($action['skip']) {
+                $instance = $this->container->create(SkipAction::class, [
+                    $this->container->get(LoggerInterface::class),
+                    $action['name']
+                ]);
+            } else {
+                $instance = $this->container->create($action['type']);
+            }
 
-        $this->sorter->sortScenarios($scenarios);
+            if (!$instance instanceof ActionInterface) {
+                throw new ValidationException(sprintf(
+                    '%s is not instance of %s',
+                    get_class($instance),
+                    ActionInterface::class
+                ));
+            }
 
-        foreach ($scenarios as $step) {
+            $instances[$action['name']] = $instance;
+        }
+
+        return $instances;
+    }
+
+    /**
+     * Creates Step instances
+     *
+     * @param array $steps
+     * @return array
+     * @throws ValidationException
+     * @throws ContainerException
+     */
+    private function createStepInstances(array $steps): array
+    {
+        $instances = [];
+        foreach ($steps as $step) {
             if ($step['skip']) {
                 $instance = $this->container->create(SkipStep::class, [
                     $this->container->get(LoggerInterface::class),
@@ -86,6 +141,7 @@ class Resolver
      * @param string $stepName
      * @return array
      * @throws ValidationException
+     * @throws ContainerException
      */
     private function resolveParams(array $data, string $stepName): array
     {

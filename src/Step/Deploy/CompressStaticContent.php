@@ -7,8 +7,13 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Step\Deploy;
 
+use Magento\MagentoCloud\App\Error;
+use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
+use Magento\MagentoCloud\Shell\ShellException;
+use Magento\MagentoCloud\Shell\UtilityException;
+use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
 use Psr\Log\LoggerInterface;
 use Magento\MagentoCloud\Util\StaticContentCompressor;
@@ -72,25 +77,33 @@ class CompressStaticContent implements StepInterface
      */
     public function execute()
     {
-        if ($this->globalConfig->get(DeployInterface::VAR_SCD_ON_DEMAND)) {
-            $this->logger->notice('Skipping static content compression. SCD on demand is enabled.');
+        try {
+            if ($this->globalConfig->get(DeployInterface::VAR_SCD_ON_DEMAND)) {
+                $this->logger->notice('Skipping static content compression. SCD on demand is enabled.');
 
-            return;
-        }
+                return;
+            }
 
-        if (!$this->stageConfig->get(DeployInterface::VAR_SKIP_SCD)
-            && !$this->flagManager->exists(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)
-        ) {
-            $this->staticContentCompressor->process(
-                $this->stageConfig->get(DeployInterface::VAR_SCD_COMPRESSION_LEVEL),
-                $this->stageConfig->get(DeployInterface::VAR_SCD_COMPRESSION_TIMEOUT),
-                $this->stageConfig->get(DeployInterface::VAR_VERBOSE_COMMANDS)
-            );
-        } else {
-            $this->logger->info(
-                'Static content deployment was performed during the build phase or disabled. Skipping deploy phase'
-                . ' static content compression.'
-            );
+            if (!$this->stageConfig->get(DeployInterface::VAR_SKIP_SCD)
+                && !$this->flagManager->exists(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)
+            ) {
+                $this->staticContentCompressor->process(
+                    $this->stageConfig->get(DeployInterface::VAR_SCD_COMPRESSION_LEVEL),
+                    $this->stageConfig->get(DeployInterface::VAR_SCD_COMPRESSION_TIMEOUT),
+                    $this->stageConfig->get(DeployInterface::VAR_VERBOSE_COMMANDS)
+                );
+            } else {
+                $this->logger->info(
+                    'Static content deployment was performed during the build phase or disabled. Skipping deploy phase'
+                    . ' static content compression.'
+                );
+            }
+        } catch (UtilityException $e) {
+            throw new StepException($e->getMessage(), Error::DEPLOY_UTILITY_NOT_FOUND, $e);
+        } catch (ShellException $e) {
+            throw new StepException($e->getMessage(), Error::DEPLOY_SCD_COMPRESSION_FAILED, $e);
+        } catch (GenericException $e) {
+            throw new StepException($e->getMessage(), $e->getCode(), $e);
         }
     }
 }

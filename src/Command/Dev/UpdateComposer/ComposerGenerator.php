@@ -139,15 +139,24 @@ class ComposerGenerator
         $installFromGitScripts[] = 'rm -rf ' . implode(' ', array_keys($repoOptions));
 
         foreach ($repoOptions as $repoName => $gitOption) {
-            $gitRef = $gitOption['ref'] ?? $gitOption['branch'];
-            $installFromGitScripts[] = sprintf(
-                'git clone %s "%s" && git --git-dir="%s/.git" --work-tree="%s" checkout %s',
-                $gitOption['repo'],
-                $repoName,
-                $repoName,
-                $repoName,
-                $gitRef
-            );
+            if (!empty($gitOption['ref'])) {
+                $script = sprintf(
+                    'git clone %s "%s" && git --git-dir="%s/.git" --work-tree="%s" checkout %s',
+                    $gitOption['repo'],
+                    $repoName,
+                    $repoName,
+                    $repoName,
+                    $gitOption['ref']
+                );
+            } else {
+                $script = sprintf(
+                    'git clone -b %s --single-branch --depth 1 %s %s',
+                    $gitOption['branch'],
+                    $gitOption['repo'],
+                    $repoName
+                );
+            }
+            $installFromGitScripts[] = $script;
         }
 
         return $installFromGitScripts;

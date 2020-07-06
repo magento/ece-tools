@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Config\Validator\Deploy;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\ConfigMerger;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
@@ -61,7 +62,8 @@ class SessionConfiguration implements ValidatorInterface
         if (!isset($sessionConfig['save'])) {
             return $this->resultFactory->error(
                 sprintf('The %s variable is not configured properly', DeployInterface::VAR_SESSION_CONFIGURATION),
-                'At least "save" option must be configured for session configuration.'
+                'At least "save" option must be configured for session configuration.',
+                Error::DEPLOY_WRONG_CONFIGURATION_SESSION
             );
         }
 

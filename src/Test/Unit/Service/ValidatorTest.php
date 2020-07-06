@@ -144,7 +144,7 @@ class ValidatorTest extends TestCase
             [
                 '2.5.0',
                 [
-                    ServiceInterface::NAME_PHP => '7.2.13',
+                    ServiceInterface::NAME_PHP => '7.2.13', // wrong
                     ServiceInterface::NAME_DB => '10.2.1',
                     ServiceInterface::NAME_NGINX => '1.9',
                     ServiceInterface::NAME_VARNISH => '5.5',
@@ -152,7 +152,33 @@ class ValidatorTest extends TestCase
                     ServiceInterface::NAME_ELASTICSEARCH => '6.7', // wrong
                     ServiceInterface::NAME_RABBITMQ => '3.7'
                 ],
+                2
+            ],
+            [
+                '2.4.0',
+                [
+                    ServiceInterface::NAME_PHP => '7.4',
+                    ServiceInterface::NAME_DB => '10.4',
+                    ServiceInterface::NAME_NGINX => '1.9',
+                    ServiceInterface::NAME_VARNISH => '6.2',
+                    ServiceInterface::NAME_REDIS => '5.0',
+                    ServiceInterface::NAME_ELASTICSEARCH => '6.8', // wrong
+                    ServiceInterface::NAME_RABBITMQ => '3.8'
+                ],
                 1
+            ],
+            [
+                '2.4.0',
+                [
+                    ServiceInterface::NAME_PHP => '7.4',
+                    ServiceInterface::NAME_DB => '10.4',
+                    ServiceInterface::NAME_NGINX => '1.9',
+                    ServiceInterface::NAME_VARNISH => '6.2',
+                    ServiceInterface::NAME_REDIS => '5.0',
+                    ServiceInterface::NAME_ELASTICSEARCH => '7.4', // wrong
+                    ServiceInterface::NAME_RABBITMQ => '3.8'
+                ],
+                0
             ],
             [
                 '2.1.4',

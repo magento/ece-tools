@@ -10,6 +10,7 @@ namespace Magento\MagentoCloud\Test\Unit\Step\PostDeploy;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Pool;
 use GuzzleHttp\Promise\PromiseInterface;
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\Stage\PostDeployInterface;
 use Magento\MagentoCloud\Http\PoolFactory;
 use Magento\MagentoCloud\Step\PostDeploy\WarmUp;
@@ -168,6 +169,7 @@ class WarmUpTest extends TestCase
 
         $this->expectException(StepException::class);
         $this->expectExceptionMessage('some error');
+        $this->expectExceptionCode(Error::PD_DURING_PAGE_WARM_UP);
 
         $this->step->execute();
     }

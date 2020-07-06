@@ -5,6 +5,7 @@
         <arguments>
             <argument name="logger" xsi:type="object">Psr\Log\LoggerInterface</argument>
             <argument name="steps" xsi:type="array">
+                <item name="check-state" xsi:type="object" priority="50">Magento\MagentoCloud\Step\Deploy\PreDeploy\CheckState</item>
                 <item name="cache" xsi:type="object" priority="100">Magento\MagentoCloud\Step\Deploy\PreDeploy\ConfigUpdate\Cache</item>
                 <item name="clean-static-content" xsi:type="object" priority="200">Magento\MagentoCloud\Step\Deploy\PreDeploy\CleanStaticContent</item>
                 <item name="clean-view-preprocessed" xsi:type="object" priority="300">Magento\MagentoCloud\Step\Deploy\PreDeploy\CleanViewPreprocessed</item>
@@ -58,6 +59,7 @@
         <arguments>
             <argument name="logger" xsi:type="object">Psr\Log\LoggerInterface</argument>
             <argument name="state" xsi:type="object">Magento\MagentoCloud\Config\State</argument>
+            <argument name="flagManager" xsi:type="object">Magento\MagentoCloud\Filesystem\Flag\Manager</argument>
             <argument name="installSteps" xsi:type="array">
                 <item name="cleanup-db-config" xsi:type="object" priority="50">Magento\MagentoCloud\Step\Deploy\InstallUpdate\Install\CleanupDbConfig</item>
                 <item name="setup" xsi:type="object" priority="100">Magento\MagentoCloud\Step\Deploy\InstallUpdate\Install\Setup</item>
@@ -91,6 +93,7 @@
                 <item name="set-admin-url" xsi:type="object" priority="1000">Magento\MagentoCloud\Step\Deploy\InstallUpdate\Update\SetAdminUrl</item>
                 <item name="setup" xsi:type="object" priority="1100">Magento\MagentoCloud\Step\Deploy\InstallUpdate\Update\Setup</item>
                 <item name="split-db" xsi:type="object" priority="1200">Magento\MagentoCloud\Step\Deploy\SplitDbConnection</item>
+                <item name="cache-type" xsi:type="object" priority="1300">Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\CacheType</item>
             </argument>
         </arguments>
     </step>
@@ -116,9 +119,12 @@
             <argument name="steps" xsi:type="array">
                 <item name="enable-cron" xsi:type="object" priority="100">Magento\MagentoCloud\Step\PostDeploy\EnableCron</item>
                 <item name="backup" xsi:type="object" priority="200">Magento\MagentoCloud\Step\PostDeploy\Backup</item>
-                <item name="clean-cache" xsi:type="object" priority="300">Magento\MagentoCloud\Step\PostDeploy\CleanCache</item>
+                <item name="clean-cache" xsi:type="object" priority="300">CleanCache.Deploy</item>
             </argument>
         </arguments>
     </step>
     <step name="disable-maintenance-mode" type="Magento\MagentoCloud\Step\DisableMaintenanceMode" priority="1300"/>
+    <onFail>
+        <action name="create-deploy-failed-flag" type="Magento\MagentoCloud\OnFail\Action\CreateDeployFailedFlag" priority="100"/>
+    </onFail>
 </scenario>

@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Config\Validator\Deploy;
 
+use Magento\MagentoCloud\App\Error as AppError;
 use Magento\MagentoCloud\Config\ConfigMerger;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Config\Validator\Deploy\SessionConfiguration;
@@ -52,6 +53,23 @@ class SessionConfigurationTest extends TestCase
             $this->stageConfigMock,
             new ConfigMerger()
         );
+    }
+
+    public function testErrorCode()
+    {
+        $this->stageConfigMock->expects($this->once())
+            ->method('get')
+            ->with(DeployInterface::VAR_SESSION_CONFIGURATION)
+            ->willReturn(['key' => 'value']);
+        $this->resultFactoryMock->expects($this->once())
+            ->method('error')
+            ->with(
+                'The SESSION_CONFIGURATION variable is not configured properly',
+                'At least "save" option must be configured for session configuration.',
+                AppError::DEPLOY_WRONG_CONFIGURATION_SESSION
+            );
+
+        $this->validator->validate();
     }
 
     /**

@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\App;
 
+use Magento\MagentoCloud\App\Logger\Prepare\ErrorLogFile;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
@@ -41,6 +42,7 @@ class Logger extends \Monolog\Logger
      * @param FileList $fileList
      * @param Pool $pool
      * @param SanitizeProcessor $sanitizeProcessor
+     * @param ErrorLogFile $errorLogFile
      *
      * @throws LoggerException
      */
@@ -49,13 +51,15 @@ class Logger extends \Monolog\Logger
         DirectoryList $directoryList,
         FileList $fileList,
         Pool $pool,
-        SanitizeProcessor $sanitizeProcessor
+        SanitizeProcessor $sanitizeProcessor,
+        ErrorLogFile $errorLogFile
     ) {
         $this->file = $file;
         $this->directoryList = $directoryList;
         $this->fileList = $fileList;
 
         $this->prepare();
+        $errorLogFile->prepare();
 
         parent::__construct('default', $pool->getHandlers(), [$sanitizeProcessor]);
     }

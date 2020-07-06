@@ -11,6 +11,9 @@ use Illuminate\Contracts\Config\Repository;
 use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Config\Environment\ReaderInterface;
 use Magento\MagentoCloud\App\Logger\HandlerFactory;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
+use Magento\MagentoCloud\Package\UndefinedPackageException;
+use Symfony\Component\Yaml\Exception\ParseException;
 
 /**
  * Log configuration.
@@ -67,6 +70,9 @@ class Log
      * Returns array of handlers configs with keys as handler name.
      *
      * @return array
+     * @throws FileSystemException
+     * @throws UndefinedPackageException
+     * @throws ParseException
      */
     public function getHandlers(): array
     {
@@ -91,6 +97,9 @@ class Log
 
     /**
      * @return array
+     * @throws ParseException
+     * @throws FileSystemException
+     * @throws UndefinedPackageException
      */
     private function getConfig(): array
     {
@@ -99,6 +108,10 @@ class Log
                 [
                     HandlerFactory::HANDLER_STREAM => ['stream' => 'php://stdout'],
                     HandlerFactory::HANDLER_FILE => ['file' => $this->fileList->getCloudLog()],
+                    HandlerFactory::HANDLER_FILE_ERROR => [
+                        'file' => $this->fileList->getCloudErrorLog(),
+                        'min_level' => self::LEVEL_WARNING
+                    ],
                 ],
                 $this->reader->read()[static::SECTION_CONFIG] ?? []
             );

@@ -7,7 +7,9 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Config;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\App\GenericException;
+use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface;
 use Magento\MagentoCloud\Config\Magento\Env\WriterInterface;
 use Magento\MagentoCloud\DB\ConnectionInterface;
@@ -44,6 +46,11 @@ class StateTest extends TestCase
     private $writerMock;
 
     /**
+     * @var Environment|MockObject
+     */
+    private $environmentMock;
+
+    /**
      * @var State
      */
     private $state;
@@ -57,12 +64,14 @@ class StateTest extends TestCase
         $this->connectionMock = $this->getMockForAbstractClass(ConnectionInterface::class);
         $this->readerMock = $this->getMockForAbstractClass(ReaderInterface::class);
         $this->writerMock = $this->getMockForAbstractClass(WriterInterface::class);
+        $this->environmentMock = $this->createMock(Environment::class);
 
         $this->state = new State(
             $this->loggerMock,
             $this->connectionMock,
             $this->readerMock,
-            $this->writerMock
+            $this->writerMock,
+            $this->environmentMock
         );
     }
 
@@ -102,7 +111,8 @@ class StateTest extends TestCase
      */
     public function testIsInstalledTablesWithException($tables): void
     {
-        $this->expectException(\Exception::class);
+        $this->expectException(GenericException::class);
+        $this->expectExceptionMessage('Missing either core_config_data or setup_module table');
 
         $this->loggerMock->expects($this->once())
             ->method('info')
@@ -131,7 +141,28 @@ class StateTest extends TestCase
     /**
      * @throws GenericException
      */
-    public function testIsInstalledConfigFileIsNotExistsOrEmpty(): void
+    public function testInstalledDbAndEmptyFile(): void
+    {
+        $this->expectException(GenericException::class);
+        $this->expectExceptionMessage('Missing crypt key for upgrading Magento');
+        $this->expectExceptionCode(Error::DEPLOY_CRYPT_KEY_IS_ABSENT);
+        $this->loggerMock->expects($this->once())
+            ->method('info')
+            ->with('Checking if db exists and has tables');
+        $this->mockForTablesExist();
+        $this->environmentMock->expects($this->once())
+            ->method('getCryptKey')
+            ->willReturn('');
+        $this->writerMock->expects($this->never())
+            ->method('update');
+
+        $this->state->isInstalled();
+    }
+
+    /**
+     * @throws GenericException
+     */
+    public function testInstalledDbAndFileWithoutDate(): void
     {
         $date = 'Wed, 13 Sep 2017 13:41:32 +0000';
         $config['install']['date'] = $date;
@@ -139,16 +170,7 @@ class StateTest extends TestCase
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Checking if db exists and has tables');
-        $this->connectionMock->expects($this->once())
-            ->method('listTables')
-            ->willReturn(['core_config_data', 'setup_module']);
-        $this->connectionMock->expects($this->exactly(2))
-            ->method('getTableName')
-            ->withConsecutive(['core_config_data'], ['setup_module'])
-            ->willReturnOnConsecutiveCalls('core_config_data', 'setup_module');
-        $this->readerMock->expects($this->once())
-            ->method('read')
-            ->willReturn([]);
+        $this->mockForTablesExist(['crypt' => ['key' => 'crypt_key_value']]);
         $this->writerMock->expects($this->once())
             ->method('update')
             ->with($config);
@@ -164,7 +186,7 @@ class StateTest extends TestCase
     /**
      * @throws GenericException
      */
-    public function testIsInstalledConfigFileWithDate(): void
+    public function testInstalledWithCryptKeyOnlyInEnvironmentVar(): void
     {
         $date = 'Wed, 12 Sep 2017 10:40:30 +0000';
         $config = ['install' => ['date' => $date]];
@@ -175,6 +197,42 @@ class StateTest extends TestCase
                 ['Checking if db exists and has tables'],
                 ['Magento was installed on ' . $date]
             );
+        $this->mockForTablesExist($config);
+        $this->environmentMock->expects($this->once())
+            ->method('getCryptKey')
+            ->willReturn('crypt_key_value');
+        $this->writerMock->expects($this->never())
+            ->method('update');
+
+        $this->assertTrue($this->state->isInstalled());
+    }
+
+    /**
+     * @throws GenericException
+     */
+    public function testIsInstalledWithFullData(): void
+    {
+        $date = 'Wed, 12 Sep 2017 10:40:30 +0000';
+        $config = [
+            'install' => ['date' => $date],
+            'crypt' => ['key' => 'crypt_key_value']
+        ];
+
+        $this->loggerMock->expects($this->exactly(2))
+            ->method('info')
+            ->withConsecutive(
+                ['Checking if db exists and has tables'],
+                ['Magento was installed on ' . $date]
+            );
+        $this->mockForTablesExist($config);
+        $this->writerMock->expects($this->never())
+            ->method('update');
+
+        $this->assertTrue($this->state->isInstalled());
+    }
+
+    private function mockForTablesExist($config = [])
+    {
         $this->connectionMock->expects($this->once())
             ->method('listTables')
             ->willReturn(['core_config_data', 'setup_module']);
@@ -185,9 +243,5 @@ class StateTest extends TestCase
         $this->readerMock->expects($this->once())
             ->method('read')
             ->willReturn($config);
-        $this->writerMock->expects($this->never())
-            ->method('update');
-
-        $this->assertTrue($this->state->isInstalled());
     }
 }

@@ -15,11 +15,6 @@ namespace Magento\MagentoCloud\Shell;
 interface ShellInterface
 {
     /**
-     * Exit code for successful command execution.
-     */
-    const CODE_SUCCESS = 0;
-
-    /**
      * Runs shell command.
      *
      * @param string $command The command.

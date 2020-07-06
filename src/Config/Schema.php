@@ -9,6 +9,7 @@ namespace Magento\MagentoCloud\Config;
 
 use Magento\MagentoCloud\Filesystem\SystemList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Symfony\Component\Yaml\Parser;
 use Symfony\Component\Yaml\Yaml;
 
@@ -70,7 +71,7 @@ class Schema
      *
      * @param string $stage
      * @return array
-     * @throws \Magento\MagentoCloud\Filesystem\FileSystemException
+     * @throws FileSystemException
      */
     public function getDefaults(string $stage): array
     {
@@ -97,7 +98,7 @@ class Schema
      * 'default_values' - array of default values
      *
      * @return array
-     * @throws \Magento\MagentoCloud\Filesystem\FileSystemException
+     * @throws FileSystemException
      */
     public function getVariables(): array
     {

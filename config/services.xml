@@ -46,10 +46,13 @@
         <service id="Magento\MagentoCloud\Step\Deploy\InstallUpdate" autowire="false" />
         <service id="Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate" autowire="false" />
         <service id="Magento\MagentoCloud\Step\Deploy\PreDeploy" autowire="false" />
+        <service id="Magento\MagentoCloud\Step\PostDeploy\CleanCache" autowire="false" />
         <service id="Magento\MagentoCloud\Step\SkipStep" autowire="false" />
         <service id="Magento\MagentoCloud\Step\StepException" autowire="false" />
         <service id="Magento\MagentoCloud\Step\ValidateConfiguration" autowire="false" />
         <service id="Magento\MagentoCloud\Step\Build\BackupData" autowire="false" />
+        <service id="Magento\MagentoCloud\OnFail\Action\SkipAction" autowire="false" />
+        <service id="Magento\MagentoCloud\OnFail\Action\ActionException" autowire="false" />
         <service id="Magento\MagentoCloud\Service\ServiceMismatchException" autowire="false" />
         <service id="Magento\MagentoCloud\Shell\Process" autowire="false" />
         <service id="Magento\MagentoCloud\Shell\ProcessException" autowire="false" />
@@ -72,6 +75,18 @@
         <service id="ServiceEol.Notices" class="Magento\MagentoCloud\Config\Validator\Deploy\ServiceEol">
             <argument key="$errorLevel" type="constant">
                 Magento\MagentoCloud\Config\ValidatorInterface::LEVEL_NOTICE
+            </argument>
+        </service>
+        <service id="CleanCache.Deploy" class="Magento\MagentoCloud\Step\PostDeploy\CleanCache">
+            <argument key="$stageConfig" type="service" id="Magento\MagentoCloud\Config\Stage\DeployInterface" />
+            <argument key="$errorCode" type="constant">
+                Magento\MagentoCloud\App\Error::DEPLOY_CACHE_FLUSH_COMMAND_FAILED
+            </argument>
+        </service>
+        <service id="CleanCache.PostDeploy" class="Magento\MagentoCloud\Step\PostDeploy\CleanCache">
+            <argument key="$stageConfig" type="service" id="Magento\MagentoCloud\Config\Stage\PostDeployInterface" />
+            <argument key="$errorCode" type="constant">
+                Magento\MagentoCloud\App\Error::PD_CACHE_FLUSH_COMMAND_FAILED
             </argument>
         </service>
         <service id="Symfony\Component\Serializer\Encoder\XmlEncoder"/>

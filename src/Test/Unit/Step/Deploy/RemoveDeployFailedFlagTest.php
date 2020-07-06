@@ -7,6 +7,8 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Step\Deploy;
 
+use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Filesystem\Flag\Manager;
 use Magento\MagentoCloud\Step\Deploy\RemoveDeployFailedFlag;
 use Magento\MagentoCloud\Step\StepException;
@@ -26,17 +28,31 @@ class RemoveDeployFailedFlagTest extends TestCase
     /**
      * @var Manager|MockObject
      */
-    private $flagManager;
+    private $flagManagerMock;
+
+    /**
+     * @var File|MockObject
+     */
+    private $fileMock;
+
+    /**
+     * @var FileList|MockObject
+     */
+    private $fileListMock;
 
     /**
      * @inheritDoc
      */
     protected function setUp(): void
     {
-        $this->flagManager = $this->createMock(Manager::class);
+        $this->flagManagerMock = $this->createMock(Manager::class);
+        $this->fileMock = $this->createMock(File::class);
+        $this->fileListMock = $this->createMock(FileList::class);
 
         $this->step = new RemoveDeployFailedFlag(
-            $this->flagManager
+            $this->flagManagerMock,
+            $this->fileMock,
+            $this->fileListMock
         );
     }
 
@@ -45,13 +61,30 @@ class RemoveDeployFailedFlagTest extends TestCase
      */
     public function testExecute(): void
     {
-        $this->flagManager->expects($this->at(0))
+        $filePath = 'file/path/name.txt';
+        $this->flagManagerMock->expects($this->exactly(3))
             ->method('delete')
-            ->with(Manager::FLAG_DEPLOY_HOOK_IS_FAILED);
-        $this->flagManager->expects($this->at(1))
-            ->method('delete')
-            ->with(Manager::FLAG_IGNORE_SPLIT_DB);
+            ->withConsecutive(
+                [Manager::FLAG_DEPLOY_HOOK_IS_FAILED],
+                [Manager::FLAG_IGNORE_SPLIT_DB],
+                [Manager::FLAG_ENV_FILE_ABSENCE]
+            );
+        $this->fileListMock->expects($this->once())
+            ->method('getCloudErrorLog')
+            ->willReturn($filePath);
+        $this->fileMock->expects($this->once())
+            ->method('deleteFile')
+            ->with($filePath);
 
+        $this->step->execute();
+    }
+
+    public function testExceptionType()
+    {
+        $this->expectException(StepException::class);
+        $this->flagManagerMock->expects($this->once())
+            ->method('delete')
+            ->willThrowException(new \Exception('txt'));
         $this->step->execute();
     }
 }

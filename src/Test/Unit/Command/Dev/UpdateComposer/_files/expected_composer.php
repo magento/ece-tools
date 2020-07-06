@@ -52,11 +52,11 @@ return array(
         'install-from-git' => [
             'php -r"@mkdir(__DIR__ . \'/app/etc\', 0777, true);"',
             'rm -rf repo1 repo2 repo3 repo4 repo5',
-            'git clone path_to_repo1 "repo1" && git --git-dir="repo1/.git" --work-tree="repo1" checkout 1.0.0',
-            'git clone path_to_repo2 "repo2" && git --git-dir="repo2/.git" --work-tree="repo2" checkout 2.0.0',
-            'git clone path_to_repo3 "repo3" && git --git-dir="repo3/.git" --work-tree="repo3" checkout 3.0.0',
-            'git clone path_to_repo4 "repo4" && git --git-dir="repo4/.git" --work-tree="repo4" checkout 4.0.0',
-            'git clone path_to_repo5 "repo5" && git --git-dir="repo5/.git" --work-tree="repo5" checkout 5.0.0',
+            'git clone -b 1.0.0 --single-branch --depth 1 path_to_repo1 repo1',
+            'git clone -b 2.0.0 --single-branch --depth 1 path_to_repo2 repo2',
+            'git clone path_to_repo3 "repo3" && git --git-dir="repo3/.git" --work-tree="repo3" checkout ref3',
+            'git clone path_to_repo4 "repo4" && git --git-dir="repo4/.git" --work-tree="repo4" checkout ref4',
+            'git clone path_to_repo5 "repo5" && git --git-dir="repo5/.git" --work-tree="repo5" checkout ref5',
         ],
         'pre-install-cmd' => [
             '@install-from-git',

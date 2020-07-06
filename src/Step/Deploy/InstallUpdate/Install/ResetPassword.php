@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Step\Deploy\InstallUpdate\Install;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\AdminDataInterface;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Step\StepException;
@@ -97,8 +98,8 @@ class ResetPassword implements StepInterface
                     '{{ admin_name }}' => $adminName ?: $adminUsername,
                 ]
             );
-        } catch (FileSystemException $exception) {
-            throw new StepException($exception->getMessage(), $exception->getCode(), $exception);
+        } catch (FileSystemException $e) {
+            throw new StepException($e->getMessage(), Error::DEPLOY_UNABLE_TO_READ_RESET_PASSWORD_TMPL, $e);
         }
 
         $this->logger->info('Emailing admin URL to admin user ' . $adminUsername . ' at ' . $adminEmail);
@@ -117,8 +118,8 @@ class ResetPassword implements StepInterface
 
         try {
             $this->file->filePutContents($credentialsFile, $emailContent);
-        } catch (FileSystemException $exception) {
-            throw new StepException($exception->getMessage(), $exception->getCode(), $exception);
+        } catch (FileSystemException $e) {
+            throw new StepException($e->getMessage(), Error::DEPLOY_FILE_CREDENTIALS_EMAIL_NOT_WRITABLE, $e);
         }
     }
 }

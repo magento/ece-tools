@@ -7,6 +7,8 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Scenario;
 
+use Magento\MagentoCloud\OnFail\Action\ActionException;
+use Magento\MagentoCloud\OnFail\Action\ActionInterface;
 use Magento\MagentoCloud\Package\Manager;
 use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
@@ -35,6 +37,11 @@ class Processor
     private $packageManager;
 
     /**
+     * @var array
+     */
+    private $mergedScenarios = [];
+
+    /**
      * @param Merger $merger
      * @param LoggerInterface $logger
      * @param Manager $manager
@@ -59,7 +66,8 @@ class Processor
         ));
 
         try {
-            $steps = $this->merger->merge($scenarios);
+            $this->mergedScenarios = $this->merger->merge($scenarios);
+            $steps = $this->mergedScenarios['steps'];
 
             array_walk($steps, function (StepInterface $step, string $name) {
                 $this->logger->debug('Running step: ' . $name);
@@ -68,26 +76,49 @@ class Processor
 
                 $this->logger->debug(sprintf('Step "%s" finished', $name));
             });
-        } catch (StepException $exception) {
-            $this->logger->error($exception->getMessage());
+        } catch (StepException $stepException) {
+            try {
+                $actions = $this->mergedScenarios['actions'];
 
-            throw new ProcessorException(
-                $exception->getMessage(),
-                $exception->getCode(),
-                $exception
-            );
+                array_walk($actions, function (ActionInterface $action, string $name) {
+                    $this->logger->debug('Running on fail action: ' . $name);
+
+                    $action->execute();
+
+                    $this->logger->debug(sprintf('On fail action "%s" finished', $name));
+                });
+            } catch (ActionException $actionException) {
+                $this->logger->error($actionException->getMessage());
+            }
+            $this->handleException($stepException);
         } catch (Throwable $exception) {
-            $message = 'Unhandled error: ' . $exception->getMessage();
-
-            $this->logger->error($message);
-
-            throw new ProcessorException(
-                $message,
-                $exception->getCode(),
-                $exception
+            $this->handleException(
+                $exception,
+                sprintf('Unhandled error: [%d] %s', $exception->getCode(), $exception->getMessage())
             );
         }
 
         $this->logger->info('Scenario(s) finished');
+    }
+
+    /**
+     * Logs error message and throws ProcessorException
+     *
+     * @param Throwable $exception
+     * @param string $message
+     * @throws ProcessorException
+     */
+    private function handleException(Throwable $exception, string $message = ''): void
+    {
+        if (empty($message)) {
+            $message = sprintf('[%d] %s', $exception->getCode(), $exception->getMessage());
+        }
+        $this->logger->error($message);
+
+        throw new ProcessorException(
+            $message,
+            $exception->getCode(),
+            $exception
+        );
     }
 }

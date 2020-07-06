@@ -9,6 +9,7 @@ namespace Magento\MagentoCloud\Step\PostDeploy;
 
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Promise\PromiseInterface;
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\Stage\PostDeployInterface;
 use Magento\MagentoCloud\Http\PoolFactory;
 use Magento\MagentoCloud\WarmUp\Urls;
@@ -65,47 +66,47 @@ class WarmUp implements StepInterface
      */
     public function execute()
     {
-        $this->logger->info('Starting page warming up');
-        $config = [];
+        try {
+            $this->logger->info('Starting page warming up');
+            $config = [];
 
-        $urls = $this->urls->getAll();
+            $urls = $this->urls->getAll();
 
-        $config['fulfilled'] = function ($response, $index) use ($urls) {
-            $this->logger->info('Warmed up page: ' . $urls[$index]);
-        };
+            $config['fulfilled'] = function ($response, $index) use ($urls) {
+                $this->logger->info('Warmed up page: ' . $urls[$index]);
+            };
 
-        $config['rejected'] = function (RequestException $exception, $index) use ($urls) {
-            $context = [];
+            $config['rejected'] = function (RequestException $exception, $index) use ($urls) {
+                $context = [];
 
-            if ($exception->getResponse()) {
-                $context = [
-                    'error' => $exception->getResponse()->getReasonPhrase(),
-                    'code' => $exception->getResponse()->getStatusCode(),
-                ];
-            } elseif ($exception->getHandlerContext()) {
-                $context = [
-                    'error' => $exception->getHandlerContext()['error'] ?? '',
-                    'errno' => $exception->getHandlerContext()['errno'] ?? '',
-                    'total_time' => $exception->getHandlerContext()['total_time'] ?? '',
-                ];
+                if ($exception->getResponse()) {
+                    $context = [
+                        'error' => $exception->getResponse()->getReasonPhrase(),
+                        'code' => $exception->getResponse()->getStatusCode(),
+                    ];
+                } elseif ($exception->getHandlerContext()) {
+                    $context = [
+                        'error' => $exception->getHandlerContext()['error'] ?? '',
+                        'errno' => $exception->getHandlerContext()['errno'] ?? '',
+                        'total_time' => $exception->getHandlerContext()['total_time'] ?? '',
+                    ];
+                }
+
+                $this->logger->error('Warming up failed: ' . $urls[$index], $context);
+            };
+
+            $concurrency = $this->postDeploy->get(PostDeployInterface::VAR_WARM_UP_CONCURRENCY);
+            if ($concurrency) {
+                $config['concurrency'] = $concurrency;
             }
 
-            $this->logger->error('Warming up failed: ' . $urls[$index], $context);
-        };
-
-        $concurrency = $this->postDeploy->get(PostDeployInterface::VAR_WARM_UP_CONCURRENCY);
-        if ($concurrency) {
-            $config['concurrency'] = $concurrency;
-        }
-
-        try {
             $pool = $this->poolFactory->create($urls, $config);
 
             /** @var PromiseInterface $promise */
             $promise = $pool->promise();
             $promise->wait();
-        } catch (\Throwable $exception) {
-            throw new StepException($exception->getMessage(), $exception->getCode(), $exception);
+        } catch (\Throwable $e) {
+            throw new StepException($e->getMessage(), Error::PD_DURING_PAGE_WARM_UP, $e);
         }
     }
 }

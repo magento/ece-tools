@@ -7,7 +7,9 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Step\Deploy\InstallUpdate\Install;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\AdminDataInterface;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Step\StepException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -218,5 +220,57 @@ class ResetPasswordTest extends TestCase
             ['admin', 'root', 'root', 'Hello https://localhost/admin admin@example.com root'],
             ['admin2', 'root', 'root', 'Hello https://localhost/admin2 admin@example.com root'],
         ];
+    }
+
+    /**
+     * @throws StepException
+     */
+    public function testExceptionTemplateNotReadable()
+    {
+        $url = 'https://localhost/';
+        $this->adminDataMock->expects($this->once())
+            ->method('getPassword')
+            ->willReturn('');
+        $this->adminDataMock->expects($this->exactly(2))
+            ->method('getEmail')
+            ->willReturn('admin@example.com');
+        $this->urlManagerMock->expects($this->once())
+            ->method('getUrls')
+            ->willReturn(['secure' => ['' => $url]]);
+        $this->fileMock->expects($this->once())
+            ->method('fileGetContents')
+            ->willThrowException(new FileSystemException('some error'));
+
+        $this->expectException(StepException::class);
+        $this->expectExceptionCode(Error::DEPLOY_UNABLE_TO_READ_RESET_PASSWORD_TMPL);
+        $this->expectExceptionMessage('some error');
+
+        $this->resetPassword->execute();
+    }
+
+    public function testExceptionFileNotWritable()
+    {
+        $url = 'https://localhost/';
+        $this->adminDataMock->expects($this->once())
+            ->method('getPassword')
+            ->willReturn('');
+        $this->adminDataMock->expects($this->exactly(2))
+            ->method('getEmail')
+            ->willReturn('admin@example.com');
+        $this->urlManagerMock->expects($this->once())
+            ->method('getUrls')
+            ->willReturn(['secure' => ['' => $url]]);
+        $this->fileMock->expects($this->once())
+            ->method('fileGetContents')
+            ->willReturn('Hello {{ admin_url }} {{ admin_email }} {{ admin_name }}');
+        $this->fileMock->expects($this->once())
+            ->method('filePutContents')
+            ->willThrowException(new FileSystemException('some error'));
+
+        $this->expectException(StepException::class);
+        $this->expectExceptionCode(Error::DEPLOY_FILE_CREDENTIALS_EMAIL_NOT_WRITABLE);
+        $this->expectExceptionMessage('some error');
+
+        $this->resetPassword->execute();
     }
 }

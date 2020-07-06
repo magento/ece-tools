@@ -7,9 +7,12 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Config\Validator\Deploy;
 
+use Magento\MagentoCloud\App\Error;
+use Magento\MagentoCloud\Config\ConfigException;
 use Magento\MagentoCloud\Config\SearchEngine\ElasticSuite;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Config\Validator;
+use Magento\MagentoCloud\Config\ValidatorException;
 use Magento\MagentoCloud\Config\ValidatorInterface;
 use Magento\MagentoCloud\Service\ElasticSearch;
 
@@ -64,6 +67,8 @@ class ElasticSuiteIntegrity implements ValidatorInterface
      * Otherwise - validation is successful.
      *
      * @return Validator\ResultInterface
+     *
+     * {@inheritDoc}
      */
     public function validate(): Validator\ResultInterface
     {
@@ -72,16 +77,25 @@ class ElasticSuiteIntegrity implements ValidatorInterface
         }
 
         if (!$this->elasticSearch->isInstalled()) {
-            return $this->resultFactory->error('ElasticSuite is installed without available ElasticSearch service.');
+            return $this->resultFactory->error(
+                'ElasticSuite is installed without available ElasticSearch service.',
+                '',
+                Error::DEPLOY_ELASTIC_SUITE_WITHOUT_ES
+            );
         }
 
-        $engine = $this->config->get(DeployInterface::VAR_SEARCH_CONFIGURATION)['engine'] ?? null;
+        try {
+            $engine = $this->config->get(DeployInterface::VAR_SEARCH_CONFIGURATION)['engine'] ?? null;
+        } catch (ConfigException $e) {
+            throw new ValidatorException($e->getMessage(), $e->getCode(), $e);
+        }
 
         if ($engine && strtolower($engine) !== ElasticSuite::ENGINE_NAME) {
-            return $this->resultFactory->error(sprintf(
-                'ElasticSuite is installed but %s set as search engine.',
-                $engine
-            ));
+            return $this->resultFactory->error(
+                sprintf('ElasticSuite is installed but %s set as search engine.', $engine),
+                '',
+                Error::DEPLOY_ELASTIC_SUITE_WRONG_ENGINE
+            );
         }
 
         return $this->resultFactory->success();

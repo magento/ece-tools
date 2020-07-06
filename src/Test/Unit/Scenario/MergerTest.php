@@ -9,6 +9,7 @@ namespace Magento\MagentoCloud\Test\Unit\Scenario;
 
 use Magento\MagentoCloud\Scenario\Collector\Scenario;
 use Magento\MagentoCloud\Scenario\Collector\Step;
+use Magento\MagentoCloud\Scenario\Collector\Action;
 use Magento\MagentoCloud\Scenario\Exception\ValidationException;
 use Magento\MagentoCloud\Scenario\Merger;
 use Magento\MagentoCloud\Scenario\Resolver;
@@ -36,6 +37,11 @@ class MergerTest extends TestCase
     private $stepCollectorMock;
 
     /**
+     * @var Action|MockObject
+     */
+    private $actionCollectorMock;
+
+    /**
      * @var Scenario|MockObject
      */
     private $scenarioCollectorMock;
@@ -47,13 +53,20 @@ class MergerTest extends TestCase
     {
         $this->resolverMock = $this->createMock(Resolver::class);
         $this->stepCollectorMock = $this->createMock(Step::class);
+        $this->actionCollectorMock = $this->createMock(Action::class);
         $this->scenarioCollectorMock = $this->createMock(Scenario::class);
 
-        $this->merger = new Merger($this->resolverMock, $this->stepCollectorMock, $this->scenarioCollectorMock);
+        $this->merger = new Merger(
+            $this->resolverMock,
+            $this->stepCollectorMock,
+            $this->actionCollectorMock,
+            $this->scenarioCollectorMock
+        );
     }
 
     /**
      * @throws \Magento\MagentoCloud\Scenario\Exception\ValidationException
+     * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
     public function testMerge()
     {
@@ -73,6 +86,11 @@ class MergerTest extends TestCase
             '@priority' => 300,
             '@type' => 'customType',
         ];
+        $action = [
+            '@name' => 'create-deploy-failed-flag',
+            '@priority' => 100,
+            '@type' => 'Magento\MagentoCloud\OnFail\Action\CreateDeployFailedFlag',
+        ];
 
         $this->scenarioCollectorMock->expects($this->exactly(2))
             ->method('collect')
@@ -85,6 +103,9 @@ class MergerTest extends TestCase
                         $step1,
                         $step2
                     ],
+                    'onFail' => [
+                        'action' => $action,
+                    ]
                 ],
                 [
                     '@xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance',
@@ -114,17 +135,36 @@ class MergerTest extends TestCase
                     'type' => 'customType',
                 ]
             );
+        $this->actionCollectorMock->expects($this->once())
+            ->method('collect')
+            ->with($action)
+            ->willReturn(
+                [
+                    'name' => 'create-deploy-failed-flag',
+                    'priority' => 100,
+                    'type' => 'Magento\MagentoCloud\OnFail\Action\CreateDeployFailedFlag',
+                ]
+            );
 
         $expectedResult = [
-            'clear-init-directory' => [
-                'name' => 'clear-init-directory',
-                'priority' => 300,
-                'type' => 'customType',
+            'steps' => [
+                'clear-init-directory' => [
+                    'name' => 'clear-init-directory',
+                    'priority' => 300,
+                    'type' => 'customType',
+                ],
+                'compress-static-content' => [
+                    'name' => 'compress-static-content',
+                    'priority' => 200,
+                    'type' => 'Magento\MagentoCloud\Step\Build\CompressStaticContent',
+                ],
             ],
-            'compress-static-content' => [
-                'name' => 'compress-static-content',
-                'priority' => 200,
-                'type' => 'Magento\MagentoCloud\Step\Build\CompressStaticContent',
+            'actions' => [
+                'create-deploy-failed-flag' => [
+                    'name' => 'create-deploy-failed-flag',
+                    'priority' => 100,
+                    'type' => 'Magento\MagentoCloud\OnFail\Action\CreateDeployFailedFlag',
+                ],
             ],
         ];
 
@@ -138,7 +178,7 @@ class MergerTest extends TestCase
     public function testMissedArgumentPriorityException()
     {
         $this->expectException(ValidationException::class);
-        $this->expectExceptionMessage('Argument(s) "@priority" are missed from step');
+        $this->expectExceptionMessage('Argument(s) "@priority" are missed from item');
 
         $this->scenarioCollectorMock->expects($this->once())
             ->method('collect')
@@ -162,7 +202,7 @@ class MergerTest extends TestCase
     public function testMissedArgumentNameException()
     {
         $this->expectException(ValidationException::class);
-        $this->expectExceptionMessage('Argument(s) "@name" are missed from step');
+        $this->expectExceptionMessage('Argument(s) "@name" are missed from item');
 
         $this->scenarioCollectorMock->expects($this->once())
             ->method('collect')

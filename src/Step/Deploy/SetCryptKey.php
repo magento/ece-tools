@@ -66,6 +66,8 @@ class SetCryptKey implements StepInterface
      */
     public function execute(): void
     {
+        $this->logger->info('Checking existence of encryption key');
+
         if (!empty($this->configReader->read()['crypt']['key'])) {
             return;
         }
@@ -73,15 +75,10 @@ class SetCryptKey implements StepInterface
         $key = $this->environment->getCryptKey();
 
         if (empty($key)) {
-            $this->logger->notice(
-                'Crypt key missing. Add the crypt key to the "app/etc/env.php" file, or set the "CRYPT_KEY" '
-                . 'environment variable in the Cloud Project web UI.'
-            );
-
             return;
         }
 
-        $this->logger->info('Setting encryption key');
+        $this->logger->info(sprintf('Setting encryption key from %s', Environment::VARIABLE_CRYPT_KEY));
 
         $config['crypt']['key'] = $key;
 

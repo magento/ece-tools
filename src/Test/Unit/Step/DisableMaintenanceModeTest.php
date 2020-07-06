@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Process;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Step\DisableMaintenanceMode;
 use Magento\MagentoCloud\Step\StepException;
@@ -59,6 +60,7 @@ class DisableMaintenanceModeTest extends TestCase
     {
         $this->expectException(StepException::class);
         $this->expectExceptionMessage('Some error');
+        $this->expectExceptionCode(Error::DEPLOY_MAINTENANCE_MODE_DISABLING_FAILED);
 
         $this->switcherMock->expects($this->once())
             ->method('disable')

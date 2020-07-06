@@ -7,11 +7,14 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Step\Build\BackupData;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\App\Logger;
 use Magento\MagentoCloud\App\Logger\Pool as LoggerPool;
+use Magento\MagentoCloud\App\LoggerException;
 use Magento\MagentoCloud\Config\GlobalSection as GlobalConfig;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Step\Build\BackupData\WritableDirectories;
 use Magento\MagentoCloud\Step\StepException;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -113,6 +116,38 @@ class WritableDirectoriesTest extends TestCase
             $this->loggerMock,
             $this->loggerPoolMock
         );
+    }
+
+    /**
+     * @throws StepException
+     */
+    public function testExecuteWithLoggerException()
+    {
+        $this->loggerPoolMock->expects($this->once())
+            ->method('getHandlers')
+            ->willThrowException(new LoggerException('some error'));
+
+        $this->expectExceptionMessage('some error');
+        $this->expectException(StepException::class);
+        $this->expectExceptionCode(Error::BUILD_UNABLE_TO_CREATE_LOGGER);
+
+        $this->step->execute();
+    }
+
+    /**
+     * @throws StepException
+     */
+    public function testExecuteWithFileSystemException()
+    {
+        $this->fileMock->expects($this->any())
+            ->method('copyDirectory')
+            ->willThrowException(new FileSystemException('some error'));
+
+        $this->expectExceptionMessage('some error');
+        $this->expectException(StepException::class);
+        $this->expectExceptionCode(Error::BUILD_WRITABLE_DIRECTORY_COPYING_FAILED);
+
+        $this->step->execute();
     }
 
     /**

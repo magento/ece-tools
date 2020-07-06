@@ -16,6 +16,13 @@
         <xs:complexType>
             <xs:choice maxOccurs="unbounded">
                 <xs:element name="step" type="stepType" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element name="onFail">
+                    <xs:complexType>
+                        <xs:choice>
+                            <xs:element name="action" type="actionType" minOccurs="0" maxOccurs="unbounded"/>
+                        </xs:choice>
+                    </xs:complexType>
+                </xs:element>
             </xs:choice>
         </xs:complexType>
     </xs:element>
@@ -50,6 +57,13 @@
                 </xs:key>
             </xs:element>
         </xs:choice>
+        <xs:attribute name="name" type="xs:string" use="required"/>
+        <xs:attribute name="type" type="phpClassName"/>
+        <xs:attribute name="priority" type="xs:integer"/>
+        <xs:attribute name="skip" type="xs:boolean"/>
+    </xs:complexType>
+
+    <xs:complexType name="actionType">
         <xs:attribute name="name" type="xs:string" use="required"/>
         <xs:attribute name="type" type="phpClassName"/>
         <xs:attribute name="priority" type="xs:integer"/>

@@ -7,8 +7,11 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Step\Deploy\InstallUpdate\Install;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Filesystem\FileList;
+use Magento\MagentoCloud\Shell\ShellException;
+use Magento\MagentoCloud\Shell\UtilityException;
 use Magento\MagentoCloud\Shell\UtilityManager;
 use Magento\MagentoCloud\Step\Deploy\InstallUpdate\Install\Setup\InstallCommandFactory;
 use Magento\MagentoCloud\Step\StepException;
@@ -84,6 +87,10 @@ class Setup implements StepInterface
                 escapeshellcmd($this->commandFactory->create()),
                 $installUpgradeLog
             ));
+        } catch (ShellException $e) {
+            throw new StepException($e->getMessage(), Error::DEPLOY_INSTALL_COMMAND_FAILED, $e);
+        } catch (UtilityException $e) {
+            throw new StepException($e->getMessage(), Error::DEPLOY_UTILITY_NOT_FOUND, $e);
         } catch (GenericException $exception) {
             throw new StepException($exception->getMessage(), $exception->getCode(), $exception);
         }

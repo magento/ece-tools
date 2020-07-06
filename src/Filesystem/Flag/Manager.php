@@ -38,6 +38,11 @@ class Manager
     public const FLAG_IGNORE_SPLIT_DB = 'ignore_split_db';
 
     /**
+     * Used to mark that env.php file does not exist at the beginning of deployment
+     */
+    public const FLAG_ENV_FILE_ABSENCE = 'env_file_absence';
+
+    /**
      * @var LoggerInterface
      */
     private $logger;

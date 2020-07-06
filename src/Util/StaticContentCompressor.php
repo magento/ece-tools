@@ -8,7 +8,9 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Util;
 
 use Magento\MagentoCloud\Package\UndefinedPackageException;
+use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Shell\ShellInterface;
+use Magento\MagentoCloud\Shell\UtilityException;
 use Magento\MagentoCloud\Shell\UtilityManager;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
@@ -81,6 +83,9 @@ class StaticContentCompressor
      * @param int $timeout
      * @param string $verbose
      * @return void
+     * @throws ShellException
+     * @throws UndefinedPackageException
+     * @throws UtilityException
      */
     public function process(
         int $compressionLevel = self::DEFAULT_COMPRESSION_LEVEL,
@@ -140,6 +145,7 @@ class StaticContentCompressor
      * @return string
      *
      * @throws UndefinedPackageException
+     * @throws UtilityException
      */
     private function getCompressionCommand(
         int $compressionLevel = self::DEFAULT_COMPRESSION_LEVEL,

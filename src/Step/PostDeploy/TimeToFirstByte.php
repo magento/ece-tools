@@ -9,6 +9,8 @@ namespace Magento\MagentoCloud\Step\PostDeploy;
 
 use GuzzleHttp\Promise\PromiseInterface;
 use GuzzleHttp\RequestOptions;
+use Magento\MagentoCloud\App\Error;
+use Magento\MagentoCloud\Config\ConfigException;
 use Magento\MagentoCloud\Config\Stage\PostDeployInterface;
 use Magento\MagentoCloud\Http\PoolFactory;
 use Magento\MagentoCloud\Http\TransferStatsHandler;
@@ -75,19 +77,17 @@ class TimeToFirstByte implements StepInterface
      */
     public function execute()
     {
-        $requestOpts = [RequestOptions::ON_STATS => $this->statHandler];
-
         try {
             $pool = $this->poolFactory->create($this->getUrls(), [
-                'options' => $requestOpts,
+                'options' => [RequestOptions::ON_STATS => $this->statHandler],
                 'concurrency' => 1,
             ]);
 
             /** @var PromiseInterface $promise */
             $promise = $pool->promise();
             $promise->wait();
-        } catch (\Throwable $exception) {
-            throw new StepException($exception->getMessage(), $exception->getCode(), $exception);
+        } catch (\Throwable $e) {
+            throw new StepException($e->getMessage(), Error::PD_DURING_TIME_TO_FIRST_BYTE, $e);
         }
     }
 
@@ -95,6 +95,7 @@ class TimeToFirstByte implements StepInterface
      * Returns list of URLs which should tested.
      *
      * @return array
+     * @throws ConfigException
      */
     private function getUrls(): array
     {

@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Step;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Config\Magento\Env\WriterInterface;
 use Psr\Log\LoggerInterface;
@@ -49,8 +50,8 @@ class SetProductionMode implements StepInterface
 
         try {
             $this->writer->update(['MAGE_MODE' => 'production']);
-        } catch (FileSystemException $exception) {
-            throw new StepException($exception->getMessage(), $exception->getCode(), $exception);
+        } catch (FileSystemException $e) {
+            throw new StepException($e->getMessage(), Error::BUILD_ENV_PHP_IS_NOT_WRITABLE, $e);
         }
     }
 }

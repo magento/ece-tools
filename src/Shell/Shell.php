@@ -56,7 +56,7 @@ class Shell implements ShellInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      *
      * If your command contains pipe please use the next construction for correct logging:
      *

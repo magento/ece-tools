@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Step\Build;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
 use Magento\MagentoCloud\Shell\ShellException;
@@ -37,8 +38,8 @@ class ComposerDumpAutoload implements StepInterface
     {
         try {
             $this->shell->execute('composer dump-autoload -o --ansi --no-interaction');
-        } catch (ShellException $exception) {
-            throw new StepException($exception->getMessage(), $exception->getCode(), $exception);
+        } catch (ShellException $e) {
+            throw new StepException($e->getMessage(), Error::BUILD_COMPOSER_DUMP_AUTOLOAD_FAILED, $e);
         }
     }
 }

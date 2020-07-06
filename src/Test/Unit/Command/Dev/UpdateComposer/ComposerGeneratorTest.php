@@ -29,18 +29,22 @@ class ComposerGeneratorTest extends TestCase
         ],
         'repo2' => [
             'repo' => 'path_to_repo2',
+            'ref' => '',
             'branch' => '2.0.0',
         ],
         'repo3' => [
             'repo' => 'path_to_repo3',
+            'ref' => 'ref3',
             'branch' => '3.0.0',
         ],
         'repo4' => [
             'repo' => 'path_to_repo4',
+            'ref' => 'ref4',
             'branch' => '4.0.0',
         ],
         'repo5' => [
             'repo' => 'path_to_repo5',
+            'ref' => 'ref5',
             'branch' => '5.0.0',
         ],
     ];

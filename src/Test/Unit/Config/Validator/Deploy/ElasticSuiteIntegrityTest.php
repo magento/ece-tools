@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Config\Validator\Deploy;
 
+use Magento\MagentoCloud\App\Error as AppError;
 use Magento\MagentoCloud\Config\SearchEngine\ElasticSuite;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Config\Validator\Deploy\ElasticSuiteIntegrity;
@@ -87,7 +88,11 @@ class ElasticSuiteIntegrityTest extends TestCase
             ->willReturn(false);
         $this->resultFactoryMock->expects($this->once())
             ->method('error')
-            ->with('ElasticSuite is installed without available ElasticSearch service.')
+            ->with(
+                'ElasticSuite is installed without available ElasticSearch service.',
+                '',
+                AppError::DEPLOY_ELASTIC_SUITE_WITHOUT_ES
+            )
             ->willReturn(new Error('Some error'));
 
         $this->assertInstanceOf(Error::class, $this->validator->validate());
@@ -107,7 +112,11 @@ class ElasticSuiteIntegrityTest extends TestCase
             ->willReturn(['engine' => 'mysql']);
         $this->resultFactoryMock->expects($this->once())
             ->method('error')
-            ->with('ElasticSuite is installed but mysql set as search engine.')
+            ->with(
+                'ElasticSuite is installed but mysql set as search engine.',
+                '',
+                AppError::DEPLOY_ELASTIC_SUITE_WRONG_ENGINE
+            )
             ->willReturn(new Error('Some error'));
 
         $this->assertInstanceOf(Error::class, $this->validator->validate());

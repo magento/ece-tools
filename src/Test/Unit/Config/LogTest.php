@@ -77,6 +77,9 @@ class LogTest extends TestCase
         $this->fileListMock->expects($this->once())
             ->method('getCloudLog')
             ->willReturn('somePath');
+        $this->fileListMock->expects($this->once())
+            ->method('getCloudErrorLog')
+            ->willReturn('somePathErrorLog');
         $this->readerMock->expects($this->once())
             ->method('read')
             ->willReturn($config);
@@ -94,21 +97,24 @@ class LogTest extends TestCase
                 'config' => [],
                 'expectedResult' => [
                     HandlerFactory::HANDLER_STREAM => ['stream' => 'php://stdout'],
-                    HandlerFactory::HANDLER_FILE => ['file' => 'somePath']
+                    HandlerFactory::HANDLER_FILE => ['file' => 'somePath'],
+                    HandlerFactory::HANDLER_FILE_ERROR => ['file' => 'somePathErrorLog', 'min_level' => 'warning'],
                 ]
             ],
             [
                 'config' => ['someConfig' => ['someConfig']],
                 'expectedResult' => [
                     HandlerFactory::HANDLER_STREAM => ['stream' => 'php://stdout'],
-                    HandlerFactory::HANDLER_FILE => ['file' => 'somePath']
+                    HandlerFactory::HANDLER_FILE => ['file' => 'somePath'],
+                    HandlerFactory::HANDLER_FILE_ERROR => ['file' => 'somePathErrorLog', 'min_level' => 'warning'],
                 ],
             ],
             [
                 'config' => ['log' => []],
                 'expectedResult' => [
                     HandlerFactory::HANDLER_STREAM => ['stream' => 'php://stdout'],
-                    HandlerFactory::HANDLER_FILE => ['file' => 'somePath']
+                    HandlerFactory::HANDLER_FILE => ['file' => 'somePath'],
+                    HandlerFactory::HANDLER_FILE_ERROR => ['file' => 'somePathErrorLog', 'min_level' => 'warning'],
                 ],
             ],
             [
@@ -116,7 +122,8 @@ class LogTest extends TestCase
                 'expectedResult' => [
                     HandlerFactory::HANDLER_STREAM => ['stream' => 'php://stdout'],
                     HandlerFactory::HANDLER_FILE => ['file' => 'somePath'],
-                    'SomeHandler' => ['SomeConfig']
+                    HandlerFactory::HANDLER_FILE_ERROR => ['file' => 'somePathErrorLog', 'min_level' => 'warning'],
+                    'SomeHandler' => ['SomeConfig'],
                 ],
             ],
             [
@@ -124,7 +131,8 @@ class LogTest extends TestCase
                 'expectedResult' => [
                     HandlerFactory::HANDLER_STREAM => ['stream' => 'php://stdout'],
                     HandlerFactory::HANDLER_FILE => ['file' => 'somePath'],
-                    'SomeHandler' => ['SomeConfig']
+                    HandlerFactory::HANDLER_FILE_ERROR => ['file' => 'somePathErrorLog', 'min_level' => 'warning'],
+                    'SomeHandler' => ['SomeConfig'],
                 ],
             ],
         ];

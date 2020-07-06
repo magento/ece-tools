@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:ece-tools:config/scenario.xsd">
     <step name="pre-build" type="Magento\MagentoCloud\Step\Build\PreBuild" priority="100"/>
+    <step name="apply-patches" type="Magento\MagentoCloud\Step\Build\ApplyPatches" priority="150"/>
     <step name="set-production-mode" type="Magento\MagentoCloud\Step\SetProductionMode" priority="200"/>
     <step name="validate-configuration" type="Magento\MagentoCloud\Step\ValidateConfiguration" priority="300">
         <arguments>
@@ -23,7 +24,6 @@
     </step>
     <step name="refresh-modules" type="Magento\MagentoCloud\Step\Build\RefreshModules" priority="400"/>
     <step name="copy-pub-static" type="Magento\MagentoCloud\Step\Build\CopyPubStatic" priority="500"/>
-    <step name="apply-patches" type="Magento\MagentoCloud\Step\Build\ApplyPatches" priority="600"/>
     <step name="set-report-dir-nesting-level" type="Magento\MagentoCloud\Step\Build\SetReportDirNestingLevel" priority="700"/>
     <step name="marshall-files" type="Magento\MagentoCloud\Step\Build\MarshallFiles" priority="800"/>
     <step name="copy-sample-data" type="Magento\MagentoCloud\Step\Build\CopySampleData" priority="900"/>

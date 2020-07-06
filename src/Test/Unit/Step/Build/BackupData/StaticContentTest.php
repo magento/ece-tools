@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Step\Build\BackupData;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Step\StepException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -250,6 +251,34 @@ class StaticContentTest extends TestCase
      */
     public function testRenameFails(): void
     {
+        $this->prepareCopying();
+        $this->fileMock->expects($this->once())
+            ->method('copyDirectory')
+            ->with($this->originalPubStaticPath, $this->initPubStaticPath);
+
+        $this->step->execute();
+    }
+
+    /**
+     * @throws StepException
+     */
+    public function testCopyingWithException(): void
+    {
+        $this->prepareCopying();
+        $this->fileMock->expects($this->once())
+            ->method('copyDirectory')
+            ->with($this->originalPubStaticPath, $this->initPubStaticPath)
+            ->willThrowException(new FileSystemException('some error'));
+
+        $this->expectException(StepException::class);
+        $this->expectExceptionMessage('some error');
+        $this->expectExceptionCode(Error::BUILD_SCD_COPYING_FAILED);
+
+        $this->step->execute();
+    }
+
+    public function prepareCopying(): void
+    {
         $this->flagManagerMock->expects($this->once())
             ->method('exists')
             ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)
@@ -284,9 +313,34 @@ class StaticContentTest extends TestCase
             ->method('rename')
             ->with($this->originalPubStaticPath, $this->initPubStaticPath)
             ->willThrowException(new FileSystemException('Some error'));
+    }
+
+    /**
+     * @throws StepException
+     */
+    public function testClearingDirectoryWithFileSystemException()
+    {
+        $this->expectException(StepException::class);
+        $this->expectExceptionMessage('some error');
+        $this->expectExceptionCode(Error::BUILD_CLEAN_INIT_PUB_STATIC_FAILED);
+
+        $this->flagManagerMock->expects($this->once())
+            ->method('exists')
+            ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)
+            ->willReturn(true);
+        $this->directoryListMock->expects($this->exactly(2))
+            ->method('getPath')
+            ->willReturnMap([
+                [DirectoryList::DIR_STATIC, false, $this->originalPubStaticPath],
+                [DirectoryList::DIR_INIT, false, $this->rootInitDir]
+            ]);
         $this->fileMock->expects($this->once())
-            ->method('copyDirectory')
-            ->with($this->originalPubStaticPath, $this->initPubStaticPath);
+            ->method('isExists')
+            ->willReturn(true);
+        $this->fileMock->expects($this->once())
+            ->method('backgroundClearDirectory')
+            ->with($this->initPubStaticPath)
+            ->willThrowException(new FileSystemException('some error'));
 
         $this->step->execute();
     }

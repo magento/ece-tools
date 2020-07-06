@@ -7,13 +7,16 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Config;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\ConfigException;
 use Magento\MagentoCloud\Config\GlobalSection;
 use Magento\MagentoCloud\Config\Schema;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Magento\MagentoCloud\Config\Environment\Reader as EnvironmentReader;
 use Magento\MagentoCloud\Config\StageConfigInterface;
+use Symfony\Component\Yaml\Exception\ParseException;
 
 /**
  * @inheritdoc
@@ -169,8 +172,9 @@ class GlobalSectionTest extends TestCase
      */
     public function testNotExists(): void
     {
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(ConfigException::class);
         $this->expectExceptionMessage('Config NOT_EXISTS_VALUE was not defined.');
+        $this->expectExceptionCode(Error::GLOBAL_CONFIG_NOT_DEFINED);
 
         $this->environmentReaderMock->expects($this->never())
             ->method('read');
@@ -181,14 +185,47 @@ class GlobalSectionTest extends TestCase
     /**
      * @throws ConfigException
      */
-    public function testGetWithException(): void
+    public function testUnableToReadMagentoEnvYAml(): void
     {
         $this->expectException(ConfigException::class);
         $this->expectExceptionMessage('Some error');
+        $this->expectExceptionCode(Error::GLOBAL_CONFIG_UNABLE_TO_READ);
 
         $this->environmentReaderMock->expects($this->once())
             ->method('read')
-            ->willThrowException(new \Exception('Some error'));
+            ->willThrowException(new FileSystemException('Some error'));
+
+        $this->config->get(GlobalSection::VAR_SCD_ON_DEMAND);
+    }
+
+    /**
+     * @throws ConfigException
+     */
+    public function testUnableToParseMagentoEnvYaml(): void
+    {
+        $this->expectException(ConfigException::class);
+        $this->expectExceptionMessage('Some error');
+        $this->expectExceptionCode(Error::GLOBAL_CONFIG_PARSE_FAILED);
+
+        $this->environmentReaderMock->expects($this->once())
+            ->method('read')
+            ->willThrowException(new ParseException('Some error'));
+
+        $this->config->get(GlobalSection::VAR_SCD_ON_DEMAND);
+    }
+
+    /**
+     * @throws ConfigException
+     */
+    public function testUnableToReadSchemaFile(): void
+    {
+        $this->expectException(ConfigException::class);
+        $this->expectExceptionMessage('Some error');
+        $this->expectExceptionCode(Error::GLOBAL_CONFIG_UNABLE_TO_READ_SCHEMA_YAML);
+
+        $this->schemaMock->expects($this->once())
+            ->method('getDefaults')
+            ->willThrowException(new FileSystemException('Some error'));
 
         $this->config->get(GlobalSection::VAR_SCD_ON_DEMAND);
     }

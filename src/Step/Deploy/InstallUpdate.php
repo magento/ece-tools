@@ -9,6 +9,7 @@ namespace Magento\MagentoCloud\Step\Deploy;
 
 use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Config\State;
+use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
 use Psr\Log\LoggerInterface;
@@ -29,6 +30,11 @@ class InstallUpdate implements StepInterface
     private $deployConfig;
 
     /**
+     * @var FlagManager
+     */
+    private $flagManager;
+
+    /**
      * @var StepInterface[]
      */
     private $installSteps;
@@ -41,17 +47,20 @@ class InstallUpdate implements StepInterface
     /**
      * @param LoggerInterface $logger
      * @param State $state
+     * @param FlagManager $flagManager
      * @param StepInterface[] $installSteps
      * @param StepInterface[] $updateSteps
      */
     public function __construct(
         LoggerInterface $logger,
         State $state,
+        FlagManager $flagManager,
         array $installSteps,
         array $updateSteps
     ) {
         $this->logger = $logger;
         $this->deployConfig = $state;
+        $this->flagManager = $flagManager;
         $this->installSteps = $installSteps;
         $this->updateSteps = $updateSteps;
     }
@@ -68,6 +77,12 @@ class InstallUpdate implements StepInterface
 
                 $this->logger->notice('End of install.');
             } else {
+                if ($this->flagManager->exists(FlagManager::FLAG_ENV_FILE_ABSENCE)) {
+                    $this->logger->warning('Magento state indicated as installed'
+                        . ' but configuration file app/etc/env.php was empty or did not exist.'
+                        . ' Required data will be restored from environment configurations'
+                        . ' and from .magento.env.yaml file.');
+                }
                 $this->logger->notice('Starting update.');
 
                 foreach ($this->updateSteps as $step) {
@@ -76,6 +91,7 @@ class InstallUpdate implements StepInterface
 
                 $this->logger->notice('End of update.');
             }
+            $this->flagManager->delete(FlagManager::FLAG_ENV_FILE_ABSENCE);
         } catch (GenericException $exception) {
             throw new StepException($exception->getMessage(), $exception->getCode(), $exception);
         }

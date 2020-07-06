@@ -7,14 +7,17 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Config\Stage;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\ConfigException;
 use Magento\MagentoCloud\Config\Schema;
 use Magento\MagentoCloud\Config\Stage\Build;
 use Magento\MagentoCloud\Config\Stage\BuildInterface;
 use Magento\MagentoCloud\Config\StageConfigInterface;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Magento\MagentoCloud\Config\Environment\Reader as EnvironmentReader;
+use Symfony\Component\Yaml\Exception\ParseException;
 
 /**
  * @inheritdoc
@@ -265,10 +268,59 @@ class BuildTest extends TestCase
     {
         $this->expectException(ConfigException::class);
         $this->expectExceptionMessage('Config NOT_EXISTS_VALUE was not defined.');
+        $this->expectExceptionCode(Error::BUILD_CONFIG_NOT_DEFINED);
 
         $this->environmentReaderMock->method('read')
             ->willReturn([]);
 
         $this->config->get('NOT_EXISTS_VALUE');
+    }
+
+    /**
+     * @throws ConfigException
+     */
+    public function testUnableToReadMagentoEnvYAml(): void
+    {
+        $this->expectException(ConfigException::class);
+        $this->expectExceptionMessage('Some error');
+        $this->expectExceptionCode(Error::BUILD_CONFIG_UNABLE_TO_READ);
+
+        $this->environmentReaderMock->expects($this->once())
+            ->method('read')
+            ->willThrowException(new FileSystemException('Some error'));
+
+        $this->config->get(Build::VAR_SKIP_SCD);
+    }
+
+    /**
+     * @throws ConfigException
+     */
+    public function testUnableToParseMagentoEnvYaml(): void
+    {
+        $this->expectException(ConfigException::class);
+        $this->expectExceptionMessage('Some error');
+        $this->expectExceptionCode(Error::BUILD_CONFIG_PARSE_FAILED);
+
+        $this->environmentReaderMock->expects($this->once())
+            ->method('read')
+            ->willThrowException(new ParseException('Some error'));
+
+        $this->config->get(Build::VAR_SKIP_SCD);
+    }
+
+    /**
+     * @throws ConfigException
+     */
+    public function testUnableToReadSchemaFile(): void
+    {
+        $this->expectException(ConfigException::class);
+        $this->expectExceptionMessage('Some error');
+        $this->expectExceptionCode(Error::BUILD_CONFIG_UNABLE_TO_READ_SCHEMA_YAML);
+
+        $this->schemaMock->expects($this->once())
+            ->method('getDefaults')
+            ->willThrowException(new FileSystemException('Some error'));
+
+        $this->config->get(Build::VAR_SKIP_SCD);
     }
 }

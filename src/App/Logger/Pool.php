@@ -7,10 +7,12 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\App\Logger;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\App\LoggerException;
 use Monolog\Handler\HandlerInterface;
 use Magento\MagentoCloud\Config\Log as LogConfig;
 use Exception;
+use Symfony\Component\Yaml\Exception\ParseException;
 
 /**
  * The pool of handlers.
@@ -74,12 +76,10 @@ class Pool
 
                 $this->handlers[] = $handler;
             }
-        } catch (Exception $exception) {
-            throw new LoggerException(
-                $exception->getMessage(),
-                $exception->getCode(),
-                $exception
-            );
+        } catch (ParseException $e) {
+            throw new LoggerException($e->getMessage(), Error::BUILD_CONFIG_PARSE_FAILED, $e);
+        } catch (Exception $e) {
+            throw new LoggerException($e->getMessage(), $e->getCode(), $e);
         }
 
         return $this->handlers;

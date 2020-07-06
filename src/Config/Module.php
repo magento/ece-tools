@@ -64,6 +64,7 @@ class Module
      *
      * @throws ShellException
      * @throws FileSystemException
+     * @throws ConfigException
      */
     public function refresh(): array
     {

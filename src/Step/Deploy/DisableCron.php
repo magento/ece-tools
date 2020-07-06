@@ -7,7 +7,10 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Step\Deploy;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Cron\Switcher;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
+use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
 use Psr\Log\LoggerInterface;
 
@@ -54,9 +57,13 @@ class DisableCron implements StepInterface
      */
     public function execute()
     {
-        $this->logger->info('Disable cron');
-        $this->cronSwitcher->disable();
+        try {
+            $this->logger->info('Disable cron');
 
-        $this->backgroundProcessKill->execute();
+            $this->cronSwitcher->disable();
+            $this->backgroundProcessKill->execute();
+        } catch (FileSystemException $e) {
+            throw new StepException($e->getMessage(), Error::DEPLOY_ENV_PHP_IS_NOT_WRITABLE);
+        }
     }
 }

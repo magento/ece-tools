@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Step\Deploy\PreDeploy;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\Factory\Cache as CacheConfig;
 use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
@@ -63,11 +64,16 @@ class CleanRedisCache implements StepInterface
         }
 
         foreach ($cacheConfigs['frontend'] as $cacheType => $cacheConfig) {
-            if ($cacheConfig['backend'] !== 'Cm_Cache_Backend_Redis') {
+            $backend = stripslashes($cacheConfig['backend']);
+
+            if (!in_array($backend, CacheConfig::AVAILABLE_REDIS_BACKEND, true)) {
                 continue;
             }
 
-            $redisConfig = $cacheConfig['backend_options'];
+            $redisConfig = ($backend === CacheConfig::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE)
+                ? $cacheConfig['backend_options']['remote_backend_options']
+                : $cacheConfig['backend_options'];
+
             $this->logger->info('Clearing redis cache: ' . $cacheType);
 
             $client = $this->credisFactory->create(
@@ -79,8 +85,8 @@ class CleanRedisCache implements StepInterface
             try {
                 $client->connect();
                 $client->flushDb();
-            } catch (CredisException $exception) {
-                throw new StepException($exception->getMessage(), $exception->getCode(), $exception);
+            } catch (CredisException $e) {
+                throw new StepException($e->getMessage(), Error::DEPLOY_REDIS_CACHE_CLEAN_FAILED, $e);
             }
         }
     }

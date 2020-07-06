@@ -33,10 +33,12 @@ class ResultFactoryTest extends TestCase
         $result = $resultFactory->create(ResultInterface::ERROR, [
             'error' => 'some error',
             'suggestion' => 'some suggestion',
+            'errorCode' => 10
         ]);
 
         $this->assertInstanceOf(Result\Error::class, $result);
         $this->assertEquals($result->getError(), 'some error');
         $this->assertEquals($result->getSuggestion(), 'some suggestion');
+        $this->assertEquals($result->getErrorCode(), 10);
     }
 }

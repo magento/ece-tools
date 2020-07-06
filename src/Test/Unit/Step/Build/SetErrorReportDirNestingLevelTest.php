@@ -7,7 +7,11 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Process\Build;
 
+use Magento\MagentoCloud\App\Error;
+use Magento\MagentoCloud\Config\ConfigException;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Step\Build\SetReportDirNestingLevel;
+use Magento\MagentoCloud\Step\StepException;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
 use Magento\MagentoCloud\Config\Stage\BuildInterface;
@@ -131,6 +135,32 @@ XML
                     $value
                 )
             );
+        $this->processor->execute();
+    }
+
+    public function testExecuteWithConfigException()
+    {
+        $this->stageConfigMock->expects($this->once())
+            ->method('get')
+            ->willThrowException(new ConfigException('some error', Error::BUILD_CONFIG_NOT_DEFINED));
+
+        $this->expectExceptionCode(Error::BUILD_CONFIG_NOT_DEFINED);
+        $this->expectException(StepException::class);
+        $this->expectExceptionMessage('some error');
+
+        $this->processor->execute();
+    }
+
+    public function testExecuteWithFileSystemException()
+    {
+        $this->fileMock->expects($this->once())
+            ->method('filePutContents')
+            ->willThrowException(new FileSystemException('some error'));
+
+        $this->expectExceptionCode(Error::BUILD_FILE_LOCAL_XML_IS_NOT_WRITABLE);
+        $this->expectException(StepException::class);
+        $this->expectExceptionMessage('some error');
+
         $this->processor->execute();
     }
 }

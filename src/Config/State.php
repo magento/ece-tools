@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Config;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface;
 use Magento\MagentoCloud\Config\Magento\Env\WriterInterface;
@@ -39,21 +40,29 @@ class State
     private $writer;
 
     /**
+     * @var Environment
+     */
+    private $environment;
+
+    /**
      * @param LoggerInterface $logger
      * @param ConnectionInterface $connection
      * @param ReaderInterface $reader
      * @param WriterInterface $writer
+     * @param Environment $environment
      */
     public function __construct(
         LoggerInterface $logger,
         ConnectionInterface $connection,
         ReaderInterface $reader,
-        WriterInterface $writer
+        WriterInterface $writer,
+        Environment $environment
     ) {
         $this->logger = $logger;
         $this->connection = $connection;
         $this->reader = $reader;
         $this->writer = $writer;
+        $this->environment = $environment;
     }
 
     /**
@@ -83,6 +92,10 @@ class State
         }
 
         $data = $this->reader->read();
+        if (empty($data['crypt']['key']) && empty($this->environment->getCryptKey())) {
+            throw new GenericException('Missing crypt key for upgrading Magento', Error::DEPLOY_CRYPT_KEY_IS_ABSENT);
+        }
+
         if (isset($data['install']['date'])) {
             $this->logger->info('Magento was installed on ' . $data['install']['date']);
 

@@ -7,8 +7,10 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Step\Build;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Step\Build\CopySampleData;
 use Magento\MagentoCloud\Step\StepException;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -98,6 +100,26 @@ class CopySampleDataTest extends TestCase
             ->with('Sample data media was not found. Skipping.');
         $this->fileMock->expects($this->never())
             ->method('copyDirectory');
+
+        $this->step->execute();
+    }
+
+    /**
+     * @throws StepException
+     */
+    public function testExecuteWithException(): void
+    {
+        $this->fileMock->expects($this->once())
+            ->method('isExists')
+            ->with('magento_root/vendor/magento/sample-data-media')
+            ->willReturn(true);
+        $this->fileMock->expects($this->once())
+            ->method('copyDirectory')
+            ->willThrowException(new FileSystemException('some error'));
+
+        $this->expectExceptionCode(Error::BUILD_FAILED_COPY_SAMPLE_DATA);
+        $this->expectException(StepException::class);
+        $this->expectExceptionMessage('some error');
 
         $this->step->execute();
     }

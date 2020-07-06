@@ -7,10 +7,14 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Step\Build;
 
+use Magento\MagentoCloud\App\Error;
+use Magento\MagentoCloud\Config\ConfigException;
 use Magento\MagentoCloud\Config\Stage\BuildInterface;
+use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Step\Build\CompileDi;
 use Magento\MagentoCloud\Shell\MagentoShell;
 use Magento\MagentoCloud\Shell\ShellFactory;
+use Magento\MagentoCloud\Step\StepException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -61,6 +65,9 @@ class CompileDiTest extends TestCase
         );
     }
 
+    /**
+     * @throws StepException
+     */
     public function testExecute()
     {
         $this->stageConfigMock->expects($this->once())
@@ -76,6 +83,39 @@ class CompileDiTest extends TestCase
         $this->magentoShellMock->expects($this->once())
             ->method('execute')
             ->with('setup:di:compile', ['-vvv']);
+
+        $this->step->execute();
+    }
+
+    /**
+     * @throws StepException
+     */
+    public function testExecuteWithConfigException()
+    {
+        $this->stageConfigMock->expects($this->once())
+            ->method('get')
+            ->with(BuildInterface::VAR_VERBOSE_COMMANDS)
+            ->willThrowException(new ConfigException('some error', Error::BUILD_CONFIG_NOT_DEFINED));
+
+        $this->expectExceptionCode(Error::BUILD_CONFIG_NOT_DEFINED);
+        $this->expectException(StepException::class);
+        $this->expectExceptionMessage('some error');
+
+        $this->step->execute();
+    }
+
+    /**
+     * @throws StepException
+     */
+    public function testExecuteWithShellException()
+    {
+        $this->magentoShellMock->expects($this->once())
+            ->method('execute')
+            ->willThrowException(new ShellException('some error'));
+
+        $this->expectExceptionCode(Error::BUILD_DI_COMPILATION_FAILED);
+        $this->expectException(StepException::class);
+        $this->expectExceptionMessage('some error');
 
         $this->step->execute();
     }

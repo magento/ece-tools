@@ -13,7 +13,7 @@
     </step>
     <step name="enable-cron" type="Magento\MagentoCloud\Step\PostDeploy\EnableCron" priority="300"/>
     <step name="backup" type="Magento\MagentoCloud\Step\PostDeploy\Backup" priority="400"/>
-    <step name="clean-cache" type="Magento\MagentoCloud\Step\PostDeploy\CleanCache" priority="500"/>
+    <step name="clean-cache" type="CleanCache.PostDeploy" priority="500"/>
     <step name="warm-up" type="Magento\MagentoCloud\Step\PostDeploy\WarmUp" priority="600"/>
     <step name="time-to-first-byte" type="Magento\MagentoCloud\Step\PostDeploy\TimeToFirstByte" priority="700"/>
 </scenario>

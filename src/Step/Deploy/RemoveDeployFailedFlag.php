@@ -7,11 +7,14 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Step\Deploy;
 
+use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Filesystem\Flag\Manager;
+use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
 
 /**
- * Removes flags which set during the deploy phase.
+ * Removes flags and files which could be set during the previous deploy phase.
  */
 class RemoveDeployFailedFlag implements StepInterface
 {
@@ -21,11 +24,29 @@ class RemoveDeployFailedFlag implements StepInterface
     private $manager;
 
     /**
-     * @param Manager $manager
+     * @var File
      */
-    public function __construct(Manager $manager)
-    {
+    private $fileDriver;
+
+    /**
+     * @var FileList
+     */
+    private $fileList;
+
+    /**
+     * @param Manager $manager
+     * @param File $fileDriver
+     * @param FileList $fileList
+     */
+    public function __construct(
+        Manager $manager,
+        File $fileDriver,
+        FileList $fileList
+    ) {
+
         $this->manager = $manager;
+        $this->fileDriver = $fileDriver;
+        $this->fileList = $fileList;
     }
 
     /**
@@ -33,7 +54,13 @@ class RemoveDeployFailedFlag implements StepInterface
      */
     public function execute()
     {
-        $this->manager->delete(Manager::FLAG_DEPLOY_HOOK_IS_FAILED);
-        $this->manager->delete(Manager::FLAG_IGNORE_SPLIT_DB);
+        try {
+            $this->manager->delete(Manager::FLAG_DEPLOY_HOOK_IS_FAILED);
+            $this->manager->delete(Manager::FLAG_IGNORE_SPLIT_DB);
+            $this->manager->delete(Manager::FLAG_ENV_FILE_ABSENCE);
+            $this->fileDriver->deleteFile($this->fileList->getCloudErrorLog());
+        } catch (\Exception $e) {
+            throw new StepException($e->getMessage(), $e->getCode(), $e);
+        }
     }
 }

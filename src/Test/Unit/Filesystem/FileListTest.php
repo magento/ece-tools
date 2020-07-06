@@ -70,9 +70,30 @@ class FileListTest extends TestCase
     /**
      * @throws UndefinedPackageException
      */
+    public function testGetCloudErrorLog(): void
+    {
+        $this->assertSame('magento_root/var/log/cloud.error.log', $this->fileList->getCloudErrorLog());
+    }
+
+    /**
+     * @throws UndefinedPackageException
+     */
     public function testGetInitCloudLog(): void
     {
         $this->assertSame('magento_root/init/var/log/cloud.log', $this->fileList->getInitCloudLog());
+    }
+
+    /**
+     * @throws UndefinedPackageException
+     */
+    public function testGetInitCloudErrorLog(): void
+    {
+        $this->directoryListMock->expects($this->once())
+            ->method('getPath')
+            ->with(DirectoryList::DIR_LOG, true)
+            ->willReturn('var/log');
+
+        $this->assertSame('magento_root/init/var/log/cloud.error.log', $this->fileList->getInitCloudErrorLog());
     }
 
     public function testGetPatches(): void
@@ -139,5 +160,10 @@ class FileListTest extends TestCase
     public function testGetLogDistConfig(): void
     {
         $this->assertSame('root/dist/.log.env.md', $this->fileList->getLogDistConfig());
+    }
+
+    public function testGetErrorSchema(): void
+    {
+        $this->assertSame('root/config/schema.error.yaml', $this->fileList->getErrorSchema());
     }
 }

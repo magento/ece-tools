@@ -7,12 +7,14 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Step\Deploy\InstallUpdate\Install;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Filesystem\FileList;
+use Magento\MagentoCloud\Shell\ShellException;
+use Magento\MagentoCloud\Shell\ShellInterface;
+use Magento\MagentoCloud\Shell\UtilityException;
 use Magento\MagentoCloud\Shell\UtilityManager;
 use Magento\MagentoCloud\Step\Deploy\InstallUpdate\Install\Setup;
 use Magento\MagentoCloud\Step\Deploy\InstallUpdate\Install\Setup\InstallCommandFactory;
-use Magento\MagentoCloud\Shell\ShellException;
-use Magento\MagentoCloud\Shell\ShellInterface;
 use Magento\MagentoCloud\Step\StepException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -107,10 +109,11 @@ class SetupTest extends TestCase
     /**
      * @throws StepException
      */
-    public function testExecuteWithException(): void
+    public function testExecuteWithShellException(): void
     {
         $this->expectException(StepException::class);
         $this->expectExceptionMessage('script error');
+        $this->expectExceptionCode(Error::DEPLOY_INSTALL_COMMAND_FAILED);
 
         $installUpgradeLog = '/tmp/log.log';
 
@@ -123,7 +126,22 @@ class SetupTest extends TestCase
         $this->installCommandFactoryMock->expects($this->never())
             ->method('create');
         $this->shellMock->method('execute')
-            ->willThrowException(new StepException('script error'));
+            ->willThrowException(new ShellException('script error'));
+
+        $this->step->execute();
+    }
+
+    /**
+     * @throws StepException
+     */
+    public function testExecuteWithUtilityException(): void
+    {
+        $this->expectException(StepException::class);
+        $this->expectExceptionMessage('script error');
+        $this->expectExceptionCode(Error::DEPLOY_UTILITY_NOT_FOUND);
+
+        $this->shellMock->method('execute')
+            ->willThrowException(new UtilityException('script error'));
 
         $this->step->execute();
     }
