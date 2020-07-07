@@ -140,7 +140,7 @@ class ReportDirNestingLevelTest extends TestCase
             ->method('error')
             ->with(
                 'The directory nesting level value for error reporting has not been configured.',
-                'You can configure the setting using the `config.report.dir_nesting_level`'
+                'You can configure the setting using the `config.report.dir_nesting_level` variable'
                 . ' in the file ' . $this->reportConfigFile
             );
 
