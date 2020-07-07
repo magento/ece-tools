@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Config\Validator\Build;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\Magento\Shared\ReaderInterface;
 use Magento\MagentoCloud\Config\Validator;
 use Magento\MagentoCloud\Config\ValidatorInterface;
@@ -43,6 +44,10 @@ class ModulesExists implements ValidatorInterface
     {
         return isset($this->reader->read()['modules'])
             ? $this->resultFactory->success()
-            : $this->resultFactory->error('The modules section is missing from the shared config file.');
+            : $this->resultFactory->error(
+                'The modules section is missing from the shared config file.',
+                '',
+                Error::WARN_MISSED_MODULE_SECTION
+            );
     }
 }

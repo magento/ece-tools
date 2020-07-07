@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Config\Validator\Deploy;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Config\Validator;
@@ -63,7 +64,8 @@ class DeprecatedVariables implements ValidatorInterface
                     'The %s variable contains deprecated value. Use one of the next values: %s.',
                     DeployInterface::VAR_VERBOSE_COMMANDS,
                     implode(',', ['-v', '-vv', '-vvv'])
-                )
+                ),
+                Error::WARN_DEPRECATED_VARIABLES
             );
         }
 

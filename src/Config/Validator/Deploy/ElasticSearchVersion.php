@@ -9,6 +9,7 @@ namespace Magento\MagentoCloud\Config\Validator\Deploy;
 
 use Composer\Semver\Comparator;
 use Composer\Semver\Semver;
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\SearchEngine;
 use Magento\MagentoCloud\Config\Validator;
 use Magento\MagentoCloud\Config\ValidatorException;
@@ -132,8 +133,8 @@ class ElasticSearchVersion implements ValidatorInterface
 
         try {
             $esServiceVersion = $this->elasticSearch->getVersion();
-        } catch (ServiceException $exception) {
-            throw new ValidatorException($exception->getMessage(), $exception->getCode(), $exception);
+        } catch (ServiceException $e) {
+            throw new ValidatorException($e->getMessage(), $e->getCode(), $e);
         }
 
         if (!$this->searchEngine->isESFamily()) {
@@ -202,6 +203,6 @@ class ElasticSearchVersion implements ValidatorInterface
             ];
         }
 
-        return $this->resultFactory->error($error, implode(PHP_EOL, $suggestion));
+        return $this->resultFactory->error($error, implode(PHP_EOL, $suggestion), Error::WARN_ES_VERSION_MISMATCH);
     }
 }

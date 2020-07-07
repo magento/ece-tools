@@ -86,7 +86,7 @@ class RunBaler implements StepInterface
         $result = $this->validator->validate();
 
         if ($result instanceof Result\Error) {
-            $this->logger->warning($result->getError());
+            $this->logger->warning($result->getError(), ['errorCode' => $result->getErrorCode()]);
 
             foreach (explode(PHP_EOL, $result->getSuggestion()) as $detail) {
                 $this->logger->warning(' - ' . $detail);

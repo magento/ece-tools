@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Config\Validator\Build;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\Validator;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
 use Magento\MagentoCloud\Config\ValidatorInterface;
@@ -58,7 +59,8 @@ class UnsupportedBuildOptionsIni implements ValidatorInterface
                 sprintf(
                     'Modify your configuration to specify build options in the %s file',
                     basename($this->fileList->getEnvConfig())
-                )
+                ),
+                Error::WARN_UNSUPPORTED_BUILDS_OPTION_INI
             );
         }
 

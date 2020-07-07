@@ -62,6 +62,7 @@ class Application extends \Symfony\Component\Console\Application
             $this->container->create(Command\BackupList::class),
             $this->container->create(Command\ApplyPatches::class),
             $this->container->create(Command\Dev\UpdateComposer::class),
+            $this->container->create(Command\Dev\GenerateSchemaError::class),
             $this->container->create(Command\Wizard\ScdOnDemand::class),
             $this->container->create(Command\Wizard\ScdOnBuild::class),
             $this->container->create(Command\Wizard\ScdOnDeploy::class),
@@ -75,7 +76,8 @@ class Application extends \Symfony\Component\Console\Application
             $this->container->create(Command\CronUnlock::class),
             $this->container->create(Command\ConfigShow::class),
             $this->container->create(Command\RunCommand::class),
-            $this->container->create(Command\GenerateSchema::class)
+            $this->container->create(Command\GenerateSchema::class),
+            $this->container->create(Command\ErrorShow::class)
         ]);
     }
 }

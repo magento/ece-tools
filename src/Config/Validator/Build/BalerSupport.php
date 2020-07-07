@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Config\Validator\Build;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\Magento\Shared\ReaderInterface;
 use Magento\MagentoCloud\Config\Validator;
 use Magento\MagentoCloud\Config\ValidatorInterface;
@@ -79,7 +80,8 @@ class BalerSupport implements ValidatorInterface
             ? $this->resultFactory->success()
             : $this->resultFactory->error(
                 'Baler JS bundling cannot be used because of the following issues:',
-                implode(PHP_EOL, $errors)
+                implode(PHP_EOL, $errors),
+                Error::WARN_BALER_CANNOT_BE_USED
             );
     }
 }

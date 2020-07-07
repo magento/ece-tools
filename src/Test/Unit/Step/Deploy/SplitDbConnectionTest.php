@@ -181,7 +181,7 @@ class SplitDbConnectionTest extends TestCase
             ->method('get')
             ->willReturn($dbConfig);
         $this->loggerMock->expects($this->once())
-            ->method('error')
+            ->method('warning')
             ->with(
                 'Enabling a split database will be skipped.'
                 . ' Relationship do not have configuration for next types: ' . implode(', ', $splitTypes)

@@ -49,19 +49,25 @@ class ValidateConfiguration implements StepInterface
 
         $errors = $this->collectErrors();
 
-        ksort($errors);
-        /** @var Error[] $levelErrors */
-        foreach ($errors as $level => $levelErrors) {
-            $message = $this->createErrorMessage($levelErrors);
+        if (!empty($errors)) {
+            ksort($errors);
 
-            if ($level >= ValidatorInterface::LEVEL_CRITICAL) {
-                throw new StepException(
-                    $message,
-                    array_values($levelErrors)[0]->getErrorCode()
-                );
+            $this->logger->notice('Fix configuration with given suggestions:');
+
+            /** @var Error[] $levelErrors */
+            foreach ($errors as $level => $levelErrors) {
+                foreach ($levelErrors as $error) {
+                    $this->logger->log($level, $error->getError(), [
+                        'errorCode' => $error->getErrorCode(),
+                        'suggestion' => $error->getSuggestion()
+                    ]);
+                }
+
+                if ($level >= ValidatorInterface::LEVEL_CRITICAL) {
+                    $error = array_values($levelErrors)[0];
+                    throw new StepException($error->getError(), $error->getErrorCode());
+                }
             }
-
-            $this->logger->log($level, $message);
         }
 
         $this->logger->notice('End of validation');
@@ -102,29 +108,5 @@ class ValidateConfiguration implements StepInterface
         }
 
         return $errors;
-    }
-
-    /**
-     * Convert array of Errors to string message
-     *
-     * @param array $errors
-     * @return string
-     */
-    private function createErrorMessage(array $errors): string
-    {
-        $messages = [];
-        foreach ($errors as $error) {
-            $messages[] = '- ' . $error->getError();
-            if ($suggestion = $error->getSuggestion()) {
-                $messages[] = implode(PHP_EOL, array_map(
-                    static function ($line) {
-                        return '  ' . $line;
-                    },
-                    explode(PHP_EOL, $suggestion)
-                ));
-            }
-        }
-
-        return 'Fix configuration with given suggestions:' . PHP_EOL . implode(PHP_EOL, $messages);
     }
 }

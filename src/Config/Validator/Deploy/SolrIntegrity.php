@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Config\Validator\Deploy;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\ValidatorInterface;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
@@ -63,11 +64,13 @@ class SolrIntegrity implements ValidatorInterface
             if ($this->magentoVersion->satisfies('2.1.*')) {
                 $args['suggestion'] = 'Solr support has been deprecated in Magento 2.1. ' .
                     'Update your search engine to Elasticsearch and remove this relationship.';
+                $args['errorCode'] = Error::WARN_SOLR_DEPRECATED;
             }
 
             if ($this->magentoVersion->satisfies('>=2.2')) {
                 $args['suggestion'] = 'Solr is no longer supported by Magento 2.2 or later. ' .
                     'Remove this relationship and use Elasticsearch.';
+                $args['errorCode'] = Error::WARN_SOLR_NOT_SUPPORTED;
             }
 
             return $this->resultFactory->create(ResultInterface::ERROR, $args);

@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Config\Validator\Build;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\Validator;
 use Magento\MagentoCloud\Config\ValidatorInterface;
 use Magento\MagentoCloud\Filesystem\FileList;
@@ -69,13 +70,7 @@ class ConfigFileExists implements ValidatorInterface
                 ]
             );
 
-            return $this->resultFactory->create(
-                Validator\ResultInterface::ERROR,
-                [
-                    'error' => $error,
-                    'suggestion' => $suggestion
-                ]
-            );
+            return $this->resultFactory->error($error, $suggestion, Error::WARN_CONFIG_PHP_NOT_EXISTS);
         }
 
         return $this->resultFactory->create(Validator\ResultInterface::SUCCESS);
