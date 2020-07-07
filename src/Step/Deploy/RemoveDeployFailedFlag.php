@@ -9,11 +9,9 @@ namespace Magento\MagentoCloud\Step\Deploy;
 
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileList;
-use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Filesystem\Flag\Manager;
 use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
-use Magento\MagentoCloud\App\Logger\Error\ReaderInterface;
 
 /**
  * Removes flags and files which could be set during the previous deploy phase.
@@ -36,26 +34,18 @@ class RemoveDeployFailedFlag implements StepInterface
     private $fileList;
 
     /**
-     * @var ReaderInterface
-     */
-    private $errorReader;
-
-    /**
      * @param Manager $manager
      * @param File $fileDriver
      * @param FileList $fileList
-     * @param ReaderInterface $errorReader
      */
     public function __construct(
         Manager $manager,
         File $fileDriver,
-        FileList $fileList,
-        ReaderInterface $errorReader
+        FileList $fileList
     ) {
         $this->manager = $manager;
         $this->fileDriver = $fileDriver;
         $this->fileList = $fileList;
-        $this->errorReader = $errorReader;
     }
 
     /**
@@ -68,30 +58,24 @@ class RemoveDeployFailedFlag implements StepInterface
             $this->manager->delete(Manager::FLAG_IGNORE_SPLIT_DB);
             $this->manager->delete(Manager::FLAG_ENV_FILE_ABSENCE);
 
-            if ($this->isNeedToRemoveCloudErrorLog()) {
-                $this->fileDriver->deleteFile($this->fileList->getCloudErrorLog());
-            }
+            $this->removeErrorLogFile();
         } catch (\Exception $e) {
             throw new StepException($e->getMessage(), $e->getCode(), $e);
         }
     }
 
     /**
-     * Checks if cloud.error.log file should be removed.
-     * Returns true if file contains not only errors from the build phase
+     * Removes cloud.error.log file and copies it from init directory if exists.
      *
-     * @return bool
-     * @throws FileSystemException
+     * @throws \Magento\MagentoCloud\Package\UndefinedPackageException
      */
-    private function isNeedToRemoveCloudErrorLog(): bool
+    private function removeErrorLogFile()
     {
-        $errors = $this->errorReader->read();
-        foreach ($errors as $error) {
-            if (isset($error['stage']) && $error['stage'] != 'build') {
-                return true;
-            }
+        $errorLogFilePath = $this->fileList->getCloudErrorLog();
+        $buildPhaseErrorLogPath = $this->fileList->getInitCloudErrorLog();
+        $this->fileDriver->deleteFile($errorLogFilePath);
+        if ($this->fileDriver->isExists($buildPhaseErrorLogPath)) {
+            $this->fileDriver->copy($buildPhaseErrorLogPath, $errorLogFilePath);
         }
-
-        return false;
     }
 }
