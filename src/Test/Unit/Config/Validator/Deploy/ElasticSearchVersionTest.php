@@ -135,10 +135,10 @@ class ElasticSearchVersionTest extends TestCase
         $this->managerMock->expects($this->once())
             ->method('get')
             ->with('elasticsearch/elasticsearch')
-            ->willThrowException(new UndefinedPackageException('package doesn\'t exist'));
+            ->willThrowException(new UndefinedPackageException('package does not exist'));
         $this->loggerMock->expects($this->once())
             ->method('warning')
-            ->with('Can\'t validate version of elasticsearch: package doesn\'t exist');
+            ->with('Can\'t validate version of elasticsearch: package does not exist');
         $this->resultFactoryMock->expects($this->once())
             ->method('success');
 

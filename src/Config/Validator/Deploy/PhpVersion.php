@@ -102,7 +102,7 @@ class PhpVersion implements ValidatorInterface
                         $currentPhpConstraint->getPrettyString()
                     ),
                     "Change the version of PHP to the version that satisfies the restriction conditions.\n"
-                    . 'Change the PHP version in the .magento.app.yaml file or create a support ticket',
+                    . 'Change the PHP version in the .magento.app.yaml file, or create a support ticket',
                     Error::WARN_UPDATE_PHP_VERSION
                 );
             }
