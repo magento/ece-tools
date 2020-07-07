@@ -162,13 +162,13 @@ class SplitDbCest extends AbstractCest
             ],
             'Split Db type was deleted' => [
                 'splitDbTypes' => null,
-                'messages' => 'Variable SPLIT_DB does not have data which were already split types: quote',
+                'messages' => 'The SPLIT_DB variable is missing the configuration for split connection types: quote',
                 'expectedExists' => ['checkout'],
                 'expectedNotExist' => ['sales'],
             ],
             'Split Db  current type was deleted and new type added' => [
                 'splitDbTypes' => ['sales'],
-                'messages' => 'Variable SPLIT_DB does not have data which were already split types: quote',
+                'messages' => 'The SPLIT_DB variable is missing the configuration for split connection types: quote',
                 'expectedExists' => ['checkout'],
                 'expectedNotExist' => ['sales'],
             ],

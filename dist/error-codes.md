@@ -121,7 +121,7 @@
 | 2001 | pre-deploy:cache | Cache is configured for a Redis service that is not available. Configuration will be ignored. |  |
 | 2002 | validate-config | The configured state is not ideal |  |
 | 2003 | validate-config | The directory nesting level value for error reporting has not been configured |  |
-| 2004 | validate-config | Invalid file config ./pub/errors/local.xml |  |
+| 2004 | validate-config | Invalid configuration in the ./pub/errors/local.xml file. |  |
 | 2005 | validate-config | Admin data is used to create an admin user during initial installation only. Any changes to Admin data are ignored during the upgrade process. | After the initial installation, you can remove admin data from the configuration. |
 | 2006 | validate-config | Admin user was not created as admin email was not set | After installation, you can create an admin user manually:  Use ssh to connect to your environment. Then, run the `bin/magento admin:user:create` command. |
 | 2007 | validate-config | Update php version to recommended version |  |
@@ -141,7 +141,7 @@
 | 2021 | install-update:db-connection | For split databases used custom connections |  |
 | 2022 | install-update:db-connection | You have changed to a database configuration that is not compatible with the slave connection. |  |
 | 2023 | install-update:split-db | Enabling a split database will be skipped. |  |
-| 2024 | install-update:split-db | The SPLIT_DB variable does not have data which were already split. |  |
+| 2024 | install-update:split-db | The SPLIT_DB variable is missing the configuration for split connection types. |  |
 | 2025 | install-update:split-db | Slave connection not set. |  |
 
 ### Post-deploy stage

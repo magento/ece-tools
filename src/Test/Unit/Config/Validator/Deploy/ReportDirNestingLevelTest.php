@@ -166,7 +166,7 @@ class ReportDirNestingLevelTest extends TestCase
         $this->resultFactoryMock->expects($this->once())
             ->method('error')
             ->with(
-                sprintf('Config of the file %s is invalid. Invalid xml', $this->reportConfigFile),
+                sprintf('Invalid configuration in the %s file. Invalid xml', $this->reportConfigFile),
                 'Fix the directory nesting level configuration for error reporting in the file '
                 . $this->reportConfigFile
             );

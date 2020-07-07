@@ -92,8 +92,12 @@ class ReportDirNestingLevel implements ValidatorInterface
         } catch (FileSystemException $exception) {
             return $this->resultFactory->error($exception->getMessage());
         } catch (NotEncodableValueException $exception) {
-            $message = sprintf('Config of the file %s is invalid. ', $reportConfigFile);
-            $message .= $exception->getMessage();
+            $message = sprintf(
+                'Invalid configuration in the %s file. %s',
+                $reportConfigFile,
+                $exception->getMessage()
+            );
+
             return $this->resultFactory->error(
                 $message,
                 'Fix the directory nesting level configuration for error reporting in the file '

@@ -194,11 +194,13 @@ class SlaveConnectionTest extends TestCase
             ->withConsecutive(
                 [
                     'Slave connection for \'checkout\' connection not set.'
-                    . ' Relationships do not have the configuration for this slave connection'
+                    . ' The `relationships` configuration in the .magento.app.yaml file'
+                    . ' is missing the configuration for this slave connection'
                 ],
                 [
                     'Slave connection for \'sales\' connection not set.'
-                    . ' Relationships do not have the configuration for this slave connection'
+                    . ' The `relationships` configuration in the .magento.app.yaml file'
+                    . ' is missing the configuration for this slave connection'
                 ]
             );
         $this->configWriterMock->create($mageConfig);
