@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Step\Deploy;
 
+use Magento\MagentoCloud\App\Logger\Error\ReaderInterface;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Filesystem\Flag\Manager;
@@ -41,6 +42,11 @@ class RemoveDeployFailedFlagTest extends TestCase
     private $fileListMock;
 
     /**
+     * @var ReaderInterface|MockObject
+     */
+    private $readerMock;
+
+    /**
      * @inheritDoc
      */
     protected function setUp(): void
@@ -48,11 +54,13 @@ class RemoveDeployFailedFlagTest extends TestCase
         $this->flagManagerMock = $this->createMock(Manager::class);
         $this->fileMock = $this->createMock(File::class);
         $this->fileListMock = $this->createMock(FileList::class);
+        $this->readerMock = $this->getMockForAbstractClass(ReaderInterface::class);
 
         $this->step = new RemoveDeployFailedFlag(
             $this->flagManagerMock,
             $this->fileMock,
-            $this->fileListMock
+            $this->fileListMock,
+            $this->readerMock
         );
     }
 
@@ -72,9 +80,33 @@ class RemoveDeployFailedFlagTest extends TestCase
         $this->fileListMock->expects($this->once())
             ->method('getCloudErrorLog')
             ->willReturn($filePath);
+        $this->readerMock->expects($this->once())
+            ->method('read')
+            ->willReturn([
+                ['errorCode' => 1, 'stage' => 'deploy']
+            ]);
         $this->fileMock->expects($this->once())
             ->method('deleteFile')
             ->with($filePath);
+
+        $this->step->execute();
+    }
+
+    /**
+     * @throws StepException
+     */
+    public function testExecuteKeepErrorLogFile(): void
+    {
+        $this->readerMock->expects($this->once())
+            ->method('read')
+            ->willReturn([
+                ['errorCode' => 1, 'stage' => 'build'],
+                ['errorCode' => 2, 'stage' => 'build'],
+            ]);
+        $this->fileListMock->expects($this->never())
+            ->method('getCloudErrorLog');
+        $this->fileMock->expects($this->never())
+            ->method('deleteFile');
 
         $this->step->execute();
     }
