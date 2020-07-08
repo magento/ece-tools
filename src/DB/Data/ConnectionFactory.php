@@ -68,7 +68,7 @@ class ConnectionFactory
                 return $this->getConnectionData(DbConfig::CONNECTION_SALES, false);
             default:
                 throw new RuntimeException(
-                    sprintf('Connection with type %s doesn\'t exist', $connectionType)
+                    sprintf('Connection with type %s does not exist', $connectionType)
                 );
         }
     }

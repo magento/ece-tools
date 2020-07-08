@@ -66,7 +66,7 @@ class RelationshipConnectionFactory
                 break;
             default:
                 throw new \RuntimeException(
-                    sprintf('Connection with type %s doesn\'t exist', $connectionType)
+                    sprintf('Connection with type %s does not exist', $connectionType)
                 );
         }
 

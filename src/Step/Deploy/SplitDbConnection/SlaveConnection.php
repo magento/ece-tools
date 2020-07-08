@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Step\Deploy\SplitDbConnection;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\ConfigException;
 use Magento\MagentoCloud\Config\Database\DbConfig;
 use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface as ConfigReader;
@@ -92,11 +93,15 @@ class SlaveConnection
 
         foreach ($mageSplitConnections as $mageConnectionName) {
             if (!isset($dbConfig[DbConfig::KEY_SLAVE_CONNECTION][$mageConnectionName])) {
-                $this->logger->warning(sprintf(
-                    'Slave connection for \'%s\' connection not set. '
-                    . 'Relationships do not have the configuration for this slave connection',
-                    $mageConnectionName
-                ));
+                $this->logger->warning(
+                    sprintf(
+                        'Slave connection for \'%s\' connection not set. '
+                        . 'The `relationships` configuration in the .magento.app.yaml file '
+                        . 'is missing the configuration for this slave connection',
+                        $mageConnectionName
+                    ),
+                    ['errorCode' => Error::WARN_SLAVE_CONNECTION_NOT_SET]
+                );
                 continue;
             }
             $connectionConfig = $dbConfig[DbConfig::KEY_SLAVE_CONNECTION][$mageConnectionName];

@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Util;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Psr\Log\LoggerInterface;
@@ -48,7 +49,10 @@ class Cpu
             $result = $this->shell->execute('nproc');
             $threadCount = max((int)$result->getOutput(), 1);
         } catch (ShellException $e) {
-            $this->logger->error('Can\'t get system processor count: ' . $e->getMessage());
+            $this->logger->warning(
+                'Can\'t get system processor count: ' . $e->getMessage(),
+                ['errorCode' => Error::WARN_CANNOT_GET_PROC_COUNT]
+            );
             $threadCount = 1;
         }
 

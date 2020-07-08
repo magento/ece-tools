@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Util;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Shell\MagentoShell;
@@ -209,7 +210,10 @@ class UrlManager
                     $this->storeBaseUrls = $baseUrls;
                 }
             } catch (ShellException $e) {
-                $this->logger->error('Can\'t fetch store urls. ' . $e->getMessage());
+                $this->logger->warning(
+                    'Can\'t fetch store urls. ' . $e->getMessage(),
+                    ['errorCode' => Error::WARN_CANNOT_FETCH_STORE_URLS]
+                );
             }
         }
     }
@@ -234,7 +238,10 @@ class UrlManager
 
             return $this->storeBaseUrls[$storeId] = $process->getOutput();
         } catch (ShellException $e) {
-            $this->logger->error(sprintf('Can\'t fetch store with store code "%s". ', $storeId) . $e->getMessage());
+            $this->logger->warning(
+                sprintf('Can\'t fetch store url with store code "%s". %s', $storeId, $e->getMessage()),
+                ['errorCode' => Error::WARN_CANNOT_FETCH_STORE_URL]
+            );
 
             return null;
         }

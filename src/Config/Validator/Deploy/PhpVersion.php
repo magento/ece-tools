@@ -10,6 +10,7 @@ namespace Magento\MagentoCloud\Config\Validator\Deploy;
 use Composer\Composer;
 use Composer\Package\Version\VersionParser;
 use Composer\Semver\Constraint\ConstraintInterface;
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\GlobalSection;
 use Magento\MagentoCloud\Config\ValidatorInterface;
 use Magento\MagentoCloud\Config\Validator;
@@ -101,7 +102,8 @@ class PhpVersion implements ValidatorInterface
                         $currentPhpConstraint->getPrettyString()
                     ),
                     "Change the version of PHP to the version that satisfies the restriction conditions.\n"
-                    . 'Change the PHP version in the .magento.app.yaml file or create a support ticket'
+                    . 'Change the PHP version in the .magento.app.yaml file, or create a support ticket',
+                    Error::WARN_UPDATE_PHP_VERSION
                 );
             }
         } catch (\Exception $e) {
