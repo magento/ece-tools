@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Config\Validator\Deploy;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\ValidatorInterface;
 use Magento\MagentoCloud\Filesystem\ConfigFileList;
@@ -85,7 +86,8 @@ class ReportDirNestingLevel implements ValidatorInterface
             return $this->resultFactory->error(
                 'The directory nesting level value for error reporting has not been configured.',
                 'You can configure the setting using the `config.report.dir_nesting_level`'
-                . ' in the file ' . $reportConfigFile
+                . ' in the file ' . $reportConfigFile,
+                Error::WARN_DIR_NESTING_LEVEL_NOT_CONFIGURED
             );
         } catch (FileSystemException $exception) {
             return $this->resultFactory->error($exception->getMessage());
@@ -95,7 +97,8 @@ class ReportDirNestingLevel implements ValidatorInterface
             return $this->resultFactory->error(
                 $message,
                 'Fix the directory nesting level configuration for error reporting in the file '
-                . $reportConfigFile
+                . $reportConfigFile,
+                Error::WARN_NOT_CORRECT_LOCAL_XML_FILE
             );
         }
     }
