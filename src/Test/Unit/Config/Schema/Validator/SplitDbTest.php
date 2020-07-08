@@ -51,7 +51,7 @@ class SplitDbTest extends TestCase
         $this->assertEquals(
             new Error(
                 'The SOME_VARIABLE variable contains the invalid value.'
-                .' It should be array with next available values: [quote, sales].'
+                .' It should be an array with following values: [quote, sales].'
             ),
             $this->validator->validate('SOME_VARIABLE', ['invalid_value'])
         );

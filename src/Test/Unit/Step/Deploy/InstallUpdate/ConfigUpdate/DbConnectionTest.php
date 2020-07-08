@@ -166,7 +166,7 @@ class DbConnectionTest extends TestCase
             ->willReturn([]);
         $this->loggerMock->expects($this->once())
             ->method('notice')
-            ->with('Database relationship configuration doesn\'t exist'
+            ->with('Database relationship configuration does not exist'
                 . ' and database is not configured through .magento.env.yaml or env variable.'
                 . ' Will be applied the previous database configuration.');
         $this->flagManagerMock->expects($this->never())

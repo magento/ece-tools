@@ -74,7 +74,7 @@ class ElasticSearchUsage implements ValidatorInterface
 
         return $this->resultFactory->error(
             'Elasticsearch service is installed at infrastructure layer but is not used as a search engine.',
-            'Consider removing elasticsearch service from infrastructure layer for optimized resource usage.',
+            'Consider removing the Elasticsearch service from the infrastructure layer for optimized resource usage.',
             Error::WARN_ES_INSTALLED_BUT_NOT_USED
         );
     }

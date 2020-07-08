@@ -250,7 +250,7 @@ class SplitDbConnectionTest extends TestCase
         $this->loggerMock->expects($this->once())
             ->method('warning')
             ->with(
-                'Variable SPLIT_DB does not have data which were already split types: '
+                'The SPLIT_DB variable is missing the configuration for split connection types: '
                 . implode(', ', $splitTypes)
             );
         $this->magentoShellMock->expects($this->never())

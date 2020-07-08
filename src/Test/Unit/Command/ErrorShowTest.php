@@ -153,6 +153,6 @@ class ErrorShowTest extends TestCase
         $tester = new CommandTester($this->command);
         $tester->execute([]);
 
-        $this->assertContains('The error log is empty or doesn\'t exist', $tester->getDisplay());
+        $this->assertContains('The error log is empty or does not exist', $tester->getDisplay());
     }
 }
