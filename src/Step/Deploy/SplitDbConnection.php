@@ -129,11 +129,14 @@ class SplitDbConnection implements StepInterface
             );
 
             if (!empty($notAvailableSplitTypes)) {
-                $this->logger->error(sprintf(
+                $this->logger->warning(
+                sprintf(
                     'Enabling a split database will be skipped.'
                     . ' Relationship do not have configuration for next types: %s',
                     implode(', ', $notAvailableSplitTypes)
-                ));
+                ),
+                ['errorCode' => Error::WARN_SPLIT_DB_ENABLING_SKIPPED]
+                );
                 return;
             }
 
@@ -149,7 +152,8 @@ class SplitDbConnection implements StepInterface
             if (!empty($missedSplitTypes)) {
                 $this->logger->warning(
                     'Variable SPLIT_DB does not have data which were already split types: '
-                    . implode(', ', $missedSplitTypes)
+                    . implode(', ', $missedSplitTypes),
+                    ['errorCode' => Error::WARN_NOT_ENOUGH_DATA_SPLIT_DB_VAR]
                 );
                 return;
             }

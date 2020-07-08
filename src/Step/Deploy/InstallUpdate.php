@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Step\Deploy;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Config\State;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
@@ -78,10 +79,13 @@ class InstallUpdate implements StepInterface
                 $this->logger->notice('End of install.');
             } else {
                 if ($this->flagManager->exists(FlagManager::FLAG_ENV_FILE_ABSENCE)) {
-                    $this->logger->warning('Magento state indicated as installed'
+                    $this->logger->warning(
+                        'Magento state indicated as installed'
                         . ' but configuration file app/etc/env.php was empty or did not exist.'
                         . ' Required data will be restored from environment configurations'
-                        . ' and from .magento.env.yaml file.');
+                        . ' and from .magento.env.yaml file.',
+                        ['errorCode' => Error::WARN_ENV_PHP_MISSED]
+                    );
                 }
                 $this->logger->notice('Starting update.');
 

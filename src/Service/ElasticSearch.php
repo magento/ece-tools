@@ -8,6 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Service;
 
 use Composer\Semver\Semver;
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Http\ClientFactory;
 use Psr\Log\LoggerInterface;
@@ -101,7 +102,10 @@ class ElasticSearch implements ServiceInterface
 
                 $this->version = $esConfiguration['version']['number'];
             } catch (Throwable $exception) {
-                throw new ServiceException('Can\'t get version of elasticsearch: ' . $exception->getMessage());
+                throw new ServiceException(
+                    'Can\'t get version of elasticsearch: ' . $exception->getMessage(),
+                    Error::DEPLOY_ES_CANNOT_CONNECT
+                );
             }
         }
 

@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Config\ConfigException;
 use Magento\MagentoCloud\Config\ConfigMerger;
@@ -168,10 +169,10 @@ class DbConnection implements StepInterface
             );
 
             if (!empty($customSplitConnections)) {
-                $this->logger->warning(sprintf(
-                    'For split databases used custom connections: %s',
-                    implode(', ', $customSplitConnections)
-                ));
+                $this->logger->warning(
+                    sprintf('For split databases used custom connections: %s', implode(', ', $customSplitConnections)),
+                    ['errorCode' => Error::WARN_SPLIT_DB_CUSTOM_CONNECTION_USED]
+                );
                 $this->flagManager->set(FlagManager::FLAG_IGNORE_SPLIT_DB);
                 return;
             }
@@ -326,10 +327,13 @@ class DbConnection implements StepInterface
             DbConfig::CONNECTION_DEFAULT,
             $connectionData
         )) {
-            $this->logger->warning(sprintf(
-                'You have changed db configuration that not compatible with %s slave connection.',
-                DbConfig::CONNECTION_DEFAULT
-            ));
+            $this->logger->warning(
+                sprintf(
+                    'You have changed db configuration that not compatible with %s slave connection.',
+                    DbConfig::CONNECTION_DEFAULT
+                ),
+                ['errorCode' => Error::WARN_DB_CONFIG_NOT_COMPATIBLE_WITH_SLAVE]
+            );
         } elseif (!empty($dbConfig[DbConfig::KEY_SLAVE_CONNECTION][DbConfig::CONNECTION_DEFAULT])) {
             $this->logger->info(sprintf('Set DB slave connection for %s connection.', DbConfig::CONNECTION_DEFAULT));
         } else {

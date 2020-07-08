@@ -68,6 +68,7 @@ class ApplicationTest extends TestCase
         Command\BackupList::NAME => Command\BackupList::class,
         Command\ApplyPatches::NAME => Command\ApplyPatches::class,
         Command\Dev\UpdateComposer::NAME => Command\Dev\UpdateComposer::class,
+        Command\Dev\GenerateSchemaError::NAME => Command\Dev\GenerateSchemaError::class,
         Command\Wizard\ScdOnBuild::NAME => Command\Wizard\ScdOnBuild::class,
         Command\Wizard\ScdOnDeploy::NAME => Command\Wizard\ScdOnDeploy::class,
         Command\Wizard\ScdOnDemand::NAME => Command\Wizard\ScdOnDemand::class,
@@ -81,6 +82,7 @@ class ApplicationTest extends TestCase
         Command\ConfigShow::NAME => Command\ConfigShow::class,
         Command\RunCommand::NAME => Command\RunCommand::class,
         Command\GenerateSchema::NAME => Command\GenerateSchema::class,
+        Command\ErrorShow::NAME => Command\ErrorShow::class,
     ];
 
     /**

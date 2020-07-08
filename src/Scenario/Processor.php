@@ -10,7 +10,6 @@ namespace Magento\MagentoCloud\Scenario;
 use Magento\MagentoCloud\OnFail\Action\ActionException;
 use Magento\MagentoCloud\OnFail\Action\ActionInterface;
 use Magento\MagentoCloud\Package\Manager;
-use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
 use Magento\MagentoCloud\Scenario\Exception\ProcessorException;
 use Psr\Log\LoggerInterface;
@@ -72,7 +71,7 @@ class Processor
         } catch (Throwable $exception) {
             $this->handleException(
                 $exception,
-                sprintf('Unhandled error: [%d] %s', $exception->getCode(), $exception->getMessage())
+                sprintf('Unhandled error: %s', $exception->getMessage())
             );
         }
 
@@ -123,9 +122,9 @@ class Processor
     private function handleException(Throwable $exception, string $message = ''): void
     {
         if (empty($message)) {
-            $message = sprintf('[%d] %s', $exception->getCode(), $exception->getMessage());
+            $message = sprintf('%s', $exception->getMessage());
         }
-        $this->logger->error($message);
+        $this->logger->error($message, ['errorCode' => $exception->getCode()]);
 
         throw new ProcessorException(
             $message,

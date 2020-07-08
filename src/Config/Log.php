@@ -8,6 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Config;
 
 use Illuminate\Contracts\Config\Repository;
+use Magento\MagentoCloud\App\Logger\Formatter\ErrorFormatterFactory;
 use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Config\Environment\ReaderInterface;
 use Magento\MagentoCloud\App\Logger\HandlerFactory;
@@ -55,15 +56,26 @@ class Log
     private $repositoryFactory;
 
     /**
+     * @var ErrorFormatterFactory
+     */
+    private $errorFormatterFactory;
+
+    /**
      * @param FileList $fileList
      * @param ReaderInterface $reader
      * @param RepositoryFactory $repositoryFactory
+     * @param ErrorFormatterFactory $errorFormatterFactory
      */
-    public function __construct(FileList $fileList, ReaderInterface $reader, RepositoryFactory $repositoryFactory)
-    {
+    public function __construct(
+        FileList $fileList,
+        ReaderInterface $reader,
+        RepositoryFactory $repositoryFactory,
+        ErrorFormatterFactory $errorFormatterFactory
+    ) {
         $this->fileList = $fileList;
         $this->reader = $reader;
         $this->repositoryFactory = $repositoryFactory;
+        $this->errorFormatterFactory = $errorFormatterFactory;
     }
 
     /**
@@ -110,7 +122,8 @@ class Log
                     HandlerFactory::HANDLER_FILE => ['file' => $this->fileList->getCloudLog()],
                     HandlerFactory::HANDLER_FILE_ERROR => [
                         'file' => $this->fileList->getCloudErrorLog(),
-                        'min_level' => self::LEVEL_WARNING
+                        'min_level' => self::LEVEL_WARNING,
+                        'formatter' => $this->errorFormatterFactory->create()
                     ],
                 ],
                 $this->reader->read()[static::SECTION_CONFIG] ?? []
