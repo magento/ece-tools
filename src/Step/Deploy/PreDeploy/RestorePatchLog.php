@@ -67,7 +67,7 @@ class RestorePatchLog implements StepInterface
      */
     public function execute()
     {
-        try{
+        try {
             $buildPhaseLogPath = $this->fileList->getInitPatchLog();
             if ($this->file->isExists($buildPhaseLogPath)) {
                 $this->logger->info('Restoring patch log file');
