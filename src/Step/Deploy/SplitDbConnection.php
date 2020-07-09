@@ -12,6 +12,7 @@ use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Config\Database\DbConfig;
 use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface as ConfigReader;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Shell\MagentoShell;
 use Magento\MagentoCloud\Shell\ShellException;
@@ -107,6 +108,8 @@ class SplitDbConnection implements StepInterface
     /**
      * Starts the database splitting process
      * Updates the configuration of slave connections for split connections
+     *
+     * {@inheritDoc}
      */
     public function execute()
     {
@@ -157,12 +160,18 @@ class SplitDbConnection implements StepInterface
                 );
                 return;
             }
+        } catch (GenericException $e) {
+            throw new StepException($e->getMessage(), $e->getCode(), $e);
+        }
+
+        try {
             if (!empty($splitTypes)) {
                 $this->enableSplitConnections(array_diff($splitTypes, $enabledSplitTypes), $dbConfig);
             }
             $this->slaveConnection->update();
-        } catch (GenericException $e) {
-            throw new StepException($e->getMessage(), $e->getCode(), $e);
+        } catch (FileSystemException $e) {
+            $message = 'Cannot write slave connection(s) to the `./app/etc/env.php`';
+            throw new StepException($message, Error::DEPLOY_ENV_PHP_IS_NOT_WRITABLE, $e);
         }
     }
 

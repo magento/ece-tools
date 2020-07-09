@@ -7,9 +7,11 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Util;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Filesystem\DirectoryCopier\StrategyFactory;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
+use Magento\MagentoCloud\Package\UndefinedPackageException;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -51,6 +53,8 @@ class BuildDirCopier
      * @param string $dir The directory to copy. Pass in its normal location relative to Magento root with no prepending
      * or trailing slashes
      * @param string $strategyName Name of strategy that will be used for copying directories
+     *
+     * @throws UndefinedPackageException
      */
     public function copy(string $dir, string $strategyName)
     {
@@ -78,11 +82,12 @@ class BuildDirCopier
                         'Can\'t copy directory %s with strategy: %s',
                         $dir,
                         $strategyName
-                    )
+                    ),
+                    ['errorCode' => Error::WARN_COPY_MOUNTED_DIRS_FAILED]
                 );
             }
         } catch (FileSystemException $e) {
-            $this->logger->notice($e->getMessage());
+            $this->logger->warning($e->getMessage(), ['errorCode' => Error::WARN_COPY_MOUNTED_DIRS_FAILED]);
         }
     }
 }

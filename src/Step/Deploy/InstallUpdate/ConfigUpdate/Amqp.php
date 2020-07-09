@@ -7,7 +7,9 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\App\GenericException;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
 use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface as ConfigReader;
@@ -74,7 +76,11 @@ class Amqp implements StepInterface
         try {
             $config = $this->configReader->read();
             $amqpConfig = $this->amqpConfig->get();
+        } catch (GenericException $e) {
+            throw new StepException($e->getMessage(), $e->getCode(), $e);
+        }
 
+        try {
             if (count($amqpConfig)) {
                 $this->logger->info('Updating env.php AMQP configuration.');
                 $config['queue'] = $amqpConfig;
@@ -84,8 +90,8 @@ class Amqp implements StepInterface
                 unset($config['queue']);
                 $this->configWriter->create($config);
             }
-        } catch (GenericException $e) {
-            throw new StepException($e->getMessage(), $e->getCode(), $e);
+        } catch (FileSystemException $e) {
+            throw new StepException($e->getMessage(), Error::DEPLOY_ENV_PHP_IS_NOT_WRITABLE, $e);
         }
     }
 }

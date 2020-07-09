@@ -87,7 +87,34 @@ class BackupTest extends TestCase
             );
         $this->fileMock->expects($this->once())
             ->method('copy')
-            ->with($envPath, $envPath . BackupList::BACKUP_SUFFIX);
+            ->with($envPath, $envPath . BackupList::BACKUP_SUFFIX)
+            ->willReturn(true);
+
+        $this->backup->execute();
+    }
+
+    /**
+     * @throws StepException
+     */
+    public function testExecuteFailed()
+    {
+        $envPath = 'path/env.php';
+        $this->backupListMock->expects($this->once())
+            ->method('getList')
+            ->willReturn([
+                'env.php' => $envPath,
+            ]);
+        $this->fileMock->expects($this->once())
+            ->method('isExists')
+            ->willReturn(true);
+
+        $this->fileMock->expects($this->once())
+            ->method('copy')
+            ->willReturn(false);
+
+        $this->loggerMock->expects($this->once())
+            ->method('warning')
+            ->with('Backup ' . $envPath . BackupList::BACKUP_SUFFIX . ' for ' . $envPath . ' was not created.');
 
         $this->backup->execute();
     }

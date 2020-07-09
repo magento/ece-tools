@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Util;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Filesystem\DirectoryCopier\CopyStrategy;
 use Magento\MagentoCloud\Filesystem\DirectoryCopier\StrategyFactory;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
@@ -191,8 +192,11 @@ class BuildDirCopierTest extends TestCase
             ->method('getInit')
             ->willReturn($initDir);
         $this->loggerMock->expects($this->once())
-            ->method('notice')
-            ->with('Can\'t copy directory /path/to/root/not-exist-dir. Directory does not exist.');
+            ->method('warning')
+            ->with(
+                'Can\'t copy directory /path/to/root/not-exist-dir. Directory does not exist.',
+                ['errorCode' => Error::WARN_COPY_MOUNTED_DIRS_FAILED]
+            );
 
         $this->copier->copy($dir, $strategy);
     }

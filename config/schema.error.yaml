@@ -553,6 +553,12 @@
     stage: deploy
     step: 'install-update:split-db'
     type: warning
+!php/const Magento\MagentoCloud\App\Error::WARN_COPY_MOUNTED_DIRS_FAILED:
+    title: 'Restoring of some generated data from Build phase to mounted directories was failed.'
+    stage: deploy
+    suggestion: 'Check the `cloud.log` for more information.'
+    step: 'pre-deploy:restore-writable-dirs'
+    type: warning
 !php/const Magento\MagentoCloud\App\Error::WARN_DEBUG_LOG_ENABLED:
     title: 'Debug logging is enabled in Magento'
     suggestion: 'To save disk space, do not enable debug logging for your production environments.'
@@ -568,6 +574,11 @@
     title: 'Can not fetch store url'
     stage: post-deploy
     step: warm-up
+    type: warning
+!php/const Magento\MagentoCloud\App\Error::WARN_CREATE_CONFIG_BACKUP_FAILED:
+    title: 'Cannot create backup files'
+    stage: post-deploy
+    step: backup
     type: warning
 !php/const Magento\MagentoCloud\App\Error::WARN_CANNOT_GET_PROC_COUNT:
     title: 'Can not get system processor count:'
