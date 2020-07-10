@@ -85,7 +85,7 @@ class ScenarioTest extends TestCase
     public function testCollectWithException()
     {
         $this->expectException(ValidationException::class);
-        $this->expectExceptionMessage('File doesn\'t exist');
+        $this->expectExceptionMessage('File does not exist');
 
         $scenario = '/path/to/scenario';
 
@@ -95,7 +95,7 @@ class ScenarioTest extends TestCase
             ->willReturn($scenario);
         $this->fileMock->expects($this->once())
             ->method('fileGetContents')
-            ->willThrowException(new FileSystemException('File doesn\'t exist'));
+            ->willThrowException(new FileSystemException('File does not exist'));
 
         $this->scenarioCollector->collect($scenario);
     }

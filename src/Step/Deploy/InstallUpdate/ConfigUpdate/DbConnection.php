@@ -145,7 +145,7 @@ class DbConnection implements StepInterface
                  * not by deploy scripts.
                  */
                 $this->logger->notice(
-                    'Database relationship configuration doesn\'t exist'
+                    'Database relationship configuration does not exist'
                     . ' and database is not configured through .magento.env.yaml or env variable.'
                     . ' Will be applied the previous database configuration.'
                 );
