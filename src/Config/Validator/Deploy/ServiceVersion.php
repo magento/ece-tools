@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Config\Validator\Deploy;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Service\ServiceInterface;
 use Magento\MagentoCloud\Service\ServiceFactory;
@@ -78,7 +79,8 @@ class ServiceVersion implements ValidatorInterface
             if ($errors) {
                 return $this->resultFactory->error(
                     'The current configuration is not compatible with this version of Magento',
-                    implode(PHP_EOL, $errors)
+                    implode(PHP_EOL, $errors),
+                    Error::WARN_SERVICE_VERSION_NOT_COMPATIBLE
                 );
             }
         } catch (GenericException $e) {

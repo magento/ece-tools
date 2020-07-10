@@ -51,7 +51,7 @@ class SplitDbCest extends AbstractCest
         $this->setSplitDbTypesIntoMagentoEnvYaml($I, ['quote', 'sales']);
         $this->runDeploy($I);
         $I->seeInOutput(
-            'ERROR: Enabling a split database will be skipped.'
+            'Enabling a split database will be skipped.'
             . ' Relationship do not have configuration for next types: sales, quote'
         );
         $this->checkEnvPhpConfig($I, [], ['checkout', 'sales']);
@@ -116,7 +116,7 @@ class SplitDbCest extends AbstractCest
             'Deploy \'Split Db\' with the wrong Split Db type' => [
                 'messages' => [
                     'Fix configuration with given suggestions:',
-                    '- Environment configuration is not valid.',
+                    'Environment configuration is not valid.',
                     'Correct the following items in your .magento.env.yaml file:',
                     'The SPLIT_DB variable contains an invalid value of type string. Use the following type: array.',
                 ],
@@ -125,20 +125,20 @@ class SplitDbCest extends AbstractCest
             'Deploy \'Split Db\' with the invalid Split Db label' => [
                 'messages' => [
                     'Fix configuration with given suggestions:',
-                    '- Environment configuration is not valid.',
+                    'Environment configuration is not valid.',
                     'Correct the following items in your .magento.env.yaml file:',
                     'The SPLIT_DB variable contains the invalid value.',
-                    'It should be array with next available values: [quote, sales].'
+                    'It should be an array with following values: [quote, sales].'
                 ],
                 'splitDbTypes' => ['checkout'],
             ],
             'Deploy \'Split Db\' with the invalid and valid Split Db labels' => [
                 'messages' => [
                     'Fix configuration with given suggestions:',
-                    '- Environment configuration is not valid.',
+                    'Environment configuration is not valid.',
                     'Correct the following items in your .magento.env.yaml file:',
                     'The SPLIT_DB variable contains the invalid value.',
-                    'It should be array with next available values: [quote, sales].',
+                    'It should be an array with following values: [quote, sales].',
                 ],
                 'splitDbTypes' => ['quote', 'checkout'],
             ]
@@ -162,13 +162,13 @@ class SplitDbCest extends AbstractCest
             ],
             'Split Db type was deleted' => [
                 'splitDbTypes' => null,
-                'messages' => 'WARNING: Variable SPLIT_DB does not have data which were already split types: quote',
+                'messages' => 'The SPLIT_DB variable is missing the configuration for split connection types: quote',
                 'expectedExists' => ['checkout'],
                 'expectedNotExist' => ['sales'],
             ],
             'Split Db  current type was deleted and new type added' => [
                 'splitDbTypes' => ['sales'],
-                'messages' => 'WARNING: Variable SPLIT_DB does not have data which were already split types: quote',
+                'messages' => 'The SPLIT_DB variable is missing the configuration for split connection types: quote',
                 'expectedExists' => ['checkout'],
                 'expectedNotExist' => ['sales'],
             ],

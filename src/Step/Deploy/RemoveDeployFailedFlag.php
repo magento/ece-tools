@@ -43,7 +43,6 @@ class RemoveDeployFailedFlag implements StepInterface
         File $fileDriver,
         FileList $fileList
     ) {
-
         $this->manager = $manager;
         $this->fileDriver = $fileDriver;
         $this->fileList = $fileList;
@@ -58,9 +57,25 @@ class RemoveDeployFailedFlag implements StepInterface
             $this->manager->delete(Manager::FLAG_DEPLOY_HOOK_IS_FAILED);
             $this->manager->delete(Manager::FLAG_IGNORE_SPLIT_DB);
             $this->manager->delete(Manager::FLAG_ENV_FILE_ABSENCE);
-            $this->fileDriver->deleteFile($this->fileList->getCloudErrorLog());
+
+            $this->removeErrorLogFile();
         } catch (\Exception $e) {
             throw new StepException($e->getMessage(), $e->getCode(), $e);
+        }
+    }
+
+    /**
+     * Removes cloud.error.log file and copies it from init directory if exists.
+     *
+     * @throws \Magento\MagentoCloud\Package\UndefinedPackageException
+     */
+    private function removeErrorLogFile()
+    {
+        $errorLogFilePath = $this->fileList->getCloudErrorLog();
+        $buildPhaseErrorLogPath = $this->fileList->getInitCloudErrorLog();
+        $this->fileDriver->deleteFile($errorLogFilePath);
+        if ($this->fileDriver->isExists($buildPhaseErrorLogPath)) {
+            $this->fileDriver->copy($buildPhaseErrorLogPath, $errorLogFilePath);
         }
     }
 }
