@@ -5,6 +5,7 @@
         <arguments>
             <argument name="logger" xsi:type="object">Psr\Log\LoggerInterface</argument>
             <argument name="steps" xsi:type="array">
+                <item name="restore-patch-log" xsi:type="object" priority="25">Magento\MagentoCloud\Step\Deploy\PreDeploy\RestorePatchLog</item>
                 <item name="check-state" xsi:type="object" priority="50">Magento\MagentoCloud\Step\Deploy\PreDeploy\CheckState</item>
                 <item name="cache" xsi:type="object" priority="100">Magento\MagentoCloud\Step\Deploy\PreDeploy\ConfigUpdate\Cache</item>
                 <item name="clean-static-content" xsi:type="object" priority="200">Magento\MagentoCloud\Step\Deploy\PreDeploy\CleanStaticContent</item>

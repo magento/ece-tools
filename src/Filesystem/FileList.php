@@ -181,6 +181,24 @@ class FileList extends ConfigFileList
     }
 
     /**
+     * @return string
+     * @throws UndefinedPackageException
+     */
+    public function getPatchLog(): string
+    {
+        return $this->directoryList->getLog() . '/patch.log';
+    }
+
+    /**
+     * @return string
+     * @throws UndefinedPackageException
+     */
+    public function getInitPatchLog(): string
+    {
+        return $this->directoryList->getInit() . '/var/log/patch.log';
+    }
+
+    /**
      * Returns path to doc file generated from schema.error.yaml
      *
      * @return string
