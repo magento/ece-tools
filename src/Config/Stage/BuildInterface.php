@@ -22,7 +22,12 @@ interface BuildInterface extends StageConfigInterface
     public const VAR_ERROR_REPORT_DIR_NESTING_LEVEL = 'ERROR_REPORT_DIR_NESTING_LEVEL';
 
     /**
-     * Perfom Baler JS bundling
+     * Perform Baler JS bundling
      */
     public const VAR_SCD_USE_BALER = 'SCD_USE_BALER';
+
+    /**
+     * Magento quality patches list
+     */
+    public const VAR_QUALITY_PATCHES = 'QUALITY_PATCHES';
 }
