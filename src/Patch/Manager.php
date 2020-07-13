@@ -51,18 +51,25 @@ class Manager
     /**
      * Applies all needed patches.
      *
+     * @param array $qualityPatches
      * @throws ShellException
      * @throws ConfigException
      */
-    public function apply(): void
+    public function apply(array $qualityPatches = []): void
     {
         $this->logger->notice('Applying patches');
 
         $command = 'php ./vendor/bin/ece-patches apply';
 
+        if ($qualityPatches) {
+            $command .= sprintf(" '%s'", implode("' '", $qualityPatches));
+        }
+
         if ($this->globalSection->get(GlobalSection::VAR_DEPLOYED_MAGENTO_VERSION_FROM_GIT)) {
             $command .= ' --git-installation 1';
         }
+
+        $command .= ' --no-interaction';
 
         try {
             $this->shell->execute($command);

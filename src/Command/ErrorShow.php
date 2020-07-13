@@ -87,7 +87,7 @@ class ErrorShow extends Command
         } else {
             $errors = $this->reader->read();
             if (empty($errors)) {
-                $output->writeln('The error log is empty or doesn\'t exist');
+                $output->writeln('The error log is empty or does not exist');
 
                 return 1;
             }

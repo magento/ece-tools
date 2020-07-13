@@ -439,7 +439,7 @@
     step: validate-config
     type: warning
 !php/const Magento\MagentoCloud\App\Error::WARN_NOT_CORRECT_LOCAL_XML_FILE:
-    title: 'Invalid file config ./pub/errors/local.xml'
+    title: 'Invalid configuration in the ./pub/errors/local.xml file.'
     stage: deploy
     step: validate-config
     type: warning
@@ -544,7 +544,7 @@
     step: 'install-update:split-db'
     type: warning
 !php/const Magento\MagentoCloud\App\Error::WARN_NOT_ENOUGH_DATA_SPLIT_DB_VAR:
-    title: 'The SPLIT_DB variable does not have data which were already split.'
+    title: 'The SPLIT_DB variable is missing the configuration for split connection types.'
     stage: deploy
     step: 'install-update:split-db'
     type: warning

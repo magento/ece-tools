@@ -96,7 +96,8 @@ class SlaveConnection
                 $this->logger->warning(
                     sprintf(
                         'Slave connection for \'%s\' connection not set. '
-                        . 'Relationships do not have the configuration for this slave connection',
+                        . 'The `relationships` configuration in the .magento.app.yaml file '
+                        . 'is missing the configuration for this slave connection',
                         $mageConnectionName
                     ),
                     ['errorCode' => Error::WARN_SLAVE_CONNECTION_NOT_SET]

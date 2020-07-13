@@ -9,6 +9,7 @@ namespace Magento\MagentoCloud\Step\Build;
 
 use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\ConfigException;
+use Magento\MagentoCloud\Config\Stage\BuildInterface;
 use Magento\MagentoCloud\Patch\Manager;
 use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Step\StepException;
@@ -25,11 +26,20 @@ class ApplyPatches implements StepInterface
     private $manager;
 
     /**
-     * @param Manager $manager
+     * @var BuildInterface
      */
-    public function __construct(Manager $manager)
-    {
+    private $stageConfig;
+
+    /**
+     * @param Manager $manager
+     * @param BuildInterface $stageConfig
+     */
+    public function __construct(
+        Manager $manager,
+        BuildInterface $stageConfig
+    ) {
         $this->manager = $manager;
+        $this->stageConfig = $stageConfig;
     }
 
     /**
@@ -38,7 +48,8 @@ class ApplyPatches implements StepInterface
     public function execute(): void
     {
         try {
-            $this->manager->apply();
+            $qualityPatches = $this->stageConfig->get(BuildInterface::VAR_QUALITY_PATCHES);
+            $this->manager->apply($qualityPatches);
         } catch (ConfigException $e) {
             throw new StepException($e->getMessage(), $e->getCode(), $e);
         } catch (ShellException $e) {

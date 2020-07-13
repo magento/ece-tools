@@ -167,7 +167,7 @@ class ReportDirNestingLevelCest extends AbstractCest
             $log
         );
         $I->assertContains(
-            'You can configure the setting using the `config.report.dir_nesting_level`'
+            'You can configure the setting using the `config.report.dir_nesting_level` variable'
             . ' in the file ' . $this->expectedPathLocalXml,
             $log
         );
@@ -200,7 +200,7 @@ class ReportDirNestingLevelCest extends AbstractCest
             $log
         );
         $I->assertContains(
-            "Config of the file {$this->expectedPathLocalXml} is invalid.",
+            "Invalid configuration in the {$this->expectedPathLocalXml} file.",
             $log
         );
         $I->assertContains(

@@ -63,7 +63,7 @@ class SolrIntegrity implements ValidatorInterface
 
             if ($this->magentoVersion->satisfies('2.1.*')) {
                 $args['suggestion'] = 'Solr support has been deprecated in Magento 2.1. ' .
-                    'Update your search engine to Elasticsearch and remove this relationship.';
+                    'Remove this relationship and use Elasticsearch.';
                 $args['errorCode'] = Error::WARN_SOLR_DEPRECATED;
             }
 

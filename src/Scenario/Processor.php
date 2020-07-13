@@ -10,7 +10,6 @@ namespace Magento\MagentoCloud\Scenario;
 use Magento\MagentoCloud\OnFail\Action\ActionException;
 use Magento\MagentoCloud\OnFail\Action\ActionInterface;
 use Magento\MagentoCloud\Package\Manager;
-use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
 use Magento\MagentoCloud\Scenario\Exception\ProcessorException;
 use Psr\Log\LoggerInterface;
@@ -64,33 +63,11 @@ class Processor
             implode(', ', $scenarios),
             $this->packageManager->getPrettyInfo()
         ));
+        $steps = [];
 
         try {
             $this->mergedScenarios = $this->merger->merge($scenarios);
             $steps = $this->mergedScenarios['steps'];
-
-            array_walk($steps, function (StepInterface $step, string $name) {
-                $this->logger->debug('Running step: ' . $name);
-
-                $step->execute();
-
-                $this->logger->debug(sprintf('Step "%s" finished', $name));
-            });
-        } catch (StepException $stepException) {
-            try {
-                $actions = $this->mergedScenarios['actions'];
-
-                array_walk($actions, function (ActionInterface $action, string $name) {
-                    $this->logger->debug('Running on fail action: ' . $name);
-
-                    $action->execute();
-
-                    $this->logger->debug(sprintf('On fail action "%s" finished', $name));
-                });
-            } catch (ActionException $actionException) {
-                $this->logger->error($actionException->getMessage());
-            }
-            $this->handleException($stepException);
         } catch (Throwable $exception) {
             $this->handleException(
                 $exception,
@@ -98,7 +75,41 @@ class Processor
             );
         }
 
+        try {
+            array_walk($steps, function (StepInterface $step, string $name) {
+                $this->logger->debug('Running step: ' . $name);
+
+                $step->execute();
+
+                $this->logger->debug(sprintf('Step "%s" finished', $name));
+            });
+        } catch (Throwable $stepException) {
+            $this->runActions();
+            $this->handleException($stepException);
+        }
+
         $this->logger->info('Scenario(s) finished');
+    }
+
+    /**
+     * Run scenario actions.
+     * @return void
+     */
+    private function runActions(): void
+    {
+        try {
+            $actions = $this->mergedScenarios['actions'];
+
+            array_walk($actions, function (ActionInterface $action, string $name) {
+                $this->logger->debug('Running on fail action: ' . $name);
+
+                $action->execute();
+
+                $this->logger->debug(sprintf('On fail action "%s" finished', $name));
+            });
+        } catch (ActionException $actionException) {
+            $this->logger->error($actionException->getMessage());
+        }
     }
 
     /**

@@ -320,7 +320,7 @@ class ValidatorTest extends TestCase
                 DeployInterface::VAR_SPLIT_DB,
                 ['wrong'],
                 new Error(
-                    'The SPLIT_DB variable contains the invalid value. It should be array with next available values: '
+                    'The SPLIT_DB variable contains the invalid value. It should be an array with following values: '
                     . '[quote, sales].'
                 )
             ],
@@ -328,7 +328,7 @@ class ValidatorTest extends TestCase
                 DeployInterface::VAR_SPLIT_DB,
                 ['wrong', DeployInterface::SPLIT_DB_VALUE_QUOTE],
                 new Error(
-                    'The SPLIT_DB variable contains the invalid value. It should be array with next available values: '
+                    'The SPLIT_DB variable contains the invalid value. It should be an array with following values: '
                     . '[quote, sales].'
                 )
             ],
