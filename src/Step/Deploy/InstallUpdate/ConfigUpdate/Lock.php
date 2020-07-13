@@ -7,6 +7,8 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate;
 
+use Magento\MagentoCloud\App\GenericException;
+use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
 use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface as ConfigReader;
 use Magento\MagentoCloud\Config\Magento\Env\WriterInterface as ConfigWriter;
@@ -72,15 +74,19 @@ class Lock implements StepInterface
      */
     public function execute()
     {
-        /**
-         * Since Magento 2.2.5 we can configure lock providers.
-         */
-        if ($this->magentoVersion->isGreaterOrEqual('2.2.5')) {
-            $lockConfig = $this->lockConfig->get();
-            $config = $this->configReader->read();
-            $config['lock'] = $lockConfig;
-            $this->configWriter->create($config);
-            $this->logger->info(sprintf('The lock provider "%s" was set.', $lockConfig['provider']));
+        try {
+            /**
+             * Since Magento 2.2.5 we can configure lock providers.
+             */
+            if ($this->magentoVersion->isGreaterOrEqual('2.2.5')) {
+                $lockConfig = $this->lockConfig->get();
+                $config = $this->configReader->read();
+                $config['lock'] = $lockConfig;
+                $this->configWriter->create($config);
+                $this->logger->info(sprintf('The lock provider "%s" was set.', $lockConfig['provider']));
+            }
+        } catch (GenericException $e) {
+            throw new StepException($e->getMessage(), $e->getCode(), $e);
         }
     }
 }

@@ -46,12 +46,13 @@ class SetProductionMode implements StepInterface
      */
     public function execute()
     {
-        $this->logger->info('Set Magento application mode to \'production\'');
-
         try {
+            $this->logger->info('Set Magento application mode to \'production\'');
             $this->writer->update(['MAGE_MODE' => 'production']);
         } catch (FileSystemException $e) {
             throw new StepException($e->getMessage(), Error::BUILD_ENV_PHP_IS_NOT_WRITABLE, $e);
+        } catch (\Exception $e) {
+            throw new StepException($e->getMessage(), $e->getCode(), $e);
         }
     }
 }
