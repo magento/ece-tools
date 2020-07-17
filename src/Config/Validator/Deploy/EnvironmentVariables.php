@@ -70,7 +70,7 @@ class EnvironmentVariables implements ValidatorInterface
                 && !$this->state->isInstalled()
                 && $this->environment->getEnv('CONFIG__STORES__DEFAULT__PAYMENT__BRAINTREE__CHANNEL')
             ) {
-                $this->resultFactory->errorByCode(Error::DEPLOY_WRONG_BRAINTREE_VARIABLE);
+                return $this->resultFactory->errorByCode(Error::DEPLOY_WRONG_BRAINTREE_VARIABLE);
             }
 
             return $this->resultFactory->success();
