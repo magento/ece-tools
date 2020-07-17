@@ -9,7 +9,6 @@ namespace Magento\MagentoCloud\Config\Validator\Deploy;
 
 use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\Environment;
-use Magento\MagentoCloud\Config\State;
 use Magento\MagentoCloud\Config\Validator;
 use Magento\MagentoCloud\Config\ValidatorException;
 use Magento\MagentoCloud\Config\ValidatorInterface;
@@ -17,8 +16,7 @@ use Magento\MagentoCloud\Package\MagentoVersion;
 
 /**
  * Validates that environment variables doesn't contain redundant variables.
- * - CONFIG__STORES__DEFAULT__PAYMENT__BRAINTREE__CHANNEL must be absent in env variables
- *   for Magento > 2.4.0 if magento not installed.
+ * - CONFIG__STORES__DEFAULT__PAYMENT__BRAINTREE__CHANNEL must be absent in env variables for Magento >= 2.4.0
  */
 class EnvironmentVariables implements ValidatorInterface
 {
@@ -26,11 +24,6 @@ class EnvironmentVariables implements ValidatorInterface
      * @var Environment
      */
     private $environment;
-
-    /**
-     * @var State
-     */
-    private $state;
 
     /**
      * @var Validator\ResultFactory
@@ -44,18 +37,15 @@ class EnvironmentVariables implements ValidatorInterface
 
     /**
      * @param Environment $environment
-     * @param State $state
      * @param MagentoVersion $magentoVersion
      * @param Validator\ResultFactory $resultFactory
      */
     public function __construct(
         Environment $environment,
-        State $state,
         MagentoVersion $magentoVersion,
         Validator\ResultFactory $resultFactory
     ) {
         $this->environment = $environment;
-        $this->state = $state;
         $this->magentoVersion = $magentoVersion;
         $this->resultFactory = $resultFactory;
     }
@@ -67,7 +57,6 @@ class EnvironmentVariables implements ValidatorInterface
     {
         try {
             if ($this->magentoVersion->satisfies('>= 2.4.0')
-                && !$this->state->isInstalled()
                 && $this->environment->getEnv('CONFIG__STORES__DEFAULT__PAYMENT__BRAINTREE__CHANNEL')
             ) {
                 return $this->resultFactory->errorByCode(Error::DEPLOY_WRONG_BRAINTREE_VARIABLE);

@@ -7,9 +7,11 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Config\Validator;
 
+use Magento\MagentoCloud\App\ErrorInfo;
 use Magento\MagentoCloud\Config\Validator\Result;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
 use Magento\MagentoCloud\Config\Validator\ResultInterface;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -17,20 +19,33 @@ use PHPUnit\Framework\TestCase;
  */
 class ResultFactoryTest extends TestCase
 {
+    /**
+     * @var ResultFactory
+     */
+    private $resultFactory;
+
+    /**
+     * @var ErrorInfo|MockObject
+     */
+    private $errorInfoMock;
+
+    protected function setUp()
+    {
+        $this->errorInfoMock = $this->createMock(ErrorInfo::class);
+
+        $this->resultFactory = new ResultFactory($this->errorInfoMock);
+    }
+
     public function testCreateSuccessResult(): void
     {
-        $resultFactory = new ResultFactory();
-
-        $result = $resultFactory->create(ResultInterface::SUCCESS);
+        $result = $this->resultFactory->create(ResultInterface::SUCCESS);
 
         $this->assertInstanceOf(Result\Success::class, $result);
     }
 
     public function testCreateErrorResult(): void
     {
-        $resultFactory = new ResultFactory();
-
-        $result = $resultFactory->create(ResultInterface::ERROR, [
+        $result = $this->resultFactory->create(ResultInterface::ERROR, [
             'error' => 'some error',
             'suggestion' => 'some suggestion',
             'errorCode' => 10

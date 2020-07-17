@@ -17,7 +17,7 @@ use Magento\MagentoCloud\Package\MagentoVersion;
 /**
  * Validates that .magento.app.yaml contains correct configuration:
  * - CONFIG__STORES__DEFAULT__PAYMENT__BRAINTREE__CHANNEL must be absent in .magento.app.yaml env variables
- *   for Magento > 2.4.0
+ *   for Magento >= 2.4.0
  *
  */
 class MagentoAppYaml implements ValidatorInterface
@@ -52,7 +52,6 @@ class MagentoAppYaml implements ValidatorInterface
         $this->magentoVersion = $magentoVersion;
         $this->resultFactory = $resultFactory;
     }
-
 
     /**
      * @inheritDoc

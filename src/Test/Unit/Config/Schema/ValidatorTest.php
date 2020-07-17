@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Config\Schema;
 
+use Magento\MagentoCloud\App\ErrorInfo;
 use Magento\MagentoCloud\Config\Schema;
 use Magento\MagentoCloud\Config\Schema\Validator;
 use Magento\MagentoCloud\Config\StageConfigInterface;
@@ -48,7 +49,7 @@ class ValidatorTest extends TestCase
     protected function setUp()
     {
         $this->schemaMock = $this->createMock(Schema::class);
-        $this->resultFactoryMock = $this->createTestProxy(ResultFactory::class);
+        $this->resultFactoryMock = $this->createTestProxy(ResultFactory::class, [$this->createMock(ErrorInfo::class)]);
         $this->validatorFactoryMock = $this->createMock(Validator\ValidatorFactory::class);
 
         $this->validator = new Validator(
