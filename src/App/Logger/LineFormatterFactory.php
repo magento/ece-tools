@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\App\Logger;
 
+use Magento\MagentoCloud\App\ContainerInterface;
 use Magento\MagentoCloud\App\Logger\Formatter\LineFormatter;
 
 /**
@@ -14,6 +15,19 @@ use Magento\MagentoCloud\App\Logger\Formatter\LineFormatter;
  */
 class LineFormatterFactory
 {
+    /**
+     * @var ContainerInterface
+     */
+    private $container;
+
+    /**
+     * @param ContainerInterface $container
+     */
+    public function __construct(ContainerInterface $container)
+    {
+        $this->container = $container;
+    }
+
     /**
      * @return LineFormatter
      */
