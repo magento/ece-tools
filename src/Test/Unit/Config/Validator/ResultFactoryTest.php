@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Config\Validator;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\App\ErrorInfo;
 use Magento\MagentoCloud\Config\Validator\Result;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
@@ -55,5 +56,23 @@ class ResultFactoryTest extends TestCase
         $this->assertEquals($result->getError(), 'some error');
         $this->assertEquals($result->getSuggestion(), 'some suggestion');
         $this->assertEquals($result->getErrorCode(), 10);
+    }
+
+    public function testCreateErrorByCode()
+    {
+        $this->errorInfoMock->expects($this->once())
+            ->method('get')
+            ->with(Error::DEPLOY_WRONG_BRAINTREE_VARIABLE)
+            ->willReturn([
+                'title' => 'some title',
+                'suggestion' => 'some suggestion'
+            ]);
+
+        $result = $this->resultFactory->errorByCode(Error::DEPLOY_WRONG_BRAINTREE_VARIABLE);
+
+        $this->assertInstanceOf(Result\Error::class, $result);
+        $this->assertEquals($result->getError(), 'some title');
+        $this->assertEquals($result->getSuggestion(), 'some suggestion');
+        $this->assertEquals($result->getErrorCode(), Error::DEPLOY_WRONG_BRAINTREE_VARIABLE);
     }
 }
