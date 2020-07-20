@@ -33,19 +33,13 @@ class ApplyPatchesTest extends TestCase
     private $managerMock;
 
     /**
-     * @var BuildInterface|MockObject
-     */
-    private $stageConfigMock;
-
-    /**
      * @inheritdoc
      */
     protected function setUp()
     {
         $this->managerMock = $this->createMock(Manager::class);
-        $this->stageConfigMock = $this->getMockForAbstractClass(BuildInterface::class);
 
-        $this->step = new ApplyPatches($this->managerMock, $this->stageConfigMock);
+        $this->step = new ApplyPatches($this->managerMock);
     }
 
     /**
@@ -53,14 +47,8 @@ class ApplyPatchesTest extends TestCase
      */
     public function testExecute(): void
     {
-        $qualityPatches = ['MC-3456', 'MC-45678'];
-        $this->stageConfigMock->expects($this->once())
-            ->method('get')
-            ->with(BuildInterface::VAR_QUALITY_PATCHES)
-            ->willReturn($qualityPatches);
         $this->managerMock->expects($this->once())
-            ->method('apply')
-            ->with($qualityPatches);
+            ->method('apply');
 
         $this->step->execute();
     }
@@ -70,10 +58,6 @@ class ApplyPatchesTest extends TestCase
      */
     public function testExecuteWithConfigException(): void
     {
-        $this->stageConfigMock->expects($this->once())
-            ->method('get')
-            ->with(BuildInterface::VAR_QUALITY_PATCHES)
-            ->willReturn([]);
         $this->managerMock->expects($this->once())
             ->method('apply')
             ->willThrowException(new ConfigException('config not found', Error::BUILD_CONFIG_NOT_DEFINED));
@@ -90,10 +74,6 @@ class ApplyPatchesTest extends TestCase
      */
     public function testExecuteWithShellException(): void
     {
-        $this->stageConfigMock->expects($this->once())
-            ->method('get')
-            ->with(BuildInterface::VAR_QUALITY_PATCHES)
-            ->willReturn([]);
         $this->managerMock->expects($this->once())
             ->method('apply')
             ->willThrowException(new ShellException('command failed'));
