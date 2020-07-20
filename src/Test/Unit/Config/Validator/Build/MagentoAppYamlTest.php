@@ -47,7 +47,7 @@ class MagentoAppYamlTest extends TestCase
     /**
      * @inheritDoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
         $this->environmentMock = $this->createMock(Environment::class);
@@ -60,7 +60,7 @@ class MagentoAppYamlTest extends TestCase
         );
     }
 
-    public function testSuccessVersion()
+    public function testSuccessVersion(): void
     {
         $this->magentoVersionMock->expects($this->once())
             ->method('satisfies')
@@ -75,7 +75,7 @@ class MagentoAppYamlTest extends TestCase
         );
     }
 
-    public function testSuccessNoVariable()
+    public function testSuccessNoVariable(): void
     {
         $this->magentoVersionMock->expects($this->once())
             ->method('satisfies')
@@ -99,7 +99,7 @@ class MagentoAppYamlTest extends TestCase
         );
     }
 
-    public function testError()
+    public function testError(): void
     {
         $this->magentoVersionMock->expects($this->once())
             ->method('satisfies')
@@ -124,7 +124,7 @@ class MagentoAppYamlTest extends TestCase
         );
     }
 
-    public function testWithException()
+    public function testWithException(): void
     {
         $this->expectException(ValidatorException::class);
         $this->expectExceptionMessage('some error');

@@ -30,7 +30,7 @@ class ResultFactoryTest extends TestCase
      */
     private $errorInfoMock;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->errorInfoMock = $this->createMock(ErrorInfo::class);
 
@@ -58,7 +58,7 @@ class ResultFactoryTest extends TestCase
         $this->assertEquals($result->getErrorCode(), 10);
     }
 
-    public function testCreateErrorByCode()
+    public function testCreateErrorByCode(): void
     {
         $this->errorInfoMock->expects($this->once())
             ->method('get')

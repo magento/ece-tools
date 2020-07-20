@@ -137,7 +137,7 @@
     type: critical
 !php/const Magento\MagentoCloud\App\Error::BUILD_WRONG_BRAINTREE_VARIABLE:
     step: validate-config
-    title: 'Configuration for Braintree is redundant as Braintree module not part of Magento 2.4.0'
+    title: 'Configuration for Braintree is redundant as Braintree module is not a part of Magento >= 2.4.0'
     suggestion: 'Remove CONFIG__STORES__DEFAULT__PAYMENT__BRAINTREE__CHANNEL variable from .magento.app.yaml variables section'
     stage: build
     type: critical
@@ -327,7 +327,7 @@
     type: critical
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_WRONG_BRAINTREE_VARIABLE:
     step: validate-config
-    title: 'Configuration for Braintree is redundant as Braintree module not part of Magento 2.4.0'
+    title: 'Configuration for Braintree is redundant as Braintree module is not a part of Magento >= 2.4.0'
     suggestion: 'Remove CONFIG__STORES__DEFAULT__PAYMENT__BRAINTREE__CHANNEL variable from environment variables'
     stage: deploy
     type: critical
