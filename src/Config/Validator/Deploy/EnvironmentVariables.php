@@ -15,7 +15,7 @@ use Magento\MagentoCloud\Config\ValidatorInterface;
 use Magento\MagentoCloud\Package\MagentoVersion;
 
 /**
- * Validates that environment variables doesn't contain redundant variables.
+ * Validates that environment variables do not contain redundant variables.
  * - CONFIG__STORES__DEFAULT__PAYMENT__BRAINTREE__CHANNEL must be absent in env variables for Magento >= 2.4.0
  */
 class EnvironmentVariables implements ValidatorInterface
