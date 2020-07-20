@@ -25,6 +25,8 @@ use Psr\Log\LoggerInterface;
 
 /**
  * @inheritdoc
+ *
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class CronConsumersRunnerTest extends TestCase
 {

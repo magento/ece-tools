@@ -24,6 +24,10 @@ use Psr\Log\LoggerInterface;
 
 /**
  * Enables split database
+ *
+ * {@inheritDoc}
+ *
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class SplitDbConnection implements StepInterface
 {
@@ -154,7 +158,7 @@ class SplitDbConnection implements StepInterface
 
             if (!empty($missedSplitTypes)) {
                 $this->logger->warning(
-                    'Variable SPLIT_DB does not have data which were already split types: '
+                    'The SPLIT_DB variable is missing the configuration for split connection types: '
                     . implode(', ', $missedSplitTypes),
                     ['errorCode' => Error::WARN_NOT_ENOUGH_DATA_SPLIT_DB_VAR]
                 );

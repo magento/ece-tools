@@ -128,7 +128,7 @@ class SplitDbCest extends AbstractCest
                     'Environment configuration is not valid.',
                     'Correct the following items in your .magento.env.yaml file:',
                     'The SPLIT_DB variable contains the invalid value.',
-                    'It should be array with next available values: [quote, sales].'
+                    'It should be an array with following values: [quote, sales].'
                 ],
                 'splitDbTypes' => ['checkout'],
             ],
@@ -138,7 +138,7 @@ class SplitDbCest extends AbstractCest
                     'Environment configuration is not valid.',
                     'Correct the following items in your .magento.env.yaml file:',
                     'The SPLIT_DB variable contains the invalid value.',
-                    'It should be array with next available values: [quote, sales].',
+                    'It should be an array with following values: [quote, sales].',
                 ],
                 'splitDbTypes' => ['quote', 'checkout'],
             ]
@@ -162,13 +162,13 @@ class SplitDbCest extends AbstractCest
             ],
             'Split Db type was deleted' => [
                 'splitDbTypes' => null,
-                'messages' => 'Variable SPLIT_DB does not have data which were already split types: quote',
+                'messages' => 'The SPLIT_DB variable is missing the configuration for split connection types: quote',
                 'expectedExists' => ['checkout'],
                 'expectedNotExist' => ['sales'],
             ],
             'Split Db  current type was deleted and new type added' => [
                 'splitDbTypes' => ['sales'],
-                'messages' => 'Variable SPLIT_DB does not have data which were already split types: quote',
+                'messages' => 'The SPLIT_DB variable is missing the configuration for split connection types: quote',
                 'expectedExists' => ['checkout'],
                 'expectedNotExist' => ['sales'],
             ],
