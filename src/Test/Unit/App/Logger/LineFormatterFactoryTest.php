@@ -18,7 +18,7 @@ use PHPUnit\Framework\TestCase;
  */
 class LineFormatterFactoryTest extends TestCase
 {
-    public function testCreate()
+    public function testCreate(): void
     {
         /** @var ContainerInterface|MockObject $containerMock */
         $containerMock = $this->getMockForAbstractClass(ContainerInterface::class);

@@ -46,7 +46,7 @@ class ValidatorTest extends TestCase
     /**
      * @inheritDoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->schemaMock = $this->createMock(Schema::class);
         $this->resultFactoryMock = $this->createTestProxy(ResultFactory::class, [$this->createMock(ErrorInfo::class)]);

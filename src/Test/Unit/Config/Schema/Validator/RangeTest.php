@@ -28,7 +28,7 @@ class RangeTest extends TestCase
     /**
      * @inheritDoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->resultFactoryMock = $this->createTestProxy(
             ResultFactory::class,
