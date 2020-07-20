@@ -143,6 +143,7 @@
 | 2023 | install-update:split-db | Enabling a split database will be skipped. |  |
 | 2024 | install-update:split-db | The SPLIT_DB variable is missing the configuration for split connection types. |  |
 | 2025 | install-update:split-db | Slave connection not set. |  |
+| 2026 | pre-deploy:restore-writable-dirs | Restoring of some generated data from Build phase to mounted directories was failed. | Check the `cloud.log` for more information. |
 
 ### Post-deploy stage
 
@@ -152,6 +153,7 @@
 | 3001 | validate-config | Debug logging is enabled in Magento | To save disk space, do not enable debug logging for your production environments. |
 | 3002 | warm-up | Can not fetch store urls |  |
 | 3003 | warm-up | Can not fetch store url |  |
+| 3004 | backup | Cannot create backup files |  |
 
 ### General
 
