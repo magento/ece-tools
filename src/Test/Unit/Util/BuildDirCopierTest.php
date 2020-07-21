@@ -111,7 +111,7 @@ class BuildDirCopierTest extends TestCase
             ],
             [
                 false,
-                'notice',
+                'warning',
                 'Can\'t copy directory dir with strategy: copy',
             ],
         ];
