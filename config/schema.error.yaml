@@ -135,6 +135,12 @@
     suggestion: 'If you installed the Magento application version directly from the Magento git repository, verify that the `DEPLOYED_MAGENTO_VERSION_FROM_GIT` environment variable is configured.'
     stage: build
     type: critical
+!php/const Magento\MagentoCloud\App\Error::BUILD_WRONG_BRAINTREE_VARIABLE:
+    step: validate-config
+    title: 'Remove Magento Braintree module configuration which is no longer supported in Magento 2.4 and later versions.'
+    suggestion: 'Support for the Braintree module is no longer included with Magento 2.4.0 and later. Remove the CONFIG__STORES__DEFAULT__PAYMENT__BRAINTREE__CHANNEL variable from the variables section of the .magento.app.yaml file. For Braintree payment support, use an official extension from the Magento Marketplace instead.'
+    stage: build
+    type: critical
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_WRONG_CACHE_CONFIGURATION:
     step: 'pre-deploy: cache'
     title: 'Incorrect cache configuration (missing port or host)'
@@ -317,6 +323,12 @@
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_ES_CANNOT_CONNECT:
     title: 'Can not connect to the Elasticsearch service'
     suggestion: 'Check that credentials for elasticsearch are correct and service is running'
+    stage: deploy
+    type: critical
+!php/const Magento\MagentoCloud\App\Error::DEPLOY_WRONG_BRAINTREE_VARIABLE:
+    step: validate-config
+    title: 'Remove Magento Braintree module configuration which is no longer supported in Magento 2.4 and later versions.'
+    suggestion: 'Support for the Braintree module is no longer included with Magento 2.4.0 and later. Remove the CONFIG__STORES__DEFAULT__PAYMENT__BRAINTREE__CHANNEL variable from the variables section of the .magento.app.yaml file. For Braintree support, use an official Braintree Payments extension from the Magento Marketplace instead.'
     stage: deploy
     type: critical
 !php/const Magento\MagentoCloud\App\Error::PD_DEPLOY_IS_FAILED:
