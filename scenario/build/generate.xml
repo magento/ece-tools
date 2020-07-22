@@ -10,6 +10,7 @@
                 <item name="critical" xsi:type="array">
                     <item name="composer" xsi:type="object" priority="100">Magento\MagentoCloud\Config\Validator\Build\ComposerFile</item>
                     <item name="stage-config" xsi:type="object" priority="200">Magento\MagentoCloud\Config\Validator\Build\StageConfig</item>
+                    <item name="magento-app-yaml" xsi:type="object" priority="300">Magento\MagentoCloud\Config\Validator\Build\MagentoAppYaml</item>
                 </item>
                 <item name="warning" xsi:type="array">
                     <item name="config-file-exists" xsi:type="object" priority="100">Magento\MagentoCloud\Config\Validator\Build\ConfigFileExists</item>

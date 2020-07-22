@@ -9,6 +9,7 @@ namespace Magento\MagentoCloud\App;
 
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileList;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Symfony\Component\Yaml\Yaml;
 
 /**
@@ -46,7 +47,7 @@ class ErrorInfo
      *
      * @param int $errorCode
      * @return array
-     * @throws \Magento\MagentoCloud\Filesystem\FileSystemException
+     * @throws FileSystemException
      */
     public function get(int $errorCode): array
     {
@@ -58,7 +59,7 @@ class ErrorInfo
     /**
      * Fetches all errors from schema.error.yaml file and caches them
      *
-     * @throws \Magento\MagentoCloud\Filesystem\FileSystemException
+     * @throws FileSystemException
      */
     private function loadErrors(): void
     {

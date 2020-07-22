@@ -24,6 +24,7 @@
             <argument name="logger" xsi:type="object">Psr\Log\LoggerInterface</argument>
             <argument name="validators" xsi:type="array">
                 <item name="critical" xsi:type="array">
+                    <item name="environment-variables" xsi:type="object">Magento\MagentoCloud\Config\Validator\Deploy\EnvironmentVariables</item>
                     <item name="database-configuration" xsi:type="object">Magento\MagentoCloud\Config\Validator\Deploy\DatabaseConfiguration</item>
                     <item name="search-configuration" xsi:type="object">Magento\MagentoCloud\Config\Validator\Deploy\SearchConfiguration</item>
                     <item name="resource-configuration" xsi:type="object">Magento\MagentoCloud\Config\Validator\Deploy\ResourceConfiguration</item>
