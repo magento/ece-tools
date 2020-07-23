@@ -23,8 +23,8 @@ jobs:
           composer config --unset repositories.repo.magento.com
           composer remove --no-update magento/magento-cloud-components
           composer remove --no-update magento/magento-cloud-docker
-          composer remove --no-update magento/magento-cloud-patches
           composer remove --no-update magento/quality-patches
+          composer remove --no-update magento/magento-cloud-patches
       - name: Composer Update
         run: composer update
       - name: Static and Unit tests
