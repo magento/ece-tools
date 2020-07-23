@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Config\Validator\Deploy;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\Validator\Deploy\ElasticSearchIntegrity;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
 use Magento\MagentoCloud\Config\ValidatorException;
@@ -84,7 +85,8 @@ class ElasticsearchIntegrityTest extends TestCase
             ->method('isInstalled')
             ->willReturn(false);
         $this->resultFactoryMock->expects($this->once())
-            ->method('error');
+            ->method('errorByCode')
+            ->with(Error::DEPLOY_WRONG_SEARCH_ENGINE);
 
         $this->validator->validate();
     }

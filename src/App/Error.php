@@ -12,6 +12,8 @@ namespace Magento\MagentoCloud\App;
  */
 class Error
 {
+    public const DEFAULT_ERROR = 1;
+
     public const BUILD_ENV_PHP_IS_NOT_WRITABLE = 2;
     public const BUILD_CONFIG_NOT_DEFINED = 3;
     public const BUILD_CONFIG_PARSE_FAILED = 4;
@@ -71,6 +73,7 @@ class Error
     public const DEPLOY_CRYPT_KEY_IS_ABSENT = 131;
     public const DEPLOY_ES_CANNOT_CONNECT = 132;
     public const DEPLOY_WRONG_BRAINTREE_VARIABLE = 133;
+    public const DEPLOY_WRONG_SEARCH_ENGINE = 134;
 
     public const PD_DEPLOY_IS_FAILED = 201;
     public const PD_ENV_PHP_IS_NOT_WRITABLE = 202;

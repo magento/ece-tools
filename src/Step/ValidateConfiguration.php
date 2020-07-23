@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Step;
 
+use Magento\MagentoCloud\App\Error as AppError;
 use Magento\MagentoCloud\App\Logger;
 use Magento\MagentoCloud\Config\Validator\Result\Error;
 use Magento\MagentoCloud\Config\ValidatorException;
@@ -65,7 +66,7 @@ class ValidateConfiguration implements StepInterface
 
                 if ($level >= ValidatorInterface::LEVEL_CRITICAL) {
                     $error = array_values($levelErrors)[0];
-                    throw new StepException($error->getError(), $error->getErrorCode());
+                    throw new StepException($error->getError(), $error->getErrorCode() ?: AppError::DEFAULT_ERROR);
                 }
             }
         }
