@@ -127,14 +127,14 @@ EOT;
         $result = '';
 
         foreach ($errors as $type => $typeErrors) {
-            $result .= sprintf("\n\n## %s Errors\n\n", ucfirst($type));
+            $result .= sprintf("\n### %s Errors\n", ucfirst($type));
 
             foreach ($typeErrors as $stage => $stageErrors) {
-                $result .= sprintf("\n### %s%s\n\n", ucfirst($stage), $stage === 'general' ? '' : ' stage');
+                $result .= sprintf("\n### %s%s\n", ucfirst($stage), $stage === 'general' ? '' : ' stage');
 
-                $table = "{:.error-table}\n";
+                $table = "\n{:.error-table}\n";
                 $table .= sprintf(
-                    "| Error code | %s step | Error description | Suggested action |\n",
+                    "| Error code | %s step | Error description (Title) | Suggested action |\n",
                     ucfirst($stage)
                 );
                 $table .= "| - | - | - | - |\n";
