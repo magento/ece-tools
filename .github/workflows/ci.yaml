@@ -24,6 +24,7 @@ jobs:
           composer remove --no-update magento/magento-cloud-components
           composer remove --no-update magento/magento-cloud-docker
           composer remove --no-update magento/magento-cloud-patches
+          composer remove --no-update magento/quality-patches
       - name: Composer Update
         run: composer update
       - name: Static and Unit tests
