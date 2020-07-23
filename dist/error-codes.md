@@ -1,5 +1,7 @@
 <!-Note: The error code tables in this file are auto-generated from source code. To request changes to error code descriptions or suggestions, submit a GitHub issue to the magento/ece-tools repository.->
-### Critical Errors
+## Critical Errors
+
+Critical errors indicate a problem with the Magento Commerce Cloud project configuration that causes deployment failure, for example incorrect, unsupported, or missing configuration for required settings. Before you can deploy, you must update the configuration to resolve these errors.
 
 ### Build stage
 
@@ -97,7 +99,9 @@
 | 245 |  | Unable to read the `.magento.env.yaml` file | Unable to read the `./.magento.env.yaml` file. Check file permissions. |
 | 246 |  | Unable to read the `.schema.yaml` file |  |
 
-### Warning Errors
+## Warning Errors
+
+Warning errors indicate a problem with the Magento Commerce Cloud project configuration such as incorrect, deprecated, unsupported, or missing configuration settings for optional features that can affect site operation. Although the project is deployed, you should review warning messages and update the configuration to resolve them.
 
 ### Build stage
 

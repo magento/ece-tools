@@ -129,7 +129,8 @@ EOT;
             'submit a GitHub issue to the magento/ece-tools repository.->';
 
         foreach ($errors as $type => $typeErrors) {
-            $result .= sprintf("\n### %s Errors\n", ucfirst($type));
+            $result .= sprintf("\n## %s Errors\n", ucfirst($type));
+            $result .= sprintf("\n%s\n", $this->getErrorTypeDescription()[$type]);
 
             foreach ($typeErrors as $stage => $stageErrors) {
                 $result .= sprintf("\n### %s%s\n", ucfirst($stage), $stage === 'general' ? '' : ' stage');
@@ -155,5 +156,23 @@ EOT;
         }
 
         return $result . self::FOOTER_SCRIPTS;
+    }
+
+    /**
+     * Returns an array of error types description (warning and critical)
+     *
+     * @return array
+     */
+    public function getErrorTypeDescription(): array
+    {
+        return [
+            'critical' => 'Critical errors indicate a problem with the Magento Commerce Cloud project configuration ' .
+                'that causes deployment failure, for example incorrect, unsupported, or missing configuration for ' .
+                'required settings. Before you can deploy, you must update the configuration to resolve these errors.',
+            'warning' => 'Warning errors indicate a problem with the Magento Commerce Cloud project configuration ' .
+                'such as incorrect, deprecated, unsupported, or missing configuration settings for optional features ' .
+                'that can affect site operation. Although the project is deployed, you should review warning ' .
+                'messages and update the configuration to resolve them.',
+        ];
     }
 }
