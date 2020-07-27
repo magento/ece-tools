@@ -59,26 +59,18 @@ class ManagerTest extends TestCase
 
     /**
      * Tests patch applying.
-     *
-     * @param bool $deploymentFromGit
-     * @param string[] $qualityPatches
-     * @param string $expectedCommand
-     * @dataProvider applyDataProvider
      */
-    public function testApply(
-        bool $deploymentFromGit,
-        array $qualityPatches,
-        string $expectedCommand
-    ): void {
+    public function testApply(): void
+    {
         $this->globalSectionMock->expects($this->once())
             ->method('get')
             ->with(GlobalSection::VAR_DEPLOYED_MAGENTO_VERSION_FROM_GIT)
-            ->willReturn($deploymentFromGit);
+            ->willReturn(false);
 
         $processMock = $this->getMockForAbstractClass(ProcessInterface::class);
         $this->shellMock->expects($this->once())
             ->method('execute')
-            ->with($expectedCommand)
+            ->with('php ./vendor/bin/ece-patches apply --no-interaction')
             ->willReturn($processMock);
         $this->loggerMock->method('notice')
             ->withConsecutive(
@@ -86,7 +78,26 @@ class ManagerTest extends TestCase
                 ['End of applying patches']
             );
 
-        $this->manager->apply($qualityPatches);
+        $this->manager->apply();
+    }
+
+    /**
+     * Tests with git-based Magento.
+     */
+    public function testApplyGit(): void
+    {
+        $this->globalSectionMock->expects($this->once())
+            ->method('get')
+            ->with(GlobalSection::VAR_DEPLOYED_MAGENTO_VERSION_FROM_GIT)
+            ->willReturn(true);
+
+        $this->shellMock->expects($this->never())
+            ->method('execute');
+        $this->loggerMock->expects($this->once())
+            ->method('info')
+            ->with('Git-based installation. Skipping patches applying');
+
+        $this->manager->apply();
     }
 
     /**
@@ -99,23 +110,7 @@ class ManagerTest extends TestCase
                 'deploymentFromGit' => false,
                 'qualityPatches' => [],
                 'expectedCommand' => 'php ./vendor/bin/ece-patches apply --no-interaction'
-            ],
-            [
-                'deploymentFromGit' => true,
-                'qualityPatches' => [],
-                'expectedCommand' => 'php ./vendor/bin/ece-patches apply --git-installation 1 --no-interaction'
-            ],
-            [
-                'deploymentFromGit' => true,
-                'qualityPatches' => ['MC-11111', 'MC-22222'],
-                'expectedCommand' =>
-                    'php ./vendor/bin/ece-patches apply \'MC-11111\' \'MC-22222\' --git-installation 1 --no-interaction'
-            ],
-            [
-                'deploymentFromGit' => false,
-                'qualityPatches' => ['MC-32365'],
-                'expectedCommand' => 'php ./vendor/bin/ece-patches apply \'MC-32365\' --no-interaction'
-            ],
+            ]
         ];
     }
 
