@@ -32,9 +32,9 @@ class SplitDbTest extends TestCase
     /**
      * @inheritDoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
-        $this->resultFactoryMock = $this->createTestProxy(ResultFactory::class);
+        $this->resultFactoryMock = $this->createMock(ResultFactory::class);
 
         $this->validator = new SplitDb(
             $this->resultFactoryMock
@@ -43,16 +43,23 @@ class SplitDbTest extends TestCase
 
     public function testValidate(): void
     {
-        $this->assertEquals(new Success(), $this->validator->validate('SOME_VARIABLE', ['sales', 'quote']));
+        $this->assertInstanceOf(
+            Success::class,
+            $this->validator->validate('SOME_VARIABLE', ['sales', 'quote'])
+        );
     }
 
     public function testValidateWithError(): void
     {
-        $this->assertEquals(
-            new Error(
+        $this->resultFactoryMock->expects($this->once())
+            ->method('error')
+            ->with(
                 'The SOME_VARIABLE variable contains the invalid value.'
-                .' It should be array with next available values: [quote, sales].'
-            ),
+                .' It should be an array with following values: [quote, sales].'
+            );
+
+        $this->assertInstanceOf(
+            Error::class,
             $this->validator->validate('SOME_VARIABLE', ['invalid_value'])
         );
     }

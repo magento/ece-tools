@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Step\Deploy\InstallUpdate\ConfigUpdate;
 
+use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Step\StepException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -150,6 +151,25 @@ class AmqpTest extends TestCase
         $this->configWriterMock->expects($this->once())
             ->method('create')
             ->with($expectedConfig);
+
+        $this->step->execute();
+    }
+
+    /**
+     * @throws StepException
+     */
+    public function testExecuteWithException()
+    {
+        $exceptionMsg = 'Error';
+        $exceptionCode = 111;
+
+        $this->expectException(StepException::class);
+        $this->expectExceptionMessage($exceptionMsg);
+        $this->expectExceptionCode($exceptionCode);
+
+        $this->configReaderMock->expects($this->once())
+            ->method('read')
+            ->willThrowException(new GenericException($exceptionMsg, $exceptionCode));
 
         $this->step->execute();
     }

@@ -58,7 +58,7 @@ class ManagerTest extends TestCase
     }
 
     /**
-     * @throws ShellException
+     * Tests patch applying.
      */
     public function testApply(): void
     {
@@ -70,7 +70,7 @@ class ManagerTest extends TestCase
         $processMock = $this->getMockForAbstractClass(ProcessInterface::class);
         $this->shellMock->expects($this->once())
             ->method('execute')
-            ->with('php ./vendor/bin/ece-patches apply')
+            ->with('php ./vendor/bin/ece-patches apply --no-interaction')
             ->willReturn($processMock);
         $this->loggerMock->method('notice')
             ->withConsecutive(
@@ -79,6 +79,39 @@ class ManagerTest extends TestCase
             );
 
         $this->manager->apply();
+    }
+
+    /**
+     * Tests with git-based Magento.
+     */
+    public function testApplyGit(): void
+    {
+        $this->globalSectionMock->expects($this->once())
+            ->method('get')
+            ->with(GlobalSection::VAR_DEPLOYED_MAGENTO_VERSION_FROM_GIT)
+            ->willReturn(true);
+
+        $this->shellMock->expects($this->never())
+            ->method('execute');
+        $this->loggerMock->expects($this->once())
+            ->method('info')
+            ->with('Git-based installation. Skipping patches applying');
+
+        $this->manager->apply();
+    }
+
+    /**
+     * @return array[]
+     */
+    public function applyDataProvider(): array
+    {
+        return [
+            [
+                'deploymentFromGit' => false,
+                'qualityPatches' => [],
+                'expectedCommand' => 'php ./vendor/bin/ece-patches apply --no-interaction'
+            ]
+        ];
     }
 
     /**
@@ -96,7 +129,7 @@ class ManagerTest extends TestCase
 
         $this->shellMock->expects($this->once())
             ->method('execute')
-            ->with('php ./vendor/bin/ece-patches apply')
+            ->with('php ./vendor/bin/ece-patches apply --no-interaction')
             ->willThrowException(new ShellException('Some error'));
         $this->loggerMock->method('notice')
             ->withConsecutive(
@@ -105,30 +138,6 @@ class ManagerTest extends TestCase
         $this->loggerMock->expects($this->once())
             ->method('error')
             ->with('Some error');
-
-        $this->manager->apply();
-    }
-
-    /**
-     * @throws ShellException
-     */
-    public function testApplyDeployedFromGitAndNoCopy(): void
-    {
-        $this->globalSectionMock->expects($this->once())
-            ->method('get')
-            ->with(GlobalSection::VAR_DEPLOYED_MAGENTO_VERSION_FROM_GIT)
-            ->willReturn(true);
-
-        $processMock = $this->getMockForAbstractClass(ProcessInterface::class);
-        $this->shellMock->expects($this->once())
-            ->method('execute')
-            ->with('php ./vendor/bin/ece-patches apply --git-installation 1')
-            ->willReturn($processMock);
-        $this->loggerMock->method('notice')
-            ->withConsecutive(
-                ['Applying patches'],
-                ['End of applying patches']
-            );
 
         $this->manager->apply();
     }

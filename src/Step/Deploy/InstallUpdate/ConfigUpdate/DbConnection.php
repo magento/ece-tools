@@ -7,6 +7,8 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate;
 
+use Magento\MagentoCloud\App\Error;
+use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Config\ConfigException;
 use Magento\MagentoCloud\Config\ConfigMerger;
 use Magento\MagentoCloud\Config\Database\DbConfig;
@@ -18,11 +20,14 @@ use Magento\MagentoCloud\DB\Data\RelationshipConnectionFactory;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Filesystem\Flag\ConfigurationMismatchException;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
+use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
 use Psr\Log\LoggerInterface;
 
 /**
  * Updates DB connection configuration.
+ *
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class DbConnection implements StepInterface
 {
@@ -129,49 +134,53 @@ class DbConnection implements StepInterface
      */
     public function execute()
     {
-        $dbConfig = $this->getDbConfigData();
+        try {
+            $dbConfig = $this->getDbConfigData();
 
-        if (!isset($dbConfig[DbConfig::KEY_CONNECTION])) {
-            /**
-             * Is calling only in case when database relationship configuration doesn't exist and
-             * database is not configured through .magento.env.yaml or env variable.
-             * It's workaround for scenarios when magento was installed by raw setup:install command
-             * not by deploy scripts.
-             */
-            $this->logger->notice(
-                'Database relationship configuration doesn\'t exist'
-                . ' and database is not configured through .magento.env.yaml or env variable.'
-                . ' Will be applied the previous database configuration.'
+            if (!isset($dbConfig[DbConfig::KEY_CONNECTION])) {
+                /**
+                 * Is calling only in case when database relationship configuration doesn't exist and
+                 * database is not configured through .magento.env.yaml or env variable.
+                 * It's workaround for scenarios when magento was installed by raw setup:install command
+                 * not by deploy scripts.
+                 */
+                $this->logger->notice(
+                    'Database relationship configuration does not exist'
+                    . ' and database is not configured through .magento.env.yaml or env variable.'
+                    . ' Will be applied the previous database configuration.'
+                );
+                return;
+            }
+
+            $this->logger->info('Updating env.php DB connection configuration.');
+
+            $mageSplitConnectionsConfig = $this->getMageSplitConnectionsConfig();
+
+            $useSlave = $this->stageConfig->get(DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION);
+
+            if (empty($mageSplitConnectionsConfig)) {
+                $this->setOnlyMainConnectionsConfig($useSlave);
+                return;
+            }
+
+            $customSplitConnections = $this->getDifferentConnections(
+                $mageSplitConnectionsConfig,
+                $dbConfig[DbConfig::KEY_CONNECTION]
             );
-            return;
+
+            if (!empty($customSplitConnections)) {
+                $this->logger->warning(
+                    sprintf('For split databases used custom connections: %s', implode(', ', $customSplitConnections)),
+                    ['errorCode' => Error::WARN_SPLIT_DB_CUSTOM_CONNECTION_USED]
+                );
+                $this->flagManager->set(FlagManager::FLAG_IGNORE_SPLIT_DB);
+                return;
+            }
+
+            $this->updateConnectionsConfig($mageSplitConnectionsConfig, $useSlave);
+        } catch (GenericException $e) {
+            throw new StepException($e->getMessage(), $e->getCode(), $e);
         }
-
-        $this->logger->info('Updating env.php DB connection configuration.');
-
-        $mageSplitConnectionsConfig = $this->getMageSplitConnectionsConfig();
-
-        $useSlave = $this->stageConfig->get(DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION);
-
-        if (empty($mageSplitConnectionsConfig)) {
-            $this->setOnlyMainConnectionsConfig($useSlave);
-            return;
-        }
-
-        $customSplitConnections = $this->getDifferentConnections(
-            $mageSplitConnectionsConfig,
-            $dbConfig[DbConfig::KEY_CONNECTION]
-        );
-
-        if (!empty($customSplitConnections)) {
-            $this->logger->warning(sprintf(
-                'For split databases used custom connections: %s',
-                implode(', ', $customSplitConnections)
-            ));
-            $this->flagManager->set(FlagManager::FLAG_IGNORE_SPLIT_DB);
-            return;
-        }
-
-        $this->updateConnectionsConfig($mageSplitConnectionsConfig, $useSlave);
     }
 
     /**
@@ -318,10 +327,13 @@ class DbConnection implements StepInterface
             DbConfig::CONNECTION_DEFAULT,
             $connectionData
         )) {
-            $this->logger->warning(sprintf(
-                'You have changed db configuration that not compatible with %s slave connection.',
-                DbConfig::CONNECTION_DEFAULT
-            ));
+            $this->logger->warning(
+                sprintf(
+                    'You have changed db configuration that not compatible with %s slave connection.',
+                    DbConfig::CONNECTION_DEFAULT
+                ),
+                ['errorCode' => Error::WARN_DB_CONFIG_NOT_COMPATIBLE_WITH_SLAVE]
+            );
         } elseif (!empty($dbConfig[DbConfig::KEY_SLAVE_CONNECTION][DbConfig::CONNECTION_DEFAULT])) {
             $this->logger->info(sprintf('Set DB slave connection for %s connection.', DbConfig::CONNECTION_DEFAULT));
         } else {

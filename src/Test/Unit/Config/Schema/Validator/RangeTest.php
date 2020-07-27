@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Config\Schema\Validator;
 
+use Magento\MagentoCloud\App\ErrorInfo;
 use Magento\MagentoCloud\Config\Schema\Validator\Range;
 use Magento\MagentoCloud\Config\Validator\Result\Error;
 use Magento\MagentoCloud\Config\Validator\Result\Success;
@@ -27,9 +28,14 @@ class RangeTest extends TestCase
     /**
      * @inheritDoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
-        $this->resultFactoryMock = $this->createTestProxy(ResultFactory::class);
+        $this->resultFactoryMock = $this->createTestProxy(
+            ResultFactory::class,
+            [
+                $this->createMock(ErrorInfo::class)
+            ]
+        );
     }
 
     public function testValidate(): void

@@ -7,11 +7,13 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Step\Build;
 
+use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Config\Stage\BuildInterface;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Step\Build\PreBuild;
+use Magento\MagentoCloud\Step\StepException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -152,5 +154,21 @@ class PreBuildTest extends TestCase
             ['isExist' => true, 'clearDirectories' => 2],
             ['isExist' => false, 'clearDirectories' => 0],
         ];
+    }
+
+    public function testExecuteWithException()
+    {
+        $exceptionCode = 111;
+        $exceptionMsg = 'Error message';
+
+        $this->expectException(StepException::class);
+        $this->expectExceptionMessage($exceptionMsg);
+        $this->expectExceptionCode($exceptionCode);
+
+        $this->flagManagerMock->expects($this->once())
+            ->method('delete')
+            ->willThrowException(new GenericException($exceptionMsg, $exceptionCode));
+
+        $this->step->execute();
     }
 }

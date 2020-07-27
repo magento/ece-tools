@@ -38,7 +38,7 @@ class SkipStep implements StepInterface
     /**
      * Logs the information about step skipping.
      *
-     * @return void
+     * {@inheritDoc}
      */
     public function execute()
     {

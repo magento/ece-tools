@@ -7,6 +7,8 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate;
 
+use Magento\MagentoCloud\App\GenericException;
+use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
 use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface as ConfigReader;
 use Magento\MagentoCloud\Config\Magento\Env\WriterInterface as ConfigWriter;
@@ -69,17 +71,21 @@ class Amqp implements StepInterface
      */
     public function execute()
     {
-        $config = $this->configReader->read();
-        $amqpConfig = $this->amqpConfig->get();
+        try {
+            $config = $this->configReader->read();
+            $amqpConfig = $this->amqpConfig->get();
 
-        if (count($amqpConfig)) {
-            $this->logger->info('Updating env.php AMQP configuration.');
-            $config['queue'] = $amqpConfig;
-            $this->configWriter->create($config);
-        } elseif (isset($config['queue'])) {
-            $this->logger->info('Removing queue configuration from env.php.');
-            unset($config['queue']);
-            $this->configWriter->create($config);
+            if (count($amqpConfig)) {
+                $this->logger->info('Updating env.php AMQP configuration.');
+                $config['queue'] = $amqpConfig;
+                $this->configWriter->create($config);
+            } elseif (isset($config['queue'])) {
+                $this->logger->info('Removing queue configuration from env.php.');
+                unset($config['queue']);
+                $this->configWriter->create($config);
+            }
+        } catch (GenericException $e) {
+            throw new StepException($e->getMessage(), $e->getCode(), $e);
         }
     }
 }

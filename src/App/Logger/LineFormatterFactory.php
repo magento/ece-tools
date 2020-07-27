@@ -7,7 +7,8 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\App\Logger;
 
-use Monolog\Formatter\LineFormatter;
+use Magento\MagentoCloud\App\ContainerInterface;
+use Magento\MagentoCloud\App\Logger\Formatter\LineFormatter;
 
 /**
  * The factory for LineFormatter.
@@ -15,10 +16,23 @@ use Monolog\Formatter\LineFormatter;
 class LineFormatterFactory
 {
     /**
+     * @var ContainerInterface
+     */
+    private $container;
+
+    /**
+     * @param ContainerInterface $container
+     */
+    public function __construct(ContainerInterface $container)
+    {
+        $this->container = $container;
+    }
+
+    /**
      * @return LineFormatter
      */
     public function create(): LineFormatter
     {
-        return new LineFormatter("[%datetime%] %level_name%: %message% %context% %extra%\n", null, true, true);
+        return new LineFormatter(LineFormatter::FORMAT_BASE, null, true, true);
     }
 }

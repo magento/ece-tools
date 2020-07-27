@@ -67,7 +67,7 @@ class ConnectionFactoryTest extends TestCase
     public function testCreateWithException()
     {
         $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessage('Connection with type dummy doesn\'t exist');
+        $this->expectExceptionMessage('Connection with type dummy does not exist');
         $this->factory->create('dummy');
     }
 }
