@@ -566,7 +566,7 @@
     step: 'install-update:split-db'
     type: warning
 !php/const Magento\MagentoCloud\App\Error::WARN_COPY_MOUNTED_DIRS_FAILED:
-    title: 'Restoring of some generated data from Build phase to mounted directories was failed.'
+    title: 'Failed to restore some data generated during the build phase to the mounted directories'
     stage: deploy
     suggestion: 'Check the `cloud.log` for more information.'
     step: 'pre-deploy:restore-writable-dirs'
