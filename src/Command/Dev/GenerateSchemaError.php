@@ -124,17 +124,21 @@ EOT;
      */
     private function generateDocs(array $errors): string
     {
-        $result = '';
+        $result = '<!-Note: The error code tables in this file are auto-generated from source code. ' .
+            'To request changes to error code descriptions or suggestions, ' .
+            'submit a GitHub issue to the magento/ece-tools repository.->';
+        $result .= "\n";
 
         foreach ($errors as $type => $typeErrors) {
-            $result .= sprintf("\n\n## %s Errors\n\n", ucfirst($type));
+            $result .= sprintf("\n## %s Errors\n", ucfirst($type));
+            $result .= sprintf("\n%s\n", $this->getErrorTypeDescription()[$type]);
 
             foreach ($typeErrors as $stage => $stageErrors) {
-                $result .= sprintf("\n### %s%s\n\n", ucfirst($stage), $stage === 'general' ? '' : ' stage');
+                $result .= sprintf("\n### %s%s\n", ucfirst($stage), $stage === 'general' ? '' : ' stage');
 
-                $table = "{:.error-table}\n";
+                $table = "\n{:.error-table}\n";
                 $table .= sprintf(
-                    "| Error code | %s step | Error description | Suggested action |\n",
+                    "| Error code | %s step | Error description (Title) | Suggested action |\n",
                     ucfirst($stage)
                 );
                 $table .= "| - | - | - | - |\n";
@@ -153,5 +157,23 @@ EOT;
         }
 
         return $result . self::FOOTER_SCRIPTS;
+    }
+
+    /**
+     * Returns an array of error types description (warning and critical)
+     *
+     * @return array
+     */
+    public function getErrorTypeDescription(): array
+    {
+        return [
+            'critical' => 'Critical errors indicate a problem with the Magento Commerce Cloud project configuration ' .
+                'that causes deployment failure, for example incorrect, unsupported, or missing configuration for ' .
+                'required settings. Before you can deploy, you must update the configuration to resolve these errors.',
+            'warning' => 'Warning errors indicate a problem with the Magento Commerce Cloud project configuration ' .
+                'such as incorrect, deprecated, unsupported, or missing configuration settings for optional features ' .
+                'that can affect site operation. Although a warning does not cause deployment failure, you ' .
+                'should review warning messages and update the configuration to resolve them.',
+        ];
     }
 }

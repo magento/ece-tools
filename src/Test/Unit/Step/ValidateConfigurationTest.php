@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Step;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\App\Logger;
 use Magento\MagentoCloud\Config\Validator\Result;
 use Magento\MagentoCloud\Config\ValidatorInterface;
@@ -87,6 +88,31 @@ class ValidateConfigurationTest extends TestCase
                 ],
             ]
         );
+        $step->execute();
+    }
+
+    /**
+     * @throws StepException
+     */
+    public function testExecuteWithCriticalErrorAndEmptyErrorCode(): void
+    {
+        $this->expectException(StepException::class);
+        $this->expectExceptionMessage('some error');
+        $this->expectExceptionCode(Error::DEFAULT_ERROR);
+
+        $this->loggerMock->expects($this->once())
+            ->method('log')
+            ->with(ValidatorInterface::LEVEL_CRITICAL, 'some error');
+
+        $step = new ValidateConfiguration(
+            $this->loggerMock,
+            [
+                ValidatorInterface::LEVEL_CRITICAL => [
+                    $this->createValidatorWithError('some error', 'some  suggestion'),
+                ],
+            ]
+        );
+
         $step->execute();
     }
 
