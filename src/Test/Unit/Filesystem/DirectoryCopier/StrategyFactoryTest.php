@@ -88,7 +88,7 @@ class StrategyFactoryTest extends TestCase
     public function testCopyFromDirNotExists(): void
     {
         $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessage('Strategy "not_exists_strategy" doesn\'t exist');
+        $this->expectExceptionMessage('Strategy "not_exists_strategy" does not exist');
 
         $this->strategyFactory->create('not_exists_strategy');
     }

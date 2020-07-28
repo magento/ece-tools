@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Config\Validator\Build;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\StageConfigInterface;
 use Magento\MagentoCloud\Config\Validator;
 use Magento\MagentoCloud\Config\ValidatorInterface;
@@ -70,12 +71,16 @@ class ScdOptionsIgnorance implements ValidatorInterface
             }
 
             if (count($configuredScdVariables)) {
-                return $this->resultFactory->error(sprintf(
-                    'When %s, static content deployment does not run during the build phase ' .
-                    'and the following variables are ignored: %s',
-                    $scdOnBuildResult->getError(),
-                    implode(', ', $configuredScdVariables)
-                ));
+                return $this->resultFactory->error(
+                    sprintf(
+                        'When %s, static content deployment does not run during the build phase ' .
+                        'and the following variables are ignored: %s',
+                        $scdOnBuildResult->getError(),
+                        implode(', ', $configuredScdVariables)
+                    ),
+                    '',
+                    Error::WARN_SCD_OPTIONS_IGNORANCE
+                );
             }
         }
 

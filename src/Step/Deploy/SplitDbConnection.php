@@ -110,52 +110,60 @@ class SplitDbConnection implements StepInterface
      */
     public function execute()
     {
-        if ($this->flagManager->exists(FlagManager::FLAG_IGNORE_SPLIT_DB)) {
-            $this->logger->info(sprintf(
-                'Enabling a split database will be skipped. The flag %s was detected.',
-                FlagManager::FLAG_IGNORE_SPLIT_DB
-            ));
-            $this->flagManager->delete(FlagManager::FLAG_IGNORE_SPLIT_DB);
-            return;
-        }
+        try {
+            if ($this->flagManager->exists(FlagManager::FLAG_IGNORE_SPLIT_DB)) {
+                $this->logger->info(sprintf(
+                    'Enabling a split database will be skipped. The flag %s was detected.',
+                    FlagManager::FLAG_IGNORE_SPLIT_DB
+                ));
+                $this->flagManager->delete(FlagManager::FLAG_IGNORE_SPLIT_DB);
+                return;
+            }
 
-        $splitTypes = $this->stageConfig->get(DeployInterface::VAR_SPLIT_DB);
+            $splitTypes = $this->stageConfig->get(DeployInterface::VAR_SPLIT_DB);
 
-        $dbConfig = $this->dbConfig->get();
-        $notAvailableSplitTypes = $this->getMissedSplitTypes(
-            $splitTypes,
-            $dbConfig[DbConfig::KEY_CONNECTION] ?? []
-        );
-
-        if (!empty($notAvailableSplitTypes)) {
-            $this->logger->error(sprintf(
-                'Enabling a split database will be skipped.'
-                . ' Relationship do not have configuration for next types: %s',
-                implode(', ', $notAvailableSplitTypes)
-            ));
-            return;
-        }
-
-        $mageConfig = $this->configReader->read();
-
-        $enabledSplitTypes = array_values(array_intersect_key(
-            self::SPLIT_CONNECTION_MAP,
-            $this->getSplitConnectionsConfig($mageConfig[DbConfig::KEY_DB][DbConfig::KEY_CONNECTION])
-        ));
-
-        $missedSplitTypes = array_diff($enabledSplitTypes, $splitTypes);
-
-        if (!empty($missedSplitTypes)) {
-            $this->logger->warning(
-                'Variable SPLIT_DB does not have data which were already split types: '
-                . implode(', ', $missedSplitTypes)
+            $dbConfig = $this->dbConfig->get();
+            $notAvailableSplitTypes = $this->getMissedSplitTypes(
+                $splitTypes,
+                $dbConfig[DbConfig::KEY_CONNECTION] ?? []
             );
-            return;
+
+            if (!empty($notAvailableSplitTypes)) {
+                $this->logger->warning(
+                    sprintf(
+                        'Enabling a split database will be skipped.'
+                        . ' Relationship do not have configuration for next types: %s',
+                        implode(', ', $notAvailableSplitTypes)
+                    ),
+                    ['errorCode' => Error::WARN_SPLIT_DB_ENABLING_SKIPPED]
+                );
+                return;
+            }
+
+            $mageConfig = $this->configReader->read();
+
+            $enabledSplitTypes = array_values(array_intersect_key(
+                self::SPLIT_CONNECTION_MAP,
+                $this->getSplitConnectionsConfig($mageConfig[DbConfig::KEY_DB][DbConfig::KEY_CONNECTION])
+            ));
+
+            $missedSplitTypes = array_diff($enabledSplitTypes, $splitTypes);
+
+            if (!empty($missedSplitTypes)) {
+                $this->logger->warning(
+                    'The SPLIT_DB variable is missing the configuration for split connection types: '
+                    . implode(', ', $missedSplitTypes),
+                    ['errorCode' => Error::WARN_NOT_ENOUGH_DATA_SPLIT_DB_VAR]
+                );
+                return;
+            }
+            if (!empty($splitTypes)) {
+                $this->enableSplitConnections(array_diff($splitTypes, $enabledSplitTypes), $dbConfig);
+            }
+            $this->slaveConnection->update();
+        } catch (GenericException $e) {
+            throw new StepException($e->getMessage(), $e->getCode(), $e);
         }
-        if (!empty($splitTypes)) {
-            $this->enableSplitConnections(array_diff($splitTypes, $enabledSplitTypes), $dbConfig);
-        }
-        $this->slaveConnection->update();
     }
 
     /**

@@ -7,8 +7,10 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Step\Deploy\PreDeploy;
 
+use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Filesystem\RecoverableDirectoryList;
+use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
 use Magento\MagentoCloud\Util\BuildDirCopier;
 use Psr\Log\LoggerInterface;
@@ -57,21 +59,23 @@ class RestoreWritableDirectories implements StepInterface
     }
 
     /**
-     * Executes the process.
-     *
-     * @return void
+     * @inheritdoc
      */
     public function execute()
     {
-        foreach ($this->recoverableDirectoryList->getList() as $dirOptions) {
-            $this->buildDirCopier->copy(
-                $dirOptions[RecoverableDirectoryList::OPTION_DIRECTORY],
-                $dirOptions[RecoverableDirectoryList::OPTION_STRATEGY]
-            );
-        }
+        try {
+            foreach ($this->recoverableDirectoryList->getList() as $dirOptions) {
+                $this->buildDirCopier->copy(
+                    $dirOptions[RecoverableDirectoryList::OPTION_DIRECTORY],
+                    $dirOptions[RecoverableDirectoryList::OPTION_STRATEGY]
+                );
+            }
 
-        // Restore mounted directories.
-        $this->logger->notice('Recoverable directories were copied back.');
-        $this->flagManager->delete(FlagManager::FLAG_REGENERATE);
+            // Restore mounted directories.
+            $this->logger->notice('Recoverable directories were copied back.');
+            $this->flagManager->delete(FlagManager::FLAG_REGENERATE);
+        } catch (GenericException $e) {
+            throw new StepException($e->getMessage(), $e->getCode(), $e);
+        }
     }
 }

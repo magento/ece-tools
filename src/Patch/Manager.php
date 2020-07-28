@@ -56,16 +56,16 @@ class Manager
      */
     public function apply(): void
     {
-        $this->logger->notice('Applying patches');
-
-        $command = 'php ./vendor/bin/ece-patches apply';
-
         if ($this->globalSection->get(GlobalSection::VAR_DEPLOYED_MAGENTO_VERSION_FROM_GIT)) {
-            $command .= ' --git-installation 1';
+            $this->logger->info('Git-based installation. Skipping patches applying');
+
+            return;
         }
 
+        $this->logger->notice('Applying patches');
+
         try {
-            $this->shell->execute($command);
+            $this->shell->execute('php ./vendor/bin/ece-patches apply --no-interaction');
         } catch (ShellException $exception) {
             $this->logger->error($exception->getMessage());
             throw $exception;
