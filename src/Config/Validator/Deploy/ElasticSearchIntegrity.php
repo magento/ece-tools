@@ -7,9 +7,11 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Config\Validator\Deploy;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\Validator;
 use Magento\MagentoCloud\Config\ValidatorException;
 use Magento\MagentoCloud\Config\ValidatorInterface;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Package\UndefinedPackageException;
 use Magento\MagentoCloud\Service\ElasticSearch;
@@ -58,9 +60,9 @@ class ElasticSearchIntegrity implements ValidatorInterface
             if ($this->magentoVersion->isGreaterOrEqual('2.4.0')
                 && !$this->elasticsearch->isInstalled()
             ) {
-                return $this->resultFactory->error('Magento 2.4.0 requires Elasticsearch service to be installed.');
+                return $this->resultFactory->errorByCode(Error::DEPLOY_WRONG_SEARCH_ENGINE);
             }
-        } catch (UndefinedPackageException $exception) {
+        } catch (UndefinedPackageException | FileSystemException $exception) {
             throw new ValidatorException($exception->getMessage(), $exception->getCode(), $exception);
         }
 
