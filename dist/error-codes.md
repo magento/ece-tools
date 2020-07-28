@@ -145,7 +145,7 @@
 | 2023 | install-update:split-db | Enabling a split database will be skipped. |  |
 | 2024 | install-update:split-db | The SPLIT_DB variable is missing the configuration for split connection types. |  |
 | 2025 | install-update:split-db | Slave connection not set. |  |
-| 2026 | pre-deploy:restore-writable-dirs | Restoring of some generated data from Build phase to mounted directories was failed. | Check the `cloud.log` for more information. |
+| 2026 | pre-deploy:restore-writable-dirs | Failed to restore some data generated data during the build phase to the mounted directories. | Check the `cloud.log` for more information. |
 
 ### Post-deploy stage
 
