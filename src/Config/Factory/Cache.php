@@ -274,7 +274,7 @@ class Cache
         return [
             'backend' => $envCacheBackendModel,
             'backend_options' => [
-                'remote_backend' => addslashes('\Magento\Framework\Cache\Backend\Redis'),
+                'remote_backend' => '\Magento\Framework\Cache\Backend\Redis',
                 'remote_backend_options' => [
                     'server' => $redisConfig['host'],
                     'port' => $redisConfig['port'],
