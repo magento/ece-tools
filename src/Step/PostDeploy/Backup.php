@@ -69,7 +69,7 @@ class Backup implements StepInterface
                 $result = $this->file->copy($file, $backup);
                 if (!$result) {
                     $this->logger->warning(
-                        sprintf('Backup %s for %s was not created.', $backup, $file),
+                        sprintf('Failed to create backup %s for %s .', $backup, $file),
                         ['errorCode' => Error::WARN_CREATE_CONFIG_BACKUP_FAILED]
                     );
                 } else {
