@@ -73,7 +73,7 @@ class Backup implements StepInterface
                         ['errorCode' => Error::WARN_CREATE_CONFIG_BACKUP_FAILED]
                     );
                 } else {
-                    $this->logger->info(sprintf('Backup %s for %s was created.', $backup, $file));
+                    $this->logger->info(sprintf('Successfully created backup %s for %s .', $backup, $file));
                 }
             }
         } catch (GenericException $e) {
