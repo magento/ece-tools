@@ -107,7 +107,7 @@ class RedisPhp72Cest extends RedisCest
                         ],
                     ],
                 ],
-                'expectedBackend' => '\\\Magento\\\Framework\\\Cache\\\Backend\\\Redis',
+                'expectedBackend' => '\Magento\Framework\Cache\Backend\Redis',
                 'expectedConfig' => [
                     'backend_options' => [
                         'server' => 'redis',
@@ -125,10 +125,10 @@ class RedisPhp72Cest extends RedisCest
                         ],
                     ],
                 ],
-                'expectedBackend' => '\\\Magento\\\Framework\\\Cache\\\Backend\\\RemoteSynchronizedCache',
+                'expectedBackend' => '\Magento\Framework\Cache\Backend\RemoteSynchronizedCache',
                 'expectedConfig' => [
                     'backend_options' => [
-                        'remote_backend' => '\\\Magento\\\Framework\\\Cache\\\Backend\\\Redis',
+                        'remote_backend' => '\Magento\Framework\Cache\Backend\Redis',
                         'remote_backend_options' => [
                             'persistent' => 0,
                             'server' => 'redis',
@@ -153,7 +153,7 @@ class RedisPhp72Cest extends RedisCest
                         ],
                     ],
                 ],
-                'expectedBackend' => '\\\Magento\\\Framework\\\Cache\\\Backend\\\Redis',
+                'expectedBackend' => '\Magento\Framework\Cache\Backend\Redis',
                 'expectedConfig' => [
                     'backend_options' => [
                         'server' => 'redis',
@@ -171,10 +171,10 @@ class RedisPhp72Cest extends RedisCest
                         ],
                     ],
                 ],
-                'expectedBackend' => '\\\Magento\\\Framework\\\Cache\\\Backend\\\RemoteSynchronizedCache',
+                'expectedBackend' => '\Magento\Framework\Cache\Backend\RemoteSynchronizedCache',
                 'expectedConfig' => [
                     'backend_options' => [
-                        'remote_backend' => '\\\Magento\\\Framework\\\Cache\\\Backend\\\Redis',
+                        'remote_backend' => '\Magento\Framework\Cache\Backend\Redis',
                         'remote_backend_options' => [
                             'persistent' => 0,
                             'server' => 'redis',
@@ -199,7 +199,7 @@ class RedisPhp72Cest extends RedisCest
                         ],
                     ],
                 ],
-                'expectedBackend' => '\\\Magento\\\Framework\\\Cache\\\Backend\\\Redis',
+                'expectedBackend' => '\Magento\Framework\Cache\Backend\Redis',
                 'expectedConfig' => [
                     'backend_options' => [
                         'server' => 'redis',
@@ -217,10 +217,10 @@ class RedisPhp72Cest extends RedisCest
                         ],
                     ],
                 ],
-                'expectedBackend' => '\\\Magento\\\Framework\\\Cache\\\Backend\\\RemoteSynchronizedCache',
+                'expectedBackend' => '\Magento\Framework\Cache\Backend\RemoteSynchronizedCache',
                 'expectedConfig' => [
                     'backend_options' => [
-                        'remote_backend' => '\\\Magento\\\Framework\\\Cache\\\Backend\\\Redis',
+                        'remote_backend' => '\Magento\Framework\Cache\Backend\Redis',
                         'remote_backend_options' => [
                             'persistent' => 0,
                             'server' => 'redis',

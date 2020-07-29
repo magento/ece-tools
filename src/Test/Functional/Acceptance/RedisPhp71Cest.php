@@ -19,9 +19,6 @@ class RedisPhp71Cest extends RedisCest
     {
         return [
             [
-                'version' => '2.2.10',
-            ],
-            [
                 'version' => '2.2.11',
             ],
         ];
@@ -34,24 +31,7 @@ class RedisPhp71Cest extends RedisCest
     {
         return [
             [
-                'version' => '2.2.10',
-                'wrongConfiguration' => [
-                    'stage' => [
-                        'deploy' => [
-                            'REDIS_BACKEND' => 'TestRedisModel'
-                        ]
-                    ]
-                ],
-                'buildSuccess' => false,
-                'deploySuccess' => false,
-                'errorBuildMessage' => 'The REDIS_BACKEND variable contains an invalid value TestRedisModel.'
-                    . ' Use one of the available value options: Cm_Cache_Backend_Redis,'
-                    . ' \Magento\Framework\Cache\Backend\Redis,'
-                    . ' \Magento\Framework\Cache\Backend\RemoteSynchronizedCache.',
-                'errorDeployMessage' => '',
-            ],
-            [
-                'version' => '2.2.10',
+                'version' => '2.2.11',
                 'wrongConfiguration' => [
                     'stage' => [
                         'deploy' => [
@@ -66,7 +46,7 @@ class RedisPhp71Cest extends RedisCest
                     . '\'\Magento\Framework\Cache\Backend\Redis\'',
             ],
             [
-                'version' => '2.2.10',
+                'version' => '2.2.11',
                 'wrongConfiguration' => [
                     'stage' => [
                         'deploy' => [

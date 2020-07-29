@@ -220,18 +220,14 @@ class CacheTest extends TestCase
             ],
         ];
         $resultMasterOnlyConnectionRedisCache = $resultMasterOnlyConnection;
-        $resultMasterOnlyConnectionRedisCache['frontend']['default']['backend'] = addslashes(
-            Cache::REDIS_BACKEND_REDIS_CACHE
-        );
-        $resultMasterOnlyConnectionRedisCache['frontend']['page_cache']['backend'] = addslashes(
-            Cache::REDIS_BACKEND_REDIS_CACHE
-        );
+        $resultMasterOnlyConnectionRedisCache['frontend']['default']['backend'] = Cache::REDIS_BACKEND_REDIS_CACHE;
+        $resultMasterOnlyConnectionRedisCache['frontend']['page_cache']['backend'] = Cache::REDIS_BACKEND_REDIS_CACHE;
         $resultMasterOnlyConnectionSyncCache = [
             'frontend' => [
                 'default' => [
-                    'backend' => addslashes(Cache::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE),
+                    'backend' => Cache::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE,
                     'backend_options' => [
-                        'remote_backend' => addslashes(Cache::REDIS_BACKEND_REDIS_CACHE),
+                        'remote_backend' => Cache::REDIS_BACKEND_REDIS_CACHE,
                         'remote_backend_options' => [
                             'server' => 'master.host',
                             'port' => 'master.port',
@@ -287,12 +283,8 @@ class CacheTest extends TestCase
             $slaveConfiguration
         );
         $resultMasterSlaveConnectionRedisCache = $resultMasterSlaveConnection;
-        $resultMasterSlaveConnectionRedisCache['frontend']['default']['backend'] = addslashes(
-            Cache::REDIS_BACKEND_REDIS_CACHE
-        );
-        $resultMasterSlaveConnectionRedisCache['frontend']['page_cache']['backend'] = addslashes(
-            Cache::REDIS_BACKEND_REDIS_CACHE
-        );
+        $resultMasterSlaveConnectionRedisCache['frontend']['default']['backend'] = Cache::REDIS_BACKEND_REDIS_CACHE;
+        $resultMasterSlaveConnectionRedisCache['frontend']['page_cache']['backend'] = Cache::REDIS_BACKEND_REDIS_CACHE;
         $resultMasterSlaveConnectionSyncCache = $resultMasterOnlyConnectionSyncCache;
         $resultMasterSlaveConnectionSyncCache['frontend']['default'] = array_merge_recursive(
             $resultMasterSlaveConnectionSyncCache['frontend']['default'],
@@ -302,12 +294,10 @@ class CacheTest extends TestCase
         $resultMasterSlaveConnectionWithMergedValue = $resultMasterSlaveConnection;
         $resultMasterSlaveConnectionWithMergedValue['frontend']['default']['backend_options']['value'] = 'key';
         $resultMasterSlaveConnectionWithMergedValueRedisCache = $resultMasterSlaveConnectionWithMergedValue;
-        $resultMasterSlaveConnectionWithMergedValueRedisCache['frontend']['default']['backend'] = addslashes(
-            Cache::REDIS_BACKEND_REDIS_CACHE
-        );
-        $resultMasterSlaveConnectionWithMergedValueRedisCache['frontend']['page_cache']['backend'] = addslashes(
-            Cache::REDIS_BACKEND_REDIS_CACHE
-        );
+        $resultMasterSlaveConnectionWithMergedValueRedisCache['frontend']['default']['backend'] =
+            Cache::REDIS_BACKEND_REDIS_CACHE;
+        $resultMasterSlaveConnectionWithMergedValueRedisCache['frontend']['page_cache']['backend'] =
+            Cache::REDIS_BACKEND_REDIS_CACHE;
         $resultMasterSlaveConnectionWithMergedValueSyncCache = $resultMasterSlaveConnectionSyncCache;
         $resultMasterSlaveConnectionWithMergedValueSyncCache['frontend']['default']['backend_options']['value'] = 'key';
 
@@ -315,12 +305,10 @@ class CacheTest extends TestCase
         $resultMasterSlaveConnectionWithDiffHost['frontend']['default']['backend_options']['value'] = 'key';
         $resultMasterSlaveConnectionWithDiffHost['frontend']['default']['backend_options']['server'] = 'new.host';
         $resultMasterSlaveConnectionWithDiffHostRedisCache = $resultMasterSlaveConnectionWithDiffHost;
-        $resultMasterSlaveConnectionWithDiffHostRedisCache['frontend']['default']['backend'] = addslashes(
-            Cache::REDIS_BACKEND_REDIS_CACHE
-        );
-        $resultMasterSlaveConnectionWithDiffHostRedisCache['frontend']['page_cache']['backend'] = addslashes(
-            Cache::REDIS_BACKEND_REDIS_CACHE
-        );
+        $resultMasterSlaveConnectionWithDiffHostRedisCache['frontend']['default']['backend'] =
+            Cache::REDIS_BACKEND_REDIS_CACHE;
+        $resultMasterSlaveConnectionWithDiffHostRedisCache['frontend']['page_cache']['backend'] =
+            Cache::REDIS_BACKEND_REDIS_CACHE;
         $resultMasterSlaveConnectionWithDiffHostSyncCache = $resultMasterOnlyConnectionSyncCache;
         $remoteBackendOptionsDiffHostSync = [
             'frontend' => [

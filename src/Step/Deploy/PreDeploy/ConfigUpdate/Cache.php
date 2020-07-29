@@ -79,7 +79,7 @@ class Cache implements StepInterface
 
             if (isset($cacheConfig['frontend'])) {
                 $cacheConfig['frontend'] = array_filter($cacheConfig['frontend'], function ($cacheFrontend) {
-                    $backend = stripslashes($cacheFrontend['backend']);
+                    $backend = $cacheFrontend['backend'];
                     $this->checkBackendModel($backend);
 
                     if (!in_array($backend, CacheFactory::AVAILABLE_REDIS_BACKEND, true)) {

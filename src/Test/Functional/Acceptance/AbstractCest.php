@@ -36,8 +36,8 @@ abstract class AbstractCest
      */
     public function _after(\CliTester $I): void
     {
-        $I->stopEnvironment();
-        $I->removeWorkDir();
+//        $I->stopEnvironment();
+//        $I->removeWorkDir();
     }
 
     /**
@@ -65,6 +65,7 @@ abstract class AbstractCest
         $I->addEceDockerGitRepoToComposer();
         $I->addCloudComponentsGitRepoToComposer();
         $I->addCloudPatchesGitRepoToComposer();
+        $I->addQualityPatchesGitRepoToComposer();
         $I->addDependencyToComposer(
             'magento/magento-cloud-docker',
             $I->getDependencyVersion('magento/magento-cloud-docker')
@@ -76,6 +77,10 @@ abstract class AbstractCest
         $I->addDependencyToComposer(
             'magento/magento-cloud-patches',
             $I->getDependencyVersion('magento/magento-cloud-patches')
+        );
+        $I->addDependencyToComposer(
+            'magento/quality-patches',
+            $I->getDependencyVersion('magento/quality-patches')
         );
         $I->composerUpdate();
         $this->removeESIfExists($I);
