@@ -83,7 +83,7 @@ class BackupTest extends TestCase
             ->method('info')
             ->withConsecutive(
                 ['Create backup of important files.'],
-                ['Backup ' . $envPath . BackupList::BACKUP_SUFFIX . ' for ' . $envPath . ' was created.']
+                ['Successfully created backup ' . $envPath . BackupList::BACKUP_SUFFIX . ' for ' . $envPath . '.']
             );
         $this->fileMock->expects($this->once())
             ->method('copy')
@@ -114,7 +114,7 @@ class BackupTest extends TestCase
 
         $this->loggerMock->expects($this->once())
             ->method('warning')
-            ->with('Backup ' . $envPath . BackupList::BACKUP_SUFFIX . ' for ' . $envPath . ' was not created.');
+            ->with('Failed to create backup ' . $envPath . BackupList::BACKUP_SUFFIX . ' for ' . $envPath . '.');
 
         $this->backup->execute();
     }

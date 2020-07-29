@@ -79,7 +79,7 @@ class BuildDirCopier
             } else {
                 $this->logger->warning(
                     sprintf(
-                        'Can\'t copy directory %s with strategy: %s',
+                        'Cannot copy directory %s with strategy: %s',
                         $dir,
                         $strategyName
                     ),
