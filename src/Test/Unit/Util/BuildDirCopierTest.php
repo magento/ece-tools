@@ -179,7 +179,7 @@ class BuildDirCopierTest extends TestCase
             ->method('copy')
             ->with($fromDirectory, $toDirectory)
             ->willThrowException(
-                new FileSystemException('Can\'t copy directory /path/to/root/not-exist-dir. Directory does not exist.')
+                new FileSystemException('Cannot copy directory /path/to/root/not-exist-dir. Directory does not exist.')
             );
         $this->strategyFactory->expects($this->once())
             ->method('create')
@@ -194,7 +194,7 @@ class BuildDirCopierTest extends TestCase
         $this->loggerMock->expects($this->once())
             ->method('warning')
             ->with(
-                'Can\'t copy directory /path/to/root/not-exist-dir. Directory does not exist.',
+                'Cannot copy directory /path/to/root/not-exist-dir. Directory does not exist.',
                 ['errorCode' => Error::WARN_COPY_MOUNTED_DIRS_FAILED]
             );
 
