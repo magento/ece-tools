@@ -83,7 +83,6 @@ abstract class AbstractCest
             $I->getDependencyVersion('magento/quality-patches')
         );
         $I->composerUpdate();
-        $this->removeESIfExists($I);
     }
 
     /**
