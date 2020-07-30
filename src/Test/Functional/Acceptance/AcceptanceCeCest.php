@@ -24,7 +24,10 @@ class AcceptanceCeCest extends AbstractCest
         parent::_before($I);
 
         $I->removeDependencyFromComposer('magento/magento-cloud-metapackage');
-        $I->addDependencyToComposer('magento/product-community-edition', '@stable');
+        $I->addDependencyToComposer(
+            'magento/product-community-edition',
+            $this->magentoCloudTemplate === 'master' ?: '@stable'
+        );
         $I->composerUpdate();
     }
 
