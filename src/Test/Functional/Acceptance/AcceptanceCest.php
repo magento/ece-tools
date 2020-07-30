@@ -26,6 +26,11 @@ use Magento\MagentoCloud\Util\ArrayManager;
 class AcceptanceCest extends AbstractCest
 {
     /**
+     * @var boolean
+     */
+    protected $removeEs = false;
+
+    /**
      * @param CliTester $I
      *
      * @throws TaskException

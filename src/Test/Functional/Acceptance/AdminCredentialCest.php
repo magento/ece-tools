@@ -14,6 +14,11 @@ namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 class AdminCredentialCest extends AbstractCest
 {
     /**
+     * @var boolean
+     */
+    protected $removeEs = false;
+
+    /**
      * @param \CliTester $I
      */
     public function _before(\CliTester $I): void

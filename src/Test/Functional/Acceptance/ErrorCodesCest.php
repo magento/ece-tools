@@ -20,6 +20,11 @@ use Magento\MagentoCloud\App\Error;
 class ErrorCodesCest extends AbstractCest
 {
     /**
+     * @var boolean
+     */
+    protected $removeEs = false;
+
+    /**
      * @param \CliTester $I
      * @throws \Robo\Exception\TaskException
      */

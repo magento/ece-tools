@@ -16,7 +16,7 @@ abstract class AbstractCest
     /**
      * @var boolean
      */
-    protected $removeEs = false;
+    protected $removeEs = true;
 
     /**
      * @var string

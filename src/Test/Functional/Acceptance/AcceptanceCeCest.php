@@ -19,6 +19,11 @@ use CliTester;
  */
 class AcceptanceCeCest extends AbstractCest
 {
+    /**
+     * @var boolean
+     */
+    protected $removeEs = false;
+
     public function _before(\CliTester $I): void
     {
         parent::_before($I);

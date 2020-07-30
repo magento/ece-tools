@@ -14,6 +14,11 @@ namespace Magento\MagentoCloud\Test\Functional\Acceptance;
  */
 class WizardScdCest extends AbstractCest
 {
+    /**
+     * @var boolean
+     */
+    protected $removeEs = false;
+
     public function _before(\CliTester $I): void
     {
         parent::_before($I);

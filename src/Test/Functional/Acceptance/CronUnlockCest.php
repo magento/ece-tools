@@ -15,6 +15,11 @@ namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 class CronUnlockCest extends AbstractCest
 {
     /**
+     * @var boolean
+     */
+    protected $removeEs = false;
+
+    /**
      * @param \CliTester $I
      * @throws \Robo\Exception\TaskException
      */

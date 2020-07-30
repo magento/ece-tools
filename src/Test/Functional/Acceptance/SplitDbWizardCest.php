@@ -19,6 +19,11 @@ use Exception;
 class SplitDbWizardCest extends AbstractCest
 {
     /**
+     * @var boolean
+     */
+    protected $removeEs = false;
+
+    /**
      * {@inheritDoc}
      * @param CliTester $I
      */
