@@ -6,7 +6,7 @@
 set -e
 trap '>&2 echo Error: Command \`$BASH_COMMAND\` on line $LINENO failed with exit code $?' ERR
 
-readarray -t test_set_list <<< "$(grep -RL 'php71' --exclude='*AcceptanceCest.php' src/Test/Functional/Acceptance | sort)"
+readarray -t test_set_list <<< "$(grep -RL 'edition-ce' --exclude='*AcceptanceCest.php' --exclude='*AcceptanceCeCest.php' --exclude='*AbstractCest.php' src/Test/Functional/Acceptance | sort)"
 group_count=6
 
 if [ $(( ${#test_set_list[@]} % group_count )) -eq 0 ]; then

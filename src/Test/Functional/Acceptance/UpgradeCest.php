@@ -10,7 +10,7 @@ namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 /**
  * This test runs on the latest version of PHP
  *
- * @group php72
+ * @group php73
  */
 class UpgradeCest extends AbstractCest
 {
@@ -62,11 +62,8 @@ class UpgradeCest extends AbstractCest
      */
     protected function testProvider(): array
     {
-        // @TODO change version to 2.3.* after fix in magento core.
-        // https://magento2.atlassian.net/browse/MAGECLOUD-3725
         return [
-            ['from' => '2.3.0', 'to' => '>=2.3.1 <2.3.2'],
-            ['from' => '2.3.3', 'to' => '>=2.3.4 <2.3.5'],
+            ['from' => '2.3.5', 'to' => '>=2.4.0 <2.4.1'],
         ];
     }
 }

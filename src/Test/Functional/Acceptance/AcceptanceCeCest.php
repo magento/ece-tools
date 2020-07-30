@@ -14,6 +14,7 @@ use CliTester;
 /**
  * @inheritDoc
  *
+ * @group php74
  * @group edition-ce
  */
 class AcceptanceCeCest extends AbstractCest
