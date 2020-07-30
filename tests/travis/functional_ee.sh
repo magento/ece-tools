@@ -8,15 +8,15 @@ trap '>&2 echo Error: Command \`$BASH_COMMAND\` on line $LINENO failed with exit
 
 case $TRAVIS_PHP_VERSION in
     7.1)
-        ./vendor/bin/codecept run -g parallel_"$FUNCTIONAL_INDEX" -x php72 -x php73 -x php74 --steps
+        ./vendor/bin/codecept run -g parallel_71_"$FUNCTIONAL_INDEX" --steps
         ;;
     7.2)
-        ./vendor/bin/codecept run -g parallel_"$FUNCTIONAL_INDEX" -x php71 -x php73 -x php74 --steps
+        ./vendor/bin/codecept run -g parallel_72_"$FUNCTIONAL_INDEX" --steps
         ;;
     7.3)
-        ./vendor/bin/codecept run -g parallel_"$FUNCTIONAL_INDEX" -x php71 -x php72 -x php74 --steps
+        ./vendor/bin/codecept run -g parallel_73_"$FUNCTIONAL_INDEX" --steps
         ;;
     7.4)
-        ./vendor/bin/codecept run -g parallel_"$FUNCTIONAL_INDEX" -x php71 -x php72 -x php73 --steps
+        ./vendor/bin/codecept run -g parallel_74_"$FUNCTIONAL_INDEX" --steps
         ;;
 esac
