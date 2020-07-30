@@ -19,7 +19,7 @@ fi
 
 cp codeception.dist.yml codeception.yml
 echo "groups:" >> codeception.yml
-echo "  parallel_*: tests/functional/_data/parallel_${php_version}_*" >> codeception.yml
+echo "  parallel_${php_version}_*: tests/functional/_data/parallel_${php_version}_*" >> codeception.yml
 
 if [ $php_version == "74" ]; then
   echo "Total = ${#test_set_list[@]};"
