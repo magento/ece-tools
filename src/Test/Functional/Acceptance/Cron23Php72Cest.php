@@ -13,11 +13,6 @@ namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 class Cron23Php72Cest extends CronCest
 {
     /**
-     * @var boolean
-     */
-    protected $removeEs = true;
-
-    /**
      * @return array
      */
     protected function cronDataProvider(): array

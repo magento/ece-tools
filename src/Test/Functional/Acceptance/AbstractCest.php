@@ -96,11 +96,25 @@ abstract class AbstractCest
     }
 
     /**
+     * Checks if we can remove ES configuration for tests.
+     *
+     * @return bool
+     */
+    protected function canESbeRemoved(): bool
+    {
+        if ($this->magentoCloudTemplate === 'master') {
+            return false;
+        }
+
+        return (bool)version_compare($this->magentoCloudTemplate, '2.4.0', '<');
+    }
+
+    /**
      * @param \CliTester $I
      */
     protected function removeESIfExists(\CliTester $I): void
     {
-        if ($this->removeEs) {
+        if ($this->removeEs && $this->canESbeRemoved()) {
             $services = $I->readServicesYaml();
 
             if (isset($services['elasticsearch'])) {

@@ -19,11 +19,6 @@ use Exception;
 class SplitDbWizard73Cest extends SplitDbWizardCest
 {
     /**
-     * @var boolean
-     */
-    protected $removeEs = true;
-
-    /**
      * @return array
      */
     protected function dataProviderMagentoCloudVersions(): array

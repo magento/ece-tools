@@ -18,11 +18,6 @@ namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 class ErrorCodes23Cest extends ErrorCodesCest
 {
     /**
-     * @var boolean
-     */
-    protected $removeEs = true;
-
-    /**
      * @var string
      */
     protected $magentoCloudTemplate = '2.3.5';

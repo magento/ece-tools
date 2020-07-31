@@ -15,11 +15,6 @@ namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 class ScdMatrixCest extends AbstractCest
 {
     /**
-     * @var boolean
-     */
-    protected $removeEs = false;
-
-    /**
      * @param \CliTester $I
      * @param \Codeception\Example $data
      * @throws \Robo\Exception\TaskException

@@ -13,11 +13,6 @@ namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 class AdminCredential23Php72Cest extends AdminCredentialCest
 {
     /**
-     * @var boolean
-     */
-    protected $removeEs = true;
-
-    /**
      * @var string
      */
     protected $magentoCloudTemplate = '2.3.2';

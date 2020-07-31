@@ -19,11 +19,6 @@ use Robo\Exception\TaskException;
 class BackupDbCest extends AbstractCest
 {
     /**
-     * @var boolean
-     */
-    protected $removeEs = false;
-
-    /**
      * @var array
      */
     private $expectedLogs = [

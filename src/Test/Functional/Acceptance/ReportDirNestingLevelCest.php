@@ -17,11 +17,6 @@ use Magento\MagentoCloud\Config\Stage\BuildInterface;
 class ReportDirNestingLevelCest extends AbstractCest
 {
     /**
-     * @var boolean
-     */
-    protected $removeEs = false;
-
-    /**
      * @var string
      */
     private $expectedPathLocalXml = '/app/pub/errors/local.xml';

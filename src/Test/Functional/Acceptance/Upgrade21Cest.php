@@ -13,11 +13,6 @@ namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 class Upgrade21Cest extends UpgradeCest
 {
     /**
-     * @var boolean
-     */
-    protected $removeEs = true;
-
-    /**
      * @return array
      */
     protected function testProvider(): array

@@ -15,11 +15,6 @@ namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 class CronCest extends AbstractCest
 {
     /**
-     * @var boolean
-     */
-    protected $removeEs = false;
-
-    /**
      * @inheritdoc
      */
     public function _before(\CliTester $I): void

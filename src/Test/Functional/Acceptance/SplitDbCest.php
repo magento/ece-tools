@@ -20,11 +20,6 @@ use Exception;
 class SplitDbCest extends AbstractCest
 {
     /**
-     * @var boolean
-     */
-    protected $removeEs = false;
-
-    /**
      * {@inheritDoc}
      * @param CliTester $I
      */

@@ -19,11 +19,6 @@ use Robo\Exception\TaskException;
 class BackupDb23Cest extends BackupDbCest
 {
     /**
-     * @var boolean
-     */
-    protected $removeEs = true;
-
-    /**
      * @return array
      */
     protected function dataProviderMagentoCloudVersions(): array

@@ -16,11 +16,6 @@ namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 class SessionConfigurationCest extends AbstractCest
 {
     /**
-     * @var boolean
-     */
-    protected $removeEs = false;
-
-    /**
      * @param \CliTester $I
      * @param \Codeception\Example $data
      * @throws \Robo\Exception\TaskException
