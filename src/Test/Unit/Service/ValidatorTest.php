@@ -175,7 +175,7 @@ class ValidatorTest extends TestCase
                     ServiceInterface::NAME_NGINX => '1.9',
                     ServiceInterface::NAME_VARNISH => '6.2',
                     ServiceInterface::NAME_REDIS => '5.0',
-                    ServiceInterface::NAME_ELASTICSEARCH => '7.4', // wrong
+                    ServiceInterface::NAME_ELASTICSEARCH => '7.5',
                     ServiceInterface::NAME_RABBITMQ => '3.8'
                 ],
                 0
