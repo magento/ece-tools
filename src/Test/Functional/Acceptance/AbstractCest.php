@@ -19,6 +19,11 @@ abstract class AbstractCest
     protected $removeEs = true;
 
     /**
+     * @var bool
+     */
+    protected $runComposerUpdate = true;
+
+    /**
      * @var string
      */
     protected $magentoCloudTemplate = 'master';
@@ -82,7 +87,11 @@ abstract class AbstractCest
             'magento/quality-patches',
             $I->getDependencyVersion('magento/quality-patches')
         );
-        $I->composerUpdate();
+
+        if($this->runComposerUpdate) {
+            $I->composerUpdate();
+        }
+
         $this->removeESIfExists($I);
     }
 

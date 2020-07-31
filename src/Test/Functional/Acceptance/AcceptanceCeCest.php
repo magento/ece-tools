@@ -24,6 +24,11 @@ class AcceptanceCeCest extends AbstractCest
      */
     protected $removeEs = false;
 
+    /**
+     * @var boolean
+     */
+    protected $runComposerUpdate = false;
+
     public function _before(\CliTester $I): void
     {
         parent::_before($I);
