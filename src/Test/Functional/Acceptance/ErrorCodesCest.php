@@ -89,12 +89,15 @@ class ErrorCodesCest extends AbstractCest
      * @param string $errorLog
      * @return array
      */
-    protected function getErrors(string $errorLog): array
+    private function getErrors(string $errorLog): array
     {
         $errors = [];
 
         foreach (explode("\n", $errorLog) as $errorLine) {
             $error = json_decode(trim($errorLine), true);
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                continue;
+            }
             $errors[$error['errorCode']] = $error;
         }
 

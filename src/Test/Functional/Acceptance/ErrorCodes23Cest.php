@@ -26,20 +26,4 @@ class ErrorCodes23Cest extends ErrorCodesCest
      * @var string
      */
     protected $magentoCloudTemplate = '2.3.5';
-
-    /**
-     * @param string $errorLog
-     * @return array
-     */
-    protected function getErrors(string $errorLog): array
-    {
-        $errors = [];
-
-        foreach (explode("\n", $errorLog) as $errorLine) {
-            $error = json_decode(trim($errorLine), true);
-            $errors[$error['errorCode']] = $error;
-        }
-
-        return $errors;
-    }
 }
