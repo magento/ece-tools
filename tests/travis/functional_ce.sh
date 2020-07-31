@@ -11,7 +11,7 @@ case $TRAVIS_PHP_VERSION in
         ./vendor/bin/codecept run -g edition-ce -x php72 -x php73 -x php74 --steps
         ;;
     7.2)
-        ./vendor/bin/codecept run -g edition-ce -x php71 -x php73 -x php74--steps
+        ./vendor/bin/codecept run -g edition-ce -x php71 -x php73 -x php74 --steps
         ;;
     7.3)
         ./vendor/bin/codecept run -g edition-ce -x php72 -x php71 -x php74 --steps
