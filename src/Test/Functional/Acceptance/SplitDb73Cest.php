@@ -20,6 +20,11 @@ use Exception;
 class SplitDb73Cest extends SplitDbCest
 {
     /**
+     * @var boolean
+     */
+    protected $removeEs = true;
+
+    /**
      * @return array
      */
     protected function dataProviderMagentoCloudVersions(): array

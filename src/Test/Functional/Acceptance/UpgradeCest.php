@@ -15,6 +15,11 @@ namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 class UpgradeCest extends AbstractCest
 {
     /**
+     * @var boolean
+     */
+    protected $removeEs = false;
+
+    /**
      * @param \CliTester $I
      */
     public function _before(\CliTester $I): void

@@ -20,6 +20,11 @@ use CliTester;
 class AcceptanceCe72Cest extends AcceptanceCeCest
 {
     /**
+     * @var boolean
+     */
+    protected $removeEs = true;
+
+    /**
      * @var string
      */
     protected $magentoCloudTemplate = '2.3.2';
