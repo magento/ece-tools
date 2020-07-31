@@ -19,7 +19,7 @@ abstract class AbstractCest
     protected $removeEs = true;
 
     /**
-     * @var bool
+     * @var boolean
      */
     protected $runComposerUpdate = true;
 
@@ -88,7 +88,7 @@ abstract class AbstractCest
             $I->getDependencyVersion('magento/quality-patches')
         );
 
-        if($this->runComposerUpdate) {
+        if ($this->runComposerUpdate) {
             $I->composerUpdate();
         }
 
