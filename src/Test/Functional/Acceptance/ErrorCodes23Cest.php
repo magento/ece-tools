@@ -7,8 +7,6 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 
-use Magento\MagentoCloud\App\Error;
-
 /**
  * This test cover functionality of state-aware error codes.
  * Checks that failed scenario returns correct error code different to 1 or 255.
