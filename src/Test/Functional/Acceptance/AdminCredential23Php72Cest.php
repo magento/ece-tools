@@ -8,7 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 
 /**
- * @group php73
+ * @group php72
  */
 class AdminCredential23Php72Cest extends AdminCredentialCest
 {
