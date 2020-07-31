@@ -89,7 +89,7 @@ class ErrorCodesCest extends AbstractCest
      * @param string $errorLog
      * @return array
      */
-    private function getErrors(string $errorLog): array
+    protected function getErrors(string $errorLog): array
     {
         $errors = [];
 
