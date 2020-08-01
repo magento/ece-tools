@@ -12,55 +12,12 @@ namespace Magento\MagentoCloud\Test\Functional\Acceptance;
  *
  * @group php73
  */
-class UpgradeCest extends AbstractCest
+class UpgradeCest extends Upgrade21Cest
 {
     /**
      * @var boolean
      */
     protected $removeEs = false;
-
-    /**
-     * @param \CliTester $I
-     */
-    public function _before(\CliTester $I): void
-    {
-        // Do nothing...
-    }
-
-    /**
-     * @param \CliTester $I
-     * @param \Codeception\Example $data
-     * @throws \Robo\Exception\TaskException
-     * @dataProvider testProvider
-     */
-    public function test(\CliTester $I, \Codeception\Example $data): void
-    {
-        $this->prepareWorkplace($I, $data['from']);
-        $I->runEceDockerCommand('build:compose --mode=production');
-        $this->assert($I);
-        $I->assertTrue($I->cleanDirectories(['/vendor/*', '/setup/*']));
-        $I->stopEnvironment(true);
-        $I->addDependencyToComposer('magento/magento-cloud-metapackage', $data['to']);
-        $I->composerUpdate();
-        $this->assert($I);
-    }
-
-    /**
-     * @param \CliTester $I
-     * @throws \Robo\Exception\TaskException
-     */
-    protected function assert(\CliTester $I): void
-    {
-
-        $I->runDockerComposeCommand('run build cloud-build');
-        $I->startEnvironment();
-        $I->runDockerComposeCommand('run deploy cloud-deploy');
-        $I->runDockerComposeCommand('run deploy cloud-post-deploy');
-
-        $I->amOnPage('/');
-        $I->see('Home page');
-        $I->see('CMS homepage content goes here.');
-    }
 
     /**
      * @return array

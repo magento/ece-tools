@@ -17,11 +17,6 @@ use Magento\CloudDocker\Test\Functional\Codeception\Docker;
 class Redis73Cest extends RedisCest
 {
     /**
-     * @var boolean
-     */
-    protected $removeEs = true;
-
-    /**
      * @return array
      */
     protected function defaultConfigurationDataProvider(): array
