@@ -98,23 +98,25 @@ abstract class AbstractCest
     /**
      * Checks if we can remove ES configuration for tests.
      *
+     * @param string $templateVersion
      * @return bool
      */
-    protected function canESbeRemoved(): bool
+    protected function canESbeRemoved(string $templateVersion): bool
     {
-        if ($this->magentoCloudTemplate === 'master') {
+        if ($templateVersion === 'master') {
             return false;
         }
 
-        return (bool)version_compare($this->magentoCloudTemplate, '2.4.0', '<');
+        return (bool)version_compare($templateVersion, '2.4.0', '<');
     }
 
     /**
      * @param \CliTester $I
+     * @param string $templateVersion
      */
-    protected function removeESIfExists(\CliTester $I): void
+    protected function removeESIfExists(\CliTester $I, string $templateVersion): void
     {
-        if ($this->removeEs && $this->canESbeRemoved()) {
+        if ($this->removeEs && $this->canESbeRemoved($templateVersion)) {
             $services = $I->readServicesYaml();
 
             if (isset($services['elasticsearch'])) {
