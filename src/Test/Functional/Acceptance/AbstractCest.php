@@ -56,12 +56,12 @@ abstract class AbstractCest
 
     /**
      * @param \CliTester $I
-     * @param string $version
+     * @param string $templateVersion
      */
-    protected function prepareWorkplace(\CliTester $I, string $version): void
+    protected function prepareWorkplace(\CliTester $I, string $templateVersion): void
     {
         $I->cleanupWorkDir();
-        $I->cloneTemplateToWorkDir($version);
+        $I->cloneTemplateToWorkDir($templateVersion);
         $I->createAuthJson();
         $I->createArtifactsDir();
         $I->createArtifactCurrentTestedCode('ece-tools', '2002.1.99');
@@ -92,7 +92,7 @@ abstract class AbstractCest
             $I->composerUpdate();
         }
 
-        $this->removeESIfExists($I);
+        $this->removeESIfExists($I, $templateVersion);
     }
 
     /**
