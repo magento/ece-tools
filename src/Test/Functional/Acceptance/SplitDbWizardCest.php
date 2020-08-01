@@ -13,6 +13,8 @@ use Exception;
 
 /**
  *  Checks split database wizard functionality
+ *
+ * @group php74
  */
 class SplitDbWizardCest extends AbstractCest
 {
@@ -99,7 +101,6 @@ class SplitDbWizardCest extends AbstractCest
     {
         return [
             ['version' => 'master'],
-            ['version' => '2.3.4'],
         ];
     }
 

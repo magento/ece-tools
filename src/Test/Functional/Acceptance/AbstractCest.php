@@ -19,6 +19,11 @@ abstract class AbstractCest
     protected $removeEs = true;
 
     /**
+     * @var boolean
+     */
+    protected $runComposerUpdate = true;
+
+    /**
      * @var string
      */
     protected $magentoCloudTemplate = 'master';
@@ -51,12 +56,12 @@ abstract class AbstractCest
 
     /**
      * @param \CliTester $I
-     * @param string $version
+     * @param string $templateVersion
      */
-    protected function prepareWorkplace(\CliTester $I, string $version): void
+    protected function prepareWorkplace(\CliTester $I, string $templateVersion): void
     {
         $I->cleanupWorkDir();
-        $I->cloneTemplateToWorkDir($version);
+        $I->cloneTemplateToWorkDir($templateVersion);
         $I->createAuthJson();
         $I->createArtifactsDir();
         $I->createArtifactCurrentTestedCode('ece-tools', '2002.1.99');
@@ -65,6 +70,7 @@ abstract class AbstractCest
         $I->addEceDockerGitRepoToComposer();
         $I->addCloudComponentsGitRepoToComposer();
         $I->addCloudPatchesGitRepoToComposer();
+        $I->addQualityPatchesGitRepoToComposer();
         $I->addDependencyToComposer(
             'magento/magento-cloud-docker',
             $I->getDependencyVersion('magento/magento-cloud-docker')
@@ -77,16 +83,40 @@ abstract class AbstractCest
             'magento/magento-cloud-patches',
             $I->getDependencyVersion('magento/magento-cloud-patches')
         );
-        $I->composerUpdate();
-        $this->removeESIfExists($I);
+        $I->addDependencyToComposer(
+            'magento/quality-patches',
+            $I->getDependencyVersion('magento/quality-patches')
+        );
+
+        if ($this->runComposerUpdate) {
+            $I->composerUpdate();
+        }
+
+        $this->removeESIfExists($I, $templateVersion);
+    }
+
+    /**
+     * Checks if we can remove ES configuration for tests.
+     *
+     * @param string $templateVersion
+     * @return bool
+     */
+    protected function canESbeRemoved(string $templateVersion): bool
+    {
+        if ($templateVersion === 'master') {
+            return false;
+        }
+
+        return (bool)version_compare($templateVersion, '2.4.0', '<');
     }
 
     /**
      * @param \CliTester $I
+     * @param string $templateVersion
      */
-    protected function removeESIfExists(\CliTester $I): void
+    protected function removeESIfExists(\CliTester $I, string $templateVersion): void
     {
-        if ($this->removeEs) {
+        if ($this->removeEs && $this->canESbeRemoved($templateVersion)) {
             $services = $I->readServicesYaml();
 
             if (isset($services['elasticsearch'])) {

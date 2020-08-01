@@ -10,15 +10,10 @@ namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 /**
  * @group php71
  */
-class Upgrade22Cest extends Upgrade21Cest
+class AdminCredential22Cest extends AdminCredentialCest
 {
     /**
-     * @return array
+     * @var string
      */
-    protected function testProvider(): array
-    {
-        return [
-            ['from' => '2.2.0', 'to' => '2.2.*']
-        ];
-    }
+    protected $magentoCloudTemplate = '2.2.11';
 }

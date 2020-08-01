@@ -9,9 +9,15 @@ namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 
 /**
  * This test runs on the latest version of PHP
+ *
+ * @group php74
  */
 class WizardScdCest extends AbstractCest
 {
+    /**
+     * @param \CliTester $I
+     * @throws \Robo\Exception\TaskException
+     */
     public function _before(\CliTester $I): void
     {
         parent::_before($I);

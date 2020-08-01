@@ -7,25 +7,25 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 
+use CliTester;
+use Codeception\Example;
+use Exception;
+
 /**
- * This test runs on the latest version of PHP
+ *  Checks split database wizard functionality
  *
  * @group php73
  */
-class UpgradeCest extends Upgrade21Cest
+class SplitDbWizard73Cest extends SplitDbWizardCest
 {
-    /**
-     * @var boolean
-     */
-    protected $removeEs = false;
-
     /**
      * @return array
      */
-    protected function testProvider(): array
+    protected function dataProviderMagentoCloudVersions(): array
     {
         return [
-            ['from' => '2.3.5', 'to' => '>=2.4.0 <2.4.1'],
+            ['version' => '2.3.4'],
+            ['version' => '2.3.5'],
         ];
     }
 }
