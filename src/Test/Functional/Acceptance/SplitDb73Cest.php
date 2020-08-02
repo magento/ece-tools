@@ -7,25 +7,25 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 
+use CliTester;
+use Codeception\Example;
+use Magento\CloudDocker\Test\Functional\Codeception\Docker;
+use Exception;
+
 /**
- * This test runs on the latest version of PHP
+ * Checks split database functionality
  *
  * @group php73
  */
-class UpgradeCest extends Upgrade21Cest
+class SplitDb73Cest extends SplitDbCest
 {
-    /**
-     * @var boolean
-     */
-    protected $removeEs = false;
-
     /**
      * @return array
      */
-    protected function testProvider(): array
+    protected function dataProviderMagentoCloudVersions(): array
     {
         return [
-            ['from' => '2.3.5', 'to' => '>=2.4.0 <2.4.1'],
+            ['version' => '2.3.4'],
         ];
     }
 }

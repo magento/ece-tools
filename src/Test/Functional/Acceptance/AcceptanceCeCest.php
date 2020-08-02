@@ -14,16 +14,25 @@ use CliTester;
 /**
  * @inheritDoc
  *
+ * @group php74
  * @group edition-ce
  */
 class AcceptanceCeCest extends AbstractCest
 {
+    /**
+     * @var boolean
+     */
+    protected $runComposerUpdate = false;
+
     public function _before(\CliTester $I): void
     {
         parent::_before($I);
 
         $I->removeDependencyFromComposer('magento/magento-cloud-metapackage');
-        $I->addDependencyToComposer('magento/product-community-edition', '@stable');
+        $I->addDependencyToComposer(
+            'magento/product-community-edition',
+            $this->magentoCloudTemplate === 'master' ? '@stable' : $this->magentoCloudTemplate
+        );
         $I->composerUpdate();
     }
 

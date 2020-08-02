@@ -11,6 +11,8 @@ use Magento\MagentoCloud\Config\Stage\BuildInterface;
 
 /**
  * This test runs on the latest version of PHP
+ *
+ * @group php74
  */
 class ReportDirNestingLevelCest extends AbstractCest
 {
