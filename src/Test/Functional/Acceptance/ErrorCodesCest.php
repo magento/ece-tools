@@ -14,6 +14,8 @@ use Magento\MagentoCloud\App\Error;
  * Checks that failed scenario returns correct error code different to 1 or 255.
  * Checks that var/log/cloud.error.log file was created and contains correct data.
  * Checks that `ece-tools error:show` command returns correct errors info
+ *
+ * @group php74
  */
 class ErrorCodesCest extends AbstractCest
 {
@@ -41,13 +43,11 @@ class ErrorCodesCest extends AbstractCest
 
         $I->assertArrayHasKey(Error::WARN_MISSED_MODULE_SECTION, $errors);
         $I->assertArrayHasKey(Error::WARN_CONFIGURATION_STATE_NOT_IDEAL, $errors);
-        $I->assertArrayHasKey(Error::WARN_DEPRECATED_MYSQL_SEARCH_ENGINE, $errors);
         $I->assertArrayHasKey(Error::DEPLOY_WRONG_CONFIGURATION_DB, $errors);
 
         $I->runDockerComposeCommand('run deploy ece-command error:show');
         $I->seeInOutput('errorCode: ' . Error::WARN_MISSED_MODULE_SECTION);
         $I->seeInOutput('errorCode: ' . Error::WARN_CONFIGURATION_STATE_NOT_IDEAL);
-        $I->seeInOutput('errorCode: ' . Error::WARN_DEPRECATED_MYSQL_SEARCH_ENGINE);
         $I->seeInOutput('errorCode: ' . Error::DEPLOY_WRONG_CONFIGURATION_DB);
         $I->seeInOutput('type: critical');
     }
@@ -90,6 +90,9 @@ class ErrorCodesCest extends AbstractCest
 
         foreach (explode("\n", $errorLog) as $errorLine) {
             $error = json_decode(trim($errorLine), true);
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                continue;
+            }
             $errors[$error['errorCode']] = $error;
         }
 

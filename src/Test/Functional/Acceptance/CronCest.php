@@ -9,6 +9,8 @@ namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 
 /**
  * This test runs on the latest version of PHP
+ *
+ * @group php74
  */
 class CronCest extends AbstractCest
 {
@@ -132,16 +134,7 @@ class CronCest extends AbstractCest
     {
         return [
             [
-                'version' => '2.3.4',
-                'variables' => [
-                    'MAGENTO_CLOUD_VARIABLES' => [
-                        'ADMIN_EMAIL' => 'admin@example.com',
-                        'ADMIN_LOCALE' => 'fr_FR'
-                    ],
-                ],
-            ],
-            [
-                'version' => '2.3.3',
+                'version' => '2.4.0',
                 'variables' => [
                     'MAGENTO_CLOUD_VARIABLES' => [
                         'ADMIN_EMAIL' => 'admin@example.com',
