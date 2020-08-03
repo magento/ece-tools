@@ -7,7 +7,8 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate;
 
-use Magento\MagentoCloud\App\GenericException;
+use Magento\MagentoCloud\App\Error;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
 use Psr\Log\LoggerInterface;
@@ -48,8 +49,8 @@ class DocumentRoot implements StepInterface
         try {
             $this->logger->info('The value of the property \'directories/document_root_is_pub\' set as \'true\'');
             $this->configWriter->update(['directories' => ['document_root_is_pub' => true]]);
-        } catch (GenericException $e) {
-            throw new StepException($e->getMessage(), $e->getCode(), $e);
+        } catch (FileSystemException $e) {
+            throw new StepException($e->getMessage(), Error::DEPLOY_ENV_PHP_IS_NOT_WRITABLE, $e);
         }
     }
 }

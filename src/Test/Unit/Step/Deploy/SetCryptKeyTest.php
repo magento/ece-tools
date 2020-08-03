@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Step\Deploy;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface as ConfigReader;
 use Magento\MagentoCloud\Config\Magento\Env\WriterInterface as ConfigWriter;
 use Magento\MagentoCloud\Config\Environment;
@@ -95,8 +96,12 @@ class SetCryptKeyTest extends TestCase
      */
     public function testConfigUpdateWithError(): void
     {
+        $errorMsg = 'Some error';
+        $errorCode = 11111;
+        $exception = new FileSystemException($errorMsg, $errorCode);
         $this->expectException(StepException::class);
-        $this->expectExceptionMessage('Some error');
+        $this->expectExceptionCode(Error::DEPLOY_ENV_PHP_IS_NOT_WRITABLE);
+        $this->expectExceptionMessage($errorMsg);
 
         $this->configReaderMock->expects($this->once())
             ->method('read')
@@ -113,7 +118,7 @@ class SetCryptKeyTest extends TestCase
         $this->configWriterMock->expects($this->once())
             ->method('update')
             ->with(['crypt' => ['key' => 'TWFnZW50byBSb3g=']])
-            ->willThrowException(new FileSystemException('Some error'));
+            ->willThrowException($exception);
 
         $this->step->execute();
     }

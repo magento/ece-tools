@@ -7,7 +7,8 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Step\Deploy\InstallUpdate\ConfigUpdate;
 
-use Magento\MagentoCloud\App\GenericException;
+use Magento\MagentoCloud\App\Error;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\DocumentRoot;
 use Magento\MagentoCloud\Step\StepException;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -74,14 +75,14 @@ class DocumentRootTest extends TestCase
 
         $this->expectException(StepException::class);
         $this->expectExceptionMessage($exceptionMsg);
-        $this->expectExceptionCode($exceptionCode);
+        $this->expectExceptionCode(Error::DEPLOY_ENV_PHP_IS_NOT_WRITABLE);
 
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('The value of the property \'directories/document_root_is_pub\' set as \'true\'');
         $this->configWriterMock->expects($this->once())
             ->method('update')
-            ->willThrowException(new GenericException($exceptionMsg, $exceptionCode));
+            ->willThrowException(new FileSystemException($exceptionMsg, $exceptionCode));
 
         $this->step->execute();
     }

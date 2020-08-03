@@ -7,12 +7,14 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface as ConfigReader;
 use Magento\MagentoCloud\Config\Magento\Env\WriterInterface as ConfigWriter;
 use Magento\MagentoCloud\Config\RepositoryFactory;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
@@ -111,10 +113,14 @@ class CronConsumersRunner implements StepInterface
                 'max_messages' => $runnerConfig->get('max_messages', static::DEFAULT_MAX_MESSAGES),
                 'consumers' => $runnerConfig->get('consumers', []),
             ];
-
-            $this->configWriter->create($config);
         } catch (GenericException $e) {
             throw new StepException($e->getMessage(), $e->getCode(), $e);
+        }
+
+        try {
+            $this->configWriter->create($config);
+        } catch (FileSystemException $e) {
+            throw new StepException($e->getMessage(), Error::DEPLOY_ENV_PHP_IS_NOT_WRITABLE, $e);
         }
     }
 }

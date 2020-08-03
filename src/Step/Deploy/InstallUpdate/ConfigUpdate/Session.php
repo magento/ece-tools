@@ -7,7 +7,9 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\App\GenericException;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\Session\Config;
 use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
@@ -76,10 +78,14 @@ class Session implements StepInterface
                 $this->logger->info('Removing session configuration from env.php.');
                 $config['session'] = ['save' => 'db'];
             }
-
-            $this->configWriter->create($config);
         } catch (GenericException $e) {
             throw new StepException($e->getMessage(), $e->getCode(), $e);
+        }
+
+        try {
+            $this->configWriter->create($config);
+        } catch (FileSystemException $e) {
+            throw new StepException($e->getMessage(), Error::DEPLOY_ENV_PHP_IS_NOT_WRITABLE, $e);
         }
     }
 }
