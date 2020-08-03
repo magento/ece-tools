@@ -79,7 +79,7 @@ class Cache implements StepInterface
 
             if (isset($cacheConfig['frontend'])) {
                 $cacheConfig['frontend'] = array_filter($cacheConfig['frontend'], function ($cacheFrontend) {
-                    $backend = stripslashes($cacheFrontend['backend']);
+                    $backend = $cacheFrontend['backend'];
                     $this->checkBackendModel($backend);
 
                     if (!in_array($backend, CacheFactory::AVAILABLE_REDIS_BACKEND, true)) {
@@ -128,7 +128,7 @@ class Cache implements StepInterface
         ];
 
         try {
-            if (in_array($backend, $notAllowedBackend, true) && !$this->magentoVersion->isGreaterOrEqual('2.3.5')) {
+            if (in_array($backend, $notAllowedBackend, true) && !$this->magentoVersion->isGreaterOrEqual('2.3.0')) {
                 throw new StepException(
                     sprintf(
                         'Magento version \'%s\' does not support Redis backend model \'%s\'',

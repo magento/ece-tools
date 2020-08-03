@@ -64,7 +64,7 @@ class CleanRedisCache implements StepInterface
         }
 
         foreach ($cacheConfigs['frontend'] as $cacheType => $cacheConfig) {
-            $backend = stripslashes($cacheConfig['backend']);
+            $backend = $cacheConfig['backend'];
 
             if (!in_array($backend, CacheConfig::AVAILABLE_REDIS_BACKEND, true)) {
                 continue;

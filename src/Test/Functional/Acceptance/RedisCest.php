@@ -109,7 +109,7 @@ class RedisCest extends AbstractCest
      * @param \CliTester $I
      * @param \Codeception\Example $data
      * @throws \Robo\Exception\TaskException
-     * @dataProvider wrongConfigurationData
+     * @dataProvider wrongConfigurationDataProvider
      */
     public function testWrongConfiguration(\CliTester $I, \Codeception\Example $data): void
     {
@@ -131,7 +131,7 @@ class RedisCest extends AbstractCest
     /**
      * @return array
      */
-    protected function wrongConfigurationData(): array
+    protected function wrongConfigurationDataProvider(): array
     {
         return [
             [
@@ -208,7 +208,7 @@ class RedisCest extends AbstractCest
                         ],
                     ],
                 ],
-                'expectedBackend' => '\\\Magento\\\Framework\\\Cache\\\Backend\\\Redis',
+                'expectedBackend' => '\Magento\Framework\Cache\Backend\Redis',
                 'expectedConfig' => [
                     'backend_options' => [
                         'server' => 'redis',
@@ -226,10 +226,10 @@ class RedisCest extends AbstractCest
                         ],
                     ],
                 ],
-                'expectedBackend' => '\\\Magento\\\Framework\\\Cache\\\Backend\\\RemoteSynchronizedCache',
+                'expectedBackend' => '\Magento\Framework\Cache\Backend\RemoteSynchronizedCache',
                 'expectedConfig' => [
                     'backend_options' => [
-                        'remote_backend' => '\\\Magento\\\Framework\\\Cache\\\Backend\\\Redis',
+                        'remote_backend' => '\Magento\Framework\Cache\Backend\Redis',
                         'remote_backend_options' => [
                             'persistent' => 0,
                             'server' => 'redis',

@@ -7,14 +7,12 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 
-use Magento\CloudDocker\Test\Functional\Codeception\Docker;
-
 /**
  * Checks Redis configuration
  *
  * @group php73
  */
-class Redis73Cest extends RedisCest
+class RedisPhp73Cest extends RedisCest
 {
     /**
      * @return array
@@ -104,7 +102,7 @@ class Redis73Cest extends RedisCest
                         ],
                     ],
                 ],
-                'expectedBackend' => '\\\Magento\\\Framework\\\Cache\\\Backend\\\Redis',
+                'expectedBackend' => '\Magento\Framework\Cache\Backend\Redis',
                 'expectedConfig' => [
                     'backend_options' => [
                         'server' => 'redis',
@@ -122,10 +120,10 @@ class Redis73Cest extends RedisCest
                         ],
                     ],
                 ],
-                'expectedBackend' => '\\\Magento\\\Framework\\\Cache\\\Backend\\\RemoteSynchronizedCache',
+                'expectedBackend' => '\Magento\Framework\Cache\Backend\RemoteSynchronizedCache',
                 'expectedConfig' => [
                     'backend_options' => [
-                        'remote_backend' => '\\\Magento\\\Framework\\\Cache\\\Backend\\\Redis',
+                        'remote_backend' => '\Magento\Framework\Cache\Backend\Redis',
                         'remote_backend_options' => [
                             'persistent' => 0,
                             'server' => 'redis',
