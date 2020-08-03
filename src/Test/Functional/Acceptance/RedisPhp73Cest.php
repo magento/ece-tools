@@ -7,14 +7,12 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 
-use Magento\CloudDocker\Test\Functional\Codeception\Docker;
-
 /**
  * Checks Redis configuration
  *
  * @group php73
  */
-class Redis73Cest extends RedisCest
+class RedisPhp73Cest extends RedisCest
 {
     /**
      * @return array
