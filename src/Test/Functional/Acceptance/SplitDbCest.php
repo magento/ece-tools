@@ -14,6 +14,8 @@ use Exception;
 
 /**
  * Checks split database functionality
+ *
+ * @group php74
  */
 class SplitDbCest extends AbstractCest
 {
@@ -103,7 +105,6 @@ class SplitDbCest extends AbstractCest
     {
         return [
             ['version' => 'master'],
-            ['version' => '2.3.4'],
         ];
     }
 

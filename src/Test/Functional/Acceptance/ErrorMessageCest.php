@@ -11,6 +11,8 @@ use CliTester;
 
 /**
  * This test runs on the latest version of PHP
+ *
+ * @group php74
  */
 class ErrorMessageCest extends AbstractCest
 {

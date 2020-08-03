@@ -11,14 +11,11 @@ use Magento\CloudDocker\Test\Functional\Codeception\Docker;
 
 /**
  * This test runs on the latest version of PHP
+ *
+ * @group php74
  */
 class ElasticSearchCest extends AbstractCest
 {
-    /**
-     * @var boolean
-     */
-    protected $removeEs = false;
-
     /**
      * @param \CliTester $I
      */
@@ -115,12 +112,7 @@ class ElasticSearchCest extends AbstractCest
     {
         return [
             [
-                'magento' => '2.3.4',
-                'removeES' => true,
-                'expectedResult' => ['engine' => 'mysql'],
-            ],
-            [
-                'magento' => '2.3.4',
+                'magento' => 'master',
                 'removeES' => false,
                 'expectedResult' => [
                     'engine' => 'elasticsearch6',

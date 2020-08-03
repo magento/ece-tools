@@ -8,9 +8,9 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 
 /**
- * @group php71
+ * @group php73
  */
-class ElasticSearch22Cest extends ElasticSearchCest
+class ElasticSearch23Php73Cest extends ElasticSearchCest
 {
     /**
      * @return array
@@ -19,17 +19,17 @@ class ElasticSearch22Cest extends ElasticSearchCest
     {
         return [
             [
-                'magento' => '2.2.8',
+                'magento' => '2.3.4',
                 'removeES' => true,
                 'expectedResult' => ['engine' => 'mysql'],
             ],
             [
-                'magento' => '2.2.8',
+                'magento' => '2.3.4',
                 'removeES' => false,
                 'expectedResult' => [
                     'engine' => 'elasticsearch6',
-                    'elasticsearch_server_hostname' => 'elasticsearch',
-                    'elasticsearch_server_port' => '9200'
+                    'elasticsearch6_server_hostname' => 'elasticsearch',
+                    'elasticsearch6_server_port' => '9200'
                 ],
             ],
         ];

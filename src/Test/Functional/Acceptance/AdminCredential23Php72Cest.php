@@ -8,17 +8,12 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 
 /**
- * @group php71
+ * @group php72
  */
-class Upgrade22Cest extends Upgrade21Cest
+class AdminCredential23Php72Cest extends AdminCredentialCest
 {
     /**
-     * @return array
+     * @var string
      */
-    protected function testProvider(): array
-    {
-        return [
-            ['from' => '2.2.0', 'to' => '2.2.*']
-        ];
-    }
+    protected $magentoCloudTemplate = '2.3.2';
 }

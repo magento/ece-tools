@@ -15,17 +15,16 @@ php:
   - '7.1'
   - '7.2'
   - '7.3'
+  - '7.4'
 
 env:
   - TEST_SUITE=functional-ce
-  - TEST_SUITE=functional-ee
   - TEST_SUITE=functional-ee FUNCTIONAL_INDEX=1
   - TEST_SUITE=functional-ee FUNCTIONAL_INDEX=2
   - TEST_SUITE=functional-ee FUNCTIONAL_INDEX=3
   - TEST_SUITE=functional-ee FUNCTIONAL_INDEX=4
   - TEST_SUITE=functional-ee FUNCTIONAL_INDEX=5
   - TEST_SUITE=functional-ee FUNCTIONAL_INDEX=6
-  - TEST_SUITE=functional-ee FUNCTIONAL_INDEX=7
 
 stages:
   - test
@@ -33,25 +32,15 @@ stages:
 jobs:
   exclude:
     - php: '7.1'
-      env: TEST_SUITE=functional-ee FUNCTIONAL_INDEX=1
-    - php: '7.1'
-      env: TEST_SUITE=functional-ee FUNCTIONAL_INDEX=2
-    - php: '7.1'
-      env: TEST_SUITE=functional-ee FUNCTIONAL_INDEX=3
-    - php: '7.1'
-      env: TEST_SUITE=functional-ee FUNCTIONAL_INDEX=4
-    - php: '7.1'
-      env: TEST_SUITE=functional-ee FUNCTIONAL_INDEX=5
-    - php: '7.1'
-      env: TEST_SUITE=functional-ee FUNCTIONAL_INDEX=6
-    - php: '7.1'
-      env: TEST_SUITE=functional-ee FUNCTIONAL_INDEX=7
-
+      env: TEST_SUITE=functional-ee
 
     - php: '7.2'
       env: TEST_SUITE=functional-ee
 
     - php: '7.3'
+      env: TEST_SUITE=functional-ee
+
+    - php: '7.4'
       env: TEST_SUITE=functional-ee
 
 install:

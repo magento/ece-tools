@@ -14,6 +14,7 @@ use Robo\Exception\TaskException;
 
 /**
  * Checks database backup functionality
+ * @group php74
  */
 class BackupDbCest extends AbstractCest
 {
@@ -71,7 +72,6 @@ class BackupDbCest extends AbstractCest
     {
         return [
             ['version' => 'master'],
-            ['version' => '2.3.4'],
         ];
     }
 
