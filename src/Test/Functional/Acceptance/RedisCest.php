@@ -226,7 +226,7 @@ class RedisCest extends AbstractCest
                         ],
                     ],
                 ],
-                'expectedBackend' => '\\\Magento\\\Framework\\\Cache\Backend\RemoteSynchronizedCache',
+                'expectedBackend' => '\Magento\Framework\Cache\Backend\RemoteSynchronizedCache',
                 'expectedConfig' => [
                     'backend_options' => [
                         'remote_backend' => '\Magento\Framework\Cache\Backend\Redis',
