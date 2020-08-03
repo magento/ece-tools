@@ -100,7 +100,7 @@ class CopyStrategyTest extends TestCase
     public function testCopyFromDirNotExists(): void
     {
         $this->expectException(FileSystemException::class);
-        $this->expectExceptionMessage('Can\'t copy directory fromDir. Directory does not exist.');
+        $this->expectExceptionMessage('Cannot copy directory fromDir. Directory does not exist.');
 
         $this->fileMock->expects($this->once())
             ->method('isExists')

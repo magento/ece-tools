@@ -90,7 +90,7 @@ class SubSymlinkStrategyTest extends TestCase
     public function testCopyFromDirNotExists(): void
     {
         $this->expectException(FileSystemException::class);
-        $this->expectExceptionMessage('Can\'t copy directory "realFromDir". Directory does not exist.');
+        $this->expectExceptionMessage('Cannot copy directory "realFromDir". Directory does not exist.');
         $this->fileMock->expects($this->once())
             ->method('isExists')
             ->with('realFromDir')

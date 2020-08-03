@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Step\Deploy;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface as ConfigReader;
 use Magento\MagentoCloud\Config\Magento\Env\WriterInterface as ConfigWriter;
 use Magento\MagentoCloud\Config\Environment;
@@ -85,7 +86,7 @@ class SetCryptKey implements StepInterface
         try {
             $this->configWriter->update($config);
         } catch (FileSystemException $exception) {
-            throw new StepException($exception->getMessage(), $exception->getCode(), $exception);
+            throw new StepException($exception->getMessage(), Error::DEPLOY_ENV_PHP_IS_NOT_WRITABLE, $exception);
         }
     }
 }

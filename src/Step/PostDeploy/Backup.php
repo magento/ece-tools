@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Step\PostDeploy;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
@@ -65,8 +66,15 @@ class Backup implements StepInterface
                 }
 
                 $backup = $file . BackupList::BACKUP_SUFFIX;
-                $this->file->copy($file, $backup);
-                $this->logger->info(sprintf('Backup %s for %s was created.', $backup, $file));
+                $result = $this->file->copy($file, $backup);
+                if (!$result) {
+                    $this->logger->warning(
+                        sprintf('Failed to create backup %s for %s.', $backup, $file),
+                        ['errorCode' => Error::WARN_CREATE_CONFIG_BACKUP_FAILED]
+                    );
+                } else {
+                    $this->logger->info(sprintf('Successfully created backup %s for %s.', $backup, $file));
+                }
             }
         } catch (GenericException $e) {
             throw new StepException($e->getMessage(), $e->getCode(), $e);
