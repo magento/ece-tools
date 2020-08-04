@@ -166,7 +166,7 @@ class ProcessorTest extends TestCase
                 ['On fail action "on-fail" finished']
             );
         $this->loggerMock->method('error')
-            ->withConsecutive(['[201] Some error']);
+            ->withConsecutive(['Some error']);
 
         $this->processor->execute($scenarios);
     }
@@ -178,7 +178,7 @@ class ProcessorTest extends TestCase
     public function testExecuteWithStepAndActionException(): void
     {
         $this->expectException(ProcessorException::class);
-        $this->expectExceptionMessage('[11] Step error');
+        $this->expectExceptionMessage('Step error');
         $this->expectExceptionCode(11);
 
         $scenarios = [
@@ -224,7 +224,7 @@ class ProcessorTest extends TestCase
         $this->loggerMock->method('error')
             ->withConsecutive(
                 ['Action error'],
-                ['[11] Step error']
+                ['Step error']
             );
 
         $this->processor->execute($scenarios);
@@ -237,33 +237,18 @@ class ProcessorTest extends TestCase
     public function testExecuteWithRuntimeException(): void
     {
         $this->expectException(ProcessorException::class);
-        $this->expectExceptionMessage('Unhandled error: [10] Some error');
+        $this->expectExceptionMessage('Unhandled error: Some error');
 
         $scenarios = [
             'some/scenario.xml'
         ];
-
-        $step1 = $this->getMockForAbstractClass(StepInterface::class);
-
-        $step1->expects($this->once())
-            ->method('execute')
-            ->willThrowException(new \RuntimeException('Some error', 10));
-
-        $steps = [
-            'step1' => $step1
-        ];
-
-        $action = $this->getMockForAbstractClass(ActionInterface::class);
-        $action->expects($this->never())
-            ->method('execute');
 
         $this->packageManagerMock->expects($this->once())
             ->method('getPrettyInfo')
             ->willReturn('1.0.0');
         $this->mergerMock->expects($this->once())
             ->method('merge')
-            ->with($scenarios)
-            ->willReturn(['steps' => $steps, 'actions' => ['on-fail' => $action]]);
+            ->willThrowException(new \RuntimeException('Some error', 10));
         $this->loggerMock->method('info')
             ->withConsecutive(
                 [
@@ -273,12 +258,19 @@ class ProcessorTest extends TestCase
                     )
                 ]
             );
-        $this->loggerMock->method('debug')
-            ->withConsecutive(
-                ['Running step: step1']
-            );
+
+        $step1 = $this->getMockForAbstractClass(StepInterface::class);
+        $step1->expects($this->never())
+            ->method('execute');
+
+        $action = $this->getMockForAbstractClass(ActionInterface::class);
+        $action->expects($this->never())
+            ->method('execute');
+
+        $this->loggerMock->expects($this->never())
+            ->method('debug');
         $this->loggerMock->method('error')
-            ->withConsecutive(['Unhandled error: [10] Some error']);
+            ->withConsecutive(['Unhandled error: Some error']);
 
         $this->processor->execute($scenarios);
     }

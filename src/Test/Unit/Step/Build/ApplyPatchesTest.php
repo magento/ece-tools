@@ -9,6 +9,7 @@ namespace Magento\MagentoCloud\Test\Unit\Step\Build;
 
 use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\ConfigException;
+use Magento\MagentoCloud\Config\Stage\BuildInterface;
 use Magento\MagentoCloud\Patch\Manager;
 use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Step\Build\ApplyPatches;

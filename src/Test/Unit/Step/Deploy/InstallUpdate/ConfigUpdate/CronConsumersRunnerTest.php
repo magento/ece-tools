@@ -7,12 +7,15 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Step\Deploy\InstallUpdate\ConfigUpdate;
 
+use Magento\MagentoCloud\App\Error;
+use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface as ConfigReader;
 use Magento\MagentoCloud\Config\Magento\Env\WriterInterface as ConfigWriter;
 use Magento\MagentoCloud\Config\Environment;
 use Illuminate\Config\Repository;
 use Magento\MagentoCloud\Config\RepositoryFactory;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\CronConsumersRunner;
 use Magento\MagentoCloud\Step\StepException;
@@ -22,6 +25,8 @@ use Psr\Log\LoggerInterface;
 
 /**
  * @inheritdoc
+ *
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class CronConsumersRunnerTest extends TestCase
 {
@@ -262,6 +267,62 @@ class CronConsumersRunnerTest extends TestCase
             ->method('get');
         $this->configWriterMock->expects($this->never())
             ->method('create');
+
+        $this->cronConsumersRunner->execute();
+    }
+
+    /**
+     * @throws StepException
+     */
+    public function testExecuteWithGenericException()
+    {
+        $exceptionMsg = 'Error';
+        $exceptionCode = 111;
+
+        $this->expectException(StepException::class);
+        $this->expectExceptionMessage($exceptionMsg);
+        $this->expectExceptionCode($exceptionCode);
+
+        $this->magentoVersionMock->expects($this->once())
+            ->method('isGreaterOrEqual')
+            ->willThrowException(new GenericException($exceptionMsg, $exceptionCode));
+
+        $this->cronConsumersRunner->execute();
+    }
+
+    /**
+     * @throws StepException
+     */
+    public function testExecuteWithFileSystemExceptionInCreate()
+    {
+        $exceptionMsg = 'Some error';
+        $exceptionCode = 11111;
+        $this->expectException(StepException::class);
+        $this->expectExceptionCode(Error::DEPLOY_ENV_PHP_IS_NOT_WRITABLE);
+        $this->expectExceptionMessage($exceptionMsg);
+
+        $this->magentoVersionMock->expects($this->once())
+            ->method('isGreaterOrEqual')
+            ->with('2.2')
+            ->willReturn(true);
+
+        $this->configReaderMock->expects($this->once())
+            ->method('read')
+            ->willReturn([]);
+
+        $this->repositoryFactoryMock->expects($this->once())
+            ->method('create')
+            ->with([])
+            ->willReturn(new Repository([]));
+
+        $this->stageConfigMock->expects($this->once())
+            ->method('get')
+            ->with(DeployInterface::VAR_CRON_CONSUMERS_RUNNER)
+            ->willReturn([]);
+
+        $this->configWriterMock->expects($this->once())
+            ->method('create')
+            ->willThrowException(new FileSystemException($exceptionMsg, $exceptionCode));
 
         $this->cronConsumersRunner->execute();
     }

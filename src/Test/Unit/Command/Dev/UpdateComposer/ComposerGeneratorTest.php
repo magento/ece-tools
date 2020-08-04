@@ -29,16 +29,24 @@ class ComposerGeneratorTest extends TestCase
         ],
         'repo2' => [
             'repo' => 'path_to_repo2',
+            'ref' => '',
             'branch' => '2.0.0',
         ],
         'repo3' => [
             'repo' => 'path_to_repo3',
+            'ref' => 'ref3',
             'branch' => '3.0.0',
         ],
         'repo4' => [
             'repo' => 'path_to_repo4',
+            'ref' => 'ref4',
             'branch' => '4.0.0',
-        ]
+        ],
+        'repo5' => [
+            'repo' => 'path_to_repo5',
+            'ref' => 'ref5',
+            'branch' => '5.0.0',
+        ],
     ];
 
     /**
@@ -80,7 +88,9 @@ class ComposerGeneratorTest extends TestCase
 
     public function testGetInstallFromGitScripts()
     {
-        $this->assertInstallFromGitScripts($this->composerGenerator->getInstallFromGitScripts($this->repoOptions));
+        $expected = include(__DIR__ . '/_files/expected_composer.php');
+        $actual = $this->composerGenerator->getInstallFromGitScripts($this->repoOptions);
+        $this->assertEquals($expected['scripts']['install-from-git'], $actual);
     }
 
     public function testGenerate(): void
@@ -92,25 +102,5 @@ class ComposerGeneratorTest extends TestCase
             $this->assertArrayHasKey($key, $composer);
             $this->assertEquals($value, $composer[$key]);
         }
-    }
-
-    /**
-     * @param array $actual
-     *
-     * @return void
-     */
-    private function assertInstallFromGitScripts(array $actual): void
-    {
-        $this->assertEquals(
-            [
-                'php -r"@mkdir(__DIR__ . \'/app/etc\', 0777, true);"',
-                'rm -rf repo1 repo2 repo3 repo4',
-                'git clone path_to_repo1 "repo1" && git --git-dir="repo1/.git" --work-tree="repo1" checkout 1.0.0',
-                'git clone path_to_repo2 "repo2" && git --git-dir="repo2/.git" --work-tree="repo2" checkout 2.0.0',
-                'git clone path_to_repo3 "repo3" && git --git-dir="repo3/.git" --work-tree="repo3" checkout 3.0.0',
-                'git clone path_to_repo4 "repo4" && git --git-dir="repo4/.git" --work-tree="repo4" checkout 4.0.0',
-            ],
-            $actual
-        );
     }
 }

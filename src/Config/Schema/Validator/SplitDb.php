@@ -37,7 +37,7 @@ class SplitDb implements ValidatorInterface
         if (array_diff($value, DeployInterface::SPLIT_DB_VALUES)) {
             return $this->resultFactory->error(sprintf(
                 'The %s variable contains the invalid value. '
-                . 'It should be array with next available values: [%s].',
+                . 'It should be an array with following values: [%s].',
                 $key,
                 implode(', ', DeployInterface::SPLIT_DB_VALUES)
             ));

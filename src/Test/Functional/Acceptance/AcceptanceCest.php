@@ -20,6 +20,8 @@ use Magento\MagentoCloud\Util\ArrayManager;
  * 2. Test content presence
  * 3. Test config dump
  * 4. Test content presence
+ *
+ * @group php74
  */
 class AcceptanceCest extends AbstractCest
 {

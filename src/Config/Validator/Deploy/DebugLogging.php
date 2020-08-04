@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Config\Validator\Deploy;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\Magento\SystemInterface;
 use Magento\MagentoCloud\Config\ValidatorInterface;
 use Magento\MagentoCloud\Config\Environment;
@@ -65,8 +66,8 @@ class DebugLogging implements ValidatorInterface
 
         return $this->resultFactory->error(
             'Debug logging is enabled in Magento',
-            'To save space in Magento Cloud, '
-            . 'debug logging should not be enabled for your production environments.'
+            'To save space in Magento Cloud, disable debug logging for your production environments.',
+            Error::WARN_DEBUG_LOG_ENABLED
         );
     }
 }

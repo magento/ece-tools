@@ -73,12 +73,45 @@ class RemoveDeployFailedFlagTest extends TestCase
             ->method('getCloudErrorLog')
             ->willReturn($filePath);
         $this->fileMock->expects($this->once())
+            ->method('isExists')
+            ->willReturn(false);
+        $this->fileMock->expects($this->once())
             ->method('deleteFile')
             ->with($filePath);
 
         $this->step->execute();
     }
 
+    /**
+     * @throws StepException
+     */
+    public function testExecuteCopyBuildErrorLogFile(): void
+    {
+        $deployErrorLogFilePath = 'var/log/cloud.error.log';
+        $buildErrorLogFilePath = 'init/var/log/cloud.error.log';
+        $this->fileListMock->expects($this->once())
+            ->method('getCloudErrorLog')
+            ->willReturn($deployErrorLogFilePath);
+        $this->fileListMock->expects($this->once())
+            ->method('getInitCloudErrorLog')
+            ->willReturn($buildErrorLogFilePath);
+        $this->fileMock->expects($this->once())
+            ->method('isExists')
+            ->with($buildErrorLogFilePath)
+            ->willReturn(true);
+        $this->fileMock->expects($this->once())
+            ->method('deleteFile')
+            ->with($deployErrorLogFilePath);
+        $this->fileMock->expects($this->once())
+            ->method('copy')
+            ->with($buildErrorLogFilePath, $deployErrorLogFilePath);
+
+        $this->step->execute();
+    }
+
+    /**
+     * @throws StepException
+     */
     public function testExceptionType()
     {
         $this->expectException(StepException::class);

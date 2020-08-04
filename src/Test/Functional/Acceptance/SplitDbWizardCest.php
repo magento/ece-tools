@@ -13,6 +13,8 @@ use Exception;
 
 /**
  *  Checks split database wizard functionality
+ *
+ * @group php74
  */
 class SplitDbWizardCest extends AbstractCest
 {
@@ -43,7 +45,7 @@ class SplitDbWizardCest extends AbstractCest
         $I->runDockerComposeCommand('run deploy ece-command wizard:split-db-state');
         $I->seeInOutput([
             'DB is not split',
-            '- DB cannot be split on this environment'
+            'DB cannot be split on this environment'
         ]);
 
         $I->stopEnvironment(true);
@@ -76,7 +78,7 @@ class SplitDbWizardCest extends AbstractCest
                 'splitDbTypes' => null,
                 'messages' => [
                     'DB is not split',
-                    '- You may split DB using SPLIT_DB variable in .magento.env.yaml file'
+                    'You may split DB using SPLIT_DB variable in .magento.env.yaml file'
                 ]
             ],
             'Running Split Db wizard in an environment with Split Db architecture'
@@ -99,7 +101,6 @@ class SplitDbWizardCest extends AbstractCest
     {
         return [
             ['version' => 'master'],
-            ['version' => '2.3.4'],
         ];
     }
 

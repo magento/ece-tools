@@ -9,6 +9,7 @@ namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 
 /**
  * This test runs on the latest version of PHP
+ * @group php74
  */
 class AdminCredentialCest extends AbstractCest
 {

@@ -7,12 +7,16 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate;
 
+use Magento\MagentoCloud\App\Error;
+use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface as ConfigReader;
 use Magento\MagentoCloud\Config\Magento\Env\WriterInterface as ConfigWriter;
 use Magento\MagentoCloud\Config\RepositoryFactory;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Package\MagentoVersion;
+use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
 use Psr\Log\LoggerInterface;
 
@@ -93,22 +97,30 @@ class CronConsumersRunner implements StepInterface
      */
     public function execute()
     {
-        if (!$this->magentoVersion->isGreaterOrEqual('2.2')) {
-            return;
+        try {
+            if (!$this->magentoVersion->isGreaterOrEqual('2.2')) {
+                return;
+            }
+
+            $this->logger->info('Updating env.php cron consumers runner configuration.');
+            $config = $this->configReader->read();
+            $runnerConfig = $this->repositoryFactory->create(
+                $this->stageConfig->get(DeployInterface::VAR_CRON_CONSUMERS_RUNNER)
+            );
+
+            $config['cron_consumers_runner'] = [
+                'cron_run' => $runnerConfig->get('cron_run') === true,
+                'max_messages' => $runnerConfig->get('max_messages', static::DEFAULT_MAX_MESSAGES),
+                'consumers' => $runnerConfig->get('consumers', []),
+            ];
+        } catch (GenericException $e) {
+            throw new StepException($e->getMessage(), $e->getCode(), $e);
         }
-        
-        $this->logger->info('Updating env.php cron consumers runner configuration.');
-        $config = $this->configReader->read();
-        $runnerConfig = $this->repositoryFactory->create(
-            $this->stageConfig->get(DeployInterface::VAR_CRON_CONSUMERS_RUNNER)
-        );
 
-        $config['cron_consumers_runner'] = [
-            'cron_run' => $runnerConfig->get('cron_run') === true,
-            'max_messages' => $runnerConfig->get('max_messages', static::DEFAULT_MAX_MESSAGES),
-            'consumers' => $runnerConfig->get('consumers', []),
-        ];
-
-        $this->configWriter->create($config);
+        try {
+            $this->configWriter->create($config);
+        } catch (FileSystemException $e) {
+            throw new StepException($e->getMessage(), Error::DEPLOY_ENV_PHP_IS_NOT_WRITABLE, $e);
+        }
     }
 }

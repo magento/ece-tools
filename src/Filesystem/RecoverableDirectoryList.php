@@ -7,12 +7,15 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Filesystem;
 
+use Magento\MagentoCloud\Config\ConfigException;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\GlobalSection;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Filesystem\DirectoryCopier\StrategyInterface;
+use Magento\MagentoCloud\Filesystem\Flag\ConfigurationMismatchException;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Package\MagentoVersion;
+use Magento\MagentoCloud\Package\UndefinedPackageException;
 
 /**
  * Returns list of recoverable directories
@@ -81,6 +84,10 @@ class RecoverableDirectoryList
      * Returns list of recoverable directories with recover strategy types.
      *
      * @return array
+     *
+     * @throws ConfigException
+     * @throws ConfigurationMismatchException
+     * @throws UndefinedPackageException
      */
     public function getList(): array
     {

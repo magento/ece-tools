@@ -18,6 +18,16 @@ use Magento\MagentoCloud\Package\MagentoVersion;
 class ComposerGenerator
 {
     /**
+     * Types of supported Magento component packages
+     */
+    private const COMPONENT_PACKAGE_TYPES = [
+        'magento2-module',
+        'magento2-theme',
+        'magento2-language',
+        'magento2-library'
+    ];
+
+    /**
      * @var DirectoryList
      */
     private $directoryList;
@@ -81,10 +91,13 @@ class ComposerGenerator
             $baseRepoFolder = $this->directoryList->getMagentoRoot() . '/' . $repoDir;
 
             $dirComposerJson = $baseRepoFolder . '/composer.json';
+            $isModuleRoot = false;
             if ($this->file->isExists($dirComposerJson)) {
                 $dirPackageInfo = json_decode($this->file->fileGetContents($dirComposerJson), true);
-                if (isset($dirPackageInfo['type']) && $dirPackageInfo['type'] == 'project') {
+                if ($this->isProjectPackage($dirPackageInfo)) {
                     $composer['require'] = array_merge($composer['require'], $dirPackageInfo['require']);
+                } elseif ($this->isComponentPackage($dirPackageInfo)) {
+                    $isModuleRoot = true;
                 }
             }
 
@@ -99,12 +112,16 @@ class ComposerGenerator
                 ];
                 $composer['require'][$packageName] = '*@dev';
             }
-            $excludeRepoStr = empty($repoPackages) ? '' : "--exclude='" . join("' --exclude='", $repoPackages) . "' ";
-            $preparePackagesScripts[] = sprintf(
-                "rsync -azhm --stats $excludeRepoStr--exclude='dev/tests' --exclude='.git' " .
-                "--exclude='composer.json' --exclude='composer.lock' ./%s/ ./",
-                $repoDir
-            );
+            if (!$isModuleRoot) {
+                $excludeRepoStr = empty($repoPackages)
+                    ? ''
+                    : "--exclude='" . join("' --exclude='", $repoPackages) . "' ";
+                $preparePackagesScripts[] = sprintf(
+                    "rsync -azhm --stats $excludeRepoStr--exclude='dev/tests' --exclude='.git' " .
+                    "--exclude='composer.json' --exclude='composer.lock' ./%s/ ./",
+                    $repoDir
+                );
+            }
         }
         $composer['scripts']['prepare-packages'] = $preparePackagesScripts;
         $composer['scripts']['post-install-cmd'] = ['@prepare-packages'];
@@ -122,15 +139,24 @@ class ComposerGenerator
         $installFromGitScripts[] = 'rm -rf ' . implode(' ', array_keys($repoOptions));
 
         foreach ($repoOptions as $repoName => $gitOption) {
-            $gitRef = $gitOption['ref'] ?? $gitOption['branch'];
-            $installFromGitScripts[] = sprintf(
-                'git clone %s "%s" && git --git-dir="%s/.git" --work-tree="%s" checkout %s',
-                $gitOption['repo'],
-                $repoName,
-                $repoName,
-                $repoName,
-                $gitRef
-            );
+            if (!empty($gitOption['ref'])) {
+                $script = sprintf(
+                    'git clone %s "%s" && git --git-dir="%s/.git" --work-tree="%s" checkout %s',
+                    $gitOption['repo'],
+                    $repoName,
+                    $repoName,
+                    $repoName,
+                    $gitOption['ref']
+                );
+            } else {
+                $script = sprintf(
+                    'git clone -b %s --single-branch --depth 1 %s %s',
+                    $gitOption['branch'],
+                    $gitOption['repo'],
+                    $repoName
+                );
+            }
+            $installFromGitScripts[] = $script;
         }
 
         return $installFromGitScripts;
@@ -199,7 +225,6 @@ class ComposerGenerator
     private function findPackages(string $path)
     {
         $path = rtrim($path, '\\/');
-        $packageTypes = ['magento2-module', 'magento2-theme', 'magento2-language', 'magento2-library'];
         $pathLength = strlen($path . '/');
 
         $dirIterator = $this->file->getRecursiveFileIterator(
@@ -210,11 +235,33 @@ class ComposerGenerator
         $packages = [];
         foreach ($dirIterator as $currentFileInfo) {
             $packageInfo = json_decode($this->file->fileGetContents($currentFileInfo->getPathName()), true);
-            if (isset($packageInfo['type']) && in_array($packageInfo['type'], $packageTypes)) {
+            if ($this->isComponentPackage($packageInfo)) {
                 $packages[$packageInfo['name']] = substr($currentFileInfo->getPath(), $pathLength);
             }
         }
 
         return $packages;
+    }
+
+    /**
+     * Check if provided package info belongs to a Magento component package
+     *
+     * @param array $packageInfo
+     * @return bool
+     */
+    private function isComponentPackage(array $packageInfo): bool
+    {
+        return isset($packageInfo['type']) && in_array($packageInfo['type'], self::COMPONENT_PACKAGE_TYPES);
+    }
+
+    /**
+     * Check if provided package info belongs to a Magento project package
+     *
+     * @param array $packageInfo
+     * @return bool
+     */
+    private function isProjectPackage(array $packageInfo): bool
+    {
+        return isset($packageInfo['type']) && $packageInfo['type'] == 'project';
     }
 }

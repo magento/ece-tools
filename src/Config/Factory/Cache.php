@@ -254,7 +254,7 @@ class Cache
     private function getUnsyncedConfigStructure(string $envCacheBackendModel, array $redisConfig): array
     {
         return [
-            'backend' => addslashes($envCacheBackendModel),
+            'backend' => $envCacheBackendModel,
             'backend_options' => [
                 'server' => $redisConfig['host'],
                 'port' => $redisConfig['port'],
@@ -272,9 +272,9 @@ class Cache
     private function getSynchronizedConfigStructure(string $envCacheBackendModel, array $redisConfig): array
     {
         return [
-            'backend' => addslashes($envCacheBackendModel),
+            'backend' => $envCacheBackendModel,
             'backend_options' => [
-                'remote_backend' => addslashes('\Magento\Framework\Cache\Backend\Redis'),
+                'remote_backend' => '\Magento\Framework\Cache\Backend\Redis',
                 'remote_backend_options' => [
                     'server' => $redisConfig['host'],
                     'port' => $redisConfig['port'],

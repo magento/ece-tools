@@ -52,7 +52,7 @@ class SubSymlinkStrategy implements StrategyInterface
 
         if ($fromDirectory === false || !$this->file->isExists($fromDirectory)) {
             throw new FileSystemException(
-                sprintf('Can\'t copy directory "%s". Directory does not exist.', $fromDirectory)
+                sprintf('Cannot copy directory "%s". Directory does not exist.', $fromDirectory)
             );
         }
 

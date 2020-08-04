@@ -11,6 +11,8 @@ use Magento\MagentoCloud\Config\Stage\BuildInterface;
 
 /**
  * This test runs on the latest version of PHP
+ *
+ * @group php74
  */
 class ReportDirNestingLevelCest extends AbstractCest
 {
@@ -163,11 +165,11 @@ class ReportDirNestingLevelCest extends AbstractCest
             $log
         );
         $I->assertContains(
-            '- The directory nesting level value for error reporting has not been configured.',
+            'The directory nesting level value for error reporting has not been configured.',
             $log
         );
         $I->assertContains(
-            'You can configure the setting using the `config.report.dir_nesting_level`'
+            'You can configure the setting using the `config.report.dir_nesting_level` variable'
             . ' in the file ' . $this->expectedPathLocalXml,
             $log
         );
@@ -200,7 +202,7 @@ class ReportDirNestingLevelCest extends AbstractCest
             $log
         );
         $I->assertContains(
-            "- Config of the file {$this->expectedPathLocalXml} is invalid.",
+            "Invalid configuration in the {$this->expectedPathLocalXml} file.",
             $log
         );
         $I->assertContains(

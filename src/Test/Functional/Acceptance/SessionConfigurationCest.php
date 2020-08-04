@@ -10,6 +10,8 @@ namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 /**
  * This scenario checks that session can be configured through environment variable SESSION_CONFIGURATION
  * Zephyr ID MAGECLOUD-46
+ *
+ * @group php74
  */
 class SessionConfigurationCest extends AbstractCest
 {

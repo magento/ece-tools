@@ -7,8 +7,11 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Step\Deploy;
 
+use Magento\MagentoCloud\App\Error;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Step\Deploy\SplitDbConnection;
 use Magento\MagentoCloud\Step\Deploy\SplitDbConnection\SlaveConnection;
+use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Util\UpgradeProcess;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -21,6 +24,8 @@ use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface as ConfigReader;
 
 /**
  * @inheritdoc
+ *
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class SplitDbConnectionTest extends TestCase
 {
@@ -181,7 +186,7 @@ class SplitDbConnectionTest extends TestCase
             ->method('get')
             ->willReturn($dbConfig);
         $this->loggerMock->expects($this->once())
-            ->method('error')
+            ->method('warning')
             ->with(
                 'Enabling a split database will be skipped.'
                 . ' Relationship do not have configuration for next types: ' . implode(', ', $splitTypes)
@@ -250,7 +255,7 @@ class SplitDbConnectionTest extends TestCase
         $this->loggerMock->expects($this->once())
             ->method('warning')
             ->with(
-                'Variable SPLIT_DB does not have data which were already split types: '
+                'The SPLIT_DB variable is missing the configuration for split connection types: '
                 . implode(', ', $splitTypes)
             );
         $this->magentoShellMock->expects($this->never())
@@ -384,6 +389,70 @@ class SplitDbConnectionTest extends TestCase
             ->method('execute');
         $this->slaveConnectionMock->expects($this->once())
             ->method('update');
+
+        $this->step->execute();
+    }
+
+    public function testExecuteWithFileSystemExceptionInRead()
+    {
+        $errorMsg = 'Some error';
+        $errorCode = 111;
+        $exception = new FileSystemException($errorMsg, $errorCode);
+        $this->expectException(StepException::class);
+        $this->expectExceptionCode($errorCode);
+        $this->expectExceptionMessage($errorMsg);
+
+        $this->flagManagerMock->expects($this->once())
+            ->method('exists')
+            ->with(FlagManager::FLAG_IGNORE_SPLIT_DB)
+            ->willReturn(false);
+
+        $this->stageConfigMock->expects($this->once())
+            ->method('get')
+            ->with(DeployInterface::VAR_SPLIT_DB)
+            ->willReturn(DeployInterface::SPLIT_DB_VALUES);
+
+        $this->dbConfigMock->expects($this->once())
+            ->method('get')
+            ->willReturn(['connection' => self::CONNECTION]);
+
+        $this->configReaderMock->expects($this->once())
+            ->method('read')
+            ->willThrowException($exception);
+
+        $this->step->execute();
+    }
+
+    public function testExecuteWithFileSystemExceptionInSlaveUpdate()
+    {
+        $errorMsg = 'Some error';
+        $errorCode = 111;
+        $exception = new FileSystemException($errorMsg, $errorCode);
+        $this->expectException(StepException::class);
+        $this->expectExceptionCode(Error::DEPLOY_ENV_PHP_IS_NOT_WRITABLE);
+        $this->expectExceptionMessage('Cannot write slave connection(s) to the `./app/etc/env.php`');
+
+        $this->flagManagerMock->expects($this->once())
+            ->method('exists')
+            ->with(FlagManager::FLAG_IGNORE_SPLIT_DB)
+            ->willReturn(false);
+
+        $this->stageConfigMock->expects($this->once())
+            ->method('get')
+            ->with(DeployInterface::VAR_SPLIT_DB)
+            ->willReturn(DeployInterface::SPLIT_DB_VALUES);
+
+        $this->dbConfigMock->expects($this->once())
+            ->method('get')
+            ->willReturn(['connection' => self::CONNECTION]);
+
+        $this->configReaderMock->expects($this->once())
+            ->method('read')
+            ->willReturn(['db' => ['connection' => []]]);
+
+        $this->slaveConnectionMock->expects($this->once())
+            ->method('update')
+            ->willThrowException($exception);
 
         $this->step->execute();
     }

@@ -7,6 +7,9 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Step\Deploy\InstallUpdate\ConfigUpdate;
 
+use Magento\MagentoCloud\App\Error;
+use Magento\MagentoCloud\App\GenericException;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\Session;
 use Magento\MagentoCloud\Step\StepException;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -113,6 +116,43 @@ class SessionTest extends TestCase
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Removing session configuration from env.php.');
+
+        $this->step->execute();
+    }
+
+    /**
+     * @throws StepException
+     */
+    public function testExecuteWithException()
+    {
+        $exceptionMsg = 'Error';
+        $exceptionCode = 111;
+
+        $this->expectException(StepException::class);
+        $this->expectExceptionMessage($exceptionMsg);
+        $this->expectExceptionCode($exceptionCode);
+
+        $this->configReaderMock->expects($this->once())
+            ->method('read')
+            ->willThrowException(new GenericException($exceptionMsg, $exceptionCode));
+
+        $this->step->execute();
+    }
+
+    /**
+     * @throws StepException
+     */
+    public function testExecuteWithExceptionInCreate()
+    {
+        $exceptionMsg = 'Some error';
+        $exceptionCode = 11111;
+        $this->expectException(StepException::class);
+        $this->expectExceptionCode(Error::DEPLOY_ENV_PHP_IS_NOT_WRITABLE);
+        $this->expectExceptionMessage($exceptionMsg);
+
+        $this->configWriterMock->expects($this->once())
+            ->method('create')
+            ->willThrowException(new FileSystemException($exceptionMsg, $exceptionCode));
 
         $this->step->execute();
     }
