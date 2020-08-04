@@ -78,19 +78,9 @@ class ElasticSearchVersion implements ValidatorInterface
             'esVersionRaw' => '6.x',
         ],
         [
-            'packageVersion' => '>=7.0 <7.2',
-            'esVersion' => '>=7.0 <7.2',
-            'esVersionRaw' => '>=7.0 <7.2',
-        ],
-        [
-            'packageVersion' => '>=7.2 <7.4',
-            'esVersion' => '>=7.2 <7.4',
-            'esVersionRaw' => '>=7.2 <7.4',
-        ],
-        [
-            'packageVersion' => '>=7.4',
-            'esVersion' => '>=7.4',
-            'esVersionRaw' => '>=7.4',
+            'packageVersion' => '>=7.5',
+            'esVersion' => '>=7.5',
+            'esVersionRaw' => '>=7.5',
         ],
     ];
 
