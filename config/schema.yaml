@@ -414,7 +414,7 @@ variables:
     stages:
       - deploy
     default:
-      deploy: 'Cm_Cache_Backend_Redis'
+      deploy: '\Magento\Framework\Cache\Backend\RemoteSynchronizedCache'
     examples:
       - stage:
           deploy:

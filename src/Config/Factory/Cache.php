@@ -76,7 +76,7 @@ class Cache
     }
 
     /**
-     * Returns session configuration.
+     * Returns cache configuration.
      *
      * If cache configuration sets in CACHE_CONFIGURATION variable return it, otherwise checks if exists redis
      * configuration in relationships and if so, makes cache configuration for redis.
