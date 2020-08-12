@@ -164,9 +164,7 @@ class EnvironmentData implements EnvironmentDataInterface
     }
 
     /**
-     * Returns MAGE_MODE environment variable
-     *
-     * @return string|null
+     * @inheritDoc
      */
     public function getMageMode(): ?string
     {
