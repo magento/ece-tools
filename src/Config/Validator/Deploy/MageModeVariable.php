@@ -15,7 +15,7 @@ use Magento\MagentoCloud\Config\ValidatorInterface;
 
 /**
  * Validates value of MAGE_MODE variable.
-*/
+ */
 class MageModeVariable implements ValidatorInterface
 {
     public const PRODUCTION_MODE = 'production';
