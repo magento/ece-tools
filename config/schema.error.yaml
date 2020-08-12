@@ -577,6 +577,12 @@
     suggestion: 'Check the `cloud.log` for more information.'
     step: 'pre-deploy:restore-writable-dirs'
     type: warning
+!php/const Magento\MagentoCloud\App\Error::WARN_NOT_SUPPORTED_MAGE_MODE:
+    title: 'Environment variable MAGE_MODE has value with not supported mode '
+    stage: deploy
+    suggestion: 'Remove MAGE_MODE environment variable or change its value to "production". Magento Cloud supports only "production" mode.'
+    step: 'validate-config:mage-mode-variable'
+    type: warning
 !php/const Magento\MagentoCloud\App\Error::WARN_DEBUG_LOG_ENABLED:
     title: 'Debug logging is enabled in Magento'
     suggestion: 'To save disk space, do not enable debug logging for your production environments.'

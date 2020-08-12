@@ -130,6 +130,7 @@ class Error
     public const WARN_NOT_ENOUGH_DATA_SPLIT_DB_VAR = 2024;
     public const WARN_SLAVE_CONNECTION_NOT_SET = 2025;
     public const WARN_COPY_MOUNTED_DIRS_FAILED = 2026;
+    public const WARN_NOT_SUPPORTED_MAGE_MODE = 2027;
 
     /**
      * Post-deploy

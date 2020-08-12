@@ -162,4 +162,18 @@ class EnvironmentData implements EnvironmentDataInterface
 
         return $this->getEnv($envVarName) ? (string) $this->getEnv($envVarName) : '';
     }
+
+    /**
+     * Returns MAGE_MODE environment variable
+     *
+     * @return string|null
+     */
+    public function getMageMode(): ?string
+    {
+        if (isset($this->data['mage-mode'])) {
+            return $this->data['mage-mode'];
+        }
+
+        return $this->data['mage-mode'] = $this->getEnv('MAGE_MODE') ?: null;
+    }
 }
