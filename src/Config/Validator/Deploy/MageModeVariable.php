@@ -14,8 +14,8 @@ use Magento\MagentoCloud\Config\Validator\ResultFactory;
 use Magento\MagentoCloud\Config\ValidatorInterface;
 
 /**
- * Validates existence the split database connections in DATABASE CONFIGURATION variable
- */
+ * Validates value of MAGE_MODE variable.
+*/
 class MageModeVariable implements ValidatorInterface
 {
     public const PRODUCTION_MODE = 'production';
@@ -31,7 +31,6 @@ class MageModeVariable implements ValidatorInterface
     private $resultFactory;
 
     /**
-     * MageModeVariable constructor.
      * @param EnvironmentDataInterface $envData
      * @param ResultFactory $resultFactory
      */
