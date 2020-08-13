@@ -63,15 +63,21 @@ class DatabaseSplitConnection implements ValidatorInterface
             return $this->resultFactory->success();
         }
 
-        return $this->resultFactory->error(sprintf(
-            'Split database configuration was detected in the property %s'
-            . ' of the file .magento.env.yaml:' . PHP_EOL
-            . '%s' . PHP_EOL
-            . 'Magento Cloud does not support a custom split database configuration,'
-            . ' such configurations will be ignored',
-            DeployInterface::VAR_DATABASE_CONFIGURATION,
-            implode(PHP_EOL, $messageItem),
+        return $this->resultFactory->error(
+            sprintf(
+                'Split database configuration was detected in the property %s'
+                . ' of the file .magento.env.yaml:' . PHP_EOL
+                . '%s' . PHP_EOL
+                . 'Magento Cloud does not support a custom split database configuration,'
+                . ' such configurations will be ignored',
+                DeployInterface::VAR_DATABASE_CONFIGURATION,
+                implode(PHP_EOL, $messageItem)
+            ),
+            sprintf(
+                'Remove custom connections for split databases from %s variable in .magento.env.yam',
+                DeployInterface::VAR_DATABASE_CONFIGURATION
+            ),
             Error::WARN_WRONG_SPLIT_DB_CONFIG
-        ));
+        );
     }
 }
