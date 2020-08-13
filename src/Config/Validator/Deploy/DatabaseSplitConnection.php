@@ -65,8 +65,7 @@ class DatabaseSplitConnection implements ValidatorInterface
 
         return $this->resultFactory->error(
             sprintf(
-                'Split database configuration was detected in the property %s'
-                . ' of the file .magento.env.yaml:' . PHP_EOL
+                'Detected split database configuration in the %s property of the file .magento.env.yaml:' . PHP_EOL
                 . '%s' . PHP_EOL
                 . 'Magento Cloud does not support a custom split database configuration,'
                 . ' such configurations will be ignored',
