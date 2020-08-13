@@ -80,7 +80,7 @@ class DatabaseSplitConnectionTest extends TestCase
         $this->resultFactoryMock->expects($this->once())
             ->method('error')
             ->with(
-                'Split database configuration was detected in the property DATABASE_CONFIGURATION of the'
+                'Detected split database configuration in the DATABASE_CONFIGURATION property of the'
                     . ' file .magento.env.yaml:' . PHP_EOL
                     . '- connection: checkout' . PHP_EOL
                     . '- connection: sales' . PHP_EOL
