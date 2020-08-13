@@ -578,7 +578,7 @@
     step: 'pre-deploy:restore-writable-dirs'
     type: warning
 !php/const Magento\MagentoCloud\App\Error::WARN_NOT_SUPPORTED_MAGE_MODE:
-    title: 'Environment variable MAGE_MODE has value with not supported mode '
+    title: 'Mode value for MAGE_MODE environment variable not supported '
     stage: deploy
     suggestion: 'Remove MAGE_MODE environment variable, or change its value to "production". Magento Cloud supports only "production" mode.'
     step: 'validate-config:mage-mode-variable'
