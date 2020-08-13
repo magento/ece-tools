@@ -92,7 +92,7 @@ class MageModeVariableTest extends TestCase
         $this->resultFactoryMock->expects($this->once())
             ->method('error')
             ->with(
-                'Environment variable MAGE_MODE was found and the value is differ than "production".',
+                'Environment variable MAGE_MODE was found and the value differs from "production".',
                 'Magento Cloud does not support Magento modes other than "production". '
                 . 'Remove this variable, or change the value to "production", '
                 . 'the only supported mode on Cloud projects.',

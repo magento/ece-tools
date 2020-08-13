@@ -54,7 +54,7 @@ class MageModeVariable implements ValidatorInterface
 
         return $this->resultFactory->error(
             sprintf(
-                'Environment variable MAGE_MODE was found and the value is differ than "%s".',
+                'Environment variable MAGE_MODE was found and the value differs from "%s".',
                 self::PRODUCTION_MODE
             ),
             sprintf(
