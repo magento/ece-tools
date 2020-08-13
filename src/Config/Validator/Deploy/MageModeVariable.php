@@ -59,7 +59,7 @@ class MageModeVariable implements ValidatorInterface
             ),
             sprintf(
                 'Magento Cloud does not support Magento modes other than "%s". '
-                . 'You should remove this variable or change the value to supported mode.',
+                . 'Remove this variable, or change the value to "%s", the only supported mode on Cloud projects.',
                 self::PRODUCTION_MODE
             ),
             Error::WARN_NOT_SUPPORTED_MAGE_MODE
