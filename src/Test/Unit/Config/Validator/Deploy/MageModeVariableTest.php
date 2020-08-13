@@ -94,7 +94,7 @@ class MageModeVariableTest extends TestCase
             ->with(
                 'Environment variable MAGE_MODE was found and the value is differ than "production".',
                 'Magento Cloud does not support Magento modes other than "production". '
-                    . 'You should remove this variable or change the value to supported mode.',
+                . 'Remove this variable, or change the value to "%s", the only supported mode on Cloud projects.',
                 Error::WARN_NOT_SUPPORTED_MAGE_MODE
             );
 
