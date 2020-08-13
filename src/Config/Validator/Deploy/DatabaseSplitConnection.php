@@ -74,7 +74,7 @@ class DatabaseSplitConnection implements ValidatorInterface
                 implode(PHP_EOL, $messageItem)
             ),
             sprintf(
-                'Remove custom connections for split databases from %s variable in .magento.env.yam',
+                'Remove custom connections for split databases from the %s variable in .magento.env.yaml',
                 DeployInterface::VAR_DATABASE_CONFIGURATION
             ),
             Error::WARN_WRONG_SPLIT_DB_CONFIG
