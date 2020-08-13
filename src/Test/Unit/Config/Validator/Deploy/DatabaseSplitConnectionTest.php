@@ -89,7 +89,7 @@ class DatabaseSplitConnectionTest extends TestCase
                     . 'Magento Cloud does not support a custom split database configuration,'
                     . ' such configurations will be ignored',
                 'Remove custom connections for split databases from DATABASE_CONFIGURATION variable '
-                  . 'in .magento.env.yam',
+                  . 'in .magento.env.yaml',
                 ApplicationError::WARN_WRONG_SPLIT_DB_CONFIG
             );
 
