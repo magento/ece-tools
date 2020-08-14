@@ -67,8 +67,8 @@ class DatabaseSplitConnection implements ValidatorInterface
             sprintf(
                 'Detected split database configuration in the %s property of the file .magento.env.yaml:' . PHP_EOL
                 . '%s' . PHP_EOL
-                . 'Magento Cloud does not support a custom split database configuration,'
-                . ' such configurations will be ignored',
+                . 'Magento Cloud does not support custom connections in the split database configuration,'
+                . ' Custom connections will be ignored',
                 DeployInterface::VAR_DATABASE_CONFIGURATION,
                 implode(PHP_EOL, $messageItem)
             ),
