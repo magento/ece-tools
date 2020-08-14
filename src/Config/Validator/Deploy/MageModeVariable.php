@@ -12,6 +12,7 @@ use Magento\MagentoCloud\Config\EnvironmentDataInterface;
 use Magento\MagentoCloud\Config\Validator;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
 use Magento\MagentoCloud\Config\ValidatorInterface;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 
 /**
  * Validates value of MAGE_MODE variable.
@@ -45,6 +46,11 @@ class MageModeVariable implements ValidatorInterface
     /**
      * @return Validator\ResultInterface
      */
+
+    /**
+     * @return Validator\ResultInterface
+     * @throws FileSystemException
+     */
     public function validate(): Validator\ResultInterface
     {
         $mageMode = $this->envData->getMageMode();
@@ -52,17 +58,6 @@ class MageModeVariable implements ValidatorInterface
             return $this->resultFactory->success();
         }
 
-        return $this->resultFactory->error(
-            sprintf(
-                'Environment variable MAGE_MODE was found and the value differs from "%s".',
-                self::PRODUCTION_MODE
-            ),
-            sprintf(
-                'Magento Cloud does not support Magento modes other than "%1$s". '
-                . 'Remove this variable, or change the value to "%1$s", the only supported mode on Cloud projects.',
-                self::PRODUCTION_MODE
-            ),
-            Error::WARN_NOT_SUPPORTED_MAGE_MODE
-        );
+        return $this->resultFactory->errorByCode(Error::WARN_NOT_SUPPORTED_MAGE_MODE);
     }
 }

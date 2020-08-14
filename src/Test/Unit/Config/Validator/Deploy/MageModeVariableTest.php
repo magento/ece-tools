@@ -11,6 +11,7 @@ use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\EnvironmentDataInterface;
 use Magento\MagentoCloud\Config\Validator\Deploy\MageModeVariable;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -50,6 +51,7 @@ class MageModeVariableTest extends TestCase
 
     /**
      * @param $mageMode string|null
+     * @throws FileSystemException
      * @dataProvider validateSuccessDataProvider
      */
     public function testValidateSuccess($mageMode)
@@ -60,7 +62,7 @@ class MageModeVariableTest extends TestCase
         $this->resultFactoryMock->expects($this->once())
             ->method('success');
         $this->resultFactoryMock->expects($this->never())
-            ->method('error');
+            ->method('errorByCode');
 
         $this->validator->validate();
     }
@@ -80,6 +82,7 @@ class MageModeVariableTest extends TestCase
 
     /**
      * @param $mageMode string
+     * @throws FileSystemException
      * @dataProvider validateErrorDataProvider
      */
     public function testValidateError($mageMode)
@@ -90,14 +93,7 @@ class MageModeVariableTest extends TestCase
         $this->resultFactoryMock->expects($this->never())
             ->method('success');
         $this->resultFactoryMock->expects($this->once())
-            ->method('error')
-            ->with(
-                'Environment variable MAGE_MODE was found and the value differs from "production".',
-                'Magento Cloud does not support Magento modes other than "production". '
-                . 'Remove this variable, or change the value to "production", '
-                . 'the only supported mode on Cloud projects.',
-                Error::WARN_NOT_SUPPORTED_MAGE_MODE
-            );
+            ->method('errorByCode');
 
         $this->validator->validate();
     }
