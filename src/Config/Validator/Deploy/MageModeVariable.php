@@ -45,10 +45,6 @@ class MageModeVariable implements ValidatorInterface
 
     /**
      * @return Validator\ResultInterface
-     */
-
-    /**
-     * @return Validator\ResultInterface
      * @throws FileSystemException
      */
     public function validate(): Validator\ResultInterface
