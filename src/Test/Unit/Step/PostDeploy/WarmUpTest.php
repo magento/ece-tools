@@ -185,6 +185,14 @@ class WarmUpTest extends TestCase
         ];
         $concurrency = 2;
 
+        $this->loggerMock->expects($this->any())
+            ->method('info')
+            ->withConsecutive(
+                ['Starting page warming up'],
+                ['Warming up concurrency set to ' . $concurrency . ' which taken from '
+                    . PostDeployInterface::VAR_WARM_UP_CONCURRENCY . ' configuration']
+            );
+
         $this->urlsMock->method('getAll')
             ->willReturn($urls);
         $this->postDeployMock->method('get')
