@@ -189,7 +189,7 @@ class WarmUpTest extends TestCase
             ->method('info')
             ->withConsecutive(
                 ['Starting page warming up'],
-                ['Warming up concurrency set to ' . $concurrency . ' which taken from '
+                ['Warmup concurrency set to ' . $concurrency . ' as specified by the  '
                     . PostDeployInterface::VAR_WARM_UP_CONCURRENCY . ' configuration']
             );
 
