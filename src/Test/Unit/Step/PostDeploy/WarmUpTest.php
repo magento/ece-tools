@@ -188,7 +188,7 @@ class WarmUpTest extends TestCase
         $this->loggerMock->expects($this->any())
             ->method('info')
             ->withConsecutive(
-                ['Starting page warming up'],
+                ['Starting page warmup'],
                 ['Warmup concurrency set to ' . $concurrency . ' as specified by the  '
                     . PostDeployInterface::VAR_WARM_UP_CONCURRENCY . ' configuration']
             );
