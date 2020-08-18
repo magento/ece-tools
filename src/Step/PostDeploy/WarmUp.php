@@ -75,7 +75,7 @@ class WarmUp implements StepInterface
                 $config['concurrency'] = $concurrency;
                 $this->logger->info(
                     sprintf(
-                        'Warming up concurrency set to %s which taken from %s configuration',
+                        'Warmup concurrency set to %s as specified by the %s configuration',
                         $concurrency,
                         PostDeployInterface::VAR_WARM_UP_CONCURRENCY
                     )
