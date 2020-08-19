@@ -171,4 +171,17 @@ class EnvironmentDataTest extends TestCase
 
         $this->assertEquals([], $this->environmentData->getApplication());
     }
+
+    public function testGetMageMode(): void
+    {
+        $this->assertNull($this->environmentData->getMageMode());
+
+        $mode = 'some_mode';
+        $_ENV['MAGE_MODE'] = $mode;
+        $this->assertEquals($mode, $this->environmentData->getMageMode());
+
+        //check that value was taken from cache
+        $_ENV['MAGE_MODE'] = 'new value';
+        $this->assertEquals($mode, $this->environmentData->getMageMode());
+    }
 }
