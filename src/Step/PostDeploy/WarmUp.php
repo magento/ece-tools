@@ -67,8 +67,20 @@ class WarmUp implements StepInterface
     public function execute()
     {
         try {
-            $this->logger->info('Starting page warming up');
+            $this->logger->info('Starting page warmup');
             $config = [];
+
+            $concurrency = $this->postDeploy->get(PostDeployInterface::VAR_WARM_UP_CONCURRENCY);
+            if ($concurrency) {
+                $config['concurrency'] = $concurrency;
+                $this->logger->info(
+                    sprintf(
+                        'Warmup concurrency set to %s as specified by the %s configuration',
+                        $concurrency,
+                        PostDeployInterface::VAR_WARM_UP_CONCURRENCY
+                    )
+                );
+            }
 
             $urls = $this->urls->getAll();
 
@@ -94,11 +106,6 @@ class WarmUp implements StepInterface
 
                 $this->logger->error('Warming up failed: ' . $urls[$index], $context);
             };
-
-            $concurrency = $this->postDeploy->get(PostDeployInterface::VAR_WARM_UP_CONCURRENCY);
-            if ($concurrency) {
-                $config['concurrency'] = $concurrency;
-            }
 
             $pool = $this->poolFactory->create($urls, $config);
 
