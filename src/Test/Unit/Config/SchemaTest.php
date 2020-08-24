@@ -113,7 +113,7 @@ class SchemaTest extends TestCase
                 DeployInterface::VAR_LOCK_PROVIDER => 'file',
                 DeployInterface::VAR_CONSUMERS_WAIT_FOR_MAX_MESSAGES => false,
                 DeployInterface::VAR_SPLIT_DB => [],
-                DeployInterface::VAR_CACHE_REDIS_BACKEND => 'Cm_Cache_Backend_Redis',
+                DeployInterface::VAR_CACHE_REDIS_BACKEND => '\Magento\Framework\Cache\Backend\RemoteSynchronizedCache',
             ],
             $this->schema->getDefaults(StageConfigInterface::STAGE_DEPLOY)
         );
