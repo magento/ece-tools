@@ -64,6 +64,7 @@ abstract class AbstractCest
 
         if ($I->isCacheWorkDirExists($templateVersion)) {
             $I->restoreWorkDirFromCache($templateVersion);
+            $this->removeESIfExists($I, $templateVersion);
 
             return;
         }
