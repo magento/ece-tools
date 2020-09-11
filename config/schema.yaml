@@ -663,10 +663,7 @@ variables:
     stages:
       - global
     default:
-      global: true
-    examples:
-      - stage:
-          global: false
+      global: false
 
   # Environment variables
   ENV_RELATIONSHIPS:
