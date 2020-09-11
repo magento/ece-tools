@@ -10,7 +10,6 @@ namespace Magento\MagentoCloud\Step\Build\BackupData;
 use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Config\GlobalSection;
-use Magento\MagentoCloud\Config\Stage\BuildInterface;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
@@ -55,14 +54,14 @@ class StaticContent implements StepInterface
      * @param LoggerInterface $logger
      * @param DirectoryList $directoryList
      * @param FlagManager $flagManager
-     * @param BuildInterface $config
+     * @param GlobalSection $config
      */
     public function __construct(
         File $file,
         LoggerInterface $logger,
         DirectoryList $directoryList,
         FlagManager $flagManager,
-        BuildInterface $config
+        GlobalSection $config
     ) {
         $this->file = $file;
         $this->logger = $logger;
