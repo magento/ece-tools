@@ -9,10 +9,12 @@ namespace Magento\MagentoCloud\Step\Build\BackupData;
 
 use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\App\GenericException;
+use Magento\MagentoCloud\Config\Stage\BuildInterface;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
+use Magento\MagentoCloud\Package\UndefinedPackageException;
 use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
 use Psr\Log\LoggerInterface;
@@ -43,27 +45,35 @@ class StaticContent implements StepInterface
     private $flagManager;
 
     /**
+     * @var BuildInterface
+     */
+    private $config;
+
+    /**
      * @param File $file
      * @param LoggerInterface $logger
      * @param DirectoryList $directoryList
      * @param FlagManager $flagManager
+     * @param BuildInterface $config
      */
     public function __construct(
         File $file,
         LoggerInterface $logger,
         DirectoryList $directoryList,
-        FlagManager $flagManager
+        FlagManager $flagManager,
+        BuildInterface $config
     ) {
         $this->file = $file;
         $this->logger = $logger;
         $this->directoryList = $directoryList;
         $this->flagManager = $flagManager;
+        $this->config = $config;
     }
 
     /**
      * @inheritdoc
      */
-    public function execute()
+    public function execute(): void
     {
         try {
             $this->flagManager->delete(FlagManager::FLAG_REGENERATE);
@@ -73,17 +83,25 @@ class StaticContent implements StepInterface
 
                 return;
             }
-
-            $initPubStatic = $this->directoryList->getPath(DirectoryList::DIR_INIT) . '/pub/static';
-            $originalPubStatic = $this->directoryList->getPath(DirectoryList::DIR_STATIC);
-
-            $this->cleanInitPubStatic($initPubStatic);
-            $this->moveStaticContent($originalPubStatic, $initPubStatic);
-        } catch (StepException $e) {
-            throw $e;
         } catch (GenericException $e) {
             throw new StepException($e->getMessage(), $e->getCode(), $e);
         }
+
+        try {
+            $initPubStatic = $this->directoryList->getPath(DirectoryList::DIR_INIT) . '/pub/static';
+            $originalPubStatic = $this->directoryList->getPath(DirectoryList::DIR_STATIC);
+        } catch (UndefinedPackageException $exception) {
+            throw new StepException($exception->getMessage(), $exception->getCode(), $exception);
+        }
+
+        if ($this->config->get(BuildInterface::VAR_SKIP_SCD_MOVE)) {
+            $this->logger->info('Static content was not moved to ./init directory');
+
+            return;
+        }
+
+        $this->cleanInitPubStatic($initPubStatic);
+        $this->moveStaticContent($originalPubStatic, $initPubStatic);
     }
 
     /**
