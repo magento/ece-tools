@@ -87,7 +87,9 @@ class CleanStaticContent implements StepInterface
     {
         try {
             if (!$this->flagManager->exists(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)
-                || !$this->stageConfig->get(DeployInterface::VAR_CLEAN_STATIC_FILES)) {
+                || !$this->stageConfig->get(DeployInterface::VAR_CLEAN_STATIC_FILES)
+                || $this->stageConfig->get(DeployInterface::VAR_SKIP_SCD_MOVE)
+            ) {
                 return;
             }
 

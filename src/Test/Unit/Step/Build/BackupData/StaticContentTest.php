@@ -8,6 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit\Step\Build\BackupData;
 
 use Magento\MagentoCloud\App\Error;
+use Magento\MagentoCloud\Config\GlobalSection;
 use Magento\MagentoCloud\Step\StepException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -49,6 +50,11 @@ class StaticContentTest extends TestCase
     private $flagManagerMock;
 
     /**
+     * @var GlobalSection|MockObject
+     */
+    private $configMock;
+
+    /**
      * @var string
      */
     private $rootInitDir = 'magento_root/init';
@@ -74,6 +80,7 @@ class StaticContentTest extends TestCase
             ->getMockForAbstractClass();
         $this->directoryListMock = $this->createMock(DirectoryList::class);
         $this->flagManagerMock = $this->createMock(FlagManager::class);
+        $this->configMock = $this->createMock(GlobalSection::class);
 
         $this->flagManagerMock->expects($this->once())
             ->method('delete')
@@ -83,7 +90,8 @@ class StaticContentTest extends TestCase
             $this->fileMock,
             $this->loggerMock,
             $this->directoryListMock,
-            $this->flagManagerMock
+            $this->flagManagerMock,
+            $this->configMock
         );
     }
 
@@ -125,6 +133,10 @@ class StaticContentTest extends TestCase
             ->with($this->originalPubStaticPath, $this->initPubStaticPath);
         $this->fileMock->expects($this->never())
             ->method('copyDirectory');
+        $this->configMock->expects($this->once())
+            ->method('get')
+            ->with(GlobalSection::VAR_SKIP_SCD_MOVE)
+            ->willReturn(false);
 
         $this->step->execute();
     }
@@ -171,6 +183,10 @@ class StaticContentTest extends TestCase
             ->with($this->originalPubStaticPath, $this->initPubStaticPath);
         $this->fileMock->expects($this->never())
             ->method('copyDirectory');
+        $this->configMock->expects($this->once())
+            ->method('get')
+            ->with(GlobalSection::VAR_SKIP_SCD_MOVE)
+            ->willReturn(false);
 
         $this->step->execute();
     }
@@ -216,6 +232,10 @@ class StaticContentTest extends TestCase
             ->with($this->originalPubStaticPath, $this->initPubStaticPath);
         $this->fileMock->expects($this->never())
             ->method('copyDirectory');
+        $this->configMock->expects($this->once())
+            ->method('get')
+            ->with(GlobalSection::VAR_SKIP_SCD_MOVE)
+            ->willReturn(false);
 
         $this->step->execute();
     }
@@ -273,6 +293,10 @@ class StaticContentTest extends TestCase
         $this->expectException(StepException::class);
         $this->expectExceptionMessage('some error');
         $this->expectExceptionCode(Error::BUILD_SCD_COPYING_FAILED);
+        $this->configMock->expects($this->once())
+            ->method('get')
+            ->with(GlobalSection::VAR_SKIP_SCD_MOVE)
+            ->willReturn(false);
 
         $this->step->execute();
     }
@@ -313,12 +337,16 @@ class StaticContentTest extends TestCase
             ->method('rename')
             ->with($this->originalPubStaticPath, $this->initPubStaticPath)
             ->willThrowException(new FileSystemException('Some error'));
+        $this->configMock->expects($this->once())
+            ->method('get')
+            ->with(GlobalSection::VAR_SKIP_SCD_MOVE)
+            ->willReturn(false);
     }
 
     /**
      * @throws StepException
      */
-    public function testClearingDirectoryWithFileSystemException()
+    public function testClearingDirectoryWithFileSystemException(): void
     {
         $this->expectException(StepException::class);
         $this->expectExceptionMessage('some error');
@@ -341,6 +369,29 @@ class StaticContentTest extends TestCase
             ->method('backgroundClearDirectory')
             ->with($this->initPubStaticPath)
             ->willThrowException(new FileSystemException('some error'));
+        $this->configMock->expects($this->once())
+            ->method('get')
+            ->with(GlobalSection::VAR_SKIP_SCD_MOVE)
+            ->willReturn(false);
+
+        $this->step->execute();
+    }
+
+    public function testExecuteScdOnBuildAndReadonly(): void
+    {
+        $this->flagManagerMock->expects(self::once())
+            ->method('exists')
+            ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)
+            ->willReturn(true);
+        $this->loggerMock->expects(self::once())
+            ->method('info')
+            ->withConsecutive(
+                ['Static content was not moved to ./init directory']
+            );
+        $this->configMock->expects(self::once())
+            ->method('get')
+            ->with(GlobalSection::VAR_SKIP_SCD_MOVE)
+            ->willReturn(true);
 
         $this->step->execute();
     }
