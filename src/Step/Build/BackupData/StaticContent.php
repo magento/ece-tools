@@ -94,6 +94,8 @@ class StaticContent implements StepInterface
             throw new StepException($exception->getMessage(), $exception->getCode(), $exception);
         }
 
+        return;
+
         if ($this->config->get(BuildInterface::VAR_SKIP_SCD_MOVE)) {
             $this->logger->info('Static content was not moved to ./init directory');
 
