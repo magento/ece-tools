@@ -9,6 +9,7 @@ namespace Magento\MagentoCloud\Step\Build\BackupData;
 
 use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\App\GenericException;
+use Magento\MagentoCloud\Config\GlobalSection;
 use Magento\MagentoCloud\Config\Stage\BuildInterface;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
@@ -45,7 +46,7 @@ class StaticContent implements StepInterface
     private $flagManager;
 
     /**
-     * @var BuildInterface
+     * @var GlobalSection
      */
     private $config;
 
@@ -87,19 +88,17 @@ class StaticContent implements StepInterface
             throw new StepException($e->getMessage(), $e->getCode(), $e);
         }
 
+        if ($this->config->get(GlobalSection::VAR_SKIP_SCD_MOVE)) {
+            $this->logger->info('Static content was not moved to ./init directory');
+
+            return;
+        }
+
         try {
             $initPubStatic = $this->directoryList->getPath(DirectoryList::DIR_INIT) . '/pub/static';
             $originalPubStatic = $this->directoryList->getPath(DirectoryList::DIR_STATIC);
         } catch (UndefinedPackageException $exception) {
             throw new StepException($exception->getMessage(), $exception->getCode(), $exception);
-        }
-
-        return;
-
-        if ($this->config->get(BuildInterface::VAR_SKIP_SCD_MOVE)) {
-            $this->logger->info('Static content was not moved to ./init directory');
-
-            return;
         }
 
         $this->cleanInitPubStatic($initPubStatic);
