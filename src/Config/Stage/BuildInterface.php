@@ -30,9 +30,4 @@ interface BuildInterface extends StageConfigInterface
      * Magento quality patches list
      */
     public const VAR_QUALITY_PATCHES = 'QUALITY_PATCHES';
-
-    /**
-     * Skip SCD move in the end of build phase.
-     */
-    public const VAR_SKIP_SCD_MOVE = 'SKIP_SCD_MOVE';
 }

@@ -49,6 +49,11 @@ interface StageConfigInterface
     public const VAR_DEPLOY_FROM_GIT_OPTIONS = 'DEPLOY_FROM_GIT_OPTIONS';
 
     /**
+     * Skip SCD move in the end of build phase.
+     */
+    public const VAR_SKIP_SCD_MOVE = 'SKIP_SCD_MOVE';
+
+    /**
      * Default minimum logging level.
      */
     public const VAR_MIN_LOGGING_LEVEL = 'MIN_LOGGING_LEVEL';

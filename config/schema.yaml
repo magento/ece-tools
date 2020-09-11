@@ -660,13 +660,13 @@ variables:
   SKIP_SCD_MOVE:
     description: Skips move of static content if pub/static is read-only on deploy.
     type: boolean
-    stage:
-      - build
+    stages:
+      - global
     default:
-      build: false
+      global: true
     examples:
       - stage:
-          build: false
+          global: false
 
   # Environment variables
   ENV_RELATIONSHIPS:
