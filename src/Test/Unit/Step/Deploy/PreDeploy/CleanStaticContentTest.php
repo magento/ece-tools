@@ -10,6 +10,7 @@ namespace Magento\MagentoCloud\Test\Unit\Step\Deploy\PreDeploy;
 use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\ConfigException;
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\EnvironmentDataInterface;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
@@ -62,6 +63,11 @@ class CleanStaticContentTest extends TestCase
     private $stageConfigMock;
 
     /**
+     * @var EnvironmentDataInterface|MockObject
+     */
+    private $environmentDataMock;
+
+    /**
      * @inheritDoc
      */
     protected function setUp(): void
@@ -73,6 +79,7 @@ class CleanStaticContentTest extends TestCase
         $this->directoryListMock = $this->createMock(DirectoryList::class);
         $this->flagManagerMock = $this->createMock(FlagManager::class);
         $this->stageConfigMock = $this->createMock(DeployInterface::class);
+        $this->environmentDataMock = $this->getMockForAbstractClass(EnvironmentDataInterface::class);
 
         $this->step = new CleanStaticContent(
             $this->loggerMock,
@@ -80,7 +87,8 @@ class CleanStaticContentTest extends TestCase
             $this->fileMock,
             $this->directoryListMock,
             $this->flagManagerMock,
-            $this->stageConfigMock
+            $this->stageConfigMock,
+            $this->environmentDataMock
         );
     }
 
@@ -95,8 +103,7 @@ class CleanStaticContentTest extends TestCase
             ->willReturn(true);
         $this->stageConfigMock->method('get')
             ->willReturnMap([
-                [DeployInterface::VAR_CLEAN_STATIC_FILES, true],
-                [DeployInterface::VAR_SKIP_SCD_MOVE, false]
+                [DeployInterface::VAR_CLEAN_STATIC_FILES, true]
             ]);
         $this->directoryListMock->expects($this->once())
             ->method('getMagentoRoot')
@@ -110,6 +117,9 @@ class CleanStaticContentTest extends TestCase
                 ['Static content deployment was performed during build hook, cleaning old content.'],
                 ['Clearing pub/static']
             );
+        $this->environmentDataMock->method('hasMount')
+            ->with(EnvironmentDataInterface::MOUNT_PUB_STATIC)
+            ->willReturn(true);
 
         $this->step->execute();
     }
@@ -146,8 +156,7 @@ class CleanStaticContentTest extends TestCase
             ->willReturn(true);
         $this->stageConfigMock->method('get')
             ->willReturnMap([
-                [DeployInterface::VAR_CLEAN_STATIC_FILES, false],
-                [DeployInterface::VAR_SKIP_SCD_MOVE, false]
+                [DeployInterface::VAR_CLEAN_STATIC_FILES, false]
             ]);
         $this->directoryListMock->expects($this->never())
             ->method('getMagentoRoot')
@@ -155,6 +164,9 @@ class CleanStaticContentTest extends TestCase
         $this->fileMock->expects($this->never())
             ->method('backgroundClearDirectory')
             ->with('magento_root/pub/static');
+        $this->environmentDataMock->method('hasMount')
+            ->with(EnvironmentDataInterface::MOUNT_PUB_STATIC)
+            ->willReturn(true);
 
         $this->step->execute();
     }
@@ -174,12 +186,14 @@ class CleanStaticContentTest extends TestCase
             ->willReturn(true);
         $this->stageConfigMock->method('get')
             ->willReturnMap([
-                [DeployInterface::VAR_CLEAN_STATIC_FILES, true],
-                [DeployInterface::VAR_SKIP_SCD_MOVE, false]
+                [DeployInterface::VAR_CLEAN_STATIC_FILES, true]
             ]);
         $this->fileMock->expects($this->once())
             ->method('backgroundClearDirectory')
             ->willThrowException(new FileSystemException('some error'));
+        $this->environmentDataMock->method('hasMount')
+            ->with(EnvironmentDataInterface::MOUNT_PUB_STATIC)
+            ->willReturn(true);
 
         $this->step->execute();
     }
@@ -212,8 +226,7 @@ class CleanStaticContentTest extends TestCase
             ->willReturn(true);
         $this->stageConfigMock->method('get')
             ->willReturnMap([
-                [DeployInterface::VAR_CLEAN_STATIC_FILES, true],
-                [DeployInterface::VAR_SKIP_SCD_MOVE, true]
+                [DeployInterface::VAR_CLEAN_STATIC_FILES, true]
             ]);
         $this->directoryListMock->expects(self::never())
             ->method('getMagentoRoot')
@@ -221,6 +234,9 @@ class CleanStaticContentTest extends TestCase
         $this->fileMock->expects(self::never())
             ->method('backgroundClearDirectory')
             ->with('magento_root/pub/static');
+        $this->environmentDataMock->method('hasMount')
+            ->with(EnvironmentDataInterface::MOUNT_PUB_STATIC)
+            ->willReturn(false);
 
         $this->step->execute();
     }

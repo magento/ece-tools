@@ -657,13 +657,6 @@ variables:
               - MC-31387
               - MDVA-4567
               - MC-45634
-  SKIP_SCD_MOVE:
-    description: Skips move of static content if pub/static is read-only on deploy.
-    type: boolean
-    stages:
-      - global
-    default:
-      global: false
 
   # Environment variables
   ENV_RELATIONSHIPS:

@@ -153,6 +153,7 @@ class EnvironmentData implements EnvironmentDataInterface
 
     /**
      * Returns name of environment branch
+     *
      * @return string
      *
      */
@@ -160,7 +161,7 @@ class EnvironmentData implements EnvironmentDataInterface
     {
         $envVarName = $this->systemConfig->get(SystemConfigInterface::VAR_ENV_ENVIRONMENT);
 
-        return $this->getEnv($envVarName) ? (string) $this->getEnv($envVarName) : '';
+        return $this->getEnv($envVarName) ? (string)$this->getEnv($envVarName) : '';
     }
 
     /**
@@ -173,5 +174,33 @@ class EnvironmentData implements EnvironmentDataInterface
         }
 
         return $this->data['mage-mode'] = $this->getEnv('MAGE_MODE') ?: null;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function hasMount(string $name): bool
+    {
+        $application = $this->getApplication();
+
+        /**
+         * File config does not have slash in the beginning.
+         */
+        $name = ltrim($name, '/');
+
+        if (isset($application['mounts'][$name])) {
+            return true;
+        }
+
+        /**
+         * Environment variable have slash in the beginning.
+         */
+        $name = '/' . $name;
+
+        if (isset($application['mounts'][$name])) {
+            return true;
+        }
+
+        return false;
     }
 }

@@ -10,6 +10,7 @@ namespace Magento\MagentoCloud\Step\Deploy\PreDeploy;
 use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\EnvironmentDataInterface;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
@@ -55,6 +56,11 @@ class CleanStaticContent implements StepInterface
     private $stageConfig;
 
     /**
+     * @var EnvironmentDataInterface
+     */
+    private $environmentData;
+
+    /**
      * @param LoggerInterface $logger
      * @param Environment $env
      * @param File $file
@@ -68,7 +74,8 @@ class CleanStaticContent implements StepInterface
         File $file,
         DirectoryList $directoryList,
         FlagManager $flagManager,
-        DeployInterface $stageConfig
+        DeployInterface $stageConfig,
+        EnvironmentDataInterface $environmentData
     ) {
         $this->logger = $logger;
         $this->env = $env;
@@ -76,6 +83,7 @@ class CleanStaticContent implements StepInterface
         $this->directoryList = $directoryList;
         $this->flagManager = $flagManager;
         $this->stageConfig = $stageConfig;
+        $this->environmentData = $environmentData;
     }
 
     /**
@@ -83,12 +91,12 @@ class CleanStaticContent implements StepInterface
      *
      * {@inheritdoc}
      */
-    public function execute()
+    public function execute(): void
     {
         try {
             if (!$this->flagManager->exists(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)
                 || !$this->stageConfig->get(DeployInterface::VAR_CLEAN_STATIC_FILES)
-                || $this->stageConfig->get(DeployInterface::VAR_SKIP_SCD_MOVE)
+                || !$this->environmentData->hasMount(EnvironmentDataInterface::MOUNT_PUB_STATIC)
             ) {
                 return;
             }

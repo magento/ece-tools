@@ -8,7 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit\Step\Build\BackupData;
 
 use Magento\MagentoCloud\App\Error;
-use Magento\MagentoCloud\Config\GlobalSection;
+use Magento\MagentoCloud\Config\EnvironmentDataInterface;
 use Magento\MagentoCloud\Step\StepException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -50,9 +50,9 @@ class StaticContentTest extends TestCase
     private $flagManagerMock;
 
     /**
-     * @var GlobalSection|MockObject
+     * @var EnvironmentDataInterface|MockObject
      */
-    private $configMock;
+    private $environmentDataMock;
 
     /**
      * @var string
@@ -80,7 +80,7 @@ class StaticContentTest extends TestCase
             ->getMockForAbstractClass();
         $this->directoryListMock = $this->createMock(DirectoryList::class);
         $this->flagManagerMock = $this->createMock(FlagManager::class);
-        $this->configMock = $this->createMock(GlobalSection::class);
+        $this->environmentDataMock = $this->getMockForAbstractClass(EnvironmentDataInterface::class);
 
         $this->flagManagerMock->expects($this->once())
             ->method('delete')
@@ -91,7 +91,7 @@ class StaticContentTest extends TestCase
             $this->loggerMock,
             $this->directoryListMock,
             $this->flagManagerMock,
-            $this->configMock
+            $this->environmentDataMock
         );
     }
 
@@ -133,10 +133,10 @@ class StaticContentTest extends TestCase
             ->with($this->originalPubStaticPath, $this->initPubStaticPath);
         $this->fileMock->expects($this->never())
             ->method('copyDirectory');
-        $this->configMock->expects($this->once())
-            ->method('get')
-            ->with(GlobalSection::VAR_SKIP_SCD_MOVE)
-            ->willReturn(false);
+        $this->environmentDataMock->expects($this->once())
+            ->method('hasMount')
+            ->with(EnvironmentDataInterface::MOUNT_PUB_STATIC)
+            ->willReturn(true);
 
         $this->step->execute();
     }
@@ -183,10 +183,10 @@ class StaticContentTest extends TestCase
             ->with($this->originalPubStaticPath, $this->initPubStaticPath);
         $this->fileMock->expects($this->never())
             ->method('copyDirectory');
-        $this->configMock->expects($this->once())
-            ->method('get')
-            ->with(GlobalSection::VAR_SKIP_SCD_MOVE)
-            ->willReturn(false);
+        $this->environmentDataMock->expects($this->once())
+            ->method('hasMount')
+            ->with(EnvironmentDataInterface::MOUNT_PUB_STATIC)
+            ->willReturn(true);
 
         $this->step->execute();
     }
@@ -232,10 +232,10 @@ class StaticContentTest extends TestCase
             ->with($this->originalPubStaticPath, $this->initPubStaticPath);
         $this->fileMock->expects($this->never())
             ->method('copyDirectory');
-        $this->configMock->expects($this->once())
-            ->method('get')
-            ->with(GlobalSection::VAR_SKIP_SCD_MOVE)
-            ->willReturn(false);
+        $this->environmentDataMock->expects($this->once())
+            ->method('hasMount')
+            ->with(EnvironmentDataInterface::MOUNT_PUB_STATIC)
+            ->willReturn(true);
 
         $this->step->execute();
     }
@@ -293,10 +293,10 @@ class StaticContentTest extends TestCase
         $this->expectException(StepException::class);
         $this->expectExceptionMessage('some error');
         $this->expectExceptionCode(Error::BUILD_SCD_COPYING_FAILED);
-        $this->configMock->expects($this->once())
-            ->method('get')
-            ->with(GlobalSection::VAR_SKIP_SCD_MOVE)
-            ->willReturn(false);
+        $this->environmentDataMock->expects($this->once())
+            ->method('hasMount')
+            ->with(EnvironmentDataInterface::MOUNT_PUB_STATIC)
+            ->willReturn(true);
 
         $this->step->execute();
     }
@@ -337,10 +337,10 @@ class StaticContentTest extends TestCase
             ->method('rename')
             ->with($this->originalPubStaticPath, $this->initPubStaticPath)
             ->willThrowException(new FileSystemException('Some error'));
-        $this->configMock->expects($this->once())
-            ->method('get')
-            ->with(GlobalSection::VAR_SKIP_SCD_MOVE)
-            ->willReturn(false);
+        $this->environmentDataMock->expects($this->once())
+            ->method('hasMount')
+            ->with(EnvironmentDataInterface::MOUNT_PUB_STATIC)
+            ->willReturn(true);
     }
 
     /**
@@ -369,10 +369,10 @@ class StaticContentTest extends TestCase
             ->method('backgroundClearDirectory')
             ->with($this->initPubStaticPath)
             ->willThrowException(new FileSystemException('some error'));
-        $this->configMock->expects($this->once())
-            ->method('get')
-            ->with(GlobalSection::VAR_SKIP_SCD_MOVE)
-            ->willReturn(false);
+        $this->environmentDataMock->expects($this->once())
+            ->method('hasMount')
+            ->with(EnvironmentDataInterface::MOUNT_PUB_STATIC)
+            ->willReturn(true);
 
         $this->step->execute();
     }
@@ -388,10 +388,10 @@ class StaticContentTest extends TestCase
             ->withConsecutive(
                 ['Static content was not moved to ./init directory']
             );
-        $this->configMock->expects(self::once())
-            ->method('get')
-            ->with(GlobalSection::VAR_SKIP_SCD_MOVE)
-            ->willReturn(true);
+        $this->environmentDataMock->expects($this->once())
+            ->method('hasMount')
+            ->with(EnvironmentDataInterface::MOUNT_PUB_STATIC)
+            ->willReturn(false);
 
         $this->step->execute();
     }

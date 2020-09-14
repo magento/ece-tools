@@ -9,7 +9,7 @@ namespace Magento\MagentoCloud\Step\Build\BackupData;
 
 use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\App\GenericException;
-use Magento\MagentoCloud\Config\GlobalSection;
+use Magento\MagentoCloud\Config\EnvironmentDataInterface;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
@@ -45,29 +45,29 @@ class StaticContent implements StepInterface
     private $flagManager;
 
     /**
-     * @var GlobalSection
+     * @var EnvironmentDataInterface
      */
-    private $config;
+    private $environmentData;
 
     /**
      * @param File $file
      * @param LoggerInterface $logger
      * @param DirectoryList $directoryList
      * @param FlagManager $flagManager
-     * @param GlobalSection $config
+     * @param EnvironmentDataInterface $environmentData
      */
     public function __construct(
         File $file,
         LoggerInterface $logger,
         DirectoryList $directoryList,
         FlagManager $flagManager,
-        GlobalSection $config
+        EnvironmentDataInterface $environmentData
     ) {
         $this->file = $file;
         $this->logger = $logger;
         $this->directoryList = $directoryList;
         $this->flagManager = $flagManager;
-        $this->config = $config;
+        $this->environmentData = $environmentData;
     }
 
     /**
@@ -87,7 +87,7 @@ class StaticContent implements StepInterface
             throw new StepException($e->getMessage(), $e->getCode(), $e);
         }
 
-        if ($this->config->get(GlobalSection::VAR_SKIP_SCD_MOVE)) {
+        if (!$this->environmentData->hasMount(EnvironmentDataInterface::MOUNT_PUB_STATIC)) {
             $this->logger->info('Static content was not moved to ./init directory');
 
             return;
