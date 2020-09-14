@@ -157,6 +157,9 @@ class Environment
     /**
      * Checks whether application has specific mount.
      *
+     * The name of the mount may have slash in the beginning (env variable)
+     * or does not have it. Method checks both cases.
+     *
      * @param string $name
      * @return bool
      */
@@ -164,24 +167,9 @@ class Environment
     {
         $application = $this->getApplication();
 
-        /**
-         * File config does not have slash in the beginning.
-         */
         $name = ltrim($name, '/');
+        $slashName = '/' . $name;
 
-        if (isset($application['mounts'][$name])) {
-            return true;
-        }
-
-        /**
-         * Environment variable have slash in the beginning.
-         */
-        $name = '/' . $name;
-
-        if (isset($application['mounts'][$name])) {
-            return true;
-        }
-
-        return false;
+        return isset($application['mounts'][$name]) || isset($application['mounts'][$slashName]);
     }
 }
