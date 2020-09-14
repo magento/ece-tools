@@ -14,8 +14,6 @@ namespace Magento\MagentoCloud\Config;
  */
 interface EnvironmentDataInterface
 {
-    public const MOUNT_PUB_STATIC = 'pub/static';
-
     /**
      * 'getEnv' method is an abstraction for _ENV and getenv.
      * If _ENV is enabled in php.ini, use that.  If not, fall back to use getenv.
@@ -65,12 +63,4 @@ interface EnvironmentDataInterface
      * @return string|null
      */
     public function getMageMode(): ?string;
-
-    /**
-     * Checks whether application has specific mount.
-     *
-     * @param string $name
-     * @return bool
-     */
-    public function hasMount(string $name): bool;
 }

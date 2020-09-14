@@ -175,32 +175,4 @@ class EnvironmentData implements EnvironmentDataInterface
 
         return $this->data['mage-mode'] = $this->getEnv('MAGE_MODE') ?: null;
     }
-
-    /**
-     * @inheritDoc
-     */
-    public function hasMount(string $name): bool
-    {
-        $application = $this->getApplication();
-
-        /**
-         * File config does not have slash in the beginning.
-         */
-        $name = ltrim($name, '/');
-
-        if (isset($application['mounts'][$name])) {
-            return true;
-        }
-
-        /**
-         * Environment variable have slash in the beginning.
-         */
-        $name = '/' . $name;
-
-        if (isset($application['mounts'][$name])) {
-            return true;
-        }
-
-        return false;
-    }
 }

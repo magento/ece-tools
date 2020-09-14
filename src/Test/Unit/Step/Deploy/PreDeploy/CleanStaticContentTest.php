@@ -10,7 +10,6 @@ namespace Magento\MagentoCloud\Test\Unit\Step\Deploy\PreDeploy;
 use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\ConfigException;
 use Magento\MagentoCloud\Config\Environment;
-use Magento\MagentoCloud\Config\EnvironmentDataInterface;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
@@ -63,11 +62,6 @@ class CleanStaticContentTest extends TestCase
     private $stageConfigMock;
 
     /**
-     * @var EnvironmentDataInterface|MockObject
-     */
-    private $environmentDataMock;
-
-    /**
      * @inheritDoc
      */
     protected function setUp(): void
@@ -79,7 +73,6 @@ class CleanStaticContentTest extends TestCase
         $this->directoryListMock = $this->createMock(DirectoryList::class);
         $this->flagManagerMock = $this->createMock(FlagManager::class);
         $this->stageConfigMock = $this->createMock(DeployInterface::class);
-        $this->environmentDataMock = $this->getMockForAbstractClass(EnvironmentDataInterface::class);
 
         $this->step = new CleanStaticContent(
             $this->loggerMock,
@@ -87,8 +80,7 @@ class CleanStaticContentTest extends TestCase
             $this->fileMock,
             $this->directoryListMock,
             $this->flagManagerMock,
-            $this->stageConfigMock,
-            $this->environmentDataMock
+            $this->stageConfigMock
         );
     }
 
@@ -117,8 +109,8 @@ class CleanStaticContentTest extends TestCase
                 ['Static content deployment was performed during build hook, cleaning old content.'],
                 ['Clearing pub/static']
             );
-        $this->environmentDataMock->method('hasMount')
-            ->with(EnvironmentDataInterface::MOUNT_PUB_STATIC)
+        $this->environmentMock->method('hasMount')
+            ->with(Environment::MOUNT_PUB_STATIC)
             ->willReturn(true);
 
         $this->step->execute();
@@ -164,8 +156,8 @@ class CleanStaticContentTest extends TestCase
         $this->fileMock->expects($this->never())
             ->method('backgroundClearDirectory')
             ->with('magento_root/pub/static');
-        $this->environmentDataMock->method('hasMount')
-            ->with(EnvironmentDataInterface::MOUNT_PUB_STATIC)
+        $this->environmentMock->method('hasMount')
+            ->with(Environment::MOUNT_PUB_STATIC)
             ->willReturn(true);
 
         $this->step->execute();
@@ -191,8 +183,8 @@ class CleanStaticContentTest extends TestCase
         $this->fileMock->expects($this->once())
             ->method('backgroundClearDirectory')
             ->willThrowException(new FileSystemException('some error'));
-        $this->environmentDataMock->method('hasMount')
-            ->with(EnvironmentDataInterface::MOUNT_PUB_STATIC)
+        $this->environmentMock->method('hasMount')
+            ->with(Environment::MOUNT_PUB_STATIC)
             ->willReturn(true);
 
         $this->step->execute();
@@ -234,8 +226,8 @@ class CleanStaticContentTest extends TestCase
         $this->fileMock->expects(self::never())
             ->method('backgroundClearDirectory')
             ->with('magento_root/pub/static');
-        $this->environmentDataMock->method('hasMount')
-            ->with(EnvironmentDataInterface::MOUNT_PUB_STATIC)
+        $this->environmentMock->method('hasMount')
+            ->with(Environment::MOUNT_PUB_STATIC)
             ->willReturn(false);
 
         $this->step->execute();

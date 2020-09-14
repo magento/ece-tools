@@ -10,7 +10,6 @@ namespace Magento\MagentoCloud\Step\Deploy\PreDeploy;
 use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Config\Environment;
-use Magento\MagentoCloud\Config\EnvironmentDataInterface;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
@@ -28,7 +27,7 @@ class CleanStaticContent implements StepInterface
     /**
      * @var Environment
      */
-    private $env;
+    private $environment;
 
     /**
      * @var LoggerInterface
@@ -56,13 +55,8 @@ class CleanStaticContent implements StepInterface
     private $stageConfig;
 
     /**
-     * @var EnvironmentDataInterface
-     */
-    private $environmentData;
-
-    /**
      * @param LoggerInterface $logger
-     * @param Environment $env
+     * @param Environment $environment
      * @param File $file
      * @param DirectoryList $directoryList
      * @param FlagManager $flagManager
@@ -70,20 +64,18 @@ class CleanStaticContent implements StepInterface
      */
     public function __construct(
         LoggerInterface $logger,
-        Environment $env,
+        Environment $environment,
         File $file,
         DirectoryList $directoryList,
         FlagManager $flagManager,
-        DeployInterface $stageConfig,
-        EnvironmentDataInterface $environmentData
+        DeployInterface $stageConfig
     ) {
         $this->logger = $logger;
-        $this->env = $env;
+        $this->environment = $environment;
         $this->file = $file;
         $this->directoryList = $directoryList;
         $this->flagManager = $flagManager;
         $this->stageConfig = $stageConfig;
-        $this->environmentData = $environmentData;
     }
 
     /**
@@ -96,7 +88,7 @@ class CleanStaticContent implements StepInterface
         try {
             if (!$this->flagManager->exists(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)
                 || !$this->stageConfig->get(DeployInterface::VAR_CLEAN_STATIC_FILES)
-                || !$this->environmentData->hasMount(EnvironmentDataInterface::MOUNT_PUB_STATIC)
+                || !$this->environment->hasMount(Environment::MOUNT_PUB_STATIC)
             ) {
                 return;
             }

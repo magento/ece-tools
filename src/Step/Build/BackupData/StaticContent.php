@@ -9,7 +9,7 @@ namespace Magento\MagentoCloud\Step\Build\BackupData;
 
 use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\App\GenericException;
-use Magento\MagentoCloud\Config\EnvironmentDataInterface;
+use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
@@ -45,29 +45,29 @@ class StaticContent implements StepInterface
     private $flagManager;
 
     /**
-     * @var EnvironmentDataInterface
+     * @var Environment
      */
-    private $environmentData;
+    private $environment;
 
     /**
      * @param File $file
      * @param LoggerInterface $logger
      * @param DirectoryList $directoryList
      * @param FlagManager $flagManager
-     * @param EnvironmentDataInterface $environmentData
+     * @param Environment $environmentData
      */
     public function __construct(
         File $file,
         LoggerInterface $logger,
         DirectoryList $directoryList,
         FlagManager $flagManager,
-        EnvironmentDataInterface $environmentData
+        Environment $environmentData
     ) {
         $this->file = $file;
         $this->logger = $logger;
         $this->directoryList = $directoryList;
         $this->flagManager = $flagManager;
-        $this->environmentData = $environmentData;
+        $this->environment = $environmentData;
     }
 
     /**
@@ -87,7 +87,7 @@ class StaticContent implements StepInterface
             throw new StepException($e->getMessage(), $e->getCode(), $e);
         }
 
-        if (!$this->environmentData->hasMount(EnvironmentDataInterface::MOUNT_PUB_STATIC)) {
+        if (!$this->environment->hasMount(Environment::MOUNT_PUB_STATIC)) {
             $this->logger->info('Static content was not moved to ./init directory');
 
             return;
