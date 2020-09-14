@@ -61,6 +61,14 @@ abstract class AbstractCest
     protected function prepareWorkplace(\CliTester $I, string $templateVersion): void
     {
         $I->cleanupWorkDir();
+
+        if ($I->isCacheWorkDirExists($templateVersion)) {
+            $I->restoreWorkDirFromCache($templateVersion);
+            $this->removeESIfExists($I, $templateVersion);
+
+            return;
+        }
+
         $I->cloneTemplateToWorkDir($templateVersion);
         $I->createAuthJson();
         $I->createArtifactsDir();
@@ -90,6 +98,7 @@ abstract class AbstractCest
 
         if ($this->runComposerUpdate) {
             $I->composerUpdate();
+            $I->cacheWorkDir($templateVersion);
         }
 
         $this->removeESIfExists($I, $templateVersion);
