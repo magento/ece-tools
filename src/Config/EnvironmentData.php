@@ -136,19 +136,43 @@ class EnvironmentData implements EnvironmentDataInterface
             return $this->data['application'];
         }
 
-        $application = $this->getEnvVar(SystemConfigInterface::VAR_ENV_APPLICATION, []);
+        $applicationEnvConfig = $this->getEnvVar(SystemConfigInterface::VAR_ENV_APPLICATION, []);
+        $applicationFileConfig = $this->readApplicationConfig();
 
-        if (!$application) {
+        if (!$applicationEnvConfig) {
+            return $this->data['application'] = $applicationFileConfig;
+        }
+
+        /**
+         * Temporary fix for the case when environment data does not accurately represent file configuration.
+         *
+         * @url https://github.com/magento/magento-cloud-docker/issues/292
+         */
+        if (!isset($applicationEnvConfig['mounts']) && isset($applicationFileConfig['mounts'])) {
+            $applicationEnvConfig['mounts'] = $applicationFileConfig['mounts'];
+        }
+
+        return $this->data['application'] = $applicationEnvConfig;
+    }
+
+    /**
+     * Read file config file if exists.
+     *
+     * @return array
+     */
+    private function readApplicationConfig(): array
+    {
+        $configFile = $this->fileList->getAppConfig();
+
+        if ($this->file->isExists($configFile)) {
             try {
-                $application = Yaml::parse(
-                    $this->file->fileGetContents($this->fileList->getAppConfig())
-                );
-            } catch (FileSystemException $e) {
+                return Yaml::parse($this->file->fileGetContents($configFile));
+            } catch (FileSystemException $exception) {
                 // Do nothing as $application needs to be empty
             }
         }
 
-        return $this->data['application'] = $application;
+        return [];
     }
 
     /**
