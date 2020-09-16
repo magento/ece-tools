@@ -56,7 +56,7 @@ class BuildDirCopier
      *
      * @throws UndefinedPackageException
      */
-    public function copy(string $dir, string $strategyName)
+    public function copy(string $dir, string $strategyName): void
     {
         try {
             $magentoRoot = $this->directoryList->getMagentoRoot();

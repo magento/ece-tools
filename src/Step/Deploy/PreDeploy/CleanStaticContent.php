@@ -27,7 +27,7 @@ class CleanStaticContent implements StepInterface
     /**
      * @var Environment
      */
-    private $env;
+    private $environment;
 
     /**
      * @var LoggerInterface
@@ -56,7 +56,7 @@ class CleanStaticContent implements StepInterface
 
     /**
      * @param LoggerInterface $logger
-     * @param Environment $env
+     * @param Environment $environment
      * @param File $file
      * @param DirectoryList $directoryList
      * @param FlagManager $flagManager
@@ -64,14 +64,14 @@ class CleanStaticContent implements StepInterface
      */
     public function __construct(
         LoggerInterface $logger,
-        Environment $env,
+        Environment $environment,
         File $file,
         DirectoryList $directoryList,
         FlagManager $flagManager,
         DeployInterface $stageConfig
     ) {
         $this->logger = $logger;
-        $this->env = $env;
+        $this->environment = $environment;
         $this->file = $file;
         $this->directoryList = $directoryList;
         $this->flagManager = $flagManager;
@@ -83,11 +83,13 @@ class CleanStaticContent implements StepInterface
      *
      * {@inheritdoc}
      */
-    public function execute()
+    public function execute(): void
     {
         try {
             if (!$this->flagManager->exists(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)
-                || !$this->stageConfig->get(DeployInterface::VAR_CLEAN_STATIC_FILES)) {
+                || !$this->stageConfig->get(DeployInterface::VAR_CLEAN_STATIC_FILES)
+                || !$this->environment->hasMount(Environment::MOUNT_PUB_STATIC)
+            ) {
                 return;
             }
 
