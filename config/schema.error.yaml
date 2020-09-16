@@ -340,7 +340,7 @@
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_WRONG_SEARCH_ENGINE:
     step: validate-config
     title: 'The search engine must be set to Elasticsearch for Magento >= 2.4.0'
-    suggestion: 'Be sure that engine option does not exist in SEARCH_CONFIGURATION variable or its value is set for elasticsearch.'
+    suggestion: 'Check the SEARCH_CONFIGURATION variable for the  `engine` option. If it is configured, remove the option, or set the value to elasticsearch.'
     stage: deploy
     type: critical
 !php/const Magento\MagentoCloud\App\Error::PD_DEPLOY_IS_FAILED:
