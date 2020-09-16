@@ -337,6 +337,12 @@
     suggestion: 'Install Elasticsearch service'
     stage: deploy
     type: critical
+!php/const Magento\MagentoCloud\App\Error::DEPLOY_WRONG_SEARCH_ENGINE_CONFIGURED:
+    step: validate-config
+    title: 'Elasticsearch must be set as search engine for Magento > 2.4.0'
+    suggestion: 'Update your configuration to use elasticsearch as search engine'
+    stage: deploy
+    type: critical
 !php/const Magento\MagentoCloud\App\Error::PD_DEPLOY_IS_FAILED:
     step: is-deploy-failed
     title: 'Deploy stage failed'

@@ -74,6 +74,7 @@ Critical errors indicate a problem with the Magento Commerce Cloud project confi
 | 132 |  | Can not connect to the Elasticsearch service | Check that credentials for elasticsearch are correct and service is running |
 | 133 | validate-config | Remove Magento Braintree module configuration which is no longer supported in Magento 2.4 and later versions. | Support for the Braintree module is no longer included with Magento 2.4.0 and later. Remove the CONFIG__STORES__DEFAULT__PAYMENT__BRAINTREE__CHANNEL variable from the variables section of the .magento.app.yaml file. For Braintree support, use an official Braintree Payments extension from the Magento Marketplace instead. |
 | 134 | validate-config | Magento 2.4.0 requires Elasticsearch service to be installed | Install Elasticsearch service |
+| 135 | validate-config | Elasticsearch must be set as search engine for Magento > 2.4.0 | Update your configuration to use elasticsearch as search engine |
 
 ### Post-deploy stage
 
