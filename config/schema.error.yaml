@@ -331,13 +331,13 @@
     suggestion: 'Support for the Braintree module is no longer included with Magento 2.4.0 and later. Remove the CONFIG__STORES__DEFAULT__PAYMENT__BRAINTREE__CHANNEL variable from the variables section of the .magento.app.yaml file. For Braintree support, use an official Braintree Payments extension from the Magento Marketplace instead.'
     stage: deploy
     type: critical
-!php/const Magento\MagentoCloud\App\Error::DEPLOY_WRONG_SEARCH_ENGINE:
+!php/const Magento\MagentoCloud\App\Error::DEPLOY_ES_SERVICE_NOT_INSTALLED:
     step: validate-config
     title: 'Magento 2.4.0 requires Elasticsearch service to be installed'
     suggestion: 'Install Elasticsearch service'
     stage: deploy
     type: critical
-!php/const Magento\MagentoCloud\App\Error::DEPLOY_WRONG_SEARCH_ENGINE_CONFIGURED:
+!php/const Magento\MagentoCloud\App\Error::DEPLOY_WRONG_SEARCH_ENGINE:
     step: validate-config
     title: 'The search engine must be set to Elasticsearch for Magento >= 2.4.0'
     suggestion: 'Update your configuration to use Elasticsearch as the search engine'

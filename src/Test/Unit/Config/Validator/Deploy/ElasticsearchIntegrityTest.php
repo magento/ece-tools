@@ -86,7 +86,7 @@ class ElasticsearchIntegrityTest extends TestCase
             ->willReturn(false);
         $this->resultFactoryMock->expects($this->once())
             ->method('errorByCode')
-            ->with(Error::DEPLOY_WRONG_SEARCH_ENGINE);
+            ->with(Error::DEPLOY_ES_SERVICE_NOT_INSTALLED);
 
         $this->validator->validate();
     }

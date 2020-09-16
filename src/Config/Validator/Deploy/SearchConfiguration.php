@@ -76,7 +76,7 @@ class SearchConfiguration implements ValidatorInterface
                 && isset($searchConfig['engine'])
                 && $searchConfig['engine'] != ElasticSearch::ENGINE_NAME
             ) {
-                return $this->resultFactory->errorByCode(Error::DEPLOY_WRONG_SEARCH_ENGINE_CONFIGURED);
+                return $this->resultFactory->errorByCode(Error::DEPLOY_WRONG_SEARCH_ENGINE);
             }
 
             if ($this->configMerger->isEmpty($searchConfig) || $this->configMerger->isMergeRequired($searchConfig)) {
