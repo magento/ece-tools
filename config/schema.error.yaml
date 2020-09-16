@@ -322,7 +322,7 @@
     type: critical
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_ES_CANNOT_CONNECT:
     title: 'Can not connect to the Elasticsearch service'
-    suggestion: 'Check that credentials for elasticsearch are correct and service is running'
+    suggestion: 'Check for valid elasticsearch credentials and verify that the  service is running'
     stage: deploy
     type: critical
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_WRONG_BRAINTREE_VARIABLE:
