@@ -24,6 +24,8 @@ class Environment
     public const VAL_DISABLED = 'disabled';
     public const VARIABLE_CRYPT_KEY = 'CRYPT_KEY';
 
+    public const MOUNT_PUB_STATIC = 'pub/static';
+
     /**
      * The environment variable for controlling the directory nesting level for error reporting
      */
@@ -150,5 +152,24 @@ class Environment
 
         return !empty($branchName)
             && preg_match(self::GIT_MASTER_BRANCH_RE, $branchName);
+    }
+
+    /**
+     * Checks whether application has specific mount.
+     *
+     * The name of the mount may have slash in the beginning (env variable)
+     * or does not have it. Method checks both cases.
+     *
+     * @param string $name
+     * @return bool
+     */
+    public function hasMount(string $name): bool
+    {
+        $application = $this->getApplication();
+
+        $name = ltrim($name, '/');
+        $slashName = '/' . $name;
+
+        return isset($application['mounts'][$name]) || isset($application['mounts'][$slashName]);
     }
 }

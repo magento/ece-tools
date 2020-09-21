@@ -60,7 +60,7 @@ class ElasticSearchIntegrity implements ValidatorInterface
             if ($this->magentoVersion->isGreaterOrEqual('2.4.0')
                 && !$this->elasticsearch->isInstalled()
             ) {
-                return $this->resultFactory->errorByCode(Error::DEPLOY_WRONG_SEARCH_ENGINE);
+                return $this->resultFactory->errorByCode(Error::DEPLOY_ES_SERVICE_NOT_INSTALLED);
             }
         } catch (UndefinedPackageException | FileSystemException $exception) {
             throw new ValidatorException($exception->getMessage(), $exception->getCode(), $exception);

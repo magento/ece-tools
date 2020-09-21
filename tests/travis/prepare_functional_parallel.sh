@@ -8,14 +8,8 @@ trap '>&2 echo Error: Command \`$BASH_COMMAND\` on line $LINENO failed with exit
 
 php_version="${TRAVIS_PHP_VERSION//./}"
 
-readarray -t test_set_list <<< "$(grep -Rl php${php_version} --exclude='*AcceptanceCest.php' --exclude='*AcceptanceCeCest.php' --exclude='*AcceptanceCe71Cest.php' --exclude='*AcceptanceCe72Cest.php' --exclude='*AcceptanceCe73Cest.php' --exclude='*AbstractCest.php' src/Test/Functional/Acceptance | sort)"
+test_set_list=($(grep -Rl php${php_version} --exclude='*AcceptanceCest.php' --exclude='*AcceptanceCeCest.php' --exclude='*AcceptanceCe71Cest.php' --exclude='*AcceptanceCe72Cest.php' --exclude='*AcceptanceCe73Cest.php' --exclude='*AbstractCest.php' src/Test/Functional/Acceptance | sort))
 group_count=6
-
-if [ $(( ${#test_set_list[@]} % group_count )) -eq 0 ]; then
-  element_in_group=$(printf "%.0f" "$(echo "scale=2;(${#test_set_list[@]})/${group_count}" | bc)")
-else
-  element_in_group=$(printf "%.0f" "$(echo "scale=2;(${#test_set_list[@]} + ${group_count} - 1)/${group_count}" | bc)")
-fi
 
 cp codeception.dist.yml codeception.yml
 echo "groups:" >> codeception.yml
@@ -30,15 +24,11 @@ else
   start_group_id=1
 fi
 
-for((i=0, group_id=start_group_id; i < ${#test_set_list[@]}; i+=element_in_group, group_id++))
+for((i=0, group_id=start_group_id; i < ${#test_set_list[@]}; i+=1, group_id++))
 do
-  test_file_group=( "${test_set_list[@]:i:element_in_group}" )
-  echo "Batch #${group_id} = ${#test_file_group[@]}"
-
+  if [ $group_id -gt $group_count ]; then
+      group_id=$start_group_id
+  fi
   group_file="tests/functional/_data/parallel_${php_version}_$group_id.yml"
-
-  for test_file in "${test_file_group[@]}"
-  do
-    echo "$test_file" >> "$group_file"
-  done
+  echo "${test_set_list[i]}" >> "$group_file"
 done

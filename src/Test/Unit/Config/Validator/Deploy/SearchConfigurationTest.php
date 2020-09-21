@@ -14,6 +14,9 @@ use Magento\MagentoCloud\Config\Validator\Deploy\SearchConfiguration;
 use Magento\MagentoCloud\Config\Validator\Result\Error;
 use Magento\MagentoCloud\Config\Validator\Result\Success;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
+use Magento\MagentoCloud\Config\ValidatorException;
+use Magento\MagentoCloud\Package\MagentoVersion;
+use Magento\MagentoCloud\Package\UndefinedPackageException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -38,6 +41,11 @@ class SearchConfigurationTest extends TestCase
     private $stageConfigMock;
 
     /**
+     * @var MagentoVersion|MockObject
+     */
+    private $magentoVersionMock;
+
+    /**
      * @inheritdoc
      */
     protected function setUp()
@@ -47,11 +55,13 @@ class SearchConfigurationTest extends TestCase
             'error' => $this->createMock(Error::class)
         ]);
         $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
+        $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
 
         $this->validator = new SearchConfiguration(
             $this->resultFactoryMock,
             $this->stageConfigMock,
-            new ConfigMerger()
+            new ConfigMerger(),
+            $this->magentoVersionMock
         );
     }
 
@@ -75,10 +85,16 @@ class SearchConfigurationTest extends TestCase
     /**
      * @param array $searchConfiguration
      * @param string $expectedResultClass
+     * @param bool $isMagento24plus
      * @dataProvider validateDataProvider
+     * @throws ValidatorException
      */
-    public function testValidate(array $searchConfiguration, string $expectedResultClass)
+    public function testValidate(array $searchConfiguration, string $expectedResultClass, bool $isMagento24plus = false)
     {
+        $this->magentoVersionMock->expects($this->once())
+            ->method('isGreaterOrEqual')
+            ->with('2.4.0')
+            ->willReturn($isMagento24plus);
         $this->stageConfigMock->expects($this->once())
             ->method('get')
             ->with(DeployInterface::VAR_SEARCH_CONFIGURATION)
@@ -125,13 +141,58 @@ class SearchConfigurationTest extends TestCase
                 Success::class,
             ],
             [
-
                 [
                     'engine' => 'mysql',
                     '_merge' => true,
                 ],
                 Success::class,
             ],
+            [
+                [],
+                Success::class,
+                true
+            ],
+            [
+                [
+                    'engine' => 'mysql',
+                    '_merge' => true,
+                ],
+                Error::class,
+                true
+            ],
+            [
+                [
+                    'engine' => 'mysql',
+                ],
+                Error::class,
+                true
+            ],
+            [
+                [
+                    'engine' => 'elasticsearch',
+                ],
+                Success::class,
+                true
+            ],
         ];
+    }
+
+    /**
+     * @throws ValidatorException
+     */
+    public function testValidateWithException()
+    {
+        $this->expectException(ValidatorException::class);
+        $this->expectExceptionMessage('some error');
+
+        $this->stageConfigMock->expects($this->once())
+            ->method('get')
+            ->with(DeployInterface::VAR_SEARCH_CONFIGURATION)
+            ->willReturn(['engine' => 'elasticsearch']);
+        $this->magentoVersionMock->expects($this->once())
+            ->method('isGreaterOrEqual')
+            ->willThrowException(new UndefinedPackageException('some error'));
+
+        $this->validator->validate();
     }
 }

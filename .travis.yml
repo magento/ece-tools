@@ -43,7 +43,13 @@ jobs:
     - php: '7.4'
       env: TEST_SUITE=functional-ee
 
+before_install:
+# https://github.com/kylekatarnls/update-helper/issues/9
+  - if [ -n "${COMPOSER_VERSION}" ]; then travis_retry composer self-update ${COMPOSER_VERSION}; fi;
+
+
 install:
+  - phpenv config-add travis.php.ini
   - composer config http-basic.repo.magento.com ${REPO_USERNAME_CE} ${REPO_PASSWORD_CE}
   - composer config github-oauth.github.com ${GITHUB_TOKEN}
   - if [ -n "${MCC_VERSION}" ]; then composer config repositories.mcc git git@github.com:magento/magento-cloud-components.git && composer require "magento/magento-cloud-components:${MCC_VERSION}" --no-update; fi;

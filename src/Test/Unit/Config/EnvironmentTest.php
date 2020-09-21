@@ -148,4 +148,22 @@ class EnvironmentTest extends TestCase
 
         $this->assertSame(1, $this->environment->getEnvVarMageErrorReportDirNestingLevel());
     }
+
+    public function testHasMount(): void
+    {
+        $this->environmentDataMock->method('getApplication')
+            ->willReturn([
+                'mounts' => [
+                    'test' => [],
+                    '/test_with_slash' => []
+                ]
+            ]);
+
+        self::assertTrue($this->environment->hasMount('test'));
+        self::assertTrue($this->environment->hasMount('/test'));
+        self::assertTrue($this->environment->hasMount('test_with_slash'));
+        self::assertTrue($this->environment->hasMount('/test_with_slash'));
+        self::assertFalse($this->environment->hasMount('/unknown'));
+        self::assertFalse($this->environment->hasMount('unknown'));
+    }
 }
