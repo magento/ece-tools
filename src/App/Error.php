@@ -73,7 +73,8 @@ class Error
     public const DEPLOY_CRYPT_KEY_IS_ABSENT = 131;
     public const DEPLOY_ES_CANNOT_CONNECT = 132;
     public const DEPLOY_WRONG_BRAINTREE_VARIABLE = 133;
-    public const DEPLOY_WRONG_SEARCH_ENGINE = 134;
+    public const DEPLOY_ES_SERVICE_NOT_INSTALLED = 134;
+    public const DEPLOY_WRONG_SEARCH_ENGINE = 135;
 
     public const PD_DEPLOY_IS_FAILED = 201;
     public const PD_ENV_PHP_IS_NOT_WRITABLE = 202;
