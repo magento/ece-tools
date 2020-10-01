@@ -77,7 +77,8 @@ class SchemaTest extends TestCase
                 BuildInterface::VAR_SCD_MAX_EXEC_TIME => null,
                 BuildInterface::VAR_ERROR_REPORT_DIR_NESTING_LEVEL => 1,
                 BuildInterface::VAR_SCD_USE_BALER => false,
-                BuildInterface::VAR_QUALITY_PATCHES => []
+                BuildInterface::VAR_QUALITY_PATCHES => [],
+                BuildInterface::VAR_SKIP_COMPOSER_DUMP_AUTOLOAD => false,
             ],
             $this->schema->getDefaults(StageConfigInterface::STAGE_BUILD)
         );
