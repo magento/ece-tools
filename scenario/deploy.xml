@@ -128,7 +128,7 @@
     </step>
     <step name="disable-maintenance-mode" type="Magento\MagentoCloud\Step\DisableMaintenanceMode" priority="1300"/>
     <step name="remote-storage" type="Magento\MagentoCloud\Step\Deploy\RemoteStorage" priority="1400"/>
-    <step name="store-config" type="Magento\MagentoCloud\Step\Deploy\StoreConfig"  priority="1200"/>
+    <step name="store-config" type="Magento\MagentoCloud\Step\Deploy\StoreConfig" priority="1200"/>
     <onFail>
         <action name="create-deploy-failed-flag" type="Magento\MagentoCloud\OnFail\Action\CreateDeployFailedFlag" priority="100"/>
     </onFail>
