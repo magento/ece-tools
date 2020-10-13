@@ -47,7 +47,7 @@ class RemoteStorageFactory
                 ];
 
                 if (isset($config['key'], $config['secret'])) {
-                    $config['credentials'] = [
+                    $preparedConfig['credentials'] = [
                         'key' => $config['key'],
                         'secret' => $config['secret']
                     ];

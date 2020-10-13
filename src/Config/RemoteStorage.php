@@ -49,7 +49,6 @@ class RemoteStorage
         return [
             'bucket' => (string)$this->environment->getEnv('REMOTE_STORAGE_BUCKET'),
             'region' => (string)$this->environment->getEnv('REMOTE_STORAGE_REGION'),
-            'prefix' => (string)$this->environment->getEnv('REMOTE_STORAGE_PREFIX'),
             'key' => (string)$this->environment->getEnv('REMOTE_STORAGE_KEY'),
             'secret' => (string)$this->environment->getEnv('REMOTE_STORAGE_SECRET')
         ];

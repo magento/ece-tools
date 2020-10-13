@@ -61,18 +61,22 @@ class StoreConfig implements StepInterface
             if ($adapter) {
                 $config = json_encode(['install' => ['date' => date('r')]]);
 
+                $this->logger->debug('Storing config in remote storage');
+
                 $this->remoteStorageFactory->create(
                     $adapter,
                     $this->remoteStorageConfig->getConfig(),
                     $this->remoteStorageConfig->getPrefix()
                 )->write('config.json', $config, new Config([]));
-            }
 
-            $this->logger->info(sprintf(
-                'Install date was stored in remote storage "%s"',
-                $adapter
-            ));
+                $this->logger->info(sprintf(
+                    'Install date was stored in remote storage "%s"',
+                    $adapter
+                ));
+            }
         } catch (Exception $exception) {
+            $this->logger->critical('Cannot store config in remote storage: ' . $exception->getMessage());
+
             throw new StepException($exception->getMessage(), $exception->getCode(), $exception);
         }
     }
