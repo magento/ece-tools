@@ -5,7 +5,7 @@
  */
 declare(strict_types=1);
 
-namespace Magento\MagentoCloud\Step\Deploy\InstallUpdate\Install;
+namespace Magento\MagentoCloud\Step\Deploy;
 
 use League\Flysystem\Config;
 use Magento\MagentoCloud\Config\RemoteStorage;
@@ -14,6 +14,7 @@ use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
 use Exception;
 use Psr\Log\LoggerInterface;
+use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface;
 
 /**
  * Stores config on remote storage.
@@ -36,18 +37,26 @@ class StoreConfig implements StepInterface
     private $logger;
 
     /**
+     * @var ReaderInterface
+     */
+    private $reader;
+
+    /**
      * @param RemoteStorage $remoteStorageConfig
      * @param RemoteStorageFactory $remoteStorageFactory
      * @param LoggerInterface $logger
+     * @param ReaderInterface $reader
      */
     public function __construct(
         RemoteStorage $remoteStorageConfig,
         RemoteStorageFactory $remoteStorageFactory,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        ReaderInterface $reader
     ) {
         $this->remoteStorageConfig = $remoteStorageConfig;
         $this->remoteStorageFactory = $remoteStorageFactory;
         $this->logger = $logger;
+        $this->reader = $reader;
     }
 
     /**
@@ -59,7 +68,7 @@ class StoreConfig implements StepInterface
 
         try {
             if ($adapter) {
-                $config = json_encode(['install' => ['date' => date('r')]]);
+                $config = json_encode(['install' => $this->reader->read()['install']]);
 
                 $this->logger->debug('Storing config in remote storage');
 
