@@ -78,24 +78,32 @@ class RemoteStorage implements StepInterface
             $config = $this->config->getConfig();
 
             try {
-                $this->magentoShell->execute(
-                    'remote-storage:enable',
-                    [
-                        $adapter,
-                        $config['bucket'] ?? '',
-                        $config['region'] ?? '',
-                        $config['prefix'] ?? '',
-                        $config['key'] ?? '',
-                        $config['secret'] ?? '',
-                    ]
-                );
+                $arguments = [
+                    $adapter,
+                    $config['bucket'] ?? '',
+                    $config['region'] ?? '',
+                    $config['prefix'] ?? '',
+                ];
+
+                if (!empty($config['key']) && !empty($config['secret'])) {
+                    $arguments[] = '--access-key=' . $config['key'];
+                    $arguments[] = '--secret-key=' . $config['secret'];
+                }
+
+                $this->magentoShell->execute(sprintf(
+                    'remote-storage:enable %s',
+                    implode(' ', $arguments)
+                ));
             } catch (ShellException $exception) {
                 $this->logger->warning($exception->getMessage());
 
                 return;
             }
 
-            $this->logger->info('Remote storage with driver "%s" was enabled');
+            $this->logger->info(sprintf(
+                'Remote storage with driver "%s" was enabled',
+                $adapter
+            ));
 
             return;
         }
