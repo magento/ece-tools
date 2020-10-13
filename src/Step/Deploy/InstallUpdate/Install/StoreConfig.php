@@ -5,7 +5,7 @@
  */
 declare(strict_types=1);
 
-namespace Magento\MagentoCloud\Step\Deploy;
+namespace Magento\MagentoCloud\Step\Deploy\InstallUpdate\Install;
 
 use League\Flysystem\Config;
 use Magento\MagentoCloud\Config\RemoteStorage;
@@ -21,6 +21,8 @@ use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface;
  */
 class StoreConfig implements StepInterface
 {
+    private const PATH = 'config.json';
+
     /**
      * @var RemoteStorage
      */
@@ -66,23 +68,25 @@ class StoreConfig implements StepInterface
     {
         $adapter = $this->remoteStorageConfig->getAdapter();
 
+        if (!$adapter) {
+            return;
+        }
+
+        $config = json_encode(['install' => $this->reader->read()['install']]);
+
+        $this->logger->info('Storing config in remote storage');
+
         try {
-            if ($adapter) {
-                $config = json_encode(['install' => $this->reader->read()['install']]);
+            $this->remoteStorageFactory->create(
+                $adapter,
+                $this->remoteStorageConfig->getConfig(),
+                $this->remoteStorageConfig->getPrefix()
+            )->write(self::PATH, $config, new Config([]));
 
-                $this->logger->debug('Storing config in remote storage');
-
-                $this->remoteStorageFactory->create(
-                    $adapter,
-                    $this->remoteStorageConfig->getConfig(),
-                    $this->remoteStorageConfig->getPrefix()
-                )->write('config.json', $config, new Config([]));
-
-                $this->logger->info(sprintf(
-                    'Install date was stored in remote storage "%s"',
-                    $adapter
-                ));
-            }
+            $this->logger->info(sprintf(
+                'Install date was stored in remote storage "%s"',
+                $adapter
+            ));
         } catch (Exception $exception) {
             $this->logger->critical('Cannot store config in remote storage: ' . $exception->getMessage());
 
