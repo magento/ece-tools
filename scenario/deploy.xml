@@ -66,6 +66,7 @@
             <argument name="installSteps" xsi:type="array">
                 <item name="cleanup-db-config" xsi:type="object" priority="50">Magento\MagentoCloud\Step\Deploy\InstallUpdate\Install\CleanupDbConfig</item>
                 <item name="setup" xsi:type="object" priority="100">Magento\MagentoCloud\Step\Deploy\InstallUpdate\Install\Setup</item>
+                <item name="store-config" xsi:type="object"  priority="1200">Magento\MagentoCloud\Step\Deploy\InstallUpdate\Install\StoreConfig</item>
                 <!-- Config update start -->
                 <item name="prepare-config" xsi:type="object" priority="200">Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\PrepareConfig</item>
                 <item name="cron-consumer-runner" xsi:type="object" priority="300">Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\CronConsumersRunner</item>
@@ -100,6 +101,7 @@
             </argument>
         </arguments>
     </step>
+    <step name="remote-storage" type="Magento\MagentoCloud\Step\Deploy\RemoteStorage" priority="850"/>
     <step name="deploy-static-content" type="Magento\MagentoCloud\Step\Deploy\DeployStaticContent" priority="900">
         <arguments>
             <argument name="flag-manager" xsi:type="object">Magento\MagentoCloud\Filesystem\Flag\Manager</argument>

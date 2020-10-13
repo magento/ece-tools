@@ -21,6 +21,8 @@
     "graylog2/gelf-php": "^1.4.2",
     "guzzlehttp/guzzle": "^6.2",
     "illuminate/config": "^5.5",
+    "league/flysystem": "^1.1",
+    "league/flysystem-aws-s3-v3": "^1.0",
     "magento/magento-cloud-components": "^1.0.6",
     "magento/magento-cloud-docker": "^1.0.0",
     "magento/magento-cloud-patches": "^1.0.6",
