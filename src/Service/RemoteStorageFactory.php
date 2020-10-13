@@ -17,7 +17,7 @@ use Magento\MagentoCloud\App\GenericException;
  */
 class RemoteStorageFactory
 {
-    public const DRIVER_AWS_S3 = 'aws_s3';
+    public const ADAPTER_AWS_S3 = 'aws-s3';
 
     /**
      * @param string $adapter
@@ -32,7 +32,7 @@ class RemoteStorageFactory
         string $prefix = ''
     ): AdapterInterface {
         switch ($adapter) {
-            case self::DRIVER_AWS_S3:
+            case self::ADAPTER_AWS_S3:
                 if (!isset($config['region'])) {
                     throw new GenericException('Missing required adapter parameter "region"');
                 }
