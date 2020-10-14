@@ -60,7 +60,10 @@ class RemoteStorage implements StepInterface
     }
 
     /**
-     * @inheritDoc
+     * Enables or disables remote storage.
+     *
+     * @throws StepException
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      */
     public function execute(): void
     {
