@@ -99,6 +99,10 @@ class RemoteStorage implements StepInterface
                 $arguments[] = '--secret-key=' . $config['secret'];
             }
 
+            if (!empty($config['public'])) {
+                $arguments[] = '--is-public=1';
+            }
+
             try {
                 $this->magentoShell->execute(sprintf(
                     'remote-storage:enable %s',
