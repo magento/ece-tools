@@ -14,6 +14,8 @@ use Magento\MagentoCloud\App\GenericException;
 
 /**
  * Factory of remote storage adapters.
+ *
+ * @codeCoverageIgnore
  */
 class RemoteStorageFactory
 {

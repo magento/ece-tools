@@ -77,27 +77,34 @@ class RemoteStorage implements StepInterface
         if ($adapter) {
             $config = $this->config->getConfig();
 
+            if (empty($config['bucket']) || empty($config['region'])) {
+                throw new StepException('Bucket and region are required configurations');
+            }
+
+            $arguments = [
+                $adapter,
+                $config['bucket'],
+                $config['region']
+            ];
+
+            if (!empty($config['prefix'])) {
+                $arguments[] = $config['prefix'];
+            }
+
+            if (!empty($config['key']) && !empty($config['secret'])) {
+                $arguments[] = '--access-key=' . $config['key'];
+                $arguments[] = '--secret-key=' . $config['secret'];
+            }
+
             try {
-                $arguments = [
-                    $adapter,
-                    $config['bucket'] ?? '',
-                    $config['region'] ?? '',
-                    $config['prefix'] ?? '',
-                ];
-
-                if (!empty($config['key']) && !empty($config['secret'])) {
-                    $arguments[] = '--access-key=' . $config['key'];
-                    $arguments[] = '--secret-key=' . $config['secret'];
-                }
-
                 $this->magentoShell->execute(sprintf(
                     'remote-storage:enable %s',
                     implode(' ', $arguments)
                 ));
             } catch (ShellException $exception) {
-                $this->logger->warning($exception->getMessage());
+                $this->logger->critical($exception->getMessage());
 
-                return;
+                throw new StepException($exception->getMessage(), $exception->getCode(), $exception);
             }
 
             $this->logger->info(sprintf(
