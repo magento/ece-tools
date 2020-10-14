@@ -51,6 +51,7 @@ table.error-table td:nth-child(2) {
   width: 200px;
 }
 </style>
+
 EOT;
 
     /**

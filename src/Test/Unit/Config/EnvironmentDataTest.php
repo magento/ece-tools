@@ -154,6 +154,9 @@ class EnvironmentDataTest extends TestCase
         $_ENV = null;
 
         $this->fileMock->expects($this->once())
+            ->method('isExists')
+            ->willReturn(true);
+        $this->fileMock->expects($this->once())
             ->method('fileGetContents')
             ->willReturn('[]');
 
@@ -165,6 +168,9 @@ class EnvironmentDataTest extends TestCase
         $_ENV = null;
         $exception = new FilesystemException('.magento.app.yaml not exist');
 
+        $this->fileMock->expects($this->once())
+            ->method('isExists')
+            ->willReturn(true);
         $this->fileMock->expects($this->once())
             ->method('fileGetContents')
             ->willThrowException($exception);
