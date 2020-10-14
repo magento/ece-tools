@@ -668,6 +668,23 @@ variables:
               - MC-31387
               - MDVA-4567
               - MC-45634
+  REMOTE_STORAGE:
+    description: Configures remote storage credentials.
+    magento_version: '>=2.4.2'
+    type: array
+    stages:
+      - deploy
+    default:
+      deploy: []
+    examples:
+      - stage:
+          deploy:
+            REMOTE_STORAGE:
+              adater: aws_s3
+              prefix: test-prefix
+              config:
+                region: us-east-1
+                bucket: test-bucket
 
   # Environment variables
   ENV_RELATIONSHIPS:

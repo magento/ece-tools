@@ -7,8 +7,8 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Config;
 
-use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\RemoteStorage;
+use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -26,19 +26,22 @@ class RemoteStorageTest extends TestCase
      */
     protected function setUp(): void
     {
-        $environmentMock = $this->createMock(Environment::class);
+        $stageConfig = $this->getMockForAbstractClass(DeployInterface::class);
         $this->config = new RemoteStorage(
-            $environmentMock
+            $stageConfig
         );
 
-        $environmentMock->method('getEnv')
-            ->willReturnMap([
-                ['REMOTE_STORAGE_ADAPTER', 'adapter'],
-                ['REMOTE_STORAGE_PREFIX', 'prefix'],
-                ['REMOTE_STORAGE_BUCKET', 'bucket'],
-                ['REMOTE_STORAGE_REGION', 'region'],
-                ['REMOTE_STORAGE_KEY', 'key'],
-                ['REMOTE_STORAGE_SECRET', 'secret']
+        $stageConfig->method('get')
+            ->with(DeployInterface::VAR_REMOTE_STORAGE)
+            ->willReturn([
+                'adapter' => 'adapter',
+                'prefix' => 'prefix',
+                'config' => [
+                    'bucket' => 'bucket',
+                    'region' => 'region',
+                    'key' => 'key',
+                    'secret' => 'secret'
+                ]
             ]);
     }
 

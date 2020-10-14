@@ -29,6 +29,7 @@ interface DeployInterface extends StageConfigInterface
     public const VAR_CLEAN_STATIC_FILES = 'CLEAN_STATIC_FILES';
     public const VAR_UPDATE_URLS = 'UPDATE_URLS';
     public const VAR_FORCE_UPDATE_URLS = 'FORCE_UPDATE_URLS';
+    public const VAR_REMOTE_STORAGE = 'REMOTE_STORAGE';
 
     /**
      * The variable responsible to set lock provider for Magento 2.2.5 and higher.

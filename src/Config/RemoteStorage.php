@@ -7,22 +7,24 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Config;
 
+use Magento\MagentoCloud\Config\Stage\DeployInterface;
+
 /**
  * Config for remote storage.
  */
 class RemoteStorage
 {
     /**
-     * @var Environment
+     * @var DeployInterface
      */
-    private $environment;
+    private $deployConfig;
 
     /**
-     * @param Environment $environment
+     * @param DeployInterface $deployConfig
      */
-    public function __construct(Environment $environment)
+    public function __construct(DeployInterface $deployConfig)
     {
-        $this->environment = $environment;
+        $this->deployConfig = $deployConfig;
     }
 
     /**
@@ -30,7 +32,7 @@ class RemoteStorage
      */
     public function getAdapter(): string
     {
-        return (string)$this->environment->getEnv('REMOTE_STORAGE_ADAPTER');
+        return (string)($this->deployConfig->get(DeployInterface::VAR_REMOTE_STORAGE)['adapter'] ?? '');
     }
 
     /**
@@ -38,7 +40,7 @@ class RemoteStorage
      */
     public function getPrefix(): string
     {
-        return (string)$this->environment->getEnv('REMOTE_STORAGE_PREFIX');
+        return (string)($this->deployConfig->get(DeployInterface::VAR_REMOTE_STORAGE)['prefix'] ?? '');
     }
 
     /**
@@ -46,11 +48,6 @@ class RemoteStorage
      */
     public function getConfig(): array
     {
-        return [
-            'bucket' => (string)$this->environment->getEnv('REMOTE_STORAGE_BUCKET'),
-            'region' => (string)$this->environment->getEnv('REMOTE_STORAGE_REGION'),
-            'key' => (string)$this->environment->getEnv('REMOTE_STORAGE_KEY'),
-            'secret' => (string)$this->environment->getEnv('REMOTE_STORAGE_SECRET')
-        ];
+        return (array)($this->deployConfig->get(DeployInterface::VAR_REMOTE_STORAGE)['config'] ?? []);
     }
 }
