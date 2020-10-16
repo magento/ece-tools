@@ -43,7 +43,7 @@ class Transfer extends Command
     protected function configure()
     {
         $this->setName(static::NAME)
-            ->setDescription('Transfer generated files into init directory');
+            ->setDescription('Transfers generated files into init directory.');
 
         parent::configure();
     }

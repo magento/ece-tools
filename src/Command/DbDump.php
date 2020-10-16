@@ -60,7 +60,7 @@ class DbDump extends Command
     protected function configure()
     {
         $this->setName(self::NAME)
-            ->setDescription('Creates backups of databases');
+            ->setDescription('Creates database backups.');
         $this->addArgument(
             self::ARGUMENT_DATABASES,
             InputArgument::IS_ARRAY,
