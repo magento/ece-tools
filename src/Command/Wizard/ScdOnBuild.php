@@ -53,7 +53,7 @@ class ScdOnBuild extends Command
     protected function configure()
     {
         $this->setName(self::NAME)
-            ->setDescription('Verifies SCD on build configuration');
+            ->setDescription('Verifies SCD on build configuration.');
 
         parent::configure();
     }

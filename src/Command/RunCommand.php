@@ -44,7 +44,7 @@ class RunCommand extends Command
      */
     protected function configure()
     {
-        $this->setDescription('Execute scenario(s)')
+        $this->setDescription('Execute scenario(s).')
             ->addArgument(
                 self::ARG_SCENARIO,
                 InputArgument::REQUIRED | InputArgument::IS_ARRAY,

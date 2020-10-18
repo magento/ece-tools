@@ -68,7 +68,7 @@ class GenerateSchema extends Command
      */
     protected function configure(): void
     {
-        $this->setDescription('Generate the schema dist file');
+        $this->setDescription('Generates the schema *.dist file.');
 
         parent::configure();
     }
