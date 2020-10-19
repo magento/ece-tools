@@ -91,11 +91,11 @@ class RemoteStorage implements StepInterface
                 $config['region']
             ];
 
-            if (!empty($config['prefix'])) {
+            if (isset($config['prefix'])) {
                 $arguments[] = $config['prefix'];
             }
 
-            if (!empty($config['key']) && !empty($config['secret'])) {
+            if (isset($config['key'], $config['secret'])) {
                 $arguments[] = '--access-key=' . $config['key'];
                 $arguments[] = '--secret-key=' . $config['secret'];
             }

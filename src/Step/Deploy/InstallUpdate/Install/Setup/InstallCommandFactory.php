@@ -21,6 +21,7 @@ use Magento\MagentoCloud\Service\ElasticSearch;
 use Magento\MagentoCloud\Service\ServiceException;
 use Magento\MagentoCloud\Util\UrlManager;
 use Magento\MagentoCloud\Util\PasswordGenerator;
+use Magento\MagentoCloud\Config\RemoteStorage;
 
 /**
  * Generates command for magento installation
@@ -79,6 +80,11 @@ class InstallCommandFactory
     private $elasticSearch;
 
     /**
+     * @var RemoteStorage
+     */
+    private $remoteStorage;
+
+    /**
      * @param UrlManager $urlManager
      * @param AdminDataInterface $adminData
      * @param ConnectionFactory $connectionFactory
@@ -88,6 +94,9 @@ class InstallCommandFactory
      * @param DbConfig $dbConfig
      * @param MagentoVersion $magentoVersion
      * @param ElasticSearch $elasticSearch
+     * @param RemoteStorage $remoteStorage
+     *
+     * @SuppressWarnings(PHPMD.ExcessiveParameterList)
      */
     public function __construct(
         UrlManager $urlManager,
@@ -98,7 +107,8 @@ class InstallCommandFactory
         ElasticSuite $elasticSuite,
         DbConfig $dbConfig,
         MagentoVersion $magentoVersion,
-        ElasticSearch $elasticSearch
+        ElasticSearch $elasticSearch,
+        RemoteStorage $remoteStorage
     ) {
         $this->urlManager = $urlManager;
         $this->adminData = $adminData;
@@ -109,6 +119,7 @@ class InstallCommandFactory
         $this->dbConfig = $dbConfig;
         $this->magentoVersion = $magentoVersion;
         $this->elasticSearch = $elasticSearch;
+        $this->remoteStorage = $remoteStorage;
     }
 
     /**
@@ -127,7 +138,8 @@ class InstallCommandFactory
             $options = array_replace(
                 $this->getBaseOptions(),
                 $this->getAdminOptions(),
-                $this->getEsOptions()
+                $this->getEsOptions(),
+                $this->getRemoteStorageOptions()
             );
         } catch (GenericException $exception) {
             throw new ConfigException($exception->getMessage(), $exception->getCode(), $exception);
@@ -232,6 +244,34 @@ class InstallCommandFactory
          */
         if ($this->elasticSuite->isAvailable() && $this->elasticSuite->getServers()) {
             $options['--es-hosts'] = $this->elasticSuite->getServers();
+        }
+
+        return $options;
+    }
+
+    /**
+     * Provides install options for remote storage.
+     *
+     * @return array
+     * @throws UndefinedPackageException
+     */
+    private function getRemoteStorageOptions(): array
+    {
+        $options = [];
+
+        if ($this->magentoVersion->isGreaterOrEqual('2.4.2') && $this->remoteStorage->getAdapter()) {
+            $adapter = $this->remoteStorage->getAdapter();
+            $config = $this->remoteStorage->getConfig();
+
+            $options['--remote-storage-adapter'] = $adapter;
+            $options['--remote-storage-bucket'] = $config['bucket'];
+            $options['--remote-storage-region'] = $config['region'];
+            $options['--remote-storage-prefix'] = $config['prefix'];
+
+            if (isset($config['key'], $config['secret'])) {
+                $options['--remote-storage-key'] = $config['key'];
+                $options['--remote-storage-secret'] = $config['secret'];
+            }
         }
 
         return $options;

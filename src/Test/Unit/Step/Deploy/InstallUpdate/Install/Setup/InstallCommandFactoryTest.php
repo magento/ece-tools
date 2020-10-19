@@ -9,6 +9,7 @@ namespace Magento\MagentoCloud\Test\Unit\Step\Deploy\InstallUpdate\Install\Setup
 
 use Magento\MagentoCloud\Config\AdminDataInterface;
 use Magento\MagentoCloud\Config\Database\DbConfig;
+use Magento\MagentoCloud\Config\RemoteStorage;
 use Magento\MagentoCloud\Config\SearchEngine\ElasticSuite;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\DB\Data\ConnectionFactory;
@@ -77,6 +78,11 @@ class InstallCommandFactoryTest extends TestCase
     private $elasticSearchMock;
 
     /**
+     * @var RemoteStorage|MockObject
+     */
+    private $remoteStorageMock;
+
+    /**
      * @inheritdoc
      */
     protected function setUp(): void
@@ -95,6 +101,7 @@ class InstallCommandFactoryTest extends TestCase
         $this->dbConfigMock = $this->createMock(DbConfig::class);
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
         $this->elasticSearchMock = $this->createMock(ElasticSearch::class);
+        $this->remoteStorageMock = $this->createMock(RemoteStorage::class);
 
         $this->installCommandFactory = new InstallCommandFactory(
             $this->urlManagerMock,
@@ -105,7 +112,8 @@ class InstallCommandFactoryTest extends TestCase
             $this->elasticSuiteMock,
             $this->dbConfigMock,
             $this->magentoVersionMock,
-            $this->elasticSearchMock
+            $this->elasticSearchMock,
+            $this->remoteStorageMock
         );
     }
 
