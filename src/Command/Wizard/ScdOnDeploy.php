@@ -51,7 +51,7 @@ class ScdOnDeploy extends Command
     protected function configure()
     {
         $this->setName(self::NAME)
-            ->setDescription('Verifies SCD on deploy configuration');
+            ->setDescription('Verifies SCD on deploy configuration.');
     }
 
     /**

@@ -44,7 +44,7 @@ class ModuleRefresh extends Command
     protected function configure()
     {
         $this->setName(self::NAME)
-            ->setDescription('Refresh config to enable newly added modules');
+            ->setDescription('Refreshes the configuration to enable newly added modules.');
     }
 
     /**

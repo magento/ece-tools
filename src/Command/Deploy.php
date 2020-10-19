@@ -52,7 +52,7 @@ class Deploy extends Command
     protected function configure()
     {
         $this->setName(static::NAME)
-            ->setDescription('Deploys application');
+            ->setDescription('Deploys the application.');
 
         parent::configure();
     }

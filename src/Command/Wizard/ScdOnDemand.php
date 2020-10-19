@@ -50,7 +50,7 @@ class ScdOnDemand extends Command
     protected function configure()
     {
         $this->setName(self::NAME)
-            ->setDescription('Verifies SCD on demand configuration');
+            ->setDescription('Verifies SCD on demand configuration.');
 
         parent::configure();
     }

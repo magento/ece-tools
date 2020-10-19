@@ -28,7 +28,7 @@ class Build extends Command
     protected function configure()
     {
         $this->setName(static::NAME)
-            ->setDescription('Builds application');
+            ->setDescription('Builds application.');
 
         parent::configure();
     }

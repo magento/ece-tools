@@ -55,7 +55,7 @@ class BackupList extends Command
     protected function configure()
     {
         $this->setName(self::NAME)
-            ->setDescription('Shows the list of backup files');
+            ->setDescription('Shows the list of backup files.');
 
         parent::configure();
     }
