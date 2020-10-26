@@ -76,7 +76,7 @@ class RemoteStorage implements StepInterface
             throw new StepException($exception->getMessage(), $exception->getCode(), $exception);
         }
 
-        $adapter = $this->config->getAdapter();
+        $adapter = $this->config->getDriver();
 
         if ($adapter) {
             $config = $this->config->getConfig();
@@ -98,10 +98,6 @@ class RemoteStorage implements StepInterface
             if (isset($config['key'], $config['secret'])) {
                 $arguments[] = '--access-key=' . $config['key'];
                 $arguments[] = '--secret-key=' . $config['secret'];
-            }
-
-            if (!empty($config['public'])) {
-                $arguments[] = '--is-public=1';
             }
 
             try {

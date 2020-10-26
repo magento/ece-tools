@@ -259,11 +259,11 @@ class InstallCommandFactory
     {
         $options = [];
 
-        if ($this->magentoVersion->isGreaterOrEqual('2.4.2') && $this->remoteStorage->getAdapter()) {
-            $adapter = $this->remoteStorage->getAdapter();
+        if ($this->magentoVersion->isGreaterOrEqual('2.4.2') && $this->remoteStorage->getDriver()) {
+            $driver = $this->remoteStorage->getDriver();
             $config = $this->remoteStorage->getConfig();
 
-            $options['--remote-storage-adapter'] = $adapter;
+            $options['--remote-storage-driver'] = $driver;
             $options['--remote-storage-bucket'] = $config['bucket'];
             $options['--remote-storage-region'] = $config['region'];
             $options['--remote-storage-prefix'] = $config['prefix'];

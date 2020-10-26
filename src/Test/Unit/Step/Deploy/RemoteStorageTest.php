@@ -73,7 +73,7 @@ class RemoteStorageTest extends TestCase
         $this->magentoVersionMock->method('isGreaterOrEqual')
             ->with('2.4.2')
             ->willReturn(true);
-        $this->configMock->method('getAdapter')
+        $this->configMock->method('getDriver')
             ->willReturn('adapter');
         $this->configMock->method('getConfig')
             ->willReturn([
@@ -98,7 +98,7 @@ class RemoteStorageTest extends TestCase
         $this->magentoVersionMock->method('isGreaterOrEqual')
             ->with('2.4.2')
             ->willReturn(true);
-        $this->configMock->method('getAdapter')
+        $this->configMock->method('getDriver')
             ->willReturn('adapter');
         $this->configMock->method('getConfig')
             ->willReturn([
@@ -128,7 +128,7 @@ class RemoteStorageTest extends TestCase
         $this->magentoVersionMock->method('isGreaterOrEqual')
             ->with('2.4.2')
             ->willReturn(true);
-        $this->configMock->method('getAdapter')
+        $this->configMock->method('getDriver')
             ->willReturn('adapter');
         $this->configMock->method('getConfig')
             ->willReturn([
@@ -159,7 +159,7 @@ class RemoteStorageTest extends TestCase
         $this->magentoVersionMock->method('isGreaterOrEqual')
             ->with('2.4.2')
             ->willReturn(true);
-        $this->configMock->method('getAdapter')
+        $this->configMock->method('getDriver')
             ->willReturn('');
         $this->magentoShellMock->expects(self::once())
             ->method('execute')
@@ -181,7 +181,7 @@ class RemoteStorageTest extends TestCase
         $this->magentoVersionMock->method('isGreaterOrEqual')
             ->with('2.4.2')
             ->willReturn(true);
-        $this->configMock->method('getAdapter')
+        $this->configMock->method('getDriver')
             ->willReturn('adapter');
         $this->configMock->method('getConfig')
             ->willReturn([

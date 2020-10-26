@@ -30,9 +30,9 @@ class RemoteStorage
     /**
      * @return string
      */
-    public function getAdapter(): string
+    public function getDriver(): string
     {
-        return (string)($this->deployConfig->get(DeployInterface::VAR_REMOTE_STORAGE)['adapter'] ?? '');
+        return (string)($this->deployConfig->get(DeployInterface::VAR_REMOTE_STORAGE)['driver'] ?? '');
     }
 
     /**

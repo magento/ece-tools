@@ -34,7 +34,7 @@ class RemoteStorageTest extends TestCase
         $stageConfig->method('get')
             ->with(DeployInterface::VAR_REMOTE_STORAGE)
             ->willReturn([
-                'adapter' => 'adapter',
+                'driver' => 'driver',
                 'prefix' => 'prefix',
                 'config' => [
                     'bucket' => 'bucket',
@@ -47,7 +47,7 @@ class RemoteStorageTest extends TestCase
 
     public function testAll(): void
     {
-        self::assertSame('adapter', $this->config->getAdapter());
+        self::assertSame('driver', $this->config->getDriver());
         self::assertSame('prefix', $this->config->getPrefix());
         self::assertSame(
             ['bucket' => 'bucket', 'region' => 'region', 'key' => 'key', 'secret' => 'secret'],
