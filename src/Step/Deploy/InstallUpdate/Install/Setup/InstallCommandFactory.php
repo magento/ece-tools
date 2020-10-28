@@ -254,19 +254,24 @@ class InstallCommandFactory
      *
      * @return array
      * @throws UndefinedPackageException
+     * @throws ConfigException
      */
     private function getRemoteStorageOptions(): array
     {
         $options = [];
 
         if ($this->magentoVersion->isGreaterOrEqual('2.4.2') && $this->remoteStorage->getDriver()) {
-            $driver = $this->remoteStorage->getDriver();
             $config = $this->remoteStorage->getConfig();
 
-            $options['--remote-storage-driver'] = $driver;
+            $options['--remote-storage-driver'] = $this->remoteStorage->getDriver();
+            $options['--remote-storage-prefix'] = $this->remoteStorage->getPrefix();
+
+            if (empty($config['bucket']) || empty($config['region'])) {
+                throw new ConfigException('Bucket and region are required configurations');
+            }
+
             $options['--remote-storage-bucket'] = $config['bucket'];
             $options['--remote-storage-region'] = $config['region'];
-            $options['--remote-storage-prefix'] = $config['prefix'];
 
             if (isset($config['key'], $config['secret'])) {
                 $options['--remote-storage-key'] = $config['key'];

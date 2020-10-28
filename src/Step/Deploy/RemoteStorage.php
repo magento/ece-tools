@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Step\Deploy;
 
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Package\UndefinedPackageException;
 use Magento\MagentoCloud\Shell\MagentoShell;
@@ -76,49 +77,52 @@ class RemoteStorage implements StepInterface
             throw new StepException($exception->getMessage(), $exception->getCode(), $exception);
         }
 
-        $adapter = $this->config->getDriver();
+        $driver = $this->config->getDriver();
 
-        if ($adapter) {
+        if ($driver) {
             $config = $this->config->getConfig();
 
             if (empty($config['bucket']) || empty($config['region'])) {
                 throw new StepException('Bucket and region are required configurations');
             }
 
-            $arguments = [
-                $adapter,
-                $config['bucket'],
-                $config['region']
+            $options = [
+                '--remote-storage-driver=' . $driver,
+                '--remote-storage-bucket=' . $config['bucket'],
+                '--remote-storage-region=' . $config['region']
             ];
 
-            if (isset($config['prefix'])) {
-                $arguments[] = $config['prefix'];
+            if ($prefix = $this->config->getPrefix()) {
+                $options['--remote-storage-prefix='] = $prefix;
             }
 
             if (isset($config['key'], $config['secret'])) {
-                $arguments[] = '--access-key=' . $config['key'];
-                $arguments[] = '--secret-key=' . $config['secret'];
+                $options[] = '--remote-storage-access-key=' . $config['key'];
+                $options[] = '--remote-storage-secret-key=' . $config['secret'];
             }
 
             try {
                 $this->magentoShell->execute(sprintf(
-                    'remote-storage:enable %s',
-                    implode(' ', $arguments)
+                    'setup:config:set %s -n',
+                    implode(' ', $options)
                 ));
             } catch (ShellException $exception) {
-                $this->logger->critical($exception->getMessage());
+                $this->logger->critical(
+                    $exception->getMessage(),
+                    ['errorCode' => Error::WARN_REMOTE_STORAGE_CANNOT_BE_ENABLED]
+                );
 
                 throw new StepException($exception->getMessage(), $exception->getCode(), $exception);
             }
 
             $this->logger->info(sprintf(
                 'Remote storage with driver "%s" was enabled',
-                $adapter
+                $driver
             ));
 
             return;
         }
 
-        $this->magentoShell->execute('remote-storage:disable');
+        $this->magentoShell->execute('setup:config:set --remote-storage-driver=file -n');
     }
 }

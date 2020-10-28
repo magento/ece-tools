@@ -82,7 +82,10 @@ class RemoteStorageTest extends TestCase
             ]);
         $this->magentoShellMock->expects(self::once())
             ->method('execute')
-            ->with('remote-storage:enable adapter test_bucket test_region');
+            ->with(
+                'setup:config:set --remote-storage-driver=adapter'
+                . ' --remote-storage-bucket=test_bucket --remote-storage-region=test_region -n'
+            );
         $this->loggerMock->expects(self::once())
             ->method('info')
             ->with('Remote storage with driver "adapter" was enabled');
@@ -110,8 +113,9 @@ class RemoteStorageTest extends TestCase
         $this->magentoShellMock->expects(self::once())
             ->method('execute')
             ->with(
-                'remote-storage:enable adapter test_bucket test_region'
-                . ' --access-key=test_key --secret-key=test_secret'
+                'setup:config:set --remote-storage-driver=adapter'
+                . ' --remote-storage-bucket=test_bucket --remote-storage-region=test_region'
+                . ' --remote-storage-access-key=test_key --remote-storage-secret-key=test_secret -n'
             );
         $this->loggerMock->expects(self::once())
             ->method('info')
@@ -141,8 +145,9 @@ class RemoteStorageTest extends TestCase
         $this->magentoShellMock->expects(self::once())
             ->method('execute')
             ->with(
-                'remote-storage:enable adapter test_bucket test_region test_prefix'
-                . ' --access-key=test_key --secret-key=test_secret'
+                'setup:config:set --remote-storage-driver=adapter'
+                . ' --remote-storage-bucket=test_bucket --remote-storage-region=test_region'
+                . ' --remote-storage-access-key=test_key --remote-storage-secret-key=test_secret -n'
             );
         $this->loggerMock->expects(self::once())
             ->method('info')
@@ -164,7 +169,7 @@ class RemoteStorageTest extends TestCase
         $this->magentoShellMock->expects(self::once())
             ->method('execute')
             ->with(
-                'remote-storage:disable'
+                'setup:config:set --remote-storage-driver=file -n'
             );
 
         $this->step->execute();
@@ -197,6 +202,29 @@ class RemoteStorageTest extends TestCase
         $this->loggerMock->expects(self::once())
             ->method('critical')
             ->with('Some error');
+
+        $this->step->execute();
+    }
+
+    /**
+     * @throws StepException
+     */
+    public function testExecuteWithMissingOptions(): void
+    {
+        $this->expectException(StepException::class);
+        $this->expectExceptionMessage('Bucket and region are required configurations');
+
+        $this->magentoVersionMock->method('isGreaterOrEqual')
+            ->with('2.4.2')
+            ->willReturn(true);
+        $this->configMock->method('getDriver')
+            ->willReturn('adapter');
+        $this->configMock->method('getConfig')
+            ->willReturn([
+                'key' => 'test_key',
+                'secret' => 'test_secret',
+                'prefix' => 'test_prefix'
+            ]);
 
         $this->step->execute();
     }

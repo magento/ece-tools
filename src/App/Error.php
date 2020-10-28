@@ -132,6 +132,7 @@ class Error
     public const WARN_SLAVE_CONNECTION_NOT_SET = 2025;
     public const WARN_COPY_MOUNTED_DIRS_FAILED = 2026;
     public const WARN_NOT_SUPPORTED_MAGE_MODE = 2027;
+    public const WARN_REMOTE_STORAGE_CANNOT_BE_ENABLED = 2028;
 
     /**
      * Post-deploy

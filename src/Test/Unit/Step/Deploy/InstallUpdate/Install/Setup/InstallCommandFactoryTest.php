@@ -8,6 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit\Step\Deploy\InstallUpdate\Install\Setup;
 
 use Magento\MagentoCloud\Config\AdminDataInterface;
+use Magento\MagentoCloud\Config\ConfigException;
 use Magento\MagentoCloud\Config\Database\DbConfig;
 use Magento\MagentoCloud\Config\RemoteStorage;
 use Magento\MagentoCloud\Config\SearchEngine\ElasticSuite;
@@ -23,7 +24,9 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @inheritdoc
+ * @see InstallCommandFactory
+ *
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class InstallCommandFactoryTest extends TestCase
 {
@@ -94,7 +97,7 @@ class InstallCommandFactoryTest extends TestCase
         $this->connectionDataMock = $this->getMockForAbstractClass(ConnectionInterface::class);
         /** @var ConnectionFactory|MockObject $connectionFactoryMock */
         $connectionFactoryMock = $this->createMock(ConnectionFactory::class);
-        $connectionFactoryMock->expects($this->once())
+        $connectionFactoryMock->expects(self::once())
             ->method('create')
             ->willReturn($this->connectionDataMock);
         $this->elasticSuiteMock = $this->createMock(ElasticSuite::class);
@@ -136,70 +139,39 @@ class InstallCommandFactoryTest extends TestCase
      * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
     public function testExecute(
-        $adminEmail,
-        $adminName,
-        $adminPassword,
-        $adminUrl,
-        $adminFirstname,
-        $adminLastname,
-        $adminNameExpected,
-        $adminPasswordExpected,
-        $adminUrlExpected,
-        $adminFirstnameExpected,
-        $adminLastnameExpected,
+        string $adminEmail,
+        string $adminName,
+        string $adminPassword,
+        string $adminUrl,
+        string $adminFirstname,
+        string $adminLastname,
+        string $adminNameExpected,
+        string $adminPasswordExpected,
+        string $adminUrlExpected,
+        string $adminFirstnameExpected,
+        string $adminLastnameExpected,
         bool $elasticSuite = false,
         array $mergedConfig = []
     ): void {
-        $this->urlManagerMock->expects($this->once())
-            ->method('getUnSecureUrls')
-            ->willReturn(['' => 'http://unsecure.url']);
-        $this->urlManagerMock->expects($this->once())
-            ->method('getSecureUrls')
-            ->willReturn(['' => 'https://secure.url']);
-        $this->stageConfigMock->expects($this->exactly(2))
-            ->method('get')
-            ->willReturn(DeployInterface::VAR_VERBOSE_COMMANDS)
-            ->willReturn('-v');
-        $this->connectionDataMock->expects($this->once())
-            ->method('getPassword')
-            ->willReturn('password');
-        $this->connectionDataMock->expects($this->once())
-            ->method('getHost')
-            ->willReturn('localhost');
-        $this->connectionDataMock->expects($this->once())
-            ->method('getDbName')
-            ->willReturn('magento');
-        $this->connectionDataMock->expects($this->once())
-            ->method('getUser')
-            ->willReturn('user');
-        $this->adminDataMock->method('getLocale')
-            ->willReturn('fr_FR');
-        $this->adminDataMock->method('getUrl')
-            ->willReturn($adminUrl);
-        $this->adminDataMock->method('getFirstName')
-            ->willReturn($adminFirstname);
-        $this->adminDataMock->method('getLastName')
-            ->willReturn($adminLastname);
-        $this->adminDataMock->method('getEmail')
-            ->willReturn($adminEmail);
-        $this->adminDataMock->method('getPassword')
-            ->willReturn($adminPassword);
-        $this->adminDataMock->method('getUsername')
-            ->willReturn($adminName);
-        $this->adminDataMock->method('getDefaultCurrency')
-            ->willReturn('USD');
-        $this->dbConfigMock->expects($this->once())
+        $this->mockBaseConfig(
+            $adminEmail,
+            $adminName,
+            $adminPassword,
+            $adminUrl,
+            $adminFirstname,
+            $adminLastname
+        );
+
+        $this->dbConfigMock->expects(self::once())
             ->method('get')
             ->willReturn($mergedConfig);
-
-        $this->passwordGeneratorMock->expects($this->any())
-            ->method('generateRandomPassword')
+        $this->passwordGeneratorMock->method('generateRandomPassword')
             ->willReturn($adminPasswordExpected);
 
         $elasticSuiteOption = '';
 
         if ($elasticSuite) {
-            $this->elasticSuiteMock->expects($this->once())
+            $this->elasticSuiteMock->expects(self::once())
                 ->method('isAvailable')
                 ->willReturn(true);
             $this->elasticSuiteMock->method('getServers')
@@ -227,7 +199,7 @@ class InstallCommandFactoryTest extends TestCase
             . $adminCredential
             . $elasticSuiteOption;
 
-        $this->assertEquals(
+        self::assertEquals(
             $expectedCommand,
             $this->installCommandFactory->create()
         );
@@ -300,5 +272,144 @@ class InstallCommandFactoryTest extends TestCase
                 [],
             ],
         ];
+    }
+
+    /**
+     * @param string $adminEmail
+     * @param string $adminName
+     * @param string $adminPassword
+     * @param string $adminUrl
+     * @param string $adminFirstname
+     * @param string $adminLastname
+     */
+    private function mockBaseConfig(
+        string $adminEmail,
+        string $adminName,
+        string $adminPassword,
+        string $adminUrl,
+        string $adminFirstname,
+        string $adminLastname
+    ): void {
+        $this->urlManagerMock->expects(self::once())
+            ->method('getUnSecureUrls')
+            ->willReturn(['' => 'http://unsecure.url']);
+        $this->urlManagerMock->expects(self::once())
+            ->method('getSecureUrls')
+            ->willReturn(['' => 'https://secure.url']);
+        $this->stageConfigMock->expects(self::exactly(2))
+            ->method('get')
+            ->willReturn(DeployInterface::VAR_VERBOSE_COMMANDS)
+            ->willReturn('-v');
+        $this->connectionDataMock->expects(self::once())
+            ->method('getPassword')
+            ->willReturn('password');
+        $this->connectionDataMock->expects(self::once())
+            ->method('getHost')
+            ->willReturn('localhost');
+        $this->connectionDataMock->expects(self::once())
+            ->method('getDbName')
+            ->willReturn('magento');
+        $this->connectionDataMock->expects(self::once())
+            ->method('getUser')
+            ->willReturn('user');
+        $this->adminDataMock->method('getLocale')
+            ->willReturn('fr_FR');
+        $this->adminDataMock->method('getUrl')
+            ->willReturn($adminUrl);
+        $this->adminDataMock->method('getFirstName')
+            ->willReturn($adminFirstname);
+        $this->adminDataMock->method('getLastName')
+            ->willReturn($adminLastname);
+        $this->adminDataMock->method('getEmail')
+            ->willReturn($adminEmail);
+        $this->adminDataMock->method('getPassword')
+            ->willReturn($adminPassword);
+        $this->adminDataMock->method('getUsername')
+            ->willReturn($adminName);
+        $this->adminDataMock->method('getDefaultCurrency')
+            ->willReturn('USD');
+    }
+
+    /**
+     * @throws ConfigException
+     */
+    public function testExecuteWithRemoteStorage(): void
+    {
+        $this->mockBaseConfig('', '', '', '', '', '');
+        $this->magentoVersionMock->method('isGreaterOrEqual')
+            ->willReturnMap([
+                ['2.4.0', false],
+                ['2.4.2', true]
+            ]);
+        $this->remoteStorageMock->method('getDriver')
+            ->willReturn('someDriver');
+        $this->remoteStorageMock->method('getPrefix')
+            ->willReturn('somePrefix');
+        $this->remoteStorageMock->method('getConfig')
+            ->willReturn([
+                'bucket' => 'someBucket',
+                'region' => 'someRegion'
+            ]);
+
+        self::assertContains(
+            "--remote-storage-prefix='somePrefix' --remote-storage-bucket='someBucket'"
+            . " --remote-storage-region='someRegion'",
+            $this->installCommandFactory->create()
+        );
+    }
+
+    /**
+     * @throws ConfigException
+     */
+    public function testExecuteWithRemoteStorageWithKeys(): void
+    {
+        $this->mockBaseConfig('', '', '', '', '', '');
+        $this->magentoVersionMock->method('isGreaterOrEqual')
+            ->willReturnMap([
+                ['2.4.0', false],
+                ['2.4.2', true]
+            ]);
+        $this->remoteStorageMock->method('getDriver')
+            ->willReturn('someDriver');
+        $this->remoteStorageMock->method('getPrefix')
+            ->willReturn('somePrefix');
+        $this->remoteStorageMock->method('getConfig')
+            ->willReturn([
+                'bucket' => 'someBucket',
+                'region' => 'someRegion',
+                'key' => 'someKey',
+                'secret' => 'someSecret'
+            ]);
+
+        self::assertContains(
+            "--remote-storage-prefix='somePrefix' --remote-storage-bucket='someBucket'"
+            . " --remote-storage-region='someRegion'"
+            . " --remote-storage-key='someKey' --remote-storage-secret='someSecret'",
+            $this->installCommandFactory->create()
+        );
+    }
+
+    public function testExecuteWithRemoteStorageWithException(): void
+    {
+        $this->expectExceptionMessage('Bucket and region are required configurations');
+        $this->expectException(ConfigException::class);
+
+        $this->mockBaseConfig('', '', '', '', '', '');
+        $this->magentoVersionMock->method('isGreaterOrEqual')
+            ->willReturnMap([
+                ['2.4.0', false],
+                ['2.4.2', true]
+            ]);
+        $this->remoteStorageMock->method('getDriver')
+            ->willReturn('someDriver');
+        $this->remoteStorageMock->method('getPrefix')
+            ->willReturn('somePrefix');
+        $this->remoteStorageMock->method('getConfig')
+            ->willReturn([
+                'key' => 'someKey',
+                'secret' => 'someSecret'
+            ]);
+
+        $this->installCommandFactory->create();
     }
 }
