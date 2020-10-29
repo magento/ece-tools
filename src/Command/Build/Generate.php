@@ -44,7 +44,7 @@ class Generate extends Command
     protected function configure()
     {
         $this->setName(static::NAME)
-            ->setDescription('Generates all necessary files for build stage');
+            ->setDescription('Generates all necessary files for build stage.');
 
         parent::configure();
     }

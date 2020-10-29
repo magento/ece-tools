@@ -54,7 +54,9 @@ class BackupRestore extends Command
     protected function configure()
     {
         $this->setName(self::NAME)
-            ->setDescription('Restore important configuration files. Run backup:list to show the list of backup files');
+            ->setDescription(
+                'Restore important configuration files. Run backup:list to show the list of backup files.'
+            );
         $this->addOption(
             'force',
             'f',

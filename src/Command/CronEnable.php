@@ -49,7 +49,7 @@ class CronEnable extends Command
     protected function configure()
     {
         $this->setName(static::NAME)
-            ->setDescription('Enable Magento cron processes');
+            ->setDescription('Enables Magento cron processes.');
 
         parent::configure();
     }
