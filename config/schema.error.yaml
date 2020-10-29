@@ -322,7 +322,7 @@
     type: critical
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_ES_CANNOT_CONNECT:
     title: 'Can not connect to the Elasticsearch service'
-    suggestion: 'Check for valid elasticsearch credentials and verify that the  service is running'
+    suggestion: 'Check for valid Elasticsearch credentials and verify that the service is running'
     stage: deploy
     type: critical
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_WRONG_BRAINTREE_VARIABLE:
@@ -586,7 +586,7 @@
 !php/const Magento\MagentoCloud\App\Error::WARN_NOT_SUPPORTED_MAGE_MODE:
     title: 'Mode value for MAGE_MODE environment variable not supported'
     stage: deploy
-    suggestion: 'Remove MAGE_MODE environment variable, or change its value to "production". Magento Cloud supports only "production" mode.'
+    suggestion: 'Remove the MAGE_MODE environment variable, or change its value to "production". Magento Cloud supports "production" mode only.'
     step: 'validate-config:mage-mode-variable'
     type: warning
 !php/const Magento\MagentoCloud\App\Error::WARN_DEBUG_LOG_ENABLED:
