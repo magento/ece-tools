@@ -8,6 +8,8 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Service;
 
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Shell\ShellException;
+use Magento\MagentoCloud\Shell\ShellInterface;
 
 /**
  * Returns Redis service configurations.
@@ -23,16 +25,25 @@ class Redis implements ServiceInterface
     private $environment;
 
     /**
+     * @var ShellInterface
+     */
+    private $shell;
+
+    /**
      * @var string
      */
     private $version;
 
     /**
      * @param Environment $environment
+     * @param ShellInterface $shell
      */
-    public function __construct(Environment $environment)
-    {
+    public function __construct(
+        Environment $environment,
+        ShellInterface $shell
+    ) {
         $this->environment = $environment;
+        $this->shell = $shell;
     }
 
     /**
@@ -54,19 +65,35 @@ class Redis implements ServiceInterface
     }
 
     /**
-     * Returns version of the service.
+     * Retrieves Redis service version whether from relationship configuration
+     * or using CLI command (for PRO environments)
      *
-     * @return string
+     * {@inheritDoc}
      */
     public function getVersion(): string
     {
         if ($this->version === null) {
             $this->version = '0';
-
             $redisConfig = $this->getConfiguration();
 
+            //on integration environments
             if (isset($redisConfig['type']) && strpos($redisConfig['type'], ':') !== false) {
                 $this->version = explode(':', $redisConfig['type'])[1];
+            } elseif (isset($redisConfig['host']) && isset($redisConfig['port'])) {
+                //on dedicated environments
+                try {
+                    $process = $this->shell->execute(
+                        sprintf(
+                            'redis-cli -p %s -h %s info | grep redis_version',
+                            $redisConfig['port'],
+                            $redisConfig['host']
+                        )
+                    );
+                    preg_match('/^(?:redis_version:)(\d+\.\d+)/', $process->getOutput(), $matches);
+                    $this->version = $matches[1] ?? '0';
+                } catch (ShellException $exception) {
+                    throw new ServiceException($exception->getMessage());
+                }
             }
         }
 
