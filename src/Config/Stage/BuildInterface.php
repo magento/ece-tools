@@ -30,4 +30,9 @@ interface BuildInterface extends StageConfigInterface
      * Magento quality patches list
      */
     public const VAR_QUALITY_PATCHES = 'QUALITY_PATCHES';
+
+    /**
+     * Skip composer dump-autoload
+     */
+    public const VAR_SKIP_COMPOSER_DUMP_AUTOLOAD = 'SKIP_COMPOSER_DUMP_AUTOLOAD';
 }

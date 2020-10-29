@@ -43,7 +43,7 @@ class ApplyPatches extends Command
     protected function configure(): void
     {
         $this->setName(self::NAME)
-            ->setDescription('Applies custom patches');
+            ->setDescription('Applies custom patches.');
 
         parent::configure();
     }

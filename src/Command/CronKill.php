@@ -42,7 +42,7 @@ class CronKill extends Command
     protected function configure()
     {
         $this->setName(static::NAME)
-            ->setDescription('Kill all Magento cron processes');
+            ->setDescription('Terminates all Magento cron processes.');
 
         parent::configure();
     }

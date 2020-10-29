@@ -7,8 +7,6 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\DB\Data;
 
-use Magento\MagentoCloud\Service\Database;
-
 /**
  * Responsible for creating and configuring Magento\MagentoCloud\DB\Data\ConnectionInterface instances.
  */
@@ -24,16 +22,16 @@ class RelationshipConnectionFactory
     const CONNECTION_SALES_SLAVE = 'sales-slave';
 
     /**
-     * @var Database
+     * @var ConnectionTypes
      */
-    private $database;
+    private $connectionType;
 
     /**
-     * @param Database $database
+     * @param ConnectionTypes $connectionType
      */
-    public function __construct(Database $database)
+    public function __construct(ConnectionTypes $connectionType)
     {
-        $this->database = $database;
+        $this->connectionType = $connectionType;
     }
 
     /**
@@ -47,22 +45,22 @@ class RelationshipConnectionFactory
     {
         switch ($connectionType) {
             case self::CONNECTION_MAIN:
-                $configuration = $this->database->getConfiguration();
+                $configuration = $this->connectionType->getConfiguration();
                 break;
             case self::CONNECTION_SLAVE:
-                $configuration = $this->database->getSlaveConfiguration();
+                $configuration = $this->connectionType->getSlaveConfiguration();
                 break;
             case self::CONNECTION_QUOTE_MAIN:
-                $configuration = $this->database->getQuoteConfiguration();
+                $configuration = $this->connectionType->getQuoteConfiguration();
                 break;
             case self::CONNECTION_QUOTE_SLAVE:
-                $configuration = $this->database->getQuoteSlaveConfiguration();
+                $configuration = $this->connectionType->getQuoteSlaveConfiguration();
                 break;
             case self::CONNECTION_SALES_MAIN:
-                $configuration = $this->database->getSalesConfiguration();
+                $configuration = $this->connectionType->getSalesConfiguration();
                 break;
             case self::CONNECTION_SALES_SLAVE:
-                $configuration = $this->database->getSalesSlaveConfiguration();
+                $configuration = $this->connectionType->getSalesSlaveConfiguration();
                 break;
             default:
                 throw new \RuntimeException(

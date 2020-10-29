@@ -176,6 +176,17 @@ variables:
       - stage:
           global:
             SKIP_HTML_MINIFICATION: true
+  SKIP_COMPOSER_DUMP_AUTOLOAD:
+    description: Skip running compose dump-autoload command
+    type: boolean
+    stages:
+      - build
+    default:
+      build: false
+    examples:
+      - stage:
+          build:
+            SKIP_COMPOSER_DUMP_AUTOLOAD: true
   SCD_ON_DEMAND:
     description: Enable generation of static content when requested by a user.
       Pre-loading the cache using the post_deploy hook reduces site downtime.

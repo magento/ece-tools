@@ -66,7 +66,7 @@ class ConfigShow extends Command
     protected function configure()
     {
         $this->setName(static::NAME)
-            ->setDescription('Display encoded cloud configuration environment variables')
+            ->setDescription('Display encoded cloud configuration environment variables.')
             ->addArgument(
                 'variable',
                 InputArgument::IS_ARRAY,
