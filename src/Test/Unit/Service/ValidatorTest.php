@@ -107,6 +107,8 @@ class ValidatorTest extends TestCase
 
     /**
      * @return array
+     *
+     * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
     public function validateVersionsDataProvider(): array
     {
