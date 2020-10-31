@@ -13,11 +13,6 @@ namespace Magento\MagentoCloud\Service;
 class Php implements ServiceInterface
 {
     /**
-     * @var string
-     */
-    private $version;
-
-    /**
      * Get PHP configuration.
      *
      * @return array
@@ -34,15 +29,6 @@ class Php implements ServiceInterface
      */
     public function getVersion(): string
     {
-        if ($this->version === null) {
-            $this->version = '0';
-
-            $phpConfigs = $this->getConfiguration();
-            if (isset($phpConfigs['version'])) {
-                $this->version = $phpConfigs['version'];
-            }
-        }
-
-        return $this->version;
+        return $this->getConfiguration()['version'];
     }
 }

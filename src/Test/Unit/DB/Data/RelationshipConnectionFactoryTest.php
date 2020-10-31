@@ -7,9 +7,9 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\DB\Data;
 
+use Magento\MagentoCloud\DB\Data\ConnectionTypes;
 use Magento\MagentoCloud\DB\Data\RelationshipConnection;
 use Magento\MagentoCloud\DB\Data\RelationshipConnectionFactory;
-use Magento\MagentoCloud\Service\Database;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -24,19 +24,19 @@ class RelationshipConnectionFactoryTest extends TestCase
     private $factory;
 
     /**
-     * @var Database|MockObject
+     * @var ConnectionTypes|MockObject
      */
-    private $databaseMock;
+    private $connectionTypeMock;
 
     /**
      * @inheritdoc
      */
     protected function setUp()
     {
-        $this->databaseMock = $this->createMock(Database::class);
+        $this->connectionTypeMock = $this->createMock(ConnectionTypes::class);
 
         $this->factory = new RelationshipConnectionFactory(
-            $this->databaseMock
+            $this->connectionTypeMock
         );
     }
 
@@ -47,7 +47,7 @@ class RelationshipConnectionFactoryTest extends TestCase
      */
     public function testCreate(string $method, string $connectionType)
     {
-        $this->databaseMock->expects($this->once())
+        $this->connectionTypeMock->expects($this->once())
             ->method($method)
             ->willReturn([]);
 

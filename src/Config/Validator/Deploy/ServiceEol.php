@@ -8,11 +8,10 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Config\Validator\Deploy;
 
 use Magento\MagentoCloud\App\Error;
+use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Config\Validator;
-use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Service\EolValidator as EOLValidator;
 use Magento\MagentoCloud\Config\ValidatorInterface;
-use Magento\MagentoCloud\Service\ServiceMismatchException;
 
 /**
  * Class to check if services approaching their EOLs.
@@ -52,8 +51,7 @@ class ServiceEol implements ValidatorInterface
     /**
      * Get the defined services and versions and check for their EOLs by error level.
      *
-     * @return Validator\ResultInterface
-     * @throws FileSystemException
+     * {@inheritDoc}
      */
     public function validate(): Validator\ResultInterface
     {
@@ -70,7 +68,7 @@ class ServiceEol implements ValidatorInterface
                     $this->errorLevel == ValidatorInterface::LEVEL_WARNING ? Error::WARN_SERVICE_PASSED_EOL : null
                 );
             }
-        } catch (ServiceMismatchException $e) {
+        } catch (GenericException $e) {
             return $this->resultFactory->error('Can\'t validate version of some services: ' . $e->getMessage());
         }
 

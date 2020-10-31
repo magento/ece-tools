@@ -17,6 +17,7 @@ use Magento\MagentoCloud\Config\Validator\Result\Success;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
 
 /**
  * @inheritdoc
@@ -39,6 +40,11 @@ class ServiceVersionTest extends TestCase
     private $serviceVersionValidatorMock;
 
     /**
+     * @var LoggerInterface|MockObject
+     */
+    private $loggerMock;
+
+    /**
      * @var ServiceFactory|MockObject
      */
     private $serviceFactory;
@@ -54,15 +60,17 @@ class ServiceVersionTest extends TestCase
         ]);
         $this->serviceVersionValidatorMock = $this->createMock(ServiceVersionValidator::class);
         $this->serviceFactory = $this->createMock(ServiceFactory::class);
+        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
 
         $this->validator = new ServiceVersion(
             $this->resultFactoryMock,
             $this->serviceVersionValidatorMock,
-            $this->serviceFactory
+            $this->serviceFactory,
+            $this->loggerMock
         );
     }
 
-    public function testValidate()
+    public function testValidate(): void
     {
         $service1 = $this->createMock(ServiceInterface::class);
         $service1->expects($this->once())
@@ -79,6 +87,13 @@ class ServiceVersionTest extends TestCase
         $this->serviceFactory->expects($this->exactly(3))
             ->method('create')
             ->willReturnOnConsecutiveCalls($service1, $service2, $service3);
+        $this->loggerMock->expects($this->exactly(3))
+            ->method('info')
+            ->withConsecutive(
+                ['Version of service \'rabbitmq\' is not detected', []],
+                ['Version of service \'redis\' is 3.2', []],
+                ['Version of service \'mysql\' is 10.2', []]
+            );
         $this->serviceVersionValidatorMock->expects($this->exactly(2))
             ->method('validateService')
             ->withConsecutive(
@@ -92,7 +107,7 @@ class ServiceVersionTest extends TestCase
         $this->validator->validate();
     }
 
-    public function testValidateWithErrors()
+    public function testValidateWithErrors(): void
     {
         $errorMessages = ['error message 1', 'error message 2', 'error message 3'];
         $service1 = $this->createMock(ServiceInterface::class);
@@ -125,7 +140,7 @@ class ServiceVersionTest extends TestCase
         $this->validator->validate();
     }
 
-    public function testValidateWithException()
+    public function testValidateWithException(): void
     {
         $this->serviceFactory->expects($this->any())
             ->method('create')
