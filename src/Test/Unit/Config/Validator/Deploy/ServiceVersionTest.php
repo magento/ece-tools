@@ -72,33 +72,39 @@ class ServiceVersionTest extends TestCase
 
     public function testValidate(): void
     {
-        $service1 = $this->createMock(ServiceInterface::class);
-        $service1->expects($this->once())
+        $serviceRmq = $this->createMock(ServiceInterface::class);
+        $serviceRmq->expects($this->once())
             ->method('getVersion')
             ->willReturn('0');
-        $service2 = $this->createMock(ServiceInterface::class);
-        $service2->expects($this->once())
+        $serviceRedis = $this->createMock(ServiceInterface::class);
+        $serviceRedis->expects($this->once())
             ->method('getVersion')
             ->willReturn('3.2');
-        $service3 = $this->createMock(ServiceInterface::class);
-        $service3->expects($this->once())
+        $serviceDB = $this->createMock(ServiceInterface::class);
+        $serviceDB->expects($this->once())
             ->method('getVersion')
             ->willReturn('10.2');
-        $this->serviceFactory->expects($this->exactly(3))
+        $serviceES = $this->createMock(ServiceInterface::class);
+        $serviceES->expects($this->once())
+            ->method('getVersion')
+            ->willReturn('7.7');
+        $this->serviceFactory->expects($this->exactly(4))
             ->method('create')
-            ->willReturnOnConsecutiveCalls($service1, $service2, $service3);
-        $this->loggerMock->expects($this->exactly(3))
+            ->willReturnOnConsecutiveCalls($serviceRmq, $serviceRedis, $serviceDB, $serviceES);
+        $this->loggerMock->expects($this->exactly(4))
             ->method('info')
             ->withConsecutive(
                 ['Version of service \'rabbitmq\' is not detected', []],
                 ['Version of service \'redis\' is 3.2', []],
-                ['Version of service \'mysql\' is 10.2', []]
+                ['Version of service \'mysql\' is 10.2', []],
+                ['Version of service \'elasticsearch\' is 7.7', []]
             );
-        $this->serviceVersionValidatorMock->expects($this->exactly(2))
+        $this->serviceVersionValidatorMock->expects($this->exactly(3))
             ->method('validateService')
             ->withConsecutive(
                 [ServiceInterface::NAME_REDIS, '3.2'],
-                [ServiceInterface::NAME_DB, '10.2']
+                [ServiceInterface::NAME_DB, '10.2'],
+                [ServiceInterface::NAME_ELASTICSEARCH, '7.7']
             )
             ->willReturn('');
         $this->resultFactoryMock->expects($this->once())
@@ -109,7 +115,7 @@ class ServiceVersionTest extends TestCase
 
     public function testValidateWithErrors(): void
     {
-        $errorMessages = ['error message 1', 'error message 2', 'error message 3'];
+        $errorMessages = ['error message 1', 'error message 2', 'error message 3', 'error message 4'];
         $service1 = $this->createMock(ServiceInterface::class);
         $service1->expects($this->once())
             ->method('getVersion')
@@ -122,15 +128,20 @@ class ServiceVersionTest extends TestCase
         $service3->expects($this->once())
             ->method('getVersion')
             ->willReturn('5.7');
-        $this->serviceFactory->expects($this->exactly(3))
+        $service4 = $this->createMock(ServiceInterface::class);
+        $service4->expects($this->once())
+            ->method('getVersion')
+            ->willReturn('7.7');
+        $this->serviceFactory->expects($this->exactly(4))
             ->method('create')
-            ->willReturnOnConsecutiveCalls($service1, $service2, $service3);
-        $this->serviceVersionValidatorMock->expects($this->exactly(3))
+            ->willReturnOnConsecutiveCalls($service1, $service2, $service3, $service4);
+        $this->serviceVersionValidatorMock->expects($this->exactly(4))
             ->method('validateService')
             ->withConsecutive(
                 [ServiceInterface::NAME_RABBITMQ, '1.5'],
                 [ServiceInterface::NAME_REDIS, '2.2'],
-                [ServiceInterface::NAME_DB, '5.7']
+                [ServiceInterface::NAME_DB, '5.7'],
+                [ServiceInterface::NAME_ELASTICSEARCH, '7.7']
             )
             ->willReturnOnConsecutiveCalls(...$errorMessages);
         $this->resultFactoryMock->expects($this->once())
