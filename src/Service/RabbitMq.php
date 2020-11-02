@@ -8,6 +8,8 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Service;
 
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Shell\ShellException;
+use Magento\MagentoCloud\Shell\ShellInterface;
 
 /**
  *
@@ -27,23 +29,32 @@ class RabbitMq implements ServiceInterface
     private $environment;
 
     /**
+     * @var ShellInterface
+     */
+    private $shell;
+
+    /**
      * @var string
      */
     private $version;
 
     /**
      * @param Environment $environment
+     * @param ShellInterface $shell
      */
-    public function __construct(Environment $environment)
-    {
+    public function __construct(
+        Environment $environment,
+        ShellInterface $shell
+    ) {
         $this->environment = $environment;
+        $this->shell = $shell;
     }
 
     /**
      * Finds if configuration exists for one of possible amqp relationship names and return first match,
      * amqp relationship can have different name on different environment.
      *
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function getConfiguration(): array
     {
@@ -58,7 +69,10 @@ class RabbitMq implements ServiceInterface
     }
 
     /**
-     * @inheritdoc
+     * Retrieve RabbitMQ service version whether from relationship configuration
+     * or using CLI command (for PRO environments)
+     *
+     * {@inheritDoc}
      */
     public function getVersion(): string
     {
@@ -69,6 +83,14 @@ class RabbitMq implements ServiceInterface
 
             if (isset($config['type']) && strpos($config['type'], ':') !== false) {
                 $this->version = explode(':', $config['type'])[1];
+            } elseif (isset($config['host']) && isset($config['port'])) {
+                try {
+                    $process = $this->shell->execute('dpkg -s rabbitmq-server | grep Version');
+                    preg_match('/^(?:Version:(?:\s)?)(\d+\.\d+)/', $process->getOutput(), $matches);
+                    $this->version = $matches[1] ?? '0';
+                } catch (ShellException $exception) {
+                    throw new ServiceException($exception->getMessage());
+                }
             }
         }
 
