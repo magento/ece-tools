@@ -56,4 +56,11 @@ interface EnvironmentDataInterface
      * @return string
      */
     public function getBranchName(): string;
+
+    /**
+     * Returns MAGE_MODE environment variable
+     *
+     * @return string|null
+     */
+    public function getMageMode(): ?string;
 }

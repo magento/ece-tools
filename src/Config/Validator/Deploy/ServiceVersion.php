@@ -14,6 +14,7 @@ use Magento\MagentoCloud\Service\ServiceFactory;
 use Magento\MagentoCloud\Service\Validator as ServiceVersionValidator;
 use Magento\MagentoCloud\Config\Validator;
 use Magento\MagentoCloud\Config\ValidatorInterface;
+use Psr\Log\LoggerInterface;
 
 /**
  * Validates installed service versions according to version mapping.
@@ -37,18 +38,26 @@ class ServiceVersion implements ValidatorInterface
     private $serviceFactory;
 
     /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
+    /**
      * @param Validator\ResultFactory $resultFactory
      * @param ServiceVersionValidator $serviceVersionValidator
      * @param ServiceFactory $serviceFactory
+     * @param LoggerInterface $logger
      */
     public function __construct(
         Validator\ResultFactory $resultFactory,
         ServiceVersionValidator $serviceVersionValidator,
-        ServiceFactory $serviceFactory
+        ServiceFactory $serviceFactory,
+        LoggerInterface $logger
     ) {
         $this->resultFactory = $resultFactory;
         $this->serviceVersionValidator = $serviceVersionValidator;
         $this->serviceFactory = $serviceFactory;
+        $this->logger = $logger;
     }
 
     /**
@@ -62,13 +71,18 @@ class ServiceVersion implements ValidatorInterface
             $services = [
                 ServiceInterface::NAME_RABBITMQ,
                 ServiceInterface::NAME_REDIS,
-                ServiceInterface::NAME_DB
+                ServiceInterface::NAME_DB,
+                ServiceInterface::NAME_ELASTICSEARCH
             ];
 
             $errors = [];
             foreach ($services as $serviceName) {
                 $service = $this->serviceFactory->create($serviceName);
                 $serviceVersion = $service->getVersion();
+
+                $logMsq = $serviceVersion ? 'is ' . $serviceVersion : 'is not detected';
+                $this->logger->info(sprintf('Version of service \'%s\' %s', $serviceName, $logMsq));
+
                 if ($serviceVersion !== '0' &&
                     $error = $this->serviceVersionValidator->validateService($serviceName, $serviceVersion)
                 ) {

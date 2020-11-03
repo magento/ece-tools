@@ -19,7 +19,7 @@ class Cron21Cest extends CronCest
     {
         return [
             [
-                'version' => '2.1.17',
+                'version' => '2.1.18',
                 'variables' => [
                     'MAGENTO_CLOUD_VARIABLES' => [
                         'ADMIN_EMAIL' => 'admin@example.com',

@@ -51,6 +51,7 @@ table.error-table td:nth-child(2) {
   width: 200px;
 }
 </style>
+
 EOT;
 
     /**
@@ -72,7 +73,7 @@ EOT;
     protected function configure(): void
     {
         $this->setName(static::NAME)
-            ->setDescription('Generates dist/error-codes.md file from schema.error.yaml');
+            ->setDescription('Generates the dist/error-codes.md file from the schema.error.yaml file.');
 
         parent::configure();
     }

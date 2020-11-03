@@ -52,7 +52,7 @@ class IdealState extends Command
     protected function configure()
     {
         $this->setName(self::NAME)
-            ->setDescription('Verifies ideal state of configuration');
+            ->setDescription('Verifies ideal state of configuration.');
 
         parent::configure();
     }

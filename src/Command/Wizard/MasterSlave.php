@@ -50,7 +50,7 @@ class MasterSlave extends Command
     protected function configure()
     {
         $this->setName(self::NAME)
-            ->setDescription('Verifies master-slave configuration');
+            ->setDescription('Verifies master-slave configuration.');
     }
 
     /**

@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Config\Validator\Deploy;
 
+use Magento\MagentoCloud\App\Error as ApplicationError;
 use Magento\MagentoCloud\Config\ConfigException;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Config\Validator\Deploy\DatabaseSplitConnection;
@@ -78,14 +79,19 @@ class DatabaseSplitConnectionTest extends TestCase
             ->willReturn($dbConfiguration);
         $this->resultFactoryMock->expects($this->once())
             ->method('error')
-            ->with('Split database configuration was detected in the property DATABASE_CONFIGURATION of the'
-                . ' file .magento.env.yaml:' . PHP_EOL
-                . '- connection: checkout' . PHP_EOL
-                . '- connection: sales' . PHP_EOL
-                . '- slave_connection: checkout' . PHP_EOL
-                . '- slave_connection: sales' . PHP_EOL
-                . 'Magento Cloud does not support a custom split database configuration,'
-                . ' such configurations will be ignored');
+            ->with(
+                'Detected split database configuration in the DATABASE_CONFIGURATION property of the'
+                    . ' file .magento.env.yaml:' . PHP_EOL
+                    . '- connection: checkout' . PHP_EOL
+                    . '- connection: sales' . PHP_EOL
+                    . '- slave_connection: checkout' . PHP_EOL
+                    . '- slave_connection: sales' . PHP_EOL
+                    . 'Magento Cloud does not support custom connections in the split database configuration,'
+                    . ' Custom connections will be ignored',
+                'Update the DATABASE_CONFIGURATION variable in the \'.magento.env.yaml\' file to remove '
+                    . 'custom connections for split databases.',
+                ApplicationError::WARN_WRONG_SPLIT_DB_CONFIG
+            );
 
         $this->assertInstanceOf(Error::class, $this->validator->validate());
     }

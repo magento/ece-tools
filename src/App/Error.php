@@ -73,7 +73,8 @@ class Error
     public const DEPLOY_CRYPT_KEY_IS_ABSENT = 131;
     public const DEPLOY_ES_CANNOT_CONNECT = 132;
     public const DEPLOY_WRONG_BRAINTREE_VARIABLE = 133;
-    public const DEPLOY_WRONG_SEARCH_ENGINE = 134;
+    public const DEPLOY_ES_SERVICE_NOT_INSTALLED = 134;
+    public const DEPLOY_WRONG_SEARCH_ENGINE = 135;
 
     public const PD_DEPLOY_IS_FAILED = 201;
     public const PD_ENV_PHP_IS_NOT_WRITABLE = 202;
@@ -130,6 +131,7 @@ class Error
     public const WARN_NOT_ENOUGH_DATA_SPLIT_DB_VAR = 2024;
     public const WARN_SLAVE_CONNECTION_NOT_SET = 2025;
     public const WARN_COPY_MOUNTED_DIRS_FAILED = 2026;
+    public const WARN_NOT_SUPPORTED_MAGE_MODE = 2027;
 
     /**
      * Post-deploy

@@ -53,7 +53,7 @@ class ErrorShow extends Command
     protected function configure()
     {
         $this->setName(self::NAME)
-            ->setDescription('Display info about error by error id or info about all errors from the last deployment')
+            ->setDescription('Displays info about error by error id or info about all errors from the last deployment.')
             ->addArgument(
                 self::ARGUMENT_ERROR_CODE,
                 InputArgument::OPTIONAL,

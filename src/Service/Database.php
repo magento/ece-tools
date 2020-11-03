@@ -7,26 +7,23 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Service;
 
-use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\DB\ConnectionInterface;
+use Magento\MagentoCloud\DB\Data\ConnectionTypes;
 
 /**
- * Returns database service configurations.
+ * Returns main database service configurations.
  */
 class Database implements ServiceInterface
 {
-    const RELATIONSHIP_KEY = 'database';
-    const RELATIONSHIP_SLAVE_KEY = 'database-slave';
-
-    const RELATIONSHIP_QUOTE_KEY = 'database-quote';
-    const RELATIONSHIP_QUOTE_SLAVE_KEY = 'database-quote-slave';
-
-    const RELATIONSHIP_SALES_KEY = 'database-sales';
-    const RELATIONSHIP_SALES_SLAVE_KEY = 'database-sales-slave';
+    /**
+     * @var ConnectionTypes
+     */
+    private $connectionType;
 
     /**
-     * @var Environment
+     * @var ConnectionInterface
      */
-    private $environment;
+    private $connection;
 
     /**
      * @var string
@@ -34,11 +31,15 @@ class Database implements ServiceInterface
     private $version;
 
     /**
-     * @param Environment $environment
+     * @param ConnectionTypes $connectionType
+     * @param ConnectionInterface $connection
      */
-    public function __construct(Environment $environment)
-    {
-        $this->environment = $environment;
+    public function __construct(
+        ConnectionTypes $connectionType,
+        ConnectionInterface $connection
+    ) {
+        $this->connectionType = $connectionType;
+        $this->connection = $connection;
     }
 
     /**
@@ -46,69 +47,33 @@ class Database implements ServiceInterface
      */
     public function getConfiguration(): array
     {
-        return $this->environment->getRelationship(self::RELATIONSHIP_KEY)[0] ?? [];
+        return $this->connectionType->getConfiguration();
     }
 
     /**
-     * Returns service configuration for slave.
+     * Retrieves MySQL service version whether from relationship configuration
+     * or using SQL query (for PRO environments)
      *
-     * @return array
-     */
-    public function getSlaveConfiguration(): array
-    {
-        return $this->environment->getRelationship(self::RELATIONSHIP_SLAVE_KEY)[0] ?? [];
-    }
-
-    /**
-     * Returns configuration for quote service.
-     */
-    public function getQuoteConfiguration(): array
-    {
-        return $this->environment->getRelationship(self::RELATIONSHIP_QUOTE_KEY)[0] ?? [];
-    }
-
-    /**
-     * Returns configuration for quote slave service.
-     *
-     * @return array
-     */
-    public function getQuoteSlaveConfiguration(): array
-    {
-        return $this->environment->getRelationship(self::RELATIONSHIP_QUOTE_SLAVE_KEY)[0] ?? [];
-    }
-
-    /**
-     * Returns configuration for sales service.
-     */
-    public function getSalesConfiguration(): array
-    {
-        return $this->environment->getRelationship(self::RELATIONSHIP_SALES_KEY)[0] ?? [];
-    }
-
-    /**
-     * Returns configuration for slave sales service.
-     *
-     * @return array
-     */
-    public function getSalesSlaveConfiguration(): array
-    {
-        return $this->environment->getRelationship(self::RELATIONSHIP_SALES_SLAVE_KEY)[0] ?? [];
-    }
-
-    /**
-     * Returns version of the service.
-     *
-     * @return string
+     * {@inheritDoc}
      */
     public function getVersion(): string
     {
         if ($this->version === null) {
             $this->version = '0';
 
-            $databaseConfig = $this->getConfiguration();
+            try {
+                $databaseConfig = $this->getConfiguration();
 
-            if (isset($databaseConfig['type']) && strpos($databaseConfig['type'], ':') !== false) {
-                $this->version = explode(':', $databaseConfig['type'])[1];
+                if (isset($databaseConfig['type']) && strpos($databaseConfig['type'], ':') !== false) {
+                    $this->version = explode(':', $databaseConfig['type'])[1];
+                } elseif (!empty($databaseConfig['host'])) {
+                    $rawVersion = $this->connection->selectOne('SELECT VERSION() as version');
+                    preg_match('/^\d+\.\d+/', $rawVersion['version'] ?? '', $matches);
+
+                    $this->version = $matches[0] ?? '0';
+                }
+            } catch (\Exception $e) {
+                throw new ServiceException($e->getMessage());
             }
         }
 

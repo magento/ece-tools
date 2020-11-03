@@ -174,7 +174,7 @@
     type: critical
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_REDIS_CACHE_CLEAN_FAILED:
     title: 'Failed to clean the Redis cache'
-    suggestion: 'Failed to clean the Redis cache. Check that the Redis cache configuration is correct and that the Redis service is available. See [Setup Redis service](https://devdocs.magento.com/cloud/project/project-conf-files_services-redis.html).'
+    suggestion: 'Failed to clean the Redis cache. Check that the Redis cache configuration is correct and that the Redis service is available. See [Setup Redis service](https://devdocs.magento.com/cloud/project/services-redis.html).'
     step: 'pre-deploy: clean-redis-cache'
     stage: deploy
     type: critical
@@ -322,7 +322,7 @@
     type: critical
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_ES_CANNOT_CONNECT:
     title: 'Can not connect to the Elasticsearch service'
-    suggestion: 'Check that credentials for elasticsearch are correct and service is running'
+    suggestion: 'Check for valid Elasticsearch credentials and verify that the service is running'
     stage: deploy
     type: critical
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_WRONG_BRAINTREE_VARIABLE:
@@ -331,10 +331,16 @@
     suggestion: 'Support for the Braintree module is no longer included with Magento 2.4.0 and later. Remove the CONFIG__STORES__DEFAULT__PAYMENT__BRAINTREE__CHANNEL variable from the variables section of the .magento.app.yaml file. For Braintree support, use an official Braintree Payments extension from the Magento Marketplace instead.'
     stage: deploy
     type: critical
-!php/const Magento\MagentoCloud\App\Error::DEPLOY_WRONG_SEARCH_ENGINE:
+!php/const Magento\MagentoCloud\App\Error::DEPLOY_ES_SERVICE_NOT_INSTALLED:
     step: validate-config
     title: 'Magento 2.4.0 requires Elasticsearch service to be installed'
     suggestion: 'Install Elasticsearch service'
+    stage: deploy
+    type: critical
+!php/const Magento\MagentoCloud\App\Error::DEPLOY_WRONG_SEARCH_ENGINE:
+    step: validate-config
+    title: 'The search engine must be set to Elasticsearch for Magento >= 2.4.0'
+    suggestion: 'Check the SEARCH_CONFIGURATION variable for the `engine` option. If it is configured, remove the option, or set the value to "elasticsearch".'
     stage: deploy
     type: critical
 !php/const Magento\MagentoCloud\App\Error::PD_DEPLOY_IS_FAILED:
@@ -576,6 +582,12 @@
     stage: deploy
     suggestion: 'Check the `cloud.log` for more information.'
     step: 'pre-deploy:restore-writable-dirs'
+    type: warning
+!php/const Magento\MagentoCloud\App\Error::WARN_NOT_SUPPORTED_MAGE_MODE:
+    title: 'Mode value for MAGE_MODE environment variable not supported'
+    stage: deploy
+    suggestion: 'Remove the MAGE_MODE environment variable, or change its value to "production". Magento Cloud supports "production" mode only.'
+    step: 'validate-config:mage-mode-variable'
     type: warning
 !php/const Magento\MagentoCloud\App\Error::WARN_DEBUG_LOG_ENABLED:
     title: 'Debug logging is enabled in Magento'
