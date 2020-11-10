@@ -134,19 +134,21 @@ class RemoteStorageTest extends TestCase
             ->willReturn(true);
         $this->configMock->method('getDriver')
             ->willReturn('adapter');
+        $this->configMock->method('getPrefix')
+            ->willReturn('test_prefix');
         $this->configMock->method('getConfig')
             ->willReturn([
                 'bucket' => 'test_bucket',
                 'region' => 'test_region',
                 'key' => 'test_key',
                 'secret' => 'test_secret',
-                'prefix' => 'test_prefix'
             ]);
         $this->magentoShellMock->expects(self::once())
             ->method('execute')
             ->with(
                 'setup:config:set --remote-storage-driver=adapter'
                 . ' --remote-storage-bucket=test_bucket --remote-storage-region=test_region'
+                . ' --remote-storage-prefix=test_prefix'
                 . ' --remote-storage-access-key=test_key --remote-storage-secret-key=test_secret -n'
             );
         $this->loggerMock->expects(self::once())
@@ -193,8 +195,7 @@ class RemoteStorageTest extends TestCase
                 'bucket' => 'test_bucket',
                 'region' => 'test_region',
                 'key' => 'test_key',
-                'secret' => 'test_secret',
-                'prefix' => 'test_prefix'
+                'secret' => 'test_secret'
             ]);
         $this->magentoShellMock->expects(self::once())
             ->method('execute')
@@ -223,7 +224,6 @@ class RemoteStorageTest extends TestCase
             ->willReturn([
                 'key' => 'test_key',
                 'secret' => 'test_secret',
-                'prefix' => 'test_prefix'
             ]);
 
         $this->step->execute();

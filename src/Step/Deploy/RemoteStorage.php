@@ -93,7 +93,7 @@ class RemoteStorage implements StepInterface
             ];
 
             if ($prefix = $this->config->getPrefix()) {
-                $options['--remote-storage-prefix='] = $prefix;
+                $options[] = '--remote-storage-prefix=' . $prefix;
             }
 
             if (isset($config['key'], $config['secret'])) {
