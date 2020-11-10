@@ -115,7 +115,7 @@ class RemoteStorageTest extends TestCase
             ->with(
                 'setup:config:set --remote-storage-driver=adapter'
                 . ' --remote-storage-bucket=test_bucket --remote-storage-region=test_region'
-                . ' --remote-storage-access-key=test_key --remote-storage-secret-key=test_secret -n'
+                . ' --remote-storage-key=test_key --remote-storage-secret=test_secret -n'
             );
         $this->loggerMock->expects(self::once())
             ->method('info')
@@ -149,7 +149,7 @@ class RemoteStorageTest extends TestCase
                 'setup:config:set --remote-storage-driver=adapter'
                 . ' --remote-storage-bucket=test_bucket --remote-storage-region=test_region'
                 . ' --remote-storage-prefix=test_prefix'
-                . ' --remote-storage-access-key=test_key --remote-storage-secret-key=test_secret -n'
+                . ' --remote-storage-key=test_key --remote-storage-secret=test_secret -n'
             );
         $this->loggerMock->expects(self::once())
             ->method('info')

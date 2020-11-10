@@ -97,8 +97,8 @@ class RemoteStorage implements StepInterface
             }
 
             if (isset($config['key'], $config['secret'])) {
-                $options[] = '--remote-storage-access-key=' . $config['key'];
-                $options[] = '--remote-storage-secret-key=' . $config['secret'];
+                $options[] = '--remote-storage-key=' . $config['key'];
+                $options[] = '--remote-storage-secret=' . $config['secret'];
             }
 
             try {
