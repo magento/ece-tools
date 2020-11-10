@@ -112,7 +112,11 @@ class RemoteStorage implements StepInterface
                     ['errorCode' => Error::WARN_REMOTE_STORAGE_CANNOT_BE_ENABLED]
                 );
 
-                throw new StepException($exception->getMessage(), $exception->getCode(), $exception);
+                throw new StepException(
+                    $exception->getMessage(),
+                    Error::WARN_REMOTE_STORAGE_CANNOT_BE_ENABLED,
+                    $exception
+                );
             }
 
             $this->logger->info(sprintf(

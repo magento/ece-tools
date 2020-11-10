@@ -17,7 +17,6 @@
             </argument>
         </arguments>
     </step>
-    <step name="remote-storage" type="Magento\MagentoCloud\Step\Deploy\RemoteStorage" priority="250"/>
     <step name="enable-maintenance-mode" type="Magento\MagentoCloud\Step\EnableMaintenanceMode" priority="300"/>
     <step name="disable-cron" type="Magento\MagentoCloud\Step\Deploy\DisableCron" priority="400"/>
     <step name="validate-config" type="Magento\MagentoCloud\Step\ValidateConfiguration" priority="500">
@@ -127,6 +126,7 @@
             </argument>
         </arguments>
     </step>
+    <step name="remote-storage" type="Magento\MagentoCloud\Step\Deploy\RemoteStorage" priority="1250"/>
     <step name="disable-maintenance-mode" type="Magento\MagentoCloud\Step\DisableMaintenanceMode" priority="1300"/>
     <onFail>
         <action name="create-deploy-failed-flag" type="Magento\MagentoCloud\OnFail\Action\CreateDeployFailedFlag" priority="100"/>
