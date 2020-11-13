@@ -10,7 +10,7 @@ namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 /**
  * @group php72
  */
-class RedisPhp72Cest2 extends RedisCest
+class RedisPhp72GoodConfigCest extends RedisCest
 {
     /**
      * @return array

@@ -15,7 +15,7 @@ cp codeception.dist.yml codeception.yml
 echo "groups:" >> codeception.yml
 echo "  parallel_${php_version}_*: tests/functional/_data/parallel_${php_version}_*" >> codeception.yml
 
-if [ $php_version == "74" ]; then
+if [[ $php_version == "74" ]]; then
   echo "Total = ${#test_set_list[@]};"
   echo "Batch #1 = Acceptance"
   echo "src/Test/Functional/Acceptance/AcceptanceCest.php" >> "tests/functional/_data/parallel_${php_version}_1.yml"
