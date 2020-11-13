@@ -19,7 +19,7 @@ class RedisPhp71Cest extends RedisCest
     {
         return [
             [
-                'version' => '2.2.11',
+                'version' => '2.2.9',
             ],
         ];
     }
@@ -31,7 +31,7 @@ class RedisPhp71Cest extends RedisCest
     {
         return [
             [
-                'version' => '2.2.11',
+                'version' => '2.2.9',
                 'wrongConfiguration' => [
                     'stage' => [
                         'deploy' => [
@@ -46,7 +46,7 @@ class RedisPhp71Cest extends RedisCest
                     . '\'\Magento\Framework\Cache\Backend\Redis\'',
             ],
             [
-                'version' => '2.2.11',
+                'version' => '2.2.9',
                 'wrongConfiguration' => [
                     'stage' => [
                         'deploy' => [
@@ -71,7 +71,7 @@ class RedisPhp71Cest extends RedisCest
     {
         return [
             [
-                'version' => '2.2.11',
+                'version' => '2.2.9',
                 'backendModel' => [
                     'stage' => [
                         'deploy' => [

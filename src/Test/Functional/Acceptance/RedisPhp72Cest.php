@@ -19,6 +19,9 @@ class RedisPhp72Cest extends RedisCest
     {
         return [
             [
+                'version' => '2.2.11',
+            ],
+            [
                 'version' => '2.3.0',
             ],
             [
