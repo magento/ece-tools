@@ -19,6 +19,9 @@ class RedisPhp72Cest extends RedisCest
     {
         return [
             [
+                'version' => '2.2.11',
+            ],
+            [
                 'version' => '2.3.0',
             ],
             [
@@ -74,168 +77,13 @@ class RedisPhp72Cest extends RedisCest
     }
 
     /**
-     * @return array
-     * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
+     * @param \CliTester $I
+     * @param \Codeception\Example $data
+     * @throws \Robo\Exception\TaskException
+     * @skip
      */
-    protected function goodConfigurationDataProvider(): array
+    public function testGoodConfiguration(\CliTester $I, \Codeception\Example $data): void
     {
-        return [
-            [
-                'version' => '2.3.0',
-                'backendModel' => [
-                    'stage' => [
-                        'deploy' => [
-                            'REDIS_BACKEND' => 'Cm_Cache_Backend_Redis',
-                        ],
-                    ],
-                ],
-                'expectedBackend' => 'Cm_Cache_Backend_Redis',
-                'expectedConfig' => [
-                    'backend_options' => [
-                        'server' => 'redis',
-                        'port' => '6379',
-                        'database' => 1,
-                    ],
-                ],
-            ],
-            [
-                'version' => '2.3.0',
-                'backendModel' => [
-                    'stage' => [
-                        'deploy' => [
-                            'REDIS_BACKEND' => '\Magento\Framework\Cache\Backend\Redis',
-                        ],
-                    ],
-                ],
-                'expectedBackend' => '\Magento\Framework\Cache\Backend\Redis',
-                'expectedConfig' => [
-                    'backend_options' => [
-                        'server' => 'redis',
-                        'port' => '6379',
-                        'database' => 1,
-                    ],
-                ],
-            ],
-            [
-                'version' => '2.3.0',
-                'backendModel' => [
-                    'stage' => [
-                        'deploy' => [
-                            'REDIS_BACKEND' => '\Magento\Framework\Cache\Backend\RemoteSynchronizedCache',
-                        ],
-                    ],
-                ],
-                'expectedBackend' => '\Magento\Framework\Cache\Backend\RemoteSynchronizedCache',
-                'expectedConfig' => [
-                    'backend_options' => [
-                        'remote_backend' => '\Magento\Framework\Cache\Backend\Redis',
-                        'remote_backend_options' => [
-                            'persistent' => 0,
-                            'server' => 'redis',
-                            'database' => 1,
-                            'port' => '6379',
-                            'password' => '',
-                            'compress_data' => '1',
-                        ],
-                        'local_backend' => 'Cm_Cache_Backend_File',
-                        'local_backend_options' => [
-                            'cache_dir' => '/dev/shm/',
-                        ]
-                    ]
-                ],
-            ],
-            [
-                'version' => '2.3.1',
-                'backendModel' => [
-                    'stage' => [
-                        'deploy' => [
-                            'REDIS_BACKEND' => '\Magento\Framework\Cache\Backend\Redis',
-                        ],
-                    ],
-                ],
-                'expectedBackend' => '\Magento\Framework\Cache\Backend\Redis',
-                'expectedConfig' => [
-                    'backend_options' => [
-                        'server' => 'redis',
-                        'port' => '6379',
-                        'database' => 1,
-                    ],
-                ],
-            ],
-            [
-                'version' => '2.3.1',
-                'backendModel' => [
-                    'stage' => [
-                        'deploy' => [
-                            'REDIS_BACKEND' => '\Magento\Framework\Cache\Backend\RemoteSynchronizedCache',
-                        ],
-                    ],
-                ],
-                'expectedBackend' => '\Magento\Framework\Cache\Backend\RemoteSynchronizedCache',
-                'expectedConfig' => [
-                    'backend_options' => [
-                        'remote_backend' => '\Magento\Framework\Cache\Backend\Redis',
-                        'remote_backend_options' => [
-                            'persistent' => 0,
-                            'server' => 'redis',
-                            'database' => 1,
-                            'port' => '6379',
-                            'password' => '',
-                            'compress_data' => '1',
-                        ],
-                        'local_backend' => 'Cm_Cache_Backend_File',
-                        'local_backend_options' => [
-                            'cache_dir' => '/dev/shm/',
-                        ]
-                    ]
-                ],
-            ],
-            [
-                'version' => '2.3.2',
-                'backendModel' => [
-                    'stage' => [
-                        'deploy' => [
-                            'REDIS_BACKEND' => '\Magento\Framework\Cache\Backend\Redis',
-                        ],
-                    ],
-                ],
-                'expectedBackend' => '\Magento\Framework\Cache\Backend\Redis',
-                'expectedConfig' => [
-                    'backend_options' => [
-                        'server' => 'redis',
-                        'port' => '6379',
-                        'database' => 1,
-                    ],
-                ],
-            ],
-            [
-                'version' => '2.3.2',
-                'backendModel' => [
-                    'stage' => [
-                        'deploy' => [
-                            'REDIS_BACKEND' => '\Magento\Framework\Cache\Backend\RemoteSynchronizedCache',
-                        ],
-                    ],
-                ],
-                'expectedBackend' => '\Magento\Framework\Cache\Backend\RemoteSynchronizedCache',
-                'expectedConfig' => [
-                    'backend_options' => [
-                        'remote_backend' => '\Magento\Framework\Cache\Backend\Redis',
-                        'remote_backend_options' => [
-                            'persistent' => 0,
-                            'server' => 'redis',
-                            'database' => 1,
-                            'port' => '6379',
-                            'password' => '',
-                            'compress_data' => '1',
-                        ],
-                        'local_backend' => 'Cm_Cache_Backend_File',
-                        'local_backend_options' => [
-                            'cache_dir' => '/dev/shm/',
-                        ]
-                    ]
-                ],
-            ],
-        ];
+        return;
     }
 }
