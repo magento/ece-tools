@@ -77,11 +77,13 @@ class RedisPhp72Cest extends RedisCest
     }
 
     /**
-     * @return array
-     * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
+     * @param \CliTester $I
+     * @param \Codeception\Example $data
+     * @throws \Robo\Exception\TaskException
+     * @skip
      */
-    protected function goodConfigurationDataProvider(): array
+    public function testGoodConfiguration(\CliTester $I, \Codeception\Example $data): void
     {
-        return [];
+        return;
     }
 }

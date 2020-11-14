@@ -13,19 +13,24 @@ namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 class RedisPhp72GoodConfigCest extends RedisCest
 {
     /**
-     * @return array
+     * @param \CliTester $I
+     * @param \Codeception\Example $data
+     * @skip
      */
-    protected function defaultConfigurationDataProvider(): array
+    public function testDefaultConfiguration(\CliTester $I, \Codeception\Example $data): void
     {
-        return [];
+        return;
     }
 
     /**
-     * @return array
+     * @param \CliTester $I
+     * @param \Codeception\Example $data
+     * @throws \Robo\Exception\TaskException
+     * @skip
      */
-    protected function wrongConfigurationDataProvider(): array
+    public function testWrongConfiguration(\CliTester $I, \Codeception\Example $data): void
     {
-        return [];
+        return;
     }
 
     /**
