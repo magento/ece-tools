@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
 <scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:ece-tools:config/scenario.xsd">
+    <step name="php-opcache-reset" type="Magento\MagentoCloud\Step\Deploy\PhpOpcacheReset" priority="50"/>
     <step name="remove-deploy-failed-flag" type="Magento\MagentoCloud\Step\Deploy\RemoveDeployFailedFlag" priority="100"/>
     <step name="pre-deploy" type="Magento\MagentoCloud\Step\Deploy\PreDeploy" priority="200">
         <arguments>
