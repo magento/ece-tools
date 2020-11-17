@@ -174,6 +174,13 @@ class SearchConfigurationTest extends TestCase
                 Success::class,
                 true
             ],
+            [
+                [
+                    'engine' => 'elasticsuite',
+                ],
+                Success::class,
+                true
+            ],
         ];
     }
 

@@ -10,6 +10,7 @@ namespace Magento\MagentoCloud\Config\Validator\Deploy;
 use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Config\ConfigMerger;
+use Magento\MagentoCloud\Config\SearchEngine\ElasticSuite;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Config\Validator;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
@@ -74,7 +75,7 @@ class SearchConfiguration implements ValidatorInterface
 
             if ($this->magentoVersion->isGreaterOrEqual('2.4.0')
                 && isset($searchConfig['engine'])
-                && $searchConfig['engine'] != ElasticSearch::ENGINE_NAME
+                && !in_array($searchConfig['engine'], [ElasticSearch::ENGINE_NAME, ElasticSuite::ENGINE_NAME])
             ) {
                 return $this->resultFactory->errorByCode(Error::DEPLOY_WRONG_SEARCH_ENGINE);
             }
