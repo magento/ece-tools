@@ -84,12 +84,31 @@ class ErrorLogFileTest extends TestCase
         $this->errorLogFile->prepare();
     }
 
+    public function testBuildLogFileEmpty()
+    {
+        $this->defaultMocks();
+        $this->fileMock->expects($this->once())
+            ->method('isExists')
+            ->willReturn(true);
+        $this->fileMock->expects($this->once())
+            ->method('fileGetContents')
+            ->with('/init/var/log/cloud.error.log')
+            ->willReturn('');
+        $this->fileMock->expects($this->never())
+            ->method('copy');
+
+        $this->errorLogFile->prepare();
+    }
+
     public function testDeployLogFileNotExists()
     {
         $this->defaultMocks();
         $this->fileMock->expects($this->exactly(2))
             ->method('isExists')
             ->willReturnOnConsecutiveCalls(true, false);
+        $this->fileMock->expects($this->once())
+            ->method('fileGetContents')
+            ->willReturn('content');
         $this->fileMock->expects($this->once())
             ->method('copy')
             ->with('/init/var/log/cloud.error.log', '/var/log/cloud.error.log');
@@ -105,8 +124,8 @@ class ErrorLogFileTest extends TestCase
             ->willReturn(true);
         $this->fileMock->expects($this->exactly(2))
             ->method('fileGetContents')
-            ->withConsecutive(['/var/log/cloud.error.log'], ['/init/var/log/cloud.error.log'])
-            ->willReturnOnConsecutiveCalls('some deploy log', 'some build log');
+            ->withConsecutive(['/init/var/log/cloud.error.log'], ['/var/log/cloud.error.log'])
+            ->willReturnOnConsecutiveCalls('some build log', 'some deploy log');
 
         $this->fileMock->expects($this->once())
             ->method('copy')
@@ -123,8 +142,8 @@ class ErrorLogFileTest extends TestCase
             ->willReturn(true);
         $this->fileMock->expects($this->exactly(2))
             ->method('fileGetContents')
-            ->withConsecutive(['/var/log/cloud.error.log'], ['/init/var/log/cloud.error.log'])
-            ->willReturnOnConsecutiveCalls('some build log, some deploy log', 'some build log');
+            ->withConsecutive(['/init/var/log/cloud.error.log'], ['/var/log/cloud.error.log'])
+            ->willReturnOnConsecutiveCalls('some build log', 'some build log, some deploy log');
 
         $this->fileMock->expects($this->never())
             ->method('copy');
