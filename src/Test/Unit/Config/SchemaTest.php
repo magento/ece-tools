@@ -115,6 +115,7 @@ class SchemaTest extends TestCase
                 DeployInterface::VAR_CONSUMERS_WAIT_FOR_MAX_MESSAGES => false,
                 DeployInterface::VAR_SPLIT_DB => [],
                 DeployInterface::VAR_CACHE_REDIS_BACKEND => 'Cm_Cache_Backend_Redis',
+                DeployInterface::VAR_REMOTE_STORAGE => [],
             ],
             $this->schema->getDefaults(StageConfigInterface::STAGE_DEPLOY)
         );

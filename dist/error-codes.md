@@ -150,6 +150,7 @@ Warning errors indicate a problem with the Magento Commerce Cloud project config
 | 2025 | install-update:split-db | Slave connection not set. |  |
 | 2026 | pre-deploy:restore-writable-dirs | Failed to restore some data generated during the build phase to the mounted directories | Check the `cloud.log` for more information. |
 | 2027 | validate-config:mage-mode-variable | Mode value for MAGE_MODE environment variable not supported | Remove the MAGE_MODE environment variable, or change its value to "production". Magento Cloud supports "production" mode only. |
+| 2028 | remote-storage | Remote storage could not be enabled. | Verify remote storage credentials |
 
 ### Post-deploy stage
 
