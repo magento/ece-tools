@@ -30,9 +30,18 @@ class Validator
             '>=2.3.3 <2.4.0' => '>=7.1 <7.4',   //  '~7.1.3||~7.2.0||~7.3.0'
             '>=2.4.0' => '>=7.3 <7.5', // '~7.3.0||~7.4.0'
         ],
-        ServiceInterface::NAME_DB => [
+        ServiceInterface::NAME_DB_MARIA => [
             '<2.4.0' => '>=10.0 <10.3',
             '>=2.4.0' => '>=10.2 <10.5',
+        ],
+        ServiceInterface::NAME_DB_MYSQL => [
+            '<2.3.0' => '~5.6.0 || ~5.7.0',
+            '>=2.3.0 <2.4.0' => '~5.7.0',
+            '>=2.4.0' => '~8.0.0',
+        ],
+        ServiceInterface::NAME_DB_AURORA => [
+            '<2.3.0' => '~1.0.0 || ~2.0.0',
+            '>2.3.0' => '~2.0.0',
         ],
         ServiceInterface::NAME_NGINX => [
             '*' => '^1.9.0',
@@ -170,7 +179,7 @@ class Validator
                         break;
                     }
                 }
-                if (!$this->supportedVersionList[$serviceName]) {
+                if (!isset($this->supportedVersionList[$serviceName])) {
                     throw new ServiceMismatchException(sprintf(
                         'Service "%s" does not have defined configurations for "%s" Magento version',
                         $serviceName,

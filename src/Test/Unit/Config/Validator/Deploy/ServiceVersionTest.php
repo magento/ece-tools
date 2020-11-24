@@ -8,6 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit\Config\Validator\Deploy;
 
 use Magento\MagentoCloud\Config\Validator\Deploy\ServiceVersion;
+use Magento\MagentoCloud\Service\Detector\DatabaseType;
 use Magento\MagentoCloud\Service\ServiceMismatchException;
 use Magento\MagentoCloud\Service\ServiceInterface;
 use Magento\MagentoCloud\Service\ServiceFactory;
@@ -50,6 +51,11 @@ class ServiceVersionTest extends TestCase
     private $serviceFactory;
 
     /**
+     * @var DatabaseType|MockObject
+     */
+    private $databaseTypeMock;
+
+    /**
      * @inheritdoc
      */
     protected function setUp()
@@ -61,17 +67,22 @@ class ServiceVersionTest extends TestCase
         $this->serviceVersionValidatorMock = $this->createMock(ServiceVersionValidator::class);
         $this->serviceFactory = $this->createMock(ServiceFactory::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->databaseTypeMock = $this->createMock(DatabaseType::class);
 
         $this->validator = new ServiceVersion(
             $this->resultFactoryMock,
             $this->serviceVersionValidatorMock,
             $this->serviceFactory,
-            $this->loggerMock
+            $this->loggerMock,
+            $this->databaseTypeMock
         );
     }
 
     public function testValidate(): void
     {
+        $this->databaseTypeMock->expects($this->once())
+            ->method('getServiceName')
+            ->willReturn(ServiceInterface::NAME_DB_MARIA);
         $serviceRmq = $this->createMock(ServiceInterface::class);
         $serviceRmq->expects($this->once())
             ->method('getVersion')
@@ -80,31 +91,31 @@ class ServiceVersionTest extends TestCase
         $serviceRedis->expects($this->once())
             ->method('getVersion')
             ->willReturn('3.2');
-        $serviceDB = $this->createMock(ServiceInterface::class);
-        $serviceDB->expects($this->once())
-            ->method('getVersion')
-            ->willReturn('10.2');
         $serviceES = $this->createMock(ServiceInterface::class);
         $serviceES->expects($this->once())
             ->method('getVersion')
             ->willReturn('7.7');
+        $serviceMariaDB = $this->createMock(ServiceInterface::class);
+        $serviceMariaDB->expects($this->once())
+            ->method('getVersion')
+            ->willReturn('10.2');
         $this->serviceFactory->expects($this->exactly(4))
             ->method('create')
-            ->willReturnOnConsecutiveCalls($serviceRmq, $serviceRedis, $serviceDB, $serviceES);
+            ->willReturnOnConsecutiveCalls($serviceRmq, $serviceRedis, $serviceES, $serviceMariaDB);
         $this->loggerMock->expects($this->exactly(4))
             ->method('info')
             ->withConsecutive(
                 ['Version of service \'rabbitmq\' is not detected', []],
                 ['Version of service \'redis\' is 3.2', []],
-                ['Version of service \'mysql\' is 10.2', []],
-                ['Version of service \'elasticsearch\' is 7.7', []]
+                ['Version of service \'elasticsearch\' is 7.7', []],
+                ['Version of service \'mariadb\' is 10.2', []]
             );
         $this->serviceVersionValidatorMock->expects($this->exactly(3))
             ->method('validateService')
             ->withConsecutive(
                 [ServiceInterface::NAME_REDIS, '3.2'],
-                [ServiceInterface::NAME_DB, '10.2'],
-                [ServiceInterface::NAME_ELASTICSEARCH, '7.7']
+                [ServiceInterface::NAME_ELASTICSEARCH, '7.7'],
+                [ServiceInterface::NAME_DB_MARIA, '10.2']
             )
             ->willReturn('');
         $this->resultFactoryMock->expects($this->once())
@@ -115,6 +126,9 @@ class ServiceVersionTest extends TestCase
 
     public function testValidateWithErrors(): void
     {
+        $this->databaseTypeMock->expects($this->once())
+            ->method('getServiceName')
+            ->willReturn(ServiceInterface::NAME_DB_MYSQL);
         $errorMessages = ['error message 1', 'error message 2', 'error message 3', 'error message 4'];
         $service1 = $this->createMock(ServiceInterface::class);
         $service1->expects($this->once())
@@ -127,11 +141,11 @@ class ServiceVersionTest extends TestCase
         $service3 = $this->createMock(ServiceInterface::class);
         $service3->expects($this->once())
             ->method('getVersion')
-            ->willReturn('5.7');
+            ->willReturn('7.7');
         $service4 = $this->createMock(ServiceInterface::class);
         $service4->expects($this->once())
             ->method('getVersion')
-            ->willReturn('7.7');
+            ->willReturn('5.7');
         $this->serviceFactory->expects($this->exactly(4))
             ->method('create')
             ->willReturnOnConsecutiveCalls($service1, $service2, $service3, $service4);
@@ -140,8 +154,8 @@ class ServiceVersionTest extends TestCase
             ->withConsecutive(
                 [ServiceInterface::NAME_RABBITMQ, '1.5'],
                 [ServiceInterface::NAME_REDIS, '2.2'],
-                [ServiceInterface::NAME_DB, '5.7'],
-                [ServiceInterface::NAME_ELASTICSEARCH, '7.7']
+                [ServiceInterface::NAME_ELASTICSEARCH, '7.7'],
+                [ServiceInterface::NAME_DB_MYSQL, '5.7']
             )
             ->willReturnOnConsecutiveCalls(...$errorMessages);
         $this->resultFactoryMock->expects($this->once())

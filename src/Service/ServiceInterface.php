@@ -13,7 +13,9 @@ namespace Magento\MagentoCloud\Service;
 interface ServiceInterface
 {
     const NAME_PHP = 'php';
-    const NAME_DB = 'mysql';
+    const NAME_DB_MYSQL = 'mysql';
+    const NAME_DB_MARIA = 'mariadb';
+    const NAME_DB_AURORA = 'aurora';
     const NAME_NGINX = 'nginx';
     const NAME_REDIS = 'redis';
     const NAME_ELASTICSEARCH = 'elasticsearch';

@@ -82,7 +82,7 @@ class ServiceFactoryTest extends TestCase
             [ServiceInterface::NAME_REDIS, Redis::class],
             [ServiceInterface::NAME_RABBITMQ, RabbitMq::class],
             [ServiceInterface::NAME_ELASTICSEARCH, ElasticSearch::class],
-            [ServiceInterface::NAME_DB, Database::class],
+            [ServiceInterface::NAME_DB_MARIA, Database::class],
         ];
     }
 }

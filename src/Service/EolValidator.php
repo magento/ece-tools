@@ -13,6 +13,7 @@ use Magento\MagentoCloud\Config\ValidatorInterface;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
+use Magento\MagentoCloud\Service\Detector\DatabaseType;
 use Symfony\Component\Yaml\Yaml;
 
 /**
@@ -46,30 +47,27 @@ class EolValidator
      * @var array
      */
     private $eolConfigs;
-
     /**
-     * @var array
+     * @var DatabaseType
      */
-    private $services = [
-        ServiceInterface::NAME_PHP,
-        ServiceInterface::NAME_ELASTICSEARCH,
-        ServiceInterface::NAME_RABBITMQ,
-        ServiceInterface::NAME_REDIS,
-        ServiceInterface::NAME_DB
-    ];
+    private $databaseType;
 
     /**
      * @param FileList $fileList
+     * @param File $file
      * @param ServiceFactory $serviceFactory
+     * @param DatabaseType $databaseType
      */
     public function __construct(
         FileList $fileList,
         File $file,
-        ServiceFactory $serviceFactory
+        ServiceFactory $serviceFactory,
+        DatabaseType $databaseType
     ) {
         $this->fileList = $fileList;
         $this->file = $file;
         $this->serviceFactory = $serviceFactory;
+        $this->databaseType = $databaseType;
     }
 
     /**
@@ -78,12 +76,21 @@ class EolValidator
      * @return array
      * @throws FileSystemException
      * @throws ServiceMismatchException
+     * @throws ServiceException
      */
     public function validateServiceEol(): array
     {
         $errors = [];
 
-        foreach ($this->services as $serviceName) {
+        $services = [
+            ServiceInterface::NAME_PHP,
+            ServiceInterface::NAME_ELASTICSEARCH,
+            ServiceInterface::NAME_RABBITMQ,
+            ServiceInterface::NAME_REDIS,
+            $this->databaseType->getServiceName()
+        ];
+
+        foreach ($services as $serviceName) {
             $service = $this->serviceFactory->create($serviceName);
             $serviceVersion = $service->getVersion();
 
