@@ -11,6 +11,7 @@ use Carbon\Carbon;
 use Magento\MagentoCloud\Config\ValidatorInterface;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileList;
+use Magento\MagentoCloud\Service\Detector\DatabaseType;
 use Magento\MagentoCloud\Service\EolValidator;
 use Magento\MagentoCloud\Service\ServiceFactory;
 use Magento\MagentoCloud\Service\ServiceInterface;
@@ -46,6 +47,11 @@ class EolValidatorTest extends TestCase
     private $serviceFactoryMock;
 
     /**
+     * @var DatabaseType|MockObject
+     */
+    private $databaseTypeMock;
+
+    /**
      * @inheritDoc
      */
     protected function setUp()
@@ -58,11 +64,13 @@ class EolValidatorTest extends TestCase
         $this->fileListMock = $this->createMock(FileList::class);
         $this->fileMock = $this->createPartialMock(File::class, ['isExists']);
         $this->serviceFactoryMock = $this->createMock(ServiceFactory::class);
+        $this->databaseTypeMock = $this->createMock(DatabaseType::class);
 
         $this->validator = new EolValidator(
             $this->fileListMock,
             $this->fileMock,
-            $this->serviceFactoryMock
+            $this->serviceFactoryMock,
+            $this->databaseTypeMock
         );
     }
 
@@ -137,6 +145,9 @@ class EolValidatorTest extends TestCase
             ->with($configsPath)
             ->willReturn(true);
 
+        $this->databaseTypeMock->expects($this->once())
+            ->method('getServiceName')
+            ->willReturn(ServiceInterface::NAME_DB_MARIA);
         $service1 = $this->createMock(ServiceInterface::class);
         $service1->expects($this->once())
             ->method('getVersion')
@@ -160,6 +171,13 @@ class EolValidatorTest extends TestCase
 
         $this->serviceFactoryMock->expects($this->exactly(5))
             ->method('create')
+            ->withConsecutive(
+                ['php'],
+                ['elasticsearch'],
+                ['rabbitmq'],
+                ['redis'],
+                ['mariadb']
+            )
             ->willReturnOnConsecutiveCalls(
                 $service1,
                 $service2,

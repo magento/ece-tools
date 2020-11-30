@@ -129,7 +129,7 @@ class ValidatorTest extends TestCase
                 '2.2.4',
                 [
                     ServiceInterface::NAME_PHP => '7.0.13',
-                    ServiceInterface::NAME_DB => '10.0',
+                    ServiceInterface::NAME_DB_MARIA => '10.0',
                     ServiceInterface::NAME_NGINX => '1.9',
                     ServiceInterface::NAME_VARNISH => '4.5',
                     ServiceInterface::NAME_REDIS => '5.0',
@@ -147,7 +147,7 @@ class ValidatorTest extends TestCase
                 '2.5.0',
                 [
                     ServiceInterface::NAME_PHP => '7.2.13', // wrong
-                    ServiceInterface::NAME_DB => '10.2.1',
+                    ServiceInterface::NAME_DB_MARIA => '10.2.1',
                     ServiceInterface::NAME_NGINX => '1.9',
                     ServiceInterface::NAME_VARNISH => '5.5',
                     ServiceInterface::NAME_REDIS => 'latest',
@@ -160,7 +160,7 @@ class ValidatorTest extends TestCase
                 '2.4.0',
                 [
                     ServiceInterface::NAME_PHP => '7.4',
-                    ServiceInterface::NAME_DB => '10.4',
+                    ServiceInterface::NAME_DB_MARIA => '10.4',
                     ServiceInterface::NAME_NGINX => '1.9',
                     ServiceInterface::NAME_VARNISH => '6.2',
                     ServiceInterface::NAME_REDIS => '5.0',
@@ -173,7 +173,7 @@ class ValidatorTest extends TestCase
                 '2.4.0',
                 [
                     ServiceInterface::NAME_PHP => '7.4',
-                    ServiceInterface::NAME_DB => '10.4',
+                    ServiceInterface::NAME_DB_MARIA => '10.4',
                     ServiceInterface::NAME_NGINX => '1.9',
                     ServiceInterface::NAME_VARNISH => '6.2',
                     ServiceInterface::NAME_REDIS => '5.0',
@@ -186,7 +186,7 @@ class ValidatorTest extends TestCase
                 '2.4.1',
                 [
                     ServiceInterface::NAME_PHP => '7.4',
-                    ServiceInterface::NAME_DB => '10.4',
+                    ServiceInterface::NAME_DB_MARIA => '10.4',
                     ServiceInterface::NAME_NGINX => '1.9',
                     ServiceInterface::NAME_VARNISH => '6.2',
                     ServiceInterface::NAME_REDIS => '5.0',
@@ -199,7 +199,7 @@ class ValidatorTest extends TestCase
                 '2.4.2',
                 [
                     ServiceInterface::NAME_PHP => '7.4',
-                    ServiceInterface::NAME_DB => '10.4',
+                    ServiceInterface::NAME_DB_MARIA => '10.4',
                     ServiceInterface::NAME_NGINX => '1.9',
                     ServiceInterface::NAME_VARNISH => '6.2',
                     ServiceInterface::NAME_REDIS => '5.0',
@@ -212,7 +212,7 @@ class ValidatorTest extends TestCase
                 '2.3.6',
                 [
                     ServiceInterface::NAME_PHP => '7.4', // wrong
-                    ServiceInterface::NAME_DB => '10.2',
+                    ServiceInterface::NAME_DB_MARIA => '10.2',
                     ServiceInterface::NAME_NGINX => '1.19',
                     ServiceInterface::NAME_VARNISH => '6.2',
                     ServiceInterface::NAME_REDIS => '5.0',
@@ -236,7 +236,7 @@ class ValidatorTest extends TestCase
                 '2.2.4',
                 [
                     ServiceInterface::NAME_PHP => '7.0.13',
-                    ServiceInterface::NAME_DB => '11.0', //wrong
+                    ServiceInterface::NAME_DB_MARIA => '11.0', //wrong
                     ServiceInterface::NAME_NGINX => '0.9', //wrong
                     ServiceInterface::NAME_VARNISH => '4.0.9',
                     ServiceInterface::NAME_REDIS => '3.1',
