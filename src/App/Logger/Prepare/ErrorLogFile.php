@@ -89,6 +89,11 @@ class ErrorLogFile
             return false;
         }
 
+        $buildPhaseLogContent = $this->file->fileGetContents($buildPhaseLogPath);
+        if (empty($buildPhaseLogContent)) {
+            return false;
+        }
+
         $deployLogFileExists = $this->file->isExists($deployLogPath);
         if (!$deployLogFileExists) {
             return true;
@@ -96,7 +101,7 @@ class ErrorLogFile
 
         return false === strpos(
             $this->file->fileGetContents($deployLogPath),
-            $this->file->fileGetContents($buildPhaseLogPath)
+            $buildPhaseLogContent
         );
     }
 }
