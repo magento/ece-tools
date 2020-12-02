@@ -79,25 +79,23 @@ abstract class AbstractCest
         $I->addCloudComponentsGitRepoToComposer();
         $I->addCloudPatchesGitRepoToComposer();
         $I->addQualityPatchesGitRepoToComposer();
-        $I->addDependencyToComposer(
+
+        $dependencies = [
             'magento/magento-cloud-docker',
-            $I->getDependencyVersion('magento/magento-cloud-docker')
-        );
-        $I->addDependencyToComposer(
             'magento/magento-cloud-components',
-            $I->getDependencyVersion('magento/magento-cloud-components')
-        );
-        $I->addDependencyToComposer(
             'magento/magento-cloud-patches',
-            $I->getDependencyVersion('magento/magento-cloud-patches')
-        );
-        $I->addDependencyToComposer(
-            'magento/quality-patches',
-            $I->getDependencyVersion('magento/quality-patches')
-        );
+            'magento/quality-patches'
+        ];
+
+        foreach ($dependencies as $dependency) {
+            $I->assertTrue(
+                $I->addDependencyToComposer($dependency, $I->getDependencyVersion($dependency)),
+                'Can not add dependency ' . $dependency
+            );
+        }
 
         if ($this->runComposerUpdate) {
-            $I->composerUpdate();
+            $I->assertTrue($I->composerUpdate(), 'Composer update failed');
             $I->cacheWorkDir($templateVersion);
         }
 
