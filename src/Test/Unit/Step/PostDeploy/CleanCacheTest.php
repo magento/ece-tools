@@ -70,7 +70,7 @@ class CleanCacheTest extends TestCase
      * @throws StepException
      */
     public function testExecute()
-    {        
+    {
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
             ->withConsecutive(
