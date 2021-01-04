@@ -32,6 +32,9 @@ stages:
 jobs:
   exclude:
     - php: '7.1'
+      env: TEST_SUITE=functional-ce
+
+    - php: '7.1'
       env: TEST_SUITE=functional-ee
 
     - php: '7.2'

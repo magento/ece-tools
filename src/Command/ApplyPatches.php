@@ -7,6 +7,8 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Command;
 
+use Magento\MagentoCloud\Cli;
+use Magento\MagentoCloud\Config\ConfigException;
 use Magento\MagentoCloud\Patch\Manager;
 use Magento\MagentoCloud\Shell\ShellException;
 use Symfony\Component\Console\Command\Command;
@@ -49,12 +51,15 @@ class ApplyPatches extends Command
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      *
      * @throws ShellException
+     * @throws ConfigException
      */
-    public function execute(InputInterface $input, OutputInterface $output)
+    public function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->manager->apply();
+
+        return Cli::SUCCESS;
     }
 }

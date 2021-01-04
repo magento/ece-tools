@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Command\Dev;
 
+use Magento\MagentoCloud\Cli;
 use Magento\MagentoCloud\Command\Dev\UpdateComposer\ClearModuleRequirements;
 use Magento\MagentoCloud\Command\Dev\UpdateComposer\ComposerGenerator;
 use Magento\MagentoCloud\Config\ConfigException;
@@ -14,7 +15,6 @@ use Magento\MagentoCloud\Config\GlobalSection;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
-use Magento\MagentoCloud\Package\UndefinedPackageException;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -101,11 +101,10 @@ class UpdateComposer extends Command
      *
      * @throws ConfigException
      * @throws FileSystemException
-     * @throws UndefinedPackageException
      *
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $gitOptions = $this->globalSection->get(GlobalSection::VAR_DEPLOY_FROM_GIT_OPTIONS);
 
@@ -131,5 +130,7 @@ class UpdateComposer extends Command
 
         $output->writeln('Composer update finished.');
         $output->writeln('Please commit and push changed files.');
+
+        return Cli::SUCCESS;
     }
 }

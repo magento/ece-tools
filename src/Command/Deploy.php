@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Command;
 
+use Magento\MagentoCloud\Cli;
 use Magento\MagentoCloud\Filesystem\Flag\ConfigurationMismatchException;
 use Magento\MagentoCloud\Filesystem\Flag\Manager;
 use Magento\MagentoCloud\Scenario\Exception\ProcessorException;
@@ -22,7 +23,7 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class Deploy extends Command
 {
-    const NAME = 'deploy';
+    public const NAME = 'deploy';
 
     /**
      * @var Processor
@@ -49,7 +50,7 @@ class Deploy extends Command
     /**
      * @inheritdoc
      */
-    protected function configure()
+    protected function configure(): void
     {
         $this->setName(static::NAME)
             ->setDescription('Deploys the application.');
@@ -65,7 +66,7 @@ class Deploy extends Command
      * @throws ProcessorException
      * @throws ConfigurationMismatchException
      */
-    public function execute(InputInterface $input, OutputInterface $output)
+    public function execute(InputInterface $input, OutputInterface $output): int
     {
         try {
             $this->processor->execute([
@@ -75,5 +76,7 @@ class Deploy extends Command
             $this->flagManager->set(Manager::FLAG_DEPLOY_HOOK_IS_FAILED);
             throw $e;
         }
+
+        return Cli::SUCCESS;
     }
 }

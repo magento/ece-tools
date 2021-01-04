@@ -9,6 +9,7 @@ namespace Magento\MagentoCloud\Command;
 
 use Magento\MagentoCloud\App\ErrorInfo;
 use Magento\MagentoCloud\App\Logger\Error\ReaderInterface;
+use Magento\MagentoCloud\Cli;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -16,14 +17,14 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * Display info about particular error or info about all errors from the last deployment
+ * Display info about particular error or info about all errors from the last deployment.
+ *
+ * @api
  */
 class ErrorShow extends Command
 {
     public const NAME = 'error:show';
-
     public const ARGUMENT_ERROR_CODE = 'error-code';
-
     public const OPTION_JSON_FORMAT = 'json';
 
     /**
@@ -44,13 +45,14 @@ class ErrorShow extends Command
     {
         $this->errorInfo = $errorInfo;
         $this->reader = $reader;
+
         parent::__construct();
     }
 
     /**
      * @inheritdoc
      */
-    protected function configure()
+    protected function configure(): void
     {
         $this->setName(self::NAME)
             ->setDescription('Displays info about error by error id or info about all errors from the last deployment.')
@@ -72,7 +74,7 @@ class ErrorShow extends Command
      *
      * {@inheritDoc}
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $errorCode = (int)$input->getArgument(self::ARGUMENT_ERROR_CODE);
         if ($errorCode) {
@@ -80,7 +82,7 @@ class ErrorShow extends Command
             if (empty($errorInfo)) {
                 $output->writeln(sprintf('Error with code %s is not registered in the error schema', $errorCode));
 
-                return 1;
+                return Cli::FAILURE;
             }
             $errorInfo['errorCode'] = $errorCode;
             $errors = [$errorCode => $errorInfo];
@@ -89,14 +91,14 @@ class ErrorShow extends Command
             if (empty($errors)) {
                 $output->writeln('The error log is empty or does not exist');
 
-                return 1;
+                return Cli::FAILURE;
             }
         }
 
         if ($input->getOption(self::OPTION_JSON_FORMAT)) {
             $output->writeln(json_encode($errors));
 
-            return 0;
+            return Cli::SUCCESS;
         }
 
         $errorCount = count($errors);
@@ -108,6 +110,8 @@ class ErrorShow extends Command
                 $output->writeln(str_repeat('-', 15) . PHP_EOL);
             }
         }
+
+        return Cli::SUCCESS;
     }
 
     /**
@@ -117,6 +121,7 @@ class ErrorShow extends Command
     private function formatMessage(array $errorInfo): string
     {
         ksort($errorInfo);
+
         $result = '';
 
         foreach ($errorInfo as $key => $value) {
