@@ -77,6 +77,7 @@ class Application extends \Symfony\Component\Console\Application
             $this->container->create(Command\ConfigShow::class),
             $this->container->create(Command\ConfigCreate::class),
             $this->container->create(Command\ConfigUpdate::class),
+            $this->container->create(Command\ConfigValidate::class),
             $this->container->create(Command\RunCommand::class),
             $this->container->create(Command\GenerateSchema::class),
             $this->container->create(Command\ErrorShow::class)
