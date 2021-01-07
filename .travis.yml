@@ -1,5 +1,10 @@
 dist: bionic
 
+cache:
+  bundler: true
+  directories:
+    - $HOME/docker
+
 addons:
   hosts:
     - magento2.docker
@@ -49,7 +54,8 @@ jobs:
 before_install:
 # https://github.com/kylekatarnls/update-helper/issues/9
   - if [ -n "${COMPOSER_VERSION}" ]; then travis_retry composer self-update ${COMPOSER_VERSION}; fi;
-
+  - if [ -n "${DOCKER_USERNAME}" ] && [ -n "${DOCKER_PASSWORD}" ]; then docker login -u ${DOCKER_USERNAME}  -p ${DOCKER_PASSWORD}; fi;
+  - if [[ -d $HOME/docker ]]; then ls $HOME/docker/*.tar.gz | xargs -I {file} sh -c "zcat {file} | docker load"; fi
 
 install:
   - phpenv config-add travis.php.ini
@@ -68,3 +74,6 @@ before_script:
 script:
   - if [ $TEST_SUITE == "functional-ce" ]; then ./tests/travis/functional_ce.sh; fi;
   - if [ $TEST_SUITE == "functional-ee" ] && [ $TRAVIS_SECURE_ENV_VARS == "true" ]; then ./tests/travis/prepare_functional_parallel.sh && ./tests/travis/functional_ee.sh; fi;
+  - >
+    mkdir -p $HOME/docker && docker images -a --filter='dangling=false' --format '{{.Repository}}:{{.Tag}} {{.ID}}'
+    | xargs -n 2 -t sh -c 'test -e $HOME/docker/$1.tar.gz || docker save $0 | gzip -2 > $HOME/docker/$1.tar.gz'
