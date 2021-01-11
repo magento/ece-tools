@@ -136,4 +136,12 @@ class Option implements OptionInterface
     {
         return $this->stageConfig->get(BuildInterface::VAR_SCD_MAX_EXEC_TIME);
     }
+
+    /**
+     * @inheritdoc
+     */
+    public function hasNoParent(): bool
+    {
+        return $this->stageConfig->get(BuildInterface::VAR_SCD_NO_PARENT);
+    }
 }

@@ -23,6 +23,11 @@ class CommandFactory
     const SCD_VERSION_CONSTRAINT = '>=2.2';
 
     /**
+     * Strategy which supports --no-parent option
+     */
+    const SCD_STRATEGY_SUPPORTS_NO_PARENT = 'quick';
+
+    /**
      * @var MagentoVersion
      */
     private $magentoVersion;
@@ -160,6 +165,15 @@ class CommandFactory
             $maxExecTime = $option->getMaxExecutionTime();
             if ($maxExecTime !== null) {
                 $command .= ' --max-execution-time ' . (int)$maxExecTime;
+            }
+        }
+
+        if ($this->magentoVersion->satisfies('>=2.4.2')) {
+            // Only 'quick' strategy supports --no-parent option
+            if ($option->hasNoParent()
+                && in_array($option->getStrategy(), ['', static::SCD_STRATEGY_SUPPORTS_NO_PARENT])
+            ) {
+                $command .= ' --no-parent';
             }
         }
 
