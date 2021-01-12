@@ -7,22 +7,26 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Command;
 
+use Magento\MagentoCloud\Cli;
 use Magento\MagentoCloud\Filesystem\ConfigFileList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Yaml\Yaml;
+use InvalidArgumentException;
 
 /**
  * Creates .magento.env.yaml
+ *
+ * @api
  */
 class ConfigCreate extends Command
 {
-    const NAME = 'cloud:config:create';
-
-    const ARG_CONFIGURATION = 'configuration';
+    public const NAME = 'cloud:config:create';
+    public const ARG_CONFIGURATION = 'configuration';
 
     /**
      * @var ConfigFileList
@@ -49,7 +53,7 @@ class ConfigCreate extends Command
     /**
      * @inheritdoc
      */
-    protected function configure()
+    protected function configure(): void
     {
         $this->setName(static::NAME)
             ->setDescription(
@@ -66,16 +70,18 @@ class ConfigCreate extends Command
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
+     *
+     * @throws InvalidArgumentException
+     * @throws FileSystemException
      */
-    public function execute(InputInterface $input, OutputInterface $output)
+    public function execute(InputInterface $input, OutputInterface $output): int
     {
         $configuration = $input->getArgument(self::ARG_CONFIGURATION);
-
         $decodedConfig = json_decode($configuration, true);
 
         if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new \Exception('Wrong JSON format: ' . json_last_error_msg());
+            throw new InvalidArgumentException('Wrong JSON format: ' . json_last_error_msg());
         }
 
         $yaml = Yaml::dump($decodedConfig, 10, 2);
@@ -84,5 +90,7 @@ class ConfigCreate extends Command
         $this->file->filePutContents($filePath, $yaml);
 
         $output->writeln(sprintf("Config file %s was created", $filePath));
+
+        return Cli::SUCCESS;
     }
 }

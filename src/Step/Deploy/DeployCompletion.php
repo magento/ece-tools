@@ -53,7 +53,7 @@ class DeployCompletion implements StepInterface
     {
         if ($this->hookChecker->isPostDeployHookEnabled()) {
             $this->logger->info(
-                'Post-deploy hook enabled. Cron enabling, cache cleaning and pre-warming operations ' .
+                'Post-deploy hook enabled. Cron enabling, cache flushing and pre-warming operations ' .
                 'are postponed to post-deploy stage.'
             );
 

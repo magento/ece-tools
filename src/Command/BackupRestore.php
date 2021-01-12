@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Command;
 
+use Magento\MagentoCloud\Cli;
 use Symfony\Component\Console\Command\Command;
 use Magento\MagentoCloud\Command\Backup\Restore;
 use Symfony\Component\Console\Input\InputInterface;
@@ -14,6 +15,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Psr\Log\LoggerInterface;
+use Exception;
 
 /**
  * CLI command for restoring Magento configuration files from backup.
@@ -32,10 +34,7 @@ class BackupRestore extends Command
      */
     private $logger;
 
-    /**
-     * Command name
-     */
-    const NAME = 'backup:restore';
+    public const NAME = 'backup:restore';
 
     /**
      * @param Restore $restore
@@ -45,13 +44,14 @@ class BackupRestore extends Command
     {
         $this->restore = $restore;
         $this->logger = $logger;
+
         parent::__construct();
     }
 
     /**
      * @inheritdoc
      */
-    protected function configure()
+    protected function configure(): void
     {
         $this->setName(self::NAME)
             ->setDescription(
@@ -74,9 +74,11 @@ class BackupRestore extends Command
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
+     *
+     * @throws Exception
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         try {
             $restore = true;
@@ -93,9 +95,12 @@ class BackupRestore extends Command
             if ($restore) {
                 $this->restore->run($input, $output);
             }
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             $this->logger->critical($exception->getMessage());
+
             throw $exception;
         }
+
+        return Cli::SUCCESS;
     }
 }

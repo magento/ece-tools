@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Command\Build;
 
+use Magento\MagentoCloud\Cli;
 use Magento\MagentoCloud\Scenario\Exception\ProcessorException;
 use Magento\MagentoCloud\Scenario\Processor;
 use Symfony\Component\Console\Command\Command;
@@ -21,7 +22,7 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class Generate extends Command
 {
-    const NAME = 'build:generate';
+    public const NAME = 'build:generate';
 
     /**
      * @var Processor
@@ -41,7 +42,7 @@ class Generate extends Command
     /**
      * @inheritdoc
      */
-    protected function configure()
+    protected function configure(): void
     {
         $this->setName(static::NAME)
             ->setDescription('Generates all necessary files for build stage.');
@@ -54,10 +55,12 @@ class Generate extends Command
      *
      * @throws ProcessorException
      */
-    public function execute(InputInterface $input, OutputInterface $output)
+    public function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->processor->execute([
             'scenario/build/generate.xml'
         ]);
+
+        return Cli::SUCCESS;
     }
 }

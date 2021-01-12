@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Command\Build;
 
+use Magento\MagentoCloud\Cli;
 use Magento\MagentoCloud\Scenario\Exception\ProcessorException;
 use Magento\MagentoCloud\Scenario\Processor;
 use Symfony\Component\Console\Command\Command;
@@ -20,7 +21,7 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class Transfer extends Command
 {
-    const NAME = 'build:transfer';
+    public const NAME = 'build:transfer';
 
     /**
      * @var Processor
@@ -40,7 +41,7 @@ class Transfer extends Command
     /**
      * @inheritdoc
      */
-    protected function configure()
+    protected function configure(): void
     {
         $this->setName(static::NAME)
             ->setDescription('Transfers generated files into init directory.');
@@ -53,10 +54,12 @@ class Transfer extends Command
      *
      * @throws ProcessorException
      */
-    public function execute(InputInterface $input, OutputInterface $output)
+    public function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->processor->execute([
             'scenario/build/transfer.xml'
         ]);
+
+        return Cli::SUCCESS;
     }
 }

@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Command;
 
+use Magento\MagentoCloud\Cli;
 use Magento\MagentoCloud\Config\Schema;
 use Magento\MagentoCloud\Config\Schema\FormatterInterface;
 use Magento\MagentoCloud\Filesystem\Driver\File;
@@ -17,7 +18,9 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * Dist schema generator
+ * Dist schema generator.
+ *
+ * @api
  */
 class GenerateSchema extends Command
 {
@@ -78,7 +81,7 @@ class GenerateSchema extends Command
      *
      * @throws FileSystemException
      */
-    public function execute(InputInterface $input, OutputInterface $output)
+    public function execute(InputInterface $input, OutputInterface $output): int
     {
         $output->writeln('Starting schema dist file generation');
 
@@ -91,5 +94,7 @@ class GenerateSchema extends Command
         );
 
         $output->writeln(sprintf('Dist file was successfully generated: %s', $this->fileList->getEnvDistConfig()));
+
+        return Cli::SUCCESS;
     }
 }

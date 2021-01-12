@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Command;
 
+use Magento\MagentoCloud\Cli;
 use Magento\MagentoCloud\Command\ConfigShow\Renderer as ConfigRenderer;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
@@ -21,14 +22,15 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class ConfigShow extends Command
 {
-    const NAME = 'env:config:show';
+    public const NAME = 'env:config:show';
 
-    const RELATIONSHIPS = 'services';
-    const ROUTES = 'routes';
-    const VARIABLES = 'variables';
+    public const RELATIONSHIPS = 'services';
+    public const ROUTES = 'routes';
+    public const VARIABLES = 'variables';
 
     /**
      * Allowed environment variable options
+     *
      * @var array
      */
     private $allowedVariables = [
@@ -36,6 +38,7 @@ class ConfigShow extends Command
         self::ROUTES,
         self::VARIABLES,
     ];
+
     /**
      * @var ConfigRenderer
      */
@@ -63,7 +66,7 @@ class ConfigShow extends Command
     /**
      * @inheritdoc
      */
-    protected function configure()
+    protected function configure(): void
     {
         $this->setName(static::NAME)
             ->setDescription('Display encoded cloud configuration environment variables.')
@@ -82,7 +85,7 @@ class ConfigShow extends Command
      *
      * {@inheritdoc}
      */
-    public function execute(InputInterface $input, OutputInterface $output)
+    public function execute(InputInterface $input, OutputInterface $output): int
     {
         $variables = $input->getArgument('variable') ?? [];
         $unknownVariables = array_diff($variables, $this->allowedVariables);
@@ -91,21 +94,23 @@ class ConfigShow extends Command
             $output->writeln('<error>Unknown variable(s): ' . implode(',', $unknownVariables) . '</error>');
         }
         $this->printVariables($output, $variables);
+
+        return Cli::SUCCESS;
     }
 
     /**
      * @param OutputInterface $output
      * @param array $variables
      */
-    protected function printVariables(OutputInterface $output, array $variables = [])
+    protected function printVariables(OutputInterface $output, array $variables = []): void
     {
-        if (in_array(self::RELATIONSHIPS, $variables) || empty($variables)) {
+        if (in_array(self::RELATIONSHIPS, $variables, true) || empty($variables)) {
             $this->renderer->printRelationships($output);
         }
-        if (in_array(self::ROUTES, $variables) || empty($variables)) {
+        if (in_array(self::ROUTES, $variables, true) || empty($variables)) {
             $this->renderer->printRoutes($output);
         }
-        if (in_array(self::VARIABLES, $variables) || empty($variables)) {
+        if (in_array(self::VARIABLES, $variables, true) || empty($variables)) {
             $this->renderer->printVariables($output);
         }
     }
