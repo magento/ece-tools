@@ -14,9 +14,10 @@ use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Helper\HelperSet;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use RuntimeException;
 
 /**
- * @inheritdoc
+ * @see Build
  */
 class BuildTest extends TestCase
 {
@@ -28,15 +29,12 @@ class BuildTest extends TestCase
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->command = new Build();
     }
 
-    /**
-     * @inheritdoc
-     */
-    public function testExecute()
+    public function testExecute(): void
     {
         /** @var InputInterface|MockObject $inputMock */
         $inputMock = $this->createMock(InputInterface::class);
@@ -47,12 +45,28 @@ class BuildTest extends TestCase
 
         $applicationMock->method('getHelperSet')
             ->willReturn($this->createMock(HelperSet::class));
-        $applicationMock->expects($this->exactly(2))
+        $applicationMock->expects(self::exactly(2))
             ->method('find')
             ->willReturnMap([
                 [Build\Generate::NAME, $this->createMock(Build\Generate::class)],
                 [Build\Transfer::NAME, $this->createMock(Build\Transfer::class)],
             ]);
+
+        $this->command->setApplication($applicationMock);
+        $this->command->execute($inputMock, $outputMock);
+    }
+
+    public function testExecuteException(): void
+    {
+        $this->expectExceptionMessage('Application is not defined');
+        $this->expectException(RuntimeException::class);
+
+        /** @var InputInterface|MockObject $inputMock */
+        $inputMock = $this->createMock(InputInterface::class);
+        /** @var OutputInterface|MockObject $outputMock */
+        $outputMock = $this->createMock(OutputInterface::class);
+        /** @var Application|MockObject $applicationMock */
+        $applicationMock = null;
 
         $this->command->setApplication($applicationMock);
         $this->command->execute($inputMock, $outputMock);

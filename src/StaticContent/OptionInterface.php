@@ -46,4 +46,9 @@ interface OptionInterface
      * @return int|null
      */
     public function getMaxExecutionTime();
+
+    /**
+     * @return bool
+     */
+    public function hasNoParent(): bool;
 }

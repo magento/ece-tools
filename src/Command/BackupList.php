@@ -7,11 +7,13 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Command;
 
+use Magento\MagentoCloud\Cli;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Magento\MagentoCloud\Command\Backup\FileList as BackupFilesList;
 use Psr\Log\LoggerInterface;
+use Exception;
 
 /**
  * CLI command for showing the list of backup files.
@@ -30,10 +32,7 @@ class BackupList extends Command
      */
     private $logger;
 
-    /**
-     * Command name
-     */
-    const NAME = 'backup:list';
+    public const NAME = 'backup:list';
 
     /**
      * @param BackupFilesList $backupFilesList
@@ -52,7 +51,7 @@ class BackupList extends Command
     /**
      * @inheritdoc
      */
-    protected function configure()
+    protected function configure(): void
     {
         $this->setName(self::NAME)
             ->setDescription('Shows the list of backup files.');
@@ -61,16 +60,21 @@ class BackupList extends Command
     }
 
     /**
-     * @inheritdoc
+     * {@inheritDoc}
+     *
+     * @throws Exception
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         try {
             $output->writeln('<comment>The list of backup files:</comment>');
             $output->writeln($this->backupFilesList->get() ?: 'There are no files in the backup');
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             $this->logger->critical($exception->getMessage());
+
             throw $exception;
         }
+
+        return Cli::SUCCESS;
     }
 }

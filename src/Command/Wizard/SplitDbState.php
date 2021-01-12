@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Command\Wizard;
 
+use Magento\MagentoCloud\Cli;
 use Magento\MagentoCloud\Command\Wizard\Util\OutputFormatter;
 use Magento\MagentoCloud\Config\Database\DbConfig;
 use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface as ConfigReader;
@@ -24,10 +25,7 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class SplitDbState extends Command
 {
-    /**
-     * Command name
-     */
-    const NAME = 'wizard:split-db-state';
+    public const NAME = 'wizard:split-db-state';
 
     /**
      * Console output formatter
@@ -70,7 +68,7 @@ class SplitDbState extends Command
     /**
      * @inheritdoc
      */
-    protected function configure()
+    protected function configure(): void
     {
         $this->setName(self::NAME)
             ->setDescription('Verifies ability to split DB and whether DB was already split or not.');
@@ -79,7 +77,7 @@ class SplitDbState extends Command
     /**
      * @inheritdoc
      */
-    public function execute(InputInterface $input, OutputInterface $output)
+    public function execute(InputInterface $input, OutputInterface $output): int
     {
         $info = [];
         $mageConfig = $this->configReader->read();
@@ -116,5 +114,7 @@ class SplitDbState extends Command
         foreach ($info as $msg) {
             $this->outputFormatter->writeItem($output, $msg);
         }
+
+        return Cli::SUCCESS;
     }
 }

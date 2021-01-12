@@ -7,23 +7,27 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Command;
 
+use Magento\MagentoCloud\Cli;
 use Magento\MagentoCloud\Filesystem\ConfigFileList;
 use Magento\MagentoCloud\Config\Environment\ReaderInterface;
 use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Yaml\Yaml;
+use InvalidArgumentException;
 
 /**
- * Updates .magento.env.yaml
+ * Updates .magento.env.yaml.
+ *
+ * @api
  */
 class ConfigUpdate extends Command
 {
-    const NAME = 'cloud:config:update';
-
-    const ARG_CONFIGURATION = 'configuration';
+    public const NAME = 'cloud:config:update';
+    public const ARG_CONFIGURATION = 'configuration';
 
     /**
      * @var ConfigFileList
@@ -57,7 +61,7 @@ class ConfigUpdate extends Command
     /**
      * @inheritdoc
      */
-    protected function configure()
+    protected function configure(): void
     {
         $this->setName(static::NAME)
             ->setDescription(
@@ -74,16 +78,18 @@ class ConfigUpdate extends Command
     }
 
     /**
-     * @inheritDoc
+     * @param InputInterface $input
+     * @param OutputInterface $output
+     * @throws FileSystemException
+     * @throws InvalidArgumentException
      */
-    public function execute(InputInterface $input, OutputInterface $output)
+    public function execute(InputInterface $input, OutputInterface $output): int
     {
         $configuration = $input->getArgument(self::ARG_CONFIGURATION);
-
         $decodedConfig = json_decode($configuration, true);
 
         if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new \Exception('Wrong JSON format: ' . json_last_error_msg());
+            throw new InvalidArgumentException('Wrong JSON format: ' . json_last_error_msg());
         }
 
         $config = array_replace_recursive($this->reader->read(), $decodedConfig);
@@ -94,5 +100,7 @@ class ConfigUpdate extends Command
         $this->file->filePutContents($filePath, $yaml);
 
         $output->writeln(sprintf("Config file %s was updated", $filePath));
+
+        return Cli::SUCCESS;
     }
 }

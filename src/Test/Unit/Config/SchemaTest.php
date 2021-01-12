@@ -79,6 +79,7 @@ class SchemaTest extends TestCase
                 BuildInterface::VAR_SCD_USE_BALER => false,
                 BuildInterface::VAR_QUALITY_PATCHES => [],
                 BuildInterface::VAR_SKIP_COMPOSER_DUMP_AUTOLOAD => false,
+                BuildInterface::VAR_SCD_NO_PARENT => false,
             ],
             $this->schema->getDefaults(StageConfigInterface::STAGE_BUILD)
         );
@@ -116,6 +117,7 @@ class SchemaTest extends TestCase
                 DeployInterface::VAR_SPLIT_DB => [],
                 DeployInterface::VAR_CACHE_REDIS_BACKEND => 'Cm_Cache_Backend_Redis',
                 DeployInterface::VAR_REMOTE_STORAGE => [],
+                DeployInterface::VAR_SCD_NO_PARENT => false,
             ],
             $this->schema->getDefaults(StageConfigInterface::STAGE_DEPLOY)
         );

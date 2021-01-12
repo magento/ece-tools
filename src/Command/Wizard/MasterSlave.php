@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Command\Wizard;
 
+use Magento\MagentoCloud\Cli;
 use Magento\MagentoCloud\Command\Wizard\Util\OutputFormatter;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Symfony\Component\Console\Command\Command;
@@ -20,7 +21,7 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class MasterSlave extends Command
 {
-    const NAME = 'wizard:master-slave';
+    public const NAME = 'wizard:master-slave';
 
     /**
      * @var OutputFormatter
@@ -47,7 +48,7 @@ class MasterSlave extends Command
     /**
      * @inheritdoc
      */
-    protected function configure()
+    protected function configure(): void
     {
         $this->setName(self::NAME)
             ->setDescription('Verifies master-slave configuration.');
@@ -56,7 +57,7 @@ class MasterSlave extends Command
     /**
      * @inheritdoc
      */
-    public function execute(InputInterface $input, OutputInterface $output)
+    public function execute(InputInterface $input, OutputInterface $output): int
     {
         $errors = [];
 
@@ -77,5 +78,7 @@ class MasterSlave extends Command
             : 'Slave connections are configured';
 
         $this->outputFormatter->writeResult($output, !$errors, $message);
+
+        return Cli::SUCCESS;
     }
 }

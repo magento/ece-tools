@@ -8,6 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Command;
 
 use Magento\MagentoCloud\App\GenericException;
+use Magento\MagentoCloud\Cli;
 use Magento\MagentoCloud\DB\DumpProcessor;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
@@ -24,11 +25,9 @@ use Symfony\Component\Console\Input\InputArgument;
  */
 class DbDump extends Command
 {
-    const NAME = 'db-dump';
-
-    const ARGUMENT_DATABASES = 'databases';
-
-    const OPTION_REMOVE_DEFINERS = 'remove-definers';
+    public const NAME = 'db-dump';
+    public const ARGUMENT_DATABASES = 'databases';
+    public const OPTION_REMOVE_DEFINERS = 'remove-definers';
 
     /**
      * @var DumpProcessor
@@ -57,7 +56,7 @@ class DbDump extends Command
     /**
      * @inheritdoc
      */
-    protected function configure()
+    protected function configure(): void
     {
         $this->setName(self::NAME)
             ->setDescription('Creates database backups.');
@@ -66,9 +65,9 @@ class DbDump extends Command
             InputArgument::IS_ARRAY,
             sprintf(
                 'Databases for backup. Available Values: [ %s ]. If the argument value is not specified,'
-                .' database backups will be created using the credentials stored in the `MAGENTO_CLOUD_RELATIONSHIP`'
-                .' environment variable or/and the `stage.deploy.DATABASE_CONFIGURATION` property of the'
-                .' .magento.env.yaml configuration file.',
+                . ' database backups will be created using the credentials stored in the `MAGENTO_CLOUD_RELATIONSHIP`'
+                . ' environment variable or/and the `stage.deploy.DATABASE_CONFIGURATION` property of the'
+                . ' .magento.env.yaml configuration file.',
                 implode(' ', DumpProcessor::DATABASES)
             ),
             []
@@ -89,7 +88,7 @@ class DbDump extends Command
      *
      * {@inheritdoc}
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $databases = (array)$input->getArgument(self::ARGUMENT_DATABASES);
         try {
@@ -110,7 +109,7 @@ class DbDump extends Command
                 );
 
                 if (!$helper->ask($input, $output, $question)) {
-                    return null;
+                    return Cli::SUCCESS;
                 }
             }
 
@@ -124,6 +123,8 @@ class DbDump extends Command
             $this->logger->critical($exception->getMessage());
             throw $exception;
         }
+
+        return Cli::SUCCESS;
     }
 
     /**
@@ -132,7 +133,7 @@ class DbDump extends Command
      * @param array $databases
      * @throws GenericException
      */
-    private function validateDatabaseNames(array $databases)
+    private function validateDatabaseNames(array $databases): void
     {
         $invalidDatabaseNames = array_diff($databases, DumpProcessor::DATABASES);
         if (!empty($invalidDatabaseNames)) {

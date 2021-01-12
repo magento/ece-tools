@@ -82,6 +82,7 @@ class ApplicationTest extends TestCase
         Command\ConfigShow::NAME => Command\ConfigShow::class,
         Command\ConfigCreate::NAME => Command\ConfigCreate::class,
         Command\ConfigUpdate::NAME => Command\ConfigUpdate::class,
+        Command\ConfigValidate::NAME => Command\ConfigValidate::class,
         Command\RunCommand::NAME => Command\RunCommand::class,
         Command\GenerateSchema::NAME => Command\GenerateSchema::class,
         Command\ErrorShow::NAME => Command\ErrorShow::class,

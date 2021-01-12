@@ -11,6 +11,7 @@ use Magento\MagentoCloud\Config\Schema;
 use Magento\MagentoCloud\Config\Validator\Result\Error;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
 use Magento\MagentoCloud\Config\Validator\ResultInterface;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 
 /**
  * Validates configuration types and values by schema.
@@ -58,6 +59,8 @@ class Validator
      * @param string $stage
      * @param mixed $value
      * @return ResultInterface
+     *
+     * @throws FileSystemException
      */
     public function validate(string $key, string $stage, $value): ResultInterface
     {

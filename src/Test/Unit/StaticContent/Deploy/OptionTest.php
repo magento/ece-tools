@@ -193,4 +193,13 @@ class OptionTest extends TestCase
             $this->option->getMaxExecutionTime()
         );
     }
+
+    public function testHasNoParent(): void
+    {
+        $this->stageConfigMock->method('get')
+            ->with(DeployInterface::VAR_SCD_NO_PARENT)
+            ->willReturn(true);
+
+        $this->assertTrue($this->option->hasNoParent());
+    }
 }
