@@ -14,6 +14,7 @@ use Magento\MagentoCloud\Step\StepInterface;
 use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Shell\MagentoShell;
 use Magento\MagentoCloud\Shell\ShellFactory;
+use Psr\Log\LoggerInterface;
 
 /**
  * Cleans all cache by tags.
@@ -36,18 +37,26 @@ class CleanCache implements StepInterface
     private $errorCode;
 
     /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
+    /**
      * @param ShellFactory $shellFactory
      * @param StageConfigInterface $stageConfig
      * @param int $errorCode
+     * @param LoggerInterface $logger
      */
     public function __construct(
         ShellFactory $shellFactory,
         StageConfigInterface $stageConfig,
-        int $errorCode
+        int $errorCode,
+        LoggerInterface $logger
     ) {
         $this->magentoShell = $shellFactory->createMagento();
         $this->stageConfig = $stageConfig;
         $this->errorCode = $errorCode;
+        $this->logger = $logger;
     }
 
     /**
@@ -56,10 +65,12 @@ class CleanCache implements StepInterface
     public function execute()
     {
         try {
+            $this->logger->info('Flushing cache.');
             $this->magentoShell->execute(
                 'cache:flush',
                 [$this->stageConfig->get(StageConfigInterface::VAR_VERBOSE_COMMANDS)]
             );
+            $this->logger->info('Cache flushed successfully.');
         } catch (ShellException $e) {
             throw new StepException($e->getMessage(), $this->errorCode, $e);
         } catch (ConfigException $e) {
