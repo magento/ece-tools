@@ -7,7 +7,8 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Patch;
 
-use Magento\MagentoCloud\Config\GlobalSection;
+use Magento\MagentoCloud\Config\ConfigException;
+use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Patch\Manager;
 use Magento\MagentoCloud\Shell\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellException;
@@ -17,7 +18,7 @@ use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
 /**
- * @inheritdoc
+ * @see Manager
  */
 class ManagerTest extends TestCase
 {
@@ -37,38 +38,37 @@ class ManagerTest extends TestCase
     private $shellMock;
 
     /**
-     * @var GlobalSection|MockObject
+     * @var MagentoVersion|MockObject
      */
-    private $globalSectionMock;
+    private $magentoVersionMock;
 
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->shellMock = $this->getMockForAbstractClass(ShellInterface::class);
-        $this->globalSectionMock = $this->createMock(GlobalSection::class);
+        $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
 
         $this->manager = new Manager(
             $this->loggerMock,
             $this->shellMock,
-            $this->globalSectionMock
+            $this->magentoVersionMock
         );
     }
 
     /**
-     * Tests patch applying.
+     * @throws ConfigException
      */
     public function testApply(): void
     {
-        $this->globalSectionMock->expects($this->once())
-            ->method('get')
-            ->with(GlobalSection::VAR_DEPLOYED_MAGENTO_VERSION_FROM_GIT)
+        $this->magentoVersionMock->expects(self::once())
+            ->method('isGitInstallation')
             ->willReturn(false);
 
         $processMock = $this->getMockForAbstractClass(ProcessInterface::class);
-        $this->shellMock->expects($this->once())
+        $this->shellMock->expects(self::once())
             ->method('execute')
             ->with('php ./vendor/bin/ece-patches apply --no-interaction')
             ->willReturn($processMock);
@@ -82,18 +82,17 @@ class ManagerTest extends TestCase
     }
 
     /**
-     * Tests with git-based Magento.
+     * @throws ConfigException
      */
     public function testApplyGit(): void
     {
-        $this->globalSectionMock->expects($this->once())
-            ->method('get')
-            ->with(GlobalSection::VAR_DEPLOYED_MAGENTO_VERSION_FROM_GIT)
+        $this->magentoVersionMock->expects(self::once())
+            ->method('isGitInstallation')
             ->willReturn(true);
 
-        $this->shellMock->expects($this->never())
+        $this->shellMock->expects(self::never())
             ->method('execute');
-        $this->loggerMock->expects($this->once())
+        $this->loggerMock->expects(self::once())
             ->method('info')
             ->with('Git-based installation. Skipping patches applying');
 
@@ -115,19 +114,17 @@ class ManagerTest extends TestCase
     }
 
     /**
-     * @throws ShellException
+     * @throws ConfigException
      */
     public function testApplyWithException(): void
     {
         $this->expectException(ShellException::class);
         $this->expectExceptionMessage('Some error');
 
-        $this->globalSectionMock->expects($this->once())
-            ->method('get')
-            ->with(GlobalSection::VAR_DEPLOYED_MAGENTO_VERSION_FROM_GIT)
+        $this->magentoVersionMock->expects(self::once())
+            ->method('isGitInstallation')
             ->willReturn(false);
-
-        $this->shellMock->expects($this->once())
+        $this->shellMock->expects(self::once())
             ->method('execute')
             ->with('php ./vendor/bin/ece-patches apply --no-interaction')
             ->willThrowException(new ShellException('Some error'));
@@ -135,7 +132,7 @@ class ManagerTest extends TestCase
             ->withConsecutive(
                 ['Applying patches']
             );
-        $this->loggerMock->expects($this->once())
+        $this->loggerMock->expects(self::once())
             ->method('error')
             ->with('Some error');
 

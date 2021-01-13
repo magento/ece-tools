@@ -45,6 +45,7 @@ interface StageConfigInterface
 
     /**
      * Settings for deployment from git.
+     * @deprecated
      */
     public const VAR_DEPLOYED_MAGENTO_VERSION_FROM_GIT = 'DEPLOYED_MAGENTO_VERSION_FROM_GIT';
     public const VAR_DEPLOY_FROM_GIT_OPTIONS = 'DEPLOY_FROM_GIT_OPTIONS';

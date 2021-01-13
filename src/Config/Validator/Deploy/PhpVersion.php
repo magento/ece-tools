@@ -89,7 +89,22 @@ class PhpVersion implements ValidatorInterface
                 return $this->resultFactory->success();
             }
 
-            $recommendedPhpConstraint = $this->getRecommendedPhpConstraint();
+            $constraint = $this->composer->getLocker()
+                ->getLockedRepository()
+                ->findPackage('magento/magento2-base', '*');
+
+            if (!$constraint) {
+                return $this->resultFactory->success();
+            }
+
+            $constraintString = $constraint->getRequires()['php']
+                ->getConstraint()
+                ->getPrettyString();
+
+            $listOfConstraint = explode('|', $constraintString);
+            $lastConstraint = end($listOfConstraint);
+
+            $recommendedPhpConstraint = $this->versionParser->parseConstraints($lastConstraint);
             $currentPhpConstraint = $this->getCurrentPhpConstraint();
 
             if (!$recommendedPhpConstraint->matches($currentPhpConstraint)) {
@@ -109,29 +124,8 @@ class PhpVersion implements ValidatorInterface
         } catch (\Exception $e) {
             $this->logger->warning('Can\'t validate version of PHP: ' . $e->getMessage());
         }
+
         return $this->resultFactory->success();
-    }
-
-    /**
-     * Returns the latest PHP constraint
-     *
-     * @return ConstraintInterface
-     * @throws \Exception
-     */
-    private function getRecommendedPhpConstraint(): ConstraintInterface
-    {
-        $constraintString = $this->composer
-            ->getLocker()
-            ->getLockedRepository()
-            ->findPackage('magento/magento2-base', '*')
-            ->getRequires()['php']
-            ->getConstraint()
-            ->getPrettyString();
-
-        $listOfConstraint = explode('|', $constraintString);
-        $lastConstraint = end($listOfConstraint);
-
-        return $this->versionParser->parseConstraints($lastConstraint);
     }
 
     /**
