@@ -22,9 +22,9 @@ class DataTypesOptionValidationCest extends AbstractCest
      */
     public function dataTypesValidationOnDeploy(\CliTester $I, \Codeception\Example $data): void
     {
-        $I->runEceDockerCommand(
+        $I->generateDockerCompose(
             sprintf(
-                'build:compose --mode=production --env-vars="%s"',
+                '--mode=production --env-vars="%s"',
                 $this->convertEnvFromArrayToJson($data['variables'])
             )
         );

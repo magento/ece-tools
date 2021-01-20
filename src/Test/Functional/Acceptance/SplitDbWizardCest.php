@@ -38,7 +38,7 @@ class SplitDbWizardCest extends AbstractCest
         $this->prepareWorkplace($I, $data['version']);
         $I->writeEnvMagentoYaml(['stage' => ['global' => ['SCD_ON_DEMAND' => true]]]);
 
-        $I->runEceDockerCommand('build:compose --mode=production');
+        $I->generateDockerCompose('--mode=production');
         $I->runDockerComposeCommand('run build cloud-build');
 
         // Running 'Split Db' wizard in an environment without Split Db architecture
@@ -59,7 +59,7 @@ class SplitDbWizardCest extends AbstractCest
         $appMagento['relationships']['database-sales'] = 'mysql-sales:mysql';
         $I->writeServicesYaml($services);
         $I->writeAppMagentoYaml($appMagento);
-        $I->runEceDockerCommand('build:compose --mode=production');
+        $I->generateDockerCompose('--mode=production');
 
         foreach ($this->variationsData() as $variationData) {
             $this->setSplitDbTypesIntoMagentoEnvYaml($I, $variationData['splitDbTypes']);

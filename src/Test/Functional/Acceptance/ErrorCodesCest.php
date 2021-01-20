@@ -25,7 +25,7 @@ class ErrorCodesCest extends AbstractCest
      */
     public function testDeployFailed(\CliTester $I): void
     {
-        $I->runEceDockerCommand('build:compose --mode=production');
+        $I->generateDockerCompose('--mode=production');
         $I->copyFileToWorkDir('files/error_codes/.magento.env.fail.yaml', '.magento.env.yaml');
 
         $I->runDockerComposeCommand('run build cloud-build');
@@ -58,7 +58,7 @@ class ErrorCodesCest extends AbstractCest
      */
     public function testDeploySuccess(\CliTester $I): void
     {
-        $I->runEceDockerCommand('build:compose --mode=production');
+        $I->generateDockerCompose('--mode=production');
         $I->copyFileToWorkDir('files/error_codes/.magento.env.success.yaml', '.magento.env.yaml');
 
         $I->runDockerComposeCommand('run build cloud-build');

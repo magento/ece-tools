@@ -84,7 +84,7 @@ class BackupDbCest extends AbstractCest
     private function partRunDbDumpWithoutSplitDbArch(CliTester $I)
     {
         $I->writeEnvMagentoYaml($this->envMagento);
-        $I->runEceDockerCommand('build:compose --mode=production');
+        $I->generateDockerCompose('--mode=production');
 
         // Running database dump command with invalid database label
         $I->runDockerComposeCommand('run build cloud-build');
@@ -143,7 +143,7 @@ class BackupDbCest extends AbstractCest
         $I->writeServicesYaml($services);
         $I->writeAppMagentoYaml($appMagento);
         $I->writeEnvMagentoYaml($this->envMagento);
-        $I->runEceDockerCommand('build:compose --mode=production');
+        $I->generateDockerCompose('--mode=production');
         $I->startEnvironment();
         $I->runDockerComposeCommand('run deploy cloud-deploy');
 
