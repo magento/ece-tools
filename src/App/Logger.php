@@ -102,11 +102,21 @@ class Logger extends \Monolog\Logger
      * @param string $deployLogPath deploy log path
      * @param string $buildPhaseLogContent build log content
      * @return bool
-     *
-     * @throws FileSystemException
      */
     private function isBuildLogApplied(string $deployLogPath, string $buildPhaseLogContent): bool
     {
-        return false !== strpos($this->file->fileGetContents($deployLogPath), $buildPhaseLogContent);
+        $buildLogLines = explode(PHP_EOL, $buildPhaseLogContent);
+        if (!isset($buildLogLines[0])) {
+            return true;
+        }
+
+        $needle = strtr(addslashes($buildLogLines[0]), [
+            '[' => '\[',
+            ']' => '\]',
+        ]);
+
+        $result = @shell_exec(sprintf('grep "%s" %s', $needle, $deployLogPath));
+
+        return !empty($result);
     }
 }

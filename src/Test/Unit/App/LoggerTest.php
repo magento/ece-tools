@@ -15,6 +15,7 @@ use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\App\Logger\Pool;
 use Magento\MagentoCloud\Package\UndefinedPackageException;
+use phpmock\phpunit\PHPMock;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Magento\MagentoCloud\App\Logger\Processor\SanitizeProcessor;
@@ -24,6 +25,8 @@ use Magento\MagentoCloud\App\Logger\Processor\SanitizeProcessor;
  */
 class LoggerTest extends TestCase
 {
+    use PHPMock;
+
     /**
      * @var File|MockObject
      */
@@ -59,6 +62,8 @@ class LoggerTest extends TestCase
      */
     protected function setUp()
     {
+        self::defineFunctionMock('Magento\MagentoCloud\App', 'shell_exec');
+
         $this->fileMock = $this->createMock(File::class);
         $this->directoryListMock = $this->createMock(DirectoryList::class);
         $this->fileListMock = $this->createMock(FileList::class);
@@ -71,7 +76,6 @@ class LoggerTest extends TestCase
      * @param int $fileMockFileGetContentsExpects
      * @param string $buildPhaseLogContent
      * @param bool $buildLogFileExists
-     * @param string $deployLogContent
      * @param bool $deployLogFileExists
      * @param int $fileMockFilePutContentsExpects
      * @param int $fileMockCopyExpects
@@ -83,7 +87,6 @@ class LoggerTest extends TestCase
         $fileMockFileGetContentsExpects,
         $buildPhaseLogContent,
         $buildLogFileExists,
-        $deployLogContent,
         $deployLogFileExists,
         $fileMockFilePutContentsExpects,
         $fileMockCopyExpects
@@ -107,8 +110,7 @@ class LoggerTest extends TestCase
         $this->fileMock->expects($this->exactly($fileMockFileGetContentsExpects))
             ->method('fileGetContents')
             ->willReturnMap([
-                [$buildPhaseLogPath, false, null, $buildPhaseLogContent],
-                [$deployLogPath, false, null, $deployLogContent],
+                [$buildPhaseLogPath, false, null, $buildPhaseLogContent]
             ]);
         $this->fileMock->expects($this->exactly(2))
             ->method('isExists')
@@ -126,6 +128,14 @@ class LoggerTest extends TestCase
         $this->poolMock->expects($this->once())
             ->method('getHandlers')
             ->willReturn([]);
+        if ($buildLogFileExists && $deployLogFileExists) {
+            $shellExecMock = $this->getFunctionMock(
+                'Magento\MagentoCloud\App',
+                'shell_exec'
+            );
+            $shellExecMock->expects($this->once())
+                ->willReturn($fileMockFilePutContentsExpects ? null : 'some match');
+        }
 
         new Logger(
             $this->fileMock,
@@ -147,25 +157,22 @@ class LoggerTest extends TestCase
                 'fileMockFileGetContentsExpects' => 1,
                 'buildPhaseLogContent' => 'the build phase log was not applied',
                 'buildLogFileExists' => true,
-                'deployLogContent' => null,
                 'deployLogFileExists' => false,
                 'fileMockFilePutContentsExpects' => 0,
                 'fileMockCopyExpects' => 1,
             ],
             [
-                'fileMockFileGetContentsExpects' => 2,
+                'fileMockFileGetContentsExpects' => 1,
                 'buildPhaseLogContent' => 'the build phase log was applied',
                 'buildLogFileExists' => true,
-                'deployLogContent' => 'some log the build phase log was applied some log',
                 'deployLogFileExists' => true,
                 'fileMockFilePutContentsExpects' => 0,
                 'fileMockCopyExpects' => 0,
             ],
             [
-                'fileMockFileGetContentsExpects' => 2,
+                'fileMockFileGetContentsExpects' => 1,
                 'buildPhaseLogContent' => 'the build phase log was not applied',
                 'buildLogFileExists' => true,
-                'deployLogContent' => 'some log the build phase log was applied some log',
                 'deployLogFileExists' => true,
                 'fileMockFilePutContentsExpects' => 1,
                 'fileMockCopyExpects' => 0,
@@ -174,7 +181,6 @@ class LoggerTest extends TestCase
                 'fileMockFileGetContentsExpects' => 0,
                 'buildPhaseLogContent' => '',
                 'buildLogFileExists' => false,
-                'deployLogContent' => 'some log the build phase log was applied some log',
                 'deployLogFileExists' => true,
                 'fileMockFilePutContentsExpects' => 0,
                 'fileMockCopyExpects' => 0,
