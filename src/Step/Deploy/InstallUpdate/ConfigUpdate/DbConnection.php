@@ -128,9 +128,7 @@ class DbConnection implements StepInterface
      * In the case when the database was split with the user configuration then sets the flag '.ignore_split_db'
      * If the flag '.ignore_split_db' exists, the split process will be ignored
      *
-     * @throws FileSystemException
-     * @throws ConfigException
-     * @throws ConfigurationMismatchException
+     * @inheritDoc
      */
     public function execute()
     {
@@ -221,7 +219,7 @@ class DbConnection implements StepInterface
         }
 
         if ($useSlave && $this->slaveIsAvailable()) {
-            $slaveConnectionsConfig = $this->getMainConnections($dbConfig[DbConfig::KEY_SLAVE_CONNECTION]);
+            $slaveConnectionsConfig = $this->filterSplitConnections($dbConfig[DbConfig::KEY_SLAVE_CONNECTION]);
             $dbConfig[DbConfig::KEY_SLAVE_CONNECTION] = $slaveConnectionsConfig;
             $this->addLoggingAboutSlaveConnection($dbConfig);
         } else {
@@ -274,11 +272,11 @@ class DbConnection implements StepInterface
     private function getMainDbConfig(bool $withSlave): array
     {
         $dbConfig = $this->getDbConfigData();
-        $dbConfig[DbConfig::KEY_CONNECTION] = $this->getMainConnections($dbConfig[DbConfig::KEY_CONNECTION]);
+        $dbConfig[DbConfig::KEY_CONNECTION] = $this->filterSplitConnections($dbConfig[DbConfig::KEY_CONNECTION]);
 
         if ($withSlave && $this->slaveIsAvailable()) {
             $slaveConnections = $dbConfig[DbConfig::KEY_SLAVE_CONNECTION];
-            $dbConfig[DbConfig::KEY_SLAVE_CONNECTION] = $this->getMainConnections($slaveConnections);
+            $dbConfig[DbConfig::KEY_SLAVE_CONNECTION] = $this->filterSplitConnections($slaveConnections);
         } else {
             unset($dbConfig[DbConfig::KEY_SLAVE_CONNECTION]);
         }
@@ -287,24 +285,27 @@ class DbConnection implements StepInterface
     }
 
     /**
-     * Returns main resource configuration
+     * Returns resource configuration filtering split resources
      *
      * @return array
      */
     private function getMainResourceConfig(): array
     {
-        return array_intersect_key($this->resourceConfig->get(), array_flip([ResourceConfig::RESOURCE_DEFAULT_SETUP]));
+        return array_diff_key(
+            $this->resourceConfig->get(),
+            array_flip([ResourceConfig::RESOURCE_CHECKOUT, ResourceConfig::RESOURCE_SALES])
+        );
     }
 
     /**
-     * Returns main connection configurations
+     * Remove split connections from given connections list
      *
      * @param array $connections
      * @return array
      */
-    private function getMainConnections(array $connections): array
+    private function filterSplitConnections(array $connections): array
     {
-        return array_intersect_key($connections, array_flip(DbConfig::MAIN_CONNECTIONS));
+        return array_diff_key($connections, array_flip(DbConfig::SPLIT_CONNECTIONS));
     }
 
     /**
