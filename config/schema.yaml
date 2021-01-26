@@ -141,7 +141,7 @@ variables:
     description: Adds '--no-parent' option to SCD CLI command. This option does not allow to generate static content
       for parent themes what decrease time for generation static content.
     type: boolean
-    magento_version: '>=2.3.0'
+    magento_version: '>=2.4.2'
     stages:
       - global
       - build
