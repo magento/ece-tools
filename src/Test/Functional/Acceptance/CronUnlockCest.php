@@ -20,7 +20,7 @@ class CronUnlockCest extends AbstractCest
      */
     public function testCronUnlock(\CliTester $I): void
     {
-        $I->runEceDockerCommand(sprintf('build:compose --mode=production --expose-db-port=%s', $I->getExposedPort()));
+        $I->generateDockerCompose(sprintf('--mode=production --expose-db-port=%s', $I->getExposedPort()));
         $I->runDockerComposeCommand('run build cloud-build');
         $I->startEnvironment();
         $I->runDockerComposeCommand('run deploy cloud-deploy');

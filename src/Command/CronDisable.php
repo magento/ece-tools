@@ -8,6 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Command;
 
 use Magento\MagentoCloud\App\GenericException;
+use Magento\MagentoCloud\Cli;
 use Magento\MagentoCloud\Cron\Switcher;
 use Magento\MagentoCloud\Util\BackgroundProcess;
 use Psr\Log\LoggerInterface;
@@ -57,7 +58,7 @@ class CronDisable extends Command
     /**
      * @inheritdoc
      */
-    protected function configure()
+    protected function configure(): void
     {
         $this->setName(static::NAME)
             ->setDescription('Disable all Magento cron processes and terminates all running processes.');
@@ -70,8 +71,10 @@ class CronDisable extends Command
      * Runs process which finds all running Magento cron processes and kills them.
      *
      * {@inheritdoc}
+     *
+     * @throws GenericException
      */
-    public function execute(InputInterface $input, OutputInterface $output)
+    public function execute(InputInterface $input, OutputInterface $output): int
     {
         try {
             $this->logger->info('Disable cron');
@@ -82,5 +85,7 @@ class CronDisable extends Command
 
             throw $e;
         }
+
+        return Cli::SUCCESS;
     }
 }

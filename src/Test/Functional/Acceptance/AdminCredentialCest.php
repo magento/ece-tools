@@ -31,9 +31,9 @@ class AdminCredentialCest extends AbstractCest
      */
     public function testInstallWithoutAdminEmail(\CliTester $I, \Codeception\Example $data): void
     {
-        $I->runEceDockerCommand(
+        $I->generateDockerCompose(
             sprintf(
-                'build:compose --mode=production --env-vars="%s"',
+                '--mode=production --env-vars="%s"',
                 $this->convertEnvFromArrayToJson($data['variables'])
             )
         );
@@ -88,9 +88,9 @@ class AdminCredentialCest extends AbstractCest
      */
     public function testInstallWithDifferentVariables(\CliTester $I, \Codeception\Example $data)
     {
-        $I->runEceDockerCommand(
+        $I->generateDockerCompose(
             sprintf(
-                'build:compose --mode=production --env-vars="%s"',
+                '--mode=production --env-vars="%s"',
                 $this->convertEnvFromArrayToJson($data['variables'])
             )
         );

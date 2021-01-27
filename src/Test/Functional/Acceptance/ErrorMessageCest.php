@@ -22,7 +22,7 @@ class ErrorMessageCest extends AbstractCest
      */
     public function testShellErrorMessage(CliTester $I): void
     {
-        $I->runEceDockerCommand('build:compose --mode=production');
+        $I->generateDockerCompose('--mode=production');
         $I->runDockerComposeCommand('run build cloud-build');
         $I->cleanDirectories(['/bin/*']);
         $I->assertFalse($I->runDockerComposeCommand('run build ece-command build'));

@@ -137,6 +137,22 @@ variables:
           deploy:
             SCD_MATRIX:
               magento/backend: []
+  SCD_NO_PARENT:
+    description: Adds '--no-parent' option to SCD CLI command. This option does not allow to generate static content
+      for parent themes what decrease time for generation static content.
+    type: boolean
+    magento_version: '>=2.4.2'
+    stages:
+      - global
+      - build
+      - deploy
+    default:
+      build: false
+      deploy: false
+    examples:
+      - stage:
+          build:
+            SCD_NO_PARENT: true
   SCD_USE_BALER:
     description: Run Baler after performing static content deployment in order to generate an optimized JavaScript bundle.
     type: boolean

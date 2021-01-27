@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Command;
 
+use Magento\MagentoCloud\Cli;
 use Magento\MagentoCloud\Scenario\Exception\ProcessorException;
 use Magento\MagentoCloud\Scenario\Processor;
 use Symfony\Component\Console\Command\Command;
@@ -20,7 +21,7 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class PostDeploy extends Command
 {
-    const NAME = 'post-deploy';
+    public const NAME = 'post-deploy';
 
     /**
      * @var Processor
@@ -40,7 +41,7 @@ class PostDeploy extends Command
     /**
      * @inheritdoc
      */
-    protected function configure()
+    protected function configure(): void
     {
         $this->setName(static::NAME)
             ->setDescription('Performs after deploy operations.');
@@ -53,10 +54,12 @@ class PostDeploy extends Command
      *
      * @throws ProcessorException
      */
-    public function execute(InputInterface $input, OutputInterface $output)
+    public function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->processor->execute([
             'scenario/post-deploy.xml'
         ]);
+
+        return Cli::SUCCESS;
     }
 }

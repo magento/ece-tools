@@ -8,6 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Command;
 
 use Magento\MagentoCloud\App\GenericException;
+use Magento\MagentoCloud\Cli;
 use Magento\MagentoCloud\Command\ConfigDump\Generate;
 use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface;
 use Magento\MagentoCloud\Config\Magento\Env\WriterInterface;
@@ -27,7 +28,7 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class ConfigDump extends Command
 {
-    const NAME = 'config:dump';
+    public const NAME = 'config:dump';
 
     /**
      * @var LoggerInterface
@@ -96,7 +97,7 @@ class ConfigDump extends Command
     /**
      * @inheritdoc
      */
-    protected function configure()
+    protected function configure(): void
     {
         $this->setName(static::NAME)
             ->setDescription('Dump configuration for static content deployment.')
@@ -110,7 +111,7 @@ class ConfigDump extends Command
      *
      * @throws GenericException
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->logger->info('Starting dump.');
 
@@ -145,5 +146,7 @@ class ConfigDump extends Command
         }
 
         $this->logger->info('Dump completed.');
+
+        return Cli::SUCCESS;
     }
 }

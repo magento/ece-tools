@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Command;
 
+use Magento\MagentoCloud\Cli;
 use Magento\MagentoCloud\Scenario\Exception\ProcessorException;
 use Magento\MagentoCloud\Scenario\Processor;
 use Symfony\Component\Console\Command\Command;
@@ -42,7 +43,7 @@ class RunCommand extends Command
     /**
      * @inheritDoc
      */
-    protected function configure()
+    protected function configure(): void
     {
         $this->setDescription('Execute scenario(s).')
             ->addArgument(
@@ -59,10 +60,12 @@ class RunCommand extends Command
      *
      * @throws ProcessorException
      */
-    public function execute(InputInterface $input, OutputInterface $output)
+    public function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->processor->execute(
             (array)$input->getArgument(self::ARG_SCENARIO)
         );
+
+        return Cli::SUCCESS;
     }
 }

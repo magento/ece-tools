@@ -32,8 +32,8 @@ class CronCest extends AbstractCest
     public function testCron(\CliTester $I, \Codeception\Example $data): void
     {
         $this->prepareWorkplace($I, $data['version']);
-        $I->runEceDockerCommand(sprintf(
-            'build:compose --mode=production --expose-db-port=%s --env-vars="%s"',
+        $I->generateDockerCompose(sprintf(
+            '--mode=production --expose-db-port=%s --env-vars="%s"',
             $I->getExposedPort(),
             $this->convertEnvFromArrayToJson($data['variables'])
         ));

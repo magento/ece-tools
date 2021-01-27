@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Command;
 
+use Magento\MagentoCloud\Cli;
 use Magento\MagentoCloud\Cron\JobUnlocker;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Psr\Log\LoggerInterface;
@@ -14,6 +15,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Exception;
 
 /**
  * CLI command for unlocking cron jobs that stuck in "running" state.
@@ -22,11 +24,9 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class CronUnlock extends Command
 {
-    const NAME = 'cron:unlock';
-
-    const OPTION_JOB_CODE = 'job-code';
-
-    const UNLOCK_MESSAGE = 'The job is terminated by cron:unlock command';
+    public const NAME = 'cron:unlock';
+    public const OPTION_JOB_CODE = 'job-code';
+    public const UNLOCK_MESSAGE = 'The job is terminated by cron:unlock command';
 
     /**
      * @var LoggerInterface
@@ -60,25 +60,26 @@ class CronUnlock extends Command
     /**
      * @inheritdoc
      */
-    protected function configure()
+    protected function configure(): void
     {
         $this->setName(static::NAME)
-            ->setDescription('Unlock cron jobs that stuck in "running" state.');
-
-        $this->addOption(
-            self::OPTION_JOB_CODE,
-            null,
-            InputOption::VALUE_IS_ARRAY | InputOption::VALUE_OPTIONAL,
-            'Cron job code to unlock.'
-        );
+            ->setDescription('Unlock cron jobs that stuck in "running" state.')
+            ->addOption(
+                self::OPTION_JOB_CODE,
+                null,
+                InputOption::VALUE_IS_ARRAY | InputOption::VALUE_OPTIONAL,
+                'Cron job code to unlock.'
+            );
 
         parent::configure();
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
+     *
+     * @throws Exception
      */
-    public function execute(InputInterface $input, OutputInterface $output)
+    public function execute(InputInterface $input, OutputInterface $output): int
     {
         try {
             $this->logger->info('Starting unlocking.');
@@ -101,5 +102,7 @@ class CronUnlock extends Command
 
             throw $exception;
         }
+
+        return Cli::SUCCESS;
     }
 }

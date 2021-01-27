@@ -9,6 +9,8 @@ namespace Magento\MagentoCloud\Test\Unit\Config\Validator\Build;
 
 use Magento\MagentoCloud\App\Error as AppError;
 use Magento\MagentoCloud\Config\Validator\Build\StageConfig;
+use Magento\MagentoCloud\Config\ValidatorException;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Magento\MagentoCloud\Config\StageConfigInterface;
@@ -103,5 +105,17 @@ class StageConfigTest extends TestCase
             ->willReturn(new Validator\Result\Error('Some error'));
 
         $this->assertInstanceOf(Validator\Result\Error::class, $this->validator->validate());
+    }
+
+    public function testWithFileSystemException()
+    {
+        $this->expectException(ValidatorException::class);
+        $this->expectExceptionMessage('file system error');
+
+        $this->environmentReaderMock->expects($this->once())
+            ->method('read')
+            ->willThrowException(new FilesystemException('file system error'));
+
+        $this->validator->validate();
     }
 }

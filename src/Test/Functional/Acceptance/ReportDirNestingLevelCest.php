@@ -31,7 +31,7 @@ class ReportDirNestingLevelCest extends AbstractCest
      */
     public function testDefault(\CliTester $I): void
     {
-        $I->runEceDockerCommand('build:compose --mode=production');
+        $I->generateDockerCompose('--mode=production');
         $I->runDockerComposeCommand('run build cloud-build');
         $I->startEnvironment();
         $I->runDockerComposeCommand('run deploy cloud-deploy');
@@ -60,7 +60,7 @@ class ReportDirNestingLevelCest extends AbstractCest
     public function testWithPropertyInMagentoEnvFile(\CliTester $I): void
     {
         $I->copyFileToWorkDir('files/report_dir_nesting_level/.magento.env.yaml', '.magento.env.yaml');
-        $I->runEceDockerCommand('build:compose --mode=production');
+        $I->generateDockerCompose('--mode=production');
         $I->runDockerComposeCommand('run build cloud-build');
         $I->startEnvironment();
         $I->runDockerComposeCommand('run deploy cloud-deploy');
@@ -90,7 +90,7 @@ class ReportDirNestingLevelCest extends AbstractCest
     {
         $I->copyFileToWorkDir('files/report_dir_nesting_level/.magento.env.yaml', '.magento.env.yaml');
         $I->copyFileToWorkDir('files/report_dir_nesting_level/local_with_property.xml', 'pub/errors/local.xml');
-        $I->runEceDockerCommand('build:compose --mode=production');
+        $I->generateDockerCompose('--mode=production');
         $I->runDockerComposeCommand('run build cloud-build');
         $I->startEnvironment();
         $I->runDockerComposeCommand('run deploy cloud-deploy');
@@ -118,8 +118,8 @@ class ReportDirNestingLevelCest extends AbstractCest
     {
         $I->copyFileToWorkDir('files/report_dir_nesting_level/.magento.env.yaml', '.magento.env.yaml');
         $I->copyFileToWorkDir('files/report_dir_nesting_level/local_with_property.xml', 'pub/errors/local.xml');
-        $I->runEceDockerCommand(sprintf(
-            'build:compose --mode=production --env-vars="%s"',
+        $I->generateDockerCompose(sprintf(
+            '--mode=production --env-vars="%s"',
             $this->convertEnvFromArrayToJson(['MAGE_ERROR_REPORT_DIR_NESTING_LEVEL' => 7])
         ));
         $I->runDockerComposeCommand('run build cloud-build');
@@ -150,7 +150,7 @@ class ReportDirNestingLevelCest extends AbstractCest
     {
         $I->copyFileToWorkDir('files/report_dir_nesting_level/.magento.env.yaml', '.magento.env.yaml');
         $I->copyFileToWorkDir('files/report_dir_nesting_level/local_without_property.xml', 'pub/errors/local.xml');
-        $I->runEceDockerCommand('build:compose --mode=production');
+        $I->generateDockerCompose('--mode=production');
         $I->runDockerComposeCommand('run build cloud-build');
         $I->startEnvironment();
         $I->runDockerComposeCommand('run deploy cloud-deploy');
@@ -187,7 +187,7 @@ class ReportDirNestingLevelCest extends AbstractCest
     {
         $I->copyFileToWorkDir('files/report_dir_nesting_level/.magento.env.yaml', '.magento.env.yaml');
         $I->copyFileToWorkDir('files/report_dir_nesting_level/invalid_local.xml', 'pub/errors/local.xml');
-        $I->runEceDockerCommand('build:compose --mode=production');
+        $I->generateDockerCompose('--mode=production');
         $I->runDockerComposeCommand('run build cloud-build');
         $I->startEnvironment();
         $I->runDockerComposeCommand('run deploy cloud-deploy');

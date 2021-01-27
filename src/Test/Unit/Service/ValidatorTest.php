@@ -7,10 +7,10 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Service;
 
-use Magento\MagentoCloud\Filesystem\Flag\ConfigurationMismatchException;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Package\UndefinedPackageException;
 use Magento\MagentoCloud\Service\ServiceInterface;
+use Magento\MagentoCloud\Service\ServiceMismatchException;
 use Magento\MagentoCloud\Service\Validator;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -44,8 +44,8 @@ class ValidatorTest extends TestCase
      * @param string $magentoVersion
      * @param array $versions
      * @param int $errorsNumber
-     * @throws ConfigurationMismatchException
      * @throws UndefinedPackageException
+     * @throws ServiceMismatchException
      *
      * @dataProvider validateVersionsDataProvider
      */
@@ -58,8 +58,8 @@ class ValidatorTest extends TestCase
     }
 
     /**
-     * @throws ConfigurationMismatchException
      * @throws UndefinedPackageException
+     * @throws \Magento\MagentoCloud\Service\ServiceMismatchException
      */
     public function testValidateFailMessage()
     {
@@ -83,8 +83,8 @@ class ValidatorTest extends TestCase
     }
 
     /**
-     * @throws ConfigurationMismatchException
      * @throws UndefinedPackageException
+     * @throws ServiceMismatchException
      */
     public function testValidateNonexistentService()
     {
@@ -129,7 +129,7 @@ class ValidatorTest extends TestCase
                 '2.2.4',
                 [
                     ServiceInterface::NAME_PHP => '7.0.13',
-                    ServiceInterface::NAME_DB => '10.0',
+                    ServiceInterface::NAME_DB_MARIA => '10.0',
                     ServiceInterface::NAME_NGINX => '1.9',
                     ServiceInterface::NAME_VARNISH => '4.5',
                     ServiceInterface::NAME_REDIS => '5.0',
@@ -147,7 +147,7 @@ class ValidatorTest extends TestCase
                 '2.5.0',
                 [
                     ServiceInterface::NAME_PHP => '7.2.13', // wrong
-                    ServiceInterface::NAME_DB => '10.2.1',
+                    ServiceInterface::NAME_DB_MARIA => '10.2.1',
                     ServiceInterface::NAME_NGINX => '1.9',
                     ServiceInterface::NAME_VARNISH => '5.5',
                     ServiceInterface::NAME_REDIS => 'latest',
@@ -160,7 +160,7 @@ class ValidatorTest extends TestCase
                 '2.4.0',
                 [
                     ServiceInterface::NAME_PHP => '7.4',
-                    ServiceInterface::NAME_DB => '10.4',
+                    ServiceInterface::NAME_DB_MARIA => '10.4',
                     ServiceInterface::NAME_NGINX => '1.9',
                     ServiceInterface::NAME_VARNISH => '6.2',
                     ServiceInterface::NAME_REDIS => '5.0',
@@ -173,7 +173,7 @@ class ValidatorTest extends TestCase
                 '2.4.0',
                 [
                     ServiceInterface::NAME_PHP => '7.4',
-                    ServiceInterface::NAME_DB => '10.4',
+                    ServiceInterface::NAME_DB_MARIA => '10.4',
                     ServiceInterface::NAME_NGINX => '1.9',
                     ServiceInterface::NAME_VARNISH => '6.2',
                     ServiceInterface::NAME_REDIS => '5.0',
@@ -186,7 +186,7 @@ class ValidatorTest extends TestCase
                 '2.4.1',
                 [
                     ServiceInterface::NAME_PHP => '7.4',
-                    ServiceInterface::NAME_DB => '10.4',
+                    ServiceInterface::NAME_DB_MARIA => '10.4',
                     ServiceInterface::NAME_NGINX => '1.9',
                     ServiceInterface::NAME_VARNISH => '6.2',
                     ServiceInterface::NAME_REDIS => '5.0',
@@ -196,10 +196,31 @@ class ValidatorTest extends TestCase
                 1
             ],
             [
+                '2.4.1',
+                [
+                    ServiceInterface::NAME_DB_MYSQL => '5.6',
+                ],
+                1
+            ],
+            [
+                '2.4.1',
+                [
+                    ServiceInterface::NAME_DB_MYSQL => '5.7',
+                ],
+                0
+            ],
+            [
+                '2.4.1',
+                [
+                    ServiceInterface::NAME_DB_MYSQL => '8.0',
+                ],
+                0
+            ],
+            [
                 '2.4.2',
                 [
                     ServiceInterface::NAME_PHP => '7.4',
-                    ServiceInterface::NAME_DB => '10.4',
+                    ServiceInterface::NAME_DB_MARIA => '10.4',
                     ServiceInterface::NAME_NGINX => '1.9',
                     ServiceInterface::NAME_VARNISH => '6.2',
                     ServiceInterface::NAME_REDIS => '5.0',
@@ -212,13 +233,27 @@ class ValidatorTest extends TestCase
                 '2.3.6',
                 [
                     ServiceInterface::NAME_PHP => '7.4', // wrong
-                    ServiceInterface::NAME_DB => '10.2',
+                    ServiceInterface::NAME_DB_MARIA => '10.3', // wrong
                     ServiceInterface::NAME_NGINX => '1.19',
                     ServiceInterface::NAME_VARNISH => '6.2',
                     ServiceInterface::NAME_REDIS => '5.0',
                     ServiceInterface::NAME_ELASTICSEARCH => '7.9', //wrong
                 ],
-                2
+                3
+            ],
+            [
+                '2.3.6-p1',
+                [
+                    ServiceInterface::NAME_DB_MARIA => '10.3',
+                ],
+                0
+            ],
+            [
+                '2.3.6-p1',
+                [
+                    ServiceInterface::NAME_DB_MARIA => '10.4', // wrong
+                ],
+                1
             ],
             [
                 '2.3.7',
@@ -236,7 +271,7 @@ class ValidatorTest extends TestCase
                 '2.2.4',
                 [
                     ServiceInterface::NAME_PHP => '7.0.13',
-                    ServiceInterface::NAME_DB => '11.0', //wrong
+                    ServiceInterface::NAME_DB_MARIA => '11.0', //wrong
                     ServiceInterface::NAME_NGINX => '0.9', //wrong
                     ServiceInterface::NAME_VARNISH => '4.0.9',
                     ServiceInterface::NAME_REDIS => '3.1',

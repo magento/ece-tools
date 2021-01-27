@@ -35,6 +35,13 @@ class DbConnectionTest extends TestCase
         'username' => 'username',
     ];
 
+    private const CUSTOM_CONNECTION = [
+        'host' => 'custom.host',
+        'dbname' => 'custom.dbname',
+        'password' => 'custom.password',
+        'username' => 'custom.username',
+    ];
+
     private const CHECKOUT_CONNECTION = [
         'host' => 'checkout.host',
         'dbname' => 'checkout.dbname',
@@ -73,6 +80,7 @@ class DbConnectionTest extends TestCase
     private const RESOURCE_DEFAULT_SETUP = ['connection' => 'default'];
     private const RESOURCE_CHECKOUT = ['connection' => 'checkout'];
     private const RESOURCE_SALE = ['connection' => 'sales'];
+    private const RESOURCE_CUSTOM = ['connection' => 'custom'];
 
     /**
      * @var DeployInterface|MockObject
@@ -544,6 +552,60 @@ class DbConnectionTest extends TestCase
             ]);
         $this->flagManagerMock->expects($this->never())
             ->method('set');
+
+        $this->step->execute();
+    }
+
+    /**
+     * Case when custom connections added in DATABASE_CONFIGURATION.
+     * Tests that custom resources saves and split db resources are ignored if split db not configured
+     */
+    public function testExecuteSaveCustomConfiguration()
+    {
+        $this->dbConfigMock->expects($this->once())
+            ->method('get')
+            ->willReturn([
+                'connection' => [
+                    'default' => self::DEFAULT_CONNECTION,
+                    'indexer' => self::DEFAULT_CONNECTION,
+                    'custom' => self::CUSTOM_CONNECTION,
+                    'custom2' => self::CUSTOM_CONNECTION,
+                ],
+            ]);
+        $this->resourceConfigMock->expects($this->once())
+            ->method('get')
+            ->willReturn([
+                'custom' => self::RESOURCE_CUSTOM,
+                'custom2' => self::RESOURCE_CUSTOM,
+                ResourceConfig::RESOURCE_SALES => self::RESOURCE_SALE,
+                ResourceConfig::RESOURCE_CHECKOUT => self::RESOURCE_CHECKOUT
+            ]);
+        $this->loggerMock->expects($this->once())
+            ->method('info')
+            ->with('Updating env.php DB connection configuration.');
+        $this->configReaderMock->expects($this->once())
+            ->method('read')
+            ->willReturn([]);
+        $this->stageConfigMock->expects($this->exactly(1))
+            ->method('get')
+            ->with(DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION)
+            ->willReturn(false);
+        $this->configWriterMock->expects($this->once())
+            ->method('create')
+            ->with([
+                'db' => [
+                    'connection' => [
+                        'default' => self::DEFAULT_CONNECTION,
+                        'indexer' => self::DEFAULT_CONNECTION,
+                        'custom' => self::CUSTOM_CONNECTION,
+                        'custom2' => self::CUSTOM_CONNECTION,
+                    ]
+                ],
+                'resource' => [
+                    'custom' => self::RESOURCE_CUSTOM,
+                    'custom2' => self::RESOURCE_CUSTOM,
+                ]
+            ]);
 
         $this->step->execute();
     }

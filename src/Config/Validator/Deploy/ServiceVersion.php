@@ -9,6 +9,7 @@ namespace Magento\MagentoCloud\Config\Validator\Deploy;
 
 use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\App\GenericException;
+use Magento\MagentoCloud\Service\Detector\DatabaseType;
 use Magento\MagentoCloud\Service\ServiceInterface;
 use Magento\MagentoCloud\Service\ServiceFactory;
 use Magento\MagentoCloud\Service\Validator as ServiceVersionValidator;
@@ -41,23 +42,31 @@ class ServiceVersion implements ValidatorInterface
      * @var LoggerInterface
      */
     private $logger;
+    
+    /**
+     * @var DatabaseType
+     */
+    private $databaseType;
 
     /**
      * @param Validator\ResultFactory $resultFactory
      * @param ServiceVersionValidator $serviceVersionValidator
      * @param ServiceFactory $serviceFactory
      * @param LoggerInterface $logger
+     * @param DatabaseType $databaseType
      */
     public function __construct(
         Validator\ResultFactory $resultFactory,
         ServiceVersionValidator $serviceVersionValidator,
         ServiceFactory $serviceFactory,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        DatabaseType $databaseType
     ) {
         $this->resultFactory = $resultFactory;
         $this->serviceVersionValidator = $serviceVersionValidator;
         $this->serviceFactory = $serviceFactory;
         $this->logger = $logger;
+        $this->databaseType = $databaseType;
     }
 
     /**
@@ -71,8 +80,8 @@ class ServiceVersion implements ValidatorInterface
             $services = [
                 ServiceInterface::NAME_RABBITMQ,
                 ServiceInterface::NAME_REDIS,
-                ServiceInterface::NAME_DB,
-                ServiceInterface::NAME_ELASTICSEARCH
+                ServiceInterface::NAME_ELASTICSEARCH,
+                $this->databaseType->getServiceName()
             ];
 
             $errors = [];

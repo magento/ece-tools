@@ -44,8 +44,8 @@ class RedisCest extends AbstractCest
     public function testDefaultConfiguration(\CliTester $I, \Codeception\Example $data): void
     {
         $this->prepareWorkplace($I, $data['version']);
-        $I->runEceDockerCommand(sprintf(
-            'build:compose --mode=production --expose-db-port=%s',
+        $I->generateDockerCompose(sprintf(
+            '--mode=production --expose-db-port=%s',
             $I->getExposedPort()
         ));
 
@@ -114,8 +114,8 @@ class RedisCest extends AbstractCest
     public function testWrongConfiguration(\CliTester $I, \Codeception\Example $data): void
     {
         $this->prepareWorkplace($I, $data['version']);
-        $I->runEceDockerCommand(sprintf(
-            'build:compose --mode=production --expose-db-port=%s',
+        $I->generateDockerCompose(sprintf(
+            '--mode=production --expose-db-port=%s',
             $I->getExposedPort()
         ));
 
@@ -163,8 +163,8 @@ class RedisCest extends AbstractCest
     public function testGoodConfiguration(\CliTester $I, \Codeception\Example $data): void
     {
         $this->prepareWorkplace($I, $data['version']);
-        $I->runEceDockerCommand(sprintf(
-            'build:compose --mode=production --expose-db-port=%s',
+        $I->generateDockerCompose(sprintf(
+            '--mode=production --expose-db-port=%s',
             $I->getExposedPort()
         ));
 

@@ -8,6 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\StaticContent\Deploy;
 
 use Magento\MagentoCloud\Config\AdminDataInterface;
+use Magento\MagentoCloud\Config\Stage\BuildInterface;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\DB\ConnectionInterface;
 use Magento\MagentoCloud\Package\MagentoVersion;
@@ -138,5 +139,13 @@ class Option implements OptionInterface
     public function getMaxExecutionTime()
     {
         return $this->stageConfig->get(DeployInterface::VAR_SCD_MAX_EXEC_TIME);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function hasNoParent(): bool
+    {
+        return $this->stageConfig->get(BuildInterface::VAR_SCD_NO_PARENT);
     }
 }

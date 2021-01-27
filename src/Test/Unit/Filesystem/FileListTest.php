@@ -166,4 +166,19 @@ class FileListTest extends TestCase
     {
         $this->assertSame('root/config/schema.error.yaml', $this->fileList->getErrorSchema());
     }
+
+    public function testGetPatchLog(): void
+    {
+        $this->assertSame('magento_root/var/log/patch.log', $this->fileList->getPatchLog());
+    }
+
+    public function testGetInitPatchLog(): void
+    {
+        $this->assertSame('magento_root/init/var/log/patch.log', $this->fileList->getInitPatchLog());
+    }
+
+    public function testGetErrorDistConfig(): void
+    {
+        $this->assertSame('root/dist/error-codes.md', $this->fileList->getErrorDistConfig());
+    }
 }

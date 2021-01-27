@@ -16,6 +16,7 @@ use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Shell\ShellFactory;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
 
 /**
  * @inheritdoc
@@ -38,6 +39,11 @@ class CleanCacheTest extends TestCase
     private $stageConfig;
 
     /**
+     * @var LoggerInterface|MockObject
+     */
+    private $loggerMock;
+
+    /**
      * @inheritdoc
      */
     protected function setUp()
@@ -49,11 +55,14 @@ class CleanCacheTest extends TestCase
         $shellFactoryMock->expects($this->once())
             ->method('createMagento')
             ->willReturn($this->magentoShellMock);
+        $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
+            ->getMockForAbstractClass();
 
         $this->step = new CleanCache(
             $shellFactoryMock,
             $this->stageConfig,
-            117
+            117,
+            $this->loggerMock
         );
     }
 
@@ -62,6 +71,12 @@ class CleanCacheTest extends TestCase
      */
     public function testExecute()
     {
+        $this->loggerMock->expects($this->exactly(2))
+            ->method('info')
+            ->withConsecutive(
+                ['Flushing cache.'],
+                ['Cache flushed successfully.']
+            );
         $this->stageConfig->expects($this->once())
             ->method('get')
             ->with(DeployInterface::VAR_VERBOSE_COMMANDS)
@@ -82,6 +97,9 @@ class CleanCacheTest extends TestCase
         $this->expectExceptionMessage('Some error');
         $this->expectExceptionCode(117);
 
+        $this->loggerMock->expects($this->once())
+            ->method('info')
+            ->with('Flushing cache.');
         $this->stageConfig->expects($this->once())
             ->method('get')
             ->with(DeployInterface::VAR_VERBOSE_COMMANDS)
@@ -102,6 +120,9 @@ class CleanCacheTest extends TestCase
         $this->expectExceptionMessage('Some error');
         $this->expectExceptionCode(15);
 
+        $this->loggerMock->expects($this->once())
+            ->method('info')
+            ->with('Flushing cache.');
         $this->stageConfig->expects($this->once())
             ->method('get')
             ->willThrowException(new ConfigException('Some error', 15));
@@ -114,6 +135,12 @@ class CleanCacheTest extends TestCase
      */
     public function testExecuteWithPostDeployHook()
     {
+        $this->loggerMock->expects($this->exactly(2))
+            ->method('info')
+            ->withConsecutive(
+                ['Flushing cache.'],
+                ['Cache flushed successfully.']
+            );
         $this->stageConfig->expects($this->once())
             ->method('get')
             ->with(DeployInterface::VAR_VERBOSE_COMMANDS)
@@ -130,6 +157,12 @@ class CleanCacheTest extends TestCase
      */
     public function testExecuteNoVerbosity()
     {
+        $this->loggerMock->expects($this->exactly(2))
+            ->method('info')
+            ->withConsecutive(
+                ['Flushing cache.'],
+                ['Cache flushed successfully.']
+            );
         $this->stageConfig->expects($this->once())
             ->method('get')
             ->willReturn('');

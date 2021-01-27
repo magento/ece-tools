@@ -44,7 +44,7 @@ class ScenarioExtensibilityCest extends AbstractCest
             . ' ./vendor/magento/ece-tools-extend/scenario/extend-build-transfer.xml';
         $I->writeAppMagentoYaml($app);
 
-        $I->runEceDockerCommand('build:compose --mode=production');
+        $I->generateDockerCompose('--mode=production');
         $I->runDockerComposeCommand('run build cloud-build');
         $I->startEnvironment();
 

@@ -29,7 +29,7 @@ class Upgrade21Cest extends AbstractCest
     public function test(\CliTester $I, \Codeception\Example $data): void
     {
         $this->prepareWorkplace($I, $data['from']);
-        $I->runEceDockerCommand('build:compose --mode=production');
+        $I->generateDockerCompose('--mode=production');
         $this->assert($I);
         $I->assertTrue($I->cleanDirectories(['/vendor/*', '/setup/*']));
         $I->stopEnvironment(true);

@@ -40,7 +40,7 @@ class SplitDbCest extends AbstractCest
         $I->writeEnvMagentoYaml(['stage' => ['global' => ['SCD_ON_DEMAND' => true]]]);
 
         // Deploy 'Split Db' in an environment without prepared architecture
-        $I->runEceDockerCommand('build:compose --mode=production');
+        $I->generateDockerCompose('--mode=production');
 
         foreach ($this->variationsDataPartWithoutSplitDbArch() as $variationData) {
             $this->setSplitDbTypesIntoMagentoEnvYaml($I, $variationData['splitDbTypes']);
@@ -72,7 +72,7 @@ class SplitDbCest extends AbstractCest
         $I->writeAppMagentoYaml($magentoApp);
 
         // Deploy 'Split Db' in an environment with prepared architecture. Case with upgrade
-        $I->runEceDockerCommand('build:compose --mode=production');
+        $I->generateDockerCompose('--mode=production');
         foreach ($this->variationsDataPartWithSplitDbArch() as $variationData) {
             $this->setSplitDbTypesIntoMagentoEnvYaml($I, $variationData['splitDbTypes']);
             $I->startEnvironment();

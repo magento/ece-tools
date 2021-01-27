@@ -40,10 +40,12 @@ interface StageConfigInterface
     public const VAR_SCD_ON_DEMAND = 'SCD_ON_DEMAND';
     public const VAR_SKIP_HTML_MINIFICATION = 'SKIP_HTML_MINIFICATION';
     public const VAR_SCD_MATRIX = 'SCD_MATRIX';
+    public const VAR_SCD_NO_PARENT = 'SCD_NO_PARENT';
     public const VAR_X_FRAME_CONFIGURATION = 'X_FRAME_CONFIGURATION';
 
     /**
      * Settings for deployment from git.
+     * @deprecated
      */
     public const VAR_DEPLOYED_MAGENTO_VERSION_FROM_GIT = 'DEPLOYED_MAGENTO_VERSION_FROM_GIT';
     public const VAR_DEPLOY_FROM_GIT_OPTIONS = 'DEPLOY_FROM_GIT_OPTIONS';

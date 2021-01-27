@@ -7,6 +7,8 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 
+use Magento\CloudDocker\Test\Functional\Codeception\Docker;
+
 /**
  * This test runs on the latest version of PHP
  *
@@ -22,9 +24,9 @@ class DatabaseConfigurationCest extends AbstractCest
      */
     public function databaseConfiguration(\CliTester $I, \Codeception\Example $data): void
     {
-        $I->runEceDockerCommand(
+        $I->generateDockerCompose(
             sprintf(
-                'build:compose --mode=production --env-vars="%s"',
+                '--mode=production --env-vars="%s"',
                 $this->convertEnvFromArrayToJson($data['variables'])
             )
         );
@@ -97,9 +99,9 @@ class DatabaseConfigurationCest extends AbstractCest
             $I->see('CMS homepage content goes here.');
         };
 
-        $I->runEceDockerCommand(
+        $I->generateDockerCompose(
             sprintf(
-                'build:compose --mode=production --env-vars="%s"',
+                '--mode=production --env-vars="%s"',
                 $this->convertEnvFromArrayToJson([
                     'MAGENTO_CLOUD_VARIABLES' => [
                         'DATABASE_CONFIGURATION'=>[
@@ -123,5 +125,38 @@ class DatabaseConfigurationCest extends AbstractCest
         $I->assertTrue($I->runDockerComposeCommand('run deploy cloud-deploy'), 'Re-deployment failed');
         $I->runDockerComposeCommand('run deploy cloud-post-deploy');
         $checkResult($I);
+    }
+
+    /**
+     * Tests scenario when additional custom db configuration added into
+     * DATABASE_CONFIGURATION option in .magento.env.yaml
+     */
+    public function customDataBaseConfigurationMagentoEnvYaml(\CliTester $I)
+    {
+        $I->copyFileToWorkDir('files/custom_db_configuration/.magento.env.yaml', '.magento.env.yaml');
+        $I->runEceDockerCommand('build:compose --mode=production');
+        $I->assertTrue($I->runDockerComposeCommand('run build cloud-build'));
+        $I->assertTrue($I->startEnvironment());
+        $I->assertTrue(
+            $I->runDockerComposeCommand('run deploy cloud-deploy'),
+            'Installation with additional custom connection failed'
+        );
+        $I->runDockerComposeCommand('run deploy cloud-post-deploy');
+
+        $config = $this->getConfig($I);
+        $I->assertArrayHasKey('custom', $config['db']['connection']);
+        $I->assertArrayHasKey('custom', $config['db']['slave_connection']);
+        $I->assertArrayHasKey('custom', $config['resource']);
+    }
+
+    /**
+     * @param \CliTester $I
+     * @return array
+     */
+    private function getConfig(\CliTester $I): array
+    {
+        $destination = sys_get_temp_dir() . '/app/etc/env.php';
+        $I->assertTrue($I->downloadFromContainer('/app/etc/env.php', $destination, Docker::DEPLOY_CONTAINER));
+        return require $destination;
     }
 }

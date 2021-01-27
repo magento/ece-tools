@@ -23,7 +23,7 @@ class ScdStrategyCest extends AbstractCest
     public function testScdStrategyOnDeploy(\CliTester $I, \Codeception\Example $data): void
     {
         $I->copyFileToWorkDir($data['env_yaml'], '.magento.env.yaml');
-        $I->runEceDockerCommand('build:compose --mode=production');
+        $I->generateDockerCompose('--mode=production');
         $I->runDockerComposeCommand('run build cloud-build');
         $I->startEnvironment();
         $I->runDockerComposeCommand('run deploy cloud-deploy');

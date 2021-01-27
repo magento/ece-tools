@@ -8,6 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Service;
 
 use Magento\MagentoCloud\DB\ConnectionInterface;
+use Magento\MagentoCloud\DB\Data\ConnectionFactory;
 use Magento\MagentoCloud\DB\Data\ConnectionTypes;
 
 /**
@@ -31,18 +32,28 @@ class Database implements ServiceInterface
     private $version;
 
     /**
+     * @var ConnectionFactory
+     */
+    private $connectionFactory;
+
+    /**
      * @param ConnectionTypes $connectionType
      * @param ConnectionInterface $connection
+     * @param ConnectionFactory $connectionFactory
      */
     public function __construct(
         ConnectionTypes $connectionType,
-        ConnectionInterface $connection
+        ConnectionInterface $connection,
+        ConnectionFactory $connectionFactory
     ) {
         $this->connectionType = $connectionType;
         $this->connection = $connection;
+        $this->connectionFactory = $connectionFactory;
     }
 
     /**
+     * Returns database configuration from relationships
+     *
      * @inheritdoc
      */
     public function getConfiguration(): array
@@ -51,8 +62,9 @@ class Database implements ServiceInterface
     }
 
     /**
-     * Retrieves MySQL service version whether from relationship configuration
-     * or using SQL query (for PRO environments)
+     * Retrieves MySQL service version from relationship configuration if 'type' contains version
+     * and 'host' is relevant with final connection data.
+     * Otherwise using SQL query.
      *
      * {@inheritDoc}
      */
@@ -62,11 +74,15 @@ class Database implements ServiceInterface
             $this->version = '0';
 
             try {
-                $databaseConfig = $this->getConfiguration();
+                $relationshipConfig = $this->getConfiguration();
+                $connectionData = $this->connectionFactory->create(ConnectionFactory::CONNECTION_MAIN);
 
-                if (isset($databaseConfig['type']) && strpos($databaseConfig['type'], ':') !== false) {
-                    $this->version = explode(':', $databaseConfig['type'])[1];
-                } elseif (!empty($databaseConfig['host'])) {
+                if (isset($relationshipConfig['host'])
+                    && $relationshipConfig['host'] == $connectionData->getHost()
+                    && isset($relationshipConfig['type']) && strpos($relationshipConfig['type'], ':') !== false
+                ) {
+                    $this->version = explode(':', $relationshipConfig['type'])[1];
+                } else {
                     $rawVersion = $this->connection->selectOne('SELECT VERSION() as version');
                     preg_match('/^\d+\.\d+/', $rawVersion['version'] ?? '', $matches);
 

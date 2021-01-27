@@ -21,7 +21,9 @@ class ServiceFactory
         ServiceInterface::NAME_REDIS => Redis::class,
         ServiceInterface::NAME_ELASTICSEARCH => ElasticSearch::class,
         ServiceInterface::NAME_RABBITMQ => RabbitMq::class,
-        ServiceInterface::NAME_DB => Database::class,
+        ServiceInterface::NAME_DB_MYSQL => Database::class,
+        ServiceInterface::NAME_DB_MARIA => Database::class,
+        ServiceInterface::NAME_DB_AURORA => Aurora::class,
         ServiceInterface::NAME_PHP => Php::class
     ];
 

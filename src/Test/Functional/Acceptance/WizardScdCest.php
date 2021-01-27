@@ -22,7 +22,7 @@ class WizardScdCest extends AbstractCest
     {
         parent::_before($I);
 
-        $I->runEceDockerCommand('build:compose --mode=production');
+        $I->generateDockerCompose('--mode=production');
     }
 
     /**

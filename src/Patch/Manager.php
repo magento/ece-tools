@@ -9,6 +9,8 @@ namespace Magento\MagentoCloud\Patch;
 
 use Magento\MagentoCloud\Config\ConfigException;
 use Magento\MagentoCloud\Config\GlobalSection;
+use Magento\MagentoCloud\Package\MagentoVersion;
+use Magento\MagentoCloud\Package\UndefinedPackageException;
 use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Psr\Log\LoggerInterface;
@@ -29,23 +31,23 @@ class Manager
     private $shell;
 
     /**
-     * @var GlobalSection
+     * @var MagentoVersion
      */
-    private $globalSection;
+    private $magentoVersion;
 
     /**
      * @param LoggerInterface $logger
      * @param ShellInterface $shell
-     * @param GlobalSection $globalSection
+     * @param MagentoVersion $magentoVersion
      */
     public function __construct(
         LoggerInterface $logger,
         ShellInterface $shell,
-        GlobalSection $globalSection
+        MagentoVersion $magentoVersion
     ) {
         $this->logger = $logger;
         $this->shell = $shell;
-        $this->globalSection = $globalSection;
+        $this->magentoVersion = $magentoVersion;
     }
 
     /**
@@ -56,7 +58,7 @@ class Manager
      */
     public function apply(): void
     {
-        if ($this->globalSection->get(GlobalSection::VAR_DEPLOYED_MAGENTO_VERSION_FROM_GIT)) {
+        if ($this->magentoVersion->isGitInstallation()) {
             $this->logger->info('Git-based installation. Skipping patches applying');
 
             return;

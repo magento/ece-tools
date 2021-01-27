@@ -47,9 +47,9 @@ class AcceptanceCest extends AbstractCest
      */
     public function testDefault(\CliTester $I, \Codeception\Example $data): void
     {
-        $I->runEceDockerCommand(
+        $I->generateDockerCompose(
             sprintf(
-                'build:compose --mode=production --env-vars="%s"',
+                '--mode=production --env-vars="%s"',
                 $this->convertEnvFromArrayToJson($data['variables'])
             )
         );
@@ -254,7 +254,7 @@ class AcceptanceCest extends AbstractCest
         $config['hooks']['build'] = 'set -e' . PHP_EOL . 'php ./vendor/bin/ece-tools build' . PHP_EOL;
         $I->writeAppMagentoYaml($config);
 
-        $I->runEceDockerCommand('build:compose --mode=production');
+        $I->generateDockerCompose('--mode=production');
         $I->runDockerComposeCommand('run build cloud-build');
         $I->startEnvironment();
         $I->runDockerComposeCommand('run deploy cloud-deploy');
@@ -271,7 +271,7 @@ class AcceptanceCest extends AbstractCest
     public function testDeployInBuild(\CliTester $I): void
     {
         $tmpConfig = sys_get_temp_dir() . '/app/etc/config.php';
-        $I->runEceDockerCommand('build:compose --mode=production');
+        $I->generateDockerCompose('--mode=production');
         $I->runDockerComposeCommand('run build cloud-build');
         $I->startEnvironment();
         $I->runDockerComposeCommand('run deploy cloud-deploy');

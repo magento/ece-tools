@@ -37,7 +37,7 @@ class ElasticSearchCest extends AbstractCest
 
         $this->prepareWorkplace($I, $data['magento']);
 
-        $I->runEceDockerCommand('build:compose --mode=production');
+        $I->generateDockerCompose('--mode=production');
 
         $I->runDockerComposeCommand('run build cloud-build');
         $I->startEnvironment();
@@ -62,7 +62,7 @@ class ElasticSearchCest extends AbstractCest
         $this->removeEs = true;
         $this->removeESIfExists($I);
 
-        $I->runEceDockerCommand('build:compose --mode=production');
+        $I->generateDockerCompose('--mode=production');
 
         $I->runDockerComposeCommand('run build cloud-build');
         $I->startEnvironment();
