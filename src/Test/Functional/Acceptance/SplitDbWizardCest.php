@@ -100,7 +100,7 @@ class SplitDbWizardCest extends AbstractCest
     protected function dataProviderMagentoCloudVersions(): array
     {
         return [
-            ['version' => 'master'],
+            ['version' => '2.4.1'],
         ];
     }
 

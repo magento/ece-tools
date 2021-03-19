@@ -12,6 +12,8 @@ use Magento\MagentoCloud\Config\ConfigMerger;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Package\Manager;
 use Magento\MagentoCloud\Service\Redis;
+use Magento\MagentoCloud\Service\RedisSession;
+use Psr\Log\LoggerInterface;
 
 /**
  * Returns session configuration.
@@ -27,6 +29,11 @@ class Config
      * @var Redis
      */
     private $redis;
+
+    /**
+     * @var RedisSession
+     */
+    private $redisSession;
 
     /**
      * @var DeployInterface
@@ -49,24 +56,35 @@ class Config
     private $comparator;
 
     /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
+    /**
      * @param Redis $redis
+     * @param RedisSession $redisSession
      * @param DeployInterface $stageConfig
      * @param ConfigMerger $configMerger
      * @param Manager $manager
      * @param Comparator $comparator
+     * @param LoggerInterface $logger
      */
     public function __construct(
         Redis $redis,
+        RedisSession $redisSession,
         DeployInterface $stageConfig,
         ConfigMerger $configMerger,
         Manager $manager,
-        Comparator $comparator
+        Comparator $comparator,
+        LoggerInterface $logger
     ) {
         $this->redis = $redis;
+        $this->redisSession = $redisSession;
         $this->stageConfig = $stageConfig;
         $this->configMerger = $configMerger;
         $this->manager = $manager;
         $this->comparator = $comparator;
+        $this->logger = $logger;
     }
 
     /**
@@ -89,9 +107,17 @@ class Config
             return $envSessionConfiguration;
         }
 
-        $redisConfig = $this->redis->getConfiguration();
-
-        if (!$redisConfig) {
+        if ($redisConfig = $this->redisSession->getConfiguration()) {
+            $this->logger->info(
+                RedisSession::NAME_REDIS_SESSION . ' will be used for session if it was not override by '
+                . DeployInterface::VAR_SESSION_CONFIGURATION
+            );
+        } elseif ($redisConfig = $this->redis->getConfiguration()) {
+            $this->logger->info(
+                Redis::NAME_REDIS . ' will be used for session if it was not override by '
+                . DeployInterface::VAR_SESSION_CONFIGURATION
+            );
+        } else {
             return [];
         }
 
