@@ -94,13 +94,17 @@ class ElasticSearch implements ServiceInterface
 
         if ($this->version === null) {
             try {
-                $esConfiguration = $this->call(sprintf(
-                    '%s:%s',
-                    $this->getHost(),
-                    $this->getPort()
-                ));
-
-                $this->version = $esConfiguration['version']['number'];
+                $config = $this->getConfiguration();
+                if (isset($config['type']) && strpos($config['type'], ':') !== false) {
+                    $this->version = explode(':', $config['type'])[1];
+                } else {
+                    $esConfiguration = $this->call(sprintf(
+                        '%s:%s',
+                        $this->getHost(),
+                        $this->getPort()
+                    ));
+                    $this->version = $esConfiguration['version']['number'];
+                }
             } catch (Throwable $exception) {
                 throw new ServiceException(
                     'Can\'t get version of elasticsearch: ' . $exception->getMessage(),

@@ -88,8 +88,12 @@ class ElasticSearchTest extends TestCase
         $responseMock = $this->createMock(Response::class);
         $streamMock = $this->getMockForAbstractClass(StreamInterface::class);
 
-        $this->environmentMock->method('getRelationship')
+        $this->environmentMock->expects($this->any())
+            ->method('getRelationship')
             ->willReturn($esRelationship);
+        $this->clientFactoryMock->expects($this->once())
+            ->method('create')
+            ->willReturn($clientMock);
         $clientMock->expects($this->once())
             ->method('get')
             ->with($esConfig['host'] . ':' . $esConfig['port'])
@@ -100,9 +104,6 @@ class ElasticSearchTest extends TestCase
         $streamMock->expects($this->once())
             ->method('getContents')
             ->willReturn($esConfiguration);
-        $this->clientFactoryMock->expects($this->once())
-            ->method('create')
-            ->willReturn($clientMock);
         $this->loggerMock->expects($this->never())
             ->method('warning');
 
@@ -152,6 +153,48 @@ class ElasticSearchTest extends TestCase
                 '{"version" : {"number" : "2.4.4"}}',
                 '2.4.4',
             ],
+        ];
+    }
+
+    /**
+     * @param array $esRelationship
+     * @param string $expectedVersion
+     * @throws ServiceException
+     *
+     * @dataProvider getVersionFromTypeDataProvider
+     */
+    public function testGetVersionFromType($esRelationship, $expectedVersion)
+    {
+        $this->environmentMock->expects($this->any())
+            ->method('getRelationship')
+            ->willReturn($esRelationship);
+
+        $this->clientFactoryMock->expects($this->never())
+            ->method('create');
+
+        $this->assertSame($expectedVersion, $this->elasticSearch->getVersion());
+    }
+
+    public function getVersionFromTypeDataProvider()
+    {
+        return [
+            [
+                [],
+                '0'
+            ],
+            [
+                [
+                    ['host' => '127.0.0.1', 'port' => '1234', 'type' => 'elasticsearch:7.7']
+                ],
+                '7.7'
+            ],
+            [
+                [
+                    ['host' => '127.0.0.1', 'port' => '1234', 'type' => 'elasticsearch:5.2']
+                ],
+                '5.2'
+            ],
+
         ];
     }
 
@@ -216,6 +259,10 @@ class ElasticSearchTest extends TestCase
             [
                 '2.4',
                 'elasticsearch'
+            ],
+            [
+                '7.7',
+                'elasticsearch7'
             ]
         ];
     }
