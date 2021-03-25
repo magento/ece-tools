@@ -193,6 +193,12 @@ class SearchEngine
             "{$engine}_server_port" => $config['port'],
         ];
 
+        if ($this->elasticSearch->isAuthEnabled()) {
+            $elasticSearchConfig["{$engine}_enable_auth"] = 1;
+            $elasticSearchConfig["{$engine}_username"] = $config['username'];
+            $elasticSearchConfig["{$engine}_password"] = $config['password'];
+        }
+
         if (isset($config['query']['index'])) {
             $elasticSearchConfig["{$engine}_index_prefix"] = $config['query']['index'];
         }

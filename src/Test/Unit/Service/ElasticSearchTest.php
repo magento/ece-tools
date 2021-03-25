@@ -96,7 +96,7 @@ class ElasticSearchTest extends TestCase
             ->willReturn($clientMock);
         $clientMock->expects($this->once())
             ->method('get')
-            ->with($esConfig['host'] . ':' . $esConfig['port'])
+            ->with($esConfig['host'] . ':' . $esConfig['port'], ['auth' => ['user', 'secret']])
             ->willReturn($responseMock);
         $responseMock->expects($this->once())
             ->method('getBody')
@@ -119,6 +119,8 @@ class ElasticSearchTest extends TestCase
             [
                 'host' => '127.0.0.1',
                 'port' => '1234',
+                'username' => 'user',
+                'password' => 'secret'
             ],
         ];
 
@@ -293,7 +295,7 @@ class ElasticSearchTest extends TestCase
 
     public function testGetTemplate(): void
     {
-        $this->environmentMock->expects($this->once())
+        $this->environmentMock->expects($this->any())
             ->method('getRelationship')
             ->with('elasticsearch')
             ->willReturn([
@@ -357,7 +359,7 @@ class ElasticSearchTest extends TestCase
 
     public function testGetTemplateWithException(): void
     {
-        $this->environmentMock->expects($this->once())
+        $this->environmentMock->expects($this->any())
             ->method('getRelationship')
             ->with('elasticsearch')
             ->willReturn(
@@ -401,5 +403,42 @@ class ElasticSearchTest extends TestCase
 
         $this->assertTrue($this->elasticSearch->isInstalled());
         $this->assertFalse($this->elasticSearch->isInstalled());
+    }
+
+    public function testAuthEnabledTrue()
+    {
+        $this->environmentMock->expects($this->exactly(2))
+            ->method('getRelationship')
+            ->with('elasticsearch')
+            ->willReturn(
+                [
+                    [
+                        'host' => '127.0.0.1',
+                        'port' => '1234',
+                        'username' => 'test',
+                        'password' => 'secret',
+                    ],
+                ]
+            );
+
+        $this->assertTrue($this->elasticSearch->isAuthEnabled());
+    }
+
+    public function testAuthEnabledFalse()
+    {
+        $this->environmentMock->expects($this->exactly(1))
+            ->method('getRelationship')
+            ->with('elasticsearch')
+            ->willReturn(
+                [
+                    [
+                        'host' => '127.0.0.1',
+                        'port' => '1234',
+                        'password' => '',
+                    ],
+                ]
+            );
+
+        $this->assertFalse($this->elasticSearch->isAuthEnabled());
     }
 }

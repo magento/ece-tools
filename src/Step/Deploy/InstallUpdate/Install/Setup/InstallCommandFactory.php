@@ -237,6 +237,17 @@ class InstallCommandFactory
             $options['--search-engine'] = $this->elasticSearch->getFullVersion();
             $options['--elasticsearch-host'] = $this->elasticSearch->getHost();
             $options['--elasticsearch-port'] = $this->elasticSearch->getPort();
+
+            $esConfig = $this->elasticSearch->getConfiguration();
+            if ($this->elasticSearch->isAuthEnabled()) {
+                $options['--elasticsearch-enable-auth'] = '1';
+                $options['--elasticsearch-username'] = $esConfig['username'];
+                $options['--elasticsearch-password'] = $esConfig['password'];
+            }
+
+            if (isset($esConfig['query']['index'])) {
+                $options['--elasticsearch-index-prefix'] = $esConfig['query']['index'];
+            }
         }
 
         /**

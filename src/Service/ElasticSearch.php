@@ -147,6 +147,35 @@ class ElasticSearch implements ServiceInterface
     }
 
     /**
+     * Checks if authentication is enabled: password and username exists in configuration
+     *
+     * @return bool
+     */
+    public function isAuthEnabled(): bool
+    {
+        return !empty($this->getConfiguration()['password']) && !empty($this->getConfiguration()['username']);
+    }
+
+    /**
+     * Returns additional options for request to elasticsearch
+     *
+     * @return array|array[]
+     */
+    private function getRequestOptions(): array
+    {
+        if (!$this->isAuthEnabled()) {
+            return [];
+        }
+
+        return [
+            'auth' => [
+                $this->getConfiguration()['username'],
+                $this->getConfiguration()['password']
+            ]
+        ];
+    }
+
+    /**
      * Return full version with engine name.
      *
      * @return string
@@ -200,7 +229,7 @@ class ElasticSearch implements ServiceInterface
      */
     private function call(string $endpoint): array
     {
-        $response = $this->clientFactory->create()->get($endpoint);
+        $response = $this->clientFactory->create()->get($endpoint, $this->getRequestOptions());
         $templates = $response->getBody()->getContents();
 
         return json_decode($templates, true);

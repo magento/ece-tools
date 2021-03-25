@@ -412,4 +412,46 @@ class InstallCommandFactoryTest extends TestCase
 
         $this->installCommandFactory->create();
     }
+
+    public function testExecuteWithESauthOptions(): void
+    {
+        $this->mockBaseConfig('', '', '', '', '', '');
+        $this->magentoVersionMock->method('isGreaterOrEqual')
+            ->willReturnMap([
+                ['2.4.0', true],
+                ['2.4.2', false]
+            ]);
+        $this->elasticSearchMock->expects($this->once())
+            ->method('isInstalled')
+            ->willReturn(true);
+        $this->elasticSearchMock->expects($this->once())
+            ->method('isAuthEnabled')
+            ->willReturn(true);
+        $this->elasticSearchMock->expects($this->once())
+            ->method('getFullVersion')
+            ->willReturn('7.7');
+        $this->elasticSearchMock->expects($this->once())
+            ->method('getHost')
+            ->willReturn('127.0.0.1');
+        $this->elasticSearchMock->expects($this->once())
+            ->method('getPort')
+            ->willReturn('1234');
+        $this->elasticSearchMock->expects($this->once())
+            ->method('getConfiguration')
+            ->willReturn([
+                'host' => '127.0.0.1',
+                'port' => '1234',
+                'username' => 'user',
+                'password' => 'secret',
+                'query' => [
+                    'index' => 'test'
+                ]
+            ]);
+
+        $command = $this->installCommandFactory->create();
+        self::assertContains("--elasticsearch-enable-auth='1'", $command);
+        self::assertContains("--elasticsearch-username='user'", $command);
+        self::assertContains("--elasticsearch-password='secret'", $command);
+        self::assertContains("--elasticsearch-index-prefix='test'", $command);
+    }
 }
