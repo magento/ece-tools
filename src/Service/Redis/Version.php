@@ -41,19 +41,20 @@ class Version
     {
         $version = '0';
 
-        //on integration environments
+        // On integration environments
         if (isset($redisConfig['type']) && strpos($redisConfig['type'], ':') !== false) {
             $version = explode(':', $redisConfig['type'])[1];
-        } elseif (isset($redisConfig['host']) && isset($redisConfig['port'])) {
-            //on dedicated environments
+        } elseif (isset($redisConfig['host'], $redisConfig['port'])) {
+            // On dedicated environments
+            $cmd = sprintf('redis-cli -p %s -h %s', (string)$redisConfig['port'], (string)$redisConfig['host']);
+
+            if (!empty($redisConfig['password'])) {
+                $cmd .= ' -a ' . $redisConfig['password'];
+            }
+
             try {
-                $process = $this->shell->execute(
-                    sprintf(
-                        'redis-cli -p %s -h %s info | grep redis_version',
-                        $redisConfig['port'],
-                        $redisConfig['host']
-                    )
-                );
+                $process = $this->shell->execute($cmd .' info | grep redis_version');
+
                 preg_match('/^(?:redis_version:)(\d+\.\d+)/', $process->getOutput(), $matches);
                 $version = $matches[1] ?? '0';
             } catch (ShellException $exception) {

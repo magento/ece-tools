@@ -136,6 +136,10 @@ class Config
             $defaultConfig['redis']['disable_locking'] = $disableLocking;
         }
 
+        if (!empty($redisConfig['password'])) {
+            $defaultConfig['redis']['password'] = (string)$redisConfig['password'];
+        }
+
         return $this->configMerger->merge($defaultConfig, $envSessionConfiguration);
     }
 

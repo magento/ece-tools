@@ -280,6 +280,7 @@ class ConfigTest extends TestCase
             'host' => 'host',
             'port' => 'port',
             'scheme' => 'redis',
+            'password' => 'password'
         ];
 
         $result = [
@@ -288,7 +289,8 @@ class ConfigTest extends TestCase
                 'host' => 'host',
                 'port' => 'port',
                 'database' => Config::REDIS_DATABASE_SESSION,
-                'disable_locking' => 0
+                'disable_locking' => 0,
+                'password' => 'password'
             ],
         ];
 

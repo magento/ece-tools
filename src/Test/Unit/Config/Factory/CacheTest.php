@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Config\Factory;
 
+use Magento\MagentoCloud\Config\ConfigException;
 use Magento\MagentoCloud\Config\ConfigMerger;
 use Magento\MagentoCloud\Config\Factory\Cache;
 use Magento\MagentoCloud\Config\StageConfigInterface;
@@ -17,7 +18,7 @@ use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
 /**
- * @inheritdoc
+ * @see Cache
  */
 class CacheTest extends TestCase
 {
@@ -41,7 +42,10 @@ class CacheTest extends TestCase
      */
     private $config;
 
-    protected function setUp()
+    /**
+     * @inheritDoc
+     */
+    protected function setUp(): void
     {
         $this->redisMock = $this->createMock(Redis::class);
         $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
@@ -56,9 +60,9 @@ class CacheTest extends TestCase
         );
     }
 
-    public function testGetWithValidEnvConfig()
+    public function testGetWithValidEnvConfig(): void
     {
-        $this->stageConfigMock->expects($this->exactly(3))
+        $this->stageConfigMock->expects(self::exactly(3))
             ->method('get')
             ->willReturnMap([
                 [
@@ -70,21 +74,21 @@ class CacheTest extends TestCase
                     false,
                 ],
             ]);
-        $this->redisMock->expects($this->never())
+        $this->redisMock->expects(self::never())
             ->method('getConfiguration');
 
-        $this->loggerMock->expects($this->never())
+        $this->loggerMock->expects(self::never())
             ->method('notice');
 
-        $this->assertEquals(
+        self::assertEquals(
             ['frontend' => ['cache_option' => 'value']],
             $this->config->get()
         );
     }
 
-    public function testGetWithValidEnvConfigWithEnabledRedisSlave()
+    public function testGetWithValidEnvConfigWithEnabledRedisSlave(): void
     {
-        $this->stageConfigMock->expects($this->exactly(3))
+        $this->stageConfigMock->expects(self::exactly(3))
             ->method('get')
             ->willReturnMap([
                 [
@@ -96,32 +100,32 @@ class CacheTest extends TestCase
                     true,
                 ],
             ]);
-        $this->redisMock->expects($this->never())
+        $this->redisMock->expects(self::never())
             ->method('getConfiguration');
 
-        $this->loggerMock->expects($this->once())
+        $this->loggerMock->expects(self::once())
             ->method('notice')
             ->with('The variables \'' . DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION . '\', \''
-                    . DeployInterface::VAR_CACHE_REDIS_BACKEND . '\' are ignored'
-                    . ' as you set your own cache connection in \'' . DeployInterface::VAR_CACHE_CONFIGURATION . '\'');
+                . DeployInterface::VAR_CACHE_REDIS_BACKEND . '\' are ignored'
+                . ' as you set your own cache connection in \'' . DeployInterface::VAR_CACHE_CONFIGURATION . '\'');
 
-        $this->assertEquals(
+        self::assertEquals(
             ['frontend' => ['cache_option' => 'value']],
             $this->config->get()
         );
     }
 
-    public function testGetWithoutRedisAndWithNotValidEnvConfig()
+    public function testGetWithoutRedisAndWithNotValidEnvConfig(): void
     {
-        $this->stageConfigMock->expects($this->exactly(2))
+        $this->stageConfigMock->expects(self::exactly(2))
             ->method('get')
             ->withConsecutive([DeployInterface::VAR_CACHE_CONFIGURATION], [DeployInterface::VAR_CACHE_REDIS_BACKEND])
             ->willReturnOnConsecutiveCalls([], '');
-        $this->redisMock->expects($this->once())
+        $this->redisMock->expects(self::once())
             ->method('getConfiguration')
             ->willReturn([]);
 
-        $this->assertEmpty($this->config->get());
+        self::assertEmpty($this->config->get());
     }
 
     /**
@@ -144,7 +148,7 @@ class CacheTest extends TestCase
         $callingGetStageConfig,
         $expectedResult
     ) {
-        $this->stageConfigMock->expects($this->exactly($callingGetStageConfig))
+        $this->stageConfigMock->expects(self::exactly($callingGetStageConfig))
             ->method('get')
             ->willReturnMap([
                 [
@@ -160,14 +164,14 @@ class CacheTest extends TestCase
                     $backendModel,
                 ],
             ]);
-        $this->redisMock->expects($this->once())
+        $this->redisMock->expects(self::once())
             ->method('getConfiguration')
             ->willReturn($masterConnection);
-        $this->redisMock->expects($this->once())
+        $this->redisMock->expects(self::once())
             ->method('getSlaveConfiguration')
             ->willReturn($slaveConnection);
 
-        $this->assertEquals(
+        self::assertEquals(
             $expectedResult,
             $this->config->get()
         );
@@ -186,16 +190,18 @@ class CacheTest extends TestCase
      * @return array
      * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
-    public function getFromRelationshipsDataProvider()
+    public function getFromRelationshipsDataProvider(): array
     {
         $redisConfiguration = [
             'host' => 'master.host',
             'port' => 'master.port',
+            'password' => 'master.password',
             'scheme' => 'redis',
         ];
         $redisSlaveConfiguration = [
             'host' => 'slave.host',
             'port' => 'slave.port',
+            'password' => 'slave.password',
             'scheme' => 'redis',
         ];
 
@@ -206,6 +212,7 @@ class CacheTest extends TestCase
                     'backend_options' => [
                         'server' => 'master.host',
                         'port' => 'master.port',
+                        'password' => 'master.password',
                         'database' => Cache::REDIS_DATABASE_DEFAULT,
                     ],
                 ],
@@ -213,6 +220,7 @@ class CacheTest extends TestCase
                     'backend' => 'Cm_Cache_Backend_Redis',
                     'backend_options' => [
                         'server' => 'master.host',
+                        'password' => 'master.password',
                         'port' => 'master.port',
                         'database' => Cache::REDIS_DATABASE_PAGE_CACHE,
                     ],
@@ -233,7 +241,7 @@ class CacheTest extends TestCase
                             'port' => 'master.port',
                             'database' => Cache::REDIS_DATABASE_DEFAULT,
                             'persistent' => 0,
-                            'password' => '',
+                            'password' => 'master.password',
                             'compress_data' => '1',
                         ],
                         'local_backend' => 'Cm_Cache_Backend_File',
@@ -255,6 +263,7 @@ class CacheTest extends TestCase
             'load_from_slave' => [
                 'server' => 'slave.host',
                 'port' => 'slave.port',
+                'password' => 'slave.password'
             ],
             'read_timeout' => 1,
             'retry_reads_on_master' => 1,
@@ -556,13 +565,15 @@ class CacheTest extends TestCase
      * @param array $envCacheConfiguration
      * @param array $redisConfiguration
      * @param array $expected
+     * @throws ConfigException
+     *
      * @dataProvider envConfigurationMergingDataProvider
      */
     public function testEnvConfigurationMerging(
         array $envCacheConfiguration,
         array $redisConfiguration,
         array $expected
-    ) {
+    ): void {
         $this->stageConfigMock
             ->method('get')
             ->willReturnMap([
@@ -579,14 +590,14 @@ class CacheTest extends TestCase
                     'Cm_Cache_Backend_Redis',
                 ],
             ]);
-        $this->redisMock->expects($this->any())
+        $this->redisMock->expects(self::any())
             ->method('getConfiguration')
             ->willReturn($redisConfiguration);
-        $this->redisMock->expects($this->any())
+        $this->redisMock->expects(self::any())
             ->method('getSlaveConfiguration')
             ->willReturn([]);
 
-        $this->assertEquals(
+        self::assertEquals(
             $expected,
             $this->config->get()
         );
@@ -601,6 +612,7 @@ class CacheTest extends TestCase
         $redisConfiguration = [
             'host' => 'master.host',
             'port' => 'master.port',
+            'password' => 'master.password',
             'scheme' => 'redis',
         ];
 
@@ -611,6 +623,7 @@ class CacheTest extends TestCase
                     'backend_options' => [
                         'server' => 'master.host',
                         'port' => 'master.port',
+                        'password' => 'master.password',
                         'database' => Cache::REDIS_DATABASE_DEFAULT,
                     ],
                 ],
@@ -619,6 +632,7 @@ class CacheTest extends TestCase
                     'backend_options' => [
                         'server' => 'master.host',
                         'port' => 'master.port',
+                        'password' => 'master.password',
                         'database' => Cache::REDIS_DATABASE_PAGE_CACHE,
                     ],
                 ],

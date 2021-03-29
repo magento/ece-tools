@@ -17,6 +17,9 @@ use CredisException;
 
 /**
  * Cleans Redis cache.
+ *
+ * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+ * @SuppressWarnings(PHPMD.NPathComplexity)
  */
 class CleanRedisCache implements StepInterface
 {
@@ -79,7 +82,8 @@ class CleanRedisCache implements StepInterface
             $client = $this->credisFactory->create(
                 isset($redisConfig['server']) ? (string)$redisConfig['server'] : '127.0.0.1',
                 isset($redisConfig['port']) ? (int)$redisConfig['port'] : 6379,
-                isset($redisConfig['database']) ? (int)$redisConfig['database'] : 0
+                isset($redisConfig['database']) ? (int)$redisConfig['database'] : 0,
+                !empty($redisConfig['password']) ? (string)$redisConfig['password'] : null
             );
 
             try {

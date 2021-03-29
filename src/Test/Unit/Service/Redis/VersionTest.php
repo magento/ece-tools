@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Service\Redis;
 
+use ReflectionException;
 use Magento\MagentoCloud\Service\Redis\Version;
 use Magento\MagentoCloud\Service\ServiceException;
 use Magento\MagentoCloud\Shell\ProcessInterface;
@@ -55,6 +56,7 @@ class VersionTest extends TestCase
 
     /**
      * Data provider for testGetVersionFromConfig
+     *
      * @return array
      */
     public function getVersionFromConfigDataProvider(): array
@@ -112,6 +114,7 @@ class VersionTest extends TestCase
 
     /**
      * Data provider for testGetVersionFromCli
+     *
      * @return array
      */
     public function getVersionFromCliDataProvider(): array
@@ -139,5 +142,51 @@ class VersionTest extends TestCase
             'host' => '127.0.0.1',
             'port' => '3306',
         ]);
+    }
+
+    /**
+     * @return array
+     */
+    public function getVersionWithPasswordDataProvider(): array
+    {
+        return [
+            ['redis_version:5.3.6', '5.3'],
+            ['redis_version:1.2.3.4.5', '1.2'],
+            ['redis_version:abc', '0'],
+            ['redis:5.3.6', '0'],
+            ['', '0'],
+            ['error', '0'],
+        ];
+    }
+
+    /**
+     * @param string $version
+     * @param string $expectedResult
+     * @throws ReflectionException
+     * @throws ServiceException
+     *
+     * @dataProvider getVersionWithPasswordDataProvider
+     */
+    public function testGetVersionWithPassword(string $version, string $expectedResult): void
+    {
+        $processMock = $this->getMockForAbstractClass(ProcessInterface::class);
+        $processMock->expects(self::once())
+            ->method('getOutput')
+            ->willReturn($version);
+        $this->shellMock->expects(self::once())
+            ->method('execute')
+            ->with('redis-cli -p 3306 -h 127.0.0.1 -a test info | grep redis_version')
+            ->willReturn($processMock);
+
+        self::assertEquals(
+            $expectedResult,
+            $this->version->getVersion(
+                [
+                    'host' => '127.0.0.1',
+                    'port' => '3306',
+                    'password' => 'test'
+                ]
+            )
+        );
     }
 }

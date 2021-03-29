@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Config\Factory;
 
+use Magento\MagentoCloud\Config\ConfigException;
 use Magento\MagentoCloud\Config\ConfigMerger;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Service\Redis;
@@ -20,18 +21,18 @@ class Cache
     /**
      * Redis database to store default cache data
      */
-    const REDIS_DATABASE_DEFAULT = 1;
+    public const REDIS_DATABASE_DEFAULT = 1;
 
     /**
      * Redis database to store page cache data
      */
-    const REDIS_DATABASE_PAGE_CACHE = 2;
+    public const REDIS_DATABASE_PAGE_CACHE = 2;
 
-    const REDIS_BACKEND_CM_CACHE = 'Cm_Cache_Backend_Redis';
-    const REDIS_BACKEND_REDIS_CACHE = '\Magento\Framework\Cache\Backend\Redis';
-    const REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE = '\Magento\Framework\Cache\Backend\RemoteSynchronizedCache';
+    public const REDIS_BACKEND_CM_CACHE = 'Cm_Cache_Backend_Redis';
+    public const REDIS_BACKEND_REDIS_CACHE = '\Magento\Framework\Cache\Backend\Redis';
+    public const REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE = '\Magento\Framework\Cache\Backend\RemoteSynchronizedCache';
 
-    const AVAILABLE_REDIS_BACKEND = [
+    public const AVAILABLE_REDIS_BACKEND = [
         self::REDIS_BACKEND_CM_CACHE,
         self::REDIS_BACKEND_REDIS_CACHE,
         self::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE
@@ -83,7 +84,7 @@ class Cache
      * Returns an empty array in other case.
      *
      * @return array
-     * @throws \Magento\MagentoCloud\Config\ConfigException
+     * @throws ConfigException
      */
     public function get(): array
     {
@@ -162,7 +163,7 @@ class Cache
      * @param array $envCacheConfiguration
      * @param array $redisConfig
      * @return array
-     * @throws \Magento\MagentoCloud\Config\ConfigException
+     * @throws ConfigException
      */
     private function getSlaveConnection(array $envCacheConfiguration, array $redisConfig): array
     {
@@ -176,6 +177,11 @@ class Cache
                 $config['load_from_slave']['port'] = $redisSlaveConfig['port'] ?? '';
                 $config['read_timeout'] = 1;
                 $config['retry_reads_on_master'] = 1;
+
+                if (!empty($redisSlaveConfig['password'])) {
+                    $config['load_from_slave']['password'] = $redisSlaveConfig['password'];
+                }
+
                 $this->logger->info('Set Redis slave connection');
             } else {
                 $this->logger->notice(
@@ -211,7 +217,7 @@ class Cache
      * @param array $envCacheConfig
      * @param array $redisConfig
      * @return bool
-     * @throws \Magento\MagentoCloud\Config\ConfigException
+     * @throws ConfigException
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      */
     private function isConfigurationCompatibleWithSlaveConnection(
@@ -253,13 +259,19 @@ class Cache
      */
     private function getUnsyncedConfigStructure(string $envCacheBackendModel, array $redisConfig): array
     {
-        return [
+        $config = [
             'backend' => $envCacheBackendModel,
             'backend_options' => [
                 'server' => $redisConfig['host'],
                 'port' => $redisConfig['port'],
             ]
         ];
+
+        if (!empty($redisConfig['password'])) {
+            $config['backend_options']['password'] = (string)$redisConfig['password'];
+        }
+
+        return $config;
     }
 
     /**
@@ -271,7 +283,7 @@ class Cache
      */
     private function getSynchronizedConfigStructure(string $envCacheBackendModel, array $redisConfig): array
     {
-        return [
+        $config = [
             'backend' => $envCacheBackendModel,
             'backend_options' => [
                 'remote_backend' => '\Magento\Framework\Cache\Backend\Redis',
@@ -292,17 +304,24 @@ class Cache
                 'write_control' => false,
             ]
         ];
+
+        if (!empty($redisConfig['password'])) {
+            $config['backend_options']['remote_backend_options']['password'] = (string)$redisConfig['password'];
+        }
+
+        return $config;
     }
 
     /**
      * Checks that config contains synchronized cache model and need to use synchronized config structure.
      *
      * @return bool
-     * @throws \Magento\MagentoCloud\Config\ConfigException
+     * @throws ConfigException
      */
     private function isSynchronizedConfigStructure(): bool
     {
         $model = (string)$this->stageConfig->get(DeployInterface::VAR_CACHE_REDIS_BACKEND);
+
         return $model === self::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE;
     }
 }
