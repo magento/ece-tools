@@ -77,6 +77,7 @@
                 <item name="urls" xsi:type="object" priority="800">Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\Urls</item>
                 <item name="document-root" xsi:type="object" priority="900">Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\DocumentRoot</item>
                 <item name="lock" xsi:type="object" priority="1000">Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\Lock</item>
+                <item name="remote-storage" xsi:type="object" priority="1100">Magento\MagentoCloud\Step\Deploy\RemoteStorage</item>
                 <!-- Config update end -->
                 <item name="config-import" xsi:type="object" priority="1100">Magento\MagentoCloud\Step\Deploy\InstallUpdate\Install\ConfigImport</item>
                 <item name="split-db" xsi:type="object" priority="1150">Magento\MagentoCloud\Step\Deploy\SplitDbConnection</item>
@@ -93,6 +94,7 @@
                 <item name="urls" xsi:type="object" priority="700">Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\Urls</item>
                 <item name="document-root" xsi:type="object" priority="800">Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\DocumentRoot</item>
                 <item name="lock" xsi:type="object" priority="900">Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\Lock</item>
+                <item name="remote-storage" xsi:type="object" priority="1000">Magento\MagentoCloud\Step\Deploy\RemoteStorage</item>
                 <!-- Config update end -->
                 <item name="set-admin-url" xsi:type="object" priority="1000">Magento\MagentoCloud\Step\Deploy\InstallUpdate\Update\SetAdminUrl</item>
                 <item name="setup" xsi:type="object" priority="1100">Magento\MagentoCloud\Step\Deploy\InstallUpdate\Update\Setup</item>
@@ -127,7 +129,6 @@
             </argument>
         </arguments>
     </step>
-    <step name="remote-storage" type="Magento\MagentoCloud\Step\Deploy\RemoteStorage" priority="1250"/>
     <step name="disable-maintenance-mode" type="Magento\MagentoCloud\Step\DisableMaintenanceMode" priority="1300"/>
     <onFail>
         <action name="create-deploy-failed-flag" type="Magento\MagentoCloud\OnFail\Action\CreateDeployFailedFlag" priority="100"/>
