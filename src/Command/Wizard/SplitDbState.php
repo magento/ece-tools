@@ -22,6 +22,7 @@ use Symfony\Component\Console\Output\OutputInterface;
  * Verifies whether DB was split or not
  *
  * @api
+ * @deprecated started from Magento 2.4.2 and will be removed in 2.5.0
  */
 class SplitDbState extends Command
 {

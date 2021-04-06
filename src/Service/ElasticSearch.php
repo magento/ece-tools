@@ -159,7 +159,7 @@ class ElasticSearch implements ServiceInterface
     /**
      * Returns additional options for request to elasticsearch
      *
-     * @return array|array[]
+     * @return array
      */
     private function getRequestOptions(): array
     {

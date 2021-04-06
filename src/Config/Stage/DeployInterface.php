@@ -48,21 +48,29 @@ interface DeployInterface extends StageConfigInterface
 
     /**
      * The variable responsible to use split database.
+     *
+     * @deprecated started from Magento 2.4.2 and will be removed in 2.5.0
      */
     const VAR_SPLIT_DB = 'SPLIT_DB';
 
     /**
      * The value of the variable SPLIT_DB
+     *
+     * @deprecated started from Magento 2.4.2 and will be removed in 2.5.0
      */
     const SPLIT_DB_VALUE_QUOTE = 'quote';
 
     /**
      * The value of the variable SPLIT_DB
+     *
+     * @deprecated started from Magento 2.4.2 and will be removed in 2.5.0
      */
     const SPLIT_DB_VALUE_SALES = 'sales';
 
     /**
      * Values for variable SPLIT_DB
+     *
+     * @deprecated started from Magento 2.4.2 and will be removed in 2.5.0
      */
     const SPLIT_DB_VALUES = [
         self::SPLIT_DB_VALUE_QUOTE,

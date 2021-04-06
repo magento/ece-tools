@@ -1,3 +1,4 @@
+# Critical errors
 !php/const Magento\MagentoCloud\App\Error::BUILD_ENV_PHP_IS_NOT_WRITABLE:
     title: 'Cannot write to the `./app/etc/env.php` file'
     suggestion: 'Deployment script cannot make required changes to the `/app/etc/env.php` file. Check your filesystem permissions.'
@@ -343,6 +344,12 @@
     suggestion: 'Check the SEARCH_CONFIGURATION variable for the `engine` option. If it is configured, remove the option, or set the value to "elasticsearch".'
     stage: deploy
     type: critical
+!php/const Magento\MagentoCloud\App\Error::DEPLOY_REMOVED_SPLIT_DB:
+    step: validate-config
+    title: 'Split Database was removed starting from Magento 2.5.0.'
+    suggestion: 'If you use split database you have to revert to or migrate to a single database or use an alternative approach.'
+    stage: deploy
+    type: critical
 !php/const Magento\MagentoCloud\App\Error::PD_DEPLOY_IS_FAILED:
     step: is-deploy-failed
     title: 'Deploy stage failed'
@@ -412,6 +419,7 @@
     suggestion: ''
     stage: general
     type: critical
+# Warning errors
 !php/const Magento\MagentoCloud\App\Error::WARN_CONFIG_PHP_NOT_EXISTS:
     title: 'File app/etc/config.php does not exist'
     stage: build
@@ -546,6 +554,12 @@
     stage: deploy
     step: validate-config
     type: warning
+!php/const Magento\MagentoCloud\App\Error::WARN_DEPRECATED_SPLIT_DB:
+    title: 'Split Database was deprecated in the Magento 2.4.2 and will be removed in 2.5.'
+    stage: deploy
+    suggestion: 'If you use split database you should start planning to revert to or migrate to a single database or use an alternative approach.'
+    step: validate-config
+    type: warning
 !php/const Magento\MagentoCloud\App\Error::WARN_ENV_PHP_MISSED:
     title: 'Magento installation completed, but the `app/etc/env.php` configuration file was missing or empty.'
     suggestion: 'Required data will be restored from environment configurations and from .magento.env.yaml file.'
@@ -588,6 +602,12 @@
     stage: deploy
     suggestion: 'Remove the MAGE_MODE environment variable, or change its value to "production". Magento Cloud supports "production" mode only.'
     step: 'validate-config:mage-mode-variable'
+    type: warning
+!php/const Magento\MagentoCloud\App\Error::WARN_REMOTE_STORAGE_CANNOT_BE_ENABLED:
+    title: 'Remote storage could not be enabled.'
+    stage: deploy
+    suggestion: 'Verify remote storage credentials.'
+    step: remote-storage
     type: warning
 !php/const Magento\MagentoCloud\App\Error::WARN_DEBUG_LOG_ENABLED:
     title: 'Debug logging is enabled in Magento'
