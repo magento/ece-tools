@@ -156,15 +156,32 @@ class Cache implements StepInterface
      */
     private function testRedisConnection(array $backendOptions): bool
     {
-        if (!isset($backendOptions['server'], $backendOptions['port'])) {
-            throw new StepException('Missing required Redis configuration!', Error::DEPLOY_WRONG_CACHE_CONFIGURATION);
+        if (empty($backendOptions['server'])) {
+            throw new StepException(
+                'Missing required Redis configuration \'server\'!',
+                Error::DEPLOY_WRONG_CACHE_CONFIGURATION
+            );
+        }
+        $address = $backendOptions['server'];
+        if (!isset($backendOptions['port'])) {
+            preg_match('#^(.{1,4}://)?([^:]+)(:([0-9]+))?#', $address, $matches);
+            if (!isset($matches[4])) {
+                throw new StepException(
+                    'Missing required Redis configuration \'port\'!',
+                    Error::DEPLOY_WRONG_CACHE_CONFIGURATION
+                );
+            }
+            $address = $matches[2];
+            $port = $matches[4];
+        } else {
+            $port = $backendOptions['port'];
         }
 
         $sock = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
         $connected = @socket_connect(
             $sock,
-            (string)$backendOptions['server'],
-            (int)$backendOptions['port']
+            (string)$address,
+            (int)$port
         );
         socket_close($sock);
 
