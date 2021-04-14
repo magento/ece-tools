@@ -17,6 +17,13 @@ use Magento\MagentoCloud\Package\UndefinedPackageException;
 class Validator
 {
     /**
+     * Supported version constraints of Redis services
+     */
+    private const REDIS_SUPPORT_VERSIONS = [
+        '*' => '~3.2.0 || ~4.0.0 || ~5.0.0 || ~6.0.0',
+    ];
+
+    /**
      * Supported version constraints of services for every Magento version.
      * Magento version constraint is a key in every element of service array
      * and value of its element is the service version constraint
@@ -52,9 +59,8 @@ class Validator
             '>=2.2.0 <2.3.3' => '^4.0 || ^5.0',
             '>=2.3.3' => '^4.0 || ^5.0 || ^6.2',
         ],
-        ServiceInterface::NAME_REDIS => [
-            '*' => '~3.2.0 || ~4.0.0 || ~5.0.0 || ~6.0.0',
-        ],
+        ServiceInterface::NAME_REDIS => self::REDIS_SUPPORT_VERSIONS,
+        ServiceInterface::NAME_REDIS_SESSION => self::REDIS_SUPPORT_VERSIONS,
         ServiceInterface::NAME_ELASTICSEARCH => [
             '<2.2.0' => '~1.7.0 || ~2.4.0',
             '>=2.2.0 <2.2.8 || 2.3.0' => '~1.7.0 || ~2.4.0 || ~5.2.0',

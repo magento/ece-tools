@@ -8,20 +8,20 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit\Service;
 
 use Magento\MagentoCloud\Config\Environment;
-use Magento\MagentoCloud\Service\Redis;
 use Magento\MagentoCloud\Service\Redis\Version;
+use Magento\MagentoCloud\Service\RedisSession;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @inheritdoc
+ * @inheritDoc
  */
-class RedisTest extends TestCase
+class RedisSessionTest extends TestCase
 {
     /**
-     * @var Redis
+     * @var RedisSession
      */
-    private $redis;
+    private $redisSession;
 
     /**
      * @var Environment|MockObject
@@ -34,14 +34,14 @@ class RedisTest extends TestCase
     private $versionRetrieverMock;
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
-    public function setUp()
+    public function setUp(): void
     {
         $this->environmentMock = $this->createMock(Environment::class);
         $this->versionRetrieverMock = $this->createMock(Version::class);
 
-        $this->redis = new Redis(
+        $this->redisSession = new RedisSession(
             $this->environmentMock,
             $this->versionRetrieverMock
         );
@@ -51,7 +51,7 @@ class RedisTest extends TestCase
     {
         $this->environmentMock->expects($this->once())
             ->method('getRelationship')
-            ->with(Redis::RELATIONSHIP_KEY)
+            ->with(RedisSession::RELATIONSHIP_SESSION_KEY)
             ->willReturn([
                 [
                     'host' => '127.0.0.1',
@@ -64,28 +64,7 @@ class RedisTest extends TestCase
                 'host' => '127.0.0.1',
                 'port' => '3306',
             ],
-            $this->redis->getConfiguration()
-        );
-    }
-
-    public function testGetSlaveConfiguration(): void
-    {
-        $this->environmentMock->expects($this->once())
-            ->method('getRelationship')
-            ->with(Redis::RELATIONSHIP_SLAVE_KEY)
-            ->willReturn([
-                [
-                    'host' => '127.0.0.1',
-                    'port' => '3307',
-                ]
-            ]);
-
-        $this->assertSame(
-            [
-                'host' => '127.0.0.1',
-                'port' => '3307',
-            ],
-            $this->redis->getSlaveConfiguration()
+            $this->redisSession->getConfiguration()
         );
     }
 
@@ -104,7 +83,7 @@ class RedisTest extends TestCase
             ->willReturn($version);
         $this->assertSame(
             $version,
-            $this->redis->getVersion()
+            $this->redisSession->getVersion()
         );
     }
 }

@@ -18,6 +18,7 @@ interface ServiceInterface
     const NAME_DB_AURORA = 'aurora';
     const NAME_NGINX = 'nginx';
     const NAME_REDIS = 'redis';
+    const NAME_REDIS_SESSION = 'redis-session';
     const NAME_ELASTICSEARCH = 'elasticsearch';
     const NAME_RABBITMQ = 'rabbitmq';
     const NAME_NODE = 'node';

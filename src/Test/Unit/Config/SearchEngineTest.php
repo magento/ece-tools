@@ -14,6 +14,7 @@ use Magento\MagentoCloud\Config\SearchEngine\ElasticSuite;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Service\ElasticSearch;
+use Magento\MagentoCloud\Service\ServiceException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -112,13 +113,16 @@ class SearchEngineTest extends TestCase
      * @param array $customSearchConfig
      * @param array $esServiceConfig
      * @param array $expected
+     * @param bool $authEnabled
      *
+     * @throws ServiceException
      * @dataProvider testGetWithElasticSearchDataProvider
      */
     public function testGetWithElasticSearch(
         array $customSearchConfig,
         array $esServiceConfig,
-        array $expected
+        array $expected,
+        bool $authEnabled = false
     ): void {
         $this->stageConfigMock->expects($this->once())
             ->method('get')
@@ -127,6 +131,9 @@ class SearchEngineTest extends TestCase
         $this->elasticSearchMock->expects($this->once())
             ->method('getConfiguration')
             ->willReturn($esServiceConfig);
+        $this->elasticSearchMock->expects($this->once())
+            ->method('isAuthEnabled')
+            ->willReturn($authEnabled);
 
         $expected = ['system' => ['default' => ['catalog' => ['search' => $expected]]]];
 
@@ -218,6 +225,24 @@ class SearchEngineTest extends TestCase
                     'elasticsearch_server_hostname' => 'localhost',
                     'elasticsearch_server_port' => 1234,
                 ],
+            ],
+            [
+                'customSearchConfig' => [],
+                'esServiceConfig' => [
+                    'host' => 'localhost',
+                    'port' => 1234,
+                    'password' => 'secret',
+                    'username' => 'user',
+                ],
+                'expected' => [
+                    'engine' => 'elasticsearch',
+                    'elasticsearch_server_hostname' => 'localhost',
+                    'elasticsearch_server_port' => 1234,
+                    'elasticsearch_enable_auth' => 1,
+                    'elasticsearch_username' => 'user',
+                    'elasticsearch_password' => 'secret',
+                ],
+                true
             ],
             $generateDataForVersionChecking('elasticsearch'),
             $generateDataForVersionChecking('elasticsearch'),

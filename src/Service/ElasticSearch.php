@@ -94,13 +94,17 @@ class ElasticSearch implements ServiceInterface
 
         if ($this->version === null) {
             try {
-                $esConfiguration = $this->call(sprintf(
-                    '%s:%s',
-                    $this->getHost(),
-                    $this->getPort()
-                ));
-
-                $this->version = $esConfiguration['version']['number'];
+                $config = $this->getConfiguration();
+                if (isset($config['type']) && strpos($config['type'], ':') !== false) {
+                    $this->version = explode(':', $config['type'])[1];
+                } else {
+                    $esConfiguration = $this->call(sprintf(
+                        '%s:%s',
+                        $this->getHost(),
+                        $this->getPort()
+                    ));
+                    $this->version = $esConfiguration['version']['number'];
+                }
             } catch (Throwable $exception) {
                 throw new ServiceException(
                     'Can\'t get version of elasticsearch: ' . $exception->getMessage(),
@@ -140,6 +144,35 @@ class ElasticSearch implements ServiceInterface
         }
 
         return (string)$this->getConfiguration()['port'];
+    }
+
+    /**
+     * Checks if authentication is enabled: password and username exists in configuration
+     *
+     * @return bool
+     */
+    public function isAuthEnabled(): bool
+    {
+        return !empty($this->getConfiguration()['password']) && !empty($this->getConfiguration()['username']);
+    }
+
+    /**
+     * Returns additional options for request to elasticsearch
+     *
+     * @return array
+     */
+    private function getRequestOptions(): array
+    {
+        if (!$this->isAuthEnabled()) {
+            return [];
+        }
+
+        return [
+            'auth' => [
+                $this->getConfiguration()['username'],
+                $this->getConfiguration()['password']
+            ]
+        ];
     }
 
     /**
@@ -196,7 +229,7 @@ class ElasticSearch implements ServiceInterface
      */
     private function call(string $endpoint): array
     {
-        $response = $this->clientFactory->create()->get($endpoint);
+        $response = $this->clientFactory->create()->get($endpoint, $this->getRequestOptions());
         $templates = $response->getBody()->getContents();
 
         return json_decode($templates, true);

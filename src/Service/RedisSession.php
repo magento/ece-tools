@@ -11,12 +11,11 @@ use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Service\Redis\Version;
 
 /**
- * Returns Redis service configurations.
+ * Returns Redis service configurations for sessions.
  */
-class Redis implements ServiceInterface
+class RedisSession implements ServiceInterface
 {
-    const RELATIONSHIP_KEY = 'redis';
-    const RELATIONSHIP_SLAVE_KEY = 'redis-slave';
+    const RELATIONSHIP_SESSION_KEY = 'redis-session';
 
     /**
      * @var Environment
@@ -50,17 +49,7 @@ class Redis implements ServiceInterface
      */
     public function getConfiguration(): array
     {
-        return $this->environment->getRelationship(self::RELATIONSHIP_KEY)[0] ?? [];
-    }
-
-    /**
-     * Returns service configuration for slave.
-     *
-     * @return array
-     */
-    public function getSlaveConfiguration(): array
-    {
-        return $this->environment->getRelationship(self::RELATIONSHIP_SLAVE_KEY)[0] ?? [];
+        return $this->environment->getRelationship(self::RELATIONSHIP_SESSION_KEY)[0] ?? [];
     }
 
     /**

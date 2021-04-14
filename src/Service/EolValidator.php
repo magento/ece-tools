@@ -87,6 +87,7 @@ class EolValidator
             ServiceInterface::NAME_ELASTICSEARCH,
             ServiceInterface::NAME_RABBITMQ,
             ServiceInterface::NAME_REDIS,
+            ServiceInterface::NAME_REDIS_SESSION,
             $this->databaseType->getServiceName()
         ];
 
@@ -170,14 +171,24 @@ class EolValidator
 
     /**
      * Perform service name conversions.
-     * Explicitly resetting 'mysql' to 'mariadb' for MariaDB validation; getting the version from
-     * relationship returns mysql:<version>.
+     * Explicitly resetting 'mysql' to 'mariadb' for MariaDB validation
+     * and 'redis-session' to 'redis' for Redis validation; getting the version
+     * from relationship returns mysql:<version>.
      *
      * @param string $serviceName
      * @return string
      */
     private function getConvertedServiceName(string $serviceName) : string
     {
-        return $serviceName == 'mysql' ? 'mariadb' : $serviceName;
+        switch ($serviceName) {
+            case ServiceInterface::NAME_DB_MYSQL:
+                $serviceName = ServiceInterface::NAME_DB_MARIA;
+                break;
+            case ServiceInterface::NAME_REDIS_SESSION:
+                $serviceName = ServiceInterface::NAME_REDIS;
+                break;
+        }
+
+        return $serviceName;
     }
 }

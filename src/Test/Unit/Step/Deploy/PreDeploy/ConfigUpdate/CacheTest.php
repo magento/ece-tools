@@ -107,9 +107,13 @@ class CacheTest extends TestCase
 
     /**
      * @param array $config
+     * @param bool $isGreaterOrEqual
+     * @param string $address
+     * @param int $port
+     * @throws StepException
      * @dataProvider executeDataProvider
      */
-    public function testExecute(array $config, bool $isGreaterOrEqual)
+    public function testExecute(array $config, bool $isGreaterOrEqual, $address, $port)
     {
         $this->magentoVersion->expects($this->any())
             ->method('isGreaterOrEqual')
@@ -128,10 +132,15 @@ class CacheTest extends TestCase
             ->method('info')
             ->with('Updating cache configuration.');
 
-        $this->socketCreateMock->expects($this->once());
+        $sock = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
+        $this->socketCreateMock->expects($this->once())
+            ->willReturn($sock);
         $this->socketConnectMock->expects($this->once())
+            ->with($sock, $address, $port)
             ->willReturn(true);
-        $this->socketCloseMock->expects($this->once());
+        $this->socketCloseMock->expects($this->once())
+            ->with($sock);
+        socket_close($sock);
 
         $this->step->execute();
     }
@@ -152,6 +161,8 @@ class CacheTest extends TestCase
                     ],
                 ],
                 'isGreaterOrEqual' => false,
+                'address' => 'localhost',
+                'port' => 6370
             ],
             'backend model with remote_backend_options' => [
                 'config' => [
@@ -168,6 +179,42 @@ class CacheTest extends TestCase
                     ],
                 ],
                 'isGreaterOrEqual' => true,
+                'address' => 'localhost',
+                'port' => 6370
+            ],
+            'Server contains port data' => [
+                'config' => [
+                    'frontend' => [
+                        'frontName' => [
+                            'backend' => CacheFactory::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE,
+                            'backend_options' => [
+                                'remote_backend_options' => [
+                                    'server' => '127.0.0.1:6371',
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+                'isGreaterOrEqual' => true,
+                'address' => '127.0.0.1',
+                'port' => 6371
+            ],
+            'Server contains protocol and port data' => [
+                'config' => [
+                    'frontend' => [
+                        'frontName' => [
+                            'backend' => CacheFactory::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE,
+                            'backend_options' => [
+                                'remote_backend_options' => [
+                                    'server' => 'tcp://localhost:6379',
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+                'isGreaterOrEqual' => true,
+                'address' => 'localhost',
+                'port' => 6379
             ],
         ];
     }
@@ -300,13 +347,17 @@ class CacheTest extends TestCase
     }
 
     /**
+     * @param $options
+     * @param $errorMessage
      * @throws StepException
+     *
+     * @dataProvider dataProviderExecuteWithWrongConfiguration
      */
-    public function testExecuteWithWrongConfiguration()
+    public function testExecuteWithWrongConfiguration($options, $errorMessage)
     {
         $this->expectExceptionCode(Error::DEPLOY_WRONG_CACHE_CONFIGURATION);
         $this->expectException(StepException::class);
-        $this->expectExceptionMessage('Missing required Redis configuration!');
+        $this->expectExceptionMessage($errorMessage);
 
         $this->configReaderMock->expects($this->once())
             ->method('read')
@@ -316,11 +367,29 @@ class CacheTest extends TestCase
             ->willReturn([
                 'frontend' => ['frontName' => [
                     'backend' => 'Cm_Cache_Backend_Redis',
-                    'backend_options' => ['server' => 'redis.server'],
+                    'backend_options' => $options,
                 ]],
             ]);
 
         $this->step->execute();
+    }
+
+    public function dataProviderExecuteWithWrongConfiguration()
+    {
+        return [
+            [
+                ['server' => 'redis.server'],
+                'Missing required Redis configuration \'port\'!'
+            ],
+            [
+                ['server' => '', 'port' => '6379'],
+                'Missing required Redis configuration \'server\'!'
+            ],
+            [
+                ['port' => '6379'],
+                'Missing required Redis configuration \'server\'!'
+            ],
+        ];
     }
 
     /**

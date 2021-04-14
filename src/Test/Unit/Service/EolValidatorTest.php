@@ -167,15 +167,20 @@ class EolValidatorTest extends TestCase
         $service5 = $this->createMock(ServiceInterface::class);
         $service5->expects($this->once())
             ->method('getVersion')
+            ->willReturn('3.2');
+        $service6 = $this->createMock(ServiceInterface::class);
+        $service6->expects($this->once())
+            ->method('getVersion')
             ->willReturn('10.2');
 
-        $this->serviceFactoryMock->expects($this->exactly(5))
+        $this->serviceFactoryMock->expects($this->exactly(6))
             ->method('create')
             ->withConsecutive(
                 ['php'],
                 ['elasticsearch'],
                 ['rabbitmq'],
                 ['redis'],
+                ['redis-session'],
                 ['mariadb']
             )
             ->willReturnOnConsecutiveCalls(
@@ -183,7 +188,8 @@ class EolValidatorTest extends TestCase
                 $service2,
                 $service3,
                 $service4,
-                $service5
+                $service5,
+                $service6
             );
 
         $this->assertEquals(

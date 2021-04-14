@@ -28,6 +28,7 @@ use Psr\Log\LoggerInterface;
  * {@inheritDoc}
  *
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
+ * @deprecated started from Magento 2.4.2 and will be removed in 2.5.0
  */
 class SplitDbConnection implements StepInterface
 {

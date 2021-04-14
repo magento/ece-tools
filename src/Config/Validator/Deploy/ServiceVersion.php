@@ -80,6 +80,7 @@ class ServiceVersion implements ValidatorInterface
             $services = [
                 ServiceInterface::NAME_RABBITMQ,
                 ServiceInterface::NAME_REDIS,
+                ServiceInterface::NAME_REDIS_SESSION,
                 ServiceInterface::NAME_ELASTICSEARCH,
                 $this->databaseType->getServiceName()
             ];

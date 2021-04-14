@@ -87,7 +87,8 @@ class CleanRedisCacheTest extends TestCase
                         'backend' => 'Cm_Cache_Backend_Redis',
                         'backend_options' => [
                             'server' => 'localhost',
-                            'database' => 2
+                            'database' => 2,
+                            'password' => 'password'
                         ]
                     ],
                     'some_type1' => [
@@ -125,7 +126,7 @@ class CleanRedisCacheTest extends TestCase
             ->withConsecutive(
                 ['localhost', '1234', 0],
                 ['127.0.0.1', 1234, 1],
-                ['localhost', 6379, 2],
+                ['localhost', 6379, 2, 'password'],
                 ['localhost', 1234, 0],
                 ['127.0.0.1', 6379, 0]
             )->willReturn($credisClient);

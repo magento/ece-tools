@@ -37,7 +37,7 @@ class ElasticsearchIntegrityTest extends TestCase
     private $resultFactoryMock;
 
     /**
-     * @var ElasticSearch
+     * @var ElasticSearch|MockObject
      */
     private $elasticSearchMock;
 

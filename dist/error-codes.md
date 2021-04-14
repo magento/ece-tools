@@ -75,6 +75,7 @@ Critical errors indicate a problem with the Magento Commerce Cloud project confi
 | 133 | validate-config | Remove Magento Braintree module configuration which is no longer supported in Magento 2.4 and later versions. | Support for the Braintree module is no longer included with Magento 2.4.0 and later. Remove the CONFIG__STORES__DEFAULT__PAYMENT__BRAINTREE__CHANNEL variable from the variables section of the .magento.app.yaml file. For Braintree support, use an official Braintree Payments extension from the Magento Marketplace instead. |
 | 134 | validate-config | Magento 2.4.0 requires Elasticsearch service to be installed | Install Elasticsearch service |
 | 135 | validate-config | The search engine must be set to Elasticsearch for Magento >= 2.4.0 | Check the SEARCH_CONFIGURATION variable for the `engine` option. If it is configured, remove the option, or set the value to "elasticsearch". |
+| 136 | validate-config | Split Database was removed starting from Magento 2.5.0. | If you use split database you have to revert to or migrate to a single database or use an alternative approach. |
 
 ### Post-deploy stage
 
@@ -142,6 +143,7 @@ Warning errors indicate a problem with the Magento Commerce Cloud project config
 | 2017 | validate-config | The current configuration is not compatible with this version of Magento |  |
 | 2018 | validate-config | Some services have passed EOL |  |
 | 2019 | validate-config | The MySQL search configuration option is deprecated | Use Elasticsearch instead. |
+| 2029 | validate-config | Split Database was deprecated in the Magento 2.4.2 and will be removed in 2.5. | If you use split database you should start planning to revert to or migrate to a single database or use an alternative approach. |
 | 2020 | install-update | Magento installation completed, but the `app/etc/env.php` configuration file was missing or empty. | Required data will be restored from environment configurations and from .magento.env.yaml file. |
 | 2021 | install-update:db-connection | For split databases used custom connections |  |
 | 2022 | install-update:db-connection | You have changed to a database configuration that is not compatible with the slave connection. |  |
@@ -150,7 +152,7 @@ Warning errors indicate a problem with the Magento Commerce Cloud project config
 | 2025 | install-update:split-db | Slave connection not set. |  |
 | 2026 | pre-deploy:restore-writable-dirs | Failed to restore some data generated during the build phase to the mounted directories | Check the `cloud.log` for more information. |
 | 2027 | validate-config:mage-mode-variable | Mode value for MAGE_MODE environment variable not supported | Remove the MAGE_MODE environment variable, or change its value to "production". Magento Cloud supports "production" mode only. |
-| 2028 | remote-storage | Remote storage could not be enabled. | Verify remote storage credentials |
+| 2028 | remote-storage | Remote storage could not be enabled. | Verify remote storage credentials. |
 
 ### Post-deploy stage
 
