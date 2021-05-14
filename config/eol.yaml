@@ -9,7 +9,7 @@ php:
   - version: '7.3'
     eol: 2021-12-06
   - version: '7.4'
-    eol:
+    eol: 2022-11-28
 mariadb:
   - version: '10.0'
     eol: 2019-03-31
@@ -40,6 +40,8 @@ elasticsearch:
     eol: 2021-08-11
   - version: '7.7'
     eol: 2021-11-13
+  - version: '7.9'
+    eol: 2022-02-18
 rabbitmq:
   - version: '3.5'
     eol: 2016-10-31
