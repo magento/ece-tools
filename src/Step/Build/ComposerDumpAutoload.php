@@ -61,7 +61,7 @@ class ComposerDumpAutoload implements StepInterface
 
                 return;
             }
-            $this->shell->execute('composer dump-autoload -o --ansi --no-interaction');
+            $this->shell->execute('composer dump-autoload --optimize --apcu --ansi --no-interaction');
         } catch (ConfigException $e) {
             throw new StepException($e->getMessage(), $e->getCode(), $e);
         } catch (ShellException $e) {

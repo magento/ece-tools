@@ -70,7 +70,7 @@ class ComposerDumpAutoloadTest extends TestCase
             ->willReturn(false);
         $this->shellMock->expects($this->once())
             ->method('execute')
-            ->with('composer dump-autoload -o --ansi --no-interaction');
+            ->with('composer dump-autoload --optimize --apcu --ansi --no-interaction');
 
         $this->step->execute();
     }
@@ -106,7 +106,7 @@ class ComposerDumpAutoloadTest extends TestCase
 
         $this->shellMock->expects($this->once())
             ->method('execute')
-            ->with('composer dump-autoload -o --ansi --no-interaction')
+            ->with('composer dump-autoload --optimize --apcu --ansi --no-interaction')
             ->willThrowException(new ShellException('something went wrong'));
 
         $this->step->execute();

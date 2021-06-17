@@ -13,6 +13,7 @@
   "require": {
     "php": "^7.1.3",
     "ext-PDO": "*",
+    "ext-apcu": "*",
     "ext-json": "*",
     "ext-sockets": "*",
     "colinmollenhour/credis": "^1.6.0",
