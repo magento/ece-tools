@@ -2,7 +2,7 @@
   "name": "magento/ece-tools",
   "description": "Provides tools to build and deploy Magento 2 Enterprise Edition",
   "type": "magento2-component",
-  "version": "2002.1.6",
+  "version": "2002.1.7",
   "license": "OSL-3.0",
   "repositories": {
     "repo.magento.com": {
@@ -16,15 +16,15 @@
     "ext-json": "*",
     "ext-sockets": "*",
     "colinmollenhour/credis": "^1.6.0",
-    "composer/composer": "^1.4",
-    "composer/semver": "^1.4",
+    "composer/composer": "^1.4||^2.0",
+    "composer/semver": "@stable",
     "graylog2/gelf-php": "^1.4.2",
     "guzzlehttp/guzzle": "^6.2",
     "illuminate/config": "^5.5",
-    "magento/magento-cloud-components": "^1.0.6",
-    "magento/magento-cloud-docker": "^1.0.0",
-    "magento/magento-cloud-patches": "^1.0.6",
-    "magento/quality-patches": "^1.0.3",
+    "magento/magento-cloud-components": "^1.0.8",
+    "magento/magento-cloud-docker": "^1.2",
+    "magento/magento-cloud-patches": "^1.0.11",
+    "magento/quality-patches": "^1.0.26",
     "monolog/monolog": "^1.16",
     "nesbot/carbon": "^1.0||^2.0",
     "psr/container": "^1.0",
@@ -94,12 +94,6 @@
   },
   "prefer-stable": true,
   "extra": {
-    "map": [
-      [
-        "dist/.magento.env.yaml",
-        ".magento.env.yaml.dist"
-      ]
-    ],
     "include_files": [
       "vendor/codeception/phpunit-wrapper/src/phpunit7-interfaces.php"
     ]
