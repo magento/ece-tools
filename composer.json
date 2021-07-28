@@ -48,7 +48,8 @@
     "funkjedi/composer-include-files": "^1.0"
   },
   "conflict": {
-    "nesbot/carbon": ">=1.38 <2.0"
+    "nesbot/carbon": ">=1.38 <2.0",
+    "symfony/console": "4.4.27 || 4.4.28"
   },
   "replace": {
     "magento/ece-patches": "*",
