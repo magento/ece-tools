@@ -72,7 +72,7 @@ class ComposerFileTest extends TestCase
      */
     public function testValidateCorrectComposerJson(): void
     {
-        $this->magentoVersionMock->expects($this->once())
+        $this->magentoVersionMock->expects($this->atLeastOnce())
             ->method('isGreaterOrEqual')
             ->with('2.3')
             ->willReturn(true);
@@ -90,7 +90,25 @@ class ComposerFileTest extends TestCase
      */
     public function testValidateCorrectLaminasComposerJson(): void
     {
-        $this->magentoVersionMock->expects($this->once())
+        $this->magentoVersionMock->expects($this->atLeastOnce())
+            ->method('isGreaterOrEqual')
+            ->with('2.3')
+            ->willReturn(true);
+        $this->fileListMock->expects($this->once())
+            ->method('getMagentoComposer')
+            ->willReturn(__DIR__ . '/_files/correct_composer_2.3_2.json');
+        $this->resultFactoryMock->expects($this->once())
+            ->method('success');
+
+        $this->validator->validate();
+    }
+
+    /**
+     * @throws UndefinedPackageException
+     */
+    public function testValidateCorrectAutoload243ComposerJson(): void
+    {
+        $this->magentoVersionMock->expects($this->atLeastOnce())
             ->method('isGreaterOrEqual')
             ->with('2.3')
             ->willReturn(true);
@@ -108,7 +126,7 @@ class ComposerFileTest extends TestCase
      */
     public function testValidateWrongComposerJson(): void
     {
-        $this->magentoVersionMock->expects($this->once())
+        $this->magentoVersionMock->expects($this->atLeastOnce())
             ->method('isGreaterOrEqual')
             ->with('2.3')
             ->willReturn(true);
@@ -137,7 +155,7 @@ class ComposerFileTest extends TestCase
      */
     public function testValidateMagentoLower23(): void
     {
-        $this->magentoVersionMock->expects($this->once())
+        $this->magentoVersionMock->expects($this->atLeastOnce())
             ->method('isGreaterOrEqual')
             ->with('2.3')
             ->willReturn(false);
@@ -152,9 +170,26 @@ class ComposerFileTest extends TestCase
     /**
      * @throws UndefinedPackageException
      */
+    public function testValidateMagentoHigherEqual243(): void
+    {
+        $this->magentoVersionMock->expects($this->atLeastOnce())
+            ->method('isGreaterOrEqual')
+            ->with('2.4.3')
+            ->willReturn(false);
+        $this->fileListMock->expects($this->never())
+            ->method('getMagentoComposer');
+        $this->resultFactoryMock->expects($this->once())
+            ->method('success');
+
+        $this->validator->validate();
+    }
+
+    /**
+     * @throws UndefinedPackageException
+     */
     public function testValidateComposerFileNotExists(): void
     {
-        $this->magentoVersionMock->expects($this->once())
+        $this->magentoVersionMock->expects($this->atLeastOnce())
             ->method('isGreaterOrEqual')
             ->with('2.3')
             ->willReturn(true);
@@ -177,7 +212,7 @@ class ComposerFileTest extends TestCase
      */
     public function testValidateCantGetMagentoVersion(): void
     {
-        $this->magentoVersionMock->expects($this->once())
+        $this->magentoVersionMock->expects($this->atLeastOnce())
             ->method('isGreaterOrEqual')
             ->willThrowException(new UndefinedPackageException('some error'));
         $this->fileListMock->expects($this->never())
