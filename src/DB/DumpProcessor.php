@@ -126,13 +126,14 @@ class DumpProcessor
      *
      * @param array $databases
      * @param bool $removeDefiners
+     * @param string $alternativeDestination
      *
      * @throws ConfigException
      * @throws FileSystemException
      * @throws GenericException
      * @throws UndefinedPackageException
      */
-    public function execute(bool $removeDefiners, array $databases = [])
+    public function execute(bool $removeDefiners, array $databases = [], string $alternativeDestination = '')
     {
         try {
             if (empty($databases)) {
@@ -157,7 +158,8 @@ class DumpProcessor
                 $this->dumpGenerator->create(
                     self::DATABASE_MAP[$connection],
                     $this->connectionFactory->create($connection),
-                    $removeDefiners
+                    $removeDefiners,
+                    $alternativeDestination
                 );
             }
         } finally {
