@@ -14,9 +14,6 @@ use Magento\MagentoCloud\Filesystem\FileSystemException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
-/**
- * @inheritDoc
- */
 class JsonErrorFormatterTest extends TestCase
 {
     /**
@@ -37,7 +34,7 @@ class JsonErrorFormatterTest extends TestCase
     /**
      * @inheritDoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->errorInfoMock = $this->createMock(ErrorInfo::class);
         $this->readerMock = $this->getMockForAbstractClass(ReaderInterface::class);
@@ -48,7 +45,7 @@ class JsonErrorFormatterTest extends TestCase
         );
     }
 
-    public function testFormat()
+    public function testFormat(): void
     {
         $this->readerMock->expects($this->once())
             ->method('read')
@@ -67,7 +64,7 @@ class JsonErrorFormatterTest extends TestCase
         );
     }
 
-    public function testFormatEmptyError()
+    public function testFormatEmptyError(): void
     {
         $this->readerMock->expects($this->once())
             ->method('read')
@@ -86,7 +83,7 @@ class JsonErrorFormatterTest extends TestCase
         );
     }
 
-    public function testFormatMessageAlreadyLogged()
+    public function testFormatMessageAlreadyLogged(): void
     {
         $this->readerMock->expects($this->once())
             ->method('read')
@@ -96,27 +93,27 @@ class JsonErrorFormatterTest extends TestCase
         $this->errorInfoMock->expects($this->never())
             ->method('get');
 
-        $this->assertFalse(
+        $this->assertEmpty(
             $this->jsonErrorFormatter->format(['message' => 'some error', 'context' => ['errorCode' => 11]])
         );
     }
 
-    public function testFormatNoErrorCode()
+    public function testFormatNoErrorCode(): void
     {
         $this->readerMock->expects($this->never())
             ->method('read');
         $this->errorInfoMock->expects($this->never())
             ->method('get');
 
-        $this->assertFalse($this->jsonErrorFormatter->format(['message' => 'test']));
+        $this->assertEmpty($this->jsonErrorFormatter->format(['message' => 'test']));
     }
 
-    public function testFormatWithException()
+    public function testFormatWithException(): void
     {
         $this->readerMock->expects($this->once())
             ->method('read')
             ->willThrowException(new FileSystemException('error'));
 
-        $this->assertFalse($this->jsonErrorFormatter->format(['message' => 'test', 'context' => ['errorCode' => 11]]));
+        $this->assertEmpty($this->jsonErrorFormatter->format(['message' => 'test', 'context' => ['errorCode' => 11]]));
     }
 }
