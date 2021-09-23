@@ -15,6 +15,7 @@ use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\UriInterface;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -53,7 +54,14 @@ class TransferStatsHandlerTest extends TestCase
 
     public function testStatHandlerRedirect()
     {
-        $mockRequest = $this->createMock(RequestInterface::class);
+        $mockUriInterface = $this->createMock(UriInterface::class);
+        $mockRequest = $this->getMockBuilder(RequestInterface::class)
+            ->disableOriginalConstructor()
+            ->setMethods(['getUri'])
+            ->getMockForAbstractClass();
+        $mockRequest->expects($this->any())
+            ->method('getUri')
+            ->willReturn($mockUriInterface);
         $mockResponse = $this->createMock(ResponseInterface::class);
 
         $stats = new TransferStats($mockRequest, $mockResponse);
@@ -70,7 +78,20 @@ class TransferStatsHandlerTest extends TestCase
 
     public function testStatHandlerTransferTime()
     {
-        $mockRequest = $this->createMock(RequestInterface::class);
+        $mockUriInterface = $this->getMockBuilder(UriInterface::class)
+            ->disableOriginalConstructor()
+            ->setMethods(['__toString'])
+            ->getMockForAbstractClass();
+        $mockUriInterface->expects($this->any())
+            ->method('__toString')
+            ->willReturn('/');
+        $mockRequest = $this->getMockBuilder(RequestInterface::class)
+            ->disableOriginalConstructor()
+            ->setMethods(['getUri'])
+            ->getMockForAbstractClass();
+        $mockRequest->expects($this->any())
+            ->method('getUri')
+            ->willReturn($mockUriInterface);
 
         $stats = new TransferStats($mockRequest, null, 3.1415926);
 
@@ -109,13 +130,24 @@ class TransferStatsHandlerTest extends TestCase
 
     public function testStatHandlerCurlStats()
     {
-        $mockRequest = $this->createMock(RequestInterface::class);
+        $mockUriInterface = $this->getMockBuilder(UriInterface::class)
+            ->disableOriginalConstructor()
+            ->setMethods(['__toString'])
+            ->getMockForAbstractClass();
+        $mockUriInterface->expects($this->any())
+            ->method('__toString')
+            ->willReturn('/customer');
+        $mockRequest = $this->getMockBuilder(RequestInterface::class)
+            ->disableOriginalConstructor()
+            ->setMethods(['getUri'])
+            ->getMockForAbstractClass();
+        $mockRequest->expects($this->any())
+            ->method('getUri')
+            ->willReturn($mockUriInterface);
         $mockResponse = $this->createMock(ResponseInterface::class);
 
         $stats = new TransferStats($mockRequest, $mockResponse, 3.1415926, null, [CURLINFO_STARTTRANSFER_TIME => 0.62]);
 
-        $mockRequest->method('getUri')
-            ->wilLReturn('/customer');
         $mockResponse->expects($this->once())
             ->method('getStatusCode')
             ->willReturn(200);
