@@ -12,7 +12,7 @@ namespace Magento\MagentoCloud\Test\Functional\Acceptance;
  *
  * @group php73
  */
-class UpgradeCest extends Upgrade21Cest
+class UpgradeCest extends Upgrade22Cest
 {
     /**
      * @var boolean
