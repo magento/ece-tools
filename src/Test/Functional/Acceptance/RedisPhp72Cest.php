@@ -19,7 +19,16 @@ class RedisPhp72Cest extends RedisCest
     {
         return [
             [
-                'version' => '2.2.10',
+                'version' => '2.2.11',
+            ],
+            [
+                'version' => '2.3.0',
+            ],
+            [
+                'version' => '2.3.1',
+            ],
+            [
+                'version' => '2.3.2',
             ],
         ];
     }
@@ -31,63 +40,50 @@ class RedisPhp72Cest extends RedisCest
     {
         return [
             [
-                'version' => '2.2.10',
+                'version' => '2.3.0',
                 'wrongConfiguration' => [
                     'stage' => [
                         'deploy' => [
-                            'REDIS_BACKEND' => '\Magento\Framework\Cache\Backend\Redis'
+                            'REDIS_BACKEND' => 'TestRedisModel'
                         ]
                     ]
                 ],
-                'buildSuccess' => true,
+                'buildSuccess' => false,
                 'deploySuccess' => false,
-                'errorBuildMessage' => '',
-                'errorDeployMessage' => 'does not support Redis backend model '
-                    . '\'\Magento\Framework\Cache\Backend\Redis\'',
+                'errorBuildMessage' => 'The REDIS_BACKEND variable contains an invalid value TestRedisModel.'
+                    . ' Use one of the available value options: Cm_Cache_Backend_Redis,'
+                    . ' \Magento\Framework\Cache\Backend\Redis,'
+                    . ' \Magento\Framework\Cache\Backend\RemoteSynchronizedCache.',
+                'errorDeployMessage' => '',
             ],
             [
-                'version' => '2.2.10',
+                'version' => '2.3.2',
                 'wrongConfiguration' => [
                     'stage' => [
                         'deploy' => [
-                            'REDIS_BACKEND' => '\Magento\Framework\Cache\Backend\RemoteSynchronizedCache'
+                            'REDIS_BACKEND' => 'TestRedisModel'
                         ]
                     ]
                 ],
-                'buildSuccess' => true,
+                'buildSuccess' => false,
                 'deploySuccess' => false,
-                'errorBuildMessage' => '',
-                'errorDeployMessage' => 'does not support Redis backend model '
-                    . '\'\Magento\Framework\Cache\Backend\RemoteSynchronizedCache\'',
+                'errorBuildMessage' => 'The REDIS_BACKEND variable contains an invalid value TestRedisModel.'
+                    . ' Use one of the available value options: Cm_Cache_Backend_Redis,'
+                    . ' \Magento\Framework\Cache\Backend\Redis,'
+                    . ' \Magento\Framework\Cache\Backend\RemoteSynchronizedCache.',
+                'errorDeployMessage' => '',
             ],
         ];
     }
 
     /**
-     * @return array
-     * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
+     * @param \CliTester $I
+     * @param \Codeception\Example $data
+     * @throws \Robo\Exception\TaskException
+     * @skip
      */
-    protected function goodConfigurationDataProvider(): array
+    public function testGoodConfiguration(\CliTester $I, \Codeception\Example $data): void
     {
-        return [
-            [
-                'version' => '2.2.10',
-                'backendModel' => [
-                    'stage' => [
-                        'deploy' => [
-                            'REDIS_BACKEND' => 'Cm_Cache_Backend_Redis',
-                        ],
-                    ],
-                ],
-                'expectedBackend' => 'Cm_Cache_Backend_Redis',
-                'expectedConfig' => [
-                    'backend_options' => [
-                        'server' => 'redis',
-                        'port' => '6379',
-                        'database' => 1,
-                    ],
-                ],
-            ],
-        ];
+        return;
     }
 }
