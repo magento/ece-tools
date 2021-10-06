@@ -30,7 +30,7 @@ class JsonErrorFormatter extends JsonFormatter
     /**
      * @param ErrorInfo $errorInfo
      * @param ReaderInterface $reader
-     * @param int $batchMode
+     * @param 1|2 $batchMode
      * @param bool $appendNewline
      */
     public function __construct(
@@ -50,22 +50,22 @@ class JsonErrorFormatter extends JsonFormatter
      *
      * {@inheritDoc}
      */
-    public function format(array $record)
+    public function format(array $record): string
     {
         try {
             if (!isset($record['context']['errorCode'])) {
-                return false;
+                return '';
             }
 
             $loggedErrors = $this->reader->read();
 
             if (isset($loggedErrors[$record['context']['errorCode']])) {
-                return false;
+                return '';
             }
 
             return parent::format($this->formatLog($record));
-        } catch (\Exception $e) {
-            return false;
+        } catch (\Exception $exception) {
+            return '';
         }
     }
 
@@ -98,6 +98,7 @@ class JsonErrorFormatter extends JsonFormatter
         }
 
         ksort($errorInfo);
+
         return $errorInfo;
     }
 }

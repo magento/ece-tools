@@ -11,7 +11,6 @@ use Illuminate\Config\Repository;
 use Magento\MagentoCloud\App\Logger\Gelf\Handler as GelfHandler;
 use Magento\MagentoCloud\App\Logger\Gelf\HandlerFactory as GelfHandlerFactory;
 use Magento\MagentoCloud\App\Logger\HandlerFactory;
-use Magento\MagentoCloud\App\Logger\LevelResolver;
 use Magento\MagentoCloud\Config\GlobalSection;
 use Magento\MagentoCloud\Config\Log as LogConfig;
 use Monolog\Handler\AbstractHandler;
@@ -26,16 +25,10 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @inheritdoc
- *
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class HandlerFactoryTest extends TestCase
 {
-    /**
-     * @var LevelResolver|MockObject
-     */
-    private $levelResolverMock;
 
     /**
      * @var LogConfig|MockObject
@@ -67,14 +60,12 @@ class HandlerFactoryTest extends TestCase
      */
     protected function setUp()
     {
-        $this->levelResolverMock = $this->createMock(LevelResolver::class);
         $this->logConfigMock = $this->createMock(LogConfig::class);
         $this->repositoryMock = $this->createMock(Repository::class);
         $this->gelfHandlerFactoryMock = $this->createMock(GelfHandlerFactory::class);
         $this->globalConfigMock = $this->createMock(GlobalSection::class);
 
         $this->handlerFactory = new HandlerFactory(
-            $this->levelResolverMock,
             $this->logConfigMock,
             $this->gelfHandlerFactoryMock,
             $this->globalConfigMock
@@ -96,12 +87,6 @@ class HandlerFactoryTest extends TestCase
             ->willReturnMap([
                 ['min_level', LogConfig::LEVEL_NOTICE, LogConfig::LEVEL_NOTICE],
                 ['min_level', LogConfig::LEVEL_INFO, LogConfig::LEVEL_INFO],
-            ]);
-        $this->levelResolverMock
-            ->method('resolve')
-            ->willReturnMap([
-                [LogConfig::LEVEL_NOTICE, Logger::NOTICE],
-                [LogConfig::LEVEL_INFO, Logger::INFO]
             ]);
 
         $this->handlerFactory->create($handler);
@@ -154,14 +139,6 @@ class HandlerFactoryTest extends TestCase
             ->method('get')
             ->with(GlobalSection::VAR_MIN_LOGGING_LEVEL)
             ->willReturn($minLevelOverride);
-        $this->levelResolverMock
-            ->method('resolve')
-            ->willReturnMap([
-                [LogConfig::LEVEL_NOTICE, Logger::NOTICE],
-                [LogConfig::LEVEL_INFO, Logger::INFO],
-                [LogConfig::LEVEL_WARNING, Logger::WARNING],
-                [LogConfig::LEVEL_DEBUG, Logger::DEBUG],
-            ]);
 
         /** @var AbstractHandler $handler */
         $handler = $this->handlerFactory->create($handlerName);
@@ -225,8 +202,8 @@ class HandlerFactoryTest extends TestCase
                 'handler' => HandlerFactory::HANDLER_FILE,
                 'repositoryMockReturnMap' => [
                     ['file', null, 'var/log/cloud.log'],
-                    ['min_level', LogConfig::LEVEL_NOTICE, LogConfig::LEVEL_INFO],
-                    ['min_level', LogConfig::LEVEL_DEBUG, LogConfig::LEVEL_INFO],
+                    ['min_level', null, LogConfig::LEVEL_INFO],
+                    ['min_level', null, LogConfig::LEVEL_INFO],
                 ],
                 'minLevelOverride' => '',
                 'expectedClass' => StreamHandler::class,
@@ -236,8 +213,7 @@ class HandlerFactoryTest extends TestCase
                 'handler' => HandlerFactory::HANDLER_FILE,
                 'repositoryMockReturnMap' => [
                     ['file', null, 'var/log/cloud.log'],
-                    ['min_level', LogConfig::LEVEL_INFO, LogConfig::LEVEL_DEBUG],
-                    ['min_level', LogConfig::LEVEL_DEBUG, LogConfig::LEVEL_DEBUG],
+                    ['min_level', null, LogConfig::LEVEL_DEBUG]
                 ],
                 'minLevelOverride' => LogConfig::LEVEL_INFO,
                 'expectedClass' => StreamHandler::class,
@@ -273,7 +249,7 @@ class HandlerFactoryTest extends TestCase
                 'repositoryMockReturnMap' => [
                     ['to', null, 'user@example.com'],
                     ['from', null, 'user2@example.com'],
-                    ['subject', 'Log form Magento Cloud', 'someSubject'],
+                    ['subject', 'Log from Magento Cloud', 'someSubject'],
                     ['min_level', LogConfig::LEVEL_NOTICE, LogConfig::LEVEL_NOTICE],
                     ['min_level', LogConfig::LEVEL_INFO, LogConfig::LEVEL_INFO],
                 ],

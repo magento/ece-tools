@@ -14,15 +14,12 @@ use Magento\MagentoCloud\App\Logger\LineFormatterFactory;
 use Magento\MagentoCloud\App\LoggerException;
 use Magento\MagentoCloud\App\Logger\Formatter\LineFormatter;
 use Magento\MagentoCloud\App\Logger\HandlerFactory;
-use Monolog\Handler\HandlerInterface;
 use Magento\MagentoCloud\Config\Log as LogConfig;
+use Monolog\Handler\AbstractProcessingHandler;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Yaml\Exception\ParseException;
 
-/**
- * @inheritdoc
- */
 class PoolTest extends TestCase
 {
     /**
@@ -60,7 +57,7 @@ class PoolTest extends TestCase
     /**
      * @throws \Exception
      */
-    public function testGetHandlers()
+    public function testGetHandlers(): void
     {
         $jsonErrorFormatterMock = $this->createMock(JsonErrorFormatter::class);
         $this->logConfigMock->expects($this->once())
@@ -77,20 +74,52 @@ class PoolTest extends TestCase
             ->method('create')
             ->willReturn($formatterMock);
 
-        $slackHandlerMock = $this->getMockForAbstractClass(HandlerInterface::class);
+        $slackHandlerMock = $this->getMockForAbstractClass(
+            AbstractProcessingHandler::class,
+            [],
+            '',
+            true,
+            true,
+            true,
+            ['setFormatter']
+        );
         $slackHandlerMock->expects($this->once())
             ->method('setFormatter')
             ->with($formatterMock)
             ->willReturnSelf();
-        $emailHandlerMock = $this->getMockForAbstractClass(HandlerInterface::class);
+        $emailHandlerMock = $this->getMockForAbstractClass(
+            AbstractProcessingHandler::class,
+            [],
+            '',
+            true,
+            true,
+            true,
+            ['setFormatter']
+        );
         $emailHandlerMock->expects($this->once())
             ->method('setFormatter')
             ->with($formatterMock)
             ->willReturnSelf();
-        $syslogHandler = $this->getMockForAbstractClass(HandlerInterface::class);
+        $syslogHandler = $this->getMockForAbstractClass(
+            AbstractProcessingHandler::class,
+            [],
+            '',
+            true,
+            true,
+            true,
+            ['setFormatter']
+        );
         $syslogHandler->expects($this->never())
             ->method('setFormatter');
-        $errorHandler = $this->getMockForAbstractClass(HandlerInterface::class);
+        $errorHandler = $this->getMockForAbstractClass(
+            AbstractProcessingHandler::class,
+            [],
+            '',
+            true,
+            true,
+            true,
+            ['setFormatter']
+        );
         $errorHandler->expects($this->once())
             ->method('setFormatter')
             ->with($jsonErrorFormatterMock)

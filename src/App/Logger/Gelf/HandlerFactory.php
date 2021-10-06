@@ -33,11 +33,11 @@ class HandlerFactory
      * Creates instance of Gelf handler.
      *
      * @param Repository $configuration
-     * @param int $minLevel
+     * @param mixed $minLevel
      * @return Handler
      * @throws LoggerException
      */
-    public function create(Repository $configuration, int $minLevel): Handler
+    public function create(Repository $configuration, $minLevel): Handler
     {
         $this->increaseSocketTimeout();
 

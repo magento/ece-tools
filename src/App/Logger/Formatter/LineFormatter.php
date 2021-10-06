@@ -20,7 +20,7 @@ class LineFormatter extends \Monolog\Formatter\LineFormatter
     /**
      * @inheritDoc
      */
-    public function format(array $record)
+    public function format(array $record): string
     {
         $errorLevels = [
             Logger::getLevelName(Logger::WARNING),

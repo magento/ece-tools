@@ -10,7 +10,7 @@ namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 /**
  * @group php72
  */
-class Upgrade23Cest extends Upgrade21Cest
+class Upgrade23Cest extends Upgrade22Cest
 {
     /**
      * @return array
