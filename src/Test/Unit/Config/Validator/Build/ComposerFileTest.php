@@ -68,7 +68,7 @@ class ComposerFileTest extends TestCase
     }
 
     /**
-     * @throws UndefinedPackageException
+     * @inheritdoc
      */
     public function testValidateCorrectComposerJson(): void
     {
@@ -86,7 +86,7 @@ class ComposerFileTest extends TestCase
     }
 
     /**
-     * @throws UndefinedPackageException
+     * @inheritdoc
      */
     public function testValidateCorrectLaminasComposerJson(): void
     {
@@ -104,7 +104,7 @@ class ComposerFileTest extends TestCase
     }
 
     /**
-     * @throws UndefinedPackageException
+     * @inheritdoc
      */
     public function testValidateCorrectAutoload243ComposerJson(): void
     {
@@ -122,7 +122,7 @@ class ComposerFileTest extends TestCase
     }
 
     /**
-     * @throws UndefinedPackageException
+     * @inheritdoc
      */
     public function testValidateWrongComposerJson(): void
     {
@@ -151,7 +151,7 @@ class ComposerFileTest extends TestCase
     }
 
     /**
-     * @throws UndefinedPackageException
+     * @inheritdoc
      */
     public function testValidateMagentoLower23(): void
     {
@@ -168,14 +168,14 @@ class ComposerFileTest extends TestCase
     }
 
     /**
-     * @throws UndefinedPackageException
+     * @inheritdoc
      */
     public function testValidateMagentoHigherEqual243(): void
     {
-        $this->magentoVersionMock->expects($this->exactly(1))
+        $this->magentoVersionMock->expects($this->exactly(2))
             ->method('isGreaterOrEqual')
-            ->withConsecutive(['2.3'])
-            ->willReturnOnConsecutiveCalls(false);
+            ->withConsecutive(['2.3'], ['2.4.3'])
+            ->willReturnOnConsecutiveCalls(true, true);
         $this->fileListMock->expects($this->never())
             ->method('getMagentoComposer');
         $this->resultFactoryMock->expects($this->once())
@@ -185,7 +185,7 @@ class ComposerFileTest extends TestCase
     }
 
     /**
-     * @throws UndefinedPackageException
+     * @inheritdoc
      */
     public function testValidateComposerFileNotExists(): void
     {
