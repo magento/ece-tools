@@ -28,6 +28,7 @@ class DbDump extends Command
     public const NAME = 'db-dump';
     public const ARGUMENT_DATABASES = 'databases';
     public const OPTION_REMOVE_DEFINERS = 'remove-definers';
+    public const OPTION_DUMP_DIRECTORY = 'dump-directory';
 
     /**
      * @var DumpProcessor
@@ -78,6 +79,12 @@ class DbDump extends Command
             InputOption::VALUE_NONE,
             'Remove definers from the database dump'
         );
+        $this->addOption(
+            self::OPTION_DUMP_DIRECTORY,
+            'a',
+            InputOption:: VALUE_REQUIRED,
+            'Use alternative directory for saving dump'
+        );
 
         parent::configure();
     }
@@ -116,7 +123,8 @@ class DbDump extends Command
             $this->logger->info('Starting backup.');
             $this->dumpProcessor->execute(
                 (bool)$input->getOption(self::OPTION_REMOVE_DEFINERS),
-                $databases
+                $databases,
+                (string)$input->getOption(self::OPTION_DUMP_DIRECTORY)
             );
             $this->logger->info('Backup completed.');
         } catch (\Exception $exception) {

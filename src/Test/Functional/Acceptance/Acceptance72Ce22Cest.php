@@ -14,13 +14,13 @@ use CliTester;
 /**
  * @inheritDoc
  *
- * @group php71
+ * @group php72
  * @group edition-ce
  */
-class AcceptanceCe71Cest extends AcceptanceCeCest
+class Acceptance72Ce22Cest extends AcceptanceCeCest
 {
     /**
      * @var string
      */
-    protected $magentoCloudTemplate = '2.2.9';
+    protected $magentoCloudTemplate = '2.2.10';
 }

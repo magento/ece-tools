@@ -118,7 +118,7 @@ class BackupDbCest extends AbstractCest
             $this->expectedLogs,
             [
                 'INFO: Start creation DB dump for main database...',
-                'INFO: Finished DB dump for main database, it can be found here: /tmp/dump-main',
+                'INFO: Finished DB dump for main database, it can be found here: /app/var/dump-main',
             ]
         ));
         $I->doNotSeeInOutput(['quote', 'sales']);
@@ -153,11 +153,11 @@ class BackupDbCest extends AbstractCest
             $this->expectedLogs,
             [
                 'INFO: Start creation DB dump for main database...',
-                'INFO: Finished DB dump for main database, it can be found here: /tmp/dump-main',
+                'INFO: Finished DB dump for main database, it can be found here: /app/var/dump-main',
                 'INFO: Start creation DB dump for quote database...',
-                'INFO: Finished DB dump for quote database, it can be found here: /tmp/dump-quote',
+                'INFO: Finished DB dump for quote database, it can be found here: /app/var/dump-quote',
                 'INFO: Start creation DB dump for sales database...',
-                'INFO: Finished DB dump for sales database, it can be found here: /tmp/dump-sales',
+                'INFO: Finished DB dump for sales database, it can be found here: /app/var/dump-sales',
             ]
         ));
 
@@ -167,9 +167,9 @@ class BackupDbCest extends AbstractCest
             $this->expectedLogs,
             [
                 'INFO: Start creation DB dump for quote database...',
-                'INFO: Finished DB dump for quote database, it can be found here: /tmp/dump-quote',
+                'INFO: Finished DB dump for quote database, it can be found here: /app/var/dump-quote',
                 'INFO: Start creation DB dump for sales database...',
-                'INFO: Finished DB dump for sales database, it can be found here: /tmp/dump-sales',
+                'INFO: Finished DB dump for sales database, it can be found here: /app/var/dump-sales',
             ]
         ));
         $I->doNotSeeInOutput('main');

@@ -23,7 +23,9 @@
     <rule ref="Squiz.Functions.GlobalFunction"/>
     <rule ref="Squiz.WhiteSpace.LogicalOperatorSpacing"/>
     <rule ref="Squiz.Commenting.VariableComment" />
-    <rule ref="Squiz.Commenting.ClassComment" />
+    <rule ref="Squiz.Commenting.ClassComment">
+        <exclude-pattern>Test</exclude-pattern>
+    </rule>
 
     <exclude-pattern>_files</exclude-pattern>
     <exclude-pattern>_file</exclude-pattern>

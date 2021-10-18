@@ -85,14 +85,20 @@ class DumpGenerator
      * @param string $database
      * @param ConnectionInterface $connectionData
      * @param bool $removeDefiners
+     * @param string $alternativeDestination
      *
      * @throws UndefinedPackageException
      * @throws ShellException
      */
-    public function create(string $database, ConnectionInterface $connectionData, bool $removeDefiners)
-    {
+    public function create(
+        string $database,
+        ConnectionInterface $connectionData,
+        bool $removeDefiners,
+        string $alternativeDestination
+    ) {
         $dumpFileName = sprintf(self::DUMP_FILE_NAME_TEMPLATE, $database, time());
-        $temporaryDirectory = sys_get_temp_dir();
+        $temporaryDirectory = !empty($alternativeDestination) ? $alternativeDestination
+            : $this->directoryList->getVar();
         $dumpFile = $temporaryDirectory . '/' . $dumpFileName;
         $lockFile = $this->directoryList->getVar() . '/' . self::LOCK_FILE_NAME;
 

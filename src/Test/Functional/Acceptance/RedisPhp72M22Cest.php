@@ -8,9 +8,9 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 
 /**
- * @group php71
+ * @group php72
  */
-class RedisPhp71Cest extends RedisCest
+class RedisPhp72M22Cest extends RedisCest
 {
     /**
      * @return array
@@ -19,7 +19,7 @@ class RedisPhp71Cest extends RedisCest
     {
         return [
             [
-                'version' => '2.2.9',
+                'version' => '2.2.10',
             ],
         ];
     }
@@ -31,7 +31,7 @@ class RedisPhp71Cest extends RedisCest
     {
         return [
             [
-                'version' => '2.2.9',
+                'version' => '2.2.10',
                 'wrongConfiguration' => [
                     'stage' => [
                         'deploy' => [
@@ -46,7 +46,7 @@ class RedisPhp71Cest extends RedisCest
                     . '\'\Magento\Framework\Cache\Backend\Redis\'',
             ],
             [
-                'version' => '2.2.9',
+                'version' => '2.2.10',
                 'wrongConfiguration' => [
                     'stage' => [
                         'deploy' => [
@@ -71,7 +71,7 @@ class RedisPhp71Cest extends RedisCest
     {
         return [
             [
-                'version' => '2.2.9',
+                'version' => '2.2.10',
                 'backendModel' => [
                     'stage' => [
                         'deploy' => [

@@ -68,14 +68,14 @@ class ComposerFileTest extends TestCase
     }
 
     /**
-     * @throws UndefinedPackageException
+     * @inheritdoc
      */
     public function testValidateCorrectComposerJson(): void
     {
-        $this->magentoVersionMock->expects($this->once())
+        $this->magentoVersionMock->expects($this->exactly(2))
             ->method('isGreaterOrEqual')
-            ->with('2.3')
-            ->willReturn(true);
+            ->withConsecutive(['2.3'], ['2.4.3'])
+            ->willReturnOnConsecutiveCalls(true, false);
         $this->fileListMock->expects($this->once())
             ->method('getMagentoComposer')
             ->willReturn(__DIR__ . '/_files/correct_composer_2.3.json');
@@ -86,14 +86,14 @@ class ComposerFileTest extends TestCase
     }
 
     /**
-     * @throws UndefinedPackageException
+     * @inheritdoc
      */
     public function testValidateCorrectLaminasComposerJson(): void
     {
-        $this->magentoVersionMock->expects($this->once())
+        $this->magentoVersionMock->expects($this->exactly(2))
             ->method('isGreaterOrEqual')
-            ->with('2.3')
-            ->willReturn(true);
+            ->withConsecutive(['2.3'], ['2.4.3'])
+            ->willReturnOnConsecutiveCalls(true, false);
         $this->fileListMock->expects($this->once())
             ->method('getMagentoComposer')
             ->willReturn(__DIR__ . '/_files/correct_composer_2.3_2.json');
@@ -104,14 +104,32 @@ class ComposerFileTest extends TestCase
     }
 
     /**
-     * @throws UndefinedPackageException
+     * @inheritdoc
+     */
+    public function testValidateCorrectAutoload243ComposerJson(): void
+    {
+        $this->magentoVersionMock->expects($this->exactly(2))
+            ->method('isGreaterOrEqual')
+            ->withConsecutive(['2.3'], ['2.4.3'])
+            ->willReturnOnConsecutiveCalls(true, false);
+        $this->fileListMock->expects($this->once())
+            ->method('getMagentoComposer')
+            ->willReturn(__DIR__ . '/_files/correct_composer_2.3_2.json');
+        $this->resultFactoryMock->expects($this->once())
+            ->method('success');
+
+        $this->validator->validate();
+    }
+
+    /**
+     * @inheritdoc
      */
     public function testValidateWrongComposerJson(): void
     {
-        $this->magentoVersionMock->expects($this->once())
+        $this->magentoVersionMock->expects($this->exactly(2))
             ->method('isGreaterOrEqual')
-            ->with('2.3')
-            ->willReturn(true);
+            ->withConsecutive(['2.3'], ['2.4.3'])
+            ->willReturnOnConsecutiveCalls(true, false);
         $this->fileListMock->expects($this->once())
             ->method('getMagentoComposer')
             ->willReturn(__DIR__ . '/_files/wrong_composer_2.3.json');
@@ -133,14 +151,14 @@ class ComposerFileTest extends TestCase
     }
 
     /**
-     * @throws UndefinedPackageException
+     * @inheritdoc
      */
     public function testValidateMagentoLower23(): void
     {
-        $this->magentoVersionMock->expects($this->once())
+        $this->magentoVersionMock->expects($this->exactly(1))
             ->method('isGreaterOrEqual')
-            ->with('2.3')
-            ->willReturn(false);
+            ->withConsecutive(['2.3'])
+            ->willReturnOnConsecutiveCalls(false);
         $this->fileListMock->expects($this->never())
             ->method('getMagentoComposer');
         $this->resultFactoryMock->expects($this->once())
@@ -150,14 +168,31 @@ class ComposerFileTest extends TestCase
     }
 
     /**
-     * @throws UndefinedPackageException
+     * @inheritdoc
+     */
+    public function testValidateMagentoHigherEqual243(): void
+    {
+        $this->magentoVersionMock->expects($this->exactly(2))
+            ->method('isGreaterOrEqual')
+            ->withConsecutive(['2.3'], ['2.4.3'])
+            ->willReturnOnConsecutiveCalls(true, true);
+        $this->fileListMock->expects($this->never())
+            ->method('getMagentoComposer');
+        $this->resultFactoryMock->expects($this->once())
+            ->method('success');
+
+        $this->validator->validate();
+    }
+
+    /**
+     * @inheritdoc
      */
     public function testValidateComposerFileNotExists(): void
     {
-        $this->magentoVersionMock->expects($this->once())
+        $this->magentoVersionMock->expects($this->exactly(2))
             ->method('isGreaterOrEqual')
-            ->with('2.3')
-            ->willReturn(true);
+            ->withConsecutive(['2.3'], ['2.4.3'])
+            ->willReturnOnConsecutiveCalls(true, false);
         $this->fileListMock->expects($this->once())
             ->method('getMagentoComposer')
             ->willReturn(__DIR__ . '/_files/file_not_exists.json');

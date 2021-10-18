@@ -84,7 +84,7 @@ class ComposerFile implements ValidatorInterface
     public function validate(): Validator\ResultInterface
     {
         try {
-            if (!$this->magentoVersion->isGreaterOrEqual('2.3')) {
+            if (!$this->magentoVersion->isGreaterOrEqual('2.3') || $this->magentoVersion->isGreaterOrEqual('2.4.3')) {
                 return $this->resultFactory->success();
             }
 

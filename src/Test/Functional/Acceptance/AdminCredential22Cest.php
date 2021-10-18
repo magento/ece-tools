@@ -8,12 +8,12 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 
 /**
- * @group php71
+ * @group php72
  */
 class AdminCredential22Cest extends AdminCredentialCest
 {
     /**
      * @var string
      */
-    protected $magentoCloudTemplate = '2.2.9';
+    protected $magentoCloudTemplate = '2.2.10';
 }

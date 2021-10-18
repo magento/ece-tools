@@ -9,7 +9,7 @@ namespace Magento\MagentoCloud\App\Logger;
 
 use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\App\LoggerException;
-use Monolog\Handler\HandlerInterface;
+use Monolog\Handler\AbstractProcessingHandler;
 use Magento\MagentoCloud\Config\Log as LogConfig;
 use Exception;
 use Symfony\Component\Yaml\Exception\ParseException;
@@ -20,7 +20,7 @@ use Symfony\Component\Yaml\Exception\ParseException;
 class Pool
 {
     /**
-     * @var HandlerInterface[]
+     * @var AbstractProcessingHandler[]
      */
     private $handlers;
 
@@ -55,8 +55,8 @@ class Pool
     }
 
     /**
-     * @return HandlerInterface[]
-     * @throws LoggerException If can't create handlers from config.
+     * @return AbstractProcessingHandler[]
+     * @throws LoggerException
      */
     public function getHandlers(): array
     {

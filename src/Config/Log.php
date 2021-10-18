@@ -82,9 +82,7 @@ class Log
      * Returns array of handlers configs with keys as handler name.
      *
      * @return array
-     * @throws FileSystemException
-     * @throws UndefinedPackageException
-     * @throws ParseException
+     * @throws ConfigException
      */
     public function getHandlers(): array
     {
@@ -94,40 +92,44 @@ class Log
     /**
      * @param string $handler
      * @return Repository
-     * @throws \Exception
+     * @throws ConfigException
      */
     public function get(string $handler): Repository
     {
-        if (!isset($this->getConfig()[$handler])) {
-            throw new \Exception('Configuration for ' . $handler . ' is not found');
+        $config = $this->getConfig();
+
+        if (!isset($config[$handler])) {
+            throw new ConfigException('Configuration for ' . $handler . ' is not found');
         }
 
         return $this->repositoryFactory->create(
-            $this->getConfig()[$handler]
+            $config[$handler]
         );
     }
 
     /**
      * @return array
-     * @throws ParseException
-     * @throws FileSystemException
-     * @throws UndefinedPackageException
+     * @throws ConfigException
      */
     private function getConfig(): array
     {
-        if ($this->config === null) {
-            $this->config = array_replace_recursive(
-                [
-                    HandlerFactory::HANDLER_STREAM => ['stream' => 'php://stdout'],
-                    HandlerFactory::HANDLER_FILE => ['file' => $this->fileList->getCloudLog()],
-                    HandlerFactory::HANDLER_FILE_ERROR => [
-                        'file' => $this->fileList->getCloudErrorLog(),
-                        'min_level' => self::LEVEL_WARNING,
-                        'formatter' => $this->errorFormatterFactory->create()
+        try {
+            if ($this->config === null) {
+                $this->config = array_replace_recursive(
+                    [
+                        HandlerFactory::HANDLER_STREAM => ['stream' => 'php://stdout'],
+                        HandlerFactory::HANDLER_FILE => ['file' => $this->fileList->getCloudLog()],
+                        HandlerFactory::HANDLER_FILE_ERROR => [
+                            'file' => $this->fileList->getCloudErrorLog(),
+                            'min_level' => self::LEVEL_WARNING,
+                            'formatter' => $this->errorFormatterFactory->create()
+                        ],
                     ],
-                ],
-                $this->reader->read()[static::SECTION_CONFIG] ?? []
-            );
+                    $this->reader->read()[static::SECTION_CONFIG] ?? []
+                );
+            }
+        } catch (ParseException | FileSystemException | UndefinedPackageException $exception) {
+            throw new ConfigException($exception->getMessage(), $exception->getCode(), $exception);
         }
 
         return $this->config;
