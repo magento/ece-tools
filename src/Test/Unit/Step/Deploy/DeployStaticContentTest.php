@@ -69,7 +69,7 @@ class DeployStaticContentTest extends TestCase
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->flagManagerMock = $this->createMock(FlagManager::class);
         $this->shellMock = $this->getMockForAbstractClass(ShellInterface::class);

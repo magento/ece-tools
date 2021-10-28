@@ -36,7 +36,7 @@ class DumpTest extends TestCase
     /**
      * Setup the test environment.
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->connectionDataMock = $this->getMockForAbstractClass(ConnectionInterface::class);
         $this->connectionFactoryMock = $this->createMock(ConnectionFactory::class);

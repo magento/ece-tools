@@ -43,7 +43,7 @@ class ResolverTest extends TestCase
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->configFileListMock = $this->createMock(ConfigFileList::class);
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);

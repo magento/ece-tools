@@ -45,7 +45,7 @@ class JsonFormatVariableTest extends TestCase
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->resultFactoryMock = $this->createMock(ResultFactory::class);
         $this->mergedConfigMock = $this->createMock(MergedConfig::class);

@@ -49,7 +49,7 @@ class ElasticSuiteTest extends TestCase
     /**
      * @inheritDoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->managerMock = $this->createMock(Manager::class);
         $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);

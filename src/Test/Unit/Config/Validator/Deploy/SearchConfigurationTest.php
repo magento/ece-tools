@@ -48,7 +48,7 @@ class SearchConfigurationTest extends TestCase
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->resultFactoryMock = $this->createConfiguredMock(ResultFactory::class, [
             'success' => $this->createMock(Success::class),

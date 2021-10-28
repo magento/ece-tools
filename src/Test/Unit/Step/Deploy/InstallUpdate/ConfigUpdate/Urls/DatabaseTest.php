@@ -9,7 +9,6 @@ namespace Magento\MagentoCloud\Test\Unit\Step\Deploy\InstallUpdate\ConfigUpdate\
 
 use Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\Urls\Database;
 use Magento\MagentoCloud\Step\StepException;
-use PHPUnit\Framework\MockObject\Matcher\InvokedCount;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Magento\MagentoCloud\Config\Environment;
@@ -66,18 +65,18 @@ class DatabaseTest extends TestCase
     }
 
     /**
-     * @param InvokedCount $loggerInfoExpects
+     * @param $loggerInfoExpects
      * @param array $urlManagerGetUrlsWillReturn
-     * @param InvokedCount $connectionExpectsAffectingQuery
+     * @param $connectionExpectsAffectingQuery
      *
      * @throws StepException
      *
      * @dataProvider executeDataProvider
      */
     public function testExecute(
-        InvokedCount $loggerInfoExpects,
+        $loggerInfoExpects,
         array $urlManagerGetUrlsWillReturn,
-        InvokedCount $connectionExpectsAffectingQuery
+        $connectionExpectsAffectingQuery
     ): void {
         $this->loggerMock->expects($loggerInfoExpects)
             ->method('info')

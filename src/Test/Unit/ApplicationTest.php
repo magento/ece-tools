@@ -91,7 +91,7 @@ class ApplicationTest extends TestCase
     /**
      * @inheritdoc
      */
-    public function setUp()
+    public function setUp(): void
     {
         $this->containerMock = $this->getMockForAbstractClass(ContainerInterface::class);
         $this->packageMock = $this->getMockForAbstractClass(PackageInterface::class);

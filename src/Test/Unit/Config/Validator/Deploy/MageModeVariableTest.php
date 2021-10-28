@@ -38,7 +38,7 @@ class MageModeVariableTest extends TestCase
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->envDataMock = $this->createMock(EnvironmentDataInterface::class);
         $this->resultFactoryMock = $this->createMock(ResultFactory::class);

@@ -56,7 +56,7 @@ class ConnectionTest extends TestCase
      *
      * @throws \ReflectionException
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->pdoMock = $this->createMock(\PDO::class);
         $this->statementMock = $this->createMock(\PDOStatement::class);

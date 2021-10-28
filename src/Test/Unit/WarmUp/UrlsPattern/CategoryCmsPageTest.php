@@ -37,7 +37,7 @@ class CategoryCmsPageTest extends TestCase
     /**
      * @inheritDoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->configShowUrlCommandMock = $this->createMock(ConfigShowUrlCommand::class);
         $this->argumentBuilderMock = $this->createMock(CommandArgumentBuilder::class);

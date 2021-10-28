@@ -45,7 +45,7 @@ class SystemTest extends TestCase
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->shellFactoryMock = $this->createMock(ShellFactory::class);
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);

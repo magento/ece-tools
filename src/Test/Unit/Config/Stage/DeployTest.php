@@ -39,7 +39,7 @@ class DeployTest extends TestCase
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->mergedConfigMock = $this->createMock(Deploy\MergedConfig::class);
         $this->schemaMock = $this->createMock(Schema::class);

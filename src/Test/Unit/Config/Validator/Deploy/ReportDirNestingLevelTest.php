@@ -64,7 +64,7 @@ class ReportDirNestingLevelTest extends TestCase
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->environmentMock = $this->createMock(Environment::class);
         $this->configFileListMock = $this->createMock(ConfigFileList::class);

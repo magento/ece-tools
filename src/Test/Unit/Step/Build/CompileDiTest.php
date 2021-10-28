@@ -47,7 +47,7 @@ class CompileDiTest extends TestCase
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->magentoShellMock = $this->createMock(MagentoShell::class);

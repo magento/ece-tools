@@ -154,8 +154,7 @@ class BuildDirCopierTest extends TestCase
             ->willReturn(false);
         $fileMock->expects($this->once())
             ->method('copyDirectory')
-            ->with($rootInitDir, $rootDir . '/' . $dir)
-            ->willReturn(false);
+            ->with($rootInitDir, $rootDir . '/' . $dir);
         $this->loggerMock->expects($this->once())
             ->method('debug')
             ->with('Directory ' . $dir . ' was copied with strategy: ' . $strategy);

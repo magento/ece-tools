@@ -44,7 +44,7 @@ class DebugLoggingTest extends TestCase
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->configValidatorMock = $this->createMock(System::class);
         $this->environmentMock = $this->createMock(Environment::class);

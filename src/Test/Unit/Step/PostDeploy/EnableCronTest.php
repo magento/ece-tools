@@ -39,7 +39,7 @@ class EnableCronTest extends TestCase
     /**
      * Setup the test environment.
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->cronSwitcherMock = $this->createMock(Switcher::class);

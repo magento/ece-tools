@@ -37,7 +37,7 @@ class PathResolverTest extends TestCase
     /**
      * @inheritDoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->fileMock = $this->createMock(File::class);
         $this->systemListMock = $this->createMock(SystemList::class);

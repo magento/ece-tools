@@ -30,7 +30,7 @@ class StorePageTest extends TestCase
     /**
      * @inheritDoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->urlManagerMock = $this->createMock(UrlManager::class);
 

@@ -46,7 +46,7 @@ class StageConfigTest extends TestCase
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->environmentReaderMock = $this->createMock(EnvironmentReader::class);
         $this->resultFactoryMock = $this->createMock(Validator\ResultFactory::class);

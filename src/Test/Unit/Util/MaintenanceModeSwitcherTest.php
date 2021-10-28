@@ -57,7 +57,7 @@ class MaintenanceModeSwitcherTest extends TestCase
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->magentoShellMock = $this->createMock(MagentoShell::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);

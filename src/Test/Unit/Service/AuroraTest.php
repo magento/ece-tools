@@ -32,7 +32,7 @@ class AuroraTest extends TestCase
     /**
      * @inheritdoc
      */
-    public function setUp()
+    public function setUp(): void
     {
         $this->connectionMock = $this->getMockForAbstractClass(ConnectionInterface::class);
 

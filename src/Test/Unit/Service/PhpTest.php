@@ -23,7 +23,7 @@ class PhpTest extends TestCase
     /**
      * @inheritDoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->phpService = new Php();
     }

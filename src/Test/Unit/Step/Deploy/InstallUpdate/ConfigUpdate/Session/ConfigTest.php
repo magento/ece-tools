@@ -68,7 +68,7 @@ class ConfigTest extends TestCase
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->redisMock = $this->createMock(Redis::class);
         $this->redisSessionMock = $this->createMock(RedisSession::class);

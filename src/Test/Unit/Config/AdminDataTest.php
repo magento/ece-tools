@@ -30,7 +30,7 @@ class AdminDataTest extends TestCase
     /**
      * @inheritDoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->environmentDataMock = $this->getMockForAbstractClass(EnvironmentDataInterface::class);
 

@@ -36,7 +36,7 @@ class FileListTest extends TestCase
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->backupListMock = $this->createMock(BackupList::class);
         $this->fileMock = $this->createMock(File::class);

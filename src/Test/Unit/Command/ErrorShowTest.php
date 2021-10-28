@@ -34,7 +34,7 @@ class ErrorShowTest extends TestCase
      */
     private $readerMock;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->errorInfoMock = $this->createMock(ErrorInfo::class);
         $this->readerMock = $this->getMockForAbstractClass(ReaderInterface::class);
@@ -64,7 +64,7 @@ class ErrorShowTest extends TestCase
             'suggestion: some suggestion',
             'title: some error'
         ]);
-        $this->assertContains($message, $tester->getDisplay());
+        $this->assertStringContainsString($message, $tester->getDisplay());
     }
 
     public function testExecuteWithWrongErrorCode()
@@ -79,7 +79,10 @@ class ErrorShowTest extends TestCase
         $tester = new CommandTester($this->command);
         $tester->execute([ErrorShow::ARGUMENT_ERROR_CODE => '1111']);
 
-        $this->assertContains('Error with code 1111 is not registered in the error schema', $tester->getDisplay());
+        $this->assertStringContainsString(
+            'Error with code 1111 is not registered in the error schema',
+            $tester->getDisplay()
+        );
     }
 
     public function testExecuteWithoutCode()
@@ -108,8 +111,8 @@ class ErrorShowTest extends TestCase
         $tester = new CommandTester($this->command);
         $tester->execute([]);
 
-        $this->assertContains('errorCode: 13', $tester->getDisplay());
-        $this->assertContains('errorCode: 12', $tester->getDisplay());
+        $this->assertStringContainsString('errorCode: 13', $tester->getDisplay());
+        $this->assertStringContainsString('errorCode: 12', $tester->getDisplay());
     }
 
     public function testExecuteWithoutCodeJsonFormat()
@@ -139,7 +142,7 @@ class ErrorShowTest extends TestCase
         $tester = new CommandTester($this->command);
         $tester->execute(['--json' => true]);
 
-        $this->assertContains(json_encode($errors), $tester->getDisplay());
+        $this->assertStringContainsString(json_encode($errors), $tester->getDisplay());
     }
 
     public function testExecuteWithoutCodeEmptyLog()
@@ -153,6 +156,6 @@ class ErrorShowTest extends TestCase
         $tester = new CommandTester($this->command);
         $tester->execute([]);
 
-        $this->assertContains('The error log is empty or does not exist', $tester->getDisplay());
+        $this->assertStringContainsString('The error log is empty or does not exist', $tester->getDisplay());
     }
 }

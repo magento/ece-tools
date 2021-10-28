@@ -47,7 +47,7 @@ class SchemaTest extends TestCase
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->systemListMock = $this->createMock(SystemList::class);
         $this->parserMock = $this->createTestProxy(Parser::class);

@@ -32,7 +32,7 @@ class ConnectionTypesTest extends TestCase
     /**
      * @inheritdoc
      */
-    public function setUp()
+    public function setUp(): void
     {
         $this->environmentMock = $this->createMock(Environment::class);
 

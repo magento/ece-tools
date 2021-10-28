@@ -15,7 +15,6 @@ use Magento\MagentoCloud\Config\State;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit\Framework\MockObject\Matcher\InvokedCount as InvokedCountMatcher;
 
 /**
  * @inheritdoc
@@ -50,7 +49,7 @@ class AdminDataTest extends TestCase
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->stateMock = $this->createMock(State::class);
         $this->adminDataMock = $this->getMockForAbstractClass(AdminDataInterface::class);
@@ -74,8 +73,8 @@ class AdminDataTest extends TestCase
      * @param bool $isInstalled
      * @param string $expectedMessage
      * @param string $expectedSuggestion
-     * @param InvokedCountMatcher $expectedError
-     * @param InvokedCountMatcher $expectedSuccess
+     * @param $expectedError
+     * @param $expectedSuccess
      * @dataProvider validateDataProvider
      * @SuppressWarnings(PHPMD.ExcessiveParameterList)
      */
@@ -88,8 +87,8 @@ class AdminDataTest extends TestCase
         bool $isInstalled,
         string $expectedMessage,
         string $expectedSuggestion,
-        InvokedCountMatcher $expectedError,
-        InvokedCountMatcher $expectedSuccess
+        $expectedError,
+        $expectedSuccess
     ) {
         $this->databaseConfigurationMock->expects($this->once())
             ->method('validate')

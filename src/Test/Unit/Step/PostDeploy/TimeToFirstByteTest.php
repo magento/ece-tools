@@ -69,7 +69,7 @@ class TimeToFirstByteTest extends TestCase
     /**
      * {@inheritdoc}
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->postDeployMock = $this->createMock(PostDeployInterface::class);
         $this->poolFactoryMock = $this->createMock(PoolFactory::class);

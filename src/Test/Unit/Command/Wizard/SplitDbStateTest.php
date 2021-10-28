@@ -45,7 +45,7 @@ class SplitDbStateTest extends TestCase
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->outputFormatterMock = $this->createMock(OutputFormatter::class);
         $this->configReaderMock = $this->getMockForAbstractClass(ReaderInterface::class);

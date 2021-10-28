@@ -31,7 +31,7 @@ class CreateDeployFailedFlagTest extends TestCase
     /**
      * @inheritDoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->flagManagerMock = $this->createMock(FlagManager::class);
         $this->action = new CreateDeployFailedFlag($this->flagManagerMock);
@@ -52,11 +52,12 @@ class CreateDeployFailedFlagTest extends TestCase
     }
 
     /**
-     * @expectedException \Magento\MagentoCloud\OnFail\Action\ActionException
-     * @expectedExceptionMessage Test message
+     * Test exception
      */
     public function testExecuteWithException(): void
     {
+        $this->expectException(\Magento\MagentoCloud\OnFail\Action\ActionException::class);
+        $this->expectExceptionMessage('Test message');
         $this->flagManagerMock->expects($this->once())
             ->method('set')
             ->with(FlagManager::FLAG_DEPLOY_HOOK_IS_FAILED)
