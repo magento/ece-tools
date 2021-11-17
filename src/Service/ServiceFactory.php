@@ -21,6 +21,7 @@ class ServiceFactory
         ServiceInterface::NAME_REDIS => Redis::class,
         ServiceInterface::NAME_REDIS_SESSION => RedisSession::class,
         ServiceInterface::NAME_ELASTICSEARCH => ElasticSearch::class,
+        ServiceInterface::NAME_OPENSEARCH => OpenSearch::class,
         ServiceInterface::NAME_RABBITMQ => RabbitMq::class,
         ServiceInterface::NAME_DB_MYSQL => Database::class,
         ServiceInterface::NAME_DB_MARIA => Database::class,

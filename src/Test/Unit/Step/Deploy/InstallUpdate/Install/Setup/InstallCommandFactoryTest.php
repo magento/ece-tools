@@ -17,6 +17,7 @@ use Magento\MagentoCloud\DB\Data\ConnectionFactory;
 use Magento\MagentoCloud\DB\Data\ConnectionInterface;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Service\ElasticSearch;
+use Magento\MagentoCloud\Service\OpenSearch;
 use Magento\MagentoCloud\Step\Deploy\InstallUpdate\Install\Setup\InstallCommandFactory;
 use Magento\MagentoCloud\Util\PasswordGenerator;
 use Magento\MagentoCloud\Util\UrlManager;
@@ -81,6 +82,11 @@ class InstallCommandFactoryTest extends TestCase
     private $elasticSearchMock;
 
     /**
+     * @var OpenSearch|MockObject
+     */
+    private $openSearchMock;
+
+    /**
      * @var RemoteStorage|MockObject
      */
     private $remoteStorageMock;
@@ -104,6 +110,7 @@ class InstallCommandFactoryTest extends TestCase
         $this->dbConfigMock = $this->createMock(DbConfig::class);
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
         $this->elasticSearchMock = $this->createMock(ElasticSearch::class);
+        $this->openSearchMock = $this->createMock(OpenSearch::class);
         $this->remoteStorageMock = $this->createMock(RemoteStorage::class);
 
         $this->installCommandFactory = new InstallCommandFactory(
@@ -116,6 +123,7 @@ class InstallCommandFactoryTest extends TestCase
             $this->dbConfigMock,
             $this->magentoVersionMock,
             $this->elasticSearchMock,
+            $this->openSearchMock,
             $this->remoteStorageMock
         );
     }
@@ -351,7 +359,7 @@ class InstallCommandFactoryTest extends TestCase
                 'region' => 'someRegion'
             ]);
 
-        self::assertStringContainsString(
+        self::assertContains(
             "--remote-storage-prefix='somePrefix' --remote-storage-bucket='someBucket'"
             . " --remote-storage-region='someRegion'",
             $this->installCommandFactory->create()
@@ -381,7 +389,7 @@ class InstallCommandFactoryTest extends TestCase
                 'secret' => 'someSecret'
             ]);
 
-        self::assertStringContainsString(
+        self::assertContains(
             "--remote-storage-prefix='somePrefix' --remote-storage-bucket='someBucket'"
             . " --remote-storage-region='someRegion'"
             . " --remote-storage-key='someKey' --remote-storage-secret='someSecret'",
@@ -428,8 +436,8 @@ class InstallCommandFactoryTest extends TestCase
             ->method('isAuthEnabled')
             ->willReturn(true);
         $this->elasticSearchMock->expects($this->once())
-            ->method('getFullVersion')
-            ->willReturn('7.7');
+            ->method('getFullEngineName')
+            ->willReturn('elasticsearch7');
         $this->elasticSearchMock->expects($this->once())
             ->method('getHost')
             ->willReturn('127.0.0.1');
@@ -448,10 +456,83 @@ class InstallCommandFactoryTest extends TestCase
                 ]
             ]);
 
+        $this->openSearchMock->expects($this->once())
+            ->method('isInstalled')
+            ->willReturn(false);
+        $this->openSearchMock->expects($this->never())
+            ->method('isAuthEnabled');
+        $this->openSearchMock->expects($this->never())
+            ->method('getFullEngineName');
+        $this->openSearchMock->expects($this->never())
+            ->method('getHost');
+        $this->openSearchMock->expects($this->never())
+            ->method('getPort');
+        $this->openSearchMock->expects($this->never())
+            ->method('getConfiguration');
+
         $command = $this->installCommandFactory->create();
-        self::assertStringContainsString("--elasticsearch-enable-auth='1'", $command);
-        self::assertStringContainsString("--elasticsearch-username='user'", $command);
-        self::assertStringContainsString("--elasticsearch-password='secret'", $command);
-        self::assertStringContainsString("--elasticsearch-index-prefix='test'", $command);
+        self::assertContains("--search-engine='elasticsearch7'", $command);
+        self::assertContains("--elasticsearch-enable-auth='1'", $command);
+        self::assertContains("--elasticsearch-username='user'", $command);
+        self::assertContains("--elasticsearch-password='secret'", $command);
+        self::assertContains("--elasticsearch-index-prefix='test'", $command);
+    }
+
+    public function testExecuteWithOSauthOptions(): void
+    {
+        $this->mockBaseConfig('', '', '', '', '', '');
+        $this->magentoVersionMock->method('isGreaterOrEqual')
+            ->willReturnMap([
+                ['2.4.0', true],
+                ['2.4.2', true],
+                ['2.4.4', true],
+            ]);
+        $this->openSearchMock->expects($this->once())
+            ->method('isInstalled')
+            ->willReturn(true);
+        $this->openSearchMock->expects($this->once())
+            ->method('isAuthEnabled')
+            ->willReturn(true);
+        $this->openSearchMock->expects($this->once())
+            ->method('getFullEngineName')
+            ->willReturn('opensearch1');
+        $this->openSearchMock->expects($this->once())
+            ->method('getHost')
+            ->willReturn('127.0.0.1');
+        $this->openSearchMock->expects($this->once())
+            ->method('getPort')
+            ->willReturn('1234');
+        $this->openSearchMock->expects($this->once())
+            ->method('getConfiguration')
+            ->willReturn([
+                'host' => '127.0.0.1',
+                'port' => '1234',
+                'username' => 'user',
+                'password' => 'secret',
+                'query' => [
+                    'index' => 'test'
+                ]
+            ]);
+
+        $this->elasticSearchMock->expects($this->once())
+            ->method('isInstalled')
+            ->willReturn(true);
+        $this->elasticSearchMock->expects($this->never())
+            ->method('isAuthEnabled');
+        $this->elasticSearchMock->expects($this->never())
+            ->method('getFullEngineName');
+        $this->elasticSearchMock->expects($this->never())
+            ->method('getHost');
+        $this->elasticSearchMock->expects($this->never())
+            ->method('getPort');
+        $this->elasticSearchMock->expects($this->never())
+            ->method('getConfiguration');
+
+        $command = $this->installCommandFactory->create();
+        self::assertContains("--search-engine='opensearch1'", $command);
+        self::assertContains("--elasticsearch-enable-auth='1'", $command);
+        self::assertContains("--elasticsearch-username='user'", $command);
+        self::assertContains("--elasticsearch-password='secret'", $command);
+        self::assertContains("--elasticsearch-index-prefix='test'", $command);
     }
 }

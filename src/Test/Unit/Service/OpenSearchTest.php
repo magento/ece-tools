@@ -12,7 +12,7 @@ use GuzzleHttp\Psr7\Response;
 use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Http\ClientFactory;
-use Magento\MagentoCloud\Service\ElasticSearch;
+use Magento\MagentoCloud\Service\OpenSearch;
 use Magento\MagentoCloud\Service\ServiceException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -20,14 +20,14 @@ use Psr\Http\Message\StreamInterface;
 use Psr\Log\LoggerInterface;
 
 /**
- * @see ElasticSearch
+ * @see OpenSearch
  */
-class ElasticSearchTest extends TestCase
+class OpenSearchTest extends TestCase
 {
     /**
-     * @var ElasticSearch
+     * @var OpenSearch
      */
-    private $elasticSearch;
+    private $openSearch;
 
     /**
      * @var LoggerInterface|MockObject
@@ -53,7 +53,7 @@ class ElasticSearchTest extends TestCase
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->clientFactoryMock = $this->createMock(ClientFactory::class);
 
-        $this->elasticSearch = new ElasticSearch(
+        $this->openSearch = new OpenSearch(
             $this->environmentMock,
             $this->clientFactoryMock,
             $this->loggerMock
@@ -71,27 +71,27 @@ class ElasticSearchTest extends TestCase
         $this->clientFactoryMock->expects($this->never())
             ->method('create');
 
-        $this->assertEquals('0', $this->elasticSearch->getVersion());
+        $this->assertEquals('0', $this->openSearch->getVersion());
     }
 
     /**
-     * @param array $esRelationship
-     * @param string $esConfiguration
+     * @param array $osRelationship
+     * @param string $osConfiguration
      * @param string $expectedVersion
      * @throws ServiceException
      *
      * @dataProvider getVersionDataProvider
      */
-    public function testGetVersion(array $esRelationship, string $esConfiguration, string $expectedVersion): void
+    public function testGetVersion(array $osRelationship, string $osConfiguration, string $expectedVersion): void
     {
-        $esConfig = $esRelationship[0];
+        $esConfig = $osRelationship[0];
         $clientMock = $this->createPartialMock(Client::class, ['get']);
         $responseMock = $this->createMock(Response::class);
         $streamMock = $this->getMockForAbstractClass(StreamInterface::class);
 
         $this->environmentMock->expects($this->any())
             ->method('getRelationship')
-            ->willReturn($esRelationship);
+            ->willReturn($osRelationship);
         $this->clientFactoryMock->expects($this->once())
             ->method('create')
             ->willReturn($clientMock);
@@ -104,11 +104,11 @@ class ElasticSearchTest extends TestCase
             ->willReturn($streamMock);
         $streamMock->expects($this->once())
             ->method('getContents')
-            ->willReturn($esConfiguration);
+            ->willReturn($osConfiguration);
         $this->loggerMock->expects($this->never())
             ->method('warning');
 
-        $this->assertSame($expectedVersion, $this->elasticSearch->getVersion());
+        $this->assertSame($expectedVersion, $this->openSearch->getVersion());
     }
 
     /**
@@ -130,7 +130,7 @@ class ElasticSearchTest extends TestCase
                 $relationships,
                 '{
                         "name" : "ZaIj9mo",
-                        "cluster_name" : "elasticsearch",
+                        "cluster_name" : "opensearch",
                         "cluster_uuid" : "CIXBGIVdS6mwM_0lmVhF4g",
                         "version" : {
                             "number" : "5.1",
@@ -160,22 +160,22 @@ class ElasticSearchTest extends TestCase
     }
 
     /**
-     * @param array $esRelationship
+     * @param array $osRelationship
      * @param string $expectedVersion
      * @throws ServiceException
      *
      * @dataProvider getVersionFromTypeDataProvider
      */
-    public function testGetVersionFromType($esRelationship, $expectedVersion)
+    public function testGetVersionFromType($osRelationship, $expectedVersion)
     {
         $this->environmentMock->expects($this->any())
             ->method('getRelationship')
-            ->willReturn($esRelationship);
+            ->willReturn($osRelationship);
 
         $this->clientFactoryMock->expects($this->never())
             ->method('create');
 
-        $this->assertSame($expectedVersion, $this->elasticSearch->getVersion());
+        $this->assertSame($expectedVersion, $this->openSearch->getVersion());
     }
 
     public function getVersionFromTypeDataProvider()
@@ -187,94 +187,33 @@ class ElasticSearchTest extends TestCase
             ],
             [
                 [
-                    ['host' => '127.0.0.1', 'port' => '1234', 'type' => 'elasticsearch:7.7']
+                    ['host' => '127.0.0.1', 'port' => '1234', 'type' => 'opensearch:1.0']
                 ],
-                '7.7'
+                '1.0'
             ],
             [
                 [
-                    ['host' => '127.0.0.1', 'port' => '1234', 'type' => 'elasticsearch:5.2']
+                    ['host' => '127.0.0.1', 'port' => '1234', 'type' => 'opensearch:1.1']
                 ],
-                '5.2'
+                '1.1'
             ],
 
         ];
     }
 
     /**
-     * @param string $version
-     * @param string $expected
      * @throws ServiceException
-     *
-     * @dataProvider getFullVersionDataProvider
      */
-    public function testGetFullVersion(string $version, string $expected): void
+    public function testGetFullVersion(): void
     {
-        $clientMock = $this->createPartialMock(Client::class, ['get']);
-        $responseMock = $this->createMock(Response::class);
-        $streamMock = $this->getMockForAbstractClass(StreamInterface::class);
-
-        $esConfig = [
-            'host' => '127.0.0.1',
-            'port' => '1234',
-        ];
-        $esRelationship = [$esConfig];
-        $esConfiguration = json_encode([
-            'name' => 'ZaIj9mo',
-            'cluster_name' => 'elasticsearch',
-            'cluster_uuid' => 'CIXBGIVdS6mwM_0lmVhF4g',
-            'version' => [
-                'number' => $version,
-                'build_hash' => 'c59ff00'
-            ],
-            'tagline' => 'You Know, for Search'
-        ]);
-
-        $this->environmentMock->method('getRelationship')
-            ->willReturn($esRelationship);
-        $clientMock->expects($this->once())
-            ->method('get')
-            ->with($esConfig['host'] . ':' . $esConfig['port'])
-            ->willReturn($responseMock);
-        $responseMock->expects($this->once())
-            ->method('getBody')
-            ->willReturn($streamMock);
-        $streamMock->expects($this->once())
-            ->method('getContents')
-            ->willReturn($esConfiguration);
-        $this->clientFactoryMock->expects($this->once())
-            ->method('create')
-            ->willReturn($clientMock);
-
-        $this->assertSame($expected, $this->elasticSearch->getFullEngineName());
-    }
-
-    /**
-     * @return array
-     */
-    public function getFullVersionDataProvider(): array
-    {
-        return [
-            [
-                '5.1',
-                'elasticsearch5'
-            ],
-            [
-                '2.4',
-                'elasticsearch'
-            ],
-            [
-                '7.7',
-                'elasticsearch7'
-            ]
-        ];
+        $this->assertSame('elasticsearch7', $this->openSearch->getFullEngineName());
     }
 
     public function testGetVersionWithException(): void
     {
         $this->expectException(ServiceException::class);
-        $this->expectExceptionMessage('Can\'t get version of elasticsearch: ES is not available');
-        $this->expectExceptionCode(Error::DEPLOY_ES_CANNOT_CONNECT);
+        $this->expectExceptionMessage('Can\'t get version of opensearch: OS is not available');
+        $this->expectExceptionCode(Error::DEPLOY_OS_CANNOT_CONNECT);
 
         $this->environmentMock->method('getRelationship')
             ->willReturn([
@@ -287,19 +226,19 @@ class ElasticSearchTest extends TestCase
         $clientMock->expects($this->once())
             ->method('get')
             ->with('127.0.0.1:1234')
-            ->willThrowException(new \RuntimeException('ES is not available'));
+            ->willThrowException(new \RuntimeException('OS is not available'));
         $this->clientFactoryMock->expects($this->once())
             ->method('create')
             ->willReturn($clientMock);
 
-        $this->assertEquals(0, $this->elasticSearch->getVersion());
+        $this->assertEquals(0, $this->openSearch->getVersion());
     }
 
     public function testGetTemplate(): void
     {
         $this->environmentMock->expects($this->any())
             ->method('getRelationship')
-            ->with('elasticsearch')
+            ->with('opensearch')
             ->willReturn([
                 [
                     'host' => '127.0.0.1',
@@ -310,7 +249,7 @@ class ElasticSearchTest extends TestCase
         $responseMock = $this->createMock(Response::class);
         $streamMock = $this->getMockForAbstractClass(StreamInterface::class);
 
-        $esConfiguration = json_encode(
+        $osConfiguration = json_encode(
             [
                 'default' => [
                     'settings' => [
@@ -331,7 +270,7 @@ class ElasticSearchTest extends TestCase
             ->willReturn($streamMock);
         $streamMock->expects($this->once())
             ->method('getContents')
-            ->willReturn($esConfiguration);
+            ->willReturn($osConfiguration);
         $this->clientFactoryMock->expects($this->once())
             ->method('create')
             ->willReturn($clientMock);
@@ -345,7 +284,7 @@ class ElasticSearchTest extends TestCase
                     'number_of_replicas' => 2,
                 ]
             ],
-            $this->elasticSearch->getTemplate()
+            $this->openSearch->getTemplate()
         );
     }
 
@@ -353,17 +292,17 @@ class ElasticSearchTest extends TestCase
     {
         $this->environmentMock->expects($this->once())
             ->method('getRelationship')
-            ->with('elasticsearch')
+            ->with('opensearch')
             ->willReturn([]);
 
-        $this->assertSame([], $this->elasticSearch->getTemplate());
+        $this->assertSame([], $this->openSearch->getTemplate());
     }
 
     public function testGetTemplateWithException(): void
     {
         $this->environmentMock->expects($this->any())
             ->method('getRelationship')
-            ->with('elasticsearch')
+            ->with('opensearch')
             ->willReturn(
                 [
                     [
@@ -383,16 +322,16 @@ class ElasticSearchTest extends TestCase
             ->willReturn($clientMock);
         $this->loggerMock->expects($this->once())
             ->method('warning')
-            ->with('Can\'t get configuration of elasticsearch: Some error');
+            ->with('Can\'t get configuration of opensearch: Some error');
 
-        $this->assertSame([], $this->elasticSearch->getTemplate());
+        $this->assertSame([], $this->openSearch->getTemplate());
     }
 
     public function testIsInstalled(): void
     {
         $this->environmentMock->expects($this->exactly(2))
             ->method('getRelationship')
-            ->with('elasticsearch')
+            ->with('opensearch')
             ->willReturnOnConsecutiveCalls(
                 [
                     [
@@ -403,15 +342,15 @@ class ElasticSearchTest extends TestCase
                 []
             );
 
-        $this->assertTrue($this->elasticSearch->isInstalled());
-        $this->assertFalse($this->elasticSearch->isInstalled());
+        $this->assertTrue($this->openSearch->isInstalled());
+        $this->assertFalse($this->openSearch->isInstalled());
     }
 
     public function testAuthEnabledTrue()
     {
         $this->environmentMock->expects($this->exactly(2))
             ->method('getRelationship')
-            ->with('elasticsearch')
+            ->with('opensearch')
             ->willReturn(
                 [
                     [
@@ -423,14 +362,14 @@ class ElasticSearchTest extends TestCase
                 ]
             );
 
-        $this->assertTrue($this->elasticSearch->isAuthEnabled());
+        $this->assertTrue($this->openSearch->isAuthEnabled());
     }
 
     public function testAuthEnabledFalse()
     {
         $this->environmentMock->expects($this->exactly(1))
             ->method('getRelationship')
-            ->with('elasticsearch')
+            ->with('opensearch')
             ->willReturn(
                 [
                     [
@@ -441,6 +380,6 @@ class ElasticSearchTest extends TestCase
                 ]
             );
 
-        $this->assertFalse($this->elasticSearch->isAuthEnabled());
+        $this->assertFalse($this->openSearch->isAuthEnabled());
     }
 }
