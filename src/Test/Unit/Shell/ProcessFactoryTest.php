@@ -46,7 +46,7 @@ class ProcessFactoryTest extends TestCase
     /**
      * @inheritDoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->repositoryMock = $this->getMockForAbstractClass(RepositoryInterface::class);
         $this->packageMock = $this->getMockForAbstractClass(PackageInterface::class);

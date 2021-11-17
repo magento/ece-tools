@@ -359,7 +359,7 @@ class InstallCommandFactoryTest extends TestCase
                 'region' => 'someRegion'
             ]);
 
-        self::assertContains(
+        self::assertStringContainsString(
             "--remote-storage-prefix='somePrefix' --remote-storage-bucket='someBucket'"
             . " --remote-storage-region='someRegion'",
             $this->installCommandFactory->create()
@@ -389,7 +389,7 @@ class InstallCommandFactoryTest extends TestCase
                 'secret' => 'someSecret'
             ]);
 
-        self::assertContains(
+        self::assertStringContainsString(
             "--remote-storage-prefix='somePrefix' --remote-storage-bucket='someBucket'"
             . " --remote-storage-region='someRegion'"
             . " --remote-storage-key='someKey' --remote-storage-secret='someSecret'",
@@ -471,11 +471,11 @@ class InstallCommandFactoryTest extends TestCase
             ->method('getConfiguration');
 
         $command = $this->installCommandFactory->create();
-        self::assertContains("--search-engine='elasticsearch7'", $command);
-        self::assertContains("--elasticsearch-enable-auth='1'", $command);
-        self::assertContains("--elasticsearch-username='user'", $command);
-        self::assertContains("--elasticsearch-password='secret'", $command);
-        self::assertContains("--elasticsearch-index-prefix='test'", $command);
+        self::assertStringContainsString("--search-engine='elasticsearch7'", $command);
+        self::assertStringContainsString("--elasticsearch-enable-auth='1'", $command);
+        self::assertStringContainsString("--elasticsearch-username='user'", $command);
+        self::assertStringContainsString("--elasticsearch-password='secret'", $command);
+        self::assertStringContainsString("--elasticsearch-index-prefix='test'", $command);
     }
 
     public function testExecuteWithOSauthOptions(): void
@@ -529,10 +529,10 @@ class InstallCommandFactoryTest extends TestCase
             ->method('getConfiguration');
 
         $command = $this->installCommandFactory->create();
-        self::assertContains("--search-engine='opensearch1'", $command);
-        self::assertContains("--elasticsearch-enable-auth='1'", $command);
-        self::assertContains("--elasticsearch-username='user'", $command);
-        self::assertContains("--elasticsearch-password='secret'", $command);
-        self::assertContains("--elasticsearch-index-prefix='test'", $command);
+        self::assertStringContainsString("--search-engine='opensearch1'", $command);
+        self::assertStringContainsString("--elasticsearch-enable-auth='1'", $command);
+        self::assertStringContainsString("--elasticsearch-username='user'", $command);
+        self::assertStringContainsString("--elasticsearch-password='secret'", $command);
+        self::assertStringContainsString("--elasticsearch-index-prefix='test'", $command);
     }
 }
