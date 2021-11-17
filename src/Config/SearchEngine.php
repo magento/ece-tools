@@ -12,6 +12,7 @@ use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Package\UndefinedPackageException;
 use Magento\MagentoCloud\Service\ElasticSearch;
+use Magento\MagentoCloud\Service\OpenSearch;
 use Magento\MagentoCloud\Service\ServiceException;
 
 /**
@@ -37,6 +38,11 @@ class SearchEngine
     private $elasticSearch;
 
     /**
+     * @var OpenSearch
+     */
+    private $openSearch;
+
+    /**
      * @var MagentoVersion
      */
     private $magentoVersion;
@@ -60,6 +66,7 @@ class SearchEngine
      * @param Environment $environment
      * @param DeployInterface $stageConfig
      * @param ElasticSearch $elasticSearch
+     * @param OpenSearch $openSearch
      * @param ElasticSuite $elasticSuite
      * @param MagentoVersion $version
      * @param ConfigMerger $configMerger
@@ -68,6 +75,7 @@ class SearchEngine
         Environment $environment,
         DeployInterface $stageConfig,
         ElasticSearch $elasticSearch,
+        OpenSearch $openSearch,
         ElasticSuite $elasticSuite,
         MagentoVersion $version,
         ConfigMerger $configMerger
@@ -75,6 +83,7 @@ class SearchEngine
         $this->environment = $environment;
         $this->stageConfig = $stageConfig;
         $this->elasticSearch = $elasticSearch;
+        $this->openSearch = $openSearch;
         $this->elasticSuite = $elasticSuite;
         $this->magentoVersion = $version;
         $this->configMerger = $configMerger;
@@ -134,7 +143,7 @@ class SearchEngine
         $searchEngine = $this->getName();
 
         return (strpos($searchEngine, ElasticSearch::ENGINE_NAME) === 0)
-            || ($searchEngine === ElasticSuite::ENGINE_NAME);
+            || ($searchEngine === ElasticSuite::ENGINE_NAME) || ($searchEngine === OpenSearch::ENGINE_NAME);
     }
 
     /**
@@ -145,8 +154,20 @@ class SearchEngine
      */
     private function getSearchConfig(): array
     {
+        if ($osConfig = $this->openSearch->getConfiguration()) {
+            return $this->getElasticSearchFamilyConfiguration(
+                $this->openSearch->getFullEngineName(),
+                $osConfig,
+                $this->openSearch->isAuthEnabled()
+            );
+        }
+
         if ($esConfig = $this->elasticSearch->getConfiguration()) {
-            return $this->getElasticSearchConfiguration($esConfig);
+            return $this->getElasticSearchFamilyConfiguration(
+                $this->elasticSearch->getFullEngineName(),
+                $esConfig,
+                $this->elasticSearch->isAuthEnabled()
+            );
         }
 
         $solrConfig = $this->environment->getRelationship('solr');
@@ -178,22 +199,22 @@ class SearchEngine
     /**
      * Returns ElasticSearch configuration
      *
-     * @param array $config Elasticsearch connection configuration
+     * @param string $engine Engine name
+     * @param array $config ElasticSearch/OpenSearch connection configuration
+     * @param bool $isAuthEnabled
      * @return array
      *
      * @throws ServiceException
      */
-    private function getElasticSearchConfiguration(array $config): array
+    private function getElasticSearchFamilyConfiguration(string $engine, array $config, bool $isAuthEnabled): array
     {
-        $engine = $this->elasticSearch->getFullVersion();
-
         $elasticSearchConfig = [
             'engine' => $engine,
             "{$engine}_server_hostname" => $config['host'],
             "{$engine}_server_port" => $config['port'],
         ];
 
-        if ($this->elasticSearch->isAuthEnabled()) {
+        if ($isAuthEnabled) {
             $elasticSearchConfig["{$engine}_enable_auth"] = 1;
             $elasticSearchConfig["{$engine}_username"] = $config['username'];
             $elasticSearchConfig["{$engine}_password"] = $config['password'];

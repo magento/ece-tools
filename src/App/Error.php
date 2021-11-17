@@ -76,6 +76,8 @@ class Error
     public const DEPLOY_ES_SERVICE_NOT_INSTALLED = 134;
     public const DEPLOY_WRONG_SEARCH_ENGINE = 135;
     public const DEPLOY_REMOVED_SPLIT_DB = 136;
+    public const DEPLOY_OS_CANNOT_CONNECT = 137;
+    public const DEPLOY_OS_SERVICE_NOT_INSTALLED = 138;
 
     public const PD_DEPLOY_IS_FAILED = 201;
     public const PD_ENV_PHP_IS_NOT_WRITABLE = 202;
@@ -135,6 +137,7 @@ class Error
     public const WARN_NOT_SUPPORTED_MAGE_MODE = 2027;
     public const WARN_REMOTE_STORAGE_CANNOT_BE_ENABLED = 2028;
     public const WARN_DEPRECATED_SPLIT_DB = 2029;
+    public const WARN_OS_ES_SERVICES_BOTH_INSTALLED = 2030;
 
     /**
      * Post-deploy

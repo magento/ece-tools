@@ -8,6 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Config\Validator\Deploy;
 
 use Magento\MagentoCloud\App\Error;
+use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Config\Validator;
 use Magento\MagentoCloud\Config\ValidatorException;
 use Magento\MagentoCloud\Config\ValidatorInterface;
@@ -18,9 +19,9 @@ use Magento\MagentoCloud\Service\ElasticSearch;
 use Magento\MagentoCloud\Service\OpenSearch;
 
 /**
- * Verifies if Elasticsearch service present for Magento 2.4.0 and above
+ * Verifies if OpenSearch service present for Magento 2.4.4 and above
  */
-class ElasticSearchIntegrity implements ValidatorInterface
+class OpenSearchIntegrity implements ValidatorInterface
 {
     /**
      * @var MagentoVersion
@@ -66,14 +67,14 @@ class ElasticSearchIntegrity implements ValidatorInterface
     public function validate(): Validator\ResultInterface
     {
         try {
-            if ($this->magentoVersion->isGreaterOrEqual('2.4.4') && $this->openSearch->isInstalled()) {
+            if ($this->magentoVersion->isGreaterOrEqual('2.4.0') && $this->elasticsearch->isInstalled()) {
                 return $this->resultFactory->success();
             }
 
-            if ($this->magentoVersion->isGreaterOrEqual('2.4.0')
-                && !$this->elasticsearch->isInstalled()
+            if ($this->magentoVersion->isGreaterOrEqual('2.4.4')
+                && !$this->openSearch->isInstalled()
             ) {
-                return $this->resultFactory->errorByCode(Error::DEPLOY_ES_SERVICE_NOT_INSTALLED);
+                return $this->resultFactory->errorByCode(Error::DEPLOY_OS_SERVICE_NOT_INSTALLED);
             }
         } catch (UndefinedPackageException | FileSystemException $exception) {
             throw new ValidatorException($exception->getMessage(), $exception->getCode(), $exception);
