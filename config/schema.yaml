@@ -561,7 +561,9 @@ variables:
                      process before terminating. Although we do not recommend it, you can use 0
                      to prevent the consumer from terminating.\n\n
       consumers — an array of strings specifying which consumer(s) to run.
-                  An empty array runs all consumers."
+                  An empty array runs all consumers.\n\n
+      multiple_processes - a number specifying the number of processes to spawn for each consumer.
+                           Supported in Magento 2.4.4 or greater."
     type: array
     stages:
       - deploy
@@ -576,6 +578,9 @@ variables:
               consumers:
                 - consumer1
                 - consumer2
+              multiple_processes:
+                consumer1: 4
+                consumer2: 3
   CONSUMERS_WAIT_FOR_MAX_MESSAGES:
     description: Use this variable to configure how consumers process messages. If this value is true, a consumer waits
       to process the number of messages (max_messages) from the message queue specified in the CRONS_CONSUMERS_RUNNER
