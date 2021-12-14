@@ -14,6 +14,7 @@ use Magento\MagentoCloud\Package\UndefinedPackageException;
 use Magento\MagentoCloud\Service\ElasticSearch;
 use Magento\MagentoCloud\Service\OpenSearch;
 use Magento\MagentoCloud\Service\ServiceException;
+use Magento\MagentoCloud\Service\Search\AbstractService as AbstractSearchService;
 
 /**
  * Returns search configuration.
@@ -154,20 +155,12 @@ class SearchEngine
      */
     private function getSearchConfig(): array
     {
-        if ($osConfig = $this->openSearch->getConfiguration()) {
-            return $this->getElasticSearchFamilyConfiguration(
-                $this->openSearch->getFullEngineName(),
-                $osConfig,
-                $this->openSearch->isAuthEnabled()
-            );
+        if ($this->openSearch->getConfiguration()) {
+            return $this->getElasticSearchFamilyConfiguration($this->openSearch);
         }
 
-        if ($esConfig = $this->elasticSearch->getConfiguration()) {
-            return $this->getElasticSearchFamilyConfiguration(
-                $this->elasticSearch->getFullEngineName(),
-                $esConfig,
-                $this->elasticSearch->isAuthEnabled()
-            );
+        if ($this->elasticSearch->getConfiguration()) {
+            return $this->getElasticSearchFamilyConfiguration($this->elasticSearch);
         }
 
         $solrConfig = $this->environment->getRelationship('solr');
@@ -199,22 +192,23 @@ class SearchEngine
     /**
      * Returns ElasticSearch configuration
      *
-     * @param string $engine Engine name
-     * @param array $config ElasticSearch/OpenSearch connection configuration
-     * @param bool $isAuthEnabled
+     * @param AbstractSearchService $searchService
      * @return array
      *
      * @throws ServiceException
      */
-    private function getElasticSearchFamilyConfiguration(string $engine, array $config, bool $isAuthEnabled): array
+    private function getElasticSearchFamilyConfiguration(AbstractSearchService $searchService): array
     {
+        $engine = $searchService->getFullEngineName();
+        $config = $searchService->getConfiguration();
+
         $elasticSearchConfig = [
             'engine' => $engine,
-            "{$engine}_server_hostname" => $config['host'],
+            "{$engine}_server_hostname" => $searchService->getHost(),
             "{$engine}_server_port" => $config['port'],
         ];
 
-        if ($isAuthEnabled) {
+        if ($searchService->isAuthEnabled()) {
             $elasticSearchConfig["{$engine}_enable_auth"] = 1;
             $elasticSearchConfig["{$engine}_username"] = $config['username'];
             $elasticSearchConfig["{$engine}_password"] = $config['password'];

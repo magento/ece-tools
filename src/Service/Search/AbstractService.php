@@ -132,6 +132,10 @@ abstract class AbstractService implements ServiceInterface
             throw new ServiceException(static::ENGINE_SHORT_NAME . ' service is not installed');
         }
 
+        if (!empty($this->getConfiguration()['scheme'])) {
+            return $this->getConfiguration()['scheme'] . '://' . $this->getConfiguration()['host'];
+        }
+
         return (string)$this->getConfiguration()['host'];
     }
 
@@ -204,7 +208,7 @@ abstract class AbstractService implements ServiceInterface
         try {
             $templates = $this->call(sprintf(
                 '%s:%s/_template/platformsh_index_settings',
-                $config['host'],
+                $this->getHost(),
                 $config['port']
             ));
 
