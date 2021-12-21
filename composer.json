@@ -20,7 +20,7 @@
     "composer/semver": "@stable",
     "graylog2/gelf-php": "^1.4.2",
     "guzzlehttp/guzzle": "^6.3||^7.3",
-    "illuminate/config": "^5.5",
+    "illuminate/config": "^5.5||^8.77",
     "magento/magento-cloud-components": "^1.0.8",
     "magento/magento-cloud-docker": "^1.0.0",
     "magento/magento-cloud-patches": "^1.0.11",
