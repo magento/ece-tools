@@ -112,6 +112,7 @@ class CronConsumersRunner implements StepInterface
                 'cron_run' => $runnerConfig->get('cron_run') === true,
                 'max_messages' => $runnerConfig->get('max_messages', static::DEFAULT_MAX_MESSAGES),
                 'consumers' => $runnerConfig->get('consumers', []),
+                'multiple_processes' => $runnerConfig->get('multiple_processes', []),
             ];
         } catch (GenericException $e) {
             throw new StepException($e->getMessage(), $e->getCode(), $e);

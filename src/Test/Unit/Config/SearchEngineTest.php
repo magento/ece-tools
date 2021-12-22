@@ -136,12 +136,15 @@ class SearchEngineTest extends TestCase
             ->method('get')
             ->with(DeployInterface::VAR_SEARCH_CONFIGURATION)
             ->willReturn($customSearchConfig);
-        $this->elasticSearchMock->expects($this->once())
+        $this->elasticSearchMock->expects($this->exactly(2))
             ->method('getConfiguration')
             ->willReturn($esServiceConfig);
         $this->openSearchMock->expects($this->once())
             ->method('getConfiguration')
             ->willReturn([]);
+        $this->elasticSearchMock->expects($this->once())
+            ->method('getHost')
+            ->willReturn('localhost');
         $this->elasticSearchMock->expects($this->once())
             ->method('isAuthEnabled')
             ->willReturn($authEnabled);
@@ -152,6 +155,8 @@ class SearchEngineTest extends TestCase
             ->willReturn('elasticsearch');
         $this->openSearchMock->expects($this->never())
             ->method('getFullEngineName');
+        $this->elasticSearchMock->method('getHost')
+            ->willReturn($esServiceConfig['host']);
 
         $expected = ['system' => ['default' => ['catalog' => ['search' => $expected]]]];
 
@@ -292,7 +297,7 @@ class SearchEngineTest extends TestCase
             ->method('isAuthEnabled');
         $this->elasticSearchMock->expects($this->never())
             ->method('getFullEngineName');
-        $this->openSearchMock->expects($this->once())
+        $this->openSearchMock->expects($this->exactly(2))
             ->method('getConfiguration')
             ->willReturn($osServiceConfig);
         $this->openSearchMock->expects($this->once())
@@ -301,6 +306,8 @@ class SearchEngineTest extends TestCase
         $this->openSearchMock->expects($this->once())
             ->method('getFullEngineName')
             ->willReturn('opensearch');
+        $this->openSearchMock->method('getHost')
+            ->willReturn($osServiceConfig['host']);
 
         $expected = ['system' => ['default' => ['catalog' => ['search' => $expected]]]];
 
@@ -432,7 +439,7 @@ class SearchEngineTest extends TestCase
             ->method('get')
             ->with(DeployInterface::VAR_SEARCH_CONFIGURATION)
             ->willReturn($customSearchConfig);
-        $this->elasticSearchMock->expects($this->once())
+        $this->elasticSearchMock->expects($this->exactly(2))
             ->method('getConfiguration')
             ->willReturn($esServiceConfig);
         $this->openSearchMock->expects($this->once())
@@ -449,6 +456,8 @@ class SearchEngineTest extends TestCase
         $this->elasticSearchMock->expects($this->once())
             ->method('getFullEngineName')
             ->willReturn('elasticsearch');
+        $this->elasticSearchMock->method('getHost')
+            ->willReturn($esServiceConfig['host']);
 
         $expected = ['system' => ['default' => $expected]];
 
