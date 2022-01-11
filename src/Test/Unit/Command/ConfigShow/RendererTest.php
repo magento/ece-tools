@@ -71,6 +71,9 @@ class RendererTest extends TestCase
                     'option2' => 'value2'
                 ]]
             ]);
+        $this->outputFormatterMock->expects(self::any())
+            ->method('format')
+            ->willReturnArgument(0);
         $this->outputMock->expects($this->atLeast(8))
             ->method('writeln')
             ->withConsecutive(
@@ -96,6 +99,9 @@ class RendererTest extends TestCase
                     'option1' => 'value1'
                 ]]
             ]);
+        $this->outputFormatterMock->expects(self::any())
+            ->method('format')
+            ->willReturnArgument(0);
         $this->outputMock->expects($this->atLeast(8))
             ->method('writeln')
             ->withConsecutive(
@@ -125,6 +131,9 @@ class RendererTest extends TestCase
                     'option2' => 'optionValue2'
                 ],
             ]);
+        $this->outputFormatterMock->expects(self::any())
+            ->method('format')
+            ->willReturnArgument(0);
         $this->outputMock->expects($this->atLeast(10))
             ->method('writeln')
             ->withConsecutive(
