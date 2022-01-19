@@ -138,6 +138,7 @@ class Error
     public const WARN_REMOTE_STORAGE_CANNOT_BE_ENABLED = 2028;
     public const WARN_DEPRECATED_SPLIT_DB = 2029;
     public const WARN_OS_ES_SERVICES_BOTH_INSTALLED = 2030;
+    public const WARN_REMOTE_STORAGE_CANNOT_BE_DISABLED = 2031;
 
     /**
      * Post-deploy
