@@ -82,6 +82,7 @@ class ServiceVersion implements ValidatorInterface
                 ServiceInterface::NAME_REDIS,
                 ServiceInterface::NAME_REDIS_SESSION,
                 ServiceInterface::NAME_ELASTICSEARCH,
+                ServiceInterface::NAME_OPENSEARCH,
                 $this->databaseType->getServiceName()
             ];
 

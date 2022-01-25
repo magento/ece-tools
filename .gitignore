@@ -9,3 +9,4 @@
 /codeception.yml
 /_workdir
 /*.code-workspace
+**/.phpunit.result.cache

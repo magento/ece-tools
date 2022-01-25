@@ -101,6 +101,7 @@
                 <item name="remote-storage" xsi:type="object" priority="1000">Magento\MagentoCloud\Step\Deploy\RemoteStorage</item>
                 <!-- Config update end -->
                 <item name="set-admin-url" xsi:type="object" priority="1000">Magento\MagentoCloud\Step\Deploy\InstallUpdate\Update\SetAdminUrl</item>
+                <item name="clean-cache" xsi:type="object" priority="1050">CleanCache.Deploy</item>
                 <item name="setup" xsi:type="object" priority="1100">Magento\MagentoCloud\Step\Deploy\InstallUpdate\Update\Setup</item>
                 <item name="split-db" xsi:type="object" priority="1200">Magento\MagentoCloud\Step\Deploy\SplitDbConnection</item>
                 <item name="cache-type" xsi:type="object" priority="1300">Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\CacheType</item>

@@ -70,9 +70,13 @@ class ElasticsearchIntegrityTest extends TestCase
      */
     public function testValidate(): void
     {
-        $this->magentoVersionMock->expects($this->exactly(2))
+        $this->magentoVersionMock->expects($this->once())
+            ->method('satisfies')
+            ->with('>=2.4.3-p2')
+            ->willReturn(false);
+        $this->magentoVersionMock->expects($this->once())
             ->method('isGreaterOrEqual')
-            ->withConsecutive(['2.4.4'], ['2.4.0'])
+            ->with('2.4.0')
             ->willReturn(false);
         $this->openSearchMock->expects($this->never())
             ->method('isInstalled');
@@ -87,9 +91,13 @@ class ElasticsearchIntegrityTest extends TestCase
      */
     public function testValidateNoElasticSearchAndNoOpenSearchMagentoGreater244(): void
     {
-        $this->magentoVersionMock->expects($this->exactly(2))
+        $this->magentoVersionMock->expects($this->once())
+            ->method('satisfies')
+            ->with('>=2.4.3-p2')
+            ->willReturn(true);
+        $this->magentoVersionMock->expects($this->once())
             ->method('isGreaterOrEqual')
-            ->withConsecutive(['2.4.4'], ['2.4.0'])
+            ->with('2.4.0')
             ->willReturn(true);
         $this->openSearchMock->expects($this->once())
             ->method('isInstalled')
@@ -109,10 +117,14 @@ class ElasticsearchIntegrityTest extends TestCase
      */
     public function testValidateWithElasticSearchNoOrWithOpenSearch240(): void
     {
-        $this->magentoVersionMock->expects($this->exactly(2))
+        $this->magentoVersionMock->expects($this->once())
+            ->method('satisfies')
+            ->with('>=2.4.3-p2')
+            ->willReturn(false);
+        $this->magentoVersionMock->expects($this->once())
             ->method('isGreaterOrEqual')
-            ->withConsecutive(['2.4.4'], ['2.4.0'])
-            ->willReturnOnConsecutiveCalls(false, true);
+            ->with('2.4.0')
+            ->willReturn(true);
         $this->openSearchMock->expects($this->never())
             ->method('isInstalled');
         $this->elasticSearchMock->expects($this->once())
@@ -129,10 +141,13 @@ class ElasticsearchIntegrityTest extends TestCase
      */
     public function testValidateWithElasticSearchNoOpenSearch244(): void
     {
-        $this->magentoVersionMock->expects($this->exactly(2))
+        $this->magentoVersionMock->expects($this->once())
+            ->method('satisfies')
+            ->with('>=2.4.3-p2')
+            ->willReturn(true);
+        $this->magentoVersionMock->expects($this->once())
             ->method('isGreaterOrEqual')
-            ->withConsecutive(['2.4.4'], ['2.4.0'])
-            ->willReturnOnConsecutiveCalls(true, true);
+            ->willReturn(true);
         $this->openSearchMock->expects($this->once())
             ->method('isInstalled')
             ->willReturn(false);
@@ -151,9 +166,11 @@ class ElasticsearchIntegrityTest extends TestCase
     public function testValidateWithOrNoElasticSearchWithOpenSearch244(): void
     {
         $this->magentoVersionMock->expects($this->once())
-            ->method('isGreaterOrEqual')
-            ->with('2.4.4')
+            ->method('satisfies')
+            ->with('>=2.4.3-p2')
             ->willReturn(true);
+        $this->magentoVersionMock->expects($this->never())
+            ->method('isGreaterOrEqual');
         $this->openSearchMock->expects($this->once())
             ->method('isInstalled')
             ->willReturn(true);
@@ -170,10 +187,14 @@ class ElasticsearchIntegrityTest extends TestCase
      */
     public function testValidateNoElasticSearchWithOpenSearch240(): void
     {
-        $this->magentoVersionMock->expects($this->exactly(2))
+        $this->magentoVersionMock->expects($this->once())
+            ->method('satisfies')
+            ->with('>=2.4.3-p2')
+            ->willReturn(false);
+        $this->magentoVersionMock->expects($this->once())
             ->method('isGreaterOrEqual')
-            ->withConsecutive(['2.4.4'], ['2.4.0'])
-            ->willReturnOnConsecutiveCalls(false, true);
+            ->with('2.4.0')
+            ->willReturn(true);
         $this->openSearchMock->expects($this->never())
             ->method('isInstalled');
         $this->elasticSearchMock->expects($this->once())

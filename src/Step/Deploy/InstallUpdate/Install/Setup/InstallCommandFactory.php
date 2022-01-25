@@ -246,7 +246,9 @@ class InstallCommandFactory
                 );
             }
 
-            if ($this->openSearch->isInstalled() && $this->magentoVersion->isGreaterOrEqual('2.4.4')) {
+            if ($this->openSearch->isInstalled()
+                && $this->magentoVersion->satisfies('>=2.3.7-p3 <2.4.0 || >=2.4.3-p2')
+            ) {
                 $engine = $this->openSearch->getFullEngineName();
                 $host = $this->openSearch->getHost();
                 $port = $this->openSearch->getPort();

@@ -66,7 +66,7 @@ class ElasticSearchIntegrity implements ValidatorInterface
     public function validate(): Validator\ResultInterface
     {
         try {
-            if ($this->magentoVersion->isGreaterOrEqual('2.4.4') && $this->openSearch->isInstalled()) {
+            if ($this->magentoVersion->satisfies('>=2.4.3-p2') && $this->openSearch->isInstalled()) {
                 return $this->resultFactory->success();
             }
 
