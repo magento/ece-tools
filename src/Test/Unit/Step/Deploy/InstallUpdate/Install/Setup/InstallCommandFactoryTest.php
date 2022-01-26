@@ -487,6 +487,10 @@ class InstallCommandFactoryTest extends TestCase
                 ['2.4.2', true],
                 ['2.4.4', true],
             ]);
+        $this->magentoVersionMock->expects($this->once())
+            ->method('satisfies')
+            ->with('>=2.3.7-p3 <2.4.0 || >=2.4.3-p2')
+            ->willReturn(true);
         $this->openSearchMock->expects($this->once())
             ->method('isInstalled')
             ->willReturn(true);

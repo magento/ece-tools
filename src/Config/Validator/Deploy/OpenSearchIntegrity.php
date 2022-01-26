@@ -71,7 +71,13 @@ class OpenSearchIntegrity implements ValidatorInterface
                 return $this->resultFactory->success();
             }
 
-            if ($this->magentoVersion->isGreaterOrEqual('2.4.4')
+            if (!$this->magentoVersion->satisfies('>=2.3.7-p3 <2.4.0 || >=2.4.3-p2')
+                && $this->openSearch->isInstalled()
+            ) {
+                return $this->resultFactory->errorByCode(Error::DEPLOY_MAGENTO_VERSION_DOES_NOT_SUPPORT_OS);
+            }
+
+            if ($this->magentoVersion->isGreaterOrEqual('2.4.3-p2')
                 && !$this->openSearch->isInstalled()
             ) {
                 return $this->resultFactory->errorByCode(Error::DEPLOY_OS_SERVICE_NOT_INSTALLED);

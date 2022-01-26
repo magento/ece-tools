@@ -7,9 +7,9 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Step\Deploy;
 
+use Magento\MagentoCloud\Config\Magento\Env\WriterInterface;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Package\MagentoVersion;
-use Magento\MagentoCloud\Shell\MagentoShell;
-use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Step\Deploy\RemoteStorage;
 use Magento\MagentoCloud\Step\StepException;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -33,11 +33,6 @@ class RemoteStorageTest extends TestCase
     private $configMock;
 
     /**
-     * @var MagentoShell|MockObject
-     */
-    private $magentoShellMock;
-
-    /**
      * @var MagentoVersion|MockObject
      */
     private $magentoVersionMock;
@@ -48,20 +43,25 @@ class RemoteStorageTest extends TestCase
     private $loggerMock;
 
     /**
+     * @var WriterInterface|MockObject
+     */
+    private $writerMock;
+
+    /**
      * @inheritDoc
      */
     protected function setUp(): void
     {
         $this->configMock = $this->createMock(Config::class);
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
-        $this->magentoShellMock = $this->createMock(MagentoShell::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->writerMock = $this->getMockForAbstractClass(WriterInterface::class);
 
         $this->step = new RemoteStorage(
             $this->configMock,
-            $this->magentoShellMock,
             $this->magentoVersionMock,
-            $this->loggerMock
+            $this->loggerMock,
+            $this->writerMock
         );
     }
 
@@ -80,15 +80,20 @@ class RemoteStorageTest extends TestCase
                 'bucket' => 'test_bucket',
                 'region' => 'test_region',
             ]);
-        $this->magentoShellMock->expects(self::once())
-            ->method('execute')
-            ->with(
-                'setup:config:set --remote-storage-driver=adapter'
-                . ' --remote-storage-bucket=test_bucket --remote-storage-region=test_region -n'
-            );
+        $this->writerMock->expects(self::once())
+            ->method('update')
+            ->with([
+                'remote_storage' => [
+                    'driver' => 'adapter',
+                    'config' => [
+                        'bucket' => 'test_bucket',
+                        'region' => 'test_region'
+                    ]
+                ]
+            ]);
         $this->loggerMock->expects(self::once())
             ->method('info')
-            ->with('Remote storage with driver "adapter" was enabled');
+            ->with('Remote storage driver set to: "adapter"');
 
         $this->step->execute();
     }
@@ -110,16 +115,24 @@ class RemoteStorageTest extends TestCase
                 'key' => 'test_key',
                 'secret' => 'test_secret'
             ]);
-        $this->magentoShellMock->expects(self::once())
-            ->method('execute')
-            ->with(
-                'setup:config:set --remote-storage-driver=adapter'
-                . ' --remote-storage-bucket=test_bucket --remote-storage-region=test_region'
-                . ' --remote-storage-key=test_key --remote-storage-secret=test_secret -n'
-            );
+        $this->writerMock->expects(self::once())
+            ->method('update')
+            ->with([
+                'remote_storage' => [
+                    'driver' => 'adapter',
+                    'config' => [
+                        'bucket' => 'test_bucket',
+                        'region' => 'test_region',
+                        'credentials' => [
+                            'key' => 'test_key',
+                            'secret' => 'test_secret'
+                        ]
+                    ]
+                ]
+            ]);
         $this->loggerMock->expects(self::once())
             ->method('info')
-            ->with('Remote storage with driver "adapter" was enabled');
+            ->with('Remote storage driver set to: "adapter"');
 
         $this->step->execute();
     }
@@ -143,17 +156,25 @@ class RemoteStorageTest extends TestCase
                 'key' => 'test_key',
                 'secret' => 'test_secret',
             ]);
-        $this->magentoShellMock->expects(self::once())
-            ->method('execute')
-            ->with(
-                'setup:config:set --remote-storage-driver=adapter'
-                . ' --remote-storage-bucket=test_bucket --remote-storage-region=test_region'
-                . ' --remote-storage-prefix=test_prefix'
-                . ' --remote-storage-key=test_key --remote-storage-secret=test_secret -n'
-            );
+        $this->writerMock->expects(self::once())
+            ->method('update')
+            ->with([
+                'remote_storage' => [
+                    'driver' => 'adapter',
+                    'config' => [
+                        'bucket' => 'test_bucket',
+                        'region' => 'test_region',
+                        'credentials' => [
+                            'key' => 'test_key',
+                            'secret' => 'test_secret'
+                        ],
+                        'prefix' => 'test_prefix'
+                    ]
+                ]
+            ]);
         $this->loggerMock->expects(self::once())
             ->method('info')
-            ->with('Remote storage with driver "adapter" was enabled');
+            ->with('Remote storage driver set to: "adapter"');
 
         $this->step->execute();
     }
@@ -168,11 +189,9 @@ class RemoteStorageTest extends TestCase
             ->willReturn(true);
         $this->configMock->method('getDriver')
             ->willReturn('');
-        $this->magentoShellMock->expects(self::once())
-            ->method('execute')
-            ->with(
-                'setup:config:set --remote-storage-driver=file -n'
-            );
+        $this->writerMock->expects(self::once())
+            ->method('update')
+            ->with(['remote_storage' => ['driver' => 'file']]);
 
         $this->step->execute();
     }
@@ -197,9 +216,9 @@ class RemoteStorageTest extends TestCase
                 'key' => 'test_key',
                 'secret' => 'test_secret'
             ]);
-        $this->magentoShellMock->expects(self::once())
-            ->method('execute')
-            ->willThrowException(new ShellException('Some error'));
+        $this->writerMock->expects(self::once())
+            ->method('update')
+            ->willThrowException(new FileSystemException('Some error'));
         $this->loggerMock->expects(self::once())
             ->method('critical')
             ->with('Some error');
