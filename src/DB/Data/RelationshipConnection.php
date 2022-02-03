@@ -68,4 +68,12 @@ class RelationshipConnection implements ConnectionInterface
     {
         return $this->connectionData['password'] ?? '';
     }
+
+    /**
+     * @inheritDoc
+     */
+    public function getDriverOptions()
+    {
+        return $this->connectionData['driver_options'] ?? [];
+    }
 }

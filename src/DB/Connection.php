@@ -218,9 +218,7 @@ class Connection implements ConnectionInterface
             ),
             $connectionData->getUser(),
             $connectionData->getPassword(),
-            [
-                \PDO::ATTR_PERSISTENT => true,
-            ]
+            [\PDO::ATTR_PERSISTENT => true] + $connectionData->getDriverOptions()
         );
     }
 
