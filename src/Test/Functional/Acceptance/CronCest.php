@@ -10,7 +10,7 @@ namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 /**
  * This test runs on the latest version of PHP
  *
- * @group php74
+ * @group php81
  */
 class CronCest extends AbstractCest
 {
@@ -120,7 +120,11 @@ class CronCest extends AbstractCest
 
             if (isset($previousTimestamp)) {
                 $diff = $timestamp->diff($previousTimestamp);
-                $I->assertEquals($timeInterval, $diff->i, 'Schedule is not ' . $timeInterval . ' minutes apart');
+                $I->assertContains(
+                    $diff->i,
+                    [$timeInterval, $timeInterval*3],
+                    'Schedule is not ' . $timeInterval . '/' . $timeInterval*3 . ' minutes apart'
+                );
             }
 
             $previousTimestamp = $timestamp;
@@ -134,7 +138,7 @@ class CronCest extends AbstractCest
     {
         return [
             [
-                'version' => '2.4.0',
+                'version' => '2.4.4',
                 'variables' => [
                     'MAGENTO_CLOUD_VARIABLES' => [
                         'ADMIN_EMAIL' => 'admin@example.com',

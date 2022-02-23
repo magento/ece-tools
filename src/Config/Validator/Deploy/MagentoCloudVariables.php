@@ -89,7 +89,7 @@ class MagentoCloudVariables implements ValidatorInterface
         foreach ($intVariables as $intVarName) {
             if (isset($variables[$intVarName])
                 && !is_int($variables[$intVarName])
-                && !ctype_digit($variables[$intVarName])
+                && !ctype_digit(strval($variables[$intVarName]))
             ) {
                 $errors[] = sprintf(
                     '  The variable %s has wrong value "%s" and will be ignored, use only integer value',
@@ -100,7 +100,7 @@ class MagentoCloudVariables implements ValidatorInterface
         }
 
         if (isset($variables[DeployInterface::VAR_SCD_COMPRESSION_LEVEL])) {
-            if (!ctype_digit($variables[DeployInterface::VAR_SCD_COMPRESSION_LEVEL])
+            if (!ctype_digit(strval($variables[DeployInterface::VAR_SCD_COMPRESSION_LEVEL]))
                 || !in_array(intval($variables[DeployInterface::VAR_SCD_COMPRESSION_LEVEL]), range(0, 9))
             ) {
                 $errors[] = sprintf(

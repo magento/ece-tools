@@ -7,6 +7,8 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 
+use Magento\MagentoCloud\Util\ArrayManager;
+
 /**
  * General Cest
  * @SuppressWarnings(PHPMD.NumberOfChildren)
@@ -27,6 +29,11 @@ abstract class AbstractCest
      * @var string
      */
     protected $magentoCloudTemplate = 'master';
+
+    /**
+     * @var ArrayManager
+     */
+    protected $arrayManager;
 
     /**
      * @param \CliTester $I
@@ -134,6 +141,36 @@ abstract class AbstractCest
                 unset($app['relationships']['elasticsearch']);
                 $I->writeAppMagentoYaml($app);
             }
+        }
+    }
+
+    /**
+     * @return ArrayManager
+     */
+    protected function getArrayManager(): ArrayManager
+    {
+        if ($this->arrayManager == null) {
+            $this->arrayManager = new ArrayManager();
+        }
+
+        return $this->arrayManager;
+    }
+
+    /**
+     * Perform asserts for arrays to check that $array contains information from $subset
+     *
+     * @param array $subset
+     * @param array $array
+     * @param \CliTester $I
+     * @return void
+     */
+    protected function checkArraySubset(array $subset, array $array, \CliTester $I): void
+    {
+        $flattenArray = $this->getArrayManager()->flatten($array);
+        $flattenSubset = $this->getArrayManager()->flatten($subset);
+        foreach ($flattenSubset as $path => $value) {
+            $I->assertArrayHasKey($path, $flattenArray);
+            $I->assertEquals($value, $flattenArray[$path]);
         }
     }
 }

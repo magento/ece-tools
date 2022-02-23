@@ -47,7 +47,7 @@ class ConfigShowTest extends TestCase
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->configRendererMock = $this->createMock(ConfigShow\Renderer::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);

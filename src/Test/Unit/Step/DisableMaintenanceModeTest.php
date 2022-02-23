@@ -33,7 +33,7 @@ class DisableMaintenanceModeTest extends TestCase
     /**
      * @inheritDoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->switcherMock = $this->createMock(MaintenanceModeSwitcher::class);
 

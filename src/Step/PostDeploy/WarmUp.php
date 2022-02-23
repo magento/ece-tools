@@ -88,15 +88,15 @@ class WarmUp implements StepInterface
                 $this->logger->info('Warmed up page: ' . $urls[$index]);
             };
 
-            $config['rejected'] = function (RequestException $exception, $index) use ($urls) {
+            $config['rejected'] = function ($exception, $index) use ($urls) {
                 $context = [];
 
-                if ($exception->getResponse()) {
+                if (method_exists($exception, 'getResponse') && $exception->getResponse()) {
                     $context = [
                         'error' => $exception->getResponse()->getReasonPhrase(),
                         'code' => $exception->getResponse()->getStatusCode(),
                     ];
-                } elseif ($exception->getHandlerContext()) {
+                } elseif (method_exists($exception, 'getHandlerContext') && $exception->getHandlerContext()) {
                     $context = [
                         'error' => $exception->getHandlerContext()['error'] ?? '',
                         'errno' => $exception->getHandlerContext()['errno'] ?? '',

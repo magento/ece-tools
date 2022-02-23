@@ -20,7 +20,7 @@ class Validator
      * Supported version constraints of Redis services
      */
     private const REDIS_SUPPORT_VERSIONS = [
-        '*' => '~3.2.0 || ~4.0.0 || ~5.0.0 || ~6.0.0',
+        '*' => '~3.2.0 || ~4.0.0 || ~5.0.0 || ~6.0.0 || ~6.2.0',
     ];
 
     /**
@@ -76,7 +76,8 @@ class Validator
         ],
         ServiceInterface::NAME_RABBITMQ => [
             '<2.3.0' => '~3.5.0',
-            '>=2.3.0' => '~3.5.0 || ~3.7.0 || ~3.8.0',
+            '>=2.3.0 <2.4.4' => '~3.5.0 || ~3.7.0 || ~3.8.0',
+            '>=2.4.4' => '~3.5.0 || ~3.7.0 || ~3.8.0 || ~3.9.0',
         ],
         ServiceInterface::NAME_NODE => [
             '*' => '^6 || ^8 || ^10 || ^11',

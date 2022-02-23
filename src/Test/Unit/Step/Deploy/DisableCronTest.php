@@ -45,7 +45,7 @@ class DisableCronTest extends TestCase
     /**
      * Setup the test environment.
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->backgroundProcessKillMock = $this->createMock(BackgroundProcessKill::class);
         $this->cronSwitcherMock = $this->createMock(Switcher::class);

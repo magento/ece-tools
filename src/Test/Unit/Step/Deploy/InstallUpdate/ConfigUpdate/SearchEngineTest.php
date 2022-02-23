@@ -17,7 +17,6 @@ use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Package\UndefinedPackageException;
 use Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\SearchEngine;
 use Magento\MagentoCloud\Step\StepException;
-use PHPUnit\Framework\MockObject\Matcher\InvokedCount;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -70,7 +69,7 @@ class SearchEngineTest extends TestCase
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->envWriterMock = $this->getMockForAbstractClass(EnvWriter::class);
         $this->envReaderMock = $this->getMockForAbstractClass(EnvReader::class);
@@ -93,10 +92,10 @@ class SearchEngineTest extends TestCase
 
     /**
      * @param bool $is21
-     * @param InvokedCount $useSharedWriter
-     * @param InvokedCount $useSharedReader
-     * @param InvokedCount $useEnvWriter
-     * @param InvokedCount $useEnvReader
+     * @param $useSharedWriter
+     * @param $useSharedReader
+     * @param $useEnvWriter
+     * @param $useEnvReader
      * @param array $searchConfig
      * @param array $fileConfig
      * @param array $expectedConfig
@@ -105,10 +104,10 @@ class SearchEngineTest extends TestCase
      */
     public function testExecute(
         bool $is21,
-        InvokedCount $useSharedWriter,
-        InvokedCount $useSharedReader,
-        InvokedCount $useEnvWriter,
-        InvokedCount $useEnvReader,
+        $useSharedWriter,
+        $useSharedReader,
+        $useEnvWriter,
+        $useEnvReader,
         array $searchConfig,
         array $fileConfig,
         array $expectedConfig

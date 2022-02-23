@@ -2,7 +2,7 @@
   "name": "magento/ece-tools",
   "description": "Provides tools to build and deploy Magento 2 Enterprise Edition",
   "type": "magento2-component",
-  "version": "2002.1.8",
+  "version": "2002.1.9",
   "license": "OSL-3.0",
   "repositories": {
     "repo.magento.com": {
@@ -11,7 +11,7 @@
     }
   },
   "require": {
-    "php": "^7.1.3",
+    "php": "^7.2 || ^8.0",
     "ext-PDO": "*",
     "ext-json": "*",
     "ext-sockets": "*",
@@ -20,7 +20,7 @@
     "composer/semver": "@stable",
     "graylog2/gelf-php": "^1.4.2",
     "guzzlehttp/guzzle": "^6.3||^7.3",
-    "illuminate/config": "^5.5",
+    "illuminate/config": "^5.5||^8.77",
     "magento/magento-cloud-components": "^1.0.8",
     "magento/magento-cloud-docker": "^1.0.0",
     "magento/magento-cloud-patches": "^1.0.11",
@@ -37,13 +37,17 @@
     "symfony/yaml": "^3.3 || ^4.0 || ^5.1"
   },
   "require-dev": {
-    "codeception/codeception": "^2.5.3",
+    "codeception/codeception": "^4.1",
+    "codeception/module-asserts": "^1.2",
+    "codeception/module-db": "^1.0",
+    "codeception/module-phpbrowser": "^1.0",
+    "codeception/module-rest": "^1.2",
     "consolidation/robo": "^1.2",
     "php-mock/php-mock-phpunit": "^2.0",
     "phpmd/phpmd": "@stable",
     "phpstan/phpstan": "^0.12",
-    "phpunit/php-code-coverage": "^6.0",
-    "phpunit/phpunit": "^7.2",
+    "phpunit/php-code-coverage": "^7.0 || ^9.2",
+    "phpunit/phpunit": "^8.5 || ^9.5",
     "squizlabs/php_codesniffer": "^3.0",
     "funkjedi/composer-include-files": "^1.0"
   },

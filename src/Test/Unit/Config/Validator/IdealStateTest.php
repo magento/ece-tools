@@ -56,7 +56,7 @@ class IdealStateTest extends TestCase
     /**
      * @inheritdoc
      */
-    public function setUp()
+    public function setUp(): void
     {
         $this->resultFactoryMock = $this->createMock(ResultFactory::class);
         $this->validatorFactoryMock = $this->createMock(ValidatorFactory::class);

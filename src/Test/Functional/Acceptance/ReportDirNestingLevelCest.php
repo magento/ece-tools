@@ -12,10 +12,15 @@ use Magento\MagentoCloud\Config\Stage\BuildInterface;
 /**
  * This test runs on the latest version of PHP
  *
- * @group php74
+ * @group php81
  */
 class ReportDirNestingLevelCest extends AbstractCest
 {
+    /**
+     * @var string
+     */
+    protected $magentoCloudTemplate = '2.4.4';
+
     /**
      * @var string
      */
@@ -35,12 +40,12 @@ class ReportDirNestingLevelCest extends AbstractCest
         $I->runDockerComposeCommand('run build cloud-build');
         $I->startEnvironment();
         $I->runDockerComposeCommand('run deploy cloud-deploy');
-        $I->assertContains(
+        $I->assertStringContainsString(
             $this->getTemplateLocalXm(1),
             $I->grabFileContent('/pub/errors/local.xml')
         );
         $log = $I->grabFileContent('/var/log/cloud.log');
-        $I->assertContains(
+        $I->assertStringContainsString(
             sprintf(
                 'NOTICE: The file %s with the `config.report.dir_nesting_level` property: `1` was created.',
                 $this->expectedPathLocalXml
@@ -64,12 +69,12 @@ class ReportDirNestingLevelCest extends AbstractCest
         $I->runDockerComposeCommand('run build cloud-build');
         $I->startEnvironment();
         $I->runDockerComposeCommand('run deploy cloud-deploy');
-        $I->assertContains(
+        $I->assertStringContainsString(
             $this->getTemplateLocalXm(3),
             $I->grabFileContent('/pub/errors/local.xml')
         );
         $log = $I->grabFileContent('/var/log/cloud.log');
-        $I->assertContains(
+        $I->assertStringContainsString(
             sprintf(
                 'NOTICE: The file %s with the `config.report.dir_nesting_level` property: `3` was created.',
                 $this->expectedPathLocalXml
@@ -95,7 +100,7 @@ class ReportDirNestingLevelCest extends AbstractCest
         $I->startEnvironment();
         $I->runDockerComposeCommand('run deploy cloud-deploy');
         $log = $I->grabFileContent('/var/log/cloud.log');
-        $I->assertContains(
+        $I->assertStringContainsString(
             sprintf(
                 'NOTICE: The error reports configuration file `%s` exists.'
                 . ' Value of the property `%s` of .magento.env.yaml will be ignored',
@@ -127,7 +132,7 @@ class ReportDirNestingLevelCest extends AbstractCest
         $I->runDockerComposeCommand('run deploy cloud-deploy');
 
         $log = $I->grabFileContent('/var/log/cloud.log');
-        $I->assertContains(
+        $I->assertStringContainsString(
             sprintf(
                 'NOTICE: The error reports configuration file `%s` exists.'
                 . ' Value of the property `%s` of .magento.env.yaml will be ignored',
@@ -155,7 +160,7 @@ class ReportDirNestingLevelCest extends AbstractCest
         $I->startEnvironment();
         $I->runDockerComposeCommand('run deploy cloud-deploy');
         $log = $I->grabFileContent('/var/log/cloud.log');
-        $I->assertContains(
+        $I->assertStringContainsString(
             sprintf(
                 'NOTICE: The error reports configuration file `%s` exists.'
                 . ' Value of the property `%s` of .magento.env.yaml will be ignored',
@@ -164,11 +169,11 @@ class ReportDirNestingLevelCest extends AbstractCest
             ),
             $log
         );
-        $I->assertContains(
+        $I->assertStringContainsString(
             'The directory nesting level value for error reporting has not been configured.',
             $log
         );
-        $I->assertContains(
+        $I->assertStringContainsString(
             'You can configure the setting using the `config.report.dir_nesting_level` variable'
             . ' in the file ' . $this->expectedPathLocalXml,
             $log
@@ -192,7 +197,7 @@ class ReportDirNestingLevelCest extends AbstractCest
         $I->startEnvironment();
         $I->runDockerComposeCommand('run deploy cloud-deploy');
         $log = $I->grabFileContent('/var/log/cloud.log');
-        $I->assertContains(
+        $I->assertStringContainsString(
             sprintf(
                 'NOTICE: The error reports configuration file `%s` exists.'
                 . ' Value of the property `%s` of .magento.env.yaml will be ignored',
@@ -201,11 +206,11 @@ class ReportDirNestingLevelCest extends AbstractCest
             ),
             $log
         );
-        $I->assertContains(
+        $I->assertStringContainsString(
             "Invalid configuration in the {$this->expectedPathLocalXml} file.",
             $log
         );
-        $I->assertContains(
+        $I->assertStringContainsString(
             'Fix the directory nesting level configuration for error reporting in the file '
             . $this->expectedPathLocalXml,
             $log

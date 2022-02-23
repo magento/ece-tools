@@ -69,7 +69,7 @@ class DumpGeneratorTest extends TestCase
     /**
      * Setup the test environment.
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->dumpMock = $this->getMockForAbstractClass(DumpInterface::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
@@ -97,7 +97,7 @@ class DumpGeneratorTest extends TestCase
         );
     }
 
-    protected function tearDown()
+    protected function tearDown(): void
     {
         if (file_exists($this->tmpDir . '/dbdump.lock')) {
             unlink($this->tmpDir . '/dbdump.lock');

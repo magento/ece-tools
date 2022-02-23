@@ -59,7 +59,7 @@ class GenerateTest extends TestCase
     /**
      * @inheritDoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->connectionMock = $this->getMockForAbstractClass(ConnectionInterface::class);
         $this->fileMock = $this->createMock(File::class);

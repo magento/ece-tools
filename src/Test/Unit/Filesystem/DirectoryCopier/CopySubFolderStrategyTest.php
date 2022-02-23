@@ -34,7 +34,7 @@ class CopySubFolderStrategyTest extends TestCase
      */
     private $loggerMock;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->fileMock = $this->createMock(File::class);
         $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)

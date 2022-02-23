@@ -34,7 +34,7 @@ class ConfigShowUrlCommandTest extends TestCase
     /**
      * @inheritDoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->magentoShellMock = $this->createMock(MagentoShell::class);
         /** @var ShellFactory|MockObject $shellFactoryMock */

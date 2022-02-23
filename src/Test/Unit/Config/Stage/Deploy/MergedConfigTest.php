@@ -48,7 +48,7 @@ class MergedConfigTest extends TestCase
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->environmentReaderMock = $this->createMock(EnvironmentReader::class);
         $this->environmentConfigMock = $this->createMock(EnvironmentConfig::class);

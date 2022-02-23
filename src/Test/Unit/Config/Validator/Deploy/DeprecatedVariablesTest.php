@@ -44,7 +44,7 @@ class DeprecatedVariablesTest extends TestCase
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->environmentMock = $this->createPartialMock(Environment::class, ['getVariables']);
         $this->resultFactoryMock = $this->createConfiguredMock(ResultFactory::class, [
@@ -101,7 +101,7 @@ class DeprecatedVariablesTest extends TestCase
         ];
     }
 
-    public function tearDown()
+    public function tearDown(): void
     {
         $_ENV = $this->envBackup;
     }

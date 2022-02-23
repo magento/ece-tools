@@ -135,7 +135,7 @@ class DbConnectionTest extends TestCase
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
         $this->dbConfigMock = $this->createMock(DbConfig::class);

@@ -33,7 +33,7 @@ class ValidatorTest extends TestCase
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
 
@@ -325,7 +325,10 @@ class ValidatorTest extends TestCase
             [
                 '2.4.4',
                 [
-                    ServiceInterface::NAME_OPENSEARCH => '1.2.2'
+                    ServiceInterface::NAME_OPENSEARCH => '1.2.2',
+                    ServiceInterface::NAME_REDIS => '6.2',
+                    ServiceInterface::NAME_REDIS_SESSION => '6.2',
+                    ServiceInterface::NAME_RABBITMQ => '3.9'
                 ],
                 0
             ],

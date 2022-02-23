@@ -45,7 +45,7 @@ class PoolTest extends TestCase
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->logConfigMock = $this->createMock(LogConfig::class);
         $this->lineFormatterFactoryMock = $this->createMock(LineFormatterFactory::class);

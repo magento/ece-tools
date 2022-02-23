@@ -42,7 +42,7 @@ class SetupTest extends TestCase
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->flagManagerMock = $this->createMock(FlagManager::class);
         $this->upgradeProcessMock = $this->createMock(UpgradeProcess::class);

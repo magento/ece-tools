@@ -50,7 +50,7 @@ class ScdOnBuildTest extends TestCase
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->resultFactoryMock = $this->createMock(ResultFactory::class);
         $this->globalConfigMock = $this->createMock(GlobalSection::class);

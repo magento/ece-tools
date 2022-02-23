@@ -35,7 +35,7 @@ class PatternFactoryTest extends TestCase
     /**
      * @inheritDoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->containerMock = $this->createMock(ContainerInterface::class);
 

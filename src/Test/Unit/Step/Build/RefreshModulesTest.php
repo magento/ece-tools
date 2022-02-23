@@ -42,7 +42,7 @@ class RefreshModulesTest extends TestCase
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->configMock = $this->createMock(Module::class);

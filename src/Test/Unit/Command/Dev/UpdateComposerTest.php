@@ -59,7 +59,7 @@ class UpdateComposerTest extends TestCase
     /**
      * @inheritDoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->composerGeneratorMock = $this->createMock(UpdateComposer\ComposerGenerator::class);
         $this->clearModuleRequirementsMock = $this->createMock(UpdateComposer\ClearModuleRequirements::class);

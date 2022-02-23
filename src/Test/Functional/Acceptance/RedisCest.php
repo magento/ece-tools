@@ -12,7 +12,7 @@ use Magento\CloudDocker\Test\Functional\Codeception\Docker;
 /**
  * Checks Redis configuration
  *
- * @group php74
+ * @group php81
  */
 class RedisCest extends AbstractCest
 {
@@ -61,7 +61,7 @@ class RedisCest extends AbstractCest
             $config['cache']['frontend']['default']['backend'],
             'Wrong backend model'
         );
-        $I->assertArraySubset(
+        $this->checkArraySubset(
             [
                 'backend_options' => [
                     'server' => 'redis',
@@ -69,14 +69,15 @@ class RedisCest extends AbstractCest
                     'database' => 1,
                 ]
             ],
-            $config['cache']['frontend']['default']
+            $config['cache']['frontend']['default'],
+            $I
         );
         $I->assertSame(
             'Cm_Cache_Backend_Redis',
             $config['cache']['frontend']['page_cache']['backend'],
             'Wrong backend model'
         );
-        $I->assertArraySubset(
+        $this->checkArraySubset(
             [
                 'backend_options' => [
                     'server' => 'redis',
@@ -84,7 +85,8 @@ class RedisCest extends AbstractCest
                     'database' => 2,
                 ]
             ],
-            $config['cache']['frontend']['page_cache']
+            $config['cache']['frontend']['page_cache'],
+            $I
         );
         $I->assertArrayNotHasKey('type', $config['cache']);
 
@@ -100,7 +102,7 @@ class RedisCest extends AbstractCest
     {
         return [
             [
-                'version' => 'master',
+                'version' => '2.4.4',
             ],
         ];
     }
@@ -123,7 +125,7 @@ class RedisCest extends AbstractCest
 
         $I->assertSame($data['buildSuccess'], $I->runDockerComposeCommand('run build cloud-build'));
         $I->seeInOutput($data['errorBuildMessage']);
-
+        $I->assertTrue($I->startEnvironment(), 'Docker could not start');
         $I->assertSame($data['deploySuccess'], $I->runDockerComposeCommand('run build cloud-deploy'));
         $I->seeInOutput($data['errorDeployMessage']);
     }
@@ -135,7 +137,7 @@ class RedisCest extends AbstractCest
     {
         return [
             [
-                'version' => 'master',
+                'version' => '2.4.4',
                 'wrongConfiguration' => [
                     'stage' => [
                         'deploy' => [
@@ -182,9 +184,10 @@ class RedisCest extends AbstractCest
             'Wrong backend model'
         );
 
-        $I->assertArraySubset(
+        $this->checkArraySubset(
             $data['expectedConfig'],
-            $config['cache']['frontend']['default']
+            $config['cache']['frontend']['default'],
+            $I
         );
 
         $I->amOnPage('/');
@@ -200,7 +203,7 @@ class RedisCest extends AbstractCest
     {
         return [
             [
-                'version' => 'master',
+                'version' => '2.4.4',
                 'backendModel' => [
                     'stage' => [
                         'deploy' => [
@@ -218,7 +221,7 @@ class RedisCest extends AbstractCest
                 ],
             ],
             [
-                'version' => 'master',
+                'version' => '2.4.4',
                 'backendModel' => [
                     'stage' => [
                         'deploy' => [

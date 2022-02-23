@@ -24,7 +24,7 @@ class PoolTest extends TestCase
     /**
      * @inheritDoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->pool = new Pool();
     }

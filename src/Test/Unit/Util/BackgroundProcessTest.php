@@ -38,7 +38,7 @@ class BackgroundProcessTest extends TestCase
     /**
      * @inheritDoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->shellMock = $this->createMock(ShellInterface::class);
@@ -123,7 +123,7 @@ class BackgroundProcessTest extends TestCase
         $processMock = $this->getMockForAbstractClass(ProcessInterface::class);
         $processMock->expects($this->once())
             ->method('getOutput')
-            ->willReturn("111\n222");
+            ->willReturn("111");
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
             ->withConsecutive(
@@ -133,14 +133,16 @@ class BackgroundProcessTest extends TestCase
         $this->loggerMock->expects($this->once())
             ->method('debug')
             ->with('some error');
-        $this->shellMock->expects($this->at(0))
+        $this->shellMock->expects($this->exactly(2))
             ->method('execute')
-            ->with('pgrep -U "$(id -u)" -f "bin/magento +(cron:run|queue:consumers:start)"')
-            ->willReturn($processMock);
-        $this->shellMock->expects($this->at(1))
-            ->method('execute')
-            ->with('kill 111')
-            ->willThrowException(new ShellException('some error', 1));
+            ->withConsecutive(
+                ['pgrep -U "$(id -u)" -f "bin/magento +(cron:run|queue:consumers:start)"'],
+                ['kill 111']
+            )
+            ->willReturnOnConsecutiveCalls(
+                $processMock,
+                $this->throwException(new ShellException('some error', 1))
+            );
 
         $this->process->kill();
     }

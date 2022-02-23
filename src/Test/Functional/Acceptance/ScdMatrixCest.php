@@ -10,10 +10,15 @@ namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 /**
  * This test runs on the latest version of PHP
  *
- * @group php74
+ * @group php81
  */
 class ScdMatrixCest extends AbstractCest
 {
+    /**
+     * @var string
+     */
+    protected $magentoCloudTemplate = '2.4.4';
+
     /**
      * @param \CliTester $I
      * @param \Codeception\Example $data

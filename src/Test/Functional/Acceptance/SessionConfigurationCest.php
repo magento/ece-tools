@@ -11,10 +11,15 @@ namespace Magento\MagentoCloud\Test\Functional\Acceptance;
  * This scenario checks that session can be configured through environment variable SESSION_CONFIGURATION
  * Zephyr ID MAGECLOUD-46
  *
- * @group php74
+ * @group php81
  */
 class SessionConfigurationCest extends AbstractCest
 {
+    /**
+     * @var string
+     */
+    protected $magentoCloudTemplate = '2.4.4';
+
     /**
      * @param \CliTester $I
      * @param \Codeception\Example $data
@@ -34,8 +39,8 @@ class SessionConfigurationCest extends AbstractCest
         $I->runDockerComposeCommand('run deploy cloud-deploy');
 
         $file = $I->grabFileContent('/app/etc/env.php');
-        $I->assertContains($data['mergedConfig'], $file);
-        $I->assertContains($data['defaultConfig'], $file);
+        $I->assertStringContainsString($data['mergedConfig'], $file);
+        $I->assertStringContainsString($data['defaultConfig'], $file);
     }
 
     /**

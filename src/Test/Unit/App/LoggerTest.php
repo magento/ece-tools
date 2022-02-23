@@ -60,7 +60,7 @@ class LoggerTest extends TestCase
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         self::defineFunctionMock('Magento\MagentoCloud\App', 'shell_exec');
 

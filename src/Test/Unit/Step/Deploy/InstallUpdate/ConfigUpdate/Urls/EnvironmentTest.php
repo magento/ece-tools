@@ -9,7 +9,6 @@ namespace Magento\MagentoCloud\Test\Unit\Step\Deploy\InstallUpdate\ConfigUpdate\
 
 use Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\Urls\Environment;
 use Magento\MagentoCloud\Step\StepException;
-use PHPUnit\Framework\MockObject\Matcher\InvokedCount;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface;
@@ -50,7 +49,7 @@ class EnvironmentTest extends TestCase
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->urlManagerMock = $this->createMock(UrlManager::class);
@@ -66,18 +65,18 @@ class EnvironmentTest extends TestCase
     }
 
     /**
-     * @param InvokedCount $loggerInfoExpects
+     * @param $loggerInfoExpects
      * @param array $urlManagerGetUrlsWillReturn
-     * @param InvokedCount $writerWriteExpects
+     * @param $writerWriteExpects
      *
      * @throws StepException
      *
      * @dataProvider executeDataProvider
      */
     public function testExecute(
-        InvokedCount $loggerInfoExpects,
+        $loggerInfoExpects,
         array $urlManagerGetUrlsWillReturn,
-        InvokedCount $writerWriteExpects
+        $writerWriteExpects
     ): void {
         $this->loggerMock->expects($loggerInfoExpects)
             ->method('info')

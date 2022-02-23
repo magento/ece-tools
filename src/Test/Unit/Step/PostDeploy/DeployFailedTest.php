@@ -32,7 +32,7 @@ class DeployFailedTest extends TestCase
     /**
      * @inheritDoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->flagManagerMock = $this->createMock(Manager::class);
 

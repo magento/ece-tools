@@ -8,9 +8,9 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 
 /**
- * @group php72
+ * @group php74
  */
-class Cron22Cest extends CronCest
+class Cron24Cest extends CronCest
 {
     /**
      * @return array
@@ -19,7 +19,7 @@ class Cron22Cest extends CronCest
     {
         return [
             [
-                'version' => '2.2.10',
+                'version' => '2.4.0',
                 'variables' => [
                     'MAGENTO_CLOUD_VARIABLES' => [
                         'ADMIN_EMAIL' => 'admin@example.com',
@@ -27,15 +27,6 @@ class Cron22Cest extends CronCest
                     ],
                 ],
             ],
-            [
-                'version' => '2.2.11',
-                'variables' => [
-                    'MAGENTO_CLOUD_VARIABLES' => [
-                        'ADMIN_EMAIL' => 'admin@example.com',
-                        'ADMIN_LOCALE' => 'ar_KW'
-                    ],
-                ],
-            ]
         ];
     }
 }

@@ -67,7 +67,7 @@ class ComposerGeneratorTest extends TestCase
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->directoryListMock = $this->createMock(DirectoryList::class);
         $this->directoryListMock->expects($this->any())

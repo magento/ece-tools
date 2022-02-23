@@ -9,10 +9,15 @@ namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 
 /**
  * This test runs on the latest version of PHP
- * @group php74
+ * @group php81
  */
 class AdminCredentialCest extends AbstractCest
 {
+    /**
+     * @var string
+     */
+    protected $magentoCloudTemplate = '2.4.4';
+
     /**
      * @param \CliTester $I
      */
@@ -46,17 +51,17 @@ class AdminCredentialCest extends AbstractCest
         $I->see('CMS homepage content goes here.');
 
         $log = $I->grabFileContent('/var/log/cloud.log');
-        $I->assertContains($data['installMessage'], $log);
-        $I->assertNotContains('--admin-user', $log);
-        $I->assertNotContains('--admin-firstname', $log);
-        $I->assertNotContains('--admin-lastname', $log);
-        $I->assertNotContains('--admin-email', $log);
-        $I->assertNotContains('--admin-password', $log);
+        $I->assertStringContainsString($data['installMessage'], $log);
+        $I->assertStringNotContainsString('--admin-user', $log);
+        $I->assertStringNotContainsString('--admin-firstname', $log);
+        $I->assertStringNotContainsString('--admin-lastname', $log);
+        $I->assertStringNotContainsString('--admin-email', $log);
+        $I->assertStringNotContainsString('--admin-password', $log);
 
         // Upgrade
         $I->runDockerComposeCommand('run deploy cloud-deploy');
 
-        $I->assertContains($data['upgradeMessage'], $I->grabFileContent('/var/log/cloud.log'));
+        $I->assertStringContainsString($data['upgradeMessage'], $I->grabFileContent('/var/log/cloud.log'));
     }
 
     /**
@@ -102,17 +107,17 @@ class AdminCredentialCest extends AbstractCest
         $I->see('CMS homepage content goes here.');
 
         $credentialsEmail = $I->grabFileContent('/var/credentials_email.txt');
-        $I->assertContains($data['expectedAdminEmail'], $credentialsEmail);
-        $I->assertContains($data['expectedAdminUsername'], $credentialsEmail);
-        $I->assertContains($data['expectedAdminUrl'], $credentialsEmail);
+        $I->assertStringContainsString($data['expectedAdminEmail'], $credentialsEmail);
+        $I->assertStringContainsString($data['expectedAdminUsername'], $credentialsEmail);
+        $I->assertStringContainsString($data['expectedAdminUrl'], $credentialsEmail);
 
         $log = $I->grabFileContent('/var/log/cloud.log');
-        $I->assertContains('--admin-user', $log);
-        $I->assertContains('--admin-firstname', $log);
-        $I->assertContains('--admin-lastname', $log);
-        $I->assertContains('--admin-email', $log);
-        $I->assertContains('--admin-password', $log);
-        $I->assertNotContains(
+        $I->assertStringContainsString('--admin-user', $log);
+        $I->assertStringContainsString('--admin-firstname', $log);
+        $I->assertStringContainsString('--admin-lastname', $log);
+        $I->assertStringContainsString('--admin-email', $log);
+        $I->assertStringContainsString('--admin-password', $log);
+        $I->assertStringNotContainsString(
             'The following admin data was ignored and an admin was not created because admin email is not set',
             $log
         );
@@ -120,7 +125,7 @@ class AdminCredentialCest extends AbstractCest
         // Upgrade
         $I->runDockerComposeCommand('run deploy cloud-deploy');
 
-        $I->assertNotContains(
+        $I->assertStringNotContainsString(
             'The following admin data is required to create an admin user during initial installation only'
             . ' and is ignored during upgrade process: admin login',
             $I->grabFileContent('/var/log/cloud.log')

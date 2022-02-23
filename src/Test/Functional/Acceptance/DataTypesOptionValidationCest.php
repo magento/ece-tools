@@ -10,10 +10,15 @@ namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 /**
  * This test runs on the latest version of PHP
  *
- * @group php74
+ * @group php81
  */
 class DataTypesOptionValidationCest extends AbstractCest
 {
+    /**
+     * @var string
+     */
+    protected $magentoCloudTemplate = '2.4.4';
+
     /**
      * @param \CliTester $I
      * @param \Codeception\Example $data
@@ -33,7 +38,7 @@ class DataTypesOptionValidationCest extends AbstractCest
         $I->runDockerComposeCommand('run deploy cloud-deploy');
 
         $log = $I->grabFileContent('/var/log/cloud.log');
-        $I->assertContains($data['expectedError'], $log);
+        $I->assertStringContainsString($data['expectedError'], $log);
     }
 
     /**

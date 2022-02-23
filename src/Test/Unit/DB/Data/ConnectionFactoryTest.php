@@ -30,7 +30,7 @@ class ConnectionFactoryTest extends TestCase
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->dbConfigMock = $this->createMock(DbConfig::class);
 

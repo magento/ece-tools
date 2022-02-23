@@ -67,7 +67,7 @@ class DbConfigTest extends TestCase
     /**
      * @throws \ReflectionException
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
         $this->envConnectionDataFactoryMock = $this->createMock(RelationshipConnectionFactory::class);

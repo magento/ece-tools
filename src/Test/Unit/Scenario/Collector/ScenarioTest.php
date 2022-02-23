@@ -44,7 +44,7 @@ class ScenarioTest extends TestCase
     /**
      * @inheritDoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->pathResolverMock = $this->createMock(PathResolver::class);
         $this->fileMock = $this->createMock(File::class);

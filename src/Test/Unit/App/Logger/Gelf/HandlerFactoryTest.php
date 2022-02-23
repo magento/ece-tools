@@ -39,7 +39,7 @@ class HandlerFactoryTest extends TestCase
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->transportFactoryMock = $this->createMock(TransportFactory::class);
         $this->repositoryMock = $this->createMock(Repository::class);

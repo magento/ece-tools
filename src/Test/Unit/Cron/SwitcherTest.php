@@ -36,7 +36,7 @@ class SwitcherTest extends TestCase
     /**
      * @inheritDoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->readerMock = $this->getMockForAbstractClass(ReaderInterface::class);
         $this->writerMock = $this->getMockForAbstractClass(WriterInterface::class);

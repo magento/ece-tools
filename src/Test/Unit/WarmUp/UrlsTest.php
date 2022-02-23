@@ -48,7 +48,7 @@ class UrlsTest extends TestCase
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->postDeployMock = $this->getMockForAbstractClass(PostDeployInterface::class);
         $this->urlManagerMock = $this->createMock(UrlManager::class);

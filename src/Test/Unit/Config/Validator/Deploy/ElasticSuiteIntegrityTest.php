@@ -51,7 +51,7 @@ class ElasticSuiteIntegrityTest extends TestCase
     /**
      * @inheritDoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->elasticSuiteMock = $this->createMock(ElasticSuite::class);
         $this->elasticSearchMock = $this->createMock(ElasticSearch::class);

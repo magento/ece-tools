@@ -10,10 +10,15 @@ namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 /**
  * This test runs on the latest version of PHP
  *
- * @group php74
+ * @group php81
  */
 class PostDeployCest extends AbstractCest
 {
+    /**
+     * @var string
+     */
+    protected $magentoCloudTemplate = '2.4.4';
+
     /**
      * @param \CliTester $I
      * @param \Codeception\Example $data
@@ -37,13 +42,13 @@ class PostDeployCest extends AbstractCest
         $I->runDockerComposeCommand('run deploy cloud-post-deploy');
 
         $log = $I->grabFileContent('/var/log/cloud.log');
-        $I->assertContains('INFO: Starting scenario(s): scenario/post-deploy.xml', $log);
-        $I->assertContains('DEBUG: Running step: is-deploy-failed', $log);
-        $I->assertContains('DEBUG: Running step: validate-config', $log);
-        $I->assertContains('DEBUG: Running step: enable-cron', $log);
-        $I->assertContains('DEBUG: Running step: clean-cache', $log);
-        $I->assertContains('DEBUG: Running step: warm-up', $log);
-        $I->assertContains('DEBUG: Running step: time-to-first-byte', $log);
+        $I->assertStringContainsString('INFO: Starting scenario(s): scenario/post-deploy.xml', $log);
+        $I->assertStringContainsString('DEBUG: Running step: is-deploy-failed', $log);
+        $I->assertStringContainsString('DEBUG: Running step: validate-config', $log);
+        $I->assertStringContainsString('DEBUG: Running step: enable-cron', $log);
+        $I->assertStringContainsString('DEBUG: Running step: clean-cache', $log);
+        $I->assertStringContainsString('DEBUG: Running step: warm-up', $log);
+        $I->assertStringContainsString('DEBUG: Running step: time-to-first-byte', $log);
     }
 
     /**
@@ -79,10 +84,10 @@ class PostDeployCest extends AbstractCest
         $I->runDockerComposeCommand('run deploy cloud-post-deploy');
 
         $log = $I->grabFileContent('/var/log/cloud.log');
-        $I->assertContains('Fix configuration with given suggestions', $log);
-        $I->assertContains('Post-deploy is skipped because deploy was failed.', $log);
-        $I->assertNotContains('NOTICE: Starting post-deploy.', $log);
-        $I->assertNotContains('INFO: Warmed up page:', $log);
-        $I->assertNotContains('NOTICE: Post-deploy is complete.', $log);
+        $I->assertStringContainsString('Fix configuration with given suggestions', $log);
+        $I->assertStringContainsString('Post-deploy is skipped because deploy was failed.', $log);
+        $I->assertStringNotContainsString('NOTICE: Starting post-deploy.', $log);
+        $I->assertStringNotContainsString('INFO: Warmed up page:', $log);
+        $I->assertStringNotContainsString('NOTICE: Post-deploy is complete.', $log);
     }
 }
