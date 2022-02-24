@@ -39,7 +39,7 @@
 !php/const Magento\MagentoCloud\App\Error::BUILD_COMPOSER_MISSED_REQUIRED_AUTOLOAD:
     step: validate-config
     title: 'Composer.json is missing required autoload section'
-    suggestion: 'Required `autoload` section is missing from the `composer.json` file. Compare the autoload section to the `composer.json` file in the Magento Cloud template, and add the missing configuration.'
+    suggestion: 'Required `autoload` section is missing from the `composer.json` file. Compare the autoload section to the `composer.json` file in the Cloud template, and add the missing configuration.'
     stage: build
     type: critical
 !php/const Magento\MagentoCloud\App\Error::BUILD_WRONG_CONFIGURATION_MAGENTO_ENV_YAML:
@@ -133,13 +133,13 @@
     type: critical
 !php/const Magento\MagentoCloud\App\Error::BUILD_COMPOSER_PACKAGE_NOT_FOUND:
     title: 'Cannot find the Composer package'
-    suggestion: 'If you installed the Magento application version directly from the Magento git repository, verify that the `DEPLOYED_MAGENTO_VERSION_FROM_GIT` environment variable is configured.'
+    suggestion: 'If you installed the Adobe Commerce application version directly from the GitHub repository, verify that the `DEPLOYED_MAGENTO_VERSION_FROM_GIT` environment variable is configured.'
     stage: build
     type: critical
 !php/const Magento\MagentoCloud\App\Error::BUILD_WRONG_BRAINTREE_VARIABLE:
     step: validate-config
-    title: 'Remove Magento Braintree module configuration which is no longer supported in Magento 2.4 and later versions.'
-    suggestion: 'Support for the Braintree module is no longer included with Magento 2.4.0 and later. Remove the CONFIG__STORES__DEFAULT__PAYMENT__BRAINTREE__CHANNEL variable from the variables section of the .magento.app.yaml file. For Braintree payment support, use an official extension from the Magento Marketplace instead.'
+    title: 'Remove Magento Braintree module configuration which is no longer supported in Adobe Commerce and Magento Open Source 2.4 and later versions.'
+    suggestion: 'Support for the Braintree module is no longer included with Magento 2.4.0 and later. Remove the CONFIG__STORES__DEFAULT__PAYMENT__BRAINTREE__CHANNEL variable from the variables section of the .magento.app.yaml file. For Braintree payment support, use an official extension from the Commerce Marketplace instead.'
     stage: build
     type: critical
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_WRONG_CACHE_CONFIGURATION:
@@ -312,13 +312,13 @@
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_CACHE_ENABLE_FAILED:
     step: 'install-update: cache_type'
     title: 'Command failed: `php ./bin/magento cache:enable`'
-    suggestion: 'Command `php ./bin/magento cache:enable` runs only when Magento was installed but `./app/etc/env.php` file was absent or empty at the beginning of the deployment. Check the `cloud.log` for more information. Add `VERBOSE_COMMANDS: ''-vvv''` into `.magento.env.yaml` for more detailed command output.'
+    suggestion: 'Command `php ./bin/magento cache:enable` runs only when Adobe Commerce was installed but `./app/etc/env.php` file was absent or empty at the beginning of the deployment. Check the `cloud.log` for more information. Add `VERBOSE_COMMANDS: ''-vvv''` into `.magento.env.yaml` for more detailed command output.'
     stage: deploy
     type: critical
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_CRYPT_KEY_IS_ABSENT:
     step: install-update
     title: 'The `crypt/key`  key value does not exist in the `./app/etc/env.php` file or the `CRYPT_KEY` cloud environment variable'
-    suggestion: "This error occurs if the `./app/etc/env.php` file is not present when Magento deployment begins, or if the `crypt/key` value is undefined. If you migrated the database from another environment, retrieve the crypt key value from that environment. Then, add the value to the [CRYPT_KEY](https://devdocs.magento.com/cloud/env/variables-deploy.html#crypt_key) cloud environment variable in your current environment. See [Add the Magento encryption key](https://devdocs.magento.com/cloud/setup/first-time-setup-import-import.html#encryption-key). If you accidentally removed the `./app/etc/env.php` file, use the following command to restore it from the backup files created from a previous deployment: `./vendor/bin/ece-tools backup:restore` CLI command .\""
+    suggestion: "This error occurs if the `./app/etc/env.php` file is not present when Adobe Commerce deployment begins, or if the `crypt/key` value is undefined. If you migrated the database from another environment, retrieve the crypt key value from that environment. Then, add the value to the [CRYPT_KEY](https://devdocs.magento.com/cloud/env/variables-deploy.html#crypt_key) cloud environment variable in your current environment. See [Add the Magento encryption key](https://devdocs.magento.com/cloud/setup/first-time-setup-import-import.html#encryption-key). If you accidentally removed the `./app/etc/env.php` file, use the following command to restore it from the backup files created from a previous deployment: `./vendor/bin/ece-tools backup:restore` CLI command .\""
     stage: deploy
     type: critical
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_ES_CANNOT_CONNECT:
@@ -333,31 +333,31 @@
     type: critical
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_WRONG_BRAINTREE_VARIABLE:
     step: validate-config
-    title: 'Remove Magento Braintree module configuration which is no longer supported in Magento 2.4 and later versions.'
-    suggestion: 'Support for the Braintree module is no longer included with Magento 2.4.0 and later. Remove the CONFIG__STORES__DEFAULT__PAYMENT__BRAINTREE__CHANNEL variable from the variables section of the .magento.app.yaml file. For Braintree support, use an official Braintree Payments extension from the Commerce Marketplace instead.'
+    title: 'Remove Magento Braintree module configuration which is no longer supported in Adobe Commerce and Magento Open Source 2.4 and later versions.'
+    suggestion: 'Support for the Braintree module is no longer included with Adobe Commerce and Magento Open Source 2.4.0 and later. Remove the CONFIG__STORES__DEFAULT__PAYMENT__BRAINTREE__CHANNEL variable from the variables section of the .magento.app.yaml file. For Braintree support, use an official Braintree Payments extension from the Commerce Marketplace instead.'
     stage: deploy
     type: critical
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_ES_SERVICE_NOT_INSTALLED:
     step: validate-config
-    title: 'Magento 2.4.0 requires Elasticsearch service to be installed'
+    title: 'Adobe Commerce and Magento Open Source 2.4.0 require Elasticsearch service to be installed'
     suggestion: 'Install Elasticsearch service'
     stage: deploy
     type: critical
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_OS_SERVICE_NOT_INSTALLED:
     step: validate-config
-    title: 'Magento 2.4.4 requires Opensearch or Elasticsearch service to be installed'
+    title: 'Adobe Commerce and Magento Open Source 2.4.4 requires Opensearch or Elasticsearch service to be installed'
     suggestion: 'Install Opensearch service'
     stage: deploy
     type: critical
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_WRONG_SEARCH_ENGINE:
     step: validate-config
-    title: 'The search engine must be set to Elasticsearch for Magento >= 2.4.0'
+    title: 'The search engine must be set to Elasticsearch for Adobe Commerce and Magento Open Source >= 2.4.0'
     suggestion: 'Check the SEARCH_CONFIGURATION variable for the `engine` option. If it is configured, remove the option, or set the value to "elasticsearch".'
     stage: deploy
     type: critical
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_REMOVED_SPLIT_DB:
     step: validate-config
-    title: 'Split Database was removed starting from Magento 2.5.0.'
+    title: 'Split Database was removed starting from Adobe Commerce and Magento Open Source 2.5.0.'
     suggestion: 'If you use split database you have to revert to or migrate to a single database or use an alternative approach.'
     stage: deploy
     type: critical
