@@ -188,7 +188,7 @@
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_WRONG_CONFIGURATION_DB:
     step: validate-config
     title: 'Incorrect database configuration'
-    suggestion: 'Check that the the `DATABASE_CONFIGURATION` environment variable is configured correctly.'
+    suggestion: 'Check that the `DATABASE_CONFIGURATION` environment variable is configured correctly.'
     stage: deploy
     type: critical
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_WRONG_CONFIGURATION_SESSION:
