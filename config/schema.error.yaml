@@ -334,7 +334,7 @@
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_WRONG_BRAINTREE_VARIABLE:
     step: validate-config
     title: 'Remove Magento Braintree module configuration which is no longer supported in Magento 2.4 and later versions.'
-    suggestion: 'Support for the Braintree module is no longer included with Magento 2.4.0 and later. Remove the CONFIG__STORES__DEFAULT__PAYMENT__BRAINTREE__CHANNEL variable from the variables section of the .magento.app.yaml file. For Braintree support, use an official Braintree Payments extension from the Commerce Marketplace instead.'
+    suggestion: 'Support for the Braintree module is no longer included with Adobe Commerce and Magento Open Source 2.4.0 and later. Remove the CONFIG__STORES__DEFAULT__PAYMENT__BRAINTREE__CHANNEL variable from the variables section of the .magento.app.yaml file. For Braintree support, use an official Braintree Payments extension from the Commerce Marketplace instead.'
     stage: deploy
     type: critical
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_ES_SERVICE_NOT_INSTALLED:
