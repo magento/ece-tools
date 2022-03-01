@@ -46,7 +46,7 @@ class SolrIntegrityTest extends TestCase
     /**
      * @inheritdoc
      */
-    public function setUp()
+    public function setUp(): void
     {
         $this->environmentMock = $this->createMock(Environment::class);
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);

@@ -31,7 +31,7 @@ class RelationshipConnectionFactoryTest extends TestCase
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->connectionTypeMock = $this->createMock(ConnectionTypes::class);
 

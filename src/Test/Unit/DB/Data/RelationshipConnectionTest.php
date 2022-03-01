@@ -23,6 +23,10 @@ class RelationshipConnectionTest extends TestCase
             'path' => 'dbName',
             'username' => 'user',
             'password' => '1234',
+            'driver_options' => [
+                'option1' => 'value1',
+                'option2' => 'value2'
+            ],
         ]);
 
         $this->assertEquals('127.0.0.1', $relationshipConnection->getHost());
@@ -30,6 +34,13 @@ class RelationshipConnectionTest extends TestCase
         $this->assertEquals('dbName', $relationshipConnection->getDbName());
         $this->assertEquals('user', $relationshipConnection->getUser());
         $this->assertEquals('1234', $relationshipConnection->getPassword());
+        $this->assertEquals(
+            [
+                'option1' => 'value1',
+                'option2' => 'value2'
+            ],
+            $relationshipConnection->getDriverOptions()
+        );
     }
 
     public function testGetEmptyOptions()
@@ -41,5 +52,6 @@ class RelationshipConnectionTest extends TestCase
         $this->assertEmpty($relationshipConnection->getDbName());
         $this->assertEmpty($relationshipConnection->getUser());
         $this->assertEmpty($relationshipConnection->getPassword());
+        $this->assertEquals([], $relationshipConnection->getDriverOptions());
     }
 }

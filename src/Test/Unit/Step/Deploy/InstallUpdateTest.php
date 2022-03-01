@@ -55,7 +55,7 @@ class InstallUpdateTest extends TestCase
     /**
      * @inheritDoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->stateMock = $this->createMock(State::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);

@@ -33,7 +33,7 @@ class ErrorInfoTest extends TestCase
      */
     private $fileMock;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->fileListMock = $this->createMock(FileList::class);
         $this->fileMock = $this->createMock(File::class);

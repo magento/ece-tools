@@ -45,7 +45,7 @@ class SetAdminUrlTest extends TestCase
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->adminDataMock = $this->getMockForAbstractClass(AdminDataInterface::class);
         $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)

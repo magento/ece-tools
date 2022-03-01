@@ -46,4 +46,11 @@ interface ConnectionInterface
      * @return string|null
      */
     public function getPassword();
+
+    /**
+     * Returns driver options
+     *
+     * @return array
+     */
+    public function getDriverOptions();
 }

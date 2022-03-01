@@ -58,7 +58,7 @@ class ServiceVersionTest extends TestCase
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->resultFactoryMock = $this->createConfiguredMock(ResultFactory::class, [
             'success' => $this->createMock(Success::class),
@@ -99,34 +99,41 @@ class ServiceVersionTest extends TestCase
         $serviceES->expects($this->once())
             ->method('getVersion')
             ->willReturn('7.7');
+        $serviceOS = $this->createMock(ServiceInterface::class);
+        $serviceOS->expects($this->once())
+            ->method('getVersion')
+            ->willReturn('1.2');
         $serviceMariaDB = $this->createMock(ServiceInterface::class);
         $serviceMariaDB->expects($this->once())
             ->method('getVersion')
             ->willReturn('10.2');
-        $this->serviceFactory->expects($this->exactly(5))
+        $this->serviceFactory->expects($this->exactly(6))
             ->method('create')
             ->willReturnOnConsecutiveCalls(
                 $serviceRmq,
                 $serviceRedis,
                 $serviceRedisSession,
                 $serviceES,
+                $serviceOS,
                 $serviceMariaDB
             );
-        $this->loggerMock->expects($this->exactly(5))
+        $this->loggerMock->expects($this->exactly(6))
             ->method('info')
             ->withConsecutive(
                 ['Version of service \'rabbitmq\' is not detected', []],
                 ['Version of service \'redis\' is 3.2', []],
                 ['Version of service \'redis-session\' is 3.2', []],
                 ['Version of service \'elasticsearch\' is 7.7', []],
+                ['Version of service \'opensearch\' is 1.2', []],
                 ['Version of service \'mariadb\' is 10.2', []]
             );
-        $this->serviceVersionValidatorMock->expects($this->exactly(4))
+        $this->serviceVersionValidatorMock->expects($this->exactly(5))
             ->method('validateService')
             ->withConsecutive(
                 [ServiceInterface::NAME_REDIS, '3.2'],
                 [ServiceInterface::NAME_REDIS_SESSION, '3.2'],
                 [ServiceInterface::NAME_ELASTICSEARCH, '7.7'],
+                [ServiceInterface::NAME_OPENSEARCH, '1.2'],
                 [ServiceInterface::NAME_DB_MARIA, '10.2']
             )
             ->willReturn('');
@@ -142,7 +149,12 @@ class ServiceVersionTest extends TestCase
             ->method('getServiceName')
             ->willReturn(ServiceInterface::NAME_DB_MYSQL);
         $errorMessages = [
-            'error message 1', 'error message 2', 'error message 3', 'error message 4', 'error message 5'
+            'error message 1',
+            'error message 2',
+            'error message 3',
+            'error message 4',
+            'error message 5',
+            'error message 6'
         ];
         $service1 = $this->createMock(ServiceInterface::class);
         $service1->expects($this->once())
@@ -163,17 +175,22 @@ class ServiceVersionTest extends TestCase
         $service5 = $this->createMock(ServiceInterface::class);
         $service5->expects($this->once())
             ->method('getVersion')
+            ->willReturn('1.2');
+        $service6 = $this->createMock(ServiceInterface::class);
+        $service6->expects($this->once())
+            ->method('getVersion')
             ->willReturn('5.7');
-        $this->serviceFactory->expects($this->exactly(5))
+        $this->serviceFactory->expects($this->exactly(6))
             ->method('create')
-            ->willReturnOnConsecutiveCalls($service1, $service2, $service3, $service4, $service5);
-        $this->serviceVersionValidatorMock->expects($this->exactly(5))
+            ->willReturnOnConsecutiveCalls($service1, $service2, $service3, $service4, $service5, $service6);
+        $this->serviceVersionValidatorMock->expects($this->exactly(6))
             ->method('validateService')
             ->withConsecutive(
                 [ServiceInterface::NAME_RABBITMQ, '1.5'],
                 [ServiceInterface::NAME_REDIS, '2.2'],
                 [ServiceInterface::NAME_REDIS_SESSION, '2.2'],
                 [ServiceInterface::NAME_ELASTICSEARCH, '7.7'],
+                [ServiceInterface::NAME_OPENSEARCH, '1.2'],
                 [ServiceInterface::NAME_DB_MYSQL, '5.7']
             )
             ->willReturnOnConsecutiveCalls(...$errorMessages);

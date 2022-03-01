@@ -51,7 +51,7 @@ class SetCryptKeyTest extends TestCase
     /**
      * @inheritDoc
      */
-    public function setUp()
+    public function setUp(): void
     {
         $this->environmentMock = $this->createMock(Environment::class);
         $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)

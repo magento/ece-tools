@@ -23,6 +23,10 @@ class ConnectionTest extends TestCase
             'dbname' => 'dbName',
             'username' => 'user',
             'password' => '1234',
+            'driver_options' => [
+                'option1' => 'value1',
+                'option2' => 'value2'
+            ],
         ]);
 
         $this->assertEquals('127.0.0.1', $relationshipConnection->getHost());
@@ -30,6 +34,13 @@ class ConnectionTest extends TestCase
         $this->assertEquals('dbName', $relationshipConnection->getDbName());
         $this->assertEquals('user', $relationshipConnection->getUser());
         $this->assertEquals('1234', $relationshipConnection->getPassword());
+        $this->assertEquals(
+            [
+                'option1' => 'value1',
+                'option2' => 'value2'
+            ],
+            $relationshipConnection->getDriverOptions()
+        );
     }
 
     public function testGetOptionsWithEmptyPortAndPortInHost()
@@ -74,5 +85,11 @@ class ConnectionTest extends TestCase
 
         $this->assertEquals('/tmp/mysql.sock', $relationshipConnection->getHost());
         $this->assertEquals('', $relationshipConnection->getPort());
+    }
+
+    public function testGetDriverOptionsEmpty()
+    {
+        $relationshipConnection = new Connection([]);
+        $this->assertEquals([], $relationshipConnection->getDriverOptions());
     }
 }

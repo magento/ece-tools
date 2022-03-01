@@ -49,7 +49,7 @@ class StaticContentCompressorTest extends TestCase
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->directoryListMock = $this->createMock(DirectoryList::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);

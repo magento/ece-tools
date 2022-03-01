@@ -15,6 +15,7 @@ use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Package\UndefinedPackageException;
 use Magento\MagentoCloud\Service\ElasticSearch;
+use Magento\MagentoCloud\Service\OpenSearch;
 
 /**
  * Verifies if Elasticsearch service present for Magento 2.4.0 and above
@@ -37,18 +38,26 @@ class ElasticSearchIntegrity implements ValidatorInterface
     private $elasticsearch;
 
     /**
+     * @var OpenSearch
+     */
+    private $openSearch;
+
+    /**
      * @param MagentoVersion $magentoVersion
      * @param Validator\ResultFactory $resultFactory
      * @param ElasticSearch $elasticSearch
+     * @param OpenSearch $openSearch
      */
     public function __construct(
         MagentoVersion $magentoVersion,
         Validator\ResultFactory $resultFactory,
-        ElasticSearch $elasticSearch
+        ElasticSearch $elasticSearch,
+        OpenSearch $openSearch
     ) {
         $this->magentoVersion = $magentoVersion;
         $this->resultFactory = $resultFactory;
         $this->elasticsearch = $elasticSearch;
+        $this->openSearch = $openSearch;
     }
 
     /**
@@ -57,6 +66,10 @@ class ElasticSearchIntegrity implements ValidatorInterface
     public function validate(): Validator\ResultInterface
     {
         try {
+            if ($this->magentoVersion->satisfies('>=2.4.3-p2') && $this->openSearch->isInstalled()) {
+                return $this->resultFactory->success();
+            }
+
             if ($this->magentoVersion->isGreaterOrEqual('2.4.0')
                 && !$this->elasticsearch->isInstalled()
             ) {

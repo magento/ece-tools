@@ -14,6 +14,7 @@ use Magento\MagentoCloud\Config\SearchEngine\ElasticSuite;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Service\ElasticSearch;
+use Magento\MagentoCloud\Service\OpenSearch;
 use Magento\MagentoCloud\Service\ServiceException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -49,6 +50,11 @@ class SearchEngineTest extends TestCase
     private $elasticSearchMock;
 
     /**
+     * @var OpenSearch|MockObject
+     */
+    private $openSearchMock;
+
+    /**
      * @var ElasticSuite|MockObject
      */
     private $elasticSuiteMock;
@@ -62,15 +68,14 @@ class SearchEngineTest extends TestCase
         $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
         $this->elasticSearchMock = $this->createMock(ElasticSearch::class);
+        $this->openSearchMock = $this->createMock(OpenSearch::class);
         $this->elasticSuiteMock = $this->createMock(ElasticSuite::class);
-
-        $this->elasticSearchMock->method('getFullVersion')
-            ->willReturn('elasticsearch');
 
         $this->config = new SearchEngine(
             $this->environmentMock,
             $this->stageConfigMock,
             $this->elasticSearchMock,
+            $this->openSearchMock,
             $this->elasticSuiteMock,
             $this->magentoVersionMock,
             new ConfigMerger()
@@ -94,6 +99,9 @@ class SearchEngineTest extends TestCase
             ->method('satisfies');
         $this->elasticSearchMock->expects($this->never())
             ->method('getVersion');
+        $this->elasticSearchMock->expects($this->never())
+            ->method('getFullEngineName')
+            ->willReturn('elasticsearch');
 
         $this->assertEquals($expectedConfig, $this->config->getConfig());
     }
@@ -116,7 +124,7 @@ class SearchEngineTest extends TestCase
      * @param bool $authEnabled
      *
      * @throws ServiceException
-     * @dataProvider testGetWithElasticSearchDataProvider
+     * @dataProvider getWithElasticSearchDataProvider
      */
     public function testGetWithElasticSearch(
         array $customSearchConfig,
@@ -128,12 +136,27 @@ class SearchEngineTest extends TestCase
             ->method('get')
             ->with(DeployInterface::VAR_SEARCH_CONFIGURATION)
             ->willReturn($customSearchConfig);
-        $this->elasticSearchMock->expects($this->once())
+        $this->elasticSearchMock->expects($this->exactly(2))
             ->method('getConfiguration')
             ->willReturn($esServiceConfig);
+        $this->openSearchMock->expects($this->once())
+            ->method('getConfiguration')
+            ->willReturn([]);
+        $this->elasticSearchMock->expects($this->once())
+            ->method('getHost')
+            ->willReturn('localhost');
         $this->elasticSearchMock->expects($this->once())
             ->method('isAuthEnabled')
             ->willReturn($authEnabled);
+        $this->openSearchMock->expects($this->never())
+            ->method('isAuthEnabled');
+        $this->elasticSearchMock->expects($this->once())
+            ->method('getFullEngineName')
+            ->willReturn('elasticsearch');
+        $this->openSearchMock->expects($this->never())
+            ->method('getFullEngineName');
+        $this->elasticSearchMock->method('getHost')
+            ->willReturn($esServiceConfig['host']);
 
         $expected = ['system' => ['default' => ['catalog' => ['search' => $expected]]]];
 
@@ -145,7 +168,7 @@ class SearchEngineTest extends TestCase
      *
      * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
-    public function testGetWithElasticSearchDataProvider(): array
+    public function getWithElasticSearchDataProvider(): array
     {
         $generateDataForVersionChecking = static function ($engine) {
             return [
@@ -251,10 +274,161 @@ class SearchEngineTest extends TestCase
 
     /**
      * @param array $customSearchConfig
+     * @param array $osServiceConfig
+     * @param array $expected
+     * @param bool $authEnabled
+     *
+     * @throws ServiceException
+     * @dataProvider getWithOpenSearchDataProvider
+     */
+    public function testGetWithOpenSearch(
+        array $customSearchConfig,
+        array $osServiceConfig,
+        array $expected,
+        bool $authEnabled = false
+    ): void {
+        $this->stageConfigMock->expects($this->once())
+            ->method('get')
+            ->with(DeployInterface::VAR_SEARCH_CONFIGURATION)
+            ->willReturn($customSearchConfig);
+        $this->elasticSearchMock->expects($this->never())
+            ->method('getConfiguration');
+        $this->elasticSearchMock->expects($this->never())
+            ->method('isAuthEnabled');
+        $this->elasticSearchMock->expects($this->never())
+            ->method('getFullEngineName');
+        $this->openSearchMock->expects($this->exactly(2))
+            ->method('getConfiguration')
+            ->willReturn($osServiceConfig);
+        $this->openSearchMock->expects($this->once())
+            ->method('isAuthEnabled')
+            ->willReturn($authEnabled);
+        $this->openSearchMock->expects($this->once())
+            ->method('getFullEngineName')
+            ->willReturn('opensearch');
+        $this->openSearchMock->method('getHost')
+            ->willReturn($osServiceConfig['host']);
+
+        $expected = ['system' => ['default' => ['catalog' => ['search' => $expected]]]];
+
+        $this->assertEquals($expected, $this->config->getConfig());
+    }
+
+    /**
+     * @return array
+     *
+     * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
+     */
+    public function getWithOpenSearchDataProvider(): array
+    {
+        $generateDataForVersionChecking = static function ($engine) {
+            return [
+                'customSearchConfig' => [],
+                'relationship' => [
+                    'host' => 'localhost',
+                    'port' => 1234,
+                ],
+                'expected' => [
+                    'engine' => $engine,
+                    $engine . '_server_hostname' => 'localhost',
+                    $engine . '_server_port' => 1234,
+                ],
+            ];
+        };
+
+        return [
+            [
+                'customSearchConfig' => ['some_key' => 'some_value'],
+                'osServiceConfig' => [
+                    'host' => 'localhost',
+                    'port' => 1234,
+                    'query' => ['index' => 'stg'],
+                ],
+                'expected' => [
+                    'engine' => 'opensearch',
+                    'opensearch_server_hostname' => 'localhost',
+                    'opensearch_server_port' => 1234,
+                    'opensearch_index_prefix' => 'stg',
+                ],
+            ],
+            [
+                'customSearchConfig' => [
+                    'engine' => 'opensearch',
+                    'opensearch_server_hostname' => 'some_host',
+                    'opensearch_index_prefix' => 'prefix',
+                    '_merge' => true,
+                ],
+                'osServiceConfig' => [
+                    'host' => 'localhost',
+                    'port' => 1234,
+                ],
+                'expected' => [
+                    'engine' => 'opensearch',
+                    'opensearch_server_hostname' => 'some_host',
+                    'opensearch_server_port' => 1234,
+                    'opensearch_index_prefix' => 'prefix',
+                ],
+            ],
+            [
+                'customSearchConfig' => [
+                    'opensearch_server_port' => 2345,
+                    'opensearch_index_prefix' => 'new_prefix',
+                    '_merge' => true,
+                ],
+                'osServiceConfig' => [
+                    'host' => 'localhost',
+                    'port' => 1234,
+                ],
+                'expected' => [
+                    'engine' => 'opensearch',
+                    'opensearch_server_hostname' => 'localhost',
+                    'opensearch_server_port' => 2345,
+                    'opensearch_index_prefix' => 'new_prefix',
+                ],
+            ],
+            [
+                'customSearchConfig' => [
+                    '_merge' => true,
+                ],
+                'osServiceConfig' => [
+                    'host' => 'localhost',
+                    'port' => 1234,
+                ],
+                'expected' => [
+                    'engine' => 'opensearch',
+                    'opensearch_server_hostname' => 'localhost',
+                    'opensearch_server_port' => 1234,
+                ],
+            ],
+            [
+                'customSearchConfig' => [],
+                'osServiceConfig' => [
+                    'host' => 'localhost',
+                    'port' => 1234,
+                    'password' => 'secret',
+                    'username' => 'user',
+                ],
+                'expected' => [
+                    'engine' => 'opensearch',
+                    'opensearch_server_hostname' => 'localhost',
+                    'opensearch_server_port' => 1234,
+                    'opensearch_enable_auth' => 1,
+                    'opensearch_username' => 'user',
+                    'opensearch_password' => 'secret',
+                ],
+                true
+            ],
+            $generateDataForVersionChecking('opensearch'),
+            $generateDataForVersionChecking('opensearch'),
+        ];
+    }
+
+    /**
+     * @param array $customSearchConfig
      * @param array $esServiceConfig
      * @param array $expected
      *
-     * @dataProvider testGetWithElasticSuiteDataProvider
+     * @dataProvider getWithElasticSuiteDataProvider
      */
     public function testGetWithElasticSuite(
         array $customSearchConfig,
@@ -265,9 +439,12 @@ class SearchEngineTest extends TestCase
             ->method('get')
             ->with(DeployInterface::VAR_SEARCH_CONFIGURATION)
             ->willReturn($customSearchConfig);
-        $this->elasticSearchMock->expects($this->once())
+        $this->elasticSearchMock->expects($this->exactly(2))
             ->method('getConfiguration')
             ->willReturn($esServiceConfig);
+        $this->openSearchMock->expects($this->once())
+            ->method('getConfiguration')
+            ->willReturn([]);
         $this->elasticSuiteMock->expects($this->once())
             ->method('isInstalled')
             ->willReturn(true);
@@ -276,6 +453,11 @@ class SearchEngineTest extends TestCase
             ->willReturn([
                 'servers' => 'localhost'
             ]);
+        $this->elasticSearchMock->expects($this->once())
+            ->method('getFullEngineName')
+            ->willReturn('elasticsearch');
+        $this->elasticSearchMock->method('getHost')
+            ->willReturn($esServiceConfig['host']);
 
         $expected = ['system' => ['default' => $expected]];
 
@@ -287,7 +469,7 @@ class SearchEngineTest extends TestCase
      *
      * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
-    public function testGetWithElasticSuiteDataProvider(): array
+    public function getWithElasticSuiteDataProvider(): array
     {
         return [
             [
@@ -377,6 +559,8 @@ class SearchEngineTest extends TestCase
             [[], false],
             [['engine' => 'elasticsearch'], true],
             [['engine' => 'elasticsearch5'], true],
+            [['engine' => 'elasticsearch7'], true],
+            [['engine' => 'opensearch'], true],
             [['engine' => 'elasticsuite'], true],
             [['engine' => 'some'], false],
         ];

@@ -43,7 +43,7 @@ class TransferStatsHandlerTest extends TestCase
      */
     private $handler;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->fileMock = $this->createMock(File::class);
         $this->fileListMock = $this->createMock(FileList::class);
@@ -116,10 +116,16 @@ class TransferStatsHandlerTest extends TestCase
             ->with(
                 $this->equalTo('/path/to/ttfb.json'),
                 $this->callBack(function (string $subject) {
-                    $this->assertRegExp('/"timestamp"\s*:\s*"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}"/', $subject);
-                    $this->assertRegExp('/"url"\s*:\s*"\/"/', $subject);
-                    $this->assertRegExp('/"status"\s*:\s*"unknown"/', $subject);
-                    $this->assertRegExp('/"ttfb"\s*:\s*3.141592/', $subject);
+                    $regMethod = method_exists($this, 'assertMatchesRegularExpression')
+                        ? 'assertMatchesRegularExpression'
+                        : 'assertRegExp';
+                    $this->{$regMethod}(
+                        '/"timestamp"\s*:\s*"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}"/',
+                        $subject
+                    );
+                    $this->{$regMethod}('/"url"\s*:\s*"\/"/', $subject);
+                    $this->{$regMethod}('/"status"\s*:\s*"unknown"/', $subject);
+                    $this->{$regMethod}('/"ttfb"\s*:\s*3.141592/', $subject);
 
                     return true;
                 })
@@ -169,11 +175,17 @@ class TransferStatsHandlerTest extends TestCase
             ->with(
                 $this->equalTo('/path/to/ttfb.json'),
                 $this->callBack(function (string $subject) {
-                    $this->assertRegExp('/\{\s*"previous"\s*:\s*"result"\s*\}/', $subject);
-                    $this->assertRegExp('/"timestamp"\s*:\s*"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}"/', $subject);
-                    $this->assertRegExp('/"url"\s*:\s*"\/customer"/', $subject);
-                    $this->assertRegExp('/"status"\s*:\s*200/', $subject);
-                    $this->assertRegExp('/"ttfb"\s*:\s*0\.62/', $subject);
+                    $regMethod = method_exists($this, 'assertMatchesRegularExpression')
+                        ? 'assertMatchesRegularExpression'
+                        : 'assertRegExp';
+                    $this->{$regMethod}('/\{\s*"previous"\s*:\s*"result"\s*\}/', $subject);
+                    $this->{$regMethod}(
+                        '/"timestamp"\s*:\s*"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}"/',
+                        $subject
+                    );
+                    $this->{$regMethod}('/"url"\s*:\s*"\/customer"/', $subject);
+                    $this->{$regMethod}('/"status"\s*:\s*200/', $subject);
+                    $this->{$regMethod}('/"ttfb"\s*:\s*0\.62/', $subject);
 
                     return true;
                 })

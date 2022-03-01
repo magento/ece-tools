@@ -40,7 +40,7 @@ class RabbitMqTest extends TestCase
     /**
      * @inheritdoc
      */
-    public function setUp()
+    public function setUp(): void
     {
         $this->environmentMock = $this->createMock(Environment::class);
         $this->shellMock = $this->getMockForAbstractClass(ShellInterface::class);

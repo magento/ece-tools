@@ -12,10 +12,15 @@ use Magento\CloudDocker\Test\Functional\Codeception\Docker;
 /**
  * This test runs on the latest version of PHP
  *
- * @group php74
+ * @group php81
  */
 class DatabaseConfigurationCest extends AbstractCest
 {
+    /**
+     * @var string
+     */
+    protected $magentoCloudTemplate = '2.4.4';
+
     /**
      * @param \CliTester $I
      * @param \Codeception\Example $data
@@ -35,8 +40,8 @@ class DatabaseConfigurationCest extends AbstractCest
         $I->runDockerComposeCommand('run deploy cloud-deploy');
 
         $file = $I->grabFileContent('/app/etc/env.php');
-        $I->assertContains($data['mergedConfig'], $file);
-        $I->assertContains($data['defaultConfig'], $file);
+        $I->assertStringContainsString($data['mergedConfig'], $file);
+        $I->assertStringContainsString($data['defaultConfig'], $file);
     }
 
     /**
@@ -93,7 +98,7 @@ class DatabaseConfigurationCest extends AbstractCest
     {
         $checkResult = function (\CliTester $I) {
             $file = $I->grabFileContent('/app/etc/env.php');
-            $I->assertContains("'table_prefix' => 'ece_'", $file, 'Wrong table prefix in app/etc/env.php');
+            $I->assertStringContainsString("'table_prefix' => 'ece_'", $file, 'Wrong table prefix in app/etc/env.php');
             $I->amOnPage('/');
             $I->see('Home page');
             $I->see('CMS homepage content goes here.');

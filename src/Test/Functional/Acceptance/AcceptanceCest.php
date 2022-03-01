@@ -11,7 +11,6 @@ use CliTester;
 use Robo\Exception\TaskException;
 use Codeception\Example;
 use Magento\CloudDocker\Test\Functional\Codeception\Docker;
-use Magento\MagentoCloud\Util\ArrayManager;
 
 /**
  * This test runs on the latest version of PHP
@@ -21,10 +20,15 @@ use Magento\MagentoCloud\Util\ArrayManager;
  * 3. Test config dump
  * 4. Test content presence
  *
- * @group php74
+ * @group php81
  */
 class AcceptanceCest extends AbstractCest
 {
+    /**
+     * @var string
+     */
+    protected $magentoCloudTemplate = '2.4.4';
+
     /**
      * @param CliTester $I
      *
@@ -63,36 +67,34 @@ class AcceptanceCest extends AbstractCest
         $destination = sys_get_temp_dir() . '/app/etc/env.php';
         $I->assertTrue($I->downloadFromContainer('/app/etc/env.php', $destination, Docker::DEPLOY_CONTAINER));
         $config = require $destination;
-        $I->assertArraySubset($data['expectedConfig'], $config);
+        $this->checkArraySubset($data['expectedConfig'], $config, $I);
 
         $I->assertTrue($I->runDockerComposeCommand('run deploy ece-command config:dump'));
         $destination = sys_get_temp_dir() . '/app/etc/config.php';
         $I->assertTrue($I->downloadFromContainer('/app/etc/config.php', $destination, Docker::DEPLOY_CONTAINER));
         $config = require $destination;
+        $flattenKeysConfig = implode(array_keys($this->getArrayManager()->flatten($config, '#')));
 
-        $arrayManager = new ArrayManager();
-        $flattenKeysConfig = implode(array_keys($arrayManager->flatten($config, '#')));
-
-        $I->assertContains('#modules', $flattenKeysConfig);
-        $I->assertContains('#scopes', $flattenKeysConfig);
-        $I->assertContains('#system/default/general/locale/code', $flattenKeysConfig);
-        $I->assertContains('#system/default/dev/static/sign', $flattenKeysConfig);
-        $I->assertContains('#system/default/dev/front_end_development_workflow', $flattenKeysConfig);
-        $I->assertContains('#system/default/dev/template', $flattenKeysConfig);
-        $I->assertContains('#system/default/dev/js', $flattenKeysConfig);
-        $I->assertContains('#system/default/dev/css', $flattenKeysConfig);
-        $I->assertContains('#system/stores', $flattenKeysConfig);
-        $I->assertContains('#system/websites', $flattenKeysConfig);
-        $I->assertContains('#admin_user/locale/code', $flattenKeysConfig);
+        $I->assertStringContainsString('#modules', $flattenKeysConfig);
+        $I->assertStringContainsString('#scopes', $flattenKeysConfig);
+        $I->assertStringContainsString('#system/default/general/locale/code', $flattenKeysConfig);
+        $I->assertStringContainsString('#system/default/dev/static/sign', $flattenKeysConfig);
+        $I->assertStringContainsString('#system/default/dev/front_end_development_workflow', $flattenKeysConfig);
+        $I->assertStringContainsString('#system/default/dev/template', $flattenKeysConfig);
+        $I->assertStringContainsString('#system/default/dev/js', $flattenKeysConfig);
+        $I->assertStringContainsString('#system/default/dev/css', $flattenKeysConfig);
+        $I->assertStringContainsString('#system/stores', $flattenKeysConfig);
+        $I->assertStringContainsString('#system/websites', $flattenKeysConfig);
+        $I->assertStringContainsString('#admin_user/locale/code', $flattenKeysConfig);
 
         $I->amOnPage('/');
         $I->see('Home page');
         $I->see('CMS homepage content goes here.');
 
         $log = $I->grabFileContent('/var/log/cloud.log');
-        $I->assertContains('--admin-password=\'******\'', $log);
+        $I->assertStringContainsString('--admin-password=\'******\'', $log);
         if (strpos($log, '--db-password') !== false) {
-            $I->assertContains('--db-password=\'******\'', $log);
+            $I->assertStringContainsString('--db-password=\'******\'', $log);
         }
     }
 
@@ -279,7 +281,7 @@ class AcceptanceCest extends AbstractCest
         $I->see('Home page');
         $I->see('CMS homepage content goes here.');
         $I->runDockerComposeCommand('run deploy ece-command config:dump');
-        $I->assertNotContains(
+        $I->assertStringNotContainsString(
             'Static content deployment was performed during the build phase or disabled. '
             . 'Skipping deploy phase static content compression.',
             $I->grabFileContent('/var/log/cloud.log')
@@ -297,7 +299,7 @@ class AcceptanceCest extends AbstractCest
         $I->runDockerComposeCommand('run build cloud-build');
         $I->startEnvironment();
         $I->runDockerComposeCommand('run deploy cloud-deploy');
-        $I->assertContains(
+        $I->assertStringContainsString(
             'Static content deployment was performed during the build phase or disabled. '
             . 'Skipping deploy phase static content compression.',
             $I->grabFileContent('/var/log/cloud.log')

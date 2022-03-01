@@ -49,7 +49,7 @@ class DisableGoogleAnalyticsTest extends TestCase
      */
     private $deployConfigMock;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->environmentMock = $this->createMock(Environment::class);
         $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)

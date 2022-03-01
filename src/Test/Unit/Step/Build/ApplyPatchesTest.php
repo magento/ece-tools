@@ -35,7 +35,7 @@ class ApplyPatchesTest extends TestCase
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->managerMock = $this->createMock(Manager::class);
 

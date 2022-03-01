@@ -14,7 +14,7 @@ use Robo\Exception\TaskException;
 
 /**
  * Checks database backup functionality
- * @group php74
+ * @group php81
  */
 class BackupDbCest extends AbstractCest
 {
@@ -60,9 +60,6 @@ class BackupDbCest extends AbstractCest
         $this->partRunDbDumpWithoutSplitDbArch($I);
 
         $I->stopEnvironment(true);
-
-        // Part of test with 'SplitDB' architecture
-        $this->partRunDbDumpWithSplitDbArch($I);
     }
 
     /**
@@ -71,7 +68,7 @@ class BackupDbCest extends AbstractCest
     protected function dataProviderMagentoCloudVersions(): array
     {
         return [
-            ['version' => 'master'],
+            ['version' => '2.4.4'],
         ];
     }
 
@@ -122,56 +119,5 @@ class BackupDbCest extends AbstractCest
             ]
         ));
         $I->doNotSeeInOutput(['quote', 'sales']);
-    }
-
-    /**
-     * Part of test with 'SplitDB' architecture
-     *
-     * @param CliTester $I
-     * @throws TaskException
-     */
-    private function partRunDbDumpWithSplitDbArch(CliTester $I)
-    {
-        // Deploy 'Split Db' architecture
-        $services = $I->readServicesYaml();
-        $appMagento = $I->readAppMagentoYaml();
-        $services['mysql-quote']['type'] = 'mysql:10.2';
-        $services['mysql-sales']['type'] = 'mysql:10.2';
-        $appMagento['relationships']['database-quote'] = 'mysql-quote:mysql';
-        $appMagento['relationships']['database-sales'] = 'mysql-sales:mysql';
-        $this->envMagento['stage']['deploy']['SPLIT_DB'] = ['quote', 'sales'];
-        $I->writeServicesYaml($services);
-        $I->writeAppMagentoYaml($appMagento);
-        $I->writeEnvMagentoYaml($this->envMagento);
-        $I->generateDockerCompose('--mode=production');
-        $I->startEnvironment();
-        $I->runDockerComposeCommand('run deploy cloud-deploy');
-
-        // Running database dump command without database labels (by default)
-        $I->runDockerComposeCommand('run deploy ece-command db-dump -n');
-        $I->seeInOutput(array_merge(
-            $this->expectedLogs,
-            [
-                'INFO: Start creation DB dump for main database...',
-                'INFO: Finished DB dump for main database, it can be found here: /app/var/dump-main',
-                'INFO: Start creation DB dump for quote database...',
-                'INFO: Finished DB dump for quote database, it can be found here: /app/var/dump-quote',
-                'INFO: Start creation DB dump for sales database...',
-                'INFO: Finished DB dump for sales database, it can be found here: /app/var/dump-sales',
-            ]
-        ));
-
-        // Running database dump command with database labels
-        $I->runDockerComposeCommand('run deploy ece-command db-dump -n quote sales');
-        $I->seeInOutput(array_merge(
-            $this->expectedLogs,
-            [
-                'INFO: Start creation DB dump for quote database...',
-                'INFO: Finished DB dump for quote database, it can be found here: /app/var/dump-quote',
-                'INFO: Start creation DB dump for sales database...',
-                'INFO: Finished DB dump for sales database, it can be found here: /app/var/dump-sales',
-            ]
-        ));
-        $I->doNotSeeInOutput('main');
     }
 }

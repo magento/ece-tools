@@ -54,7 +54,7 @@ class EolValidatorTest extends TestCase
     /**
      * @inheritDoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         self::defineFunctionMock('Magento\MagentoCloud\Filesystem\Driver', 'file_get_contents');
         self::defineFunctionMock('Magento\MagentoCloud\Filesystem\Driver', 'file_exists');
@@ -77,7 +77,7 @@ class EolValidatorTest extends TestCase
     /**
      * @inheritDoc
      */
-    protected function tearDown()
+    protected function tearDown(): void
     {
         Carbon::setTestNow();
     }

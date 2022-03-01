@@ -36,7 +36,7 @@ class ModulesExistsTest extends TestCase
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->readerMock = $this->getMockForAbstractClass(ReaderInterface::class);
         $this->resultFactoryMock = $this->createMock(ResultFactory::class);

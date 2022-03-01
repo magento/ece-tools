@@ -50,7 +50,7 @@ class DbDumpTest extends TestCase
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->dumpProcessorMock = $this->createMock(DumpProcessor::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);

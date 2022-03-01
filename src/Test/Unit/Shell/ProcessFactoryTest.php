@@ -7,29 +7,83 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Shell;
 
-use Magento\MagentoCloud\App\ContainerInterface;
 use Magento\MagentoCloud\Shell\Process;
 use Magento\MagentoCloud\Shell\ProcessFactory;
 use Magento\MagentoCloud\Shell\ProcessInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Magento\MagentoCloud\App\GenericException;
+use Composer\Composer;
+use Composer\Repository\RepositoryInterface;
+use Composer\Package\Locker;
+use Composer\Package\PackageInterface;
 
 /**
- * @inheritdoc
+ * @inheritDoc
  */
 class ProcessFactoryTest extends TestCase
 {
+    /**
+     * @var RepositoryInterface|MockObject
+     */
+    private $repositoryMock;
+
+    /**
+     * @var PackageInterface|MockObject
+     */
+    private $packageMock;
+
+    /**
+     * @var Composer|MockObject
+     */
+    private $composerMock;
+
+    /**
+     * @var ProcessFactory
+     */
+    private $processFactory;
+
+    /**
+     * @inheritDoc
+     */
+    protected function setUp(): void
+    {
+        $this->repositoryMock = $this->getMockForAbstractClass(RepositoryInterface::class);
+        $this->packageMock = $this->getMockForAbstractClass(PackageInterface::class);
+        $this->composerMock = $this->createMock(Composer::class);
+
+        /** @var Locker|MockObject $lockerMock */
+        $lockerMock = $this->createMock(Locker::class);
+        $lockerMock->expects(self::once())
+            ->method('getLockedRepository')
+            ->willReturn($this->repositoryMock);
+
+        $this->composerMock->expects(self::once())
+            ->method('getLocker')
+            ->willReturn($lockerMock);
+
+        $this->processFactory = new ProcessFactory($this->composerMock);
+    }
+
     public function testCreate()
     {
-        $processFactory = new ProcessFactory();
-        /** @var ProcessInterface|MockObject $processMock */
+        $this->repositoryMock->expects(self::once())
+            ->method('findPackage')
+            ->with('symfony/process', '*')
+            ->willReturn($this->packageMock);
+
+        $this->packageMock->expects(self::once())
+            ->method('getVersion')
+            ->willReturn('4.2.0');
+
         $params = [
             'command' => 'ls -la',
             'cwd' => '/home/',
             'timeout' => 0,
         ];
 
-        $process = $processFactory->create($params);
+        /** @var ProcessInterface|MockObject $processMock */
+        $process = $this->processFactory->create($params);
 
         $this->assertInstanceOf(Process::class, $process);
     }

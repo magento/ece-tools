@@ -30,7 +30,7 @@ class MagentoShellTest extends TestCase
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->shellMock = $this->createMock(Shell::class);
 

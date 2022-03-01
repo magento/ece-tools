@@ -24,7 +24,7 @@ class StepTest extends TestCase
     /**
      * @inheritDoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->stepCollector = new Step();
     }

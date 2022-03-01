@@ -32,7 +32,7 @@ class DatabaseTypeTest extends TestCase
      * @throws \ReflectionException
      * @inheritDoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->connectionMock = $this->getMockForAbstractClass(ConnectionInterface::class);
 

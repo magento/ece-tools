@@ -20,6 +20,7 @@ interface ServiceInterface
     const NAME_REDIS = 'redis';
     const NAME_REDIS_SESSION = 'redis-session';
     const NAME_ELASTICSEARCH = 'elasticsearch';
+    const NAME_OPENSEARCH = 'opensearch';
     const NAME_RABBITMQ = 'rabbitmq';
     const NAME_NODE = 'node';
     const NAME_VARNISH = 'varnish';

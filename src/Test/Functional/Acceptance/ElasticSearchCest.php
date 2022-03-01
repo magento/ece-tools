@@ -52,9 +52,10 @@ class ElasticSearchCest extends AbstractCest
         $I->see('Home page');
 
         $config = $this->getConfig($I);
-        $I->assertArraySubset(
+        $this->checkArraySubset(
             $data['expectedResult'],
-            $config['system']['default']['catalog']['search']
+            $config['system']['default']['catalog']['search'],
+            $I
         );
 
         $I->assertTrue($I->cleanDirectories(['/vendor/*', '/setup/*']));
@@ -74,9 +75,10 @@ class ElasticSearchCest extends AbstractCest
         $I->see('Home page');
 
         $config = $this->getConfig($I);
-        $I->assertArraySubset(
+        $this->checkArraySubset(
             ['engine' => 'mysql'],
-            $config['system']['default']['catalog']['search']
+            $config['system']['default']['catalog']['search'],
+            $I
         );
     }
 
@@ -98,10 +100,10 @@ class ElasticSearchCest extends AbstractCest
     private function checkConfigurationIsNotRemoved(\CliTester $I): void
     {
         $config = $this->getConfig($I);
-
-        $I->assertArraySubset(
+        $this->checkArraySubset(
             ['general' => ['region' => ['state_required' => 'US']]],
-            $config['system']['default']
+            $config['system']['default'],
+            $I
         );
     }
 
@@ -112,7 +114,7 @@ class ElasticSearchCest extends AbstractCest
     {
         return [
             [
-                'magento' => 'master',
+                'magento' => '2.4.3',
                 'removeES' => false,
                 'expectedResult' => [
                     'engine' => 'elasticsearch6',

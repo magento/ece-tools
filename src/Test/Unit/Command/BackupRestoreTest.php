@@ -49,7 +49,7 @@ class BackupRestoreTest extends TestCase
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->restoreMock = $this->createMock(Restore::class);
         $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)

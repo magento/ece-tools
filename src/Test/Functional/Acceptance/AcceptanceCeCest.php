@@ -14,11 +14,16 @@ use CliTester;
 /**
  * @inheritDoc
  *
- * @group php74
+ * @group php81
  * @group edition-ce
  */
 class AcceptanceCeCest extends AbstractCest
 {
+    /**
+     * @var string
+     */
+    protected $magentoCloudTemplate = '2.4.4';
+
     /**
      * @var boolean
      */

@@ -10,10 +10,15 @@ namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 /**
  * This test runs on the latest version of PHP
  *
- * @group php74
+ * @group php81
  */
 class ScdStrategyCest extends AbstractCest
 {
+    /**
+     * @var string
+     */
+    protected $magentoCloudTemplate = '2.4.4';
+
     /**
      * @param \CliTester $I
      * @param \Codeception\Example $data
@@ -33,7 +38,7 @@ class ScdStrategyCest extends AbstractCest
         $I->see('Home page');
         $I->see('CMS homepage content goes here.');
         $log = $I->grabFileContent('/var/log/cloud.log');
-        $I->assertContains('-s ' . $data['strategy'], $log);
+        $I->assertStringContainsString('-s ' . $data['strategy'], $log);
     }
 
     /**

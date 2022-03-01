@@ -23,7 +23,7 @@ class LineFormatterTest extends TestCase
     /**
      * @inheritDoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->lineFormatter = new LineFormatter(LineFormatter::FORMAT_BASE, null, true, true);
     }

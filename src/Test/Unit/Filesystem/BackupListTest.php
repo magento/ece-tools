@@ -36,7 +36,7 @@ class BackupListTest extends TestCase
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->fileListMock = $this->createMock(FileList::class);
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);

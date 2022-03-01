@@ -128,7 +128,7 @@ class ElasticSearchVersionTest extends TestCase
             ->willReturn(true);
         $this->elasticSearchMock->expects($this->once())
             ->method('getVersion')
-            ->willReturn(2);
+            ->willReturn('2');
         $this->elasticSearchMock->expects($this->once())
             ->method('isInstalled')
             ->willReturn(true);
@@ -155,7 +155,7 @@ class ElasticSearchVersionTest extends TestCase
             ->willReturn(false);
         $this->elasticSearchMock->expects($this->once())
             ->method('getVersion')
-            ->willReturn(2);
+            ->willReturn('2');
         $this->managerMock->expects($this->never())
             ->method('get');
         $this->loggerMock->expects($this->never())

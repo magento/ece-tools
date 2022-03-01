@@ -12,7 +12,6 @@ use Magento\MagentoCloud\Config\Database\ResourceConfig;
 use Magento\MagentoCloud\Config\Validator\Deploy\ResourceConfiguration as ResourceConfigurationValidator;
 use Magento\MagentoCloud\Config\Validator\Result;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
-use PHPUnit\Framework\MockObject\Matcher\InvokedCount as InvokedCountMatcher;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -39,7 +38,7 @@ class ResourceConfigurationTest extends TestCase
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->resultFactoryMock = $this->createMock(ResultFactory::class);
         $this->resourceConfigMock = $this->createMock(ResourceConfig::class);
@@ -64,15 +63,15 @@ class ResourceConfigurationTest extends TestCase
 
     /**
      * @param array $resourcesConfig
-     * @param InvokedCountMatcher $successExpects
-     * @param InvokedCountMatcher $errorExpects
+     * @param $successExpects
+     * @param $errorExpects
      * @param string $expectedResultClass
      * @dataProvider validateDataProvider
      */
     public function testValidate(
         array $resourcesConfig,
-        InvokedCountMatcher $successExpects,
-        InvokedCountMatcher $errorExpects,
+        $successExpects,
+        $errorExpects,
         string $expectedResultClass
     ) {
         /** @var Result\Success|MockObject $successMock */

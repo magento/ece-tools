@@ -53,7 +53,7 @@ class ConfigUpdateTest extends TestCase
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->configFileListMock = $this->createMock(ConfigFileList::class);
         $this->fileMock = $this->createMock(File::class);

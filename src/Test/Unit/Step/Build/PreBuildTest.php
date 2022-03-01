@@ -56,7 +56,7 @@ class PreBuildTest extends TestCase
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->stageConfigMock = $this->getMockBuilder(BuildInterface::class)
             ->getMockForAbstractClass();

@@ -46,7 +46,7 @@ class ConfigValidateTest extends TestCase
     /**
      * @inheritDoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->stageConfigMock = $this->createMock(StageConfig::class);
         $this->inputMock = $this->getMockForAbstractClass(InputInterface::class);

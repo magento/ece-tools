@@ -38,7 +38,7 @@ class RestoreTest extends TestCase
     /**
      * @inheritdoc
      */
-    public function setUp()
+    public function setUp(): void
     {
         $this->backupListMock = $this->createMock(BackupList::class);
         $this->fileMock = $this->createMock(File::class);

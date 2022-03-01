@@ -58,7 +58,7 @@ class HandlerFactoryTest extends TestCase
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->logConfigMock = $this->createMock(LogConfig::class);
         $this->repositoryMock = $this->createMock(Repository::class);

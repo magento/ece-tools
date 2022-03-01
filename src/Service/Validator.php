@@ -20,7 +20,7 @@ class Validator
      * Supported version constraints of Redis services
      */
     private const REDIS_SUPPORT_VERSIONS = [
-        '*' => '~3.2.0 || ~4.0.0 || ~5.0.0 || ~6.0.0',
+        '*' => '~3.2.0 || ~4.0.0 || ~5.0.0 || ~6.0.0 || ~6.2.0',
     ];
 
     /**
@@ -71,9 +71,13 @@ class Validator
             '>=2.4.0 <2.4.2' => '~7.5.0 || ~7.6.0 || ~7.7.0',
             '>=2.4.2' => '~7.5.0 || ~7.6.0 || ~7.7.0 || ~7.9.0',
         ],
+        ServiceInterface::NAME_OPENSEARCH => [
+            '>=2.3.7-p3 <2.4.0 || >=2.4.3-p2' => '~1.1 || ~1.2.1',
+        ],
         ServiceInterface::NAME_RABBITMQ => [
             '<2.3.0' => '~3.5.0',
-            '>=2.3.0' => '~3.5.0 || ~3.7.0 || ~3.8.0',
+            '>=2.3.0 <2.4.4' => '~3.5.0 || ~3.7.0 || ~3.8.0',
+            '>=2.4.4' => '~3.5.0 || ~3.7.0 || ~3.8.0 || ~3.9.0',
         ],
         ServiceInterface::NAME_NODE => [
             '*' => '^6 || ^8 || ^10 || ^11',
@@ -186,7 +190,8 @@ class Validator
                         break;
                     }
                 }
-                if (!isset($this->supportedVersionList[$serviceName])) {
+                if (!isset($this->supportedVersionList[$serviceName])
+                    && $serviceName !== ServiceInterface::NAME_OPENSEARCH) {
                     throw new ServiceMismatchException(sprintf(
                         'Service "%s" does not have defined configurations for "%s" Magento version',
                         $serviceName,

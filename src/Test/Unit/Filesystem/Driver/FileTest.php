@@ -33,7 +33,7 @@ class FileTest extends TestCase
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->shellMock = $this->getFunctionMock(
             'Magento\MagentoCloud\Filesystem\Driver',

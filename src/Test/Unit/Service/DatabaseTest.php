@@ -49,7 +49,7 @@ class DatabaseTest extends TestCase
     /**
      * @inheritdoc
      */
-    public function setUp()
+    public function setUp(): void
     {
         $this->connectionTypeMock = $this->createMock(ConnectionTypes::class);
         $this->connectionMock = $this->getMockForAbstractClass(ConnectionInterface::class);

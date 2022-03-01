@@ -37,7 +37,7 @@ class BackupListTest extends TestCase
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->backupFilesListMock = $this->createMock(BackupFilesList::class);
         $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)

@@ -64,7 +64,7 @@ class WarmUpTest extends TestCase
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->poolFactoryMock = $this->createMock(PoolFactory::class);
         $this->poolMock = $this->createMock(Pool::class);

@@ -49,7 +49,7 @@ class MergerTest extends TestCase
     /**
      * @inheritDoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->resolverMock = $this->createMock(Resolver::class);
         $this->stepCollectorMock = $this->createMock(Step::class);

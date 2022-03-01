@@ -43,7 +43,7 @@ class DeployCompletionTest extends TestCase
     /**
      * @inheritDoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->hookChecker = $this->createMock(HookChecker::class);

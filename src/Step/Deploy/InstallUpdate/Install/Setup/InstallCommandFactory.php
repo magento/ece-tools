@@ -18,6 +18,7 @@ use Magento\MagentoCloud\Config\SearchEngine\ElasticSuite;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Package\UndefinedPackageException;
 use Magento\MagentoCloud\Service\ElasticSearch;
+use Magento\MagentoCloud\Service\OpenSearch;
 use Magento\MagentoCloud\Service\ServiceException;
 use Magento\MagentoCloud\Util\UrlManager;
 use Magento\MagentoCloud\Util\PasswordGenerator;
@@ -80,6 +81,11 @@ class InstallCommandFactory
     private $elasticSearch;
 
     /**
+     * @var OpenSearch
+     */
+    private $openSearch;
+
+    /**
      * @var RemoteStorage
      */
     private $remoteStorage;
@@ -94,6 +100,7 @@ class InstallCommandFactory
      * @param DbConfig $dbConfig
      * @param MagentoVersion $magentoVersion
      * @param ElasticSearch $elasticSearch
+     * @param OpenSearch $openSearch
      * @param RemoteStorage $remoteStorage
      *
      * @SuppressWarnings(PHPMD.ExcessiveParameterList)
@@ -108,6 +115,7 @@ class InstallCommandFactory
         DbConfig $dbConfig,
         MagentoVersion $magentoVersion,
         ElasticSearch $elasticSearch,
+        OpenSearch $openSearch,
         RemoteStorage $remoteStorage
     ) {
         $this->urlManager = $urlManager;
@@ -119,6 +127,7 @@ class InstallCommandFactory
         $this->dbConfig = $dbConfig;
         $this->magentoVersion = $magentoVersion;
         $this->elasticSearch = $elasticSearch;
+        $this->openSearch = $openSearch;
         $this->remoteStorage = $remoteStorage;
     }
 
@@ -224,29 +233,47 @@ class InstallCommandFactory
      * @throws UndefinedPackageException
      * @throws ConfigException
      * @throws ServiceException
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      */
     private function getEsOptions(): array
     {
         $options = [];
 
         if ($this->magentoVersion->isGreaterOrEqual('2.4.0')) {
-            if (!$this->elasticSearch->isInstalled()) {
-                throw new ConfigException('Elasticsearch service is required');
+            if (!$this->elasticSearch->isInstalled() && !$this->openSearch->isInstalled()) {
+                throw new ConfigException(
+                    'Elasticsearch service is required! If you use Magento 2.4.4 or higher you can use OpenSearch'
+                );
             }
 
-            $options['--search-engine'] = $this->elasticSearch->getFullVersion();
-            $options['--elasticsearch-host'] = $this->elasticSearch->getHost();
-            $options['--elasticsearch-port'] = $this->elasticSearch->getPort();
+            if ($this->openSearch->isInstalled()
+                && $this->magentoVersion->satisfies('>=2.3.7-p3 <2.4.0 || >=2.4.3-p2')
+            ) {
+                $engine = $this->openSearch->getFullEngineName();
+                $host = $this->openSearch->getHost();
+                $port = $this->openSearch->getPort();
+                $configuration = $this->openSearch->getConfiguration();
+                $isAuthEnabled = $this->openSearch->isAuthEnabled();
+            } else {
+                $engine = $this->elasticSearch->getFullEngineName();
+                $host = $this->elasticSearch->getHost();
+                $port = $this->elasticSearch->getPort();
+                $configuration = $this->elasticSearch->getConfiguration();
+                $isAuthEnabled = $this->elasticSearch->isAuthEnabled();
+            }
 
-            $esConfig = $this->elasticSearch->getConfiguration();
-            if ($this->elasticSearch->isAuthEnabled()) {
+            $options['--search-engine'] = $engine;
+                $options['--elasticsearch-host'] = $host;
+            $options['--elasticsearch-port'] = $port;
+
+            if ($isAuthEnabled) {
                 $options['--elasticsearch-enable-auth'] = '1';
-                $options['--elasticsearch-username'] = $esConfig['username'];
-                $options['--elasticsearch-password'] = $esConfig['password'];
+                $options['--elasticsearch-username'] = $configuration['username'];
+                $options['--elasticsearch-password'] = $configuration['password'];
             }
 
-            if (isset($esConfig['query']['index'])) {
-                $options['--elasticsearch-index-prefix'] = $esConfig['query']['index'];
+            if (isset($configuration['query']['index'])) {
+                $options['--elasticsearch-index-prefix'] = $configuration['query']['index'];
             }
         }
 

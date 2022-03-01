@@ -46,7 +46,7 @@ class CleanCacheTest extends TestCase
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->magentoShellMock = $this->createMock(MagentoShell::class);
         $this->stageConfig = $this->getMockForAbstractClass(DeployInterface::class);

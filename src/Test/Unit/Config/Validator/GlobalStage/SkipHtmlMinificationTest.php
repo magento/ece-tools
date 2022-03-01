@@ -37,7 +37,7 @@ class SkipHtmlMinificationTest extends TestCase
     /**
      * {@inheritdoc}
      */
-    public function setUp()
+    public function setUp(): void
     {
         $this->globalConfigMock = $this->createMock(GlobalSection::class);
         $this->resultFactoryMock = $this->createMock(ResultFactory::class);

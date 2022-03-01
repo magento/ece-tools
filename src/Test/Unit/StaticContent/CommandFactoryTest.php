@@ -49,7 +49,7 @@ class CommandFactoryTest extends TestCase
     /**
      * @inheritdoc
      */
-    public function setUp()
+    public function setUp(): void
     {
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
         $this->globalConfigMock = $this->createMock(GlobalSection::class);

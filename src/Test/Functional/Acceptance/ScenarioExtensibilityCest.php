@@ -12,10 +12,15 @@ use Magento\CloudDocker\Test\Functional\Codeception\Docker;
 /**
  * Tests extensibility base deployment scenarios
  *
- * @group php74
+ * @group php81
  */
 class ScenarioExtensibilityCest extends AbstractCest
 {
+    /**
+     * @var string
+     */
+    protected $magentoCloudTemplate = '2.4.4';
+
     /**
      * @param \CliTester $I
      */
@@ -50,18 +55,22 @@ class ScenarioExtensibilityCest extends AbstractCest
 
         $cloudLog = $I->grabFileContent('/var/log/cloud.log', Docker::BUILD_CONTAINER);
 
-        $I->assertContains(
+        $I->assertStringContainsString(
             'Step "copy-sample-data" was skipped',
             $cloudLog,
             'Checks that step copy-sample-data was skipped'
         );
-        $I->assertContains('Step "compile-di" was skipped', $cloudLog, 'Checks that step compile-di was skipped');
-        $I->assertContains(
+        $I->assertStringContainsString(
+            'Step "compile-di" was skipped',
+            $cloudLog,
+            'Checks that step compile-di was skipped'
+        );
+        $I->assertStringContainsString(
             'Doing some actions after static content generation',
             $cloudLog,
             'Checks that new step update-static-content was added'
         );
-        $I->assertContains(
+        $I->assertStringContainsString(
             'Customized step for enabling production mode',
             $cloudLog,
             'Checks that step set-production-mode was customized'

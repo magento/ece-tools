@@ -47,7 +47,7 @@ class ProcessorTest extends TestCase
     /**
      * @inheritDoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->mergerMock = $this->createMock(Merger::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);

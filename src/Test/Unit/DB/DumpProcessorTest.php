@@ -19,7 +19,6 @@ use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Package\UndefinedPackageException;
 use Magento\MagentoCloud\Util\BackgroundProcess;
 use Magento\MagentoCloud\Util\MaintenanceModeSwitcher;
-use PHPUnit\Framework\MockObject\Matcher\InvokedCount;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Magento\MagentoCloud\DB\Data\ConnectionInterface;
@@ -78,7 +77,7 @@ class DumpProcessorTest extends TestCase
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->maintenanceModeSwitcherMock = $this->createMock(MaintenanceModeSwitcher::class);
         $this->cronSwitcherMock = $this->createMock(Switcher::class);
@@ -113,7 +112,7 @@ class DumpProcessorTest extends TestCase
 
     /**
      * @param array $dbConfig
-     * @param InvokedCount $expects
+     * @param $expects
      * @param bool $removeDefiners
      * @throws ConfigException
      * @throws FileSystemException
@@ -121,7 +120,7 @@ class DumpProcessorTest extends TestCase
      * @throws UndefinedPackageException
      * @dataProvider executeDataProvider
      */
-    public function testExecute(array $dbConfig, InvokedCount $expects, bool $removeDefiners)
+    public function testExecute(array $dbConfig, $expects, bool $removeDefiners)
     {
         $this->dbConfigMock->expects($this->once())
             ->method('get')
@@ -194,7 +193,7 @@ class DumpProcessorTest extends TestCase
 
     /**
      * @param array $databases
-     * @param InvokedCount $expects
+     * @param $expects
      * @throws ConfigException
      * @throws FileSystemException
      * @throws GenericException
@@ -203,7 +202,7 @@ class DumpProcessorTest extends TestCase
      */
     public function testExecuteWithDatabases(
         array $databases,
-        InvokedCount $expects
+        $expects
     ) {
         $this->dbConfigMock->expects($this->once())
             ->method('get')

@@ -28,7 +28,7 @@ class ReaderTest extends TestCase
      */
     private $fileListMock;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->fileListMock = $this->createMock(FileList::class);
 

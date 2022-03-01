@@ -31,6 +31,7 @@
                     <item name="resource-configuration" xsi:type="object">Magento\MagentoCloud\Config\Validator\Deploy\ResourceConfiguration</item>
                     <item name="session-configuration" xsi:type="object">Magento\MagentoCloud\Config\Validator\Deploy\SessionConfiguration</item>
                     <item name="elasticsearch-integrity" xsi:type="object">Magento\MagentoCloud\Config\Validator\Deploy\ElasticSearchIntegrity</item>
+                    <item name="opensearch-integrity" xsi:type="object">Magento\MagentoCloud\Config\Validator\Deploy\OpenSearchIntegrity</item>
                     <item name="elasticsuite-integrity" xsi:type="object">Magento\MagentoCloud\Config\Validator\Deploy\ElasticSuiteIntegrity</item>
                     <item name="removed-split-db" xsi:type="object">Magento\MagentoCloud\Config\Validator\Deploy\RemovedSplitDb</item>
                 </item>
@@ -43,6 +44,7 @@
                     <item name="solr-integrity" xsi:type="object">Magento\MagentoCloud\Config\Validator\Deploy\SolrIntegrity</item>
                     <item name="es-usage" xsi:type="object">Magento\MagentoCloud\Config\Validator\Deploy\ElasticSearchUsage</item>
                     <item name="es-version" xsi:type="object">Magento\MagentoCloud\Config\Validator\Deploy\ElasticSearchVersion</item>
+                    <item name="es-os-installed-both" xsi:type="object">Magento\MagentoCloud\Config\Validator\Deploy\OpenSearchElasticSearchBothInstalled</item>
                     <item name="appropriate-version" xsi:type="object">Magento\MagentoCloud\Config\Validator\Deploy\AppropriateVersion</item>
                     <item name="scd-options-ignorance" xsi:type="object">Magento\MagentoCloud\Config\Validator\Deploy\ScdOptionsIgnorance</item>
                     <item name="deprecated-variables" xsi:type="object">Magento\MagentoCloud\Config\Validator\Deploy\DeprecatedVariables</item>
@@ -99,6 +101,7 @@
                 <item name="remote-storage" xsi:type="object" priority="1000">Magento\MagentoCloud\Step\Deploy\RemoteStorage</item>
                 <!-- Config update end -->
                 <item name="set-admin-url" xsi:type="object" priority="1000">Magento\MagentoCloud\Step\Deploy\InstallUpdate\Update\SetAdminUrl</item>
+                <item name="clean-cache" xsi:type="object" priority="1050">CleanCache.Deploy</item>
                 <item name="setup" xsi:type="object" priority="1100">Magento\MagentoCloud\Step\Deploy\InstallUpdate\Update\Setup</item>
                 <item name="split-db" xsi:type="object" priority="1200">Magento\MagentoCloud\Step\Deploy\SplitDbConnection</item>
                 <item name="cache-type" xsi:type="object" priority="1300">Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\CacheType</item>

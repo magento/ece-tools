@@ -9,6 +9,7 @@ namespace Magento\MagentoCloud\Test\Unit\Service;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Response;
+use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Http\ClientFactory;
 use Magento\MagentoCloud\Service\ElasticSearch;
@@ -245,7 +246,7 @@ class ElasticSearchTest extends TestCase
             ->method('create')
             ->willReturn($clientMock);
 
-        $this->assertSame($expected, $this->elasticSearch->getFullVersion());
+        $this->assertSame($expected, $this->elasticSearch->getFullEngineName());
     }
 
     /**
@@ -273,6 +274,7 @@ class ElasticSearchTest extends TestCase
     {
         $this->expectException(ServiceException::class);
         $this->expectExceptionMessage('Can\'t get version of elasticsearch: ES is not available');
+        $this->expectExceptionCode(Error::DEPLOY_ES_CANNOT_CONNECT);
 
         $this->environmentMock->method('getRelationship')
             ->willReturn([
