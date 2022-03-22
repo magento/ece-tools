@@ -332,6 +332,55 @@ class ValidatorTest extends TestCase
                 ],
                 0
             ],
+            [
+                '2.3.7-p2',
+                [
+                    ServiceInterface::NAME_ELASTICSEARCH => '7.10' //wrong
+                ],
+                1
+            ],
+            [
+                '2.3.7-p3',
+                [
+                    ServiceInterface::NAME_ELASTICSEARCH => '7.10'
+                ],
+                0
+            ],
+            [
+                '2.4.0',
+                [
+                    ServiceInterface::NAME_ELASTICSEARCH => '7.10' //wrong
+                ],
+                1
+            ],
+            [
+                '2.4.1',
+                [
+                    ServiceInterface::NAME_ELASTICSEARCH => '7.10' //wrong
+                ],
+                1
+            ],
+            [
+                '2.4.2',
+                [
+                    ServiceInterface::NAME_ELASTICSEARCH => '7.10' //wrong
+                ],
+                1
+            ],
+            [
+                '2.4.3',
+                [
+                    ServiceInterface::NAME_ELASTICSEARCH => '7.10'
+                ],
+                0
+            ],
+            [
+                '2.4.4',
+                [
+                    ServiceInterface::NAME_ELASTICSEARCH => '7.10'
+                ],
+                0
+            ],
         ];
     }
 }
