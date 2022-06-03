@@ -15,6 +15,7 @@ use Magento\MagentoCloud\Config\Validator\Result\Error;
 use Magento\MagentoCloud\Config\Validator\Result\Success;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
 use Magento\MagentoCloud\Service\ElasticSearch;
+use Magento\MagentoCloud\Service\OpenSearch;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -39,6 +40,11 @@ class ElasticSuiteIntegrityTest extends TestCase
     private $elasticSearchMock;
 
     /**
+     * @var OpenSearch|MockObject
+     */
+    private $openSearchMock;
+
+    /**
      * @var ResultFactory|MockObject
      */
     private $resultFactoryMock;
@@ -55,12 +61,14 @@ class ElasticSuiteIntegrityTest extends TestCase
     {
         $this->elasticSuiteMock = $this->createMock(ElasticSuite::class);
         $this->elasticSearchMock = $this->createMock(ElasticSearch::class);
+        $this->openSearchMock = $this->createMock(OpenSearch::class);
         $this->resultFactoryMock = $this->createMock(ResultFactory::class);
         $this->stageConfigMock = $this->createMock(DeployInterface::class);
 
         $this->validator = new ElasticSuiteIntegrity(
             $this->elasticSuiteMock,
             $this->elasticSearchMock,
+            $this->openSearchMock,
             $this->resultFactoryMock,
             $this->stageConfigMock
         );
@@ -71,6 +79,10 @@ class ElasticSuiteIntegrityTest extends TestCase
         $this->elasticSuiteMock->expects($this->once())
             ->method('isInstalled')
             ->willReturn(false);
+        $this->elasticSearchMock->expects($this->never())
+            ->method('isInstalled');
+        $this->openSearchMock->expects($this->never())
+            ->method('isInstalled');
         $this->resultFactoryMock->expects($this->once())
             ->method('success')
             ->willReturn(new Success());
@@ -78,7 +90,39 @@ class ElasticSuiteIntegrityTest extends TestCase
         $this->assertInstanceOf(Success::class, $this->validator->validate());
     }
 
-    public function testValidateNoESInstalled()
+    public function testValidateEsOs()
+    {
+        $this->elasticSuiteMock->expects($this->once())
+            ->method('isInstalled')
+            ->willReturn(true);
+        $this->openSearchMock->expects($this->once())
+            ->method('isInstalled')
+            ->willReturn(true);
+        $this->resultFactoryMock->expects($this->once())
+            ->method('success')
+            ->willReturn(new Success());
+
+        $this->assertInstanceOf(Success::class, $this->validator->validate());
+    }
+
+    public function testValidateEs()
+    {
+        $this->elasticSuiteMock->expects($this->once())
+            ->method('isInstalled')
+            ->willReturn(true);
+        $this->elasticSearchMock->expects($this->once())
+            ->method('isInstalled')
+            ->willReturn(true);
+        $this->openSearchMock->expects($this->never())
+            ->method('isInstalled');
+        $this->resultFactoryMock->expects($this->once())
+            ->method('success')
+            ->willReturn(new Success());
+
+        $this->assertInstanceOf(Success::class, $this->validator->validate());
+    }
+
+    public function testValidateOs()
     {
         $this->elasticSuiteMock->expects($this->once())
             ->method('isInstalled')
@@ -86,10 +130,31 @@ class ElasticSuiteIntegrityTest extends TestCase
         $this->elasticSearchMock->expects($this->once())
             ->method('isInstalled')
             ->willReturn(false);
+        $this->openSearchMock->expects($this->once())
+            ->method('isInstalled')
+            ->willReturn(true);
+        $this->resultFactoryMock->expects($this->once())
+            ->method('success')
+            ->willReturn(new Success());
+
+        $this->assertInstanceOf(Success::class, $this->validator->validate());
+    }
+
+    public function testValidateNoESandOSInstalled()
+    {
+        $this->elasticSuiteMock->expects($this->once())
+            ->method('isInstalled')
+            ->willReturn(true);
+        $this->elasticSearchMock->expects($this->once())
+            ->method('isInstalled')
+            ->willReturn(false);
+        $this->openSearchMock->expects($this->once())
+            ->method('isInstalled')
+            ->willReturn(false);
         $this->resultFactoryMock->expects($this->once())
             ->method('error')
             ->with(
-                'ElasticSuite is installed without available ElasticSearch service.',
+                'ElasticSuite is installed without available ElasticSearch or OpenSearch service.',
                 '',
                 AppError::DEPLOY_ELASTIC_SUITE_WITHOUT_ES
             )
@@ -106,6 +171,8 @@ class ElasticSuiteIntegrityTest extends TestCase
         $this->elasticSearchMock->expects($this->once())
             ->method('isInstalled')
             ->willReturn(true);
+        $this->openSearchMock->expects($this->never())
+            ->method('isInstalled');
         $this->stageConfigMock->expects($this->once())
             ->method('get')
             ->with(DeployInterface::VAR_SEARCH_CONFIGURATION)
@@ -130,6 +197,8 @@ class ElasticSuiteIntegrityTest extends TestCase
         $this->elasticSearchMock->expects($this->once())
             ->method('isInstalled')
             ->willReturn(true);
+        $this->openSearchMock->expects($this->never())
+            ->method('isInstalled');
         $this->stageConfigMock->expects($this->once())
             ->method('get')
             ->with(DeployInterface::VAR_SEARCH_CONFIGURATION)
