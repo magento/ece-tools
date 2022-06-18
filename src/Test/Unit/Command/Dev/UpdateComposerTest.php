@@ -106,6 +106,13 @@ class UpdateComposerTest extends TestCase
                 'script3',
             ]);
         $this->composerGeneratorMock->expects($this->once())
+            ->method('getFrameworkPreparationScript')
+            ->with(array_keys($gitOptions['repositories']))
+            ->willReturn([
+                'script4',
+                'script5',
+            ]);
+        $this->composerGeneratorMock->expects($this->once())
             ->method('generate')
             ->with($gitOptions['repositories'])
             ->willReturn([
@@ -121,11 +128,13 @@ class UpdateComposerTest extends TestCase
                     ],
                 ],
             ]);
-        $this->shellMock->expects($this->exactly(3))
+        $this->shellMock->expects($this->exactly(5))
             ->method('execute')
             ->withConsecutive(
                 ['script2'],
                 ['script3'],
+                ['script4'],
+                ['script5'],
                 ['composer update --ansi --no-interaction']
             );
         $this->fileListMock->expects($this->once())

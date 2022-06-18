@@ -69,13 +69,14 @@ class ComposerGenerator
      * Generates composer.json data for installation from git.
      *
      * @param array $repoOptions
+     * @param array $installFromGitScripts
      * @return array
      * @throws FileSystemException
      * @codeCoverageIgnore
      */
-    public function generate(array $repoOptions): array
+    public function generate(array $repoOptions, array $installFromGitScripts): array
     {
-        $composer = $this->getBaseComposer($repoOptions);
+        $composer = $this->getBaseComposer($installFromGitScripts);
 
         $rootComposerJsonPath = $this->directoryList->getMagentoRoot() . '/composer.json';
         if ($this->file->isExists($rootComposerJsonPath)) {
@@ -163,14 +164,38 @@ class ComposerGenerator
     }
 
     /**
+     * @param array $repoNames
+     * @return array
+     * @throws FileSystemException
+     */
+    public function getFrameworkPreparationScript(array $repoNames): array
+    {
+        $script = [];
+
+        foreach ($repoNames as $repoName) {
+            $path = $repoName . '/lib/internal/Magento/Framework';
+            $absolutePath = $this->directoryList->getMagentoRoot() . '/' .$path;
+
+            if ($this->file->isExists($absolutePath)) {
+                foreach ($this->findPackages($absolutePath) as $package) {
+                    if ($package) {
+                        $script[] = 'mv ' . $path . '/' . $package . ' ' . $path . '-' . $package;
+                    }
+                }
+            }
+        }
+
+        return $script;
+    }
+
+    /**
      * Returns base skeleton for composer.json.
      *
-     * @param array $repoOptions
+     * @param array $installFromGitScripts
      * @return array
      */
-    private function getBaseComposer(array $repoOptions): array
+    private function getBaseComposer(array $installFromGitScripts): array
     {
-        $installFromGitScripts = $this->getInstallFromGitScripts($repoOptions);
         $composer = [
             'name' => 'magento/cloud-dev',
             'description' => 'eCommerce Platform for Growth',
@@ -188,6 +213,11 @@ class ComposerGenerator
             ],
             'config' => [
                 'use-include-path' => true,
+                'allow-plugins' => [
+                    'dealerdirect/phpcodesniffer-composer-installer' => true,
+                    'laminas/laminas-dependency-plugin' => true,
+                    'magento/*' => true
+                ]
             ],
             'autoload' => [
                 'psr-4' => [
@@ -200,6 +230,11 @@ class ComposerGenerator
             'extra' => [
                 'magento-force' => 'override',
                 'magento-deploystrategy' => 'copy',
+                'magento-deploy-ignore' => [
+                    '*' => [
+                        '/.gitignore'
+                    ]
+                ]
             ],
             'scripts' => [
                 'install-from-git' => $installFromGitScripts,
