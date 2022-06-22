@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Command\Dev;
 
+use Magento\MagentoCloud\Cli;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileList;
 use Symfony\Component\Console\Command\Command;
@@ -79,14 +80,11 @@ EOT;
     }
 
     /**
-     * @param InputInterface $input
-     * @param OutputInterface $output
-     * @return int|void
-     * @throws \Magento\MagentoCloud\Filesystem\FileSystemException
+     * @inheritdoc
      *
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $errors = Yaml::parse(
             $this->file->fileGetContents($this->fileList->getErrorSchema()),
@@ -100,6 +98,8 @@ EOT;
         $this->file->filePutContents($this->fileList->getErrorDistConfig(), $docs);
 
         $output->writeln(sprintf('File %s was generated', $this->fileList->getErrorDistConfig()));
+
+        return Cli::SUCCESS;
     }
 
     /**
