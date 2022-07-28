@@ -5,9 +5,8 @@
  */
 declare(strict_types=1);
 
-namespace Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\Amqp;
+namespace Magento\MagentoCloud\Config;
 
-use Magento\MagentoCloud\Config\ConfigMerger;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Service\RabbitMq;
 use Magento\MagentoCloud\Package\MagentoVersion;
@@ -15,7 +14,7 @@ use Magento\MagentoCloud\Package\MagentoVersion;
 /**
  * Returns queue configuration.
  */
-class Config
+class Amqp
 {
     /**
      * @var RabbitMq
@@ -61,9 +60,9 @@ class Config
      * @return array
      * @throws \Magento\MagentoCloud\Package\UndefinedPackageException
      */
-    public function get(): array
+    public function getConfig(): array
     {
-        $config = $this->getConfig();
+        $config = $this->getMergedConfig();
 
         if ($this->magentoVersion->isGreaterOrEqual('2.2')) {
             $config['consumers_wait_for_messages'] = $this->stageConfig->get(
@@ -79,7 +78,7 @@ class Config
      *
      * @return array
      */
-    private function getConfig(): array
+    private function getMergedConfig(): array
     {
         $envQueueConfig = $this->stageConfig->get(DeployInterface::VAR_QUEUE_CONFIGURATION);
         $mqConfig = $this->getAmqpConfig();

@@ -15,7 +15,7 @@ use Magento\MagentoCloud\Step\StepInterface;
 use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface as ConfigReader;
 use Magento\MagentoCloud\Config\Magento\Env\WriterInterface as ConfigWriter;
 use Psr\Log\LoggerInterface;
-use Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\Amqp\Config as AmqpConfig;
+use Magento\MagentoCloud\Config\Amqp as AmqpConfig;
 
 /**
  * @inheritdoc
@@ -75,7 +75,7 @@ class Amqp implements StepInterface
     {
         try {
             $config = $this->configReader->read();
-            $amqpConfig = $this->amqpConfig->get();
+            $amqpConfig = $this->amqpConfig->getConfig();
         } catch (GenericException $e) {
             throw new StepException($e->getMessage(), $e->getCode(), $e);
         }

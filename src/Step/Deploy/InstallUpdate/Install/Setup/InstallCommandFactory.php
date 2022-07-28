@@ -23,6 +23,7 @@ use Magento\MagentoCloud\Service\ServiceException;
 use Magento\MagentoCloud\Util\UrlManager;
 use Magento\MagentoCloud\Util\PasswordGenerator;
 use Magento\MagentoCloud\Config\RemoteStorage;
+use Magento\MagentoCloud\Config\Amqp as AmqpConfig;
 
 /**
  * Generates command for magento installation
@@ -91,6 +92,11 @@ class InstallCommandFactory
     private $remoteStorage;
 
     /**
+     * @var AmqpConfig
+     */
+    private $amqpConfig;
+
+    /**
      * @param UrlManager $urlManager
      * @param AdminDataInterface $adminData
      * @param ConnectionFactory $connectionFactory
@@ -102,6 +108,7 @@ class InstallCommandFactory
      * @param ElasticSearch $elasticSearch
      * @param OpenSearch $openSearch
      * @param RemoteStorage $remoteStorage
+     * @param AmqpConfig $amqpConfig
      *
      * @SuppressWarnings(PHPMD.ExcessiveParameterList)
      */
@@ -116,7 +123,8 @@ class InstallCommandFactory
         MagentoVersion $magentoVersion,
         ElasticSearch $elasticSearch,
         OpenSearch $openSearch,
-        RemoteStorage $remoteStorage
+        RemoteStorage $remoteStorage,
+        AmqpConfig $amqpConfig
     ) {
         $this->urlManager = $urlManager;
         $this->adminData = $adminData;
@@ -129,6 +137,7 @@ class InstallCommandFactory
         $this->elasticSearch = $elasticSearch;
         $this->openSearch = $openSearch;
         $this->remoteStorage = $remoteStorage;
+        $this->amqpConfig = $amqpConfig;
     }
 
     /**
@@ -148,7 +157,8 @@ class InstallCommandFactory
                 $this->getBaseOptions(),
                 $this->getAdminOptions(),
                 $this->getEsOptions(),
-                $this->getRemoteStorageOptions()
+                $this->getRemoteStorageOptions(),
+                $this->getAmqpOptions()
             );
         } catch (GenericException $exception) {
             throw new ConfigException($exception->getMessage(), $exception->getCode(), $exception);
@@ -333,5 +343,28 @@ class InstallCommandFactory
         }
 
         return $this->connectionData;
+    }
+
+    /**
+     * Returns AMQP optional config options.
+     *
+     * @return array
+     * @throws UndefinedPackageException
+     */
+    private function getAmqpOptions(): array
+    {
+        $options = [];
+        $config = $this->amqpConfig->getConfig();
+        $map = ['host', 'port', 'user', 'password', 'virtualhost'];
+
+        if (!empty($config['amqp']['host'])) {
+            foreach ($map as $option) {
+                if (!empty($config['amqp'][$option])) {
+                    $options['--amqp-' . $option] = (string)$config['amqp'][$option];
+                }
+            }
+        }
+
+        return $options;
     }
 }

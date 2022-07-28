@@ -18,6 +18,7 @@ use Magento\MagentoCloud\DB\Data\ConnectionInterface;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Service\ElasticSearch;
 use Magento\MagentoCloud\Service\OpenSearch;
+use Magento\MagentoCloud\Config\Amqp as AmqpConfig;
 use Magento\MagentoCloud\Step\Deploy\InstallUpdate\Install\Setup\InstallCommandFactory;
 use Magento\MagentoCloud\Util\PasswordGenerator;
 use Magento\MagentoCloud\Util\UrlManager;
@@ -92,6 +93,11 @@ class InstallCommandFactoryTest extends TestCase
     private $remoteStorageMock;
 
     /**
+     * @var AmqpConfig|MockObject
+     */
+    private $amqpConfigMock;
+
+    /**
      * @inheritdoc
      */
     protected function setUp(): void
@@ -112,6 +118,7 @@ class InstallCommandFactoryTest extends TestCase
         $this->elasticSearchMock = $this->createMock(ElasticSearch::class);
         $this->openSearchMock = $this->createMock(OpenSearch::class);
         $this->remoteStorageMock = $this->createMock(RemoteStorage::class);
+        $this->amqpConfigMock = $this->createMock(AmqpConfig::class);
 
         $this->installCommandFactory = new InstallCommandFactory(
             $this->urlManagerMock,
@@ -124,7 +131,8 @@ class InstallCommandFactoryTest extends TestCase
             $this->magentoVersionMock,
             $this->elasticSearchMock,
             $this->openSearchMock,
-            $this->remoteStorageMock
+            $this->remoteStorageMock,
+            $this->amqpConfigMock
         );
     }
 
@@ -538,5 +546,125 @@ class InstallCommandFactoryTest extends TestCase
         self::assertStringContainsString("--elasticsearch-username='user'", $command);
         self::assertStringContainsString("--elasticsearch-password='secret'", $command);
         self::assertStringContainsString("--elasticsearch-index-prefix='test'", $command);
+    }
+
+    /**
+     * @param array $amqpConfig
+     * @param string $expectedResult
+     * @return void
+     * @throws ConfigException
+     *
+     * @dataProvider executeWithAmqpConfigOptionsDataProvider
+     */
+    public function testExecuteWithAmqpConfigOptions(
+        array $amqpConfig,
+        string $expectedResult
+    ): void {
+        $this->mockBaseConfig('', '', '', '', '', '');
+        $this->magentoVersionMock->method('isGreaterOrEqual')
+            ->willReturnMap([
+                ['2.4.0', false],
+                ['2.4.2', true]
+            ]);
+        $this->amqpConfigMock->method('getConfig')
+            ->willReturn($amqpConfig);
+
+        self::assertStringContainsString($expectedResult, $this->installCommandFactory->create());
+    }
+
+    /**
+     * @return array
+     */
+    public function executeWithAmqpConfigOptionsDataProvider(): array
+    {
+        return [
+            'with all parameters and other config' => [
+                'amqpConfig' => [
+                    'amqp' => [
+                        'host' => 'some_host',
+                        'port' => 'some_port',
+                        'user' => 'some_user',
+                        'password' => 'some_password',
+                        'virtualhost' => 'some_host',
+                        'some_config' => 'some_config'
+                    ],
+                    'some_config' => 'some_value',
+                ],
+                'expectedResult' => "--amqp-host='some_host' --amqp-port='some_port' --amqp-user='some_user'"
+                    . " --amqp-password='some_password' --amqp-virtualhost='some_host'",
+            ],
+            'only host' => [
+                'amqpConfig' => [
+                    'amqp' => [
+                        'host' => 'some_host',
+                        'user' => 'some_user',
+                        'password' => 'some_password',
+                        'virtualhost' => 'some_host',
+                        'some_config' => 'some_config'
+                    ],
+                    'some_config' => 'some_value',
+                ],
+                'expectedResult' => "--amqp-host='some_host'",
+            ],
+        ];
+    }
+
+    /**
+     * @param array $amqpConfig
+     * @return void
+     * @throws ConfigException
+     *
+     * @dataProvider executeWithAmqpConfigOptionsWithoutHostDataProvider
+     */
+    public function testExecuteWithAmqpConfigOptionsWithoutHost(array $amqpConfig): void
+    {
+        $this->mockBaseConfig('', '', '', '', '', '');
+        $this->magentoVersionMock->method('isGreaterOrEqual')
+            ->willReturnMap([
+                ['2.4.0', false],
+                ['2.4.2', true]
+            ]);
+        $this->amqpConfigMock->method('getConfig')
+            ->willReturn($amqpConfig);
+
+        $command = $this->installCommandFactory->create();
+        self::assertStringNotContainsString('--amqp-host', $command);
+        self::assertStringNotContainsString('--amqp-port', $command);
+        self::assertStringNotContainsString('--amqp-user', $command);
+        self::assertStringNotContainsString('--amqp-password', $command);
+        self::assertStringNotContainsString('--amqp-virtualhost', $command);
+    }
+
+    /**
+     * @return array
+     */
+    public function executeWithAmqpConfigOptionsWithoutHostDataProvider(): array
+    {
+        return [
+            'host is not set' => [
+                'amqpConfig' => [
+                    'amqp' => [
+                        'port' => 'some_port',
+                        'user' => 'some_user',
+                        'password' => 'some_password',
+                        'virtualhost' => 'some_host',
+                        'some_config' => 'some_config'
+                    ],
+                    'some_config' => 'some_value',
+                ],
+            ],
+            'host is empty' => [
+                'amqpConfig' => [
+                    'amqp' => [
+                        'host' => '',
+                        'user' => 'some_user',
+                        'password' => 'some_password',
+                        'virtualhost' => 'some_host',
+                        'some_config' => 'some_config'
+                    ],
+                    'some_config' => 'some_value',
+                ],
+            ],
+        ];
     }
 }

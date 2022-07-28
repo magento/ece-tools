@@ -17,7 +17,7 @@ use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface as ConfigReader;
 use Magento\MagentoCloud\Config\Magento\Env\WriterInterface as ConfigWriter;
 use Psr\Log\LoggerInterface;
 use Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\Amqp;
-use Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\Amqp\Config as AmqpConfig;
+use Magento\MagentoCloud\Config\Amqp as AmqpConfig;
 
 /**
  * @inheritdoc
@@ -78,7 +78,7 @@ class AmqpTest extends TestCase
             ->method('read')
             ->willReturn($config);
         $this->amqpConfigMock->expects($this->once())
-            ->method('get')
+            ->method('getConfig')
             ->willReturn([]);
         $this->loggerMock->expects($this->never())
             ->method('info');
@@ -113,7 +113,7 @@ class AmqpTest extends TestCase
             ->method('read')
             ->willReturn($config);
         $this->amqpConfigMock->expects($this->once())
-            ->method('get')
+            ->method('getConfig')
             ->willReturn($amqpConfig);
         $this->loggerMock->expects($this->once())
             ->method('info')
