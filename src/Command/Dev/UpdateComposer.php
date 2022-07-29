@@ -108,12 +108,23 @@ class UpdateComposer extends Command
     {
         $gitOptions = $this->globalSection->get(GlobalSection::VAR_DEPLOY_FROM_GIT_OPTIONS);
 
-        $scripts = $this->composerGenerator->getInstallFromGitScripts($gitOptions['repositories']);
-        foreach (array_slice($scripts, 1) as $script) {
+        $InstallFromGitScripts = $this->composerGenerator->getInstallFromGitScripts($gitOptions['repositories']);
+        foreach (array_slice($InstallFromGitScripts, 1) as $script) {
             $this->shell->execute($script);
         }
 
-        $composer = $this->composerGenerator->generate($gitOptions['repositories']);
+        // Preparing framework modules for installation
+        $frameworkPreparationScript = $this->composerGenerator->getFrameworkPreparationScript(
+            array_keys($gitOptions['repositories'])
+        );
+        foreach ($frameworkPreparationScript as $script) {
+            $this->shell->execute($script);
+        }
+
+        $composer = $this->composerGenerator->generate(
+            $gitOptions['repositories'],
+            array_merge($InstallFromGitScripts, $frameworkPreparationScript)
+        );
 
         if (!empty($gitOptions['clear_magento_module_requirements'])) {
             $clearRequirementsScript = $this->clearModuleRequirements->generate();

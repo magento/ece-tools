@@ -15,6 +15,7 @@ use Magento\MagentoCloud\Config\Validator;
 use Magento\MagentoCloud\Config\ValidatorException;
 use Magento\MagentoCloud\Config\ValidatorInterface;
 use Magento\MagentoCloud\Service\ElasticSearch;
+use Magento\MagentoCloud\Service\OpenSearch;
 
 /**
  * Validates different aspects of ElasticSuite's configuration.
@@ -32,6 +33,11 @@ class ElasticSuiteIntegrity implements ValidatorInterface
     private $elasticSearch;
 
     /**
+     * @var OpenSearch
+     */
+    private $openSearch;
+
+    /**
      * @var Validator\ResultFactory
      */
     private $resultFactory;
@@ -44,24 +50,27 @@ class ElasticSuiteIntegrity implements ValidatorInterface
     /**
      * @param ElasticSuite $elasticSuite
      * @param ElasticSearch $elasticSearch
+     * @param OpenSearch $openSearch
      * @param Validator\ResultFactory $resultFactory
      * @param DeployInterface $config
      */
     public function __construct(
         ElasticSuite $elasticSuite,
         ElasticSearch $elasticSearch,
+        OpenSearch $openSearch,
         Validator\ResultFactory $resultFactory,
         DeployInterface $config
     ) {
         $this->elasticSuite = $elasticSuite;
         $this->elasticSearch = $elasticSearch;
+        $this->openSearch = $openSearch;
         $this->resultFactory = $resultFactory;
         $this->config = $config;
     }
 
     /**
      * If ElasticSuite is absent - skip validation.
-     * If ElasticSuite is present and no ElasticSearch connection - fail validation.
+     * If ElasticSuite is present and no ElasticSearch or OpenSearch connection - fail validation.
      * If search engine is manually set to non-ElasticSuite it will fail after deploy - fail validation.
      *
      * Otherwise - validation is successful.
@@ -76,9 +85,9 @@ class ElasticSuiteIntegrity implements ValidatorInterface
             return $this->resultFactory->success();
         }
 
-        if (!$this->elasticSearch->isInstalled()) {
+        if (!$this->elasticSearch->isInstalled() && !$this->openSearch->isInstalled()) {
             return $this->resultFactory->error(
-                'ElasticSuite is installed without available ElasticSearch service.',
+                'ElasticSuite is installed without available ElasticSearch or OpenSearch service.',
                 '',
                 Error::DEPLOY_ELASTIC_SUITE_WITHOUT_ES
             );

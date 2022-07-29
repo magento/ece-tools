@@ -5,13 +5,13 @@
  */
 declare(strict_types=1);
 
-namespace Magento\MagentoCloud\Test\Unit\Step\Deploy\InstallUpdate\ConfigUpdate\Amqp;
+namespace Magento\MagentoCloud\Test\Unit\Config;
 
 use Magento\MagentoCloud\Config\ConfigMerger;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Package\UndefinedPackageException;
-use Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\Amqp\Config;
+use Magento\MagentoCloud\Config\Amqp;
 use Magento\MagentoCloud\Service\RabbitMq;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -19,10 +19,10 @@ use PHPUnit\Framework\TestCase;
 /**
  * @inheritdoc
  */
-class ConfigTest extends TestCase
+class AmqpTest extends TestCase
 {
     /**
-     * @var Config
+     * @var Amqp
      */
     protected $config;
 
@@ -50,7 +50,7 @@ class ConfigTest extends TestCase
         $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
 
-        $this->config = new Config(
+        $this->config = new Amqp(
             $this->rabbitMq,
             $this->stageConfigMock,
             new ConfigMerger(),
@@ -67,9 +67,9 @@ class ConfigTest extends TestCase
      * @param array $expectedQueueConfig
      * @throws UndefinedPackageException
      *
-     * @dataProvider getDataProvider
+     * @dataProvider getConfigDataProvider
      */
-    public function testGet(
+    public function testGetConfig(
         array $customQueueConfig,
         array $amqpServiceConfig,
         bool $isGreaterOrEqualReturns,
@@ -92,7 +92,7 @@ class ConfigTest extends TestCase
             ->with('2.2')
             ->willReturn($isGreaterOrEqualReturns);
 
-        $this->assertEquals($expectedQueueConfig, $this->config->get());
+        $this->assertEquals($expectedQueueConfig, $this->config->getConfig());
     }
 
     /**
@@ -100,7 +100,7 @@ class ConfigTest extends TestCase
      *
      * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
-    public function getDataProvider(): array
+    public function getConfigDataProvider(): array
     {
         return [
             'queue configuration does not exist' => [
