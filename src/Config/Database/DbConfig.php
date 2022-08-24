@@ -35,6 +35,7 @@ class DbConfig implements ConfigInterface
     const KEY_ENGINE = 'engine';
     const KEY_INIT_STATEMENTS = 'initStatements';
     const KEY_ACTIVE = 'active';
+    const KEY_SYNCHRONOUS_REPLICATION = 'synchronous_replication';
 
     /**
      * Names of connections
@@ -195,6 +196,7 @@ class DbConfig implements ConfigInterface
             }
             $mageConnectionConfig = $this->convertToMageFormat($slaveConnectionData, true);
             $config[self::KEY_SLAVE_CONNECTION][$mageConnectionName] = $mageConnectionConfig;
+            $config[self::KEY_SLAVE_CONNECTION][$mageConnectionName][self::KEY_SYNCHRONOUS_REPLICATION] = true;
         }
         return $config;
     }
