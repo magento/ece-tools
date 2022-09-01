@@ -486,14 +486,23 @@ class InstallCommandFactoryTest extends TestCase
         self::assertStringContainsString("--elasticsearch-index-prefix='test'", $command);
     }
 
-    public function testExecuteWithOSauthOptions(): void
-    {
+    /**
+     * @param bool $greaterOrEqual
+     * @param string $enginePrefixName
+     * @throws ConfigException
+     * @dataProvider executeWithOSauthOptionsDataProvider
+     */
+    public function testExecuteWithOSauthOptions(
+        bool $greaterOrEqual,
+        string $enginePrefixName
+    ): void {
         $this->mockBaseConfig('', '', '', '', '', '');
         $this->magentoVersionMock->method('isGreaterOrEqual')
             ->willReturnMap([
                 ['2.4.0', true],
                 ['2.4.2', true],
                 ['2.4.4', true],
+                ['2.4.6', $greaterOrEqual],
             ]);
         $this->magentoVersionMock->expects($this->once())
             ->method('satisfies')
@@ -542,10 +551,21 @@ class InstallCommandFactoryTest extends TestCase
 
         $command = $this->installCommandFactory->create();
         self::assertStringContainsString("--search-engine='opensearch1'", $command);
-        self::assertStringContainsString("--elasticsearch-enable-auth='1'", $command);
-        self::assertStringContainsString("--elasticsearch-username='user'", $command);
-        self::assertStringContainsString("--elasticsearch-password='secret'", $command);
-        self::assertStringContainsString("--elasticsearch-index-prefix='test'", $command);
+        self::assertStringContainsString("--" . $enginePrefixName . "-enable-auth='1'", $command);
+        self::assertStringContainsString("--" . $enginePrefixName . "-username='user'", $command);
+        self::assertStringContainsString("--" . $enginePrefixName . "-password='secret'", $command);
+        self::assertStringContainsString("--" . $enginePrefixName . "-index-prefix='test'", $command);
+    }
+
+    /**
+     * @return array
+     */
+    public function executeWithOSauthOptionsDataProvider()
+    {
+        return [
+            [false, 'elasticsearch'],
+            [true, 'opensearch'],
+        ];
     }
 
     /**

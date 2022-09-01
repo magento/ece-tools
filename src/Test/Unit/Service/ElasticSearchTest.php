@@ -208,7 +208,7 @@ class ElasticSearchTest extends TestCase
      *
      * @dataProvider getFullVersionDataProvider
      */
-    public function testGetFullVersion(string $version, string $expected): void
+    public function testGetFullEngineName(string $version, string $expected): void
     {
         $clientMock = $this->createPartialMock(Client::class, ['get']);
         $responseMock = $this->createMock(Response::class);
