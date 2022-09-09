@@ -7,7 +7,11 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Service;
 
+use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Http\ClientFactory;
 use Magento\MagentoCloud\Service\Search\AbstractService;
+use Magento\MagentoCloud\Package\MagentoVersion;
+use Psr\Log\LoggerInterface;
 
 /**
  * Returns OpenSearch service configurations.
@@ -19,6 +23,27 @@ class OpenSearch extends AbstractService implements ServiceInterface
     public const ENGINE_NAME = 'opensearch';
 
     /**
+     * @var MagentoVersion
+     */
+    private $magentoVersion;
+
+    /**
+     * @param Environment $environment
+     * @param ClientFactory $clientFactory
+     * @param LoggerInterface $logger
+     * @param MagentoVersion $magentoVersion
+     */
+    public function __construct(
+        Environment $environment,
+        ClientFactory $clientFactory,
+        LoggerInterface $logger,
+        MagentoVersion $magentoVersion
+    ) {
+        $this->magentoVersion = $magentoVersion;
+        parent::__construct($environment, $clientFactory, $logger);
+    }
+
+    /**
      * Return full engine name.
      *
      * @return string
@@ -26,6 +51,10 @@ class OpenSearch extends AbstractService implements ServiceInterface
      */
     public function getFullEngineName(): string
     {
+        if ($this->magentoVersion->isGreaterOrEqual('2.4.6')) {
+            return static::ENGINE_NAME;
+        }
+
         return 'elasticsearch7';
     }
 }

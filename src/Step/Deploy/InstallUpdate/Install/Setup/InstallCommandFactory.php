@@ -29,6 +29,7 @@ use Magento\MagentoCloud\Config\Amqp as AmqpConfig;
  * Generates command for magento installation
  *
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
+ * @SuppressWarnings(PHPMD.NPathComplexity)
  */
 class InstallCommandFactory
 {
@@ -256,6 +257,8 @@ class InstallCommandFactory
                 );
             }
 
+            $enginePrefixName = 'elasticsearch';
+
             if ($this->openSearch->isInstalled()
                 && $this->magentoVersion->satisfies('>=2.3.7-p3 <2.4.0 || >=2.4.3-p2')
             ) {
@@ -264,6 +267,10 @@ class InstallCommandFactory
                 $port = $this->openSearch->getPort();
                 $configuration = $this->openSearch->getConfiguration();
                 $isAuthEnabled = $this->openSearch->isAuthEnabled();
+
+                if ($this->magentoVersion->isGreaterOrEqual('2.4.6')) {
+                    $enginePrefixName = 'opensearch';
+                }
             } else {
                 $engine = $this->elasticSearch->getFullEngineName();
                 $host = $this->elasticSearch->getHost();
@@ -273,17 +280,17 @@ class InstallCommandFactory
             }
 
             $options['--search-engine'] = $engine;
-                $options['--elasticsearch-host'] = $host;
-            $options['--elasticsearch-port'] = $port;
+                $options['--' . $enginePrefixName . '-host'] = $host;
+            $options['--' . $enginePrefixName . '-port'] = $port;
 
             if ($isAuthEnabled) {
-                $options['--elasticsearch-enable-auth'] = '1';
-                $options['--elasticsearch-username'] = $configuration['username'];
-                $options['--elasticsearch-password'] = $configuration['password'];
+                $options['--' . $enginePrefixName . '-enable-auth'] = '1';
+                $options['--' . $enginePrefixName . '-username'] = $configuration['username'];
+                $options['--' . $enginePrefixName . '-password'] = $configuration['password'];
             }
 
             if (isset($configuration['query']['index'])) {
-                $options['--elasticsearch-index-prefix'] = $configuration['query']['index'];
+                $options['--' . $enginePrefixName . '-index-prefix'] = $configuration['query']['index'];
             }
         }
 

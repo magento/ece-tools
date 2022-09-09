@@ -14,6 +14,7 @@ use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Http\ClientFactory;
 use Magento\MagentoCloud\Service\OpenSearch;
 use Magento\MagentoCloud\Service\ServiceException;
+use Magento\MagentoCloud\Package\MagentoVersion;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\StreamInterface;
@@ -45,6 +46,11 @@ class OpenSearchTest extends TestCase
     private $clientFactoryMock;
 
     /**
+     * @var MagentoVersion|MockObject
+     */
+    private $magentoVersionMock;
+
+    /**
      * @inheritdoc
      */
     public function setUp(): void
@@ -52,11 +58,13 @@ class OpenSearchTest extends TestCase
         $this->environmentMock = $this->createMock(Environment::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->clientFactoryMock = $this->createMock(ClientFactory::class);
+        $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
 
         $this->openSearch = new OpenSearch(
             $this->environmentMock,
             $this->clientFactoryMock,
-            $this->loggerMock
+            $this->loggerMock,
+            $this->magentoVersionMock
         );
     }
 
@@ -202,11 +210,28 @@ class OpenSearchTest extends TestCase
     }
 
     /**
+     * @param bool $greaterOrEqual
+     * @param string $expectedResult
      * @throws ServiceException
+     * @dataProvider getFullEngineNameDataProvider
      */
-    public function testGetFullVersion(): void
+    public function testGetFullEngineName(bool $greaterOrEqual, string $expectedResult): void
     {
-        $this->assertSame('elasticsearch7', $this->openSearch->getFullEngineName());
+        $this->magentoVersionMock->expects($this->once())
+            ->method('isGreaterOrEqual')
+            ->willReturn($greaterOrEqual);
+        $this->assertSame($expectedResult, $this->openSearch->getFullEngineName());
+    }
+
+    /**
+     * @return array
+     */
+    public function getFullEngineNameDataProvider()
+    {
+        return [
+            [false, 'elasticsearch7'],
+            [true, 'opensearch'],
+        ];
     }
 
     public function testGetVersionWithException(): void
