@@ -94,6 +94,8 @@ class Error
     public const GLOBAL_CONFIG_PARSE_FAILED = 244;
     public const GLOBAL_CONFIG_UNABLE_TO_READ = 245;
     public const GLOBAL_CONFIG_UNABLE_TO_READ_SCHEMA_YAML = 246;
+    public const GLOBAL_EVENTING_MODULE_GENERATE_FAILED = 247;
+    public const GLOBAL_EVENTING_MODULE_ENABLEMENT_FAILED = 248;
 
     /**
      * Build

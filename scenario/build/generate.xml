@@ -28,6 +28,7 @@
     <step name="set-report-dir-nesting-level" type="Magento\MagentoCloud\Step\Build\SetReportDirNestingLevel" priority="700"/>
     <step name="marshall-files" type="Magento\MagentoCloud\Step\Build\MarshallFiles" priority="800"/>
     <step name="copy-sample-data" type="Magento\MagentoCloud\Step\Build\CopySampleData" priority="900"/>
+    <step name="enable-eventing" type="Magento\MagentoCloud\Step\Build\EnableEventing" priority="950" />
     <step name="compile-di" type="Magento\MagentoCloud\Step\Build\CompileDi" priority="1000"/>
     <step name="dump-autoload" type="Magento\MagentoCloud\Step\Build\ComposerDumpAutoload" priority="1100"/>
     <step name="deploy-static-content" type="Magento\MagentoCloud\Step\Build\DeployStaticContent" priority="1200">

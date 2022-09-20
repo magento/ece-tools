@@ -706,6 +706,17 @@ variables:
               config:
                 region: us-east-1
                 bucket: test-bucket
+  ENABLE_EVENTING:
+    description: Enables commerce eventing.
+    type: boolean
+    stages:
+      - global
+    default:
+      global: false
+    examples:
+      - stage:
+          global:
+            ENABLE_EVENTING: true
 
   # Environment variables
   ENV_RELATIONSHIPS:

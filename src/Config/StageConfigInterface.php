@@ -42,6 +42,7 @@ interface StageConfigInterface
     public const VAR_SCD_MATRIX = 'SCD_MATRIX';
     public const VAR_SCD_NO_PARENT = 'SCD_NO_PARENT';
     public const VAR_X_FRAME_CONFIGURATION = 'X_FRAME_CONFIGURATION';
+    public const VAR_ENABLE_EVENTING = 'ENABLE_EVENTING';
 
     /**
      * Settings for deployment from git.
