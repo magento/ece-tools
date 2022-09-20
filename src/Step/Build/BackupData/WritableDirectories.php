@@ -148,7 +148,7 @@ class WritableDirectories implements StepInterface
     {
         try {
             $this->file->createDirectory($destination);
-            $this->file->copyDirectory($source, $destination);
+            $this->file->rename($source, $destination);
         } catch (FileSystemException $e) {
             throw new StepException($e->getMessage(), Error::BUILD_WRITABLE_DIRECTORY_COPYING_FAILED, $e);
         }
