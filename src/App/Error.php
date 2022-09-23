@@ -34,7 +34,7 @@ class Error
     public const BUILD_SCD_FAILED = 19;
     public const BUILD_SCD_COMPRESSION_FAILED = 20;
     public const BUILD_SCD_COPYING_FAILED = 21;
-    public const BUILD_WRITABLE_DIRECTORY_COPYING_FAILED = 22;
+    public const BUILD_WRITABLE_DIRECTORY_MOVING_FAILED = 22;
     public const BUILD_UNABLE_TO_CREATE_LOGGER = 23;
     public const BUILD_CLEAN_INIT_PUB_STATIC_FAILED = 24;
     public const BUILD_COMPOSER_PACKAGE_NOT_FOUND = 25;

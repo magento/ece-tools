@@ -145,7 +145,7 @@ class WritableDirectoriesTest extends TestCase
 
         $this->expectExceptionMessage('some error');
         $this->expectException(StepException::class);
-        $this->expectExceptionCode(Error::BUILD_WRITABLE_DIRECTORY_COPYING_FAILED);
+        $this->expectExceptionCode(Error::BUILD_WRITABLE_DIRECTORY_MOVING_FAILED);
 
         $this->step->execute();
     }

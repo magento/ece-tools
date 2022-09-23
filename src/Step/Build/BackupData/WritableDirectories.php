@@ -85,7 +85,7 @@ class WritableDirectories implements StepInterface
             $logDir = $this->directoryList->getPath(DirectoryList::DIR_LOG, true);
             $writableDirectories = $this->directoryList->getWritableDirectories();
 
-            $this->logger->info(sprintf('Copying writable directories to %s directory.', $rootInitDir));
+            $this->logger->info(sprintf('Moving writable directories to %s directory.', $rootInitDir));
 
             foreach ($writableDirectories as $dir) {
                 if ($dir === $logDir) {
@@ -104,11 +104,11 @@ class WritableDirectories implements StepInterface
                 if (($dir === $viewPreprocessedDir)
                     && $this->globalConfig->get(GlobalConfig::VAR_SKIP_HTML_MINIFICATION)
                 ) {
-                    $this->logger->notice(sprintf('Skip copying %s->%s', $originalDir, $initDir));
+                    $this->logger->notice(sprintf('Skip moving %s->%s', $originalDir, $initDir));
                     continue;
                 }
 
-                $this->logger->debug(sprintf('Copying %s->%s', $originalDir, $initDir));
+                $this->logger->debug(sprintf('Moving %s->%s', $originalDir, $initDir));
                 $this->backupDir($originalDir, $initDir);
             }
 
@@ -130,7 +130,7 @@ class WritableDirectories implements StepInterface
     private function backupLogDir(string $originalLogDir, string $initLogDir)
     {
         try {
-            $this->logger->debug(sprintf('Copying %s->%s', $originalLogDir, $initLogDir));
+            $this->logger->debug(sprintf('Moving %s->%s', $originalLogDir, $initLogDir));
             $this->logger->setHandlers([]);
             $this->backupDir($originalLogDir, $initLogDir);
             $this->logger->setHandlers($this->loggerPool->getHandlers());
@@ -150,7 +150,7 @@ class WritableDirectories implements StepInterface
             $this->file->createDirectory($destination);
             $this->file->rename($source, $destination);
         } catch (FileSystemException $e) {
-            throw new StepException($e->getMessage(), Error::BUILD_WRITABLE_DIRECTORY_COPYING_FAILED, $e);
+            throw new StepException($e->getMessage(), Error::BUILD_WRITABLE_DIRECTORY_MOVING_FAILED, $e);
         }
     }
 }
