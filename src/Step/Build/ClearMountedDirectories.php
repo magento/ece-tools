@@ -56,7 +56,9 @@ class ClearMountedDirectories implements StepInterface
         $appData = $this->environment->getApplication();
         $mounts = $appData['mounts'];
         foreach ($mounts as $mount) {
-            $this->logger->debug($this->file->scanDir($mount));
+            foreach ($this->file->scanDir($mount) as $file) {
+                $this->logger->debug("$mount: $file");
+            }
         }
     }
 }
