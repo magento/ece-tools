@@ -11,6 +11,7 @@ namespace Magento\MagentoCloud\Step\Build;
 
 use Magento\MagentoCloud\Config\EnvironmentDataInterface;
 use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
 use Psr\Log\LoggerInterface;
@@ -33,19 +34,19 @@ class ClearMountedDirectories implements StepInterface
     /** @var File */
     private $file;
 
-    /**
-     * @param EnvironmentDataInterface $environment
-     * @param LoggerInterface          $logger
-     * @param File                     $file
-     */
+    /** @var DirectoryList */
+    private $directory;
+
     public function __construct(
         EnvironmentDataInterface $environment,
         LoggerInterface $logger,
-        File $file
+        File $file,
+        DirectoryList $directory
     ) {
         $this->environment = $environment;
         $this->logger = $logger;
         $this->file = $file;
+        $this->directory = $directory;
     }
 
     /**
@@ -54,8 +55,17 @@ class ClearMountedDirectories implements StepInterface
     public function execute()
     {
         $appData = $this->environment->getApplication();
-        var_dump($appData);
-        $mounts = $appData['mounts'];
+
+        $mountsFull = $appData['mounts'];
+
+        // Remove the metadata and only return the paths.
+        $mountsSlash = array_keys($mountsFull);
+
+        // Change the mount path strings with a leading slash into absolute path strings.
+        $mounts = array_map(function ($mount) {
+            return $this->directory->getMagentoRoot() . $mount;
+        }, $mountsSlash);
+
         foreach ($mounts as $mount) {
             foreach ($this->file->scanDir($mount) as $file) {
                 $this->logger->debug("$mount: $file");
