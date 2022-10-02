@@ -54,7 +54,7 @@ class UnlockCronJobs implements StepInterface
     }
 
     /**
-     * Updates running cron jobs to status 'missed'.
+     * Updates running cron jobs to status 'error'.
      *
      * {@inheritdoc}
      */
