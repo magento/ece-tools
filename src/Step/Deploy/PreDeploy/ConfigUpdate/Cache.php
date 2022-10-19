@@ -76,6 +76,7 @@ class Cache implements StepInterface
         try {
             $config = $this->configReader->read();
             $cacheConfig = $this->cacheConfig->get();
+            $graphqlConfig = $config['cache']['graphql'] ?? [];
 
             if (isset($cacheConfig['frontend'])) {
                 $cacheConfig['frontend'] = array_filter($cacheConfig['frontend'], function ($cacheFrontend) {
@@ -106,6 +107,10 @@ class Cache implements StepInterface
             } else {
                 $this->logger->info('Updating cache configuration.');
                 $config['cache'] = $cacheConfig;
+            }
+
+            if (!empty($graphqlConfig)) {
+                $config['cache']['graphql'] = $graphqlConfig;
             }
 
             $this->configWriter->create($config);
