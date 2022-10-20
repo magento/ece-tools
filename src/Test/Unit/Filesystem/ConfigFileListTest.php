@@ -72,4 +72,14 @@ class ConfigFileListTest extends TestCase
     {
         $this->assertSame('magento_root/pub/errors/local.xml', $this->configFileList->getErrorReportConfig());
     }
+
+    public function testGetPhpIni(): void
+    {
+        $this->assertSame('magento_root/php.ini', $this->configFileList->getPhpIni());
+    }
+
+    public function testGetOpCacheExcludeList(): void
+    {
+        $this->assertSame('magento_root/op-exclude.txt', $this->configFileList->getOpCacheExcludeList());
+    }
 }

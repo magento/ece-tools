@@ -107,6 +107,7 @@ class Error
     public const WARN_SCD_OPTIONS_IGNORANCE = 1005;
     public const WARN_CONFIGURATION_STATE_NOT_IDEAL = 1006;
     public const WARN_BALER_CANNOT_BE_USED = 1007;
+    public const WARN_WRONG_OPCACHE_CONFIG = 1008;
 
     /**
      * Deploy
