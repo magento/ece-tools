@@ -139,7 +139,7 @@
 !php/const Magento\MagentoCloud\App\Error::BUILD_WRONG_BRAINTREE_VARIABLE:
     step: validate-config
     title: 'Remove Magento Braintree module configuration which is no longer supported in Adobe Commerce and Magento Open Source 2.4 and later versions.'
-    suggestion: 'Support for the Braintree module is no longer included with Magento 2.4.0 and later. Remove the CONFIG__STORES__DEFAULT__PAYMENT__BRAINTREE__CHANNEL variable from the variables section of the .magento.app.yaml file. For Braintree payment support, use an official extension from the Commerce Marketplace instead.'
+    suggestion: 'Support for the Braintree module is no longer included with Magento 2.4.0 and later. Remove the CONFIG__STORES__DEFAULT__PAYMENT__BRAINTREE__CHANNEL variable from the variables section of the `.magento.app.yaml` file. For Braintree payment support, use an official extension from the Commerce Marketplace instead.'
     stage: build
     type: critical
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_WRONG_CACHE_CONFIGURATION:
@@ -334,7 +334,7 @@
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_WRONG_BRAINTREE_VARIABLE:
     step: validate-config
     title: 'Remove Magento Braintree module configuration which is no longer supported in Adobe Commerce or Magento Open Source 2.4 and later versions.'
-    suggestion: 'Support for the Braintree module is no longer included with Adobe Commerce or Magento Open Source 2.4.0 and later. Remove the CONFIG__STORES__DEFAULT__PAYMENT__BRAINTREE__CHANNEL variable from the variables section of the .magento.app.yaml file. For Braintree support, use an official Braintree Payments extension from the Commerce Marketplace instead.'
+    suggestion: 'Support for the Braintree module is no longer included with Adobe Commerce or Magento Open Source 2.4.0 and later. Remove the CONFIG__STORES__DEFAULT__PAYMENT__BRAINTREE__CHANNEL variable from the variables section of the `.magento.app.yaml` file. For Braintree support, use an official Braintree Payments extension from the Commerce Marketplace instead.'
     stage: deploy
     type: critical
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_ES_SERVICE_NOT_INSTALLED:
@@ -428,6 +428,16 @@
 !php/const Magento\MagentoCloud\App\Error::GLOBAL_CONFIG_UNABLE_TO_READ_SCHEMA_YAML:
     title: 'Unable to read the `.schema.yaml` file'
     suggestion: ''
+    stage: general
+    type: critical
+!php/const Magento\MagentoCloud\App\Error::GLOBAL_EVENTING_MODULE_GENERATE_FAILED:
+    title: 'Unable to generate a module for eventing'
+    suggestion: 'Check the `cloud.log` for more information.'
+    stage: general
+    type: critical
+!php/const Magento\MagentoCloud\App\Error::GLOBAL_EVENTING_MODULE_ENABLEMENT_FAILED:
+    title: 'Unable to enable a module for eventing'
+    suggestion: 'Check the `cloud.log` for more information.'
     stage: general
     type: critical
 # Warning errors
