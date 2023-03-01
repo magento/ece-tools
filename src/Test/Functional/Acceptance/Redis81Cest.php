@@ -12,9 +12,9 @@ use Magento\CloudDocker\Test\Functional\Codeception\Docker;
 /**
  * Checks Redis configuration
  *
- * @group php82
+ * @group php81
  */
-class RedisCest extends AbstractCest
+class Redis81Cest extends RedisCest
 {
     /**
      * @inheritdoc
@@ -102,7 +102,7 @@ class RedisCest extends AbstractCest
     {
         return [
             [
-                'version' => '2.4.6',
+                'version' => '2.4.4',
             ],
         ];
     }
@@ -137,7 +137,7 @@ class RedisCest extends AbstractCest
     {
         return [
             [
-                'version' => '2.4.6',
+                'version' => '2.4.4',
                 'wrongConfiguration' => [
                     'stage' => [
                         'deploy' => [
@@ -203,7 +203,7 @@ class RedisCest extends AbstractCest
     {
         return [
             [
-                'version' => '2.4.6',
+                'version' => '2.4.4',
                 'backendModel' => [
                     'stage' => [
                         'deploy' => [
@@ -221,7 +221,7 @@ class RedisCest extends AbstractCest
                 ],
             ],
             [
-                'version' => '2.4.6',
+                'version' => '2.4.4',
                 'backendModel' => [
                     'stage' => [
                         'deploy' => [
