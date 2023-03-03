@@ -84,7 +84,7 @@ class Validator
         ],
         ServiceInterface::NAME_OPENSEARCH => [
             '>=2.3.7-p3 <2.4.0 || >=2.4.3-p2 <2.4.6' => '~1.1.0 || ~1.2.1',
-            '>=2.4.6' => '~2.3.0',
+            '>=2.4.6' => '^2',
         ],
         ServiceInterface::NAME_RABBITMQ => [
             '<2.3.0' => '~3.5.0',
