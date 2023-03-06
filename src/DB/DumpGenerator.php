@@ -142,7 +142,7 @@ class DumpGenerator
             flock($lockFileHandle, LOCK_UN);
         } catch (ShellException $exception) {
             if (file_exists($dumpFile)) {
-                $this->shell->execute('rm -rf' . $dumpFile);
+                $this->shell->execute('rm -rf ' . $dumpFile);
             }
             throw $exception;
         } finally {
