@@ -137,7 +137,6 @@ EOT;
             foreach ($typeErrors as $stage => $stageErrors) {
                 $result .= sprintf("\n### %s%s\n", ucfirst($stage), $stage === 'general' ? '' : ' stage');
 
-                $table = "\n{:.error-table}\n";
                 $table .= sprintf(
                     "| Error code | %s step | Error description (Title) | Suggested action |\n",
                     ucfirst($stage)
