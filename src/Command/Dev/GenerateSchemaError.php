@@ -34,28 +34,6 @@ class GenerateSchemaError extends Command
     private $fileList;
 
     /**
-     * CSS style which appends in the bottom of the file
-     */
-    private const FOOTER_SCRIPTS = <<<EOT
-
-<!--Custom css-->
-
-<!--
-  This is a style declaration so that first column does not wrap
--->
-
-<style>
-table.error-table td:nth-child(1) {
-  width: 100px;
-}
-table.error-table td:nth-child(2) {
-  width: 200px;
-}
-</style>
-
-EOT;
-
-    /**
      *
      * @param File $file
      * @param FileList $fileList
@@ -156,7 +134,7 @@ EOT;
             }
         }
 
-        return $result . self::FOOTER_SCRIPTS;
+        return $result;
     }
 
     /**
