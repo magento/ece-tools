@@ -34,28 +34,6 @@ class GenerateSchemaError extends Command
     private $fileList;
 
     /**
-     * CSS style which appends in the bottom of the file
-     */
-    private const FOOTER_SCRIPTS = <<<EOT
-
-<!--Custom css-->
-
-<!--
-  This is a style declaration so that first column does not wrap
--->
-
-<style>
-table.error-table td:nth-child(1) {
-  width: 100px;
-}
-table.error-table td:nth-child(2) {
-  width: 200px;
-}
-</style>
-
-EOT;
-
-    /**
      *
      * @param File $file
      * @param FileList $fileList
@@ -137,8 +115,7 @@ EOT;
             foreach ($typeErrors as $stage => $stageErrors) {
                 $result .= sprintf("\n### %s%s\n", ucfirst($stage), $stage === 'general' ? '' : ' stage');
 
-                $table = "\n{:.error-table}\n";
-                $table .= sprintf(
+                $table = sprintf(
                     "| Error code | %s step | Error description (Title) | Suggested action |\n",
                     ucfirst($stage)
                 );
@@ -157,7 +134,7 @@ EOT;
             }
         }
 
-        return $result . self::FOOTER_SCRIPTS;
+        return $result;
     }
 
     /**
