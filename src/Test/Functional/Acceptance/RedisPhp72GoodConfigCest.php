@@ -16,6 +16,7 @@ class RedisPhp72GoodConfigCest extends RedisCest
      * @param \CliTester $I
      * @param \Codeception\Example $data
      * @skip
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     public function testDefaultConfiguration(\CliTester $I, \Codeception\Example $data): void
     {
@@ -27,6 +28,7 @@ class RedisPhp72GoodConfigCest extends RedisCest
      * @param \Codeception\Example $data
      * @throws \Robo\Exception\TaskException
      * @skip
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     public function testWrongConfiguration(\CliTester $I, \Codeception\Example $data): void
     {
@@ -42,7 +44,7 @@ class RedisPhp72GoodConfigCest extends RedisCest
         return [
             [
                 'version' => '2.3.0',
-                'backendModel' => [
+                'configuration' => [
                     'stage' => [
                         'deploy' => [
                             'REDIS_BACKEND' => 'Cm_Cache_Backend_Redis',
@@ -60,7 +62,27 @@ class RedisPhp72GoodConfigCest extends RedisCest
             ],
             [
                 'version' => '2.3.0',
-                'backendModel' => [
+                'configuration' => [
+                    'stage' => [
+                        'deploy' => [
+                            'CACHE_CONFIGURATION' => [
+                                '_merge' => true,
+                                'frontend' => [
+                                    'default' => [
+                                        'backend' => '\CustomRedisModel',
+                                        'backend_options' => [],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+                'expectedBackend' => '\CustomRedisModel',
+                'expectedConfig' => [],
+            ],
+            [
+                'version' => '2.3.0',
+                'configuration' => [
                     'stage' => [
                         'deploy' => [
                             'REDIS_BACKEND' => '\Magento\Framework\Cache\Backend\Redis',
@@ -78,7 +100,7 @@ class RedisPhp72GoodConfigCest extends RedisCest
             ],
             [
                 'version' => '2.3.0',
-                'backendModel' => [
+                'configuration' => [
                     'stage' => [
                         'deploy' => [
                             'REDIS_BACKEND' => '\Magento\Framework\Cache\Backend\RemoteSynchronizedCache',
@@ -106,7 +128,7 @@ class RedisPhp72GoodConfigCest extends RedisCest
             ],
             [
                 'version' => '2.3.1',
-                'backendModel' => [
+                'configuration' => [
                     'stage' => [
                         'deploy' => [
                             'REDIS_BACKEND' => '\Magento\Framework\Cache\Backend\Redis',
@@ -124,7 +146,7 @@ class RedisPhp72GoodConfigCest extends RedisCest
             ],
             [
                 'version' => '2.3.1',
-                'backendModel' => [
+                'configuration' => [
                     'stage' => [
                         'deploy' => [
                             'REDIS_BACKEND' => '\Magento\Framework\Cache\Backend\RemoteSynchronizedCache',
@@ -152,7 +174,7 @@ class RedisPhp72GoodConfigCest extends RedisCest
             ],
             [
                 'version' => '2.3.2',
-                'backendModel' => [
+                'configuration' => [
                     'stage' => [
                         'deploy' => [
                             'REDIS_BACKEND' => '\Magento\Framework\Cache\Backend\Redis',
@@ -170,7 +192,7 @@ class RedisPhp72GoodConfigCest extends RedisCest
             ],
             [
                 'version' => '2.3.2',
-                'backendModel' => [
+                'configuration' => [
                     'stage' => [
                         'deploy' => [
                             'REDIS_BACKEND' => '\Magento\Framework\Cache\Backend\RemoteSynchronizedCache',
@@ -197,5 +219,26 @@ class RedisPhp72GoodConfigCest extends RedisCest
                 ],
             ],
         ];
+    }
+
+    /**
+     * @param \CliTester $I
+     * @param \Codeception\Example $data
+     * @skip
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     */
+    public function testRedisWrongConnection(\CliTester $I, \Codeception\Example $data): void
+    {
+        return;
+    }
+
+    /**
+     * @param \CliTester $I
+     * @param \Codeception\Example $data
+     * @skip
+     */
+    public function testWrongConfigurationRedisBackend(\CliTester $I, \Codeception\Example $data): void
+    {
+        return;
     }
 }

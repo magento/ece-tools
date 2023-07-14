@@ -18,6 +18,7 @@ class Redis81Cest extends RedisCest
 {
     /**
      * @inheritdoc
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     public function _before(\CliTester $I): void
     {
@@ -111,7 +112,7 @@ class Redis81Cest extends RedisCest
      * @param \CliTester $I
      * @param \Codeception\Example $data
      * @throws \Robo\Exception\TaskException
-     * @dataProvider wrongConfigurationDataProvider
+     * @dataProvider wrongConfigurationRedisBackendDataProvider
      */
     public function testWrongConfiguration(\CliTester $I, \Codeception\Example $data): void
     {
@@ -170,7 +171,7 @@ class Redis81Cest extends RedisCest
             $I->getExposedPort()
         ));
 
-        $I->writeEnvMagentoYaml($data['backendModel']);
+        $I->writeEnvMagentoYaml($data['configuration']);
 
         $I->assertTrue($I->runDockerComposeCommand('run build cloud-build'), 'Build phase was failed');
         $I->assertTrue($I->startEnvironment(), 'Docker could not start');
@@ -204,7 +205,7 @@ class Redis81Cest extends RedisCest
         return [
             [
                 'version' => '2.4.4',
-                'backendModel' => [
+                'configuration' => [
                     'stage' => [
                         'deploy' => [
                             'REDIS_BACKEND' => '\Magento\Framework\Cache\Backend\Redis',
@@ -222,7 +223,27 @@ class Redis81Cest extends RedisCest
             ],
             [
                 'version' => '2.4.4',
-                'backendModel' => [
+                'configuration' => [
+                    'stage' => [
+                        'deploy' => [
+                            'CACHE_CONFIGURATION' => [
+                                '_merge' => true,
+                                'frontend' => [
+                                    'default' => [
+                                        'backend' => '\CustomRedisModel',
+                                        'backend_options' => [],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+                'expectedBackend' => '\CustomRedisModel',
+                'expectedConfig' => [],
+            ],
+            [
+                'version' => '2.4.4',
+                'configuration' => [
                     'stage' => [
                         'deploy' => [
                             'REDIS_BACKEND' => '\Magento\Framework\Cache\Backend\RemoteSynchronizedCache',
@@ -249,5 +270,25 @@ class Redis81Cest extends RedisCest
                 ],
             ],
         ];
+    }
+
+    /**
+     * @param \CliTester $I
+     * @param \Codeception\Example $data
+     * @skip
+     */
+    public function testRedisWrongConnection(\CliTester $I, \Codeception\Example $data): void
+    {
+        return;
+    }
+
+    /**
+     * @param \CliTester $I
+     * @param \Codeception\Example $data
+     * @skip
+     */
+    public function testWrongConfigurationRedisBackend(\CliTester $I, \Codeception\Example $data): void
+    {
+        return;
     }
 }

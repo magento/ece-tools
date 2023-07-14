@@ -324,6 +324,37 @@ class CacheTest extends TestCase
                 'address' => 'localhost',
                 'port' => 6379
             ],
+            'Custom redis model' => [
+                'configFromFile' => [],
+                'config' => [
+                    'frontend' => [
+                        'frontName' => [
+                            'backend' => 'SomeCustomRedisModel',
+                            '_custom_redis_backend' => true,
+                            'backend_options' => [
+                                'server' => 'localhost',
+                                'port' => 6370,
+                            ],
+                        ],
+                    ],
+                ],
+                'finalConfig' => [
+                    'cache' => [
+                        'frontend' => [
+                            'frontName' => [
+                                'backend' => 'SomeCustomRedisModel',
+                                'backend_options' => [
+                                    'server' => 'localhost',
+                                    'port' => 6370,
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+                'isGreaterOrEqual' => true,
+                'address' => 'localhost',
+                'port' => 6370
+            ],
         ];
     }
 

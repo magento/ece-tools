@@ -33,7 +33,7 @@ class RedisPhp72Cest extends RedisCest
     /**
      * @return array
      */
-    protected function wrongConfigurationDataProvider(): array
+    protected function wrongConfigurationRedisBackendDataProvider(): array
     {
         return [
             [
@@ -76,10 +76,29 @@ class RedisPhp72Cest extends RedisCest
     /**
      * @param \CliTester $I
      * @param \Codeception\Example $data
-     * @throws \Robo\Exception\TaskException
      * @skip
      */
     public function testGoodConfiguration(\CliTester $I, \Codeception\Example $data): void
+    {
+        return;
+    }
+
+    /**
+     * @param \CliTester $I
+     * @param \Codeception\Example $data
+     * @skip
+     */
+    public function testRedisWrongConnection(\CliTester $I, \Codeception\Example $data): void
+    {
+        return;
+    }
+
+    /**
+     * @param \CliTester $I
+     * @param \Codeception\Example $data
+     * @skip
+     */
+    public function testWrongConfigurationRedisBackend(\CliTester $I, \Codeception\Example $data): void
     {
         return;
     }
