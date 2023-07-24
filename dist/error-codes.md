@@ -5,6 +5,7 @@
 Critical errors indicate a problem with the Commerce on cloud infrastructure project configuration that causes deployment failure, for example incorrect, unsupported, or missing configuration for required settings. Before you can deploy, you must update the configuration to resolve these errors.
 
 ### Build stage
+
 | Error code | Build step | Error description (Title) | Suggested action |
 | - | - | - | - |
 | 2 |  | Can not write to the `./app/etc/env.php` file | Deployment script can not make required changes to the `/app/etc/env.php` file. Check your filesystem permissions. |
@@ -34,6 +35,7 @@ Critical errors indicate a problem with the Commerce on cloud infrastructure pro
 | 26 | validate-config | Remove Magento Braintree module configuration which is no longer supported in Adobe Commerce and Magento Open Source 2.4 and later versions. | Support for the Braintree module is no longer included with Magento 2.4.0 and later. Remove the CONFIG__STORES__DEFAULT__PAYMENT__BRAINTREE__CHANNEL variable from the variables section of the `.magento.app.yaml` file. For Braintree payment support, use an official extension from the Commerce Marketplace instead. |
 
 ### Deploy stage
+
 | Error code | Deploy step | Error description (Title) | Suggested action |
 | - | - | - | - |
 | 101 | pre-deploy: cache | Incorrect cache configuration (missing port or host) | Cache configuration is missing required parameters `server` or `port`. Check the `cloud.log` for more information. |
@@ -77,6 +79,7 @@ Critical errors indicate a problem with the Commerce on cloud infrastructure pro
 | 139 | validate-config | Incorrect search engine | This Adobe Commerce or Magento Open Source version does not support OpenSearch. You must use versions 2.3.7-p3, 2.4.3-p2, or later |
 
 ### Post-deploy stage
+
 | Error code | Post-deploy step | Error description (Title) | Suggested action |
 | - | - | - | - |
 | 201 | is-deploy-failed | Deploy stage failed |  |
@@ -90,6 +93,7 @@ Critical errors indicate a problem with the Commerce on cloud infrastructure pro
 | 227 | clean-cache | Command `/bin/magento cache:flush` failed | Check the `cloud.log` for more information. Add `VERBOSE_COMMANDS: '-vvv'` into `.magento.env.yaml` for more detailed command output. |
 
 ### General
+
 | Error code | General step | Error description (Title) | Suggested action |
 | - | - | - | - |
 | 243 |  | Configuration is not defined in the `schema.yaml` file | Check that the config variable name is correct, and that it defined. |
@@ -104,6 +108,7 @@ Critical errors indicate a problem with the Commerce on cloud infrastructure pro
 Warning errors indicate a problem with the Commerce on cloud infrastructure project configuration such as incorrect, deprecated, unsupported, or missing configuration settings for optional features that can affect site operation. Although a warning does not cause deployment failure, you should review warning messages and update the configuration to resolve them.
 
 ### Build stage
+
 | Error code | Build step | Error description (Title) | Suggested action |
 | - | - | - | - |
 | 1001 | validate-config | File app/etc/config.php does not exist |  |
@@ -115,6 +120,7 @@ Warning errors indicate a problem with the Commerce on cloud infrastructure proj
 | 1007 | run-baler | Baler JS bundling can not be used |  |
 
 ### Deploy stage
+
 | Error code | Deploy step | Error description (Title) | Suggested action |
 | - | - | - | - |
 | 2001 | pre-deploy:cache | Cache is configured for a Redis service that is not available. Configuration will be ignored. |  |
@@ -149,6 +155,7 @@ Warning errors indicate a problem with the Commerce on cloud infrastructure proj
 | 2030 | validate-config | Elasticsearch and OpenSearch services are both installed at infrastructure layer. Adobe Commerce and Magento Open Source 2.4.4 and later use OpenSearch by default | Consider removing the Elasticsearch or OpenSearch service from the infrastructure layer to optimize resource usage. |
 
 ### Post-deploy stage
+
 | Error code | Post-deploy step | Error description (Title) | Suggested action |
 | - | - | - | - |
 | 3001 | validate-config | Debug logging is enabled in Adobe Commerce | To save disk space, do not enable debug logging for your production environments. |
@@ -157,6 +164,7 @@ Warning errors indicate a problem with the Commerce on cloud infrastructure proj
 | 3004 | backup | Can not create backup files |  |
 
 ### General
+
 | Error code | General step | Error description (Title) | Suggested action |
 | - | - | - | - |
 | 4001 |  | Can not get system processor count: |  |
