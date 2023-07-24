@@ -116,7 +116,7 @@ class GenerateSchemaError extends Command
                 $result .= sprintf("\n### %s%s\n", ucfirst($stage), $stage === 'general' ? '' : ' stage');
 
                 $table = sprintf(
-                    "| Error code | %s step | Error description (Title) | Suggested action |\n",
+                    "\n| Error code | %s step | Error description (Title) | Suggested action |\n",
                     ucfirst($stage)
                 );
                 $table .= "| - | - | - | - |\n";
