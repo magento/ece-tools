@@ -31,7 +31,7 @@ class Redis74Cest extends RedisCest
     /**
      * @return array
      */
-    protected function wrongConfigurationDataProvider(): array
+    protected function wrongConfigurationRedisBackendDataProvider(): array
     {
         return [
             [
@@ -63,7 +63,7 @@ class Redis74Cest extends RedisCest
         return [
             [
                 'version' => '2.4.3',
-                'backendModel' => [
+                'configuration' => [
                     'stage' => [
                         'deploy' => [
                             'REDIS_BACKEND' => '\Magento\Framework\Cache\Backend\Redis',
@@ -81,7 +81,27 @@ class Redis74Cest extends RedisCest
             ],
             [
                 'version' => '2.4.3',
-                'backendModel' => [
+                'configuration' => [
+                    'stage' => [
+                        'deploy' => [
+                            'CACHE_CONFIGURATION' => [
+                                '_merge' => true,
+                                'frontend' => [
+                                    'default' => [
+                                        'backend' => '\CustomRedisModel',
+                                        'backend_options' => [],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+                'expectedBackend' => '\CustomRedisModel',
+                'expectedConfig' => [],
+            ],
+            [
+                'version' => '2.4.3',
+                'configuration' => [
                     'stage' => [
                         'deploy' => [
                             'REDIS_BACKEND' => '\Magento\Framework\Cache\Backend\RemoteSynchronizedCache',
@@ -108,5 +128,26 @@ class Redis74Cest extends RedisCest
                 ],
             ],
         ];
+    }
+
+    /**
+     * @param \CliTester $I
+     * @param \Codeception\Example $data
+     * @skip
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     */
+    public function testRedisWrongConnection(\CliTester $I, \Codeception\Example $data): void
+    {
+        return;
+    }
+
+    /**
+     * @param \CliTester $I
+     * @param \Codeception\Example $data
+     * @skip
+     */
+    public function testWrongConfigurationRedisBackend(\CliTester $I, \Codeception\Example $data): void
+    {
+        return;
     }
 }

@@ -104,36 +104,43 @@ class CleanRedisCacheTest extends TestCase
                     ],
                     'some_type3' => [
                         'backend' => 'SomeClase',
-                    ]
+                    ],
+                    'some_type4' => [
+                        'backend' => 'SomeClase',
+                        '_custom_redis_backend' => true,
+                        'backend_options' => []
+                    ],
                 ]
             ]);
-        $this->loggerMock->expects($this->exactly(5))
+        $this->loggerMock->expects($this->exactly(6))
             ->method('info')
             ->withConsecutive(
                 ['Clearing redis cache: default'],
                 ['Clearing redis cache: page_cache'],
                 ['Clearing redis cache: some_type0'],
                 ['Clearing redis cache: some_type1'],
-                ['Clearing redis cache: some_type2']
+                ['Clearing redis cache: some_type2'],
+                ['Clearing redis cache: some_type4']
             );
 
         /** @var Credis_Client|MockObject $credisClient */
         $credisClient = $this->getMockBuilder(Credis_Client::class)
             ->setMethods(['connect', 'flushDb'])
             ->getMock();
-        $this->credisFactoryMock->expects($this->exactly(5))
+        $this->credisFactoryMock->expects($this->exactly(6))
             ->method('create')
             ->withConsecutive(
                 ['localhost', '1234', 0],
                 ['127.0.0.1', 1234, 1],
                 ['localhost', 6379, 2, 'password'],
                 ['localhost', 1234, 0],
-                ['127.0.0.1', 6379, 0]
+                ['127.0.0.1', 6379, 0],
+                []
             )->willReturn($credisClient);
 
-        $credisClient->expects($this->exactly(5))
+        $credisClient->expects($this->exactly(6))
             ->method('connect');
-        $credisClient->expects($this->exactly(5))
+        $credisClient->expects($this->exactly(6))
             ->method('flushDb');
 
         $this->step->execute();
