@@ -717,6 +717,17 @@ variables:
       - stage:
           global:
             ENABLE_EVENTING: true
+  ENABLE_WEBHOOKS:
+    description: Enables commerce webhooks.
+    type: boolean
+    stages:
+      - global
+    default:
+      global: false
+    examples:
+      - stage:
+          global:
+            ENABLE_WEBHOOKS: true
 
   # Environment variables
   ENV_RELATIONSHIPS:

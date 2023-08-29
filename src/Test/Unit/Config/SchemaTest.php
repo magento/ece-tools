@@ -175,6 +175,7 @@ class SchemaTest extends TestCase
                 StageConfigInterface::VAR_MIN_LOGGING_LEVEL => '',
                 StageConfigInterface::VAR_X_FRAME_CONFIGURATION => 'SAMEORIGIN',
                 StageConfigInterface::VAR_ENABLE_EVENTING => false,
+                StageConfigInterface::VAR_ENABLE_WEBHOOKS => false,
             ],
             $this->schema->getDefaults(StageConfigInterface::STAGE_GLOBAL)
         );
