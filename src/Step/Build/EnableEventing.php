@@ -75,7 +75,7 @@ class EnableEventing implements StepInterface
         } catch (ShellException $e) {
             $this->logger->error(
                 'Failed to generate the Magento_AdobeCommerceEvents module. ' .
-                'Refer to the eventing documentation to determine if all required modules are have been installed. ' .
+                'Refer to the eventing documentation to determine if all required modules have been installed. ' .
                 'Error: ' . $e->getMessage()
             );
             throw new StepException($e->getMessage(), Error::GLOBAL_EVENTING_MODULE_GENERATE_FAILED, $e);

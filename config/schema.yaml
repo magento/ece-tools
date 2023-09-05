@@ -718,7 +718,7 @@ variables:
           global:
             ENABLE_EVENTING: true
   ENABLE_WEBHOOKS:
-    description: Enables commerce webhooks.
+    description: Enables Commerce webhooks.
     type: boolean
     stages:
       - global

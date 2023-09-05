@@ -441,12 +441,12 @@
     stage: general
     type: critical
 !php/const Magento\MagentoCloud\App\Error::GLOBAL_WEBHOOKS_MODULE_GENERATE_FAILED:
-    title: 'Unable to generate a module for commerce webhooks'
+    title: 'Failed to generate the AdobeCommerceWebhookPlugins module'
     suggestion: 'Check the `cloud.log` for more information.'
     stage: general
     type: critical
 !php/const Magento\MagentoCloud\App\Error::GLOBAL_WEBHOOKS_MODULE_ENABLEMENT_FAILED:
-    title: 'Unable to enable a module for commerce webhooks'
+    title: 'Failed to enable the AdobeCommerceWebhookPlugins module'
     suggestion: 'Check the `cloud.log` for more information.'
     stage: general
     type: critical

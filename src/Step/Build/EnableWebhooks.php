@@ -55,7 +55,7 @@ class EnableWebhooks implements StepInterface
     }
 
     /**
-     * Generates and enables a module for commerce webhooks
+     * Generates and enables a module for Commerce webhooks
      * if @see StageConfigInterface::VAR_ENABLE_WEBHOOKS set to true
      *
      * {@inheritDoc}
@@ -71,23 +71,23 @@ class EnableWebhooks implements StepInterface
         }
 
         try {
-            $this->logger->notice('Generating module for commerce webhooks');
+            $this->logger->notice('Generating module for Commerce webhooks');
             $this->magentoShell->execute('webhooks:generate:module');
         } catch (ShellException $e) {
             $this->logger->error(
                 'Failed to generate the AdobeCommerceWebhookPlugins module. ' .
-                'Refer to the commerce webhooks documentation to determine if all ' .
-                'required modules are have been installed. ' .
+                'Refer to the Commerce webhooks documentation to determine if all ' .
+                'required modules have been installed. ' .
                 'Error: ' . $e->getMessage()
             );
             throw new StepException($e->getMessage(), Error::GLOBAL_WEBHOOKS_MODULE_GENERATE_FAILED, $e);
         }
 
         try {
-            $this->logger->notice('Enabling module for commerce webhooks');
+            $this->logger->notice('Enabling module for Commerce webhooks');
             $this->magentoShell->execute('module:enable Magento_AdobeCommerceWebhookPlugins');
         } catch (ShellException $e) {
-            $this->logger->error('Failed to enable module for commerce webhooks: ' . $e->getMessage());
+            $this->logger->error('Failed to enable module for Commerce webhooks: ' . $e->getMessage());
             throw new StepException($e->getMessage(), Error::GLOBAL_WEBHOOKS_MODULE_ENABLEMENT_FAILED, $e);
         }
     }
