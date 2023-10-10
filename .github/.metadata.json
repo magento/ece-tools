@@ -1,14 +1,14 @@
 {
-  "templateVersion": "0.1",
+  "templateVersion": "0.2",
   "product": {
     "name": "Magento Commerce Cloud Deployment Tools",
     "description": "ECE-Tools is a set of scripts and tools designed to manage and deploy Cloud projects"
   },
   "contacts": {
     "team": {
-      "name": "Magic Mountain",
-      "DL": "Grp-magento-cloud-all",
-      "slackChannel": "magic_mountain"
+      "name": "Mystic Mountain",
+      "DL": "Grp-Mystic-Mountain",
+      "slackChannel": "#mystic-mountain-team"
     }
   },
   "ticketTracker": {
@@ -17,10 +17,8 @@
     },
     "securityJiraQueue": {
       "projectKey": "MAGREQ",
-      "component": "Magento Cloud Engineering"
+      "component": "MAGREQ/Magento Cloud Engineering"
     }
   },
-  "staticScan": {
-    "enable": false
-  }
+  "productionCodeBranches": ["2002.0", "2002.1"]
 }
