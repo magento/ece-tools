@@ -13,7 +13,7 @@ You must have a [GitHub account](https://help.github.com/en/github/getting-start
 
 ## Contribution requirements
 
-1. Contributions must adhere to the [Magento coding standards](https://devdocs.magento.com/guides/v2.3/coding-standards/bk-coding-standards.html).
+1. Contributions must adhere to the [Magento coding standards](https://developer.adobe.com/commerce/php/coding-standards/).
 2. When you submit a Pull request (PR), write a meaningful description to explain the purpose of your contribution. Comprehensive descriptions increase the chances that a pull request can be merged quickly, without requests for additional clarification. See the [Magento Cloud Tools Pull Request Template](https://github.com/magento/ece-tools/blob/develop/.github/PULL_REQUEST_TEMPLATE.md) for more information.
 3. Commits must be accompanied by meaningful commit messages.
 4. If your PR includes bug fixes, provide a step-by-step description of how to reproduce the bug in the pull request description.

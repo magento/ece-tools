@@ -45,7 +45,7 @@ class PasswordGenerator
     {
         while (true) {
             $password = $this->generateRandomString($length);
-            /* http://docs.magento.com/m2/ee/user_guide/stores/admin-signin.html
+            /* https://experienceleague.adobe.com/docs/commerce-admin/start/admin/admin-signin.html#admin-sign-in
              * An Admin password must be seven or more characters long, and include both letters and numbers.
              */
             if ((preg_match('/.*[A-Za-z].*/', $password)) && (preg_match('/.*[\d].*/', $password))) {

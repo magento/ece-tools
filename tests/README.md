@@ -38,7 +38,7 @@ This test will generate a pretty report for unit test coverage.
 
 1. Run the command `composer test:coverage`
 2. Observe result in CLI output
- - Be sure to enable [xDebug](http://devdocs.magento.com/guides/v2.2/cloud/howtos/debug.html) for this test
+ - Be sure to enable [xDebug](https://experienceleague.adobe.com/docs/commerce-cloud-service/user-guide/develop/test/debug.html) for this test
 
 ## Code coverage report
 
@@ -46,7 +46,7 @@ This test will generate a pretty report for unit test coverage.
 
 1. Run the command `composer test:coverage-generate`
 2. Navigate to `tests/unit/tmp/coverage` and open `index.html` file in browser
- - Be sure to enable [xDebug](http://devdocs.magento.com/guides/v2.2/cloud/howtos/debug.html) for this test
+ - Be sure to enable [xDebug](https://experienceleague.adobe.com/docs/commerce-cloud-service/user-guide/develop/test/debug.html) for this test
 
 ## Best practices
 
