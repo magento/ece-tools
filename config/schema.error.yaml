@@ -440,6 +440,16 @@
     suggestion: 'Check the `cloud.log` for more information.'
     stage: general
     type: critical
+!php/const Magento\MagentoCloud\App\Error::GLOBAL_WEBHOOKS_MODULE_GENERATE_FAILED:
+    title: 'Failed to generate the AdobeCommerceWebhookPlugins module'
+    suggestion: 'Check the `cloud.log` for more information.'
+    stage: general
+    type: critical
+!php/const Magento\MagentoCloud\App\Error::GLOBAL_WEBHOOKS_MODULE_ENABLEMENT_FAILED:
+    title: 'Failed to enable the AdobeCommerceWebhookPlugins module'
+    suggestion: 'Check the `cloud.log` for more information.'
+    stage: general
+    type: critical
 # Warning errors
 !php/const Magento\MagentoCloud\App\Error::WARN_CONFIG_PHP_NOT_EXISTS:
     title: 'File app/etc/config.php does not exist'

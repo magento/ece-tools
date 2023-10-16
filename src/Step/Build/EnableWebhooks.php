@@ -19,10 +19,10 @@ use Magento\MagentoCloud\Step\StepInterface;
 use Psr\Log\LoggerInterface;
 
 /**
- * Runs a command to generate a module for eventing and enables this module in case when
+ * Runs a command to generate a module for webhooks and enables this module in case when
  * it is enabled in configuration
  */
-class EnableEventing implements StepInterface
+class EnableWebhooks implements StepInterface
 {
     /**
      * @var LoggerInterface
@@ -55,14 +55,15 @@ class EnableEventing implements StepInterface
     }
 
     /**
-     * Generates and enables a module for eventing if @see StageConfigInterface::VAR_ENABLE_EVENTING set to true
+     * Generates and enables a module for Commerce webhooks
+     * if @see StageConfigInterface::VAR_ENABLE_WEBHOOKS set to true
      *
      * {@inheritDoc}
      */
     public function execute()
     {
         try {
-            if (!$this->globalConfig->get(StageConfigInterface::VAR_ENABLE_EVENTING)) {
+            if (!$this->globalConfig->get(StageConfigInterface::VAR_ENABLE_WEBHOOKS)) {
                 return;
             }
         } catch (ConfigException $e) {
@@ -70,23 +71,24 @@ class EnableEventing implements StepInterface
         }
 
         try {
-            $this->logger->notice('Generating module for eventing');
-            $this->magentoShell->execute('events:generate:module');
+            $this->logger->notice('Generating module for Commerce webhooks');
+            $this->magentoShell->execute('webhooks:generate:module');
         } catch (ShellException $e) {
             $this->logger->error(
-                'Failed to generate the Magento_AdobeCommerceEvents module. ' .
-                'Refer to the eventing documentation to determine if all required modules have been installed. ' .
+                'Failed to generate the AdobeCommerceWebhookPlugins module. ' .
+                'Refer to the Commerce webhooks documentation to determine if all ' .
+                'required modules have been installed. ' .
                 'Error: ' . $e->getMessage()
             );
-            throw new StepException($e->getMessage(), Error::GLOBAL_EVENTING_MODULE_GENERATE_FAILED, $e);
+            throw new StepException($e->getMessage(), Error::GLOBAL_WEBHOOKS_MODULE_GENERATE_FAILED, $e);
         }
 
         try {
-            $this->logger->notice('Enabling module for eventing');
-            $this->magentoShell->execute('module:enable Magento_AdobeCommerceEvents');
+            $this->logger->notice('Enabling module for Commerce webhooks');
+            $this->magentoShell->execute('module:enable Magento_AdobeCommerceWebhookPlugins');
         } catch (ShellException $e) {
-            $this->logger->error('Failed to enable module for eventing: ' . $e->getMessage());
-            throw new StepException($e->getMessage(), Error::GLOBAL_EVENTING_MODULE_ENABLEMENT_FAILED, $e);
+            $this->logger->error('Failed to enable module for Commerce webhooks: ' . $e->getMessage());
+            throw new StepException($e->getMessage(), Error::GLOBAL_WEBHOOKS_MODULE_ENABLEMENT_FAILED, $e);
         }
     }
 }

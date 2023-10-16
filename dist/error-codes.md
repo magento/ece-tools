@@ -102,6 +102,8 @@ Critical errors indicate a problem with the Commerce on cloud infrastructure pro
 | 246 |  | Unable to read the `.schema.yaml` file |  |
 | 247 |  | Unable to generate a module for eventing | Check the `cloud.log` for more information. |
 | 248 |  | Unable to enable a module for eventing | Check the `cloud.log` for more information. |
+| 249 |  | Failed to generate the AdobeCommerceWebhookPlugins module | Check the `cloud.log` for more information. |
+| 250 |  | Failed to enable the AdobeCommerceWebhookPlugins module | Check the `cloud.log` for more information. |
 
 ## Warning Errors
 
