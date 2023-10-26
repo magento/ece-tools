@@ -62,9 +62,9 @@ class ClearMountedDirectories implements StepInterface
         $mountsSlash = array_keys($mountsFull);
 
         // Change the mount path strings with a leading slash into absolute path strings.
-        // $mounts = array_map(function ($mount) {
-        //     return $mount;
-        // }, $mountsSlash);
+        $mounts = array_map(function ($mount) {
+            return $this->directory->getRoot() . $mount;
+        }, $mountsSlash);
          
 
         foreach ($mountsSlash as $mount) {
