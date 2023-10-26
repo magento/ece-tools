@@ -63,14 +63,11 @@ class ClearMountedDirectories implements StepInterface
 
         // Change the mount path strings with a leading slash into absolute path strings.
         $mounts = array_map(function ($mount) {
-            return $this->directory->getRoot() . $mount;
+            return $this->directory->getMagentoRoot() . $mount;
         }, $mountsSlash);
          
-
         foreach ($mountsSlash as $mount) {
-            foreach ($this->file->scanDir($mount) as $file) {
-                $this->logger->debug("$mount: $file");
-            }
+            $this->file->clearDirectory($mount);
         }
     }
 }
