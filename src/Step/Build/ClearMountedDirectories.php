@@ -37,8 +37,6 @@ class ClearMountedDirectories implements StepInterface
     /** @var DirectoryList */
     private $directory;
 
-    const CLEAN_MOUNTED_DIR = ;
-
     public function __construct(
         EnvironmentDataInterface $environment,
         LoggerInterface $logger,
@@ -85,6 +83,6 @@ class ClearMountedDirectories implements StepInterface
             '/pub/static',
             '/var',
             '/pub/media'
-        ;]
+        ];
     }
 }
