@@ -78,11 +78,12 @@ class ClearMountedDirectories implements StepInterface
 
     private function getCleanMountedDir()
     {
-        return [
-            '/app/etc',
-            '/pub/static',
-            '/var',
-            '/pub/media'
-        ];
+        $projectRoot = $this->directory->getRoot();
+        return preg_filter('/^/', $projectRoot, [
+            $projectRoot . 'app/etc',
+            $projectRoot . 'pub/static',
+            $projectRoot . 'var',
+            $projectRoot . 'pub/media'
+        ]);
     }
 }
