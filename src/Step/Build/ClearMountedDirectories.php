@@ -72,18 +72,19 @@ class ClearMountedDirectories implements StepInterface
                 continue;
             }
             
-            $this->file->clearDirectory($mount);
+            if ($this->file->isExists($mount)) {
+                $this->file->clearDirectory($mount);
+            }
         }
     }
 
     private function getCleanMountedDir()
     {
-        $projectRoot = $this->directory->getRoot();
-        return preg_filter('/^/', $projectRoot, [
-            'app/etc',
-            'pub/static',
-            'var',
-            'pub/media'
-        ]);
+        return [
+            $this->directory->getPath(DirectoryList::DIR_MEDIA),
+            $this->directory->getPath(DirectoryList::DIR_VAR),
+            $this->directory->getPath(DirectoryList::DIR_ETC),
+            $this->directory->getPath(DirectoryList::DIR_STATIC)
+        ];
     }
 }
