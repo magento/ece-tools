@@ -37,6 +37,8 @@ class ClearMountedDirectories implements StepInterface
     /** @var DirectoryList */
     private $directory;
 
+    const CLEAN_MOUNTED_DIR = ;
+
     public function __construct(
         EnvironmentDataInterface $environment,
         LoggerInterface $logger,
@@ -66,8 +68,23 @@ class ClearMountedDirectories implements StepInterface
             return $this->directory->getMagentoRoot() . $mount;
         }, $mountsSlash);
          
+        $cleanMountedDir = $this->getCleanMountedDir(); 
         foreach ($mountsSlash as $mount) {
+            if (!in_array($path, $cleanMountedDir)) {
+                continue;
+            }
+            
             $this->file->clearDirectory($mount);
         }
+    }
+
+    private function getCleanMountedDir()
+    {
+        return [
+            '/app/etc',
+            '/pub/static',
+            '/var',
+            '/pub/media'
+        ;]
     }
 }
