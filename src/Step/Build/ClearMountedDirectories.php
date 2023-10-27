@@ -67,10 +67,7 @@ class ClearMountedDirectories implements StepInterface
         }, $mountsSlash);
          
         $cleanMountedDir = $this->getCleanMountedDir(); 
-        foreach ($mountsSlash as $mount) {
-            if (!in_array($mount, $cleanMountedDir)) {
-                continue;
-            }
+        foreach ($cleanMountedDir as $mount) {
             
             if ($this->file->isExists($mount)) {
                 $this->file->clearDirectory($mount);
