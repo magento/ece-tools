@@ -19,6 +19,7 @@ class RedisPhp73Cest extends RedisCest
      * @param \Codeception\Example $data
      * @throws \Robo\Exception\TaskException
      * @skip
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     public function testGoodConfiguration(\CliTester $I, \Codeception\Example $data): void
     {
@@ -43,7 +44,7 @@ class RedisPhp73Cest extends RedisCest
     /**
      * @return array
      */
-    protected function wrongConfigurationDataProvider(): array
+    protected function wrongConfigurationRedisBackendDataProvider(): array
     {
         return [
             [
@@ -81,5 +82,26 @@ class RedisPhp73Cest extends RedisCest
                 'errorDeployMessage' => '',
             ],
         ];
+    }
+
+    /**
+     * @param \CliTester $I
+     * @param \Codeception\Example $data
+     * @skip
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     */
+    public function testRedisWrongConnection(\CliTester $I, \Codeception\Example $data): void
+    {
+        return;
+    }
+
+    /**
+     * @param \CliTester $I
+     * @param \Codeception\Example $data
+     * @skip
+     */
+    public function testWrongConfigurationRedisBackend(\CliTester $I, \Codeception\Example $data): void
+    {
+        return;
     }
 }

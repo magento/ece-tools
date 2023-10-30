@@ -10,14 +10,14 @@ namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 /**
  * This test runs on the latest version of PHP
  *
- * @group php81
+ * @group php82
  */
 class PostDeployCest extends AbstractCest
 {
     /**
      * @var string
      */
-    protected $magentoCloudTemplate = '2.4.4';
+    protected $magentoCloudTemplate = '2.4.6';
 
     /**
      * @param \CliTester $I
@@ -74,7 +74,7 @@ class PostDeployCest extends AbstractCest
      */
     public function testPostDeployIsNotRun(\CliTester $I): void
     {
-        $I->runEceDockerCommand('build:compose --mode=production');
+        $I->generateDockerCompose('--mode=production');
         $I->copyFileToWorkDir('files/wrong_db_configuration/.magento.env.yaml', '.magento.env.yaml');
 
         $I->runDockerComposeCommand('run build cloud-build');

@@ -94,6 +94,10 @@ class Error
     public const GLOBAL_CONFIG_PARSE_FAILED = 244;
     public const GLOBAL_CONFIG_UNABLE_TO_READ = 245;
     public const GLOBAL_CONFIG_UNABLE_TO_READ_SCHEMA_YAML = 246;
+    public const GLOBAL_EVENTING_MODULE_GENERATE_FAILED = 247;
+    public const GLOBAL_EVENTING_MODULE_ENABLEMENT_FAILED = 248;
+    public const GLOBAL_WEBHOOKS_MODULE_GENERATE_FAILED = 249;
+    public const GLOBAL_WEBHOOKS_MODULE_ENABLEMENT_FAILED = 250;
 
     /**
      * Build
@@ -105,6 +109,7 @@ class Error
     public const WARN_SCD_OPTIONS_IGNORANCE = 1005;
     public const WARN_CONFIGURATION_STATE_NOT_IDEAL = 1006;
     public const WARN_BALER_CANNOT_BE_USED = 1007;
+    public const WARN_WRONG_OPCACHE_CONFIG = 1008;
 
     /**
      * Deploy

@@ -14,6 +14,7 @@
                 </item>
                 <item name="warning" xsi:type="array">
                     <item name="config-file-exists" xsi:type="object" priority="100">Magento\MagentoCloud\Config\Validator\Build\ConfigFileExists</item>
+                    <item name="opcache-exclude-paths" xsi:type="object" priority="100">Magento\MagentoCloud\Config\Validator\Build\OpcacheExcludePaths</item>
                     <item name="deprecated-ini" xsi:type="object" priority="200">Magento\MagentoCloud\Config\Validator\Build\UnsupportedBuildOptionsIni</item>
                     <item name="modules-exists" xsi:type="object" priority="300">Magento\MagentoCloud\Config\Validator\Build\ModulesExists</item>
                     <item name="appropriate-version" xsi:type="object" priority="400">Magento\MagentoCloud\Config\Validator\Build\AppropriateVersion</item>
@@ -28,6 +29,8 @@
     <step name="set-report-dir-nesting-level" type="Magento\MagentoCloud\Step\Build\SetReportDirNestingLevel" priority="700"/>
     <step name="marshall-files" type="Magento\MagentoCloud\Step\Build\MarshallFiles" priority="800"/>
     <step name="copy-sample-data" type="Magento\MagentoCloud\Step\Build\CopySampleData" priority="900"/>
+    <step name="enable-eventing" type="Magento\MagentoCloud\Step\Build\EnableEventing" priority="950" />
+    <step name="enable-webhooks" type="Magento\MagentoCloud\Step\Build\EnableWebhooks" priority="975" />
     <step name="compile-di" type="Magento\MagentoCloud\Step\Build\CompileDi" priority="1000"/>
     <step name="dump-autoload" type="Magento\MagentoCloud\Step\Build\ComposerDumpAutoload" priority="1100"/>
     <step name="deploy-static-content" type="Magento\MagentoCloud\Step\Build\DeployStaticContent" priority="1200">
