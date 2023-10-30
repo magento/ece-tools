@@ -54,23 +54,10 @@ class ClearMountedDirectories implements StepInterface
      */
     public function execute()
     {
-        $appData = $this->environment->getApplication();
-
-        $mountsFull = $appData['mounts'];
-
-        // Remove the metadata and only return the paths.
-        $mountsSlash = array_keys($mountsFull);
-
-        // Change the mount path strings with a leading slash into absolute path strings.
-        $mounts = array_map(function ($mount) {
-            return $this->directory->getMagentoRoot() . $mount;
-        }, $mountsSlash);
-         
         $cleanMountedDir = $this->getCleanMountedDir(); 
         foreach ($cleanMountedDir as $mount) {
-            
             if ($this->file->isExists($mount)) {
-                $this->file->clearDirectory($mount);
+                $this->file->backgroundClearDirectory($mount);
             }
         }
     }
