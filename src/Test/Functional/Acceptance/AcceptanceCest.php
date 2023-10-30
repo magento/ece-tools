@@ -20,14 +20,14 @@ use Magento\CloudDocker\Test\Functional\Codeception\Docker;
  * 3. Test config dump
  * 4. Test content presence
  *
- * @group php81
+ * @group php82
  */
 class AcceptanceCest extends AbstractCest
 {
     /**
      * @var string
      */
-    protected $magentoCloudTemplate = '2.4.4';
+    protected $magentoCloudTemplate = '2.4.6';
 
     /**
      * @param CliTester $I
@@ -123,9 +123,6 @@ class AcceptanceCest extends AbstractCest
                     ],
                     'lock' => [
                         'provider' => 'db',
-                        'config' => [
-                            'prefix' => null,
-                        ],
                     ],
                 ],
             ],
@@ -182,9 +179,6 @@ class AcceptanceCest extends AbstractCest
                     ],
                     'lock' => [
                         'provider' => 'db',
-                        'config' => [
-                            'prefix' => null,
-                        ],
                     ],
                 ],
             ],

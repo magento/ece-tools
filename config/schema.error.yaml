@@ -1,12 +1,12 @@
 # Critical errors
 !php/const Magento\MagentoCloud\App\Error::BUILD_ENV_PHP_IS_NOT_WRITABLE:
-    title: 'Cannot write to the `./app/etc/env.php` file'
-    suggestion: 'Deployment script cannot make required changes to the `/app/etc/env.php` file. Check your filesystem permissions.'
+    title: 'Can not write to the `./app/etc/env.php` file'
+    suggestion: 'Deployment script can not make required changes to the `/app/etc/env.php` file. Check your filesystem permissions.'
     stage: build
     type: critical
 !php/const Magento\MagentoCloud\App\Error::BUILD_CONFIG_NOT_DEFINED:
-    title: 'Configuration isn''t defined in the `schema.yaml` file'
-    suggestion: 'Configuration is not defined in the `./vendor/magento/ece-tools/config/schema.yaml` file. Check that the config variable name is correct, and that it is defined.'
+    title: 'Configuration is not defined in the `schema.yaml` file'
+    suggestion: 'Configuration is not defined in the `./vendor/magento/ece-tools/config/schema.yaml` file. Check that the config variable name is correct and defined.'
     stage: build
     type: critical
 !php/const Magento\MagentoCloud\App\Error::BUILD_CONFIG_PARSE_FAILED:
@@ -26,32 +26,32 @@
     type: critical
 !php/const Magento\MagentoCloud\App\Error::BUILD_CONFIG_PHP_IS_NOT_WRITABLE:
     step: refresh-modules
-    title: 'Cannot write to the `./app/etc/config.php` file'
-    suggestion: 'The deployment script cannot make required changes to the `/app/etc/config.php` file. Check your filesystem permissions.'
+    title: 'Can not write to the `./app/etc/config.php` file'
+    suggestion: 'The deployment script can not make required changes to the `/app/etc/config.php` file. Check your filesystem permissions.'
     stage: build
     type: critical
 !php/const Magento\MagentoCloud\App\Error::BUILD_CANT_READ_COMPOSER_JSON:
     step: validate-config
-    title: 'Cannot read the `composer.json` file'
+    title: 'Can not read the `composer.json` file'
     suggestion: 'Unable to read the `./composer.json` file. Check file permissions.'
     stage: build
     type: critical
 !php/const Magento\MagentoCloud\App\Error::BUILD_COMPOSER_MISSED_REQUIRED_AUTOLOAD:
     step: validate-config
-    title: 'Composer.json is missing required autoload section'
+    title: 'The `composer.json` file is missing required autoload section'
     suggestion: 'Required `autoload` section is missing from the `composer.json` file. Compare the autoload section to the `composer.json` file in the Cloud template, and add the missing configuration.'
     stage: build
     type: critical
 !php/const Magento\MagentoCloud\App\Error::BUILD_WRONG_CONFIGURATION_MAGENTO_ENV_YAML:
     step: validate-config
-    title: 'The file `.magento.env.yaml` contains an option that is not declared in the schema, or an option configured with an invalid value or stage'
+    title: 'The `.magento.env.yaml` file contains an option that is not declared in the schema, or an option configured with an invalid value or stage'
     suggestion: 'The `./.magento.env.yaml` file contains invalid configuration. Check the error log for detailed info.'
     stage: build
     type: critical
 !php/const Magento\MagentoCloud\App\Error::BUILD_MODULE_ENABLE_COMMAND_FAILED:
     step: refresh-modules
     title: 'Command failed: `/bin/magento module:enable --all`'
-    suggestion: 'Try to run `composer update` locally. Then, commit and push the updated `composer.lock` file. Also check the `cloud.log` for more information. For more detailed command output, add the `VERBOSE_COMMANDS: ''-vvv''` option to  the `.magento.env.yaml` file.'
+    suggestion: 'Try to run `composer update` locally. Then, commit and push the updated `composer.lock` file. Also, check the `cloud.log` for more information. For more detailed command output, add the `VERBOSE_COMMANDS: ''-vvv''` option to  the `.magento.env.yaml` file.'
     stage: build
     type: critical
 !php/const Magento\MagentoCloud\App\Error::BUILD_PATCH_APPLYING_FAILED:
@@ -62,7 +62,7 @@
     type: critical
 !php/const Magento\MagentoCloud\App\Error::BUILD_FILE_LOCAL_XML_IS_NOT_WRITABLE:
     step: set-report-dir-nesting-level
-    title: 'Cannot write to the file `/pub/errors/local.xml`'
+    title: 'Can not write to the file `/pub/errors/local.xml`'
     suggestion: ''
     stage: build
     type: critical
@@ -92,7 +92,7 @@
     type: critical
 !php/const Magento\MagentoCloud\App\Error::BUILD_UTILITY_NOT_FOUND:
     step: compress-static-content
-    title: 'Required utility wasn''t found (timeout, bash)'
+    title: 'Required utility was not found (timeout, bash)'
     suggestion: ''
     stage: build
     type: critical
@@ -132,14 +132,14 @@
     stage: build
     type: critical
 !php/const Magento\MagentoCloud\App\Error::BUILD_COMPOSER_PACKAGE_NOT_FOUND:
-    title: 'Cannot find the Composer package'
+    title: 'Can not find the Composer package'
     suggestion: 'If you installed the Adobe Commerce application version directly from the GitHub repository, verify that the `DEPLOYED_MAGENTO_VERSION_FROM_GIT` environment variable is configured.'
     stage: build
     type: critical
 !php/const Magento\MagentoCloud\App\Error::BUILD_WRONG_BRAINTREE_VARIABLE:
     step: validate-config
     title: 'Remove Magento Braintree module configuration which is no longer supported in Adobe Commerce and Magento Open Source 2.4 and later versions.'
-    suggestion: 'Support for the Braintree module is no longer included with Magento 2.4.0 and later. Remove the CONFIG__STORES__DEFAULT__PAYMENT__BRAINTREE__CHANNEL variable from the variables section of the .magento.app.yaml file. For Braintree payment support, use an official extension from the Commerce Marketplace instead.'
+    suggestion: 'Support for the Braintree module is no longer included with Magento 2.4.0 and later. Remove the CONFIG__STORES__DEFAULT__PAYMENT__BRAINTREE__CHANNEL variable from the variables section of the `.magento.app.yaml` file. For Braintree payment support, use an official extension from the Commerce Marketplace instead.'
     stage: build
     type: critical
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_WRONG_CACHE_CONFIGURATION:
@@ -149,12 +149,12 @@
     stage: deploy
     type: critical
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_ENV_PHP_IS_NOT_WRITABLE:
-    title: 'Cannot write to the `./app/etc/env.php` file'
-    suggestion: 'Deployment script cannot make required changes to the `/app/etc/env.php` file. Check your filesystem permissions.'
+    title: 'Can not write to the `./app/etc/env.php` file'
+    suggestion: 'Deployment script can not make required changes to the `/app/etc/env.php` file. Check your filesystem permissions.'
     stage: deploy
     type: critical
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_CONFIG_NOT_DEFINED:
-    title: 'Configuration isn''t defined in the `schema.yaml` file'
+    title: 'Configuration is not defined in the `schema.yaml` file'
     suggestion: 'Configuration is not defined in the `./vendor/magento/ece-tools/config/schema.yaml` file. Check that the config variable name is correct, and that it is defined.'
     stage: deploy
     type: critical
@@ -175,7 +175,7 @@
     type: critical
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_REDIS_CACHE_CLEAN_FAILED:
     title: 'Failed to clean the Redis cache'
-    suggestion: 'Failed to clean the Redis cache. Check that the Redis cache configuration is correct and that the Redis service is available. See [Setup Redis service](https://devdocs.magento.com/cloud/project/services-redis.html).'
+    suggestion: 'Failed to clean the Redis cache. Check that the Redis cache configuration is correct and that the Redis service is available. See [Setup Redis service](https://experienceleague.adobe.com/docs/commerce-cloud-service/user-guide/configure/service/redis.html).'
     step: 'pre-deploy: clean-redis-cache'
     stage: deploy
     type: critical
@@ -239,7 +239,7 @@
     stage: deploy
     type: critical
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_UTILITY_NOT_FOUND:
-    title: 'Required utility wasn''t found (timeout, bash)'
+    title: 'Required utility was not found (timeout, bash)'
     suggestion: ''
     stage: deploy
     type: critical
@@ -257,8 +257,8 @@
     type: critical
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_SCD_CANNOT_UPDATE_VERSION:
     step: 'deploy-static-content:generate'
-    title: 'Cannot update the deployed version'
-    suggestion: 'Cannot update the `./pub/static/deployed_version.txt` file. Check your filesystem permissions.'
+    title: 'Can not update the deployed version'
+    suggestion: 'Can not update the `./pub/static/deployed_version.txt` file. Check your filesystem permissions.'
     stage: deploy
     type: critical
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_SCD_CLEAN_FAILED:
@@ -318,7 +318,7 @@
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_CRYPT_KEY_IS_ABSENT:
     step: install-update
     title: 'The `crypt/key`  key value does not exist in the `./app/etc/env.php` file or the `CRYPT_KEY` cloud environment variable'
-    suggestion: "This error occurs if the `./app/etc/env.php` file is not present when Adobe Commerce deployment begins, or if the `crypt/key` value is undefined. If you migrated the database from another environment, retrieve the crypt key value from that environment. Then, add the value to the [CRYPT_KEY](https://devdocs.magento.com/cloud/env/variables-deploy.html#crypt_key) cloud environment variable in your current environment. See [Add the Magento encryption key](https://devdocs.magento.com/cloud/setup/first-time-setup-import-import.html#encryption-key). If you accidentally removed the `./app/etc/env.php` file, use the following command to restore it from the backup files created from a previous deployment: `./vendor/bin/ece-tools backup:restore` CLI command .\""
+    suggestion: "This error occurs if the `./app/etc/env.php` file is not present when Adobe Commerce deployment begins, or if the `crypt/key` value is undefined. If you migrated the database from another environment, retrieve the crypt key value from that environment. Then, add the value to the [CRYPT_KEY](https://experienceleague.adobe.com/docs/commerce-cloud-service/user-guide/configure/env/stage/variables-deploy.html#crypt_key) cloud environment variable in your current environment. See [Adobe Commerce encryption key](https://experienceleague.adobe.com/docs/commerce-cloud-service/user-guide/develop/overview.html#gather-credentials). If you accidentally removed the `./app/etc/env.php` file, use the following command to restore it from the backup files created from a previous deployment: `./vendor/bin/ece-tools backup:restore` CLI command .\""
     stage: deploy
     type: critical
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_ES_CANNOT_CONNECT:
@@ -327,14 +327,14 @@
     stage: deploy
     type: critical
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_OS_CANNOT_CONNECT:
-    title: 'Can not connect to the Opensearch service'
-    suggestion: 'Check for valid Opensearch credentials and verify that the service is running'
+    title: 'Can not connect to the OpenSearch service'
+    suggestion: 'Check for valid OpenSearch credentials and verify that the service is running'
     stage: deploy
     type: critical
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_WRONG_BRAINTREE_VARIABLE:
     step: validate-config
     title: 'Remove Magento Braintree module configuration which is no longer supported in Adobe Commerce or Magento Open Source 2.4 and later versions.'
-    suggestion: 'Support for the Braintree module is no longer included with Adobe Commerce or Magento Open Source 2.4.0 and later. Remove the CONFIG__STORES__DEFAULT__PAYMENT__BRAINTREE__CHANNEL variable from the variables section of the .magento.app.yaml file. For Braintree support, use an official Braintree Payments extension from the Commerce Marketplace instead.'
+    suggestion: 'Support for the Braintree module is no longer included with Adobe Commerce or Magento Open Source 2.4.0 and later. Remove the CONFIG__STORES__DEFAULT__PAYMENT__BRAINTREE__CHANNEL variable from the variables section of the `.magento.app.yaml` file. For Braintree support, use an official Braintree Payments extension from the Commerce Marketplace instead.'
     stage: deploy
     type: critical
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_ES_SERVICE_NOT_INSTALLED:
@@ -345,8 +345,8 @@
     type: critical
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_OS_SERVICE_NOT_INSTALLED:
     step: validate-config
-    title: 'Adobe Commerce and Magento Open Source 2.4.4 requires Opensearch or Elasticsearch service to be installed'
-    suggestion: 'Install Opensearch service'
+    title: 'Adobe Commerce and Magento Open Source 2.4.4 requires OpenSearch or Elasticsearch service to be installed'
+    suggestion: 'Install OpenSearch service'
     stage: deploy
     type: critical
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_WRONG_SEARCH_ENGINE:
@@ -369,11 +369,11 @@
     type: critical
 !php/const Magento\MagentoCloud\App\Error::PD_ENV_PHP_IS_NOT_WRITABLE:
     title: 'The `./app/etc/env.php` file is not writable'
-    suggestion: 'Deployment script cannot make required changes to the `/app/etc/env.php` file. Check your filesystem permissions.'
+    suggestion: 'Deployment script can not make required changes to the `/app/etc/env.php` file. Check your filesystem permissions.'
     stage: post-deploy
     type: critical
 !php/const Magento\MagentoCloud\App\Error::PD_CONFIG_NOT_DEFINED:
-    title: 'Configuration isn''t defined in the `schema.yaml` file'
+    title: 'Configuration is not defined in the `schema.yaml` file'
     suggestion: 'Configuration is not defined in the `./vendor/magento/ece-tools/config/schema.yaml` file. Check that the config variable name is correct, and that it is defined.'
     stage: post-deploy
     type: critical
@@ -394,7 +394,7 @@
     type: critical
 !php/const Magento\MagentoCloud\App\Error::PD_DURING_PAGE_WARM_UP:
     step: warm-up
-    title: 'Failed to warm-up some pages'
+    title: 'Failed to preload some warm-up pages'
     suggestion: ''
     stage: post-deploy
     type: critical
@@ -430,6 +430,26 @@
     suggestion: ''
     stage: general
     type: critical
+!php/const Magento\MagentoCloud\App\Error::GLOBAL_EVENTING_MODULE_GENERATE_FAILED:
+    title: 'Unable to generate a module for eventing'
+    suggestion: 'Check the `cloud.log` for more information.'
+    stage: general
+    type: critical
+!php/const Magento\MagentoCloud\App\Error::GLOBAL_EVENTING_MODULE_ENABLEMENT_FAILED:
+    title: 'Unable to enable a module for eventing'
+    suggestion: 'Check the `cloud.log` for more information.'
+    stage: general
+    type: critical
+!php/const Magento\MagentoCloud\App\Error::GLOBAL_WEBHOOKS_MODULE_GENERATE_FAILED:
+    title: 'Failed to generate the AdobeCommerceWebhookPlugins module'
+    suggestion: 'Check the `cloud.log` for more information.'
+    stage: general
+    type: critical
+!php/const Magento\MagentoCloud\App\Error::GLOBAL_WEBHOOKS_MODULE_ENABLEMENT_FAILED:
+    title: 'Failed to enable the AdobeCommerceWebhookPlugins module'
+    suggestion: 'Check the `cloud.log` for more information.'
+    stage: general
+    type: critical
 # Warning errors
 !php/const Magento\MagentoCloud\App\Error::WARN_CONFIG_PHP_NOT_EXISTS:
     title: 'File app/etc/config.php does not exist'
@@ -462,7 +482,7 @@
     step: validate-config
     type: warning
 !php/const Magento\MagentoCloud\App\Error::WARN_BALER_CANNOT_BE_USED:
-    title: 'Baler JS bundling cannot be used'
+    title: 'Baler JS bundling can not be used'
     stage: build
     step: run-baler
     type: warning
@@ -573,7 +593,7 @@
     type: warning
 !php/const Magento\MagentoCloud\App\Error::WARN_ENV_PHP_MISSED:
     title: 'Adobe Commerce installation completed, but the `app/etc/env.php` configuration file was missing or empty.'
-    suggestion: 'Required data will be restored from environment configurations and from .magento.env.yaml file.'
+    suggestion: 'Required data will be restored from environment configurations and from the .magento.env.yaml file.'
     stage: deploy
     step: install-update
     type: warning
@@ -637,7 +657,7 @@
     step: warm-up
     type: warning
 !php/const Magento\MagentoCloud\App\Error::WARN_CREATE_CONFIG_BACKUP_FAILED:
-    title: 'Cannot create backup files'
+    title: 'Can not create backup files'
     stage: post-deploy
     step: backup
     type: warning
@@ -646,14 +666,14 @@
     type: warning
     stage: general
 !php/const Magento\MagentoCloud\App\Error::WARN_OS_ES_SERVICES_BOTH_INSTALLED:
-    title: 'Elasticsearch and Opensearch services are both installed at infrastructure layer. Adobe Commerce and Magento Open Source 2.4.4 and higher use Opensearch by default'
-    suggestion: 'Consider removing the Elasticsearch or Opensearch service from the infrastructure layer to optimize resource usage.'
+    title: 'Elasticsearch and OpenSearch services are both installed at infrastructure layer. Adobe Commerce and Magento Open Source 2.4.4 and later use OpenSearch by default'
+    suggestion: 'Consider removing the Elasticsearch or OpenSearch service from the infrastructure layer to optimize resource usage.'
     stage: deploy
     step: validate-config
     type: warning
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_MAGENTO_VERSION_DOES_NOT_SUPPORT_OS:
     step: validate-config
     title: 'Incorrect search engine'
-    suggestion: 'This Adobe Commerce or Magento Open Source version does not support Opensearch. You must use versions 2.3.7-p3, 2.4.3-p2, or higher'
+    suggestion: 'This Adobe Commerce or Magento Open Source version does not support OpenSearch. You must use versions 2.3.7-p3, 2.4.3-p2, or later'
     stage: deploy
     type: critical

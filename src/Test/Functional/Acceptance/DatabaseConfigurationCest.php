@@ -12,14 +12,14 @@ use Magento\CloudDocker\Test\Functional\Codeception\Docker;
 /**
  * This test runs on the latest version of PHP
  *
- * @group php81
+ * @group php82
  */
 class DatabaseConfigurationCest extends AbstractCest
 {
     /**
      * @var string
      */
-    protected $magentoCloudTemplate = '2.4.4';
+    protected $magentoCloudTemplate = '2.4.6';
 
     /**
      * @param \CliTester $I
@@ -139,7 +139,7 @@ class DatabaseConfigurationCest extends AbstractCest
     public function customDataBaseConfigurationMagentoEnvYaml(\CliTester $I)
     {
         $I->copyFileToWorkDir('files/custom_db_configuration/.magento.env.yaml', '.magento.env.yaml');
-        $I->runEceDockerCommand('build:compose --mode=production');
+        $I->generateDockerCompose('--mode=production');
         $I->assertTrue($I->runDockerComposeCommand('run build cloud-build'));
         $I->assertTrue($I->startEnvironment());
         $I->assertTrue(

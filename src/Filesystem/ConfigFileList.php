@@ -73,4 +73,20 @@ class ConfigFileList
     {
         return $this->systemList->getMagentoRoot() . '/pub/errors/local.xml';
     }
+
+    /**
+     * @return string
+     */
+    public function getPhpIni(): string
+    {
+        return $this->systemList->getMagentoRoot() . '/php.ini';
+    }
+
+    /**
+     * @return string
+     */
+    public function getOpCacheExcludeList(): string
+    {
+        return $this->systemList->getMagentoRoot() . '/op-exclude.txt';
+    }
 }

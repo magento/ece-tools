@@ -12,12 +12,13 @@ use Magento\CloudDocker\Test\Functional\Codeception\Docker;
 /**
  * Checks Redis configuration
  *
- * @group php82
+ * @group php81
  */
-class RedisCest extends AbstractCest
+class Redis81Cest extends RedisCest
 {
     /**
      * @inheritdoc
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     public function _before(\CliTester $I): void
     {
@@ -102,7 +103,7 @@ class RedisCest extends AbstractCest
     {
         return [
             [
-                'version' => '2.4.6',
+                'version' => '2.4.4',
             ],
         ];
     }
@@ -113,7 +114,7 @@ class RedisCest extends AbstractCest
      * @throws \Robo\Exception\TaskException
      * @dataProvider wrongConfigurationRedisBackendDataProvider
      */
-    public function testWrongConfigurationRedisBackend(\CliTester $I, \Codeception\Example $data): void
+    public function testWrongConfiguration(\CliTester $I, \Codeception\Example $data): void
     {
         $this->prepareWorkplace($I, $data['version']);
         $I->generateDockerCompose(sprintf(
@@ -133,11 +134,11 @@ class RedisCest extends AbstractCest
     /**
      * @return array
      */
-    protected function wrongConfigurationRedisBackendDataProvider(): array
+    protected function wrongConfigurationDataProvider(): array
     {
         return [
             [
-                'version' => '2.4.6',
+                'version' => '2.4.4',
                 'wrongConfiguration' => [
                     'stage' => [
                         'deploy' => [
@@ -152,77 +153,6 @@ class RedisCest extends AbstractCest
                     . ' \Magento\Framework\Cache\Backend\Redis,'
                     . ' \Magento\Framework\Cache\Backend\RemoteSynchronizedCache.',
                 'errorDeployMessage' => '',
-            ],
-        ];
-    }
-
-    /**
-     * @param \CliTester $I
-     * @param \Codeception\Example $data
-     * @throws \Robo\Exception\TaskException
-     * @dataProvider redisWrongConnectionDataProvider
-     */
-    public function testRedisWrongConnection(\CliTester $I, \Codeception\Example $data): void
-    {
-        $this->prepareWorkplace($I, $data['version']);
-        $I->generateDockerCompose(sprintf(
-            '--mode=production --expose-db-port=%s',
-            $I->getExposedPort()
-        ));
-
-        $I->writeEnvMagentoYaml($data['configuration']);
-
-        $I->assertTrue($I->runDockerComposeCommand('run build cloud-build'), 'Build phase was failed');
-        $I->assertTrue($I->startEnvironment(), 'Docker could not start');
-        $I->assertFalse($I->runDockerComposeCommand('run deploy cloud-deploy'), 'Deploy phase was successful');
-    }
-
-    /**
-     * @return array
-     */
-    protected function redisWrongConnectionDataProvider(): array
-    {
-        return [
-            [
-                'version' => '2.4.6',
-                'configuration' => [
-                    'stage' => [
-                        'deploy' => [
-                            'CACHE_CONFIGURATION' => [
-                                '_merge' => true,
-                                'frontend' => [
-                                    'default' => [
-                                        'backend' => '\Magento\Framework\Cache\Backend\Redis',
-                                        'backend_options' => [
-                                            'port' => 9999,
-                                        ],
-                                    ],
-                                ],
-                            ],
-                        ],
-                    ],
-                ],
-            ],
-            [
-                'version' => '2.4.6',
-                'configuration' => [
-                    'stage' => [
-                        'deploy' => [
-                            'CACHE_CONFIGURATION' => [
-                                '_merge' => true,
-                                'frontend' => [
-                                    'default' => [
-                                        '_custom_redis_backend' => true,
-                                        'backend' => '\CustomRedisModel',
-                                        'backend_options' => [
-                                            'port' => 9999,
-                                        ],
-                                    ],
-                                ],
-                            ],
-                        ],
-                    ],
-                ],
             ],
         ];
     }
@@ -274,7 +204,7 @@ class RedisCest extends AbstractCest
     {
         return [
             [
-                'version' => '2.4.6',
+                'version' => '2.4.4',
                 'configuration' => [
                     'stage' => [
                         'deploy' => [
@@ -292,7 +222,7 @@ class RedisCest extends AbstractCest
                 ],
             ],
             [
-                'version' => '2.4.6',
+                'version' => '2.4.4',
                 'configuration' => [
                     'stage' => [
                         'deploy' => [
@@ -312,7 +242,7 @@ class RedisCest extends AbstractCest
                 'expectedConfig' => [],
             ],
             [
-                'version' => '2.4.6',
+                'version' => '2.4.4',
                 'configuration' => [
                     'stage' => [
                         'deploy' => [
@@ -340,5 +270,25 @@ class RedisCest extends AbstractCest
                 ],
             ],
         ];
+    }
+
+    /**
+     * @param \CliTester $I
+     * @param \Codeception\Example $data
+     * @skip
+     */
+    public function testRedisWrongConnection(\CliTester $I, \Codeception\Example $data): void
+    {
+        return;
+    }
+
+    /**
+     * @param \CliTester $I
+     * @param \Codeception\Example $data
+     * @skip
+     */
+    public function testWrongConfigurationRedisBackend(\CliTester $I, \Codeception\Example $data): void
+    {
+        return;
     }
 }

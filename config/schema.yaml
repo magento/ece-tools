@@ -57,9 +57,9 @@ variables:
           build:
             SCD_COMPRESSION_TIMEOUT: 900
   SCD_STRATEGY:
-    description: Customize the deployment strategy for static content. The value "standard" will deploy all static view
-      files for all packages, "quick" will minimize deployment time, and "compact" will conserve space on the server.
-      Compact is not compatible with multi-threaded deployment and will set the value of `SCD_THREADS` to 1. The default
+    description: Customize the deployment strategy for static content. The value "standard" deploys all static view
+      files for all packages, "quick" minimizes deployment time, and "compact" conserves space on the server.
+      Compact is not compatible with multi-threaded deployment and sets the value of `SCD_THREADS` to 1. The default
       value is "quick".
     type: string
     magento_version: '>=2.2.0'
@@ -218,7 +218,7 @@ variables:
   MIN_LOGGING_LEVEL:
     description: Use to override the minimum logging level for all output streams without making changes to the code.
       This helps to improve troubleshooting problems with deployment. For example, if your deployment fails,
-      you can use this variable to increase the logging granularity globally. Doesn't affect log level for the file output.
+      you can use this variable to increase the logging granularity globally. Does not affect log level for the file output.
       See Set up notifications—Log levels.
     type: string
     allowed:
@@ -706,6 +706,28 @@ variables:
               config:
                 region: us-east-1
                 bucket: test-bucket
+  ENABLE_EVENTING:
+    description: Enables commerce eventing.
+    type: boolean
+    stages:
+      - global
+    default:
+      global: false
+    examples:
+      - stage:
+          global:
+            ENABLE_EVENTING: true
+  ENABLE_WEBHOOKS:
+    description: Enables Commerce webhooks.
+    type: boolean
+    stages:
+      - global
+    default:
+      global: false
+    examples:
+      - stage:
+          global:
+            ENABLE_WEBHOOKS: true
 
   # Environment variables
   ENV_RELATIONSHIPS:
