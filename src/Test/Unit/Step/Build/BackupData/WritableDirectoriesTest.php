@@ -240,14 +240,14 @@ class WritableDirectoriesTest extends TestCase
             ->withConsecutive(
                 [
                     sprintf(
-                        'Copying %s/some/path/1->%s/some/path/1',
+                        'Renaming %s/some/path/1->%s/some/path/1',
                         $this->magentoRootDir,
                         $this->rootInitDir
                     )
                 ],
                 [
                     sprintf(
-                        'Copying %s->%s',
+                        'Renaming %s->%s',
                         $this->magentoRootDir . '/' . $this->logDir,
                         $this->rootInitDir . '/' . $this->logDir
                     )
@@ -283,7 +283,7 @@ class WritableDirectoriesTest extends TestCase
                 [$this->rootInitDir . '/' . $this->logDir]
             );
         $this->fileMock->expects($this->exactly(2))
-            ->method('copyDirectory')
+            ->method('rename')
             ->withConsecutive(
                 [$this->magentoRootDir . '/some/path/1', $this->rootInitDir . '/some/path/1'],
                 [$this->magentoRootDir . '/' . $this->logDir, $this->rootInitDir . '/' . $this->logDir]

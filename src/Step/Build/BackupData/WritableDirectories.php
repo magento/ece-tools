@@ -108,7 +108,7 @@ class WritableDirectories implements StepInterface
                     continue;
                 }
 
-                $this->logger->debug(sprintf('Moving %s->%s', $originalDir, $initDir));
+                $this->logger->debug(sprintf('Renaming %s->%s', $originalDir, $initDir));
                 $this->backupDir($originalDir, $initDir);
             }
 
@@ -130,7 +130,7 @@ class WritableDirectories implements StepInterface
     private function backupLogDir(string $originalLogDir, string $initLogDir)
     {
         try {
-            $this->logger->debug(sprintf('Moving %s->%s', $originalLogDir, $initLogDir));
+            $this->logger->debug(sprintf('Renaming %s->%s', $originalLogDir, $initLogDir));
             $this->logger->setHandlers([]);
             $this->backupDir($originalLogDir, $initLogDir);
             $this->logger->setHandlers($this->loggerPool->getHandlers());
