@@ -1,10 +1,8 @@
 <?php
-
 /**
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-
 declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Step\Build;
@@ -25,50 +23,56 @@ use Psr\Log\LoggerInterface;
  */
 class ClearMountedDirectories implements StepInterface
 {
-    /** @var EnvironmentDataInterface */
-    private $environment;
-
     /** @var LoggerInterface */
     private $logger;
 
     /** @var File */
     private $file;
 
-    /** @var DirectoryList */
-    private $directory;
+    /**
+     * To get absolute path to the app directory.
+     * 
+     * @var DirectoryList
+     */
+    private $directoryList;
 
     public function __construct(
-        EnvironmentDataInterface $environment,
         LoggerInterface $logger,
         File $file,
-        DirectoryList $directory
+        DirectoryList $directoryList
     ) {
-        $this->environment = $environment;
         $this->logger = $logger;
         $this->file = $file;
-        $this->directory = $directory;
+        $this->directoryList = $directoryList;
     }
 
     /**
-     * @return void
+     * {@inheritDoc}
      */
     public function execute()
     {
         $cleanMountedDir = $this->getCleanMountedDir(); 
         foreach ($cleanMountedDir as $mount) {
-            if ($this->file->isExists($mount)) {
-                $this->file->backgroundClearDirectory($mount);
+            if ($this->file->isExists($mount) === false) {
+                continue;
             }
+            $this->logger->log(sprintf('Clearing the %s path of all files and folders', $mount));
+            $this->file->backgroundClearDirectory($mount);
         }
     }
 
-    private function getCleanMountedDir()
+    /**
+     * Returns the path to the cleared directories
+     *
+     * @return array
+     */
+    private function getCleanMountedDir(): array
     {
         return [
-            $this->directory->getPath(DirectoryList::DIR_MEDIA),
-            $this->directory->getPath(DirectoryList::DIR_VAR),
-            $this->directory->getPath(DirectoryList::DIR_ETC),
-            $this->directory->getPath(DirectoryList::DIR_STATIC)
+            $this->directoryList->getPath(DirectoryList::DIR_MEDIA),
+            $this->directoryList->getPath(DirectoryList::DIR_VAR),
+            $this->directoryList->getPath(DirectoryList::DIR_ETC),
+            $this->directoryList->getPath(DirectoryList::DIR_STATIC)
         ];
     }
 }
