@@ -115,8 +115,6 @@ class StaticContent implements StepInterface
     {
         try {
             $this->logger->info('Moving static content to init directory');
-            $this->logger->info($originalPubStatic);
-            $this->logger->info($initPubStatic);
             $this->file->rename($originalPubStatic, $initPubStatic);
 
             /**

@@ -51,9 +51,9 @@ class WizardScdCest extends AbstractCest
     {
         $I->copyFileToWorkDir('files/scdinbuild/config.php', 'app/etc/config.php');
         $I->runDockerComposeCommand('run build cloud-build');
-//        $I->runDockerComposeCommand('run deploy cloud-deploy');
-//        $I->assertTrue($I->runDockerComposeCommand('run deploy ece-command wizard:scd-on-build'));
-//        $I->seeInOutput('SCD on build is enabled');
+        $I->runDockerComposeCommand('run deploy cloud-deploy');
+        $I->assertTrue($I->runDockerComposeCommand('run deploy ece-command wizard:scd-on-build'));
+        $I->seeInOutput('SCD on build is enabled');
     }
 
     /**
@@ -67,11 +67,5 @@ class WizardScdCest extends AbstractCest
         $I->runDockerComposeCommand('run deploy cloud-deploy');
         $I->assertTrue($I->runDockerComposeCommand('run deploy ece-command wizard:scd-on-demand'));
         $I->seeInOutput('SCD on demand is enabled');
-    }
-
-    public function _after(\CliTester $I): void
-    {
-//        $I->stopEnvironment();
-//        $I->removeWorkDir();
     }
 }
