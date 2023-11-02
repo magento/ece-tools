@@ -145,7 +145,7 @@ class WritableDirectoriesTest extends TestCase
 
         $this->expectExceptionMessage('some error');
         $this->expectException(StepException::class);
-        $this->expectExceptionCode(Error::BUILD_WRITABLE_DIRECTORY_MOVING_FAILED);
+        $this->expectExceptionCode(Error::BUILD_WRITABLE_DIRECTORY_COPYING_FAILED);
 
         $this->step->execute();
     }
@@ -240,14 +240,14 @@ class WritableDirectoriesTest extends TestCase
             ->withConsecutive(
                 [
                     sprintf(
-                        'Renaming %s/some/path/1->%s/some/path/1',
+                        'Copying %s/some/path/1->%s/some/path/1',
                         $this->magentoRootDir,
                         $this->rootInitDir
                     )
                 ],
                 [
                     sprintf(
-                        'Renaming %s->%s',
+                        'Copying %s->%s',
                         $this->magentoRootDir . '/' . $this->logDir,
                         $this->rootInitDir . '/' . $this->logDir
                     )
@@ -283,7 +283,7 @@ class WritableDirectoriesTest extends TestCase
                 [$this->rootInitDir . '/' . $this->logDir]
             );
         $this->fileMock->expects($this->exactly(2))
-            ->method('rename')
+            ->method('copyDirectory')
             ->withConsecutive(
                 [$this->magentoRootDir . '/some/path/1', $this->rootInitDir . '/some/path/1'],
                 [$this->magentoRootDir . '/' . $this->logDir, $this->rootInitDir . '/' . $this->logDir]

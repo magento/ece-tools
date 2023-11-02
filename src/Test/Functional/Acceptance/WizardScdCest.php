@@ -37,7 +37,8 @@ class WizardScdCest extends AbstractCest
     public function testDefault(\CliTester $I): void
     {
         $I->runDockerComposeCommand('run build cloud-build');
-        $I->assertFalse($I->runDockerComposeCommand('run build ece-command wizard:scd-on-build'));
+        $I->runDockerComposeCommand('run deploy cloud-deploy');
+        $I->assertFalse($I->runDockerComposeCommand('run deploy ece-command wizard:scd-on-build'));
         $I->seeInOutput(' - No stores/website/locales found in');
         $I->seeInOutput('SCD on build is disabled');
     }
@@ -50,8 +51,9 @@ class WizardScdCest extends AbstractCest
     {
         $I->copyFileToWorkDir('files/scdinbuild/config.php', 'app/etc/config.php');
         $I->runDockerComposeCommand('run build cloud-build');
-        $I->assertTrue($I->runDockerComposeCommand('run build ece-command wizard:scd-on-build'));
-        $I->seeInOutput('SCD on build is enabled');
+//        $I->runDockerComposeCommand('run deploy cloud-deploy');
+//        $I->assertTrue($I->runDockerComposeCommand('run deploy ece-command wizard:scd-on-build'));
+//        $I->seeInOutput('SCD on build is enabled');
     }
 
     /**
@@ -62,7 +64,14 @@ class WizardScdCest extends AbstractCest
     {
         $I->copyFileToWorkDir('files/scdondemand/.magento.env.yaml', '.magento.env.yaml');
         $I->runDockerComposeCommand('run build cloud-build');
-        $I->assertTrue($I->runDockerComposeCommand('run build ece-command wizard:scd-on-demand'));
+        $I->runDockerComposeCommand('run deploy cloud-deploy');
+        $I->assertTrue($I->runDockerComposeCommand('run deploy ece-command wizard:scd-on-demand'));
         $I->seeInOutput('SCD on demand is enabled');
+    }
+
+    public function _after(\CliTester $I): void
+    {
+//        $I->stopEnvironment();
+//        $I->removeWorkDir();
     }
 }

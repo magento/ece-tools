@@ -178,6 +178,26 @@ class DirectoryList
     }
 
     /**
+     * Retrieves mount points for writable directories.
+     *
+     * @return array
+     * @throws UndefinedPackageException
+     */
+    public function getMountPoints(): array
+    {
+        $mountPoints = [
+            static::DIR_ETC,
+            static::DIR_VAR,
+            static::DIR_MEDIA,
+            static::DIR_STATIC
+        ];
+
+        return array_map(function ($path) {
+            return $this->getPath($path, true);
+        }, $mountPoints);
+    }
+
+    /**
      * @return array
      */
     private function getDefaultDirectories(): array
