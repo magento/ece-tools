@@ -53,7 +53,7 @@ class ScenarioExtensibilityCest extends AbstractCest
         $I->runDockerComposeCommand('run build cloud-build');
         $I->startEnvironment();
 
-        $cloudLog = $I->grabFileContent('/var/log/cloud.log', Docker::BUILD_CONTAINER);
+        $cloudLog = $I->grabFileContent('/init/var/log/cloud.log', Docker::BUILD_CONTAINER);
 
         $I->assertStringContainsString(
             'Step "copy-sample-data" was skipped',
