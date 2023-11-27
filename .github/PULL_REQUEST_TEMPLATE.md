@@ -34,7 +34,7 @@
 
 ### Release notes
 
-For user-facing changes, add a meaningful release note. For examples, see [Magento Cloud ECE-tools release notes](https://devdocs.magento.com/cloud/release-notes/ece-release-notes.html).
+For user-facing changes, add a meaningful release note. For examples, see [Magento Cloud ECE-tools release notes](https://experienceleague.adobe.com/docs/commerce-cloud-service/user-guide/release-notes/ece-tools-package.html).
 
 ### Associated documentation updates
 <!--
