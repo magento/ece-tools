@@ -8,6 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Config\Validator\Deploy;
 
 use Magento\MagentoCloud\App\Error;
+use Magento\MagentoCloud\Config\Module;
 use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Config\Validator;
 use Magento\MagentoCloud\Config\ValidatorException;
@@ -44,6 +45,11 @@ class OpenSearchIntegrity implements ValidatorInterface
     private $openSearch;
 
     /**
+     * @var Module
+     */
+    private $module;
+
+    /**
      * @param MagentoVersion $magentoVersion
      * @param Validator\ResultFactory $resultFactory
      * @param ElasticSearch $elasticSearch
@@ -53,12 +59,14 @@ class OpenSearchIntegrity implements ValidatorInterface
         MagentoVersion $magentoVersion,
         Validator\ResultFactory $resultFactory,
         ElasticSearch $elasticSearch,
-        OpenSearch $openSearch
+        OpenSearch $openSearch,
+        Module $module
     ) {
         $this->magentoVersion = $magentoVersion;
         $this->resultFactory = $resultFactory;
         $this->elasticsearch = $elasticSearch;
         $this->openSearch = $openSearch;
+        $this->module = $module;
     }
 
     /**
@@ -80,6 +88,10 @@ class OpenSearchIntegrity implements ValidatorInterface
             if ($this->magentoVersion->isGreaterOrEqual('2.4.3-p2')
                 && !$this->openSearch->isInstalled()
             ) {
+                $enabledModules = $this->module->refresh();
+                if (in_array('Magento_LiveSearchAdapter', $enabledModules)) {
+                    return $this->resultFactory->success();
+                }
                 return $this->resultFactory->errorByCode(Error::DEPLOY_OS_SERVICE_NOT_INSTALLED);
             }
         } catch (UndefinedPackageException | FileSystemException $exception) {
