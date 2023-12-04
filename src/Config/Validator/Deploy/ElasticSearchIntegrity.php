@@ -8,7 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Config\Validator\Deploy;
 
 use Magento\MagentoCloud\App\Error;
-use Magento\MagentoCloud\Config\Module;
+use Magento\MagentoCloud\Config\Magento\Shared\Reader;
 use Magento\MagentoCloud\Config\Validator;
 use Magento\MagentoCloud\Config\ValidatorException;
 use Magento\MagentoCloud\Config\ValidatorInterface;
@@ -44,28 +44,29 @@ class ElasticSearchIntegrity implements ValidatorInterface
     private $openSearch;
 
     /**
-     * @var Module
+     * @var Reader
      */
-    private $module;
+    private $reader;
 
     /**
      * @param MagentoVersion $magentoVersion
      * @param Validator\ResultFactory $resultFactory
      * @param ElasticSearch $elasticSearch
      * @param OpenSearch $openSearch
+     * @param Reader $reader
      */
     public function __construct(
         MagentoVersion $magentoVersion,
         Validator\ResultFactory $resultFactory,
         ElasticSearch $elasticSearch,
         OpenSearch $openSearch,
-        Module $module
+        Reader $reader
     ) {
         $this->magentoVersion = $magentoVersion;
         $this->resultFactory = $resultFactory;
         $this->elasticsearch = $elasticSearch;
         $this->openSearch = $openSearch;
-        $this->module = $module;
+        $this->reader = $reader;
     }
 
     /**
@@ -78,12 +79,11 @@ class ElasticSearchIntegrity implements ValidatorInterface
                 return $this->resultFactory->success();
             }
 
-            $enabledModules = $this->module->refresh();
-
             if ($this->magentoVersion->isGreaterOrEqual('2.4.0')
                 && !$this->elasticsearch->isInstalled()
             ) {
-                if (in_array('Magento_LiveSearchAdapter', $enabledModules)) {
+                $modules = $this->reader->read()['modules'] ?? [];
+                if (isset($modules['Magento_LiveSearchAdapter']) && $modules['Magento_LiveSearchAdapter']) {
                     return $this->resultFactory->success();
                 }
                 return $this->resultFactory->errorByCode(Error::DEPLOY_ES_SERVICE_NOT_INSTALLED);
