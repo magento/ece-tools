@@ -13,16 +13,17 @@ You must have a [GitHub account](https://help.github.com/en/github/getting-start
 
 ## Contribution requirements
 
-1. Contributions must adhere to the [Magento coding standards](https://devdocs.magento.com/guides/v2.3/coding-standards/bk-coding-standards.html).
+1. Contributions must adhere to the [coding standards](https://developer.adobe.com/commerce/php/coding-standards/).
 2. When you submit a Pull request (PR), write a meaningful description to explain the purpose of your contribution. Comprehensive descriptions increase the chances that a pull request can be merged quickly, without requests for additional clarification. See the [Magento Cloud Tools Pull Request Template](https://github.com/magento/ece-tools/blob/develop/.github/PULL_REQUEST_TEMPLATE.md) for more information.
 3. Commits must be accompanied by meaningful commit messages.
 4. If your PR includes bug fixes, provide a step-by-step description of how to reproduce the bug in the pull request description.
-3. If your PR includes new logic or new features, you must also submit the following information along with the pull request
+5. If your PR includes new logic or new features, you must also submit the following information along with the pull request
    * Unit/integration test coverage
-   * Proposed documentation updates: Submit developer documentation contributions to the [Magento DevDocs repository](https://github.com/magento/devdocs/blob/master/.github/CONTRIBUTING.md). Submit updates to Magento user documentation to the [Magento Merchant documentation repository](https://github.com/magento/merchdocs/blob/master/.github/CONTRIBUTING.md).
-4. For larger features or changes, [open an issue](https://github.com/magento/ece-tools/issues/new) to discuss the proposed changes prior to development. Discussing the updates in advance can prevent duplicate or unnecessary effort and allow other contributors to provide input.
+   * Proposed [documentation](https://developer.adobe.com/commerce) updates. Use feedback buttons __Edit in GitHub__ and __Log an issue__ at the top of a relevant topic.
+6. For larger features or changes, [open an issue](https://github.com/magento/ece-tools/issues/new) to discuss the proposed changes prior to development. Discussing the updates in advance can prevent duplicate or unnecessary effort and allow other contributors to provide input.
 
 ## Contribution process
+
 1. Search current [listed issues](https://github.com/magento/ece-tools/issues) (open or closed) for similar proposals of intended contribution before starting work on a new contribution.
 2. Review and sign the [Contributor License Agreement (CLA)](https://opensource.adobe.com/cla.html) if this is your first time contributing. You only need to sign the CLA once.
 3. Create and test your work.
