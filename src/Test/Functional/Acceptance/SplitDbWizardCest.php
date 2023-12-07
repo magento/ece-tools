@@ -59,6 +59,8 @@ class SplitDbWizardCest extends AbstractCest
         $appMagento['relationships']['database-sales'] = 'mysql-sales:mysql';
         $I->writeServicesYaml($services);
         $I->writeAppMagentoYaml($appMagento);
+        // Restore app/etc after build phase
+        $I->runDockerComposeCommand('run build bash -c "cp -r /app/init/app/etc /app/app"');
         $I->generateDockerCompose('--mode=production');
 
         foreach ($this->variationsData() as $variationData) {

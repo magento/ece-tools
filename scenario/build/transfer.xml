@@ -8,6 +8,7 @@
             <argument name="steps" xsi:type="array">
                 <item name="static-content" xsi:type="object" priority="100">Magento\MagentoCloud\Step\Build\BackupData\StaticContent</item>
                 <item name="writable-dirs" xsi:type="object"  priority="200">Magento\MagentoCloud\Step\Build\BackupData\WritableDirectories</item>
+                <item name="clear-mounted-dirs" xsi:type="object" priority="300">Magento\MagentoCloud\Step\Build\ClearMountedDirectories</item>
             </argument>
         </arguments>
     </step>

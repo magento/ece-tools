@@ -88,6 +88,10 @@ class BackupDb24Cest extends AbstractCest
 
         // Running database dump command with invalid database label
         $I->runDockerComposeCommand('run build cloud-build');
+
+        // Restore app/etc after build phase
+        $I->runDockerComposeCommand('run build bash -c "cp -r /app/init/app/etc /app/app"');
+
         $I->runDockerComposeCommand('run deploy ece-command db-dump incorrectName');
         $I->seeInOutput(
             'CRITICAL: Incorrect the database names: [ incorrectName ].'
