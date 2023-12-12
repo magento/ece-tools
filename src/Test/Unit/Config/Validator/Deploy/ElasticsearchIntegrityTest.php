@@ -8,6 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit\Config\Validator\Deploy;
 
 use Magento\MagentoCloud\App\Error;
+use Magento\MagentoCloud\Config\Magento\Shared\Reader;
 use Magento\MagentoCloud\Config\Validator\Deploy\ElasticSearchIntegrity;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
 use Magento\MagentoCloud\Config\ValidatorException;
@@ -56,12 +57,14 @@ class ElasticsearchIntegrityTest extends TestCase
         $this->resultFactoryMock = $this->createMock(ResultFactory::class);
         $this->elasticSearchMock = $this->createMock(ElasticSearch::class);
         $this->openSearchMock = $this->createMock(OpenSearch::class);
+        $this->readerMock = $this->createMock(Reader::class);
 
         $this->validator = new ElasticSearchIntegrity(
             $this->magentoVersionMock,
             $this->resultFactoryMock,
             $this->elasticSearchMock,
-            $this->openSearchMock
+            $this->openSearchMock,
+            $this->readerMock
         );
     }
 
@@ -205,6 +208,36 @@ class ElasticsearchIntegrityTest extends TestCase
         $this->resultFactoryMock->expects($this->once())
             ->method('errorByCode')
             ->with(Error::DEPLOY_ES_SERVICE_NOT_INSTALLED);
+
+        $this->validator->validate();
+    }
+
+    /**
+     * @throws ValidatorException
+     */
+    public function testValidateNoElasticSearchAndNoOpenSearchWithLiveSearchEnabledMagentoGreater244(): void
+    {
+        $this->magentoVersionMock->expects($this->once())
+            ->method('satisfies')
+            ->with('>=2.4.3-p2')
+            ->willReturn(true);
+        $this->magentoVersionMock->expects($this->once())
+            ->method('isGreaterOrEqual')
+            ->with('2.4.0')
+            ->willReturn(true);
+        $this->openSearchMock->expects($this->once())
+            ->method('isInstalled')
+            ->willReturn(false);
+        $this->elasticSearchMock->expects($this->once())
+            ->method('isInstalled')
+            ->willReturn(false);
+
+        $this->readerMock->expects($this->once())
+            ->method('read')
+            ->willReturn(['modules' => ['Magento_LiveSearchAdapter' => 1]]);
+
+        $this->resultFactoryMock->expects($this->once())
+            ->method('success');
 
         $this->validator->validate();
     }
