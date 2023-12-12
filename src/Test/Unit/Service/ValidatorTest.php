@@ -449,7 +449,7 @@ class ValidatorTest extends TestCase
                     ServiceInterface::NAME_DB_MARIA => '10.5.0', //wrong
                     ServiceInterface::NAME_VARNISH => '7.1.0', //wrong
                     ServiceInterface::NAME_REDIS => '6.1.3', //wrong
-                    ServiceInterface::NAME_OPENSEARCH => '1.2.0', //wrong
+                    ServiceInterface::NAME_OPENSEARCH => '1.0.0', //wrong
                     ServiceInterface::NAME_RABBITMQ => '3.8.1' //wrong
                 ],
                 6
