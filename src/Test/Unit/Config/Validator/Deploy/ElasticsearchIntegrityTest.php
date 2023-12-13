@@ -49,6 +49,11 @@ class ElasticsearchIntegrityTest extends TestCase
     private $openSearchMock;
 
     /**
+     * @var Reader|MockObject
+     */
+    private $readerMock;
+
+    /**
      * @inheritDoc
      */
     protected function setUp(): void

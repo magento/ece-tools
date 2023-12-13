@@ -95,4 +95,3 @@ class ElasticSearchIntegrity implements ValidatorInterface
         return $this->resultFactory->success();
     }
 }
-
