@@ -90,7 +90,7 @@ class OpenSearchIntegrity implements ValidatorInterface
             $liveSearchEnabled = $modules['Magento_LiveSearchAdapter'] ?? false;
 
             if ($this->magentoVersion->isGreaterOrEqual('2.4.3-p2')
-                && !$this->openSearch->isInstalled() && !$liveSearchEnabled 
+                && !$this->openSearch->isInstalled() && !$liveSearchEnabled
             ) {
                 return $this->resultFactory->errorByCode(Error::DEPLOY_OS_SERVICE_NOT_INSTALLED);
             }
