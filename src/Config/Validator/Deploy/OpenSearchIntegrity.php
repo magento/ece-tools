@@ -86,13 +86,12 @@ class OpenSearchIntegrity implements ValidatorInterface
                 return $this->resultFactory->errorByCode(Error::DEPLOY_MAGENTO_VERSION_DOES_NOT_SUPPORT_OS);
             }
 
+            $modules = $this->reader->read()['modules'] ?? [];
+            $liveSearchEnabled = $modules['Magento_LiveSearchAdapter'] ?? false;
+
             if ($this->magentoVersion->isGreaterOrEqual('2.4.3-p2')
-                && !$this->openSearch->isInstalled()
+                && !$this->openSearch->isInstalled() && !$liveSearchEnabled 
             ) {
-                $modules = $this->reader->read()['modules'] ?? [];
-                if (isset($modules['Magento_LiveSearchAdapter']) && $modules['Magento_LiveSearchAdapter']) {
-                    return $this->resultFactory->success();
-                }
                 return $this->resultFactory->errorByCode(Error::DEPLOY_OS_SERVICE_NOT_INSTALLED);
             }
         } catch (UndefinedPackageException | FileSystemException $exception) {

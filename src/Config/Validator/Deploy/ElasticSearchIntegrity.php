@@ -79,13 +79,12 @@ class ElasticSearchIntegrity implements ValidatorInterface
                 return $this->resultFactory->success();
             }
 
+            $modules = $this->reader->read()['modules'] ?? [];
+            $liveSearchEnabled = $modules['Magento_LiveSearchAdapter'] ?? false;
+
             if ($this->magentoVersion->isGreaterOrEqual('2.4.0')
-                && !$this->elasticsearch->isInstalled()
+                && !$this->elasticsearch->isInstalled() && !$liveSearchEnabled
             ) {
-                $modules = $this->reader->read()['modules'] ?? [];
-                if (isset($modules['Magento_LiveSearchAdapter']) && $modules['Magento_LiveSearchAdapter']) {
-                    return $this->resultFactory->success();
-                }
                 return $this->resultFactory->errorByCode(Error::DEPLOY_ES_SERVICE_NOT_INSTALLED);
             }
         } catch (UndefinedPackageException | FileSystemException $exception) {
