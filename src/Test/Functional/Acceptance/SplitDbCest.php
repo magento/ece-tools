@@ -71,6 +71,9 @@ class SplitDbCest extends AbstractCest
         $I->writeServicesYaml($services);
         $I->writeAppMagentoYaml($magentoApp);
 
+        // Restore app/etc after build phase
+        $I->runDockerComposeCommand('run build bash -c "cp -r /app/init/app/etc /app/app"');
+
         // Deploy 'Split Db' in an environment with prepared architecture. Case with upgrade
         $I->generateDockerCompose('--mode=production');
         foreach ($this->variationsDataPartWithSplitDbArch() as $variationData) {

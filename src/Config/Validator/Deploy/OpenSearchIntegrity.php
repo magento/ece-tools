@@ -8,6 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Config\Validator\Deploy;
 
 use Magento\MagentoCloud\App\Error;
+use Magento\MagentoCloud\Config\Magento\Shared\Reader;
 use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Config\Validator;
 use Magento\MagentoCloud\Config\ValidatorException;
@@ -44,21 +45,29 @@ class OpenSearchIntegrity implements ValidatorInterface
     private $openSearch;
 
     /**
+     * @var Reader
+     */
+    private $reader;
+
+    /**
      * @param MagentoVersion $magentoVersion
      * @param Validator\ResultFactory $resultFactory
      * @param ElasticSearch $elasticSearch
      * @param OpenSearch $openSearch
+     * @param Reader $reader
      */
     public function __construct(
         MagentoVersion $magentoVersion,
         Validator\ResultFactory $resultFactory,
         ElasticSearch $elasticSearch,
-        OpenSearch $openSearch
+        OpenSearch $openSearch,
+        Reader $reader
     ) {
         $this->magentoVersion = $magentoVersion;
         $this->resultFactory = $resultFactory;
         $this->elasticsearch = $elasticSearch;
         $this->openSearch = $openSearch;
+        $this->reader = $reader;
     }
 
     /**
@@ -77,8 +86,11 @@ class OpenSearchIntegrity implements ValidatorInterface
                 return $this->resultFactory->errorByCode(Error::DEPLOY_MAGENTO_VERSION_DOES_NOT_SUPPORT_OS);
             }
 
+            $modules = $this->reader->read()['modules'] ?? [];
+            $liveSearchEnabled = $modules['Magento_LiveSearchAdapter'] ?? false;
+
             if ($this->magentoVersion->isGreaterOrEqual('2.4.3-p2')
-                && !$this->openSearch->isInstalled()
+                && !$this->openSearch->isInstalled() && !$liveSearchEnabled
             ) {
                 return $this->resultFactory->errorByCode(Error::DEPLOY_OS_SERVICE_NOT_INSTALLED);
             }
