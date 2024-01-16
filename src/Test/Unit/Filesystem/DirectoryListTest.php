@@ -164,6 +164,25 @@ class DirectoryListTest extends TestCase
 
     /**
      * @param DirectoryList $directoryList
+     * @return void
+     * @dataProvider getDirectoryLists
+     */
+    public function testGetMountPoints(DirectoryList $directoryList)
+    {
+        $paths = [
+            'app/etc',
+            'pub/media',
+            'pub/static',
+            'var'
+        ];
+        $result = $directoryList->getMountPoints();
+        sort($result);
+        sort($paths);
+        $this->assertSame($paths, $result);
+    }
+
+    /**
+     * @param DirectoryList $directoryList
      * @dataProvider getDirectoryLists
      */
     public function testGetPatches(DirectoryList $directoryList)
