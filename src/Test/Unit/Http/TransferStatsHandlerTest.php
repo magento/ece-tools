@@ -95,8 +95,9 @@ class TransferStatsHandlerTest extends TestCase
 
         $stats = new TransferStats($mockRequest, null, 3.1415926);
 
+        //$mockUriInterface = $this->createMock(UriInterface::class);
         $mockRequest->method('getUri')
-            ->wilLReturn('/');
+            ->wilLReturn($mockUriInterface);
         $this->loggerMock->expects($this->once())
             ->method('debug')
             ->with('cURL stats are missing from the request; using total transfer time');
