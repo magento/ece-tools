@@ -48,7 +48,7 @@ class Application extends \Symfony\Component\Console\Application
     /**
      * @inheritdoc
      */
-    protected function getDefaultCommands()
+    protected function getDefaultCommands(): array
     {
         return array_merge(parent::getDefaultCommands(), [
             $this->container->create(Command\Build::class),
