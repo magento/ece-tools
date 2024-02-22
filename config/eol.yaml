@@ -10,6 +10,8 @@ php:
     eol: 2021-12-06
   - version: '7.4'
     eol: 2022-11-28
+  - version: '8.1'
+    eol: 2023-11-25
   - version: '8.2'
     eol: 2024-12-08
 mariadb:
@@ -53,6 +55,10 @@ rabbitmq:
     eol: 2020-03-31
   - version: '3.8'
     eol: 2022-07-31
+  - version: '3.9'
+    eol: 2023-07-31
+  - version: '3.11'
+    eol: 2024-06-30
 redis:
   - version: '3.2'
     eol: 2018-10-17
@@ -64,5 +70,7 @@ redis:
     eol: 2019-12-31
   - version: '6.0'
     eol: 2022-05-31
+  - version: '6.2'
+    eol: 2024-08-31
   - version: '7.0'
     eol: 2023-08-15
