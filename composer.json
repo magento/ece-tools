@@ -100,10 +100,5 @@
       "funkjedi/composer-include-files": true
     }
   },
-  "prefer-stable": true,
-  "extra": {
-    "include_files": [
-      "vendor/codeception/phpunit-wrapper/src/phpunit7-interfaces.php"
-    ]
-  }
+  "prefer-stable": true
 }
