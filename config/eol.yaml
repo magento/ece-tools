@@ -14,6 +14,8 @@ php:
     eol: 2023-11-25
   - version: '8.2'
     eol: 2024-12-08
+  - version: '8.3'
+    eol: 2025-11-23
 mariadb:
   - version: '10.0'
     eol: 2019-03-31
@@ -74,3 +76,5 @@ redis:
     eol: 2024-08-31
   - version: '7.0'
     eol: 2023-08-15
+  - version: '7.2'
+    eol: 2025-08-31
