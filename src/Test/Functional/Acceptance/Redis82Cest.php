@@ -12,7 +12,7 @@ use Magento\CloudDocker\Test\Functional\Codeception\Docker;
 /**
  * Checks Redis configuration
  *
- * @group php83
+ * @group php82
  */
 class RedisCest extends AbstractCest
 {
@@ -102,7 +102,7 @@ class RedisCest extends AbstractCest
     {
         return [
             [
-                'version' => '2.4.7-beta-test',
+                'version' => '2.4.6',
             ],
         ];
     }

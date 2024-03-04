@@ -10,7 +10,7 @@ namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 /**
  * This test runs on the latest version of PHP
  *
- * @group php83
+ * @group php82
  */
 class CronCest extends AbstractCest
 {
@@ -138,7 +138,7 @@ class CronCest extends AbstractCest
     {
         return [
             [
-                'version' => '2.4.7-beta-test',
+                'version' => '2.4.6',
                 'variables' => [
                     'MAGENTO_CLOUD_VARIABLES' => [
                         'ADMIN_EMAIL' => 'admin@example.com',

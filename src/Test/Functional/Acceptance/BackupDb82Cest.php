@@ -14,7 +14,7 @@ use Robo\Exception\TaskException;
 
 /**
  * Checks database backup functionality
- * @group php83
+ * @group php82
  */
 class BackupDbCest extends AbstractCest
 {
@@ -68,7 +68,7 @@ class BackupDbCest extends AbstractCest
     protected function dataProviderMagentoCloudVersions(): array
     {
         return [
-            ['version' => '2.4.7-beta-test'],
+            ['version' => '2.4.6'],
         ];
     }
 

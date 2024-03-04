@@ -19,7 +19,7 @@ class ReportDirNestingLevelCest extends AbstractCest
     /**
      * @var string
      */
-    protected $magentoCloudTemplate = '2.4.7-beta-test';
+    protected $magentoCloudTemplate = '2.4.6';
 
     /**
      * @var string
