@@ -16,7 +16,7 @@ use Magento\CloudDocker\Test\Functional\Codeception\Docker;
 /**
  * @inheritDoc
  *
- * @group php81
+ * @group php82
  */
 class Acceptance82Cest extends AcceptanceCest
 {

@@ -14,23 +14,10 @@ use CliTester;
  *
  * @group php82
  */
-class ErrorMessageCest extends AbstractCest
+class ErrorMessage82Cest extends ErrorMessageCest
 {
     /**
      * @var string
      */
     protected $magentoCloudTemplate = '2.4.6';
-
-    /**
-     * @param CliTester $I
-     * @throws \Robo\Exception\TaskException
-     */
-    public function testShellErrorMessage(CliTester $I): void
-    {
-        $I->generateDockerCompose('--mode=production');
-        $I->runDockerComposeCommand('run build cloud-build');
-        $I->cleanDirectories(['/bin/*']);
-        $I->assertFalse($I->runDockerComposeCommand('run build ece-command build'));
-        $I->seeInOutput('Could not open input file: ./bin/magento');
-    }
 }
