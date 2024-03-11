@@ -10,6 +10,12 @@ php:
     eol: 2021-12-06
   - version: '7.4'
     eol: 2022-11-28
+  - version: '8.1'
+    eol: 2023-11-25
+  - version: '8.2'
+    eol: 2024-12-08
+  - version: '8.3'
+    eol: 2025-11-23
 mariadb:
   - version: '10.0'
     eol: 2019-03-31
@@ -21,6 +27,8 @@ mariadb:
     eol: 2023-05-25
   - version: '10.4'
     eol: 2024-06-18
+  - version: '10.6'
+    eol: 2026-07-31
 elasticsearch:
   - version: '1.7'
     eol: 2017-01-16
@@ -48,15 +56,25 @@ rabbitmq:
   - version: '3.7'
     eol: 2020-03-31
   - version: '3.8'
-    eol:
+    eol: 2022-07-31
+  - version: '3.9'
+    eol: 2023-07-31
+  - version: '3.11'
+    eol: 2024-06-30
 redis:
   - version: '3.2'
     eol: 2018-10-17
   - version: '4.0'
     eol: 2020-04-30
   - version: '5.0'
-    eol:
+    eol: 2020-04-30
   - version: '5.2'
-    eol:
+    eol: 2019-12-31
   - version: '6.0'
-    eol:
+    eol: 2022-05-31
+  - version: '6.2'
+    eol: 2024-08-31
+  - version: '7.0'
+    eol: 2023-08-15
+  - version: '7.2'
+    eol: 2025-08-31
