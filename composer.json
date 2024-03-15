@@ -15,34 +15,34 @@
     "ext-PDO": "*",
     "ext-json": "*",
     "ext-sockets": "*",
-    "colinmollenhour/credis": "^1.6.0",
-    "composer/composer": "^1.4 || ^2.0",
+    "colinmollenhour/credis": "^1.6.0 || ^1.13",
+    "composer/composer": "^1.4 || ^2.0 || !=2.2.16",
     "composer/semver": "@stable",
-    "graylog2/gelf-php": "^1.4.2",
-    "guzzlehttp/guzzle": "^6.3||^7.3",
+    "graylog2/gelf-php": "^1.4.2 || ^2.0.1",
+    "guzzlehttp/guzzle": "^6.3||^7.3 || ^7.5",
     "illuminate/config": "^5.5||^8.77",
     "magento/magento-cloud-components": "^1.0.8",
     "magento/magento-cloud-docker": "^1.0.0",
     "magento/magento-cloud-patches": "^1.0.20",
     "magento/quality-patches": "^1.1.0",
-    "monolog/monolog": "^1.25 || ^2.3",
+    "monolog/monolog": "^1.25 || ^2.3 || ^2.7",
     "nesbot/carbon": "^1.0 || ^2.0",
     "psr/container": "^1.0",
-    "psr/log": "^1.0",
-    "symfony/config": "^4.4 || ^5.1",
-    "symfony/console": "^2.8 || ^4.0 || ^5.1",
-    "symfony/dependency-injection": "^3.3 || ^4.3 || ^5.1",
-    "symfony/process": "^2.1 || ^4.1 || ^5.1",
-    "symfony/serializer": "^2.8 || ^3.3 || ^4.0",
-    "symfony/yaml": "^3.3 || ^4.0 || ^5.1"
+    "psr/log": "^1.0 || ^2.0 || ^3.0",
+    "symfony/config": "^4.4 || ^5.1 || ^5.4 || ^6.4",
+    "symfony/console": "^2.8 || ^4.0 || ^5.1 || ^5.4 || ^6.4",
+    "symfony/dependency-injection": "^3.3 || ^4.3 || ^5.1 || ^5.4 || ^6.4",
+    "symfony/process": "^2.1 || ^4.1 || ^5.1 || ^5.4 || ^6.4",
+    "symfony/serializer": "^2.8 || ^3.3 || ^4.0 || ^5.4 || ^6.4",
+    "symfony/yaml": "^3.3 || ^4.0 || ^5.1 || ^5.4 || ^6.4"
   },
   "require-dev": {
-    "codeception/codeception": "^4.1",
-    "codeception/module-asserts": "^1.2",
-    "codeception/module-db": "^1.0",
-    "codeception/module-phpbrowser": "^1.0",
-    "codeception/module-rest": "^1.2",
-    "consolidation/robo": "^1.2",
+    "codeception/codeception": "^5.1",
+    "codeception/module-asserts": "^1.2 || ^3.0",
+    "codeception/module-db": "^1.0 || ^3.0",
+    "codeception/module-phpbrowser": "^1.0 || ^3.0",
+    "codeception/module-rest": "^1.2 || ^3.0",
+    "consolidation/robo": "^1.2 || ^3.0",
     "php-mock/php-mock-phpunit": "^2.0",
     "phpmd/phpmd": "@stable",
     "phpstan/phpstan": "^0.12",
@@ -100,10 +100,5 @@
       "funkjedi/composer-include-files": true
     }
   },
-  "prefer-stable": true,
-  "extra": {
-    "include_files": [
-      "vendor/codeception/phpunit-wrapper/src/phpunit7-interfaces.php"
-    ]
-  }
+  "prefer-stable": true
 }

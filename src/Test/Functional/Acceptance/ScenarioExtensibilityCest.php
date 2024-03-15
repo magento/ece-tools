@@ -12,14 +12,14 @@ use Magento\CloudDocker\Test\Functional\Codeception\Docker;
 /**
  * Tests extensibility base deployment scenarios
  *
- * @group php82
+ * @group php83
  */
 class ScenarioExtensibilityCest extends AbstractCest
 {
     /**
      * @var string
      */
-    protected $magentoCloudTemplate = '2.4.6';
+    protected $magentoCloudTemplate = '2.4.7-beta-test';
 
     /**
      * @param \CliTester $I

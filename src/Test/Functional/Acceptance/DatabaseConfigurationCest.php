@@ -12,14 +12,14 @@ use Magento\CloudDocker\Test\Functional\Codeception\Docker;
 /**
  * This test runs on the latest version of PHP
  *
- * @group php82
+ * @group php83
  */
 class DatabaseConfigurationCest extends AbstractCest
 {
     /**
      * @var string
      */
-    protected $magentoCloudTemplate = '2.4.6';
+    protected $magentoCloudTemplate = '2.4.7-beta-test';
 
     /**
      * @param \CliTester $I

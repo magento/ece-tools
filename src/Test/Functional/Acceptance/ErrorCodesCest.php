@@ -15,14 +15,14 @@ use Magento\MagentoCloud\App\Error;
  * Checks that var/log/cloud.error.log file was created and contains correct data.
  * Checks that `ece-tools error:show` command returns correct errors info
  *
- * @group php82
+ * @group php83
  */
 class ErrorCodesCest extends AbstractCest
 {
     /**
      * @var string
      */
-    protected $magentoCloudTemplate = '2.4.6';
+    protected $magentoCloudTemplate = '2.4.7-beta-test';
 
     /**
      * @param \CliTester $I

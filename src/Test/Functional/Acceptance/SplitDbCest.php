@@ -15,7 +15,7 @@ use Exception;
 /**
  * Checks split database functionality
  *
- * @group php74
+ * @group php83
  */
 class SplitDbCest extends AbstractCest
 {
@@ -107,7 +107,7 @@ class SplitDbCest extends AbstractCest
     protected function dataProviderMagentoCloudVersions(): array
     {
         return [
-            ['version' => '2.4.1'],
+            ['version' => '2.4.7-beta-test'],
         ];
     }
 

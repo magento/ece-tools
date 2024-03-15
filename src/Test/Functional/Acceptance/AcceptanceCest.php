@@ -20,14 +20,14 @@ use Magento\CloudDocker\Test\Functional\Codeception\Docker;
  * 3. Test config dump
  * 4. Test content presence
  *
- * @group php82
+ * @group php83
  */
 class AcceptanceCest extends AbstractCest
 {
     /**
      * @var string
      */
-    protected $magentoCloudTemplate = '2.4.6';
+    protected $magentoCloudTemplate = '2.4.7-beta-test';
 
     /**
      * @param CliTester $I

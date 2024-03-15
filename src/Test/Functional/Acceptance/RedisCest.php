@@ -12,7 +12,7 @@ use Magento\CloudDocker\Test\Functional\Codeception\Docker;
 /**
  * Checks Redis configuration
  *
- * @group php82
+ * @group php83
  */
 class RedisCest extends AbstractCest
 {
@@ -102,7 +102,7 @@ class RedisCest extends AbstractCest
     {
         return [
             [
-                'version' => '2.4.6',
+                'version' => '2.4.7-beta-test',
             ],
         ];
     }
@@ -137,7 +137,7 @@ class RedisCest extends AbstractCest
     {
         return [
             [
-                'version' => '2.4.6',
+                'version' => '2.4.7-beta-test',
                 'wrongConfiguration' => [
                     'stage' => [
                         'deploy' => [
@@ -184,7 +184,7 @@ class RedisCest extends AbstractCest
     {
         return [
             [
-                'version' => '2.4.6',
+                'version' => '2.4.7-beta-test',
                 'configuration' => [
                     'stage' => [
                         'deploy' => [
@@ -204,7 +204,7 @@ class RedisCest extends AbstractCest
                 ],
             ],
             [
-                'version' => '2.4.6',
+                'version' => '2.4.7-beta-test',
                 'configuration' => [
                     'stage' => [
                         'deploy' => [
@@ -274,7 +274,7 @@ class RedisCest extends AbstractCest
     {
         return [
             [
-                'version' => '2.4.6',
+                'version' => '2.4.7-beta-test',
                 'configuration' => [
                     'stage' => [
                         'deploy' => [
@@ -292,7 +292,7 @@ class RedisCest extends AbstractCest
                 ],
             ],
             [
-                'version' => '2.4.6',
+                'version' => '2.4.7-beta-test',
                 'configuration' => [
                     'stage' => [
                         'deploy' => [
@@ -312,7 +312,7 @@ class RedisCest extends AbstractCest
                 'expectedConfig' => [],
             ],
             [
-                'version' => '2.4.6',
+                'version' => '2.4.7-beta-test',
                 'configuration' => [
                     'stage' => [
                         'deploy' => [
