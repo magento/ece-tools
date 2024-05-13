@@ -106,6 +106,9 @@ class Shell implements ShellInterface
             if ($output = $process->getOutput()) {
                 $this->logger->debug($output);
             }
+            if ($errorOutput = $process->getErrorOutput()) {
+                $this->logger->debug('Error: ' . $errorOutput);
+            }
         } catch (LogicException $exception) {
             $this->logger->error('Can\'t get command output: ' . $exception->getMessage());
         }
