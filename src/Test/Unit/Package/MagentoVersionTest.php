@@ -305,8 +305,6 @@ class MagentoVersionTest extends TestCase
             ->method('get')
             ->with(GlobalConfig::VAR_DEPLOYED_MAGENTO_VERSION_FROM_GIT)
             ->willReturn(false);
-        $this->rootPackageMock->method('getPrettyVersion')
-            ->willReturn(null);
 
         self::assertTrue($this->magentoVersion->isGitInstallation());
     }

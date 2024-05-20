@@ -80,9 +80,9 @@ class DirectoryList
             throw  new \RuntimeException("Code {$code} is not registered");
         }
 
-        if (!array_key_exists(static::PATH, $directories[$code])) {
+        if (!array_key_exists(self::PATH, $directories[$code])) {
             throw new \RuntimeException(
-                sprintf('Config var "%s" does not exists', static::PATH)
+                sprintf('Config var "%s" does not exists', self::PATH)
             );
         }
 
@@ -113,7 +113,7 @@ class DirectoryList
      */
     public function getInit(): string
     {
-        return $this->getPath(static::DIR_INIT);
+        return $this->getPath(self::DIR_INIT);
     }
 
     /**
@@ -122,7 +122,7 @@ class DirectoryList
      */
     public function getVar(): string
     {
-        return $this->getPath(static::DIR_VAR);
+        return $this->getPath(self::DIR_VAR);
     }
 
     /**
@@ -131,7 +131,7 @@ class DirectoryList
      */
     public function getLog(): string
     {
-        return $this->getPath(static::DIR_LOG);
+        return $this->getPath(self::DIR_LOG);
     }
 
     /**
@@ -140,7 +140,7 @@ class DirectoryList
      */
     public function getGeneratedCode(): string
     {
-        return $this->getPath(static::DIR_GENERATED_CODE);
+        return $this->getPath(self::DIR_GENERATED_CODE);
     }
 
     /**
@@ -149,7 +149,7 @@ class DirectoryList
      */
     public function getGeneratedMetadata(): string
     {
-        return $this->getPath(static::DIR_GENERATED_METADATA);
+        return $this->getPath(self::DIR_GENERATED_METADATA);
     }
 
     /**
@@ -161,15 +161,15 @@ class DirectoryList
     public function getWritableDirectories(): array
     {
         $writableDirs = [
-            static::DIR_ETC,
-            static::DIR_MEDIA,
-            static::DIR_LOG,
-            static::DIR_VIEW_PREPROCESSED,
+            self::DIR_ETC,
+            self::DIR_MEDIA,
+            self::DIR_LOG,
+            self::DIR_VIEW_PREPROCESSED,
         ];
 
         if ($this->magentoVersion->satisfies('2.1.*')) {
-            $writableDirs[] = static::DIR_GENERATED_METADATA;
-            $writableDirs[] = static::DIR_GENERATED_CODE;
+            $writableDirs[] = self::DIR_GENERATED_METADATA;
+            $writableDirs[] = self::DIR_GENERATED_CODE;
         }
 
         return array_map(function ($path) {
@@ -186,10 +186,10 @@ class DirectoryList
     public function getMountPoints(): array
     {
         $mountPoints = [
-            static::DIR_ETC,
-            static::DIR_VAR,
-            static::DIR_MEDIA,
-            static::DIR_STATIC
+            self::DIR_ETC,
+            self::DIR_VAR,
+            self::DIR_MEDIA,
+            self::DIR_STATIC
         ];
 
         return array_map(function ($path) {
@@ -203,13 +203,13 @@ class DirectoryList
     private function getDefaultDirectories(): array
     {
         $config = [
-            static::DIR_INIT => [static::PATH => 'init'],
-            static::DIR_VAR => [static::PATH => 'var'],
-            static::DIR_LOG => [static::PATH => 'var/log'],
-            static::DIR_ETC => [static::PATH => 'app/etc'],
-            static::DIR_MEDIA => [static::PATH => 'pub/media'],
-            static::DIR_STATIC => [static::PATH => 'pub/static'],
-            static::DIR_VIEW_PREPROCESSED => [static::PATH => 'var/view_preprocessed'],
+            self::DIR_INIT => [self::PATH => 'init'],
+            self::DIR_VAR => [self::PATH => 'var'],
+            self::DIR_LOG => [self::PATH => 'var/log'],
+            self::DIR_ETC => [self::PATH => 'app/etc'],
+            self::DIR_MEDIA => [self::PATH => 'pub/media'],
+            self::DIR_STATIC => [self::PATH => 'pub/static'],
+            self::DIR_VIEW_PREPROCESSED => [self::PATH => 'var/view_preprocessed'],
         ];
 
         return $config;
@@ -224,11 +224,11 @@ class DirectoryList
         $config = [];
 
         if ($this->magentoVersion->satisfies('2.1.*')) {
-            $config[static::DIR_GENERATED_CODE] = [static::PATH => 'var/generation'];
-            $config[static::DIR_GENERATED_METADATA] = [static::PATH => 'var/di'];
+            $config[self::DIR_GENERATED_CODE] = [self::PATH => 'var/generation'];
+            $config[self::DIR_GENERATED_METADATA] = [self::PATH => 'var/di'];
         } else {
-            $config[static::DIR_GENERATED_CODE] = [static::PATH => 'generated/code'];
-            $config[static::DIR_GENERATED_METADATA] = [static::PATH => 'generated/metadata'];
+            $config[self::DIR_GENERATED_CODE] = [self::PATH => 'generated/code'];
+            $config[self::DIR_GENERATED_METADATA] = [self::PATH => 'generated/metadata'];
         }
 
         return $config;

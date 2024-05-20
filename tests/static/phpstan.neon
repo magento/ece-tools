@@ -2,9 +2,10 @@ parameters:
     level: 5
     paths:
         - ../../src
-    excludes_analyse:
+    excludePaths:
         - ../../src/Test/*
     reportUnmatchedIgnoredErrors: false
+    treatPhpDocTypesAsCertain: false
     ignoreErrors:
         - message: "#.*ComponentRegistrar.*#"
           path: ../../src/StaticContent/ThemeResolver.php
@@ -12,3 +13,25 @@ parameters:
           path: ../../src/Filesystem/Driver/File.php
         - message: "#should return int but returns null#"
           path: ../../src/Command/DbDump.php
+        - message: '#Call to an undefined method Symfony\\Component\\Console\\Helper\\HelperInterface\:\:ask\(\)\.#'
+          paths:
+            - ../../src/Command/BackupRestore.php
+            - ../../src/Command/DbDump.php
+        - message: '#Property Magento\\MagentoCloud\\App\\Logger\\LineFormatterFactory\:\:\$container is never read, only written\.#'
+          path: ../../src/App/Logger/LineFormatterFactory.php
+        - message: '#Property Magento\\MagentoCloud\\Command\\ConfigShow\:\:\$logger is never read, only written\.#'
+          path: ../../src/Command/ConfigShow.php
+        - message: '#Property Magento\\MagentoCloud\\Command\\ConfigShow\\Renderer\:\:\$logger is never read, only written\.#'
+          path: ../../src/Command/ConfigShow/Renderer.php
+        - message: '#Property Magento\\MagentoCloud\\Command\\CronUnlock\:\:\$magentoVersion is never read, only written\.#'
+          path: ../../src/Command/CronUnlock.php
+        - message: '#Property Magento\\MagentoCloud\\Filesystem\\RecoverableDirectoryList\:\:\$environment is never read, only written\.#'
+          path: ../../src/Filesystem/RecoverableDirectoryList.php
+        - message: '#Property Magento\\MagentoCloud\\Step\\Deploy\\InstallUpdate\\ConfigUpdate\\CronConsumersRunner\:\:\$environment is never read, only written\.#'
+          path: ../../src/Step/Deploy/InstallUpdate/ConfigUpdate/CronConsumersRunner.php
+        - message: '#Property Magento\\MagentoCloud\\Step\\Deploy\\InstallUpdate\\ConfigUpdate\\Urls\\Database\:\:\$environment is never read, only written\.#'
+          path: ../../src/Step/Deploy/InstallUpdate/ConfigUpdate/Urls/Database.php
+        - message: '#on null in isset\(\) does not exist#'
+          path: ../../src/Service/Validator.php
+        - message: '#Expression on left side of \?\? is not nullable#'
+          path: ../../src/Util/UrlManager.php

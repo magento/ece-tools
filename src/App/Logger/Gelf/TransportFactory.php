@@ -22,6 +22,12 @@ class TransportFactory
     public const TRANSPORT_UDP = 'udp';
     public const TRANSPORT_TCP = 'tcp';
 
+    private const DEFAULT_HOST = '127.0.0.1';
+    private const DEFAULT_PORT_HTTP = 12202;
+    private const DEFAULT_PORT_TCP = 12201;
+    private const DEFAULT_PORT_UDP = 12201;
+    private const DEFAULT_PATH_HTTP = '/gelf';
+
     /**
      * @param string $type
      * @param array $config
@@ -34,9 +40,9 @@ class TransportFactory
         switch ($type) {
             case self::TRANSPORT_HTTP:
                 $transport = new HttpTransport(
-                    $config['host'] ?? null,
-                    $config['port'] ?? null,
-                    $config['path'] ?? null
+                    $config['host'] ?? self::DEFAULT_HOST,
+                    $config['port'] ?? self::DEFAULT_PORT_HTTP,
+                    $config['path'] ?? self::DEFAULT_PATH_HTTP
                 );
                 if (isset($config['connection_timeout'])) {
                     $transport->setConnectTimeout($config['connection_timeout']);
@@ -44,8 +50,8 @@ class TransportFactory
                 break;
             case self::TRANSPORT_TCP:
                 $transport = new TcpTransport(
-                    $config['host'] ?? TcpTransport::DEFAULT_HOST,
-                    $config['port'] ?? TcpTransport::DEFAULT_PORT
+                    $config['host'] ?? self::DEFAULT_HOST,
+                    $config['port'] ?? self::DEFAULT_PORT_TCP
                 );
                 if (isset($config['connection_timeout'])) {
                     $transport->setConnectTimeout($config['connection_timeout']);
@@ -53,8 +59,8 @@ class TransportFactory
                 break;
             case self::TRANSPORT_UDP:
                 $transport = new UdpTransport(
-                    $config['host'] ?? UdpTransport::DEFAULT_HOST,
-                    $config['port'] ?? UdpTransport::DEFAULT_PORT,
+                    $config['host'] ?? self::DEFAULT_HOST,
+                    $config['port'] ?? self::DEFAULT_PORT_UDP,
                     $config['chunk_size'] ?? UdpTransport::CHUNK_SIZE_WAN
                 );
                 break;

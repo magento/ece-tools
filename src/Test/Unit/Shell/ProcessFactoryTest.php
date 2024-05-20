@@ -7,14 +7,13 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Shell;
 
+use Composer\Repository\LockArrayRepository;
 use Magento\MagentoCloud\Shell\Process;
 use Magento\MagentoCloud\Shell\ProcessFactory;
 use Magento\MagentoCloud\Shell\ProcessInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Magento\MagentoCloud\App\GenericException;
 use Composer\Composer;
-use Composer\Repository\RepositoryInterface;
 use Composer\Package\Locker;
 use Composer\Package\PackageInterface;
 
@@ -24,7 +23,7 @@ use Composer\Package\PackageInterface;
 class ProcessFactoryTest extends TestCase
 {
     /**
-     * @var RepositoryInterface|MockObject
+     * @var LockArrayRepository|MockObject
      */
     private $repositoryMock;
 
@@ -48,7 +47,7 @@ class ProcessFactoryTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->repositoryMock = $this->getMockForAbstractClass(RepositoryInterface::class);
+        $this->repositoryMock = $this->createMock(LockArrayRepository::class);
         $this->packageMock = $this->getMockForAbstractClass(PackageInterface::class);
         $this->composerMock = $this->createMock(Composer::class);
 

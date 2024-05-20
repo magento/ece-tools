@@ -9,8 +9,8 @@ namespace Magento\MagentoCloud\Test\Unit\Config;
 
 use Magento\MagentoCloud\Config\AdminData;
 use Magento\MagentoCloud\Config\EnvironmentDataInterface;
-use PHPStan\Testing\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
 
 /**
  * @inheritDoc

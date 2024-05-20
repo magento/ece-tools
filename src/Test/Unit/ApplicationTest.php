@@ -9,11 +9,13 @@ namespace Magento\MagentoCloud\Test\Unit;
 
 use Composer\Composer;
 use Composer\Package\PackageInterface;
+use Composer\Package\RootPackageInterface;
 use Magento\MagentoCloud\App\ContainerInterface;
 use Magento\MagentoCloud\Application;
 use Magento\MagentoCloud\Command;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Console\Input\InputDefinition;
 
 /**
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
@@ -36,9 +38,14 @@ class ApplicationTest extends TestCase
     private $composerMock;
 
     /**
-     * @var PackageInterface|MockObject
+     * @var RootPackageInterface|MockObject
      */
     private $packageMock;
+
+    /**
+     * @var InputDefinition|MockObject
+     */
+    private $inputDefinitionMock;
 
     /**
      * @var string
@@ -94,8 +101,9 @@ class ApplicationTest extends TestCase
     public function setUp(): void
     {
         $this->containerMock = $this->getMockForAbstractClass(ContainerInterface::class);
-        $this->packageMock = $this->getMockForAbstractClass(PackageInterface::class);
+        $this->packageMock = $this->getMockForAbstractClass(RootPackageInterface::class);
         $this->composerMock = $this->createMock(Composer::class);
+        $this->inputDefinitionMock = $this->createMock(InputDefinition::class);
 
         $map = [
             [Composer::class, [], $this->composerMock],
@@ -108,7 +116,7 @@ class ApplicationTest extends TestCase
             $mock->method('isEnabled')
                 ->willReturn(true);
             $mock->method('getDefinition')
-                ->willReturn([]);
+                ->willReturn($this->inputDefinitionMock);
             $mock->method('getAliases')
                 ->willReturn([]);
 

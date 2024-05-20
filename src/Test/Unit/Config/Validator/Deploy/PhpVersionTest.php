@@ -8,6 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit\Config\Validator\Deploy;
 
 use Composer\Composer;
+use Composer\Repository\LockArrayRepository;
 use Magento\MagentoCloud\Config\GlobalSection;
 use Magento\MagentoCloud\Config\Validator\Deploy\PhpVersion;
 use Composer\Package\Version\VersionParser;
@@ -19,7 +20,6 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Magento\MagentoCloud\Config\Validator\ResultInterface;
 use Composer\Package\Locker;
-use Composer\Repository\RepositoryInterface;
 use Composer\Package\PackageInterface;
 use Composer\Package\Link;
 use Magento\MagentoCloud\Config\Validator\Result\Error;
@@ -175,7 +175,7 @@ class PhpVersionTest extends TestCase
             ->with(GlobalSection::VAR_DEPLOYED_MAGENTO_VERSION_FROM_GIT)
             ->willReturn(null);
 
-        $repoMock = $this->getMockForAbstractClass(RepositoryInterface::class);
+        $repoMock = $this->createMock(LockArrayRepository::class);
         $lockerMock = $this->createMock(Locker::class);
         $repoMock->method('findPackage')
             ->with('magento/magento2-base', '*')
@@ -199,7 +199,7 @@ class PhpVersionTest extends TestCase
         $constraintMock = $this->getMockForAbstractClass(ConstraintInterface::class);
         $linkMock = $this->createMock(Link::class);
         $packageMock = $this->getMockForAbstractClass(PackageInterface::class);
-        $repoMock = $this->getMockForAbstractClass(RepositoryInterface::class);
+        $repoMock = $this->createMock(LockArrayRepository::class);
         $lockerMock = $this->createMock(Locker::class);
         $this->composerConstraintMock = $this->getMockForAbstractClass(ConstraintInterface::class);
         $this->phpConstraintMock = $this->getMockForAbstractClass(ConstraintInterface::class);

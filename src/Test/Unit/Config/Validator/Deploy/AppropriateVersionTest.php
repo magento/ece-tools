@@ -15,6 +15,7 @@ use Magento\MagentoCloud\Config\Validator\ResultFactory;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Magento\MagentoCloud\Config\Stage\DeployInterface;
 
 /**
  * @inheritdoc
@@ -60,12 +61,12 @@ class AppropriateVersionTest extends TestCase
         );
     }
 
-    public function testValidateVersionGreaterTwoDotTwo()
+    public function testValidateVersion()
     {
-        $this->magentoVersion->expects($this->once())
+        $this->magentoVersion->expects($this->exactly(2))
             ->method('isGreaterOrEqual')
-            ->with('2.2')
-            ->willReturn(true);
+            ->withConsecutive(['2.2'], ['2.4.7'])
+            ->willReturnOnConsecutiveCalls(true, true);
         $this->magentoVersion->expects($this->once())
             ->method('satisfies')
             ->willReturn(true);
@@ -75,32 +76,32 @@ class AppropriateVersionTest extends TestCase
         $this->assertInstanceOf(Success::class, $this->validator->validate());
     }
 
-    public function testValidateVersionTwoDotOneAndVariablesNotConfigured()
+    public function testValidateVersionAndVariablesNotConfigured()
     {
-        $this->magentoVersion->expects($this->once())
+        $this->magentoVersion->expects($this->exactly(2))
             ->method('isGreaterOrEqual')
-            ->with('2.2')
-            ->willReturn(false);
+            ->withConsecutive(['2.2'], ['2.4.7'])
+            ->willReturnOnConsecutiveCalls(false, false);
         $this->magentoVersion->expects($this->once())
             ->method('satisfies')
             ->willReturn(false);
-        $this->configurationCheckerMock->expects($this->exactly(4))
+        $this->configurationCheckerMock->expects($this->exactly(6))
             ->method('isConfigured')
             ->willReturn(false);
 
         $this->assertInstanceOf(Success::class, $this->validator->validate());
     }
 
-    public function testValidateVersionTwoDotOneAndAllVariablesAreConfigured()
+    public function testValidateVersionAndAllVariablesAreConfigured()
     {
-        $this->magentoVersion->expects($this->once())
+        $this->magentoVersion->expects($this->exactly(2))
             ->method('isGreaterOrEqual')
-            ->with('2.2')
-            ->willReturn(false);
+            ->withConsecutive(['2.2'], ['2.4.7'])
+            ->willReturnOnConsecutiveCalls(false, false);
         $this->magentoVersion->expects($this->once())
             ->method('satisfies')
             ->willReturn(false);
-        $this->configurationCheckerMock->expects($this->exactly(4))
+        $this->configurationCheckerMock->expects($this->exactly(6))
             ->method('isConfigured')
             ->willReturn(true);
         $this->resultFactoryMock->expects($this->once())
@@ -111,7 +112,9 @@ class AppropriateVersionTest extends TestCase
                     'CRON_CONSUMERS_RUNNER is available for Magento 2.2.0 and later.',
                     'SCD_STRATEGY is available for Magento 2.2.0 and later.',
                     'SCD_MAX_EXECUTION_TIME is available for Magento 2.2.0 and later.',
-                    'GENERATED_CODE_SYMLINK is available for Magento 2.1.x.'
+                    'GENERATED_CODE_SYMLINK is available for Magento 2.1.x.',
+                    'USE_LUA is available for Magento 2.4.7 and later.',
+                    'LUA_KEY is available for Magento 2.4.7 and later.'
                 ])
             );
 

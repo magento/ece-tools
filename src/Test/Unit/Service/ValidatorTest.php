@@ -516,7 +516,7 @@ class ValidatorTest extends TestCase
                     ServiceInterface::NAME_PHP => '8.2.0',
                     ServiceInterface::NAME_DB_MARIA => '10.6.0',
                     ServiceInterface::NAME_VARNISH => '7.1.1',
-                    ServiceInterface::NAME_REDIS => '7.0.0',
+                    ServiceInterface::NAME_REDIS => '7.2.0',
                     ServiceInterface::NAME_OPENSEARCH => '2.3.0',
                     ServiceInterface::NAME_RABBITMQ => '3.9.0' // wrong
                 ],
@@ -528,9 +528,16 @@ class ValidatorTest extends TestCase
                     ServiceInterface::NAME_PHP => '8.2.0',
                     ServiceInterface::NAME_DB_MARIA => '10.6.0',
                     ServiceInterface::NAME_VARNISH => '7.1.1',
-                    ServiceInterface::NAME_REDIS => '7.0.0',
+                    ServiceInterface::NAME_REDIS => '7.2.0',
                     ServiceInterface::NAME_OPENSEARCH => '2.3.0',
-                    ServiceInterface::NAME_RABBITMQ => '3.11.0'
+                    ServiceInterface::NAME_RABBITMQ => '3.12.0'
+                ],
+                0
+            ],
+            [
+                '2.4.7',
+                [
+                    ServiceInterface::NAME_RABBITMQ => '3.13.0'
                 ],
                 0
             ],

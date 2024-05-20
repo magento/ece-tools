@@ -19,6 +19,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Magento\MagentoCloud\Package\MagentoVersion;
+use Magento\MagentoCloud\Config\Stage\DeployInterface;
 
 /**
  * @inheritdoc
@@ -73,6 +74,11 @@ class CacheTest extends TestCase
     private $magentoVersion;
 
     /**
+     * @var DeployInterface
+     */
+    private $stageConfig;
+
+    /**
      * @inheritdoc
      */
     protected function setUp(): void
@@ -82,13 +88,15 @@ class CacheTest extends TestCase
         $this->configReaderMock = $this->createMock(ConfigReader::class);
         $this->cacheConfigMock = $this->createMock(CacheFactory::class);
         $this->magentoVersion = $this->createMock(MagentoVersion::class);
+        $this->stageConfig = $this->createMock(DeployInterface::class);
 
         $this->step = new Cache(
             $this->configReaderMock,
             $this->configWriterMock,
             $this->loggerMock,
             $this->cacheConfigMock,
-            $this->magentoVersion
+            $this->magentoVersion,
+            $this->stageConfig
         );
 
         $this->socketCreateMock = $this->getFunctionMock(

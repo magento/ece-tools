@@ -86,4 +86,14 @@ interface DeployInterface extends StageConfigInterface
      * The variable responsible for enabling google analytics in environments other than prod.
      */
     public const VAR_ENABLE_GOOGLE_ANALYTICS = 'ENABLE_GOOGLE_ANALYTICS';
+
+    /**
+     * The variable responsible for enabling LUA cache in environments starting from Magento 2.4.7.
+     */
+    public const VAR_USE_LUA = 'USE_LUA';
+
+    /**
+     * The variable responsible for LUA KEY in environments starting from Magento 2.4.7.
+     */
+    public const VAR_LUA_KEY = 'LUA_KEY';
 }

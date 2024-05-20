@@ -466,7 +466,28 @@ variables:
                   backend: file
                 page_cache:
                   backend: file
-
+  USE_LUA:
+    description: "Enable/Disable LUA in environments starting from Magento 2.4.7"
+    type: boolean
+    stages:
+      - deploy
+    default:
+      deploy: false
+    examples:
+      - stage:
+          deploy:
+            USE_LUA: true
+  LUA_KEY:
+    description: "LUA KEY for environments starting from Magento 2.4.7"
+    type: boolean
+    stages:
+      - deploy
+    default:
+      deploy: true
+    examples:
+      - stage:
+          deploy:
+            LUA_KEY: false
   SESSION_CONFIGURATION:
     description: "Replace or modify the Magento session configuration generated during the deployment process.
       By default, ece-tools configures Magento to store Redis session data. To replace the existing configuration,

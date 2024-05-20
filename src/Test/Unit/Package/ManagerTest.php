@@ -9,8 +9,8 @@ namespace Magento\MagentoCloud\Test\Unit\Package;
 
 use Composer\Composer;
 use Composer\Package\Locker;
-use Composer\Package\PackageInterface;
-use Composer\Repository\RepositoryInterface;
+use Composer\Package\RootPackageInterface;
+use Composer\Repository\LockArrayRepository;
 use Composer\Package\Link;
 use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Package\Manager;
@@ -34,12 +34,12 @@ class ManagerTest extends TestCase
     private $composerMock;
 
     /**
-     * @var RepositoryInterface|MockObject
+     * @var LockArrayRepository|MockObject
      */
     private $repositoryMock;
 
     /**
-     * @var PackageInterface|MockObject
+     * @var RootPackageInterface|MockObject
      */
     private $packageMock;
 
@@ -49,9 +49,8 @@ class ManagerTest extends TestCase
     protected function setUp(): void
     {
         $this->composerMock = $this->createMock(Composer::class);
-        $this->repositoryMock = $this->getMockBuilder(RepositoryInterface::class)
-            ->getMockForAbstractClass();
-        $this->packageMock = $this->getMockForAbstractClass(PackageInterface::class);
+        $this->repositoryMock = $this->createMock(LockArrayRepository::class);
+        $this->packageMock = $this->getMockForAbstractClass(RootPackageInterface::class);
         $lockerMock = $this->createMock(Locker::class);
 
         $this->composerMock->expects($this->once())
@@ -68,7 +67,7 @@ class ManagerTest extends TestCase
 
     public function testGetPrettyInfo(): void
     {
-        $packageOneMock = $this->getMockBuilder(PackageInterface::class)
+        $packageOneMock = $this->getMockBuilder(RootPackageInterface::class)
             ->getMockForAbstractClass();
         $packageOneMock->expects($this->once())
             ->method('getPrettyName')
@@ -77,7 +76,7 @@ class ManagerTest extends TestCase
             ->method('getPrettyVersion')
             ->willReturn('v1.0.0');
 
-        $packageTwoMock = $this->getMockBuilder(PackageInterface::class)
+        $packageTwoMock = $this->getMockBuilder(RootPackageInterface::class)
             ->getMockForAbstractClass();
         $packageTwoMock->expects($this->once())
             ->method('getPrettyName')
@@ -105,7 +104,7 @@ class ManagerTest extends TestCase
 
     public function testGetPrettyInfoWithNotExistPackage(): void
     {
-        $packageOneMock = $this->getMockBuilder(PackageInterface::class)
+        $packageOneMock = $this->getMockBuilder(RootPackageInterface::class)
             ->getMockForAbstractClass();
         $packageOneMock->expects($this->once())
             ->method('getPrettyName')

@@ -153,7 +153,7 @@ class StaticContentCompressor
     ): string {
         $compressionLevel = $compressionLevel > 0 && $compressionLevel <= 9
             ? $compressionLevel
-            : static::DEFAULT_COMPRESSION_LEVEL;
+            : self::DEFAULT_COMPRESSION_LEVEL;
 
         return sprintf(
             '%s -k 30 %s %s -c %s',

@@ -50,6 +50,8 @@ class AppropriateVersion implements ValidatorInterface
 
     /**
      * @return Validator\ResultInterface
+     *
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      */
     public function validate(): Validator\ResultInterface
     {
@@ -79,6 +81,22 @@ class AppropriateVersion implements ValidatorInterface
                 '%s is available for Magento 2.1.x.',
                 DeployInterface::VAR_GENERATED_CODE_SYMLINK
             );
+        }
+
+        if (!$this->magentoVersion->isGreaterOrEqual('2.4.7')) {
+            $variables = [
+                DeployInterface::VAR_USE_LUA,
+                DeployInterface::VAR_LUA_KEY,
+            ];
+
+            foreach ($variables as $variableName) {
+                if ($this->configurationChecker->isConfigured($variableName, true)) {
+                    $errors[] = sprintf(
+                        '%s is available for Magento 2.4.7 and later.',
+                        $variableName
+                    );
+                }
+            }
         }
 
         if ($errors) {
