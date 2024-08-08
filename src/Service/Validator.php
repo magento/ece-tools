@@ -197,6 +197,7 @@ class Validator
     private function getSupportedVersions(): array
     {
         if (null === $this->supportedVersionList) {
+            $this->supportedVersionList = [];
             foreach (self::MAGENTO_SUPPORTED_SERVICE_VERSIONS as $serviceName => $magentoVersions) {
                 foreach ($magentoVersions as $magentoConstrain => $serviceConstraint) {
                     if (Semver::satisfies($this->magentoVersion->getVersion(), $magentoConstrain)) {

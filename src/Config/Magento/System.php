@@ -50,7 +50,7 @@ class System implements SystemInterface
             $magentoShell = $this->shellFactory->create(ShellFactory::STRATEGY_MAGENTO_SHELL);
             $process = $magentoShell->execute('config:show', [$key]);
 
-            return $process->getOutput() ?? null;
+            return $process->getOutput();
         } catch (\Exception $exception) {
             return null;
         }
