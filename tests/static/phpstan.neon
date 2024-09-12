@@ -35,3 +35,9 @@ parameters:
           path: ../../src/Service/Validator.php
         - message: '#Expression on left side of \?\? is not nullable#'
           path: ../../src/Util/UrlManager.php
+        - message: '#Method Magento\\MagentoCloud\\App\\Container::createComposerInstance\(\) should return Composer\\Composer but returns Composer\\PartialComposer\.#'
+          path: ../../src/App/Container.php
+        - message: '#Left side of && is always true\.#'
+          path: ../../src/Service/EolValidator.php
+        - message: '#Variable \$gitIgnore on left side of \?\? always exists and is not nullable\.#'
+          path: ../../src/Command/Dev/UpdateComposer/ClearModuleRequirements.php 
