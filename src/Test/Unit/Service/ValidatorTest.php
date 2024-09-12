@@ -526,7 +526,7 @@ class ValidatorTest extends TestCase
                 '2.4.7',
                 [
                     ServiceInterface::NAME_PHP => '8.2.0',
-                    ServiceInterface::NAME_DB_MARIA => '10.6.0',
+                    ServiceInterface::NAME_DB_MARIA => '11.4.0',
                     ServiceInterface::NAME_VARNISH => '7.1.1',
                     ServiceInterface::NAME_REDIS => '7.2.0',
                     ServiceInterface::NAME_OPENSEARCH => '2.3.0',
