@@ -11,7 +11,7 @@ namespace Magento\MagentoCloud\Test\Functional\Acceptance;
  * This test runs on the latest version of PHP
  * @group php83
  */
-class AdminCredentialCest extends AdminCredentialCest
+class AdminCredential83Cest extends AdminCredentialCest
 {
     /**
      * @var string
