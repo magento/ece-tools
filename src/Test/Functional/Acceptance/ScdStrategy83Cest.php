@@ -10,8 +10,9 @@ namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 /**
  * This test runs on the latest version of PHP
  *
+ * @group php83
  */
-abstract class ScdMatrixCest extends AbstractCest
+class ScdStrategy83Cest extends ScdStrategyCest
 {
     /**
      * @var string
@@ -22,11 +23,11 @@ abstract class ScdMatrixCest extends AbstractCest
      * @param \CliTester $I
      * @param \Codeception\Example $data
      * @throws \Robo\Exception\TaskException
-     * @dataProvider scdOnDeployDataProvider
+     * @dataProvider scdStrategyDataProvider
      */
-    public function testScdOnDeploy(\CliTester $I, \Codeception\Example $data): void
+    public function testScdStrategyOnDeploy(\CliTester $I, \Codeception\Example $data): void
     {
-        $I->copyFileToWorkDir($data['env_yaml'], 'magento.env.yaml');
+        $I->copyFileToWorkDir($data['env_yaml'], '.magento.env.yaml');
         $I->generateDockerCompose('--mode=production');
         $I->runDockerComposeCommand('run build cloud-build');
         $I->startEnvironment();
@@ -36,10 +37,28 @@ abstract class ScdMatrixCest extends AbstractCest
         $I->amOnPage('/');
         $I->see('Home page');
         $I->see('CMS homepage content goes here.');
+        $log = $I->grabFileContent('/var/log/cloud.log');
+        $I->assertStringContainsString('-s ' . $data['strategy'], $log);
     }
 
     /**
      * @return array
      */
-    abstract protected function scdOnDeployDataProvider(): array;
+    protected function scdStrategyDataProvider(): array
+    {
+        return [
+            [
+              'env_yaml' => 'files/scd/scd-strategy-quick.yaml',
+              'strategy' => 'quick'
+            ],
+            [
+              'env_yaml' => 'files/scd/scd-strategy-standard.yaml',
+              'strategy' => 'standard'
+            ],
+            [
+              'env_yaml' => 'files/scd/scd-strategy-compact.yaml',
+              'strategy' => 'compact'
+            ],
+        ];
+    }
 }

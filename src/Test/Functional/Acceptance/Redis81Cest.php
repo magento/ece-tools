@@ -291,4 +291,14 @@ class Redis81Cest extends RedisCest
     {
         return;
     }
+
+    protected function wrongConfigurationRedisBackendDataProvider(): array
+    {
+        return [];
+    }
+
+    protected function redisWrongConnectionDataProvider(): array
+    {
+        return [];
+    }
 }

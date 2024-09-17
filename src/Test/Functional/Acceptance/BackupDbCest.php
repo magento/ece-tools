@@ -14,9 +14,8 @@ use Robo\Exception\TaskException;
 
 /**
  * Checks database backup functionality
- * @group php83
  */
-class BackupDbCest extends AbstractCest
+abstract class BackupDbCest extends AbstractCest
 {
     /**
      * @var array
@@ -65,12 +64,7 @@ class BackupDbCest extends AbstractCest
     /**
      * @return array
      */
-    protected function dataProviderMagentoCloudVersions(): array
-    {
-        return [
-            ['version' => '2.4.7'],
-        ];
-    }
+    abstract protected function dataProviderMagentoCloudVersions(): array;
 
     /**
      *  Part of test without 'SplitDB' architecture

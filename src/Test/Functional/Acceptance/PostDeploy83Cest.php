@@ -10,8 +10,9 @@ namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 /**
  * This test runs on the latest version of PHP
  *
+ * @group php83
  */
-abstract class PostDeployCest extends AbstractCest
+class PostDeployCest extends AbstractCest
 {
     /**
      * @var string
@@ -53,7 +54,19 @@ abstract class PostDeployCest extends AbstractCest
     /**
      * @return array
      */
-    protected function postDeployDataProvider(): array;
+    protected function postDeployDataProvider(): array
+    {
+        return [
+            [
+                'variables' => [
+                    'MAGENTO_CLOUD_VARIABLES' => ['ADMIN_EMAIL' => 'admin@example.com']
+                ],
+            ],
+            [
+                'variables' => ['MAGENTO_CLOUD_VARIABLES' => []]
+            ],
+        ];
+    }
 
     /**
      * @param \CliTester $I

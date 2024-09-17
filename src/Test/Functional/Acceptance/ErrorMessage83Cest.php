@@ -12,8 +12,9 @@ use CliTester;
 /**
  * This test runs on the latest version of PHP
  *
+ * @group php83
  */
-abstract class ErrorMessageCest extends AbstractCest
+class ErrorMessageCest extends AbstractCest
 {
     /**
      * @var string

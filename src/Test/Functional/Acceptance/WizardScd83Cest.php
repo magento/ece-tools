@@ -10,8 +10,9 @@ namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 /**
  * This test runs on the latest version of PHP
  *
+ * @group php83
  */
-abstract class WizardScdCest extends AbstractCest
+class WizardScdCest extends AbstractCest
 {
     /**
      * @var string

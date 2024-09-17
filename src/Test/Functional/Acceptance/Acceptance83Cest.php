@@ -22,7 +22,7 @@ use Magento\CloudDocker\Test\Functional\Codeception\Docker;
  *
  * @group php83
  */
-abstract class AcceptanceCest extends AbstractCest
+class Acceptance83Cest extends AcceptanceCest
 {
     /**
      * @var string

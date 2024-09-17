@@ -10,6 +10,7 @@ namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 /**
  * Test for cron:unlock.
  *
+ * @group php83
  */
 abstract class CronUnlockCest extends AbstractCest
 {

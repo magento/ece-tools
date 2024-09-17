@@ -10,8 +10,9 @@ namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 /**
  * This test runs on the latest version of PHP
  *
+ * @group php83
  */
-abstract class ScdMatrixCest extends AbstractCest
+class ScdMatrix83Cest extends ScdMatrixCest
 {
     /**
      * @var string
@@ -41,5 +42,12 @@ abstract class ScdMatrixCest extends AbstractCest
     /**
      * @return array
      */
-    abstract protected function scdOnDeployDataProvider(): array;
+    protected function scdOnDeployDataProvider(): array
+    {
+        return [
+            ['env_yaml' => 'files/scd/env_matrix_1.yaml'],
+            ['env_yaml' => 'files/scd/env_matrix_2.yaml'],
+            ['env_yaml' => 'files/scd/env_matrix_3.yaml'],
+        ];
+    }
 }

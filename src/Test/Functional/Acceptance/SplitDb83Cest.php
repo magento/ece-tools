@@ -12,7 +12,7 @@ namespace Magento\MagentoCloud\Test\Functional\Acceptance;
  *
  * @group php82
  */
-class SplitDb82Cest extends SplitDbCest
+class SplitDb83Cest extends SplitDbCest
 {
     /**
      * @return array
@@ -20,7 +20,7 @@ class SplitDb82Cest extends SplitDbCest
     protected function dataProviderMagentoCloudVersions(): array
     {
         return [
-            ['version' => '2.4.1'],
+            ['version' => '2.4.7'],
         ];
     }
 }

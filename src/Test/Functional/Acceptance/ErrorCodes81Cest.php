@@ -13,12 +13,12 @@ namespace Magento\MagentoCloud\Test\Functional\Acceptance;
  * Checks that var/log/cloud.error.log file was created and contains correct data.
  * Checks that `ece-tools error:show` command returns correct errors info
  *
- * @group php74
+ * @group php81
  */
-class ErrorCodes24Cest extends ErrorCodesCest
+class ErrorCodes81Cest extends ErrorCodesCest
 {
     /**
      * @var string
      */
-    protected $magentoCloudTemplate = '2.4.3';
+    protected $magentoCloudTemplate = '2.4.4';
 }

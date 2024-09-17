@@ -14,7 +14,7 @@ use Magento\CloudDocker\Test\Functional\Codeception\Docker;
  *
  * @group php83
  */
-abstract class DatabaseConfigurationCest extends AbstractCest
+class DatabaseConfigurationCest extends AbstractCest
 {
     /**
      * @var string
@@ -47,7 +47,46 @@ abstract class DatabaseConfigurationCest extends AbstractCest
     /**
      * @return array
      */
-    abstract protected function databaseConfigurationDataProvider(): array;
+    protected function databaseConfigurationDataProvider(): array
+    {
+        return [
+            'singleConfig' => [
+                'variables' => [
+                    'MAGENTO_CLOUD_VARIABLES' => [
+                        'DATABASE_CONFIGURATION'=>['some_config' => 'value', '_merge' => true],
+                    ],
+                ],
+                'mergedConfig' => 'some_config',
+                'defaultConfig' => 'db',
+            ],
+            'multiConfig' => [
+                'variables' => [
+                    'MAGENTO_CLOUD_VARIABLES' => [
+                        'DATABASE_CONFIGURATION'=>[
+                            'connection' => [
+                                'default' => [
+                                    'engine' => 'innodb',
+                                    'initStatements' => 'SET NAMES utf8;',
+                                    'active' => '1',
+                                    'driver_options' => [
+                                        '1001' => '1',
+                                    ],
+                                ],
+                                'indexer' => [
+                                    'driver_options' => [
+                                        '1001' => '1',
+                                    ],
+                                ],
+                            ],
+                            '_merge' => true,
+                        ],
+                    ],
+                ],
+                'mergedConfig' => '1001',
+                'defaultConfig' => 'db',
+            ],
+        ];
+    }
 
     /**
      * Check that magento can be installed and updated with configured table prefixes
