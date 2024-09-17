@@ -68,7 +68,7 @@ class BackupDbCest extends AbstractCest
     protected function dataProviderMagentoCloudVersions(): array
     {
         return [
-            ['version' => '2.4.7-beta-test'],
+            ['version' => '2.4.7'],
         ];
     }
 
