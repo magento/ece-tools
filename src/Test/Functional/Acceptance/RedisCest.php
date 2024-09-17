@@ -12,7 +12,6 @@ use Magento\CloudDocker\Test\Functional\Codeception\Docker;
 /**
  * Checks Redis configuration
  *
- * @group php83
  */
 abstract class RedisCest extends AbstractCest
 {
