@@ -14,7 +14,7 @@ use CliTester;
  *
  * @group php83
  */
-class ErrorMessageCest extends AbstractCest
+class ErrorMessage83Cest extends AbstractCest
 {
     /**
      * @var string

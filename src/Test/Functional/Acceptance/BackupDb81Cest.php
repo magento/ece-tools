@@ -7,16 +7,11 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 
-use CliTester;
-use Codeception\Example;
-use Exception;
-use Robo\Exception\TaskException;
-
 /**
  * Checks database backup functionality
  * @group php81
  */
-class BackupDb244Cest extends BackupDbCest
+class BackupDb81Cest extends BackupDbCest
 {
     /**
      * @return array

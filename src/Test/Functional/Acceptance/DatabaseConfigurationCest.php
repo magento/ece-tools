@@ -12,7 +12,6 @@ use Magento\CloudDocker\Test\Functional\Codeception\Docker;
 /**
  * This test runs on the latest version of PHP
  *
- * @group php83
  */
 abstract class DatabaseConfigurationCest extends AbstractCest
 {

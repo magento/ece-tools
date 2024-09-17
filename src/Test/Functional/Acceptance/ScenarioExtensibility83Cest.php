@@ -14,7 +14,7 @@ use Magento\CloudDocker\Test\Functional\Codeception\Docker;
  *
  * @group php83
  */
-class ScenarioExtensibilityCest extends ScenarioExtensibilityCest
+class ScenarioExtensibility83Cest extends ScenarioExtensibilityCest
 {
     /**
      * @var string

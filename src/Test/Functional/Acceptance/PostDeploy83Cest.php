@@ -12,7 +12,7 @@ namespace Magento\MagentoCloud\Test\Functional\Acceptance;
  *
  * @group php83
  */
-class PostDeployCest extends AbstractCest
+class PostDeploy83Cest extends AbstractCest
 {
     /**
      * @var string

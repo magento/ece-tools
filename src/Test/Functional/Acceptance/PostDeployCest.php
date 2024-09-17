@@ -53,7 +53,7 @@ abstract class PostDeployCest extends AbstractCest
     /**
      * @return array
      */
-    protected function postDeployDataProvider(): array;
+    abstract protected function postDeployDataProvider(): array;
 
     /**
      * @param \CliTester $I

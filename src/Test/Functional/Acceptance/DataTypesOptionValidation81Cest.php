@@ -12,7 +12,7 @@ namespace Magento\MagentoCloud\Test\Functional\Acceptance;
  *
  * @group php81
  */
-class DataTypesOptionValidation82Cest extends DataTypesOptionValidationCest
+class DataTypesOptionValidation81Cest extends DataTypesOptionValidationCest
 {
     /**
      * @var string

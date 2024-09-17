@@ -12,7 +12,7 @@ namespace Magento\MagentoCloud\Test\Functional\Acceptance;
  *
  * @group php83
  */
-abstract class CronUnlockCest extends AbstractCest
+abstract class CronUnlock83Cest extends AbstractCest
 {
     /**
      * @var string

@@ -10,7 +10,7 @@ namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 /**
  * @group php83
  */
-class Cron247Cest extends CronCest
+class Cron83Cest extends CronCest
 {
     /**
      * @return array

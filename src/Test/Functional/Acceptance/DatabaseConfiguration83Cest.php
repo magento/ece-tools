@@ -14,7 +14,7 @@ use Magento\CloudDocker\Test\Functional\Codeception\Docker;
  *
  * @group php83
  */
-class DatabaseConfigurationCest extends AbstractCest
+class DatabaseConfiguration83Cest extends AbstractCest
 {
     /**
      * @var string
