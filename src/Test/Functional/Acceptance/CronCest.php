@@ -138,7 +138,7 @@ class CronCest extends AbstractCest
     {
         return [
             [
-                'version' => '2.4.7-beta-test',
+                'version' => '2.4.7',
                 'variables' => [
                     'MAGENTO_CLOUD_VARIABLES' => [
                         'ADMIN_EMAIL' => 'admin@example.com',
