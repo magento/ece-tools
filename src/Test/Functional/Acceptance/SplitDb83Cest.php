@@ -10,7 +10,7 @@ namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 /**
  * Checks split database functionality
  *
- * @group php82
+ * @group php83
  */
 class SplitDb83Cest extends SplitDbCest
 {

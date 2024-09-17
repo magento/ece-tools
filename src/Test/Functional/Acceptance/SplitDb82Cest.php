@@ -20,7 +20,7 @@ class SplitDb82Cest extends SplitDbCest
     protected function dataProviderMagentoCloudVersions(): array
     {
         return [
-            ['version' => '2.4.1'],
+            ['version' => '2.4.4'],
         ];
     }
 }

@@ -20,7 +20,6 @@ use Magento\CloudDocker\Test\Functional\Codeception\Docker;
  * 3. Test config dump
  * 4. Test content presence
  *
- * @group php83
  */
 abstract class AcceptanceCest extends AbstractCest
 {
