@@ -14,7 +14,7 @@ use Magento\MagentoCloud\Config\Stage\BuildInterface;
  *
  * @group php83
  */
-abstract class ReportDirNestingLevel83Cest extends ReportDirNestingLevelCest
+class ReportDirNestingLevel83Cest extends ReportDirNestingLevelCest
 {
     /**
      * @var string
