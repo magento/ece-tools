@@ -8,13 +8,11 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 
 use Magento\MagentoCloud\Config\Stage\BuildInterface;
-
 /**
  * This test runs on the latest version of PHP
  *
- * @group php83
  */
-class ReportDirNestingLevelCest extends AbstractCest
+abstract class ReportDirNestingLevelCest extends AbstractCest
 {
     /**
      * @var string
