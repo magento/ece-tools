@@ -8,5 +8,6 @@
 /auth.json
 /codeception.yml
 /_workdir
+/_workdir_cache
 /*.code-workspace
 **/.phpunit.result.cache
