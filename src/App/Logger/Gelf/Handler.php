@@ -22,7 +22,7 @@ class Handler extends GelfHandler
      * @param array $record
      * @codeCoverageIgnore
      */
-    protected function write(LogRecord $record): void
+    protected function write(array|LogRecord $record): void
     {
         try {
             parent::write($record);

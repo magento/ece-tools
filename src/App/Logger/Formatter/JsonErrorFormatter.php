@@ -51,7 +51,7 @@ class JsonErrorFormatter extends JsonFormatter
      *
      * {@inheritDoc}
      */
-    public function format(LogRecord $record): string
+    public function format(array|LogRecord $record): string
     {
         try {
             if (!isset($record['context']['errorCode'])) {
