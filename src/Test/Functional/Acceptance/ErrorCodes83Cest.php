@@ -15,8 +15,9 @@ use Magento\MagentoCloud\App\Error;
  * Checks that var/log/cloud.error.log file was created and contains correct data.
  * Checks that `ece-tools error:show` command returns correct errors info
  *
+ * @group php83
  */
-abstract class ErrorCodesCest extends AbstractCest
+class ErrorCodes83Cest extends ErrorCodesCest
 {
     /**
      * @var string

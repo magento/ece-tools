@@ -7,16 +7,12 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 
-use CliTester;
-use Codeception\Example;
-use Exception;
-use Robo\Exception\TaskException;
-
 /**
- * Checks database backup functionality
- * @group php81
+ * Checks split database functionality
+ *
+ * @group php83
  */
-class BackupDb244Cest extends BackupDbCest
+class SplitDb83Cest extends SplitDbCest
 {
     /**
      * @return array
@@ -24,7 +20,7 @@ class BackupDb244Cest extends BackupDbCest
     protected function dataProviderMagentoCloudVersions(): array
     {
         return [
-            ['version' => '2.4.4'],
+            ['version' => '2.4.7'],
         ];
     }
 }

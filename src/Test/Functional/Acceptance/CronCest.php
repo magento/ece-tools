@@ -7,12 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 
-/**
- * This test runs on the latest version of PHP
- *
- * @group php83
- */
-class CronCest extends AbstractCest
+abstract class CronCest extends AbstractCest
 {
     /**
      * @inheritdoc
@@ -134,18 +129,5 @@ class CronCest extends AbstractCest
     /**
      * @return array
      */
-    protected function cronDataProvider(): array
-    {
-        return [
-            [
-                'version' => '2.4.7',
-                'variables' => [
-                    'MAGENTO_CLOUD_VARIABLES' => [
-                        'ADMIN_EMAIL' => 'admin@example.com',
-                        'ADMIN_LOCALE' => 'fr_FR'
-                    ],
-                ],
-            ],
-        ];
-    }
+    abstract protected function cronDataProvider(): array;
 }

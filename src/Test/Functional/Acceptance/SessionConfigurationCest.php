@@ -11,9 +11,8 @@ namespace Magento\MagentoCloud\Test\Functional\Acceptance;
  * This scenario checks that session can be configured through environment variable SESSION_CONFIGURATION
  * Zephyr ID MAGECLOUD-46
  *
- * @group php83
  */
-class SessionConfigurationCest extends AbstractCest
+abstract class SessionConfigurationCest extends AbstractCest
 {
     /**
      * @var string
@@ -46,40 +45,5 @@ class SessionConfigurationCest extends AbstractCest
     /**
      * @return array
      */
-    protected function sessionConfigurationDataProvider(): array
-    {
-        return [
-            'singleConfig' => [
-                'variables' => [
-                    'MAGENTO_CLOUD_VARIABLES' => [
-                        'SESSION_CONFIGURATION'=>['max_concurrency' => '10', '_merge' => true],
-                    ],
-                ],
-                'mergedConfig' => 'max_concurrency',
-                'defaultConfig' => 'redis',
-            ],
-            'withoutMerge' => [
-                'variables' => [
-                    'MAGENTO_CLOUD_VARIABLES' => [
-                        'SESSION_CONFIGURATION'=>[
-                            'save' => 'redis',
-                            'redis' => [
-                              'host' => 'redis.internal',
-                              'port' => '6379',
-                              'database' => 0,
-                              'disable_locking' => 1,
-                              'max_concurrency' => 10,
-                              'bot_first_lifetime' => 100,
-                              'bot_lifetime' => 10000,
-                              'min_lifetime' => 100,
-                              'max_lifetime' => 10000,
-                            ],
-                          ],
-                        ]
-                    ],
-                'mergedConfig' => 'max_concurrency',
-                'defaultConfig' => 'redis',
-            ],
-        ];
-    }
+    abstract protected function sessionConfigurationDataProvider(): array;
 }

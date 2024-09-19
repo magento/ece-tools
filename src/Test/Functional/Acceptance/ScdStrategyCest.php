@@ -10,9 +10,8 @@ namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 /**
  * This test runs on the latest version of PHP
  *
- * @group php83
  */
-class ScdStrategyCest extends AbstractCest
+abstract class ScdStrategyCest extends AbstractCest
 {
     /**
      * @var string
@@ -44,21 +43,5 @@ class ScdStrategyCest extends AbstractCest
     /**
      * @return array
      */
-    protected function scdStrategyDataProvider(): array
-    {
-        return [
-            [
-              'env_yaml' => 'files/scd/scd-strategy-quick.yaml',
-              'strategy' => 'quick'
-            ],
-            [
-              'env_yaml' => 'files/scd/scd-strategy-standard.yaml',
-              'strategy' => 'standard'
-            ],
-            [
-              'env_yaml' => 'files/scd/scd-strategy-compact.yaml',
-              'strategy' => 'compact'
-            ],
-        ];
-    }
+    abstract protected function scdStrategyDataProvider(): array;
 }
