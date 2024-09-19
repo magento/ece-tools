@@ -8,35 +8,71 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\App\Logger\Processor;
 
 use Magento\MagentoCloud\App\Logger\Sanitizer;
+use Monolog\LogRecord;
+use Monolog\Level;
 
-/**
- * Logger processor for sanitizing sensitive data.
- */
-class SanitizeProcessor
-{
+if (function_exists('enum_exists') && enum_exists(Level::class)) {
     /**
-     * @var Sanitizer
+     * Logger processor for sanitizing sensitive data.
      */
-    private $sanitizer;
-
-    /**
-     * @param Sanitizer $sanitizer
-     */
-    public function __construct(Sanitizer $sanitizer)
+    class SanitizeProcessor
     {
-        $this->sanitizer = $sanitizer;
+        /**
+         * @var Sanitizer
+         */
+        private $sanitizer;
+
+        /**
+         * @param Sanitizer $sanitizer
+         */
+        public function __construct(Sanitizer $sanitizer)
+        {
+            $this->sanitizer = $sanitizer;
+        }
+
+        /**
+         * Finds and replace sensitive data in record message.
+         *
+         * @param array $record
+         * @return array
+         */
+        public function __invoke(LogRecord $record)
+        {
+            $record['message'] = $this->sanitizer->sanitize($record['message']);
+
+            return $record;
+        }
     }
-
+} else {
     /**
-     * Finds and replace sensitive data in record message.
-     *
-     * @param array $record
-     * @return array
+     * Logger processor for sanitizing sensitive data.
      */
-    public function __invoke(array $record)
+    class SanitizeProcessor
     {
-        $record['message'] = $this->sanitizer->sanitize($record['message']);
+        /**
+         * @var Sanitizer
+         */
+        private $sanitizer;
 
-        return $record;
+        /**
+         * @param Sanitizer $sanitizer
+         */
+        public function __construct(Sanitizer $sanitizer)
+        {
+            $this->sanitizer = $sanitizer;
+        }
+
+        /**
+         * Finds and replace sensitive data in record message.
+         *
+         * @param array $record
+         * @return array
+         */
+        public function __invoke(array $record)
+        {
+            $record['message'] = $this->sanitizer->sanitize($record['message']);
+
+            return $record;
+        }
     }
 }

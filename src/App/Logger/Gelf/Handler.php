@@ -9,25 +9,50 @@ namespace Magento\MagentoCloud\App\Logger\Gelf;
 
 use Monolog\Handler\GelfHandler;
 use Monolog\LogRecord;
+use Monolog\Level;
 
-/**
- * Wrapper for GelfHandler class.
- */
-class Handler extends GelfHandler
-{
+if (function_exists('enum_exists') && enum_exists(Level::class)) {
     /**
-     * This method wraps parent method with try catch for avoiding stopping deploy process after
-     * losing connection to graylog server.
-     *
-     * @param array $record
-     * @codeCoverageIgnore
+     * Wrapper for GelfHandler class.
      */
-    protected function write(array|LogRecord $record): void
+    class Handler extends GelfHandler
     {
-        try {
-            parent::write($record);
-        } catch (\RuntimeException $e) {
-            fwrite(STDERR, 'Can\'t send log message: ' . $e->getMessage());
+        /**
+         * This method wraps parent method with try catch for avoiding stopping deploy process after
+         * losing connection to graylog server.
+         *
+         * @param array $record
+         * @codeCoverageIgnore
+         */
+        protected function write(LogRecord $record): void
+        {
+            try {
+                parent::write($record);
+            } catch (\RuntimeException $e) {
+                fwrite(STDERR, 'Can\'t send log message: ' . $e->getMessage());
+            }
+        }
+    }
+} else {
+ /**
+     * Wrapper for GelfHandler class.
+     */
+    class Handler extends GelfHandler
+    {
+        /**
+         * This method wraps parent method with try catch for avoiding stopping deploy process after
+         * losing connection to graylog server.
+         *
+         * @param array $record
+         * @codeCoverageIgnore
+         */
+        protected function write(array $record): void
+        {
+            try {
+                parent::write($record);
+            } catch (\RuntimeException $e) {
+                fwrite(STDERR, 'Can\'t send log message: ' . $e->getMessage());
+            }
         }
     }
 }

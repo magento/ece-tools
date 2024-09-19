@@ -13,6 +13,8 @@ use Magento\MagentoCloud\App\Logger\Formatter\JsonErrorFormatter;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Monolog\Level;
+use Monolog\LogRecord;
 
 class JsonErrorFormatterTest extends TestCase
 {
@@ -57,10 +59,22 @@ class JsonErrorFormatterTest extends TestCase
                 'title' => 'some custom title',
                 'type' => 'warning'
             ]);
+        // TODO to fix Backward compatibility monolog 2.7 and 3.6
+        if (function_exists('enum_exists') && enum_exists(Level::class)) {
+            $logRecord = new LogRecord(
+                datetime: new \DateTimeImmutable(),
+                channel: 'testChannel',
+                level: Level::Warning,
+                message: 'some error',
+                context: ['errorCode' => 11]
+            );
+        } else {
+            $logRecord = ['message' => 'some error', 'context' => ['errorCode' => 11]];
+        }
 
         $this->assertEquals(
             '{"errorCode":11,"title":"some error","type":"warning"}' . PHP_EOL,
-            $this->jsonErrorFormatter->format(['message' => 'some error', 'context' => ['errorCode' => 11]])
+            $this->jsonErrorFormatter->format($logRecord)
         );
     }
 

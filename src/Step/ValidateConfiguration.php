@@ -13,6 +13,7 @@ use Magento\MagentoCloud\Config\Validator\Result\Error;
 use Magento\MagentoCloud\Config\ValidatorException;
 use Magento\MagentoCloud\Config\ValidatorInterface;
 use Psr\Log\LoggerInterface;
+use Monolog\Level;
 
 /**
  * Validates configuration with given validators.
@@ -90,7 +91,12 @@ class ValidateConfiguration implements StepInterface
         /* @var $validators ValidatorInterface[] */
         foreach ($this->validators as $level => $validators) {
             /** @phpstan-ignore-next-line */
-            $level = Logger::toMonologLevel($level);
+            if (function_exists('enum_exists') && enum_exists(Level::class)) {
+                $level = Logger::toMonologLevel($level);
+                $level = $level->value;
+            } else {
+                $level = Logger::toMonologLevel($level);
+            }
             foreach ($validators as $name => $validator) {
                 if (!$validator instanceof ValidatorInterface) {
                     $this->logger->info(sprintf('Validator "%s" was skipped', $name));
