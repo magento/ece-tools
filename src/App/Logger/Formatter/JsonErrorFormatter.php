@@ -11,6 +11,7 @@ use Magento\MagentoCloud\App\ErrorInfo;
 use Magento\MagentoCloud\App\Logger\Error\ReaderInterface;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Monolog\Formatter\JsonFormatter;
+use Monolog\LogRecord;
 
 /**
  * Formatter for log messages for cloud.error.log
@@ -50,7 +51,7 @@ class JsonErrorFormatter extends JsonFormatter
      *
      * {@inheritDoc}
      */
-    public function format(array $record): string
+    public function format(LogRecord $record): string
     {
         try {
             if (!isset($record['context']['errorCode'])) {

@@ -8,6 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\App\Logger\Formatter;
 
 use Monolog\Logger;
+use Monolog\LogRecord;
 
 /**
  * Formatter for log messages for cloud.log
@@ -20,7 +21,7 @@ class LineFormatter extends \Monolog\Formatter\LineFormatter
     /**
      * @inheritDoc
      */
-    public function format(array $record): string
+    public function format(LogRecord $record): string
     {
         $errorLevels = [
             Logger::getLevelName(Logger::WARNING),

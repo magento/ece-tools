@@ -9,6 +9,7 @@ namespace Magento\MagentoCloud\App\Logger\Gelf;
 
 use Monolog\Formatter\GelfMessageFormatter;
 use Gelf\Message;
+use Monolog\LogRecord;
 
 /**
  * Extends functionality of GelfMessageFormatter.
@@ -34,7 +35,7 @@ class MessageFormatter extends GelfMessageFormatter
     /**
      * @inheritdoc
      */
-    public function format(array $record): Message
+    public function format(LogRecord $record): Message
     {
         $message = parent::format($record);
 

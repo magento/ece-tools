@@ -8,6 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\App\Logger\Gelf;
 
 use Monolog\Handler\GelfHandler;
+use Monolog\LogRecord;
 
 /**
  * Wrapper for GelfHandler class.
@@ -21,7 +22,7 @@ class Handler extends GelfHandler
      * @param array $record
      * @codeCoverageIgnore
      */
-    protected function write(array $record): void
+    protected function write(LogRecord $record): void
     {
         try {
             parent::write($record);

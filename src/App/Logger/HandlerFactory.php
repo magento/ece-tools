@@ -19,6 +19,7 @@ use Monolog\Handler\StreamHandler;
 use Monolog\Handler\SyslogHandler;
 use Monolog\Handler\SyslogUdpHandler;
 use Monolog\Logger;
+use Monolog\Level;
 
 /**
  * The handler factory.
@@ -87,7 +88,8 @@ class HandlerFactory
         }
 
         if ($customMinLevel = $configuration->get('min_level')) {
-            $minLevel = $this->normalizeLevel((string)$customMinLevel);
+            $levelObj = $this->normalizeLevel((string)$customMinLevel);
+            $minLevel = $levelObj->value;
         }
 
         try {
@@ -165,16 +167,16 @@ class HandlerFactory
 
     /**
      * @param string $level
-     * @return int
+     * @return Level
      * @throws LoggerException
      */
-    private function normalizeLevel(string $level): int
+    private function normalizeLevel(string $level): Level
     {
         /** @phpstan-ignore-next-line */
         $normalizedLevel = Logger::toMonologLevel($level);
 
-        if (!is_int($normalizedLevel)) {
-            throw new LoggerException('Logger lever is incorrect');
+        if (!$normalizedLevel instanceof Level) {
+            throw new LoggerException('Logger level is incorrect');
         }
 
         return $normalizedLevel;
