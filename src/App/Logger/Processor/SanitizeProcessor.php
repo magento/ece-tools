@@ -8,6 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\App\Logger\Processor;
 
 use Magento\MagentoCloud\App\Logger\Sanitizer;
+use Monolog\LogRecord;
 
 /**
  * Logger processor for sanitizing sensitive data.
@@ -33,7 +34,7 @@ class SanitizeProcessor
      * @param array $record
      * @return array
      */
-    public function __invoke(array $record)
+    public function __invoke(array|LogRecord $record)
     {
         $record['message'] = $this->sanitizer->sanitize($record['message']);
 
