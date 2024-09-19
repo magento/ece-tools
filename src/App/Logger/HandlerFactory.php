@@ -88,8 +88,7 @@ class HandlerFactory
         }
 
         if ($customMinLevel = $configuration->get('min_level')) {
-            $levelObj = $this->normalizeLevel((string)$customMinLevel);
-            $minLevel = $levelObj->value;
+            $minLevel = $this->normalizeLevel((string)$customMinLevel);
         }
 
         try {
@@ -167,16 +166,19 @@ class HandlerFactory
 
     /**
      * @param string $level
-     * @return Level
+     * @return int
      * @throws LoggerException
      */
-    private function normalizeLevel(string $level): Level
+    private function normalizeLevel(string $level): int
     {
         /** @phpstan-ignore-next-line */
-        $normalizedLevel = Logger::toMonologLevel($level);
-
-        if (!$normalizedLevel instanceof Level) {
-            throw new LoggerException('Logger level is incorrect');
+        if (function_exists('enum_exists') && enum_exists(Level::class)) {
+            if (!$level = Level::fromName($level)) {
+                // TODO for custom level we need to find custom log level int value
+            }
+            $normalizedLevel = $level->value;
+        } else {
+            $normalizedLevel = Logger::toMonologLevel($level);
         }
 
         return $normalizedLevel;
