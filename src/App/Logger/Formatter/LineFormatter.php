@@ -20,9 +20,6 @@ if (function_exists('enum_exists') && enum_exists(Level::class)) {
         public const FORMAT_BASE = "[%datetime%] %level_name%: %message%\n";
         public const FORMAT_BASE_ERROR = "[%datetime%] %level_name%: [%context.errorCode%] %message%\n";
 
-        /**
-         * @inheritDoc
-         */
         public function format(LogRecord $record): string
         {
             $errorLevels = [
@@ -53,7 +50,7 @@ if (function_exists('enum_exists') && enum_exists(Level::class)) {
                     extra: $record->extra,
                 );
             }
-
+    
             return parent::format($record);
         }
     }
