@@ -31,17 +31,27 @@ if (function_exists('enum_exists') && enum_exists(Level::class)) {
                 Logger::getLevelName(Logger::CRITICAL),
             ];
 
-            if (isset($record['level_name'])
-                && in_array($record['level_name'], $errorLevels)
-                && !empty($record['context']['errorCode'])
+            if (isset($record->level_name)
+                && in_array($record->level_name, $errorLevels)
+                && !empty($record->context['errorCode'])
             ) {
                 $this->format = self::FORMAT_BASE_ERROR;
             } else {
                 $this->format = self::FORMAT_BASE;
             }
 
-            if (isset($record['message']) && !empty($record['context']['suggestion'])) {
-                $record['message'] .= PHP_EOL . $record['context']['suggestion'];
+            if (isset($record->message) && !empty($record->context['suggestion'])) {
+                // Create new LogRecord from existing and update the message, 
+                // since message is read only
+                $message = $record->message . PHP_EOL . $record->context['suggestion'];
+                $record = new LogRecord(
+                    datetime: $record->datetime,
+                    channel: $record->channel,
+                    level: $record->level,
+                    message: $message,
+                    context: $record->context,
+                    extra: $record->extra,
+                );
             }
 
             return parent::format($record);

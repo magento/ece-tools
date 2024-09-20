@@ -57,17 +57,16 @@ if (function_exists('enum_exists') && enum_exists(Level::class)) {
         public function format(LogRecord $record): string
         {
             try {
-                if (!isset($record['context']['errorCode'])) {
+                if (!isset($record->context['errorCode'])) {
                     return '';
                 }
 
                 $loggedErrors = $this->reader->read();
 
-                if (isset($loggedErrors[$record['context']['errorCode']])) {
-                    return '';
+                if (isset($loggedErrors[$record->context['errorCode']])) {
+                   return '';
                 }
-
-                return parent::format($record);
+                return $this->toJson($this->formatLog($record)) . PHP_EOL; 
             } catch (\Exception $exception) {
                 return '';
             }
@@ -82,23 +81,23 @@ if (function_exists('enum_exists') && enum_exists(Level::class)) {
          */
         private function formatLog(LogRecord $record): array
         {
-            $errorCode = $record['context']['errorCode'];
+            $errorCode = $record->context['errorCode'];
             $errorInfo = $this->errorInfo->get($errorCode);
 
             if (empty($errorInfo)) {
                 $errorInfo = [
                     'errorCode' => $errorCode,
-                    'title' => $record['message'] ?? ''
+                    'title' => $record->message ?? ''
                 ];
             } else {
                 $errorInfo['errorCode'] = $errorCode;
-                if (!empty($record['message'])) {
-                    $errorInfo['title'] = $record['message'];
+                if (!empty($record->message)) {
+                    $errorInfo['title'] = $record->message;
                 }
             }
 
-            if (!empty($record['context']['suggestion'])) {
-                $errorInfo['suggestion'] = $record['context']['suggestion'];
+            if (!empty($record->context['suggestion'])) {
+                $errorInfo['suggestion'] = $record->context['suggestion'];
             }
 
             ksort($errorInfo);
