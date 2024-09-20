@@ -50,6 +50,8 @@ if (function_exists('enum_exists') && enum_exists(Level::class)) {
                 context: $record->context,
                 extra: $record->extra,
             );
+
+            return $record;
         }
     }
 } else {
