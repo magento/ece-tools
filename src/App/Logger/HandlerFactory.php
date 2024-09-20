@@ -166,21 +166,17 @@ class HandlerFactory
 
     /**
      * @param string $level
-     * @return int
+     * @return Level
      * @throws LoggerException
      */
-    private function normalizeLevel(string $level): int
+    private function normalizeLevel(string $level): Level
     {
         /** @phpstan-ignore-next-line */
-        if (function_exists('enum_exists') && enum_exists(Level::class)) {
-            if (!$level = Level::fromName($level)) {
-                // TODO for custom level we need to find custom log level int value
-            }
-            $normalizedLevel = $level->value;
-        } else {
-            $normalizedLevel = Logger::toMonologLevel($level);
-        }
+        $normalizedLevel = Logger::toMonologLevel($level);
 
+        if (!$normalizedLevel instanceof Level) {
+            throw new LoggerException('Logger level is incorrect');
+        }
         return $normalizedLevel;
     }
 }
