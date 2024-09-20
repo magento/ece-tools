@@ -110,7 +110,8 @@ class ValidateConfiguration implements StepInterface
                 }
 
                 if ($result instanceof Error) {
-                    $errors[$level][] = $result;
+                    $level_code = $level->value;
+                    $errors[$level_code][] = $result;
                 }
             }
         }
