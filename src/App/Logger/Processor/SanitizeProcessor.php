@@ -8,11 +8,8 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\App\Logger\Processor;
 
 use Magento\MagentoCloud\App\Logger\Sanitizer;
-use Monolog\LogRecord;
-use Monolog\Level;
-use Monolog\Logger;
 
-if (function_exists('enum_exists') && enum_exists(Level::class)) {
+if (function_exists('enum_exists') && \Monolog\Logger::API == 3) {
     /**
      * Logger processor for sanitizing sensitive data.
      */
@@ -37,12 +34,12 @@ if (function_exists('enum_exists') && enum_exists(Level::class)) {
          * @param array $record
          * @return array
          */
-        public function __invoke(LogRecord $record)
+        public function __invoke(\Monolog\LogRecord $record)
         {  
             $message = $this->sanitizer->sanitize($record->message);
             // Create new LogRecord from existing and update the message, 
             // since message is read only
-            $record = new LogRecord(
+            $record = new \Monolog\LogRecord(
                 datetime: $record->datetime,
                 channel: $record->channel,
                 level: $record->level,

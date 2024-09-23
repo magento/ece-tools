@@ -7,11 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\App\Logger\Formatter;
 
-use Monolog\Logger;
-use Monolog\LogRecord;
-use Monolog\Level;
-
-if (function_exists('enum_exists') && enum_exists(Level::class)) {
+if (function_exists('enum_exists') && \Monolog\Logger::API == 3) {
     /**
      * Formatter for log messages for cloud.log
      */
@@ -20,7 +16,7 @@ if (function_exists('enum_exists') && enum_exists(Level::class)) {
         public const FORMAT_BASE = "[%datetime%] %level_name%: %message%\n";
         public const FORMAT_BASE_ERROR = "[%datetime%] %level_name%: [%context.errorCode%] %message%\n";
 
-        public function format(LogRecord $record): string
+        public function format(\Monolog\LogRecord $record): string
         {
             $errorLevels = [
                 Logger::getLevelName(Logger::WARNING),
@@ -41,7 +37,7 @@ if (function_exists('enum_exists') && enum_exists(Level::class)) {
                 // Create new LogRecord from existing and update the message, 
                 // since message is read only
                 $message = $record->message . PHP_EOL . $record->context['suggestion'];
-                $record = new LogRecord(
+                $record = new \Monolog\LogRecord(
                     datetime: $record->datetime,
                     channel: $record->channel,
                     level: $record->level,

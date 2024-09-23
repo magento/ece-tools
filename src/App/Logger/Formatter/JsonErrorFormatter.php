@@ -11,10 +11,8 @@ use Magento\MagentoCloud\App\ErrorInfo;
 use Magento\MagentoCloud\App\Logger\Error\ReaderInterface;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Monolog\Formatter\JsonFormatter;
-use Monolog\LogRecord;
-use Monolog\Level;
 
-if (function_exists('enum_exists') && enum_exists(Level::class)) {
+if (function_exists('enum_exists') && \Monolog\Logger::API == 3) {
     /**
      *
      * Formatter for log messages for cloud.error.log
@@ -54,7 +52,7 @@ if (function_exists('enum_exists') && enum_exists(Level::class)) {
          *
          * {@inheritDoc}
          */
-        public function format(LogRecord $record): string
+        public function format(\Monolog\LogRecord $record): string
         {
             try {
                 if (!isset($record->context['errorCode'])) {
@@ -79,7 +77,7 @@ if (function_exists('enum_exists') && enum_exists(Level::class)) {
          * @return array
          * @throws FileSystemException
          */
-        private function formatLog(LogRecord $record): array
+        private function formatLog(\Monolog\LogRecord $record): array
         {
             $errorCode = $record->context['errorCode'];
             $errorInfo = $this->errorInfo->get($errorCode);

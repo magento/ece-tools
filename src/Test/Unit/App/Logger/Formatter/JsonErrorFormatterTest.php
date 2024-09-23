@@ -13,8 +13,6 @@ use Magento\MagentoCloud\App\Logger\Formatter\JsonErrorFormatter;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Monolog\Level;
-use Monolog\LogRecord;
 
 class JsonErrorFormatterTest extends TestCase
 {
@@ -60,11 +58,11 @@ class JsonErrorFormatterTest extends TestCase
                 'type' => 'warning'
             ]);
 
-        if (function_exists('enum_exists') && enum_exists(Level::class)) {
-            $logRecord = new LogRecord(
+        if (function_exists('enum_exists') && \Monolog\Logger::API == 3) {
+            $logRecord = new \Monolog\LogRecord(
                 datetime: new \DateTimeImmutable(),
                 channel: 'testChannel',
-                level: Level::Warning,
+                level: \Monolog\Level::Warning,
                 message: 'some error',
                 context: ['errorCode' => 11, ]
             );
@@ -88,11 +86,11 @@ class JsonErrorFormatterTest extends TestCase
             ->with(11)
             ->willReturn([]);
 
-            if (function_exists('enum_exists') && enum_exists(Level::class)) {
-                $logRecord = new LogRecord(
+            if (function_exists('enum_exists') && \Monolog\Logger::API == 3) {
+                $logRecord = new \Monolog\LogRecord(
                     datetime: new \DateTimeImmutable(),
                     channel: 'testChannel',
-                    level: Level::Warning,
+                    level: \Monolog\Level::Warning,
                     message: 'some error',
                     context: ['errorCode' => 11, 'suggestion' => 'some suggestion']
                 );
@@ -119,11 +117,11 @@ class JsonErrorFormatterTest extends TestCase
         $this->errorInfoMock->expects($this->never())
             ->method('get');
 
-        if (function_exists('enum_exists') && enum_exists(Level::class)) {
-            $logRecord = new LogRecord(
+        if (function_exists('enum_exists') && \Monolog\Logger::API == 3) {
+            $logRecord = new \Monolog\LogRecord(
                 datetime: new \DateTimeImmutable(),
                 channel: 'testChannel',
-                level: Level::Warning,
+                level: \Monolog\Level::Warning,
                 message: 'some error',
                 context: ['errorCode' => 11]
             );
@@ -145,11 +143,11 @@ class JsonErrorFormatterTest extends TestCase
         $this->errorInfoMock->expects($this->never())
             ->method('get');
 
-        if (function_exists('enum_exists') && enum_exists(Level::class)) {
-            $logRecord = new LogRecord(
+        if (function_exists('enum_exists') && \Monolog\Logger::API == 3) {
+            $logRecord = new \Monolog\LogRecord(
                 datetime: new \DateTimeImmutable(),
                 channel: 'testChannel',
-                level: Level::Warning,
+                level: \Monolog\Level::Warning,
                 message: 'test',
                 context: []
             );
@@ -164,14 +162,15 @@ class JsonErrorFormatterTest extends TestCase
 
     public function testFormatWithException(): void
     {
-        $this->readerMock->expects($this->once())
+        $this->readerMock->expects($this->any())
             ->method('read')
             ->willThrowException(new FileSystemException('error'));
-        if (function_exists('enum_exists') && enum_exists(Level::class)) {
-            $logRecord = new LogRecord(
+            
+        if (function_exists('enum_exists') && \Monolog\Logger::API == 3) {
+            $logRecord = new \Monolog\LogRecord(
                 datetime: new \DateTimeImmutable(),
                 channel: 'testChannel',
-                level: Level::Warning,
+                level: \Monolog\Level::Warning,
                 message: 'test',
                 context: []
             );
