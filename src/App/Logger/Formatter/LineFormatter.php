@@ -7,6 +7,8 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\App\Logger\Formatter;
 
+use Monolog\Logger;
+
 if (\Monolog\Logger::API == 3) {
     /**
      * Formatter for log messages for cloud.log
@@ -23,9 +25,8 @@ if (\Monolog\Logger::API == 3) {
                 Logger::getLevelName(Logger::ERROR),
                 Logger::getLevelName(Logger::CRITICAL),
             ];
-
-            if (isset($record->level_name)
-                && in_array($record->level_name, $errorLevels)
+            if (isset($record->level->name)
+                && in_array(strtoupper($record->level->name), $errorLevels)
                 && !empty($record->context['errorCode'])
             ) {
                 $this->format = self::FORMAT_BASE_ERROR;

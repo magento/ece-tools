@@ -91,7 +91,7 @@ class ValidateConfiguration implements StepInterface
         /* @var $validators ValidatorInterface[] */
         foreach ($this->validators as $level => $validators) {
             /** @phpstan-ignore-next-line */
-            if (function_exists('enum_exists') && enum_exists(Level::class)) {
+            if (\Monolog\Logger::API == 3) {
                 $level = Logger::toMonologLevel($level);
                 $level = $level->value;
             } else {
@@ -110,8 +110,12 @@ class ValidateConfiguration implements StepInterface
                 }
 
                 if ($result instanceof Error) {
-                    $level_code = $level->value;
-                    $errors[$level_code][] = $result;
+                    if (\Monolog\Logger::API == 3) {
+                        $level_code = $level;
+                        $errors[$level_code][] = $result;
+                    } else {
+                        $errors[$level][] = $result;
+                    }
                 }
             }
         }

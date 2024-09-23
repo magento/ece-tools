@@ -81,23 +81,29 @@ class HandlerFactory
         try {
             $levelOverride = $this->globalConfig->get(GlobalSection::VAR_MIN_LOGGING_LEVEL);
             $minLevel = !empty($levelOverride) ? $this->normalizeLevel($levelOverride) : self::UNDEFINED_LEVEL;
-
-            $configuration = $this->logConfig->get($handler);
+            if ($minLevel instanceof Level) {
+                $minLevel = $minLevel->value;
+            }
+            $configuration = $this->logConfig->get($handler);      
         } catch (ConfigException $exception) {
             throw new LoggerException($exception->getMessage(), $exception->getCode(), $exception);
         }
 
         if ($customMinLevel = $configuration->get('min_level')) {
             $minLevel = $this->normalizeLevel((string)$customMinLevel);
+            if ($minLevel instanceof Level) {
+                $minLevel = $minLevel->value;
+            }
         }
 
         try {
-            switch ($handler) {
+            switch ($handler) { 
                 case static::HANDLER_FILE:
                     $handlerInstance = new StreamHandler(
                         $configuration->get('file'),
                         $minLevel ?: Logger::DEBUG
                     );
+                    //print_r($handlerInstance);
                     break;
                 case static::HANDLER_FILE_ERROR:
                     $handlerInstance = new StreamHandler(
@@ -166,16 +172,23 @@ class HandlerFactory
 
     /**
      * @param string $level
-     * @return Level
+     * @return Level|int
      * @throws LoggerException
      */
-    private function normalizeLevel(string $level): Level
+    private function normalizeLevel(string $level): Level|int
     {
         /** @phpstan-ignore-next-line */
         $normalizedLevel = Logger::toMonologLevel($level);
 
-        if (!$normalizedLevel instanceof Level) {
-            throw new LoggerException('Logger level is incorrect');
+        if (\Monolog\Logger::API == 3) {
+            if (!$normalizedLevel instanceof Level) {
+                throw new LoggerException('Logger level is incorrect');
+            }
+        }
+        else {
+            if (!is_int($normalizedLevel)) {
+                throw new LoggerException('Logger level is incorrect');
+            }
         }
         return $normalizedLevel;
     }

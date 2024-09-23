@@ -31,8 +31,8 @@ if (\Monolog\Logger::API == 3) {
         /**
          * Finds and replace sensitive data in record message.
          *
-         * @param array $record
-         * @return array
+         * @param LogRecord $record
+         * @return LogRecord
          */
         public function __invoke(\Monolog\LogRecord $record)
         {  

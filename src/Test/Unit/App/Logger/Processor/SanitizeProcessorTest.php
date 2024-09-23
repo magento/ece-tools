@@ -27,6 +27,27 @@ class SanitizeProcessorTest extends TestCase
             ->willReturn('sanitized message');
 
         $sanitizeProcessor = new SanitizeProcessor($sanitizerMock);
-        $this->assertEquals(['message' => 'sanitized message'], $sanitizeProcessor(['message' => 'some message']));
+        if (\Monolog\Logger::API == 3) {
+            $logRecord = new \Monolog\LogRecord(
+                datetime: \DateTimeImmutable::createFromFormat('j-M-Y', '15-Feb-2009'),
+                channel: 'testChannel',
+                level: \Monolog\Level::Info,
+                message: 'some message',
+                context: []
+            );
+            $sanitizedRecord = new \Monolog\LogRecord(
+                datetime: \DateTimeImmutable::createFromFormat('j-M-Y', '15-Feb-2009'),
+                channel: 'testChannel',
+                level: \Monolog\Level::Info,
+                message: 'sanitized message',
+                context: []
+            );
+            $this->assertEquals($sanitizedRecord, $sanitizeProcessor($logRecord));
+        } else {
+            $logRecord = [
+                'message' => 'some message',
+            ];
+            $this->assertEquals(['message' => 'sanitized message'], $sanitizeProcessor($logRecord));
+        }
     }
 }

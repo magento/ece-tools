@@ -35,6 +35,16 @@ class LineFormatterTest extends TestCase
      */
     public function testFormat(string $expected, array $record)
     {
+        if (\Monolog\Logger::API == 3) {
+            $record = new \Monolog\LogRecord(
+                datetime: \DateTimeImmutable::createFromFormat('j-M-Y H:i:s', '15-Feb-2009 00:00:00'),
+                channel: 'testChannel',
+                level: \Monolog\Level::Warning,
+                message: $record['message'],
+                context: $record['context']
+            );
+        }
+
         $this->assertEquals($expected, $this->lineFormatter->format($record));
     }
 
@@ -42,35 +52,68 @@ class LineFormatterTest extends TestCase
      * @return array
      */
     public function formatDataProvider(): array
-    {
-        return [
-            [
-                '[%datetime%] WARNING: test' . PHP_EOL,
+    {   
+        if (\Monolog\Logger::API == 3) {
+            return [
                 [
-                    'message' => 'test',
-                    'level_name' => 'WARNING',
-                    'extra' => [],
-                    'context' => [],
-                ]
-            ],
-            [
-                '[%datetime%] WARNING: [111] test' . PHP_EOL,
+                    '[2009-02-15T00:00:00+00:00] WARNING: test' . PHP_EOL,
+                    [
+                        'message' => 'test',
+                        'level' => 'WARNING',
+                        'extra' => [],
+                        'context' => [],
+                    ]
+                ],
                 [
-                    'message' => 'test',
-                    'level_name' => 'WARNING',
-                    'extra' => [],
-                    'context' => ['errorCode' => 111],
-                ]
-            ],
-            [
-                '[%datetime%] WARNING: [111] test' . PHP_EOL . 'some suggestion' . PHP_EOL,
+                    '[2009-02-15T00:00:00+00:00] WARNING: [111] test' . PHP_EOL,
+                    [
+                        'message' => 'test',
+                        'level' => 'WARNING',
+                        'extra' => [],
+                        'context' => ['errorCode' => 111],
+                    ]
+                ],
                 [
-                    'message' => 'test',
-                    'level_name' => 'WARNING',
-                    'extra' => [],
-                    'context' => ['errorCode' => 111, 'suggestion' => 'some suggestion'],
-                ]
-            ],
-        ];
+                    '[2009-02-15T00:00:00+00:00] WARNING: [111] test' . PHP_EOL . 'some suggestion' . PHP_EOL,
+                    [
+                        'message' => 'test',
+                        'level' => 'WARNING',
+                        'extra' => [],
+                        'context' => ['errorCode' => 111, 'suggestion' => 'some suggestion'],
+                    ]
+                ],
+            ];
+        }
+        else {
+            return [
+                [
+                    '[%datetime%] WARNING: test' . PHP_EOL,
+                    [
+                        'message' => 'test',
+                        'level_name' => 'WARNING',
+                        'extra' => [],
+                        'context' => [],
+                    ]
+                ],
+                [
+                    '[%datetime%] WARNING: [111] test' . PHP_EOL,
+                    [
+                        'message' => 'test',
+                        'level_name' => 'WARNING',
+                        'extra' => [],
+                        'context' => ['errorCode' => 111],
+                    ]
+                ],
+                [
+                    '[%datetime%] WARNING: [111] test' . PHP_EOL . 'some suggestion' . PHP_EOL,
+                    [
+                        'message' => 'test',
+                        'level_name' => 'WARNING',
+                        'extra' => [],
+                        'context' => ['errorCode' => 111, 'suggestion' => 'some suggestion'],
+                    ]
+                ],
+            ];
+        }
     }
 }
