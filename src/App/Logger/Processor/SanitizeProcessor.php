@@ -9,7 +9,7 @@ namespace Magento\MagentoCloud\App\Logger\Processor;
 
 use Magento\MagentoCloud\App\Logger\Sanitizer;
 
-if (function_exists('enum_exists') && \Monolog\Logger::API == 3) {
+if (\Monolog\Logger::API == 3) {
     /**
      * Logger processor for sanitizing sensitive data.
      */

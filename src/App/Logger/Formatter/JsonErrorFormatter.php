@@ -12,7 +12,7 @@ use Magento\MagentoCloud\App\Logger\Error\ReaderInterface;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Monolog\Formatter\JsonFormatter;
 
-if (function_exists('enum_exists') && \Monolog\Logger::API == 3) {
+if (\Monolog\Logger::API == 3) {
     /**
      *
      * Formatter for log messages for cloud.error.log

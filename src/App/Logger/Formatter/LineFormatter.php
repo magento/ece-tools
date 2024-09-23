@@ -7,7 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\App\Logger\Formatter;
 
-if (function_exists('enum_exists') && \Monolog\Logger::API == 3) {
+if (\Monolog\Logger::API == 3) {
     /**
      * Formatter for log messages for cloud.log
      */

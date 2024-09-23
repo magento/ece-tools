@@ -58,7 +58,7 @@ class JsonErrorFormatterTest extends TestCase
                 'type' => 'warning'
             ]);
 
-        if (function_exists('enum_exists') && \Monolog\Logger::API == 3) {
+        if (\Monolog\Logger::API == 3) {
             $logRecord = new \Monolog\LogRecord(
                 datetime: new \DateTimeImmutable(),
                 channel: 'testChannel',
@@ -86,7 +86,7 @@ class JsonErrorFormatterTest extends TestCase
             ->with(11)
             ->willReturn([]);
 
-            if (function_exists('enum_exists') && \Monolog\Logger::API == 3) {
+            if (\Monolog\Logger::API == 3) {
                 $logRecord = new \Monolog\LogRecord(
                     datetime: new \DateTimeImmutable(),
                     channel: 'testChannel',
@@ -117,7 +117,7 @@ class JsonErrorFormatterTest extends TestCase
         $this->errorInfoMock->expects($this->never())
             ->method('get');
 
-        if (function_exists('enum_exists') && \Monolog\Logger::API == 3) {
+        if (\Monolog\Logger::API == 3) {
             $logRecord = new \Monolog\LogRecord(
                 datetime: new \DateTimeImmutable(),
                 channel: 'testChannel',
@@ -143,7 +143,7 @@ class JsonErrorFormatterTest extends TestCase
         $this->errorInfoMock->expects($this->never())
             ->method('get');
 
-        if (function_exists('enum_exists') && \Monolog\Logger::API == 3) {
+        if (\Monolog\Logger::API == 3) {
             $logRecord = new \Monolog\LogRecord(
                 datetime: new \DateTimeImmutable(),
                 channel: 'testChannel',
@@ -166,7 +166,7 @@ class JsonErrorFormatterTest extends TestCase
             ->method('read')
             ->willThrowException(new FileSystemException('error'));
             
-        if (function_exists('enum_exists') && \Monolog\Logger::API == 3) {
+        if (\Monolog\Logger::API == 3) {
             $logRecord = new \Monolog\LogRecord(
                 datetime: new \DateTimeImmutable(),
                 channel: 'testChannel',
