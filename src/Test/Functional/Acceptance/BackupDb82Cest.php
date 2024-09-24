@@ -16,7 +16,7 @@ use Robo\Exception\TaskException;
  * Checks database backup functionality
  * @group php82
  */
-class BackupDbCest extends AbstractCest
+class BackupDb82Cest extends AbstractCest
 {
     /**
      * @var array
