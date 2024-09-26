@@ -35,9 +35,9 @@ if (\Monolog\Logger::API == 3) {
          * @return LogRecord
          */
         public function __invoke(\Monolog\LogRecord $record)
-        {  
+        {
             $message = $this->sanitizer->sanitize($record->message);
-            // Create new LogRecord from existing and update the message, 
+            // Create new LogRecord from existing and update the message,
             // since message is read only
             $record = new \Monolog\LogRecord(
                 datetime: $record->datetime,

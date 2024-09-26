@@ -84,7 +84,7 @@ class HandlerFactory
             if ($minLevel instanceof Level) {
                 $minLevel = $minLevel->value;
             }
-            $configuration = $this->logConfig->get($handler);      
+            $configuration = $this->logConfig->get($handler);
         } catch (ConfigException $exception) {
             throw new LoggerException($exception->getMessage(), $exception->getCode(), $exception);
         }
@@ -97,7 +97,7 @@ class HandlerFactory
         }
 
         try {
-            switch ($handler) { 
+            switch ($handler) {
                 case static::HANDLER_FILE:
                     $handlerInstance = new StreamHandler(
                         $configuration->get('file'),
@@ -184,8 +184,7 @@ class HandlerFactory
             if (!$normalizedLevel instanceof Level) {
                 throw new LoggerException('Logger level is incorrect');
             }
-        }
-        else {
+        } else {
             if (!is_int($normalizedLevel)) {
                 throw new LoggerException('Logger level is incorrect');
             }

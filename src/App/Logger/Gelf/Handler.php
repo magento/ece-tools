@@ -34,7 +34,7 @@ if (function_exists('enum_exists') && enum_exists(Level::class)) {
         }
     }
 } else {
- /**
+    /**
      * Wrapper for GelfHandler class.
      */
     class Handler extends GelfHandler

@@ -86,20 +86,20 @@ class JsonErrorFormatterTest extends TestCase
             ->with(11)
             ->willReturn([]);
 
-            if (\Monolog\Logger::API == 3) {
-                $logRecord = new \Monolog\LogRecord(
-                    datetime: new \DateTimeImmutable(),
-                    channel: 'testChannel',
-                    level: \Monolog\Level::Warning,
-                    message: 'some error',
-                    context: ['errorCode' => 11, 'suggestion' => 'some suggestion']
-                );
-            } else {
-                $logRecord = [
-                    'message' => 'some error',
-                    'context' => ['errorCode' => 11, 'suggestion' => 'some suggestion']
-                ];
-            }
+        if (\Monolog\Logger::API == 3) {
+            $logRecord = new \Monolog\LogRecord(
+                datetime: new \DateTimeImmutable(),
+                channel: 'testChannel',
+                level: \Monolog\Level::Warning,
+                message: 'some error',
+                context: ['errorCode' => 11, 'suggestion' => 'some suggestion']
+            );
+        } else {
+            $logRecord = [
+                'message' => 'some error',
+                'context' => ['errorCode' => 11, 'suggestion' => 'some suggestion']
+            ];
+        }
 
         $this->assertEquals(
             '{"errorCode":11,"suggestion":"some suggestion","title":"some error"}' . PHP_EOL,

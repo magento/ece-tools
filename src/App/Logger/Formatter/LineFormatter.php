@@ -35,7 +35,7 @@ if (\Monolog\Logger::API == 3) {
             }
 
             if (isset($record->message) && !empty($record->context['suggestion'])) {
-                // Create new LogRecord from existing and update the message, 
+                // Create new LogRecord from existing and update the message,
                 // since message is read only
                 $message = $record->message . PHP_EOL . $record->context['suggestion'];
                 $record = new \Monolog\LogRecord(

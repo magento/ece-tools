@@ -62,9 +62,9 @@ if (\Monolog\Logger::API == 3) {
                 $loggedErrors = $this->reader->read();
 
                 if (isset($loggedErrors[$record->context['errorCode']])) {
-                   return '';
+                    return '';
                 }
-                return $this->toJson($this->formatLog($record)) . PHP_EOL; 
+                return $this->toJson($this->formatLog($record)) . PHP_EOL;
             } catch (\Exception $exception) {
                 return '';
             }

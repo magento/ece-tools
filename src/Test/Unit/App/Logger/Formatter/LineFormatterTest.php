@@ -52,7 +52,7 @@ class LineFormatterTest extends TestCase
      * @return array
      */
     public function formatDataProvider(): array
-    {   
+    {
         if (\Monolog\Logger::API == 3) {
             return [
                 [
@@ -83,8 +83,7 @@ class LineFormatterTest extends TestCase
                     ]
                 ],
             ];
-        }
-        else {
+        } else {
             return [
                 [
                     '[%datetime%] WARNING: test' . PHP_EOL,
