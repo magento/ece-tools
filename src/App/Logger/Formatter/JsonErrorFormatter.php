@@ -13,7 +13,6 @@ use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Monolog\Formatter\JsonFormatter;
 
 /**
- *
  * Formatter for log messages for cloud.error.log
  */
 class JsonErrorFormatter extends JsonFormatter

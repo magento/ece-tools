@@ -13,7 +13,6 @@ use Magento\MagentoCloud\Config\Validator\Result\Error;
 use Magento\MagentoCloud\Config\ValidatorException;
 use Magento\MagentoCloud\Config\ValidatorInterface;
 use Psr\Log\LoggerInterface;
-use Monolog\Level;
 
 /**
  * Validates configuration with given validators.

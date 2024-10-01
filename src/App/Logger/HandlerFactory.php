@@ -19,7 +19,6 @@ use Monolog\Handler\StreamHandler;
 use Monolog\Handler\SyslogHandler;
 use Monolog\Handler\SyslogUdpHandler;
 use Monolog\Logger;
-use Monolog\Level;
 
 /**
  * The handler factory.
@@ -97,7 +96,6 @@ class HandlerFactory
                         $configuration->get('file'),
                         $minLevel ?: Logger::DEBUG
                     );
-                    //print_r($handlerInstance);
                     break;
                 case static::HANDLER_FILE_ERROR:
                     $handlerInstance = new StreamHandler(
