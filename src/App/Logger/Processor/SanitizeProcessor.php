@@ -9,33 +9,36 @@ namespace Magento\MagentoCloud\App\Logger\Processor;
 
 use Magento\MagentoCloud\App\Logger\Sanitizer;
 
-if (\Monolog\Logger::API == 3) {
+/**
+ * Logger processor for sanitizing sensitive data.
+ */
+class SanitizeProcessor
+{
     /**
-     * Logger processor for sanitizing sensitive data.
+     * @var Sanitizer
      */
-    class SanitizeProcessor
+    private $sanitizer;
+
+    /**
+     * @param Sanitizer $sanitizer
+     */
+    public function __construct(Sanitizer $sanitizer)
     {
-        /**
-         * @var Sanitizer
-         */
-        private $sanitizer;
+        $this->sanitizer = $sanitizer;
+    }
 
-        /**
-         * @param Sanitizer $sanitizer
-         */
-        public function __construct(Sanitizer $sanitizer)
-        {
-            $this->sanitizer = $sanitizer;
-        }
-
-        /**
-         * Finds and replace sensitive data in record message.
-         *
-         * @param LogRecord $record
-         * @return LogRecord
-         */
-        public function __invoke(\Monolog\LogRecord $record)
-        {
+    /**
+     * Finds and replace sensitive data in record message.
+     *
+     * @param LogRecord $record
+     * @return LogRecord
+     */
+    public function __invoke(\Monolog\LogRecord|array $record)
+    {
+        // Older Monolog versions.
+        if (is_array($record)) {
+            $record['message'] = $this->sanitizer->sanitize($record['message']);
+        } else if ($record instanceof \Monolog\LogRecord) {  // Monolog version 3 or higher.
             $message = $this->sanitizer->sanitize($record->message);
             // Create new LogRecord from existing and update the message,
             // since message is read only
@@ -47,40 +50,7 @@ if (\Monolog\Logger::API == 3) {
                 context: $record->context,
                 extra: $record->extra,
             );
-
-            return $record;
         }
-    }
-} else {
-    /**
-     * Logger processor for sanitizing sensitive data.
-     */
-    class SanitizeProcessor
-    {
-        /**
-         * @var Sanitizer
-         */
-        private $sanitizer;
-
-        /**
-         * @param Sanitizer $sanitizer
-         */
-        public function __construct(Sanitizer $sanitizer)
-        {
-            $this->sanitizer = $sanitizer;
-        }
-
-        /**
-         * Finds and replace sensitive data in record message.
-         *
-         * @param array $record
-         * @return array
-         */
-        public function __invoke(array $record)
-        {
-            $record['message'] = $this->sanitizer->sanitize($record['message']);
-
-            return $record;
-        }
+        return $record;
     }
 }

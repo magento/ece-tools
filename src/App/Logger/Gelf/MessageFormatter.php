@@ -35,7 +35,7 @@ class MessageFormatter extends GelfMessageFormatter
     /**
      * @inheritdoc
      */
-    public function format(array|LogRecord $record): Message
+    public function format(\Monolog\LogRecord|array $record): Message
     {
         $message = parent::format($record);
 

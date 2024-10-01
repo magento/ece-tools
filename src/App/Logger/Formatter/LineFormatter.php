@@ -9,22 +9,23 @@ namespace Magento\MagentoCloud\App\Logger\Formatter;
 
 use Monolog\Logger;
 
-if (\Monolog\Logger::API == 3) {
-    /**
-     * Formatter for log messages for cloud.log
-     */
-    class LineFormatter extends \Monolog\Formatter\LineFormatter
-    {
-        public const FORMAT_BASE = "[%datetime%] %level_name%: %message%\n";
-        public const FORMAT_BASE_ERROR = "[%datetime%] %level_name%: [%context.errorCode%] %message%\n";
+/**
+ * Formatter for log messages for cloud.log
+ */
+class LineFormatter extends \Monolog\Formatter\LineFormatter
+{
+    public const FORMAT_BASE = "[%datetime%] %level_name%: %message%\n";
+    public const FORMAT_BASE_ERROR = "[%datetime%] %level_name%: [%context.errorCode%] %message%\n";
 
-        public function format(\Monolog\LogRecord $record): string
-        {
-            $errorLevels = [
-                Logger::getLevelName(Logger::WARNING),
-                Logger::getLevelName(Logger::ERROR),
-                Logger::getLevelName(Logger::CRITICAL),
-            ];
+    public function format(\Monolog\LogRecord|array $record): string
+    {
+        $errorLevels = [
+            Logger::getLevelName(Logger::WARNING),
+            Logger::getLevelName(Logger::ERROR),
+            Logger::getLevelName(Logger::CRITICAL),
+        ];
+        // Monolog version 3 or higher.
+        if ($record instanceof \Monolog\LogRecord) {
             if (isset($record->level->name)
                 && in_array(strtoupper($record->level->name), $errorLevels)
                 && !empty($record->context['errorCode'])
@@ -47,30 +48,7 @@ if (\Monolog\Logger::API == 3) {
                     extra: $record->extra,
                 );
             }
-    
-            return parent::format($record);
-        }
-    }
-} else {
-    /**
-     * Formatter for log messages for cloud.log
-     */
-    class LineFormatter extends \Monolog\Formatter\LineFormatter
-    {
-        public const FORMAT_BASE = "[%datetime%] %level_name%: %message%\n";
-        public const FORMAT_BASE_ERROR = "[%datetime%] %level_name%: [%context.errorCode%] %message%\n";
-
-        /**
-         * @inheritDoc
-         */
-        public function format(array $record): string
-        {
-            $errorLevels = [
-                Logger::getLevelName(Logger::WARNING),
-                Logger::getLevelName(Logger::ERROR),
-                Logger::getLevelName(Logger::CRITICAL),
-            ];
-
+        } else if (is_array($record)) { // Older Monolog versions.
             if (isset($record['level_name'])
                 && in_array($record['level_name'], $errorLevels)
                 && !empty($record['context']['errorCode'])
@@ -83,8 +61,8 @@ if (\Monolog\Logger::API == 3) {
             if (isset($record['message']) && !empty($record['context']['suggestion'])) {
                 $record['message'] .= PHP_EOL . $record['context']['suggestion'];
             }
-
-            return parent::format($record);
         }
+
+        return parent::format($record);
     }
 }

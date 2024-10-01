@@ -12,188 +12,113 @@ use Magento\MagentoCloud\App\Logger\Error\ReaderInterface;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Monolog\Formatter\JsonFormatter;
 
-if (\Monolog\Logger::API == 3) {
+/**
+ *
+ * Formatter for log messages for cloud.error.log
+ */
+class JsonErrorFormatter extends JsonFormatter
+{
     /**
-     *
-     * Formatter for log messages for cloud.error.log
+     * @var ErrorInfo
      */
-    class JsonErrorFormatter extends JsonFormatter
-    {
-        /**
-         * @var ErrorInfo
-         */
-        private $errorInfo;
+    private $errorInfo;
 
-        /**
-         * @var ReaderInterface
-         */
-        private $reader;
+    /**
+     * @var ReaderInterface
+     */
+    private $reader;
 
-        /**
-         * @param ErrorInfo $errorInfo
-         * @param ReaderInterface $reader
-         * @param 1|2 $batchMode
-         * @param bool $appendNewline
-         */
-        public function __construct(
-            ErrorInfo $errorInfo,
-            ReaderInterface $reader,
-            $batchMode = self::BATCH_MODE_JSON,
-            $appendNewline = true
-        ) {
-            parent::__construct($batchMode, $appendNewline);
+    /**
+     * @param ErrorInfo $errorInfo
+     * @param ReaderInterface $reader
+     * @param 1|2 $batchMode
+     * @param bool $appendNewline
+     */
+    public function __construct(
+        ErrorInfo $errorInfo,
+        ReaderInterface $reader,
+        $batchMode = self::BATCH_MODE_JSON,
+        $appendNewline = true
+    ) {
+        parent::__construct($batchMode, $appendNewline);
 
-            $this->errorInfo = $errorInfo;
-            $this->reader = $reader;
-        }
-
-        /**
-         * Format record, skip logging if ErrorCode isn't passed.
-         *
-         * {@inheritDoc}
-         */
-        public function format(\Monolog\LogRecord $record): string
-        {
-            try {
-                if (!isset($record->context['errorCode'])) {
-                    return '';
-                }
-
-                $loggedErrors = $this->reader->read();
-
-                if (isset($loggedErrors[$record->context['errorCode']])) {
-                    return '';
-                }
-                return $this->toJson($this->formatLog($record)) . PHP_EOL;
-            } catch (\Exception $exception) {
-                return '';
-            }
-        }
-
-        /**
-         * Returns error info data based on errorCode.
-         *
-         * @param array $record
-         * @return array
-         * @throws FileSystemException
-         */
-        private function formatLog(\Monolog\LogRecord $record): array
-        {
-            $errorCode = $record->context['errorCode'];
-            $errorInfo = $this->errorInfo->get($errorCode);
-
-            if (empty($errorInfo)) {
-                $errorInfo = [
-                    'errorCode' => $errorCode,
-                    'title' => $record->message ?? ''
-                ];
-            } else {
-                $errorInfo['errorCode'] = $errorCode;
-                if (!empty($record->message)) {
-                    $errorInfo['title'] = $record->message;
-                }
-            }
-
-            if (!empty($record->context['suggestion'])) {
-                $errorInfo['suggestion'] = $record->context['suggestion'];
-            }
-
-            ksort($errorInfo);
-
-            return $errorInfo;
-        }
+        $this->errorInfo = $errorInfo;
+        $this->reader = $reader;
     }
-} else {
+
     /**
+     * Format record, skip logging if ErrorCode isn't passed.
      *
-     * Formatter for log messages for cloud.error.log
+     * {@inheritDoc}
      */
-    class JsonErrorFormatter extends JsonFormatter
+    public function format(\Monolog\LogRecord|array $record): string
     {
-        /**
-         * @var ErrorInfo
-         */
-        private $errorInfo;
-
-        /**
-         * @var ReaderInterface
-         */
-        private $reader;
-
-        /**
-         * @param ErrorInfo $errorInfo
-         * @param ReaderInterface $reader
-         * @param 1|2 $batchMode
-         * @param bool $appendNewline
-         */
-        public function __construct(
-            ErrorInfo $errorInfo,
-            ReaderInterface $reader,
-            $batchMode = self::BATCH_MODE_JSON,
-            $appendNewline = true
-        ) {
-            parent::__construct($batchMode, $appendNewline);
-
-            $this->errorInfo = $errorInfo;
-            $this->reader = $reader;
-        }
-
-        /**
-         * Format record, skip logging if ErrorCode isn't passed.
-         *
-         * {@inheritDoc}
-         */
-        public function format(array $record): string
-        {
+        // Older Monolog versions.
+        if (is_array($record)) {
             try {
                 if (!isset($record['context']['errorCode'])) {
                     return '';
                 }
-
+    
                 $loggedErrors = $this->reader->read();
-
+    
                 if (isset($loggedErrors[$record['context']['errorCode']])) {
                     return '';
                 }
-
+    
                 return parent::format($this->formatLog($record));
             } catch (\Exception $exception) {
                 return '';
             }
-        }
-
-        /**
-         * Returns error info data based on errorCode.
-         *
-         * @param array $record
-         * @return array
-         * @throws FileSystemException
-         */
-        private function formatLog(array $record): array
-        {
-            $errorCode = $record['context']['errorCode'];
-            $errorInfo = $this->errorInfo->get($errorCode);
-
-            if (empty($errorInfo)) {
-                $errorInfo = [
-                    'errorCode' => $errorCode,
-                    'title' => $record['message'] ?? ''
-                ];
-            } else {
-                $errorInfo['errorCode'] = $errorCode;
-                if (!empty($record['message'])) {
-                    $errorInfo['title'] = $record['message'];
+        } else if ($record instanceof \Monolog\LogRecord) { // Monolog version 3 or higher.
+            try {
+                if (!isset($record->context['errorCode'])) {
+                    return '';
                 }
+    
+                $loggedErrors = $this->reader->read();
+    
+                if (isset($loggedErrors[$record->context['errorCode']])) {
+                    return '';
+                }
+
+                return $this->toJson($this->formatLog($record->toArray())) . PHP_EOL;
+            } catch (\Exception $exception) {
+                return '';
             }
-
-            if (!empty($record['context']['suggestion'])) {
-                $errorInfo['suggestion'] = $record['context']['suggestion'];
-            }
-
-            ksort($errorInfo);
-
-            return $errorInfo;
         }
     }
 
+    /**
+     * Returns error info data based on errorCode.
+     *
+     * @param array $record
+     * @return array
+     * @throws FileSystemException
+     */
+    private function formatLog(array $record): array
+    {
+        $errorCode = $record['context']['errorCode'];
+        $errorInfo = $this->errorInfo->get($errorCode);
+
+        if (empty($errorInfo)) {
+            $errorInfo = [
+                'errorCode' => $errorCode,
+                'title' => $record['message'] ?? ''
+            ];
+        } else {
+            $errorInfo['errorCode'] = $errorCode;
+            if (!empty($record['message'])) {
+                $errorInfo['title'] = $record['message'];
+            }
+        }
+
+        if (!empty($record['context']['suggestion'])) {
+            $errorInfo['suggestion'] = $record['context']['suggestion'];
+        }
+
+        ksort($errorInfo);
+
+        return $errorInfo;
+    }
 }

@@ -91,11 +91,9 @@ class ValidateConfiguration implements StepInterface
         /* @var $validators ValidatorInterface[] */
         foreach ($this->validators as $level => $validators) {
             /** @phpstan-ignore-next-line */
+            $level = Logger::toMonologLevel($level);
             if (\Monolog\Logger::API == 3) {
-                $level = Logger::toMonologLevel($level);
                 $level = $level->value;
-            } else {
-                $level = Logger::toMonologLevel($level);
             }
             foreach ($validators as $name => $validator) {
                 if (!$validator instanceof ValidatorInterface) {
