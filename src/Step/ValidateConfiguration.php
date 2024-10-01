@@ -92,7 +92,7 @@ class ValidateConfiguration implements StepInterface
         foreach ($this->validators as $level => $validators) {
             /** @phpstan-ignore-next-line */
             $level = Logger::toMonologLevel($level);
-            if (\Monolog\Logger::API == 3) {
+            if (!is_int($level)) {
                 $level = $level->value;
             }
             foreach ($validators as $name => $validator) {
@@ -108,12 +108,7 @@ class ValidateConfiguration implements StepInterface
                 }
 
                 if ($result instanceof Error) {
-                    if (\Monolog\Logger::API == 3) {
-                        $level_code = $level;
-                        $errors[$level_code][] = $result;
-                    } else {
-                        $errors[$level][] = $result;
-                    }
+                    $errors[$level][] = $result;
                 }
             }
         }

@@ -81,9 +81,6 @@ class HandlerFactory
         try {
             $levelOverride = $this->globalConfig->get(GlobalSection::VAR_MIN_LOGGING_LEVEL);
             $minLevel = !empty($levelOverride) ? $this->normalizeLevel($levelOverride) : self::UNDEFINED_LEVEL;
-            if ($minLevel instanceof Level) {
-                $minLevel = $minLevel->value;
-            }
             $configuration = $this->logConfig->get($handler);
         } catch (ConfigException $exception) {
             throw new LoggerException($exception->getMessage(), $exception->getCode(), $exception);
@@ -91,9 +88,6 @@ class HandlerFactory
 
         if ($customMinLevel = $configuration->get('min_level')) {
             $minLevel = $this->normalizeLevel((string)$customMinLevel);
-            if ($minLevel instanceof Level) {
-                $minLevel = $minLevel->value;
-            }
         }
 
         try {
@@ -172,23 +166,23 @@ class HandlerFactory
 
     /**
      * @param string $level
-     * @return Level|int
+     * @return int
      * @throws LoggerException
      */
-    private function normalizeLevel(string $level): Level|int
+    private function normalizeLevel(string $level): int
     {
         /** @phpstan-ignore-next-line */
         $normalizedLevel = Logger::toMonologLevel($level);
 
         if (\Monolog\Logger::API == 3) {
-            if (!$normalizedLevel instanceof Level) {
-                throw new LoggerException('Logger level is incorrect');
-            }
-        } else {
-            if (!is_int($normalizedLevel)) {
-                throw new LoggerException('Logger level is incorrect');
-            }
+            /** @phpstan-ignore-next-line */
+            $normalizedLevel =  $normalizedLevel->value;
         }
+
+        if (!is_int($normalizedLevel)) {
+            throw new LoggerException('Logger lever is incorrect');
+        }
+
         return $normalizedLevel;
     }
 }
