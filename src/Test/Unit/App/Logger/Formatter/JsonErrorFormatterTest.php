@@ -58,9 +58,21 @@ class JsonErrorFormatterTest extends TestCase
                 'type' => 'warning'
             ]);
 
+        if (\Monolog\Logger::API == 3) {
+            $logRecord = new \Monolog\LogRecord(
+                datetime: new \DateTimeImmutable(),
+                channel: 'testChannel',
+                level: \Monolog\Level::Warning,
+                message: 'some error',
+                context: ['errorCode' => 11, ]
+            );
+        } else {
+            $logRecord = ['message' => 'some error', 'context' => ['errorCode' => 11]];
+        }
+
         $this->assertEquals(
             '{"errorCode":11,"title":"some error","type":"warning"}' . PHP_EOL,
-            $this->jsonErrorFormatter->format(['message' => 'some error', 'context' => ['errorCode' => 11]])
+            $this->jsonErrorFormatter->format($logRecord)
         );
     }
 
@@ -74,12 +86,24 @@ class JsonErrorFormatterTest extends TestCase
             ->with(11)
             ->willReturn([]);
 
-        $this->assertEquals(
-            '{"errorCode":11,"suggestion":"some suggestion","title":"some error"}' . PHP_EOL,
-            $this->jsonErrorFormatter->format([
+        if (\Monolog\Logger::API == 3) {
+            $logRecord = new \Monolog\LogRecord(
+                datetime: new \DateTimeImmutable(),
+                channel: 'testChannel',
+                level: \Monolog\Level::Warning,
+                message: 'some error',
+                context: ['errorCode' => 11, 'suggestion' => 'some suggestion']
+            );
+        } else {
+            $logRecord = [
                 'message' => 'some error',
                 'context' => ['errorCode' => 11, 'suggestion' => 'some suggestion']
-            ])
+            ];
+        }
+
+        $this->assertEquals(
+            '{"errorCode":11,"suggestion":"some suggestion","title":"some error"}' . PHP_EOL,
+            $this->jsonErrorFormatter->format($logRecord)
         );
     }
 
@@ -93,8 +117,22 @@ class JsonErrorFormatterTest extends TestCase
         $this->errorInfoMock->expects($this->never())
             ->method('get');
 
+        if (\Monolog\Logger::API == 3) {
+            $logRecord = new \Monolog\LogRecord(
+                datetime: new \DateTimeImmutable(),
+                channel: 'testChannel',
+                level: \Monolog\Level::Warning,
+                message: 'some error',
+                context: ['errorCode' => 11]
+            );
+        } else {
+            $logRecord = [
+                'message' => 'some error',
+                'context' => ['errorCode' => 11]
+            ];
+        }
         $this->assertEmpty(
-            $this->jsonErrorFormatter->format(['message' => 'some error', 'context' => ['errorCode' => 11]])
+            $this->jsonErrorFormatter->format($logRecord)
         );
     }
 
@@ -105,15 +143,43 @@ class JsonErrorFormatterTest extends TestCase
         $this->errorInfoMock->expects($this->never())
             ->method('get');
 
-        $this->assertEmpty($this->jsonErrorFormatter->format(['message' => 'test']));
+        if (\Monolog\Logger::API == 3) {
+            $logRecord = new \Monolog\LogRecord(
+                datetime: new \DateTimeImmutable(),
+                channel: 'testChannel',
+                level: \Monolog\Level::Warning,
+                message: 'test',
+                context: []
+            );
+        } else {
+            $logRecord = [
+                'message' => 'test',
+                'context' => []
+            ];
+        }
+        $this->assertEmpty($this->jsonErrorFormatter->format($logRecord));
     }
 
     public function testFormatWithException(): void
     {
-        $this->readerMock->expects($this->once())
+        $this->readerMock->expects($this->any())
             ->method('read')
             ->willThrowException(new FileSystemException('error'));
-
-        $this->assertEmpty($this->jsonErrorFormatter->format(['message' => 'test', 'context' => ['errorCode' => 11]]));
+            
+        if (\Monolog\Logger::API == 3) {
+            $logRecord = new \Monolog\LogRecord(
+                datetime: new \DateTimeImmutable(),
+                channel: 'testChannel',
+                level: \Monolog\Level::Warning,
+                message: 'test',
+                context: []
+            );
+        } else {
+            $logRecord = [
+                'message' => 'test',
+                'context' => ['errorCode' => 11]
+            ];
+        }
+        $this->assertEmpty($this->jsonErrorFormatter->format($logRecord));
     }
 }

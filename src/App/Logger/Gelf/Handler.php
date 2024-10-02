@@ -21,7 +21,7 @@ class Handler extends GelfHandler
      * @param array $record
      * @codeCoverageIgnore
      */
-    protected function write(array $record): void
+    protected function write(\Monolog\LogRecord|array $record): void
     {
         try {
             parent::write($record);
