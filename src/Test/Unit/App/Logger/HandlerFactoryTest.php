@@ -21,6 +21,7 @@ use Monolog\Handler\StreamHandler;
 use Monolog\Handler\SyslogHandler;
 use Monolog\Handler\SyslogUdpHandler;
 use Monolog\Logger;
+use Monolog\Level;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -142,10 +143,13 @@ class HandlerFactoryTest extends TestCase
 
         /** @var AbstractHandler $handler */
         $handler = $this->handlerFactory->create($handlerName);
-
+        $level = $handler->getLevel();
+        if ($level instanceof Level) {
+            $level = $level->value;
+        }
         $this->assertInstanceOf(HandlerInterface::class, $handler);
         $this->assertInstanceOf($expectedClass, $handler);
-        $this->assertSame($expectedLevel, $handler->getLevel());
+        $this->assertSame($expectedLevel, $level);
     }
 
     /**

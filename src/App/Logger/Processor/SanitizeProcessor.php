@@ -29,14 +29,26 @@ class SanitizeProcessor
 
     /**
      * Finds and replace sensitive data in record message.
-     *
-     * @param array $record
-     * @return array
      */
-    public function __invoke(array $record)
+    public function __invoke(\Monolog\LogRecord|array $record)
     {
-        $record['message'] = $this->sanitizer->sanitize($record['message']);
-
-        return $record;
+        // Monolog version 3 or higher.
+        if (\Monolog\Logger::API == 3) {
+            $message = $this->sanitizer->sanitize($record->message); // @phpstan-ignore-line
+            // Create new LogRecord from existing and update the message,
+            // since message is read only
+            $record = new \Monolog\LogRecord( // @phpstan-ignore-line
+                datetime: $record->datetime, // @phpstan-ignore-line
+                channel: $record->channel, // @phpstan-ignore-line
+                level: $record->level, // @phpstan-ignore-line
+                message: $message,
+                context: $record->context, // @phpstan-ignore-line
+                extra: $record->extra, // @phpstan-ignore-line
+            );
+            return $record;
+        } else { // Older Monolog versions.
+            $record['message'] = $this->sanitizer->sanitize($record['message']);
+            return $record;
+        }
     }
 }

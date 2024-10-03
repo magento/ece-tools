@@ -50,22 +50,42 @@ class JsonErrorFormatter extends JsonFormatter
      *
      * {@inheritDoc}
      */
-    public function format(array $record): string
+    public function format(\Monolog\LogRecord|array $record): string
     {
-        try {
-            if (!isset($record['context']['errorCode'])) {
+        // Monolog version 3 or higher.
+        if (\Monolog\Logger::API == 3) {
+            try {
+                /** @phpstan-ignore-next-line */
+                if (!isset($record->context['errorCode'])) {
+                    return '';
+                }
+    
+                $loggedErrors = $this->reader->read();
+    
+                if (isset($loggedErrors[$record->context['errorCode']])) {
+                    return '';
+                }
+
+                return $this->toJson($this->formatLog($record->toArray())) . PHP_EOL;
+            } catch (\Exception $exception) {
                 return '';
             }
-
-            $loggedErrors = $this->reader->read();
-
-            if (isset($loggedErrors[$record['context']['errorCode']])) {
+        } else {  // Older Monolog versions.
+            try {
+                if (!isset($record['context']['errorCode'])) {
+                    return '';
+                }
+    
+                $loggedErrors = $this->reader->read();
+    
+                if (isset($loggedErrors[$record['context']['errorCode']])) {
+                    return '';
+                }
+    
+                return parent::format($this->formatLog($record));
+            } catch (\Exception $exception) {
                 return '';
             }
-
-            return parent::format($this->formatLog($record));
-        } catch (\Exception $exception) {
-            return '';
         }
     }
 

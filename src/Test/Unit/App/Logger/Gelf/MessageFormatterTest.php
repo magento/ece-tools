@@ -35,14 +35,26 @@ class MessageFormatterTest extends TestCase
             'some_key' => 'some_value'
         ]);
 
-        $message = $this->messageFormatter->format([
-            'message' => 'some message',
-            'datetime' => new \DateTime(),
-            'level' => Logger::INFO,
-            'extra' => [],
-            'context' => [],
-            'channel' => 'some_channel'
-        ]);
+        if (\Monolog\Logger::API == 3) {
+            $logRecord = new \Monolog\LogRecord(
+                datetime: new \DateTimeImmutable(),
+                channel: 'some_channel',
+                level: \Monolog\Level::Info,
+                message: 'some message',
+                context: []
+            );
+        } else {
+            $logRecord = [
+                'message' => 'some message',
+                'datetime' => new \DateTime(),
+                'level' => Logger::INFO,
+                'extra' => [],
+                'context' => [],
+                'channel' => 'some_channel'
+            ];
+        }
+
+        $message = $this->messageFormatter->format($logRecord);
 
         $this->assertEquals(
             [
