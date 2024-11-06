@@ -43,5 +43,21 @@ abstract class ScdStrategyCest extends AbstractCest
     /**
      * @return array
      */
-    abstract protected function scdStrategyDataProvider(): array;
+    protected function scdStrategyDataProvider(): array
+    {
+        return [
+            [
+              'env_yaml' => 'files/scd/scd-strategy-quick.yaml',
+              'strategy' => 'quick'
+            ],
+            [
+              'env_yaml' => 'files/scd/scd-strategy-standard.yaml',
+              'strategy' => 'standard'
+            ],
+            [
+              'env_yaml' => 'files/scd/scd-strategy-compact.yaml',
+              'strategy' => 'compact'
+            ],
+        ];
+    }
 }

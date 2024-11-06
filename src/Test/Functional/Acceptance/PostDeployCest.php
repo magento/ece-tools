@@ -53,7 +53,19 @@ abstract class PostDeployCest extends AbstractCest
     /**
      * @return array
      */
-    abstract protected function postDeployDataProvider(): array;
+    protected function postDeployDataProvider(): array
+    {
+        return [
+            [
+                'variables' => [
+                    'MAGENTO_CLOUD_VARIABLES' => ['ADMIN_EMAIL' => 'admin@example.com']
+                ],
+            ],
+            [
+                'variables' => ['MAGENTO_CLOUD_VARIABLES' => []]
+            ],
+        ];
+    }
 
     /**
      * @param \CliTester $I
