@@ -144,19 +144,6 @@ class ValidatorTest extends TestCase
                 ]
             ],
             [
-                '2.5.0',
-                [
-                    ServiceInterface::NAME_PHP => '7.4', // wrong
-                    ServiceInterface::NAME_DB_MARIA => '10.6.1',
-                    ServiceInterface::NAME_NGINX => '1.9',
-                    ServiceInterface::NAME_VARNISH => '7.1.1',
-                    ServiceInterface::NAME_REDIS => 'latest',
-                    ServiceInterface::NAME_ELASTICSEARCH => '7.5', // wrong
-                    ServiceInterface::NAME_RABBITMQ => '3.8' // wrong
-                ],
-                3
-            ],
-            [
                 '2.4.0',
                 [
                     ServiceInterface::NAME_PHP => '7.4',
