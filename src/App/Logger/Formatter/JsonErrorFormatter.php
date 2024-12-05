@@ -81,7 +81,7 @@ class JsonErrorFormatter extends JsonFormatter
                 if (isset($loggedErrors[$record['context']['errorCode']])) {
                     return '';
                 }
-    
+                /** @phpstan-ignore-next-line */
                 return parent::format($this->formatLog($record));
             } catch (\Exception $exception) {
                 return '';

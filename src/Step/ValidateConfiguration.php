@@ -89,10 +89,9 @@ class ValidateConfiguration implements StepInterface
 
         /* @var $validators ValidatorInterface[] */
         foreach ($this->validators as $level => $validators) {
-            /** @phpstan-ignore-next-line */
-            $level = Logger::toMonologLevel($level);
-            if (!is_int($level)) {
-                $level = $level->value;
+            $level = Logger::toMonologLevel($level); // @phpstan-ignore-line
+            if (!is_int($level)) { // @phpstan-ignore-line
+                $level = $level->value; // @phpstan-ignore-line
             }
             foreach ($validators as $name => $validator) {
                 if (!$validator instanceof ValidatorInterface) {
