@@ -278,7 +278,7 @@ class ValidateConfigurationTest extends TestCase
      * @return MockObject|ValidatorInterface
      * @throws \ReflectionException
      */
-    private function createValidatorWithError(string $error, string $suggestion, int $errorCode = null): MockObject
+    private function createValidatorWithError(string $error, string $suggestion, int | null $errorCode = null): MockObject
     {
         $warningValidator = $this->getMockForAbstractClass(ValidatorInterface::class);
         $warningResultMock = $this->createMock(Result\Error::class);

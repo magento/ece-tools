@@ -59,7 +59,7 @@ class MagentoCloudVariablesTest extends TestCase
     public function testValidate(
         array $magentoCloudVariables,
         string $expectedResultType,
-        string $suggestionMessage = null
+        string | null $suggestionMessage = null
     ): void {
         $this->environmentMock->expects($this->once())
             ->method('getVariables')
