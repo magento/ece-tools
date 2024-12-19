@@ -55,7 +55,7 @@ class DbDumpTest extends TestCase
         $this->dumpProcessorMock = $this->createMock(DumpProcessor::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->questionMock = $this->getMockBuilder(QuestionHelper::class)
-            ->setMethods(['ask'])
+            ->onlyMethods(['ask'])
             ->getMock();
         $this->helperSetMock = $this->createMock(HelperSet::class);
 

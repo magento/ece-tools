@@ -125,7 +125,7 @@ class CleanRedisCacheTest extends TestCase
 
         /** @var Credis_Client|MockObject $credisClient */
         $credisClient = $this->getMockBuilder(Credis_Client::class)
-            ->setMethods(['connect', 'flushDb'])
+            ->onlyMethods(['connect', 'flushDb'])
             ->getMock();
         $this->credisFactoryMock->expects($this->exactly(6))
             ->method('create')
@@ -204,7 +204,7 @@ class CleanRedisCacheTest extends TestCase
 
         /** @var Credis_Client|MockObject $credisClient */
         $credisClient = $this->getMockBuilder(Credis_Client::class)
-            ->setMethods(['connect', 'flushDb'])
+            ->onlyMethods(['connect', 'flushDb'])
             ->getMock();
         $this->credisFactoryMock->expects($this->once())
             ->method('create')
@@ -258,7 +258,7 @@ class CleanRedisCacheTest extends TestCase
                 ]
             ]);
         $credisClientMock = $this->getMockBuilder(Credis_Client::class)
-            ->setMethods(['connect', 'flushDb'])
+            ->onlyMethods(['connect', 'flushDb'])
             ->getMock();
         $this->credisFactoryMock->expects($this->once())
             ->method('create')

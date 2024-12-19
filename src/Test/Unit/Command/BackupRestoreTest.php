@@ -55,7 +55,7 @@ class BackupRestoreTest extends TestCase
         $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
             ->getMockForAbstractClass();
         $this->questionMock = $this->getMockBuilder(QuestionHelper::class)
-            ->setMethods(['ask'])
+            ->onlyMethods(['ask'])
             ->getMock();
         $this->helperSetMock = $this->createMock(HelperSet::class);
 

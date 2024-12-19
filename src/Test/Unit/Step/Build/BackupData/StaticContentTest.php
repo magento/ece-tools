@@ -76,7 +76,7 @@ class StaticContentTest extends TestCase
     {
         $this->fileMock = $this->createMock(File::class);
         $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
-            ->setMethods(['info'])
+            ->onlyMethods(['info'])
             ->getMockForAbstractClass();
         $this->directoryListMock = $this->createMock(DirectoryList::class);
         $this->flagManagerMock = $this->createMock(FlagManager::class);
