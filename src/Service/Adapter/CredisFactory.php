@@ -25,7 +25,7 @@ class CredisFactory
      * @param string|null $password
      * @return Credis_Client
      */
-    public function create(string $server, int $port, int $database, string $password = null): Credis_Client
+    public function create(string $server, int $port, int $database, string | null $password = null): Credis_Client
     {
         return new Credis_Client(
             $server,

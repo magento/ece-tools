@@ -34,7 +34,7 @@ class Error implements ResultInterface
      * @param string $suggestion
      * @param int|null $code
      */
-    public function __construct(string $message, string $suggestion = '', int $code = null)
+    public function __construct(string $message, string $suggestion = '', int | null $code = null)
     {
         $this->message = $message;
         $this->suggestion = $suggestion;

@@ -64,7 +64,7 @@ class ResultFactory
      * @param int|null $code
      * @return Error
      */
-    public function error(string $message, string $suggestion = '', int $code = null): Error
+    public function error(string $message, string $suggestion = '', int | null $code = null): Error
     {
         return new Error($message, $suggestion, $code);
     }
