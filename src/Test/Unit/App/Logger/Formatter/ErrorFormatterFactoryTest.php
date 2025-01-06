@@ -44,14 +44,17 @@ class ErrorFormatterFactoryTest extends TestCase
     {
         $this->containerMock->expects($this->exactly(2))
             ->method('get')
-            ->withConsecutive(
-                [ErrorInfo::class],
-                [ReaderInterface::class]
-            )
-            ->willReturnOnConsecutiveCalls(
-                $this->createMock(ErrorInfo::class),
-                $this->getMockForAbstractClass(ReaderInterface::class)
-            );
+            ->willReturnCallback(function (...$args) {
+                static $series = [
+                    [[ErrorInfo::class], $this->createMock(ErrorInfo::class)],
+                    [[ReaderInterface::class], $this->getMockForAbstractClass(ReaderInterface::class)],
+                ];
+
+                [$expectedArgs, $return] = array_shift($series);
+                $this->assertSame($expectedArgs, $args);
+
+                return $return;
+            });
 
         $errorFormatter = $this->errorFormatterFactory->create();
         $this->assertInstanceOf(JsonErrorFormatter::class, $errorFormatter);

@@ -14,6 +14,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\ExpressionLanguage\ParsedExpression;
 
 /**
  * @inheritdoc
@@ -74,6 +75,11 @@ class MasterSlaveTest extends TestCase
         $inputMock = $this->getMockForAbstractClass(InputInterface::class);
         $outputMock = $this->getMockForAbstractClass(OutputInterface::class);
 
+        $series = [
+            [$outputMock, 'MySQL slave connection is not configured'],
+            [$outputMock, 'Redis slave connection is not configured']
+        ];
+
         $this->deployConfigMock->expects($this->exactly(2))
             ->method('get')
             ->willReturnMap([
@@ -82,10 +88,10 @@ class MasterSlaveTest extends TestCase
             ]);
         $this->outputFormatterMock->expects($this->exactly(2))
             ->method('writeItem')
-            ->withConsecutive(
-                [$outputMock, 'MySQL slave connection is not configured'],
-                [$outputMock, 'Redis slave connection is not configured']
-            );
+            ->willReturnCallback(function (...$args) use (&$series) {
+                $expectedArgs = array_shift($series);
+                $this->assertSame($expectedArgs, $args);
+            });
         $this->outputFormatterMock->expects($this->once())
             ->method('writeResult')
             ->with($outputMock, false, 'Slave connections are not configured');

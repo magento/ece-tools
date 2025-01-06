@@ -75,11 +75,18 @@ class PathResolverTest extends TestCase
     public function testResolveRootPath()
     {
         $scenarioPath = 'path/to/scenario';
-
+        $series = [
+            [[$scenarioPath], false],
+            [['/root/' . $scenarioPath], true],
+        ];
         $this->fileMock->expects($this->exactly(2))
             ->method('isExists')
-            ->withConsecutive([$scenarioPath], ['/root/' . $scenarioPath])
-            ->willReturnOnConsecutiveCalls(false, true);
+            ->willReturnCallback(function (...$args) use (&$series) {
+                [$expectedArgs, $return] = array_shift($series);
+                $this->assertSame($expectedArgs, $args);
+
+                return $return;
+            });
 
         $this->assertEquals(
             '/root/' . $scenarioPath,
@@ -93,11 +100,20 @@ class PathResolverTest extends TestCase
     public function testResolveMagentoRootPath()
     {
         $scenarioPath = 'path/to/scenario';
+        $series = [
+            [[$scenarioPath], false],
+            [['/root/' . $scenarioPath], false],
+            [['/root/magento/' . $scenarioPath], true]
+        ];
 
         $this->fileMock->expects($this->exactly(3))
             ->method('isExists')
-            ->withConsecutive([$scenarioPath], ['/root/' . $scenarioPath], ['/root/magento/' . $scenarioPath])
-            ->willReturnOnConsecutiveCalls(false, false, true);
+            ->willReturnCallback(function (...$args) use (&$series) {
+                [$expectedArgs, $return] = array_shift($series);
+                $this->assertSame($expectedArgs, $args);
+
+                return $return;
+            });
 
         $this->assertEquals(
             '/root/magento/' . $scenarioPath,
@@ -111,11 +127,20 @@ class PathResolverTest extends TestCase
         $this->expectExceptionMessage('Scenario path/to/scenario does not exist');
 
         $scenarioPath = 'path/to/scenario';
+        $series = [
+            [[$scenarioPath], false],
+            [['/root/' . $scenarioPath], false],
+            [['/root/magento/' . $scenarioPath], false]
+        ];
 
         $this->fileMock->expects($this->exactly(3))
             ->method('isExists')
-            ->withConsecutive([$scenarioPath], ['/root/' . $scenarioPath], ['/root/magento/' . $scenarioPath])
-            ->willReturnOnConsecutiveCalls(false, false, false);
+            ->willReturnCallback(function (...$args) use (&$series) {
+                [$expectedArgs, $return] = array_shift($series);
+                $this->assertSame($expectedArgs, $args);
+
+                return $return;
+            });
 
         $this->pathResolver->resolve($scenarioPath);
     }
