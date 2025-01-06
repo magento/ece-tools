@@ -90,7 +90,7 @@ abstract class AcceptanceCest extends AbstractCest
         $I->see('Home page');
         $I->see('CMS homepage content goes here.');
 
-        $log = $I->grabFileContent('/var/log/cloud.log');
+        $log = $I->grabFileContent('/init/var/log/cloud.log');
         $I->assertStringContainsString('--admin-password=\'******\'', $log);
         if (strpos($log, '--db-password') !== false) {
             $I->assertStringContainsString('--db-password=\'******\'', $log);
