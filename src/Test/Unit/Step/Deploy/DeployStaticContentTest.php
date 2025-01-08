@@ -104,10 +104,15 @@ class DeployStaticContentTest extends TestCase
             ->willReturn(false);
         $this->loggerMock->expects($this->exactly(2))
             ->method('notice')
-            ->withConsecutive(
-                ['Generating fresh static content'],
-                ['End of generating fresh static content']
-            );
+            // withConsecutive() alternative.
+            ->willReturnCallback(function ($args) {
+                static $series = [
+                    'Generating fresh static content',
+                    'End of generating fresh static content'
+                ];
+                $expectedArgs = array_shift($series);
+                $this->assertSame($expectedArgs, $args);
+            });
         $this->stageConfigMock->method('get')
             ->willReturnMap([
                 [DeployInterface::VAR_CLEAN_STATIC_FILES, true],
@@ -136,10 +141,15 @@ class DeployStaticContentTest extends TestCase
             ->willReturn(false);
         $this->loggerMock->expects($this->exactly(2))
             ->method('notice')
-            ->withConsecutive(
-                ['Generating fresh static content'],
-                ['End of generating fresh static content']
-            );
+            // withConsecutive() alternative.
+            ->willReturnCallback(function ($args) {
+                static $series = [
+                    'Generating fresh static content',
+                    'End of generating fresh static content'
+                ];
+                $expectedArgs = array_shift($series);
+                $this->assertSame($expectedArgs, $args);
+            });
         $this->stageConfigMock->expects($this->any())
             ->method('get')
             ->willReturnMap([
@@ -184,9 +194,14 @@ class DeployStaticContentTest extends TestCase
             ->willReturn(true);
         $this->loggerMock->expects($this->once())
             ->method('notice')
-            ->withConsecutive(
-                ['Skipping static content deploy. SCD on demand is enabled.']
-            );
+            // withConsecutive() alternative.
+            ->willReturnCallback(function ($args) {
+                static $series = [
+                    'Skipping static content deploy. SCD on demand is enabled.'
+                ];
+                $expectedArgs = array_shift($series);
+                $this->assertSame($expectedArgs, $args);
+            });
         $this->flagManagerMock->expects($this->never())
             ->method('exists');
         $this->staticContentCleanerMock->expects($this->once())

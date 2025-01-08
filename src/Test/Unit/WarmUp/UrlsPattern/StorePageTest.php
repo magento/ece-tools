@@ -41,8 +41,11 @@ class StorePageTest extends TestCase
     {
         $this->urlManagerMock->expects($this->exactly(2))
             ->method('getStoreBaseUrl')
-            ->withConsecutive(['store1'], ['store2'])
-            ->willReturnOnConsecutiveCalls('http://store1.com/', 'http://store2.com');
+            // withConsecutive() alternative.
+            ->willReturnCallback(fn($param) => match ([$param]) {
+                ['store1'] => 'http://store1.com/',
+                ['store2'] => 'http://store2.com'
+            });
         $this->urlManagerMock->expects($this->never())
             ->method('getBaseUrls');
 

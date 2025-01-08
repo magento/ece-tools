@@ -56,10 +56,14 @@ class BackupDataTest extends TestCase
     {
         $this->loggerMock->expects($this->exactly(2))
             ->method('notice')
-            ->withConsecutive(
-                ['Copying data to the ./init directory'],
-                ['End of copying data to the ./init directory']
-            );
+            // withConsecutive() alternative.
+            ->willReturnCallback(function (string $axis) {
+                static $series = [
+                    'Copying data to the ./init directory',
+                    'End of copying data to the ./init directory'
+                ];
+                $this->assertSame(array_shift($series), $axis);
+            });
         $this->stepMock->expects($this->once())
             ->method('execute');
 

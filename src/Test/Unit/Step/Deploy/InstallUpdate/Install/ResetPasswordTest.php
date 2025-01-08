@@ -162,6 +162,10 @@ class ResetPasswordTest extends TestCase
         $url = 'https://localhost/';
         $dir = '/root';
         $file = $dir . '/var/credentials_email.txt';
+        $series = [
+            'Emailing admin URL to admin user ' . $expectedAdminUsername . ' at ' . $adminEmail,
+            'Saving email with admin URL: ' . $file
+        ];
         $this->adminDataMock->expects($this->once())
             ->method('getPassword')
             ->willReturn('');
@@ -182,10 +186,11 @@ class ResetPasswordTest extends TestCase
             ->willReturn($adminUsername);
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
-            ->withConsecutive(
-                ['Emailing admin URL to admin user ' . $expectedAdminUsername . ' at ' . $adminEmail],
-                ['Saving email with admin URL: ' . $file]
-            );
+            // withConsecutive() alternative.
+            ->willReturnCallback(function ($args) use (&$series) {
+                $expectedArgs = array_shift($series);
+                $this->assertSame($expectedArgs, $args);
+            });
         $this->fileMock->expects($this->once())
             ->method('fileGetContents')
             ->willReturn('Hello {{ admin_url }} {{ admin_email }} {{ admin_name }}');

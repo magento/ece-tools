@@ -80,10 +80,15 @@ class SetCryptKeyTest extends TestCase
             ->willReturn('TWFnZW50byBSb3g=');
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
-            ->withConsecutive(
-                ['Checking existence of encryption key'],
-                [sprintf('Setting encryption key from %s', Environment::VARIABLE_CRYPT_KEY)]
-            );
+            // withConsecutive() alternative.
+            ->willReturnCallback(function ($args) {
+                static $series = [
+                    'Checking existence of encryption key',
+                    sprintf('Setting encryption key from %s', Environment::VARIABLE_CRYPT_KEY)
+                ];
+                $expectedArgs = array_shift($series);
+                $this->assertSame($expectedArgs, $args);
+            });
         $this->configWriterMock->expects($this->once())
             ->method('update')
             ->with(['crypt' => ['key' => 'TWFnZW50byBSb3g=']]);
@@ -111,10 +116,15 @@ class SetCryptKeyTest extends TestCase
             ->willReturn('TWFnZW50byBSb3g=');
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
-            ->withConsecutive(
-                ['Checking existence of encryption key'],
-                [sprintf('Setting encryption key from %s', Environment::VARIABLE_CRYPT_KEY)]
-            );
+            // withConsecutive() alternative.
+            ->willReturnCallback(function ($args) {
+                static $series = [
+                    'Checking existence of encryption key',
+                    sprintf('Setting encryption key from %s', Environment::VARIABLE_CRYPT_KEY)
+                ];
+                $expectedArgs = array_shift($series);
+                $this->assertSame($expectedArgs, $args);
+            });
         $this->configWriterMock->expects($this->once())
             ->method('update')
             ->with(['crypt' => ['key' => 'TWFnZW50byBSb3g=']])
