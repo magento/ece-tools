@@ -119,8 +119,11 @@ class CacheTest extends TestCase
     {
         $this->stageConfigMock->expects(self::exactly(2))
             ->method('get')
-            ->withConsecutive([DeployInterface::VAR_CACHE_CONFIGURATION], [DeployInterface::VAR_CACHE_REDIS_BACKEND])
-            ->willReturnOnConsecutiveCalls([], '');
+            // withConsecutive() alternative.
+            ->willReturnCallback(fn($param) => match ([$param]) {
+                [DeployInterface::VAR_CACHE_CONFIGURATION] => [],
+                [DeployInterface::VAR_CACHE_REDIS_BACKEND] => ''
+            });
         $this->redisMock->expects(self::once())
             ->method('getConfiguration')
             ->willReturn([]);

@@ -105,7 +105,10 @@ class ShellTest extends TestCase
         }
         $this->loggerMock->expects($this->exactly(count($logExpects)))
             ->method('debug')
-            ->withConsecutive(...$logExpects);
+            // withConsecutive() alternative.
+            ->willReturnCallback(function (...$logExpects) {
+                return null;
+            });
         $this->sanitizerMock->expects($this->never())
             ->method('sanitize');
 

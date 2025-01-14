@@ -122,6 +122,11 @@ class DumpProcessorTest extends TestCase
      */
     public function testExecute(array $dbConfig, $expects, bool $removeDefiners)
     {
+        $series = [
+            ['main', $this->connectionDataMock, $removeDefiners],
+            ['quote', $this->connectionDataMock, $removeDefiners],
+            ['sales', $this->connectionDataMock, $removeDefiners]
+        ];
         $this->dbConfigMock->expects($this->once())
             ->method('get')
             ->willReturn($dbConfig);
@@ -133,11 +138,16 @@ class DumpProcessorTest extends TestCase
             ->method('kill');
         $this->dumpGeneratorMock->expects($expects)
             ->method('create')
-            ->withConsecutive(
+            /*->withConsecutive(
                 ['main', $this->connectionDataMock, $removeDefiners],
                 ['quote', $this->connectionDataMock, $removeDefiners],
                 ['sales', $this->connectionDataMock, $removeDefiners]
-            );
+            );*/
+            // withConsecutive() alternative.
+            ->willReturnCallback(function (...$args) use (&$series) {
+                $expectedArgs = array_shift($series);
+                $this->assertSame($expectedArgs, $args);
+            });
 
         $this->dumpProcessor->execute($removeDefiners);
     }
@@ -204,6 +214,11 @@ class DumpProcessorTest extends TestCase
         array $databases,
         $expects
     ) {
+       $series = [
+            ['main', $this->connectionDataMock, true],
+            ['quote', $this->connectionDataMock, true],
+            ['sales', $this->connectionDataMock, true]
+        ];
         $this->dbConfigMock->expects($this->once())
             ->method('get')
             ->willReturn([
@@ -222,11 +237,16 @@ class DumpProcessorTest extends TestCase
             ->method('kill');
         $this->dumpGeneratorMock->expects($expects)
             ->method('create')
-            ->withConsecutive(
+            /*->withConsecutive(
                 ['main', $this->connectionDataMock, true],
                 ['quote', $this->connectionDataMock, true],
                 ['sales', $this->connectionDataMock, true]
-            );
+            );*/
+            // withConsecutive() alternative.
+            ->willReturnCallback(function (...$args) use (&$series) {
+                $expectedArgs = array_shift($series);
+                $this->assertSame($expectedArgs, $args);
+            });
 
         $this->dumpProcessor->execute(true, $databases);
     }

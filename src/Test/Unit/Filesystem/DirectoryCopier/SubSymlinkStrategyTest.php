@@ -76,10 +76,15 @@ class SubSymlinkStrategyTest extends TestCase
             ->willReturn($directoryIteratorMock);
         $this->fileMock->expects($this->exactly(2))
             ->method('symlink')
-            ->withConsecutive(
-                ['realFromDir/file1', 'toDir/file1'],
-                ['realFromDir/file2', 'toDir/file2']
-            );
+            // withConsecutive() alternative.
+            ->willReturnCallback(function (...$args) {
+                static $series = [
+                    ['realFromDir/file1', 'toDir/file1'],
+                    ['realFromDir/file2', 'toDir/file2']
+                ];
+                $expectedArgs = array_shift($series);
+                $this->assertSame($expectedArgs, $args);
+            });
 
         $this->assertTrue($this->subSymlinkStrategy->copy('fromDir', 'toDir'));
     }

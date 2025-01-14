@@ -125,10 +125,22 @@ class PoolTest extends TestCase
             ->with($jsonErrorFormatterMock)
             ->willReturnSelf();
 
+        $series = [
+            [['slack'], $slackHandlerMock],
+            [['email'], $emailHandlerMock],
+            [['syslog'], $syslogHandler],
+            [['error-logger'], $errorHandler],
+        ];
+
         $this->handlerFactoryMock->expects($this->exactly(4))
             ->method('create')
-            ->withConsecutive(['slack'], ['email'], ['syslog'], ['error-logger'])
-            ->willReturnOnConsecutiveCalls($slackHandlerMock, $emailHandlerMock, $syslogHandler, $errorHandler);
+            // withConsecutive() alternative.
+            ->willReturnCallback(function (...$args) use (&$series) {
+                [$expectedArgs, $return] = array_shift($series);
+                $this->assertSame($expectedArgs, $args);
+
+                return $return;
+            });
 
         $this->pool->getHandlers();
         // Lazy load.
