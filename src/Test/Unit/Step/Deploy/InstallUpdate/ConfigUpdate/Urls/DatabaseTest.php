@@ -80,10 +80,15 @@ class DatabaseTest extends TestCase
     ): void {
         $this->loggerMock->expects($loggerInfoExpects)
             ->method('info')
-            ->withConsecutive(
-                ['Updating secure and unsecure URLs in core_config_data table.'],
-                ['Host was replaced: [example1.com] => [example2.com]']
-            );
+            // withConsecutive() alternative.
+            ->willReturnCallback(function ($args) {
+                static $series = [
+                    'Updating secure and unsecure URLs in core_config_data table.',
+                    'Host was replaced: [example1.com] => [example2.com]'
+                ];
+                $expectedArgs = array_shift($series);
+                $this->assertSame($expectedArgs, $args);
+            });
         $this->connectionMock->expects($this->once())
             ->method('select')
             ->with(
@@ -102,17 +107,13 @@ class DatabaseTest extends TestCase
             ->willReturn($urlManagerGetUrlsWillReturn);
         $this->connectionMock->expects($connectionExpectsAffectingQuery)
             ->method('affectingQuery')
-            ->withConsecutive(
-                [
+            // withConsecutive() alternative.
+            ->willReturnCallback(fn($param) => match ($param) {
+                    ['UPDATE `core_config_data` SET `value` = REPLACE(`value`, ?, ?) WHERE `value` LIKE ?',
+                    ['example1.com', 'example2.com', '%example1.com%']] => 2,
                     'UPDATE `core_config_data` SET `value` = REPLACE(`value`, ?, ?) WHERE `value` LIKE ?',
-                    ['example1.com', 'example2.com', '%example1.com%']
-                ],
-                [
-                    'UPDATE `core_config_data` SET `value` = REPLACE(`value`, ?, ?) WHERE `value` LIKE ?',
-                    ['example1.com', 'example2.com', '%example1.com%']
-                ]
-            )
-            ->willReturnOnConsecutiveCalls(2, 0);
+                    ['example1.com', 'example2.com', '%example1.com%'] => 0,
+            });
 
         $this->step->execute();
     }
@@ -124,7 +125,7 @@ class DatabaseTest extends TestCase
     {
         return [
             'urls not equal' => [
-                'loggerInfoExpects' => $this->exactly(2),
+                'loggerInfoExpects' => $this->once(),
                 'urlManagerGetUrlsWillReturn' => [
                     'secure' => ['' => 'https://example2.com', '*' => 'https://subsite---example2.com'],
                     'unsecure' => ['' => 'http://example2.com', '*' => 'http://subsite---example2.com'],

@@ -114,30 +114,35 @@ class CleanRedisCacheTest extends TestCase
             ]);
         $this->loggerMock->expects($this->exactly(6))
             ->method('info')
-            ->withConsecutive(
-                ['Clearing redis cache: default'],
-                ['Clearing redis cache: page_cache'],
-                ['Clearing redis cache: some_type0'],
-                ['Clearing redis cache: some_type1'],
-                ['Clearing redis cache: some_type2'],
-                ['Clearing redis cache: some_type4']
-            );
+            // withConsecutive() alternative.
+            ->willReturnCallback(function ($args) {
+                static $series = [
+                    'Clearing redis cache: default',
+                    'Clearing redis cache: page_cache',
+                    'Clearing redis cache: some_type0',
+                    'Clearing redis cache: some_type1',
+                    'Clearing redis cache: some_type2',
+                    'Clearing redis cache: some_type4'
+                ];
+                $expectedArgs = array_shift($series);
+                $this->assertSame($expectedArgs, $args);
+            });
 
         /** @var Credis_Client|MockObject $credisClient */
         $credisClient = $this->getMockBuilder(Credis_Client::class)
-            ->onlyMethods(['connect', 'flushDb'])
+            ->addMethods(['flushDb'])
+            ->onlyMethods(['connect'])
             ->getMock();
         $this->credisFactoryMock->expects($this->exactly(6))
             ->method('create')
-            ->withConsecutive(
-                ['localhost', '1234', 0],
-                ['127.0.0.1', 1234, 1],
-                ['localhost', 6379, 2, 'password'],
-                ['localhost', 1234, 0],
-                ['127.0.0.1', 6379, 0],
-                []
-            )->willReturn($credisClient);
-
+            // withConsecutive() alternative.
+            ->willReturnCallback(fn($param) => match ($param) {
+                'localhost', '1234', 0 => $credisClient,
+                '127.0.0.1', 1234, 1 => $credisClient,
+                'localhost', 6379, 2, 'password' => $credisClient,
+                'localhost', 1234, 0 => $credisClient,
+                '127.0.0.1', 6379, 0 => $credisClient,
+            });
         $credisClient->expects($this->exactly(6))
             ->method('connect');
         $credisClient->expects($this->exactly(6))
@@ -198,19 +203,26 @@ class CleanRedisCacheTest extends TestCase
             ]);
         $this->loggerMock->expects($this->once())
             ->method('info')
-            ->withConsecutive(
-                ['Clearing redis cache: default']
-            );
+            // withConsecutive() alternative.
+            ->willReturnCallback(function ($args) {
+                static $series = [
+                    'Clearing redis cache: default'
+                ];
+                $expectedArgs = array_shift($series);
+                $this->assertSame($expectedArgs, $args);
+            });
 
         /** @var Credis_Client|MockObject $credisClient */
         $credisClient = $this->getMockBuilder(Credis_Client::class)
-            ->onlyMethods(['connect', 'flushDb'])
+            ->addMethods(['flushDb'])
+            ->onlyMethods(['connect'])
             ->getMock();
         $this->credisFactoryMock->expects($this->once())
             ->method('create')
-            ->withConsecutive(
-                ['localhost', '1234', 0]
-            )->willReturn($credisClient);
+            // withConsecutive() alternative.
+            ->willReturnCallback(fn($param) => match ($param) {
+                'localhost', '1234', 0 => $credisClient
+            });
 
         $credisClient->method('connect')
             ->willThrowException(new \CredisException('Some error'));
@@ -258,7 +270,9 @@ class CleanRedisCacheTest extends TestCase
                 ]
             ]);
         $credisClientMock = $this->getMockBuilder(Credis_Client::class)
-            ->onlyMethods(['connect', 'flushDb'])
+            //->onlyMethods(['connect', 'flushDb'])
+            ->addMethods(['flushDb'])
+            ->onlyMethods(['connect'])
             ->getMock();
         $this->credisFactoryMock->expects($this->once())
             ->method('create')

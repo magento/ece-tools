@@ -136,18 +136,21 @@ class DumpProcessorTest extends TestCase
             ->method('disable');
         $this->backgroundProcessMock->expects($this->once())
             ->method('kill');
+        $mocks = [
+            'main',
+            'quote',
+            'sales'
+        ];
         $this->dumpGeneratorMock->expects($expects)
             ->method('create')
-            /*->withConsecutive(
-                ['main', $this->connectionDataMock, $removeDefiners],
-                ['quote', $this->connectionDataMock, $removeDefiners],
-                ['sales', $this->connectionDataMock, $removeDefiners]
-            );*/
             // withConsecutive() alternative.
-            ->willReturnCallback(function (...$args) use (&$series) {
-                $expectedArgs = array_shift($series);
-                $this->assertSame($expectedArgs, $args);
-            });
+            ->with(
+                $this->callback(function (string $mock) use (&$mocks) {
+                  return array_shift($mocks) === $mock;
+                }),
+                $this->connectionDataMock,
+                $removeDefiners
+            );
 
         $this->dumpProcessor->execute($removeDefiners);
     }
@@ -235,18 +238,21 @@ class DumpProcessorTest extends TestCase
             ->method('disable');
         $this->backgroundProcessMock->expects($this->once())
             ->method('kill');
+        $mocks = [
+            'main',
+            'quote',
+            'sales'
+        ];
         $this->dumpGeneratorMock->expects($expects)
             ->method('create')
-            /*->withConsecutive(
-                ['main', $this->connectionDataMock, true],
-                ['quote', $this->connectionDataMock, true],
-                ['sales', $this->connectionDataMock, true]
-            );*/
             // withConsecutive() alternative.
-            ->willReturnCallback(function (...$args) use (&$series) {
-                $expectedArgs = array_shift($series);
-                $this->assertSame($expectedArgs, $args);
-            });
+            ->with(
+                $this->callback(function (string $mock) use (&$mocks) {
+                  return array_shift($mocks) === $mock;
+                }),
+                $this->connectionDataMock,
+                true
+            );
 
         $this->dumpProcessor->execute(true, $databases);
     }

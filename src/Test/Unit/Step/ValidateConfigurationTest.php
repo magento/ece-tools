@@ -315,7 +315,7 @@ class ValidateConfigurationTest extends TestCase
                 ]
             );*/
             // withConsecutive() alternative.
-            ->willReturnCallback(function ($args) use (&$series) {
+            ->willReturnCallback(function (...$args) use (&$series) {
                 $expectedArgs = array_shift($series);
                 $this->assertSame($expectedArgs, $args);
             });

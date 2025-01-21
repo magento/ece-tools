@@ -174,10 +174,18 @@ class ConnectionTest extends TestCase
 
         $this->statementMock->expects($this->exactly(2))
             ->method('bindValue')
-            ->withConsecutive(
+            /*->withConsecutive(
                 [':name', 'John', \PDO::PARAM_STR],
                 [':age', 2, \PDO::PARAM_INT]
-            );
+            );*/
+            ->willReturnCallback(function (...$args) {
+                static $series = [
+                    [':name', 'John', \PDO::PARAM_STR],
+                    [':age', 2, \PDO::PARAM_INT]
+                ];
+                $expectedArgs = array_shift($series);
+                $this->assertSame($expectedArgs, $args);
+            });
         $this->statementMock->expects($this->once())
             ->method('rowCount')
             ->willReturn(1);
@@ -194,10 +202,18 @@ class ConnectionTest extends TestCase
 
         $this->statementMock->expects($this->exactly(2))
             ->method('bindValue')
-            ->withConsecutive(
+            /*->withConsecutive(
                 [':name', 'John', \PDO::PARAM_STR],
                 [':age', 2, \PDO::PARAM_INT]
-            );
+            );*/
+            ->willReturnCallback(function (...$args) {
+                static $series = [
+                    [':name', 'John', \PDO::PARAM_STR],
+                    [':age', 2, \PDO::PARAM_INT]
+                ];
+                $expectedArgs = array_shift($series);
+                $this->assertSame($expectedArgs, $args);
+            });
         $this->statementMock->expects($this->once())
             ->method('execute')
             ->willReturn(true);
