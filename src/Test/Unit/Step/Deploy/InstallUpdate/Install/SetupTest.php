@@ -81,7 +81,6 @@ class SetupTest extends TestCase
     public function testExecute(): void
     {
         $installUpgradeLog = '/tmp/log.log';
-
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Installing Magento.');
@@ -98,10 +97,14 @@ class SetupTest extends TestCase
 
         $this->shellMock->expects($this->exactly(2))
             ->method('execute')
-            ->withConsecutive(
-                ['echo \'Installation time: \'$(date) | tee -a ' . $installUpgradeLog],
-                ['/bin/bash -c "set -o pipefail; magento install command | tee -a /tmp/log.log"']
-            );
+            // withConsecutive() alternative.
+            ->with(self::callback(function (string $message) use ($installUpgradeLog){
+                static $i = 0;
+                return match (++$i) {
+                    1 => $message === 'echo \'Installation time: \'$(date) | tee -a ' . $installUpgradeLog,
+                    2 => $message === '/bin/bash -c "set -o pipefail; magento install command | tee -a /tmp/log.log"',
+                };
+            }));
 
         $this->step->execute();
     }
