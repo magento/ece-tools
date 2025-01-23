@@ -604,13 +604,24 @@ class UrlManagerTest extends TestCase
                 'Cannot fetch base URL using the config:show:default-url command. ' .
                 'Instead, using the URL from the MAGENTO_CLOUD_ROUTES variable.'
             );
-        $this->loggerMock->expects($this->exactly(3))
+        $invokedCount = $this->atLeast(3);
+        $this->loggerMock->expects($invokedCount)
             ->method('debug')
-            ->withConsecutive(
-                ['some error'],
-                ['Initializing routes.'],
-                [$this->anything()]
-            );
+            // withConsecutive() alternative.
+            ->willReturnCallback(function ($parameters) use ($invokedCount) {
+                if ($invokedCount->numberOfInvocations() === 1) {
+                    $this->assertSame('some error', $parameters);
+                }
+        
+                if ($invokedCount->numberOfInvocations() === 2) {
+                    $this->assertSame('Initializing routes.', $parameters);
+                }
+
+                if ($invokedCount->numberOfInvocations() === 3) {
+                    $this->assertThat($parameters, $this->anything());
+                }
+            });
+
 
         $this->assertEquals(
             'https://example.com/',

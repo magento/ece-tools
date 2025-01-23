@@ -74,18 +74,43 @@ class RendererTest extends TestCase
         $this->outputFormatterMock->expects(self::any())
             ->method('format')
             ->willReturnArgument(0);
-        $this->outputMock->expects($this->atLeast(8))
+        $invokedCount = $this->atLeast(8);
+        $this->outputMock->expects($invokedCount)
             ->method('writeln')
-            ->withConsecutive(
-                [PHP_EOL . '<info>Magento Cloud Services:</info>'],
-                [$this->anything()],
-                [$this->matchesRegularExpression('|Service configuration.*?Value|')],
-                [$this->anything()],
-                [$this->stringContains('service1')],
-                [$this->anything()],
-                [$this->matchesRegularExpression('|option1.*?value1|')],
-                [$this->matchesRegularExpression('|option2.*?value2|')]
-            );
+            // withConsecutive() alternative.
+            ->willReturnCallback(function ($parameters) use ($invokedCount) {
+                if ($invokedCount->numberOfInvocations() === 1) {
+                    $this->assertSame(PHP_EOL . '<info>Magento Cloud Services:</info>', $parameters);
+                }
+        
+                if ($invokedCount->numberOfInvocations() === 2) {
+                    $this->assertThat($parameters, $this->anything());
+                }
+
+                if ($invokedCount->numberOfInvocations() === 3) {
+                    $this->assertMatchesRegularExpression('|Service configuration.*?Value|', $parameters);
+                }
+
+                if ($invokedCount->numberOfInvocations() === 4) {
+                    $this->assertThat($parameters, $this->anything());
+                }
+
+                if ($invokedCount->numberOfInvocations() === 5) {
+                    $this->assertStringContainsString('service1', $parameters);
+                }
+
+                if ($invokedCount->numberOfInvocations() === 6) {
+                    $this->assertThat($parameters, $this->anything());
+                }
+
+                if ($invokedCount->numberOfInvocations() === 7) {
+                    $this->assertMatchesRegularExpression('|option1.*?value1|', $parameters);
+                }
+
+                if ($invokedCount->numberOfInvocations() === 8) {
+                    $this->assertMatchesRegularExpression('|option2.*?value2|', $parameters);
+                }
+            });
 
         $this->renderer->printRelationships($this->outputMock);
     }
@@ -102,18 +127,43 @@ class RendererTest extends TestCase
         $this->outputFormatterMock->expects(self::any())
             ->method('format')
             ->willReturnArgument(0);
-        $this->outputMock->expects($this->atLeast(8))
+        $invokedCount = $this->atLeast(8);
+        $this->outputMock->expects($invokedCount)
             ->method('writeln')
-            ->withConsecutive(
-                [PHP_EOL . '<info>Magento Cloud Routes:</info>'],
-                [$this->anything()],
-                [$this->matchesRegularExpression('|Route configuration.*?Value|')],
-                [$this->anything()],
-                [$this->stringContains('route1')],
-                [$this->anything()],
-                [$this->anything()],
-                [$this->matchesRegularExpression('|option1.*?value1|')]
-            );
+            // withConsecutive() alternative.
+            ->willReturnCallback(function ($parameters) use ($invokedCount) {
+                if ($invokedCount->numberOfInvocations() === 1) {
+                    $this->assertSame(PHP_EOL . '<info>Magento Cloud Routes:</info>', $parameters);
+                }
+        
+                if ($invokedCount->numberOfInvocations() === 2) {
+                    $this->assertThat($parameters, $this->anything());
+                }
+
+                if ($invokedCount->numberOfInvocations() === 3) {
+                    $this->assertMatchesRegularExpression('|Route configuration.*?Value|', $parameters);
+                }
+
+                if ($invokedCount->numberOfInvocations() === 4) {
+                    $this->assertThat($parameters, $this->anything());
+                }
+
+                if ($invokedCount->numberOfInvocations() === 5) {
+                    $this->assertStringContainsString('route1', $parameters);
+                }
+
+                if ($invokedCount->numberOfInvocations() === 6) {
+                    $this->assertThat($parameters, $this->anything());
+                }
+
+                if ($invokedCount->numberOfInvocations() === 7) {
+                    $this->assertThat($parameters, $this->anything());
+                }
+
+                if ($invokedCount->numberOfInvocations() === 8) {
+                    $this->assertMatchesRegularExpression('|option1.*?value1|', $parameters);
+                }
+            });
 
         $this->renderer->printRoutes($this->outputMock);
     }
@@ -134,20 +184,51 @@ class RendererTest extends TestCase
         $this->outputFormatterMock->expects(self::any())
             ->method('format')
             ->willReturnArgument(0);
-        $this->outputMock->expects($this->atLeast(10))
+        $invokedCount = $this->atLeast(8);
+        $this->outputMock->expects($invokedCount)
             ->method('writeln')
-            ->withConsecutive(
-                [PHP_EOL . '<info>Magento Cloud Environment Variables:</info>'],
-                [$this->anything()],
-                [$this->matchesRegularExpression('|Variable name.*?Value|')],
-                [$this->anything()],
-                [$this->matchesRegularExpression('|variable1.*?value1|')],
-                [$this->matchesRegularExpression('|variable2.*?null|')],
-                [$this->matchesRegularExpression('|variable3.*?true|')],
-                [$this->stringContains('variable4')],
-                [$this->matchesRegularExpression('|option1.*?false|')],
-                [$this->matchesRegularExpression('|option2.*?optionValue2|')]
-            );
+            // withConsecutive() alternative.
+            ->willReturnCallback(function ($parameters) use ($invokedCount) {
+                if ($invokedCount->numberOfInvocations() === 1) {
+                    $this->assertSame(PHP_EOL . '<info>Magento Cloud Environment Variables:</info>', $parameters);
+                }
+        
+                if ($invokedCount->numberOfInvocations() === 2) {
+                    $this->assertThat($parameters, $this->anything());
+                }
+
+                if ($invokedCount->numberOfInvocations() === 3) {
+                    $this->assertMatchesRegularExpression('|Variable name.*?Value|', $parameters);
+                }
+
+                if ($invokedCount->numberOfInvocations() === 4) {
+                    $this->assertThat($parameters, $this->anything());
+                }
+
+                if ($invokedCount->numberOfInvocations() === 5) {
+                    $this->assertMatchesRegularExpression('|variable1.*?value1|', $parameters);
+                }
+
+                if ($invokedCount->numberOfInvocations() === 6) {
+                    $this->assertMatchesRegularExpression('|variable2.*?null|', $parameters);
+                }
+
+                if ($invokedCount->numberOfInvocations() === 7) {
+                    $this->assertMatchesRegularExpression('|variable3.*?true|', $parameters);
+                }
+
+                if ($invokedCount->numberOfInvocations() === 8) {
+                    $this->assertStringContainsString('variable4', $parameters);
+                }
+
+                if ($invokedCount->numberOfInvocations() === 9) {
+                    $this->assertMatchesRegularExpression('|option1.*?false|', $parameters);
+                }
+
+                if ($invokedCount->numberOfInvocations() === 10) {
+                    $this->assertMatchesRegularExpression('|option2.*?optionValue2|', $parameters);
+                }
+            });
 
         $this->renderer->printVariables($this->outputMock);
     }

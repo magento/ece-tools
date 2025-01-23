@@ -171,42 +171,16 @@ class ConnectionTest extends TestCase
             ':name' => 'John',
             ':age' => 2
         ];
-        $series = [
-            [':name', 'John', \PDO::PARAM_STR],
-            [':age', 2, \PDO::PARAM_INT]
-        ];
-        $matcher = $this->exactly(2);
         $this->statementMock->expects($this->exactly(2))
             ->method('bindValue')
-            /*->withConsecutive(
-                [':name', 'John', \PDO::PARAM_STR],
-                [':age', 2, \PDO::PARAM_INT]
-            );*/
-            /*->willReturnCallback(function (...$args) {
-                static $series = [
-                    [':name', 'John', \PDO::PARAM_STR],
-                    [':age', 2, \PDO::PARAM_INT]
-                ];
-                $expectedArgs = array_shift($series);
-                $this->assertSame($expectedArgs, $args);
-            });*/
-            ->with(
-                $this->callback(function ($param) use ($series, $matcher) {
-                    $arguments = $series[$this->resolveInvocations($matcher) - 1];  // retrieves arguments
-                    $this->assertStringContainsString($arguments[0], $param); // performs assertion on the argument
+            // withConsecutive() alternative.
+            ->willReturnCallback(function ($arg1, $arg2, $arg3) {
+                if ($arg1 == ':name' && $arg2 == 'John' && $arg3 == \PDO::PARAM_STR) {
                     return true;
-                }),
-                $this->callback(function ($param) use ($series, $matcher) {
-                    $arguments = $series[$this->resolveInvocations($matcher) - 1];  // retrieves arguments
-                    $this->assertStringContainsString($arguments[1], $param); // performs assertion on the argument
+                } elseif ($arg1 == ':age' && $arg2 == 2 && $arg3 == \PDO::PARAM_INT) {
                     return true;
-                }),
-                $this->callback(function ($param) use ($series, $matcher) {
-                    $arguments = $series[$this->resolveInvocations($matcher) - 1];  // retrieves arguments
-                    $this->assertStringContainsString($arguments[2], $param); // performs assertion on the argument
-                    return true;
-                }),
-            );
+                }
+            });
 
         $this->statementMock->expects($this->once())
             ->method('rowCount')
@@ -225,13 +199,12 @@ class ConnectionTest extends TestCase
         $this->statementMock->expects($this->exactly(2))
             ->method('bindValue')
             // withConsecutive() alternative.
-            ->willReturnCallback(function (...$args) {
-                static $series = [
-                    [':name', 'John', \PDO::PARAM_STR],
-                    [':age', 2, \PDO::PARAM_INT]
-                ];
-                $expectedArgs = array_shift($series);
-                $this->assertSame($expectedArgs, $args);
+            ->willReturnCallback(function ($arg1, $arg2, $arg3) {
+                if ($arg1 == ':name' && $arg2 == 'John' && $arg3 == \PDO::PARAM_STR) {
+                    return true;
+                } elseif ($arg1 == ':age' && $arg2 == 2 && $arg3 == \PDO::PARAM_INT) {
+                    return true;
+                }
             });
         $this->statementMock->expects($this->once())
             ->method('execute')

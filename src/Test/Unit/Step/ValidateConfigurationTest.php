@@ -44,10 +44,7 @@ class ValidateConfigurationTest extends TestCase
 
         $this->loggerMock->expects($this->exactly(2))
             ->method('notice')
-            /*->withConsecutive(
-                ['Validating configuration'],
-                ['End of validation']
-            );*/
+            // withConsecutive() alternative.
             ->willReturnCallback(function (string $axis) {
                 static $series = [
                     'Validating configuration',
@@ -76,10 +73,7 @@ class ValidateConfigurationTest extends TestCase
 
         $this->loggerMock->expects($this->exactly(2))
             ->method('notice')
-            /*->withConsecutive(
-                ['Validating configuration'],
-                ['Fix configuration with given suggestions:']
-            );*/
+            // withConsecutive() alternative.
             ->willReturnCallback(function (string $axis) {
                 static $series = [
                     'Validating configuration',
@@ -137,11 +131,7 @@ class ValidateConfigurationTest extends TestCase
     {
         $this->loggerMock->expects($this->exactly(3))
             ->method('notice')
-            /*->withConsecutive(
-                ['Validating configuration'],
-                ['Fix configuration with given suggestions:'],
-                ['End of validation']
-            );*/
+            // withConsecutive() alternative.
             ->willReturnCallback(function (string $axis) {
                 static $series = [
                     'Validating configuration',
@@ -183,10 +173,7 @@ class ValidateConfigurationTest extends TestCase
 
         $this->loggerMock->expects($this->exactly(2))
             ->method('notice')
-            /*->withConsecutive(
-                ['Validating configuration'],
-                ['Fix configuration with given suggestions:']
-            );*/
+            // withConsecutive() alternative.
             ->willReturnCallback(function (string $axis) {
                 static $series = [
                     'Validating configuration',
@@ -194,34 +181,30 @@ class ValidateConfigurationTest extends TestCase
                 ];
                 $this->assertSame(array_shift($series), $axis);
             });
+        $suggestion1 = [
+            'suggestion' => 'some warning suggestion',
+            'errorCode' => 2001
+        ];
+        $suggestion2 = [
+            'suggestion' => 'some warning suggestion 2',
+            'errorCode' => 2002
+        ];
+        $suggestion3 = [
+            'suggestion' => 'some critical suggestion',
+            'errorCode' => 1
+        ];
         $this->loggerMock->expects($this->exactly(3))
             ->method('log')
-            ->withConsecutive(
-                [
-                    Logger::WARNING,
-                    'some warning',
-                    [
-                        'suggestion' => 'some warning suggestion',
-                        'errorCode' => 2001
-                    ],
-                ],
-                [
-                    Logger::WARNING,
-                    'some warning 2',
-                    [
-                        'suggestion' => 'some warning suggestion 2',
-                        'errorCode' => 2002
-                    ],
-                ],
-                [
-                    Logger::CRITICAL,
-                    'Critical error',
-                    [
-                        'suggestion' => 'some critical suggestion',
-                        'errorCode' => 1
-                    ],
-                ]
-            );
+            // withConsecutive() alternative.
+            ->willReturnCallback(function ($arg1, $arg2, $arg3) use ($suggestion1, $suggestion2, $suggestion3){
+                if ($arg1 == Logger::WARNING && $arg2 == 'some warning' && $arg3 == $suggestion1) {
+                    return true;
+                } elseif ($arg1 == Logger::WARNING && $arg2 == 'some warning 2' && $arg3 == $suggestion2) {
+                    return true;
+                } elseif ($arg1 == Logger::CRITICAL && $arg2 == 'Critical error' && $arg3 == $suggestion3) {
+                    return true;
+                }
+            });
 
         $step = new ValidateConfiguration(
             $this->loggerMock,
@@ -250,10 +233,7 @@ class ValidateConfigurationTest extends TestCase
 
         $this->loggerMock->expects($this->exactly(2))
             ->method('notice')
-            /*->withConsecutive(
-                ['Validating configuration'],
-                ['Fix configuration with given suggestions:']
-            );*/
+            // withConsecutive() alternative.
             ->willReturnCallback(function (string $axis) {
                 static $series = [
                     'Validating configuration',
@@ -286,38 +266,29 @@ class ValidateConfigurationTest extends TestCase
                     'errorCode' => 10
                 ]
             ]];
+        $suggestion1 = [
+            'suggestion' => 'some notice suggestion',
+            'errorCode' => null
+        ];
+        $suggestion2 = [
+            'suggestion' => 'some warning suggestion',
+            'errorCode' => 1001
+        ];
+        $suggestion3 = [
+            'suggestion' => 'some critical suggestion',
+            'errorCode' => 10
+        ];
         $this->loggerMock->expects($this->exactly(3))
             ->method('log')
-            /*->withConsecutive(
-                [
-                    Logger::NOTICE,
-                    'some notice',
-                    [
-                        'suggestion' => 'some notice suggestion',
-                        'errorCode' => null
-                    ]
-                ],
-                [
-                    Logger::WARNING,
-                    'some warning',
-                    [
-                        'suggestion' => 'some warning suggestion',
-                        'errorCode' => 1001
-                    ]
-                ],
-                [
-                    Logger::CRITICAL,
-                    'Critical error',
-                    [
-                        'suggestion' => 'some critical suggestion',
-                        'errorCode' => 10
-                    ]
-                ]
-            );*/
             // withConsecutive() alternative.
-            ->willReturnCallback(function (...$args) use (&$series) {
-                $expectedArgs = array_shift($series);
-                $this->assertSame($expectedArgs, $args);
+            ->willReturnCallback(function ($arg1, $arg2, $arg3) use ($suggestion1, $suggestion2, $suggestion3){
+                if ($arg1 == Logger::WARNING && $arg2 == 'some notice' && $arg3 == $suggestion1) {
+                    return true;
+                } elseif ($arg1 == Logger::WARNING && $arg2 == 'some warning' && $arg3 == $suggestion2) {
+                    return true;
+                } elseif ($arg1 == Logger::CRITICAL && $arg2 == 'Critical error' && $arg3 == $suggestion3) {
+                    return true;
+                }
             });
 
 

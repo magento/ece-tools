@@ -80,8 +80,6 @@ class IdealStateTest extends TestCase
             [$outputMock, $error2]
         ];
 
-        var_dump($series);
-
         $this->validatorMock->expects($this->once())
             ->method('validate')
             ->willReturn(new Error('State is not ideal'));

@@ -117,62 +117,30 @@ class ServiceVersionTest extends TestCase
                 $serviceOS,
                 $serviceMariaDB
             );
-        $this->loggerMock->expects($this->exactly(6))
-            ->method('info')
-            /*->withConsecutive(
-                ['Version of service \'rabbitmq\' is not detected', []],
-                ['Version of service \'redis\' is 3.2', []],
-                ['Version of service \'redis-session\' is 3.2', []],
-                ['Version of service \'elasticsearch\' is 7.7', []],
-                ['Version of service \'opensearch\' is 1.2', []],
-                ['Version of service \'mariadb\' is 10.2', []]
-            );*/
-            // withConsecutive() alternative.
-            ->willReturnCallback(function (...$args) {
-                static $series = [
-                    ['Version of service \'rabbitmq\' is not detected', []],
-                    ['Version of service \'redis\' is 3.2', []],
-                    ['Version of service \'redis-session\' is 3.2', []],
-                    ['Version of service \'elasticsearch\' is 7.7', []],
-                    ['Version of service \'opensearch\' is 1.2', []],
-                    ['Version of service \'mariadb\' is 10.2', []]
-                ];
-                $expectedArgs = array_shift($series);
-                $this->assertSame($expectedArgs, $args);
-            });
         $series = [
-            [ServiceInterface::NAME_REDIS, '3.2'],
-            [ServiceInterface::NAME_REDIS_SESSION, '3.2'],
-            [ServiceInterface::NAME_ELASTICSEARCH, '7.7'],
-            [ServiceInterface::NAME_OPENSEARCH, '1.2'],
-            [ServiceInterface::NAME_DB_MARIA, '10.2']
+            ['Version of service \'rabbitmq\' is not detected', []],
+            ['Version of service \'redis\' is 3.2', []],
+            ['Version of service \'redis-session\' is 3.2', []],
+            ['Version of service \'elasticsearch\' is 7.7', []],
+            ['Version of service \'opensearch\' is 1.2', []],
+            ['Version of service \'mariadb\' is 10.2', []]
         ];
-        $this->serviceVersionValidatorMock->expects($this->exactly(5))
-            ->method('validateService')
-            /*->withConsecutive(
-                [ServiceInterface::NAME_REDIS, '3.2'],
-                [ServiceInterface::NAME_REDIS_SESSION, '3.2'],
-                [ServiceInterface::NAME_ELASTICSEARCH, '7.7'],
-                [ServiceInterface::NAME_OPENSEARCH, '1.2'],
-                [ServiceInterface::NAME_DB_MARIA, '10.2']
-            )
-            ->willReturn('');*/
-            /*->willReturnCallback(function ($arg1) use ($series) {
-                if (in_array($arg1, $series)) {
-                    return 'test';
-                }
-            });*/
-            ->willReturnCallback(function (...$args) {
-                static $series = [
-                    [ServiceInterface::NAME_REDIS, '3.2'],
-                    [ServiceInterface::NAME_REDIS_SESSION, '3.2'],
-                    [ServiceInterface::NAME_ELASTICSEARCH, '7.7'],
-                    [ServiceInterface::NAME_OPENSEARCH, '1.2'],
-                    [ServiceInterface::NAME_DB_MARIA, '10.2']
-                ];
-                $expectedArgs = array_shift($series);
-                $this->assertSame($expectedArgs, $args);
-            });
+        $matcher = $this->exactly(6);
+        $this->loggerMock->expects($matcher)
+            ->method('info')
+            // withConsecutive() alternative.
+            ->with(
+                $this->callback(function ($param) use ($series, $matcher) {
+                    $arguments = $series[$this->resolveInvocations($matcher) - 1];  // retrieves arguments
+                    $this->assertStringContainsString($arguments[0], $param); // performs assertion on the argument
+                    return true;
+                }),
+                $this->callback(function ($param) use ($series, $matcher) {
+                    $arguments = $series[$this->resolveInvocations($matcher) - 1];  // retrieves arguments
+                    $this->assertSame($arguments[1], $param); // performs assertion on the argument
+                    return true;
+                }),
+            );
         $this->resultFactoryMock->expects($this->once())
             ->method('success');
 
@@ -221,23 +189,23 @@ class ServiceVersionTest extends TestCase
             ->willReturnOnConsecutiveCalls($service1, $service2, $service3, $service4, $service5, $service6);
         $this->serviceVersionValidatorMock->expects($this->exactly(6))
             ->method('validateService')
-            /*->withConsecutive(
-                [ServiceInterface::NAME_RABBITMQ, '1.5'],
-                [ServiceInterface::NAME_REDIS, '2.2'],
-                [ServiceInterface::NAME_REDIS_SESSION, '2.2'],
-                [ServiceInterface::NAME_ELASTICSEARCH, '7.7'],
-                [ServiceInterface::NAME_OPENSEARCH, '1.2'],
-                [ServiceInterface::NAME_DB_MYSQL, '5.7']
-            )
-            ->willReturnOnConsecutiveCalls(...$errorMessages);*/
-            ->willReturnCallback(fn($param) => match ($param) {
-                ServiceInterface::NAME_RABBITMQ, '1.5' => $errorMessages,
-                ServiceInterface::NAME_REDIS, '2.2' => $errorMessages,
-                ServiceInterface::NAME_REDIS_SESSION, '2.2' => $errorMessages,
-                ServiceInterface::NAME_ELASTICSEARCH, '7.7' => $errorMessages,
-                ServiceInterface::NAME_OPENSEARCH, '1.2' => $errorMessages,
-                ServiceInterface::NAME_DB_MYSQL, '5.7' => $errorMessages
-            });
+            // withConsecutive() alternative.
+            ->willReturnCallback(
+                function ($arg1, $arg2) use ($errorMessages){
+                    if ($arg1 == ServiceInterface::NAME_RABBITMQ && $arg2 == '1.5') {
+                        return $errorMessages[0];
+                    } elseif ($arg1 == ServiceInterface::NAME_REDIS && $arg2 == '2.2') {
+                        return $errorMessages[1];
+                    } elseif ($arg1 == ServiceInterface::NAME_REDIS_SESSION && $arg2 == '2.2') {
+                        return $errorMessages[2];
+                    } elseif ($arg1 == ServiceInterface::NAME_ELASTICSEARCH && $arg2 == '7.7') {
+                        return $errorMessages[3];
+                    } elseif ($arg1 == ServiceInterface::NAME_OPENSEARCH && $arg2 == '1.2') {
+                        return $errorMessages[4];
+                    } elseif ($arg1 == ServiceInterface::NAME_DB_MYSQL && $arg2 == '5.7') {
+                        return $errorMessages[5];
+                    }
+                });
         $this->resultFactoryMock->expects($this->once())
             ->method('error')
             ->with($this->anything(), implode(PHP_EOL, $errorMessages));
@@ -255,5 +223,18 @@ class ServiceVersionTest extends TestCase
             ->with('Can\'t validate version of some services: some error');
 
         $this->validator->validate();
+    }
+
+    private function resolveInvocations(\PHPUnit\Framework\MockObject\Rule\InvocationOrder $matcher): int
+    {
+        if (method_exists($matcher, 'numberOfInvocations')) { // PHPUnit 10+ (including PHPUnit 12)
+            return $matcher->numberOfInvocations();
+        }
+
+        if (method_exists($matcher, 'getInvocationCount')) { // before PHPUnit 10
+            return $matcher->getInvocationCount();
+        }
+
+        $this->fail('Cannot count the number of invocations.');
     }
 }

@@ -139,18 +139,20 @@ class ModuleTest extends TestCase
             ->with('module:enable --all', ['']);
         $this->writerMock->expects($this->exactly(2))
             ->method('update')
-            ->withConsecutive(
-                [['modules' => []]],
-                [
-                    [
+            // withConsecutive() alternative.
+            ->with(self::callback(function (array $message) {
+                static $i = 0;
+                return match (++$i) {
+                    1 => $message === ['modules' => []],
+                    2 => $message === [
                         'modules' => [
                             'Magento_Module1' => 1,
                             'Magento_Module2' => 0,
                             'Magento_Module3' => 1,
                         ]
-                    ]
-                ]
-            );
+                    ],
+                };
+            }));
 
         $this->assertEquals(
             [
