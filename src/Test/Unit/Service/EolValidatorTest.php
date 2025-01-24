@@ -99,7 +99,7 @@ class EolValidatorTest extends TestCase
             ->willReturn(true);
 
         $serviceName = ServiceInterface::NAME_ELASTICSEARCH;
-        $serviceVersion = '6.5';
+        $serviceVersion = '8.11';
 
         $this->assertEquals([], $this->validator->validateService($serviceName, $serviceVersion));
     }

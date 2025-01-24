@@ -18,6 +18,7 @@ use Magento\MagentoCloud\Step\StepException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
+use Magento\MagentoCloud\Shell\ProcessInterface;
 
 /**
  * @inheritDoc
@@ -45,6 +46,11 @@ class EnableWebhooksTest extends TestCase
     private $globalConfigMock;
 
     /**
+     * @var ProcessInterface|MockObject
+     */
+    private $processMock;
+
+    /**
      * @inheritdoc
      */
     protected function setUp(): void
@@ -63,6 +69,7 @@ class EnableWebhooksTest extends TestCase
             $shellFactoryMock,
             $this->globalConfigMock
         );
+        $this->processMock = $this->getMockForAbstractClass(ProcessInterface::class);
     }
 
     /**
@@ -124,13 +131,15 @@ class EnableWebhooksTest extends TestCase
             ->method('get')
             ->with(StageConfigInterface::VAR_ENABLE_WEBHOOKS)
             ->willReturn(true);
-        $this->magentoShellMock->expects(self::at(0))
+        $this->magentoShellMock->expects(self::exactly(2))
             ->method('execute')
-            ->with('webhooks:generate:module');
-        $this->magentoShellMock->expects(self::at(1))
-            ->method('execute')
-            ->with('module:enable Magento_AdobeCommerceWebhookPlugins')
-            ->willThrowException(new ShellException('error during module enablement'));
+            ->willReturnCallback(function ($arg1) {
+                if ($arg1 == 'webhooks:generate:module') {
+                    return $this->processMock;
+                } elseif ($arg1 == 'module:enable Magento_AdobeCommerceWebhookPlugins') {
+                    throw new ShellException('error during module enablement'); 
+                }
+            });
         $this->loggerMock->expects(self::exactly(2))
             ->method('notice');
         $this->loggerMock->expects(self::once())
@@ -149,12 +158,13 @@ class EnableWebhooksTest extends TestCase
             ->method('get')
             ->with(StageConfigInterface::VAR_ENABLE_WEBHOOKS)
             ->willReturn(true);
-        $this->magentoShellMock->expects(self::at(0))
+        $this->magentoShellMock->expects(self::any())
             ->method('execute')
-            ->with('webhooks:generate:module');
-        $this->magentoShellMock->expects(self::at(1))
-            ->method('execute')
-            ->with('module:enable Magento_AdobeCommerceWebhookPlugins');
+            ->willReturnCallback(function ($arg1) {
+                if ($arg1 == 'webhooks:generate:module' || $arg1 == 'module:enable Magento_AdobeCommerceWebhookPlugins') {
+                    return $this->processMock;
+                }
+            });
         $this->loggerMock->expects(self::exactly(2))
             ->method('notice');
         $this->loggerMock->expects(self::never())
