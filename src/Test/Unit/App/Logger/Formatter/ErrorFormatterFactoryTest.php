@@ -42,17 +42,18 @@ class ErrorFormatterFactoryTest extends TestCase
 
     public function testCreate()
     {
+        define("ERRORINFO", $this->createMock(ErrorInfo::class));
+        define("READERINTEFACE", $this->getMockForAbstractClass(ReaderInterface::class));
         $this->containerMock->expects($this->exactly(2))
             ->method('get')
-            ->willReturnCallback(function (...$args) {
+            // withConsecutive() alternative.
+            ->willReturnCallback(function ($args) {
                 static $series = [
-                    [[ErrorInfo::class], $this->createMock(ErrorInfo::class)],
-                    [[ReaderInterface::class], $this->getMockForAbstractClass(ReaderInterface::class)],
+                    [ErrorInfo::class, ERRORINFO],
+                    [ReaderInterface::class, READERINTEFACE]
                 ];
-
                 [$expectedArgs, $return] = array_shift($series);
                 $this->assertSame($expectedArgs, $args);
-
                 return $return;
             });
 

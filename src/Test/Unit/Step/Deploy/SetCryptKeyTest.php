@@ -81,14 +81,13 @@ class SetCryptKeyTest extends TestCase
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
             // withConsecutive() alternative.
-            ->willReturnCallback(function ($args) {
-                static $series = [
-                    'Checking existence of encryption key',
-                    sprintf('Setting encryption key from %s', Environment::VARIABLE_CRYPT_KEY)
-                ];
-                $expectedArgs = array_shift($series);
-                $this->assertSame($expectedArgs, $args);
-            });
+            ->with(self::callback(function (string $message) {
+                static $i = 0;
+                return match (++$i) {
+                    1 => $message === 'Checking existence of encryption key',
+                    2 => $message === sprintf('Setting encryption key from %s', Environment::VARIABLE_CRYPT_KEY)
+                };
+            }));
         $this->configWriterMock->expects($this->once())
             ->method('update')
             ->with(['crypt' => ['key' => 'TWFnZW50byBSb3g=']]);
@@ -117,14 +116,13 @@ class SetCryptKeyTest extends TestCase
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
             // withConsecutive() alternative.
-            ->willReturnCallback(function ($args) {
-                static $series = [
-                    'Checking existence of encryption key',
-                    sprintf('Setting encryption key from %s', Environment::VARIABLE_CRYPT_KEY)
-                ];
-                $expectedArgs = array_shift($series);
-                $this->assertSame($expectedArgs, $args);
-            });
+            ->with(self::callback(function (string $message) {
+                static $i = 0;
+                return match (++$i) {
+                    1 => $message === 'Checking existence of encryption key',
+                    2 => $message === sprintf('Setting encryption key from %s', Environment::VARIABLE_CRYPT_KEY),
+                };
+            }));
         $this->configWriterMock->expects($this->once())
             ->method('update')
             ->with(['crypt' => ['key' => 'TWFnZW50byBSb3g=']])
