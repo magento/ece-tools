@@ -146,7 +146,7 @@ class DumpProcessorTest extends TestCase
             // withConsecutive() alternative.
             ->with(
                 $this->callback(function (string $mock) use (&$mocks) {
-                  return array_shift($mocks) === $mock;
+                    return array_shift($mocks) === $mock;
                 }),
                 $this->connectionDataMock,
                 $removeDefiners
@@ -217,7 +217,7 @@ class DumpProcessorTest extends TestCase
         array $databases,
         $expects
     ) {
-       $series = [
+        $series = [
             ['main', $this->connectionDataMock, true],
             ['quote', $this->connectionDataMock, true],
             ['sales', $this->connectionDataMock, true]
@@ -248,7 +248,7 @@ class DumpProcessorTest extends TestCase
             // withConsecutive() alternative.
             ->with(
                 $this->callback(function (string $mock) use (&$mocks) {
-                  return array_shift($mocks) === $mock;
+                    return array_shift($mocks) === $mock;
                 }),
                 $this->connectionDataMock,
                 true

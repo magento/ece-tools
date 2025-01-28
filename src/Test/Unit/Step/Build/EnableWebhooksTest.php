@@ -137,7 +137,7 @@ class EnableWebhooksTest extends TestCase
                 if ($arg1 == 'webhooks:generate:module') {
                     return $this->processMock;
                 } elseif ($arg1 == 'module:enable Magento_AdobeCommerceWebhookPlugins') {
-                    throw new ShellException('error during module enablement'); 
+                    throw new ShellException('error during module enablement');
                 }
             });
         $this->loggerMock->expects(self::exactly(2))
@@ -161,7 +161,8 @@ class EnableWebhooksTest extends TestCase
         $this->magentoShellMock->expects(self::any())
             ->method('execute')
             ->willReturnCallback(function ($arg1) {
-                if ($arg1 == 'webhooks:generate:module' || $arg1 == 'module:enable Magento_AdobeCommerceWebhookPlugins') {
+                if ($arg1 == 'webhooks:generate:module' ||
+                    $arg1 == 'module:enable Magento_AdobeCommerceWebhookPlugins') {
                     return $this->processMock;
                 }
             });

@@ -98,7 +98,7 @@ class GenerateTest extends TestCase
                     1 => $message === "Generating static content for locales: ua_UA fr_FR es_ES en_US\nUsing 3 Threads"
                 };
             }));
-$this->commandFactoryMock->expects($this->once())
+        $this->commandFactoryMock->expects($this->once())
             ->method('matrix')
             ->with($this->optionMock, ['some_matrix'])
             ->willReturn($commands);

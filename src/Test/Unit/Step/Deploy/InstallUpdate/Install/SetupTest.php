@@ -98,7 +98,7 @@ class SetupTest extends TestCase
         $this->shellMock->expects($this->exactly(2))
             ->method('execute')
             // withConsecutive() alternative.
-            ->with(self::callback(function (string $message) use ($installUpgradeLog){
+            ->with(self::callback(function (string $message) use ($installUpgradeLog) {
                 static $i = 0;
                 return match (++$i) {
                     1 => $message === 'echo \'Installation time: \'$(date) | tee -a ' . $installUpgradeLog,

@@ -72,7 +72,7 @@ class HandlerFactoryTest extends TestCase
                 ['additional'] => [
                     'project' => 'some_project'
                 ]
-            });            
+            });
         $series = [
             [['http', ['host' => 'localhost']], $httpTransportMock],
             [['tcp', ['host' => '127.0.0.1']], $tcpTransportMock],

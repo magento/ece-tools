@@ -196,7 +196,7 @@ class ValidateConfigurationTest extends TestCase
         $this->loggerMock->expects($this->exactly(3))
             ->method('log')
             // withConsecutive() alternative.
-            ->willReturnCallback(function ($arg1, $arg2, $arg3) use ($suggestion1, $suggestion2, $suggestion3){
+            ->willReturnCallback(function ($arg1, $arg2, $arg3) use ($suggestion1, $suggestion2, $suggestion3) {
                 if ($arg1 == Logger::WARNING && $arg2 == 'some warning' && $arg3 == $suggestion1) {
                     return true;
                 } elseif ($arg1 == Logger::WARNING && $arg2 == 'some warning 2' && $arg3 == $suggestion2) {
@@ -281,7 +281,7 @@ class ValidateConfigurationTest extends TestCase
         $this->loggerMock->expects($this->exactly(3))
             ->method('log')
             // withConsecutive() alternative.
-            ->willReturnCallback(function ($arg1, $arg2, $arg3) use ($suggestion1, $suggestion2, $suggestion3){
+            ->willReturnCallback(function ($arg1, $arg2, $arg3) use ($suggestion1, $suggestion2, $suggestion3) {
                 if ($arg1 == Logger::WARNING && $arg2 == 'some notice' && $arg3 == $suggestion1) {
                     return true;
                 } elseif ($arg1 == Logger::WARNING && $arg2 == 'some warning' && $arg3 == $suggestion2) {
@@ -290,7 +290,6 @@ class ValidateConfigurationTest extends TestCase
                     return true;
                 }
             });
-
 
         $step = new ValidateConfiguration(
             $this->loggerMock,
@@ -316,8 +315,11 @@ class ValidateConfigurationTest extends TestCase
      * @return MockObject|ValidatorInterface
      * @throws \ReflectionException
      */
-    private function createValidatorWithError(string $error, string $suggestion, int | null $errorCode = null): MockObject
-    {
+    private function createValidatorWithError(
+        string $error,
+        string $suggestion,
+        int | null $errorCode = null
+    ): MockObject {
         $warningValidator = $this->getMockForAbstractClass(ValidatorInterface::class);
         $warningResultMock = $this->createMock(Result\Error::class);
 

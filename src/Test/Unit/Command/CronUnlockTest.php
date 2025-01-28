@@ -113,7 +113,6 @@ class CronUnlockTest extends TestCase
                 }),
                 CronUnlock::UNLOCK_MESSAGE
             );
-            
 
         $tester = new CommandTester(
             $this->cronUnlockCommand

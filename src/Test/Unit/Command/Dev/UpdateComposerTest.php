@@ -140,7 +140,7 @@ class UpdateComposerTest extends TestCase
             // withConsecutive() alternative.
             ->with(
                 $this->callback(function (string $script) use (&$scripts) {
-                  return array_shift($scripts) === $script;
+                    return array_shift($scripts) === $script;
                 })
             );
         

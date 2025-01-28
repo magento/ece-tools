@@ -137,7 +137,7 @@ class EnableEventingTest extends TestCase
             if ($arg1 == 'events:generate:module') {
                 return $this->processMock;
             } elseif ($arg1 == 'module:enable Magento_AdobeCommerceEvents') {
-                throw new ShellException('error during module enablement'); 
+                throw new ShellException('error during module enablement');
             }
         });
         $this->loggerMock->expects(self::exactly(2))

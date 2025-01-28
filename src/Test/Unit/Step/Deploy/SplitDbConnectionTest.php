@@ -342,7 +342,7 @@ class SplitDbConnectionTest extends TestCase
         $this->magentoShellMock->expects($this->exactly(2))
             ->method('execute')
             // withConsecutive() alternative.
-            ->with(self::callback(function (string $message){
+            ->with(self::callback(function (string $message) {
                 static $i = 0;
                 return match (++$i) {
                     1 => $message === 'setup:db-schema:split-quote --host="checkout.host" --dbname="checkout.dbname"'
@@ -356,7 +356,7 @@ class SplitDbConnectionTest extends TestCase
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
             // withConsecutive() alternative.
-            ->with(self::callback(function (string $message){
+            ->with(self::callback(function (string $message) {
                 static $i = 0;
                 return match (++$i) {
                     1 => $message === 'Quote tables were split to DB checkout.dbname in checkout.host',

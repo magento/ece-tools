@@ -108,7 +108,7 @@ class ScdOnDeployTest extends TestCase
             // withConsecutive() alternative.
             ->with(
                 $this->callback(function (string $message) use (&$messages) {
-                  return array_shift($messages) === $message;
+                    return array_shift($messages) === $message;
                 })
             );
 

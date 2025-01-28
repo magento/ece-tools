@@ -622,7 +622,6 @@ class UrlManagerTest extends TestCase
                 }
             });
 
-
         $this->assertEquals(
             'https://example.com/',
             $this->manager->getBaseUrl()

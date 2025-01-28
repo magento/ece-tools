@@ -92,13 +92,14 @@ class IdealStateTest extends TestCase
             ->method('writeItem')
             // withConsecutive() alternative.
             ->willReturnCallback(
-                function ($arg1, $arg2) use ($outputMock, $error1, $error2){
+                function ($arg1, $arg2) use ($outputMock, $error1, $error2) {
                     if ($arg1 == $outputMock && $arg2 == $error1) {
                         return $this->outputFormatterMock;
                     } elseif ($arg1 == $outputMock && $arg2 == $error2) {
                         return $this->outputFormatterMock;
                     }
-                });
+                }
+            );
         $this->outputFormatterMock->expects($this->once())
             ->method('writeResult')
             ->with($outputMock, false, 'State is not ideal');

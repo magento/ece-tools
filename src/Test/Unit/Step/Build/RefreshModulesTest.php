@@ -88,7 +88,7 @@ class RefreshModulesTest extends TestCase
                 ];
                 $expectedArgs = array_shift($series);
                 $this->assertSame($expectedArgs, $args);
-            });            
+            });
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('No modules were changed.');

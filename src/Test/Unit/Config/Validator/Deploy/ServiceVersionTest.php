@@ -191,7 +191,7 @@ class ServiceVersionTest extends TestCase
             ->method('validateService')
             // withConsecutive() alternative.
             ->willReturnCallback(
-                function ($arg1, $arg2) use ($errorMessages){
+                function ($arg1, $arg2) use ($errorMessages) {
                     if ($arg1 == ServiceInterface::NAME_RABBITMQ && $arg2 == '1.5') {
                         return $errorMessages[0];
                     } elseif ($arg1 == ServiceInterface::NAME_REDIS && $arg2 == '2.2') {
@@ -205,7 +205,8 @@ class ServiceVersionTest extends TestCase
                     } elseif ($arg1 == ServiceInterface::NAME_DB_MYSQL && $arg2 == '5.7') {
                         return $errorMessages[5];
                     }
-                });
+                }
+            );
         $this->resultFactoryMock->expects($this->once())
             ->method('error')
             ->with($this->anything(), implode(PHP_EOL, $errorMessages));

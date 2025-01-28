@@ -148,8 +148,6 @@ class BackgroundProcessTest extends TestCase
                 'pgrep -U "$(id -u)" -f "bin/magento +(cron:run|queue:consumers:start)"' => $processMock,
                 'kill 111' => $processMock
             });
-
-
         $this->process->kill();
     }
 }
