@@ -47,7 +47,7 @@ class OpenSearch extends AbstractService implements ServiceInterface
      * Return full engine name.
      *
      * @return string
-     * @throws ServiceException // @phpstan-ignore-line
+     * @throws ServiceException
      */
     public function getFullEngineName(): string
     {
