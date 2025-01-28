@@ -48,8 +48,8 @@ class DeprecatedVariables implements ValidatorInterface
      *
      * {@inheritdoc}
      * Despite PHPMD warnings, this method is ultimately very linear: 1) Check condition; 2) Append error; etc.
-     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
-     * @SuppressWarnings(PHPMD.NPathComplexity)
+     * @SuppressWarnings("PHPMD.CyclomaticComplexity")
+     * @SuppressWarnings("PHPMD.NPathComplexity")
      */
     public function validate(): Validator\ResultInterface
     {

@@ -12,7 +12,7 @@ use Throwable;
 /**
  * Base exception for general purposes.
  *
- * @SuppressWarnings(PHPMD.NumberOfChildren)
+ * @SuppressWarnings("PHPMD.NumberOfChildren")
  */
 class GenericException extends \Exception
 {

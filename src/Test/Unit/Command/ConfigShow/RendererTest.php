@@ -61,6 +61,9 @@ class RendererTest extends TestCase
         $this->renderer = new Renderer($this->loggerMock, $this->environmentMock);
     }
 
+    /**
+     * @SuppressWarnings("PHPMD.NPathComplexity")
+     */
     public function testPrintRelationships()
     {
         $this->environmentMock->expects($this->once())
@@ -115,6 +118,9 @@ class RendererTest extends TestCase
         $this->renderer->printRelationships($this->outputMock);
     }
 
+    /**
+     * @SuppressWarnings("PHPMD.NPathComplexity")
+     */
     public function testPrintRoutes()
     {
         $this->environmentMock->expects($this->once())
@@ -168,6 +174,10 @@ class RendererTest extends TestCase
         $this->renderer->printRoutes($this->outputMock);
     }
 
+    /**
+     * @SuppressWarnings("PHPMD.CyclomaticComplexity")
+     * @SuppressWarnings("PHPMD.NPathComplexity")
+     */
     public function testPrintVariables()
     {
         $this->environmentMock->expects($this->once())

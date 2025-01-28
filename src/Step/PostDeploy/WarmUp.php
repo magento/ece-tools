@@ -62,7 +62,7 @@ class WarmUp implements StepInterface
 
     /**
      * {@inheritdoc}
-     * @SuppressWarnings(PHPMD.UnusedLocalVariable)
+     * @SuppressWarnings("PHPMD.UnusedLocalVariable")
      */
     public function execute()
     {

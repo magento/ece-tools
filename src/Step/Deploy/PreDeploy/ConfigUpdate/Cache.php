@@ -21,7 +21,7 @@ use Magento\MagentoCloud\Config\Stage\DeployInterface;
 /**
  * Processes cache configuration.
  *
- * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+ * @SuppressWarnings("PHPMD.CyclomaticComplexity")
  */
 class Cache implements StepInterface
 {

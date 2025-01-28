@@ -28,8 +28,8 @@ use Magento\MagentoCloud\Config\Amqp as AmqpConfig;
 /**
  * Generates command for magento installation
  *
- * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
- * @SuppressWarnings(PHPMD.NPathComplexity)
+ * @SuppressWarnings("PHPMD.CouplingBetweenObjects")
+ * @SuppressWarnings("PHPMD.NPathComplexity")
  */
 class InstallCommandFactory
 {
@@ -111,7 +111,7 @@ class InstallCommandFactory
      * @param RemoteStorage $remoteStorage
      * @param AmqpConfig $amqpConfig
      *
-     * @SuppressWarnings(PHPMD.ExcessiveParameterList)
+     * @SuppressWarnings("PHPMD.ExcessiveParameterList")
      */
     public function __construct(
         UrlManager $urlManager,
@@ -244,7 +244,7 @@ class InstallCommandFactory
      * @throws UndefinedPackageException
      * @throws ConfigException
      * @throws ServiceException
-     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+     * @SuppressWarnings("PHPMD.CyclomaticComplexity")
      */
     private function getEsOptions(): array
     {

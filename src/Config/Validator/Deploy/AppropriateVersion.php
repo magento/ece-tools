@@ -51,7 +51,7 @@ class AppropriateVersion implements ValidatorInterface
     /**
      * @return Validator\ResultInterface
      *
-     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+     * @SuppressWarnings("PHPMD.CyclomaticComplexity")
      */
     public function validate(): Validator\ResultInterface
     {

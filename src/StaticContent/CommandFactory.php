@@ -128,8 +128,8 @@ class CommandFactory
     /**
      * @param OptionInterface $option
      * @return string
-     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
-     * @SuppressWarnings(PHPMD.NPathComplexity)
+     * @SuppressWarnings("PHPMD.CyclomaticComplexity")
+     * @SuppressWarnings("PHPMD.NPathComplexity")
      */
     private function build(OptionInterface $option): string
     {

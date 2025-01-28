@@ -147,6 +147,9 @@ class ServiceVersionTest extends TestCase
         $this->validator->validate();
     }
 
+    /**
+     * @SuppressWarnings("PHPMD.CyclomaticComplexity")
+     */
     public function testValidateWithErrors(): void
     {
         $this->databaseTypeMock->expects($this->once())

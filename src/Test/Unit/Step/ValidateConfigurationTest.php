@@ -164,6 +164,7 @@ class ValidateConfigurationTest extends TestCase
 
     /**
      * @throws StepException
+     * @SuppressWarnings("PHPMD.CyclomaticComplexity")
      */
     public function testExecuteWithWarningAndCriticalMessage(): void
     {
@@ -224,6 +225,7 @@ class ValidateConfigurationTest extends TestCase
 
     /**
      * @throws StepException
+     * @SuppressWarnings("PHPMD.CyclomaticComplexity")
      */
     public function testExecuteTypeStringLevel(): void
     {

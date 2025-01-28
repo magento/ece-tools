@@ -218,7 +218,7 @@ class Cache
      * @param array $redisConfig
      * @return bool
      * @throws ConfigException
-     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+     * @SuppressWarnings("PHPMD.CyclomaticComplexity")
      */
     private function isConfigurationCompatibleWithSlaveConnection(
         array $envCacheConfig,
