@@ -53,7 +53,7 @@ class ValidatorTest extends TestCase
     public function testValidate(
         string $key,
         $value,
-        ResultInterface $expected = null,
+        ResultInterface | null $expected = null,
         string $stage = StageConfigInterface::STAGE_DEPLOY
     ): void {
         $expected = $expected ?? new Success();
