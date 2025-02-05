@@ -58,7 +58,7 @@ class ConfigCreate extends Command
         $this->setName(static::NAME)
             ->setDescription(
                 'Creates a `.magento.env.yaml` file with the specified build, deploy, and post-deploy variable ' .
-                'configuration. Overwrites any existing `.magento,.env.yaml` file.'
+                'configuration. Overwrites any existing `.magento.env.yaml` file.'
             )
             ->addArgument(
                 self::ARG_CONFIGURATION,
