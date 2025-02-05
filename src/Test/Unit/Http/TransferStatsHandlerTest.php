@@ -57,7 +57,7 @@ class TransferStatsHandlerTest extends TestCase
         $mockUriInterface = $this->createMock(UriInterface::class);
         $mockRequest = $this->getMockBuilder(RequestInterface::class)
             ->disableOriginalConstructor()
-            ->setMethods(['getUri'])
+            ->onlyMethods(['getUri'])
             ->getMockForAbstractClass();
         $mockRequest->expects($this->any())
             ->method('getUri')
@@ -80,14 +80,14 @@ class TransferStatsHandlerTest extends TestCase
     {
         $mockUriInterface = $this->getMockBuilder(UriInterface::class)
             ->disableOriginalConstructor()
-            ->setMethods(['__toString'])
+            ->onlyMethods(['__toString'])
             ->getMockForAbstractClass();
         $mockUriInterface->expects($this->any())
             ->method('__toString')
             ->willReturn('/');
         $mockRequest = $this->getMockBuilder(RequestInterface::class)
             ->disableOriginalConstructor()
-            ->setMethods(['getUri'])
+            ->onlyMethods(['getUri'])
             ->getMockForAbstractClass();
         $mockRequest->expects($this->any())
             ->method('getUri')
@@ -138,14 +138,14 @@ class TransferStatsHandlerTest extends TestCase
     {
         $mockUriInterface = $this->getMockBuilder(UriInterface::class)
             ->disableOriginalConstructor()
-            ->setMethods(['__toString'])
+            ->onlyMethods(['__toString'])
             ->getMockForAbstractClass();
         $mockUriInterface->expects($this->any())
             ->method('__toString')
             ->willReturn('/customer');
         $mockRequest = $this->getMockBuilder(RequestInterface::class)
             ->disableOriginalConstructor()
-            ->setMethods(['getUri'])
+            ->onlyMethods(['getUri'])
             ->getMockForAbstractClass();
         $mockRequest->expects($this->any())
             ->method('getUri')

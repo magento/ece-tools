@@ -103,14 +103,16 @@ class UpgradeProcessTest extends TestCase
             ->willReturn('/bin/bash');
         $this->shellMock->expects($this->exactly(2))
             ->method('execute')
-            ->withConsecutive(
-                ['echo \'Updating time: \'$(date) | tee -a ' . $installUpgradeLog],
-                [
-                    '/bin/bash -c "set -o pipefail; php ./bin/magento setup:upgrade '
+            // withConsecutive() alternative.
+            ->with(self::callback(function (string $message) use ($installUpgradeLog) {
+                static $i = 0;
+                return match (++$i) {
+                    1 => $message === 'echo \'Updating time: \'$(date) | tee -a ' . $installUpgradeLog,
+                    2 => $message === '/bin/bash -c "set -o pipefail; php ./bin/magento setup:upgrade '
                     . '--keep-generated --ansi --no-interaction -v | tee -a '
-                    . $installUpgradeLog . '"'
-                ]
-            );
+                    . $installUpgradeLog . '"',
+                };
+            }));
 
         $this->step->execute();
     }

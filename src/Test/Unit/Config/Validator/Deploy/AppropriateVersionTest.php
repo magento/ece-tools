@@ -63,10 +63,18 @@ class AppropriateVersionTest extends TestCase
 
     public function testValidateVersion()
     {
+        $series = [
+            [['2.2'], true],
+            [['2.4.7'], true],
+        ];
         $this->magentoVersion->expects($this->exactly(2))
             ->method('isGreaterOrEqual')
-            ->withConsecutive(['2.2'], ['2.4.7'])
-            ->willReturnOnConsecutiveCalls(true, true);
+            ->willReturnCallback(function (...$args) use (&$series) {
+                [$expectedArgs, $return] = array_shift($series);
+                $this->assertSame($expectedArgs, $args);
+
+                return $return;
+            });
         $this->magentoVersion->expects($this->once())
             ->method('satisfies')
             ->willReturn(true);
@@ -78,10 +86,18 @@ class AppropriateVersionTest extends TestCase
 
     public function testValidateVersionAndVariablesNotConfigured()
     {
+        $series = [
+            [['2.2'], false],
+            [['2.4.7'], false],
+        ];
         $this->magentoVersion->expects($this->exactly(2))
             ->method('isGreaterOrEqual')
-            ->withConsecutive(['2.2'], ['2.4.7'])
-            ->willReturnOnConsecutiveCalls(false, false);
+            ->willReturnCallback(function (...$args) use (&$series) {
+                [$expectedArgs, $return] = array_shift($series);
+                $this->assertSame($expectedArgs, $args);
+
+                return $return;
+            });
         $this->magentoVersion->expects($this->once())
             ->method('satisfies')
             ->willReturn(false);
@@ -94,10 +110,18 @@ class AppropriateVersionTest extends TestCase
 
     public function testValidateVersionAndAllVariablesAreConfigured()
     {
+        $series = [
+            [['2.2'], false],
+            [['2.4.7'], false],
+        ];
         $this->magentoVersion->expects($this->exactly(2))
             ->method('isGreaterOrEqual')
-            ->withConsecutive(['2.2'], ['2.4.7'])
-            ->willReturnOnConsecutiveCalls(false, false);
+            ->willReturnCallback(function (...$args) use (&$series) {
+                [$expectedArgs, $return] = array_shift($series);
+                $this->assertSame($expectedArgs, $args);
+
+                return $return;
+            });
         $this->magentoVersion->expects($this->once())
             ->method('satisfies')
             ->willReturn(false);

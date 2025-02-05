@@ -77,13 +77,18 @@ class AmqpTest extends TestCase
         int $countCallGetConfig,
         array $expectedQueueConfig
     ): void {
+        $series = [
+            [[DeployInterface::VAR_QUEUE_CONFIGURATION], $customQueueConfig],
+            [[DeployInterface::VAR_CONSUMERS_WAIT_FOR_MAX_MESSAGES], $consumersWaitMaxMessages],
+        ];
         $this->stageConfigMock->expects($this->exactly($countCallGetConfig))
             ->method('get')
-            ->withConsecutive(
-                [DeployInterface::VAR_QUEUE_CONFIGURATION],
-                [DeployInterface::VAR_CONSUMERS_WAIT_FOR_MAX_MESSAGES]
-            )
-            ->willReturnOnConsecutiveCalls($customQueueConfig, $consumersWaitMaxMessages);
+            ->willReturnCallback(function (...$args) use (&$series) {
+                [$expectedArgs, $return] = array_shift($series);
+                $this->assertSame($expectedArgs, $args);
+
+                return $return;
+            });
         $this->rabbitMq->expects($this->once())
             ->method('getConfiguration')
             ->willReturn($amqpServiceConfig);

@@ -41,10 +41,15 @@ class OutputFormatterTest extends TestCase
     {
         $this->outputMock->expects($this->exactly(2))
             ->method('writeln')
-            ->withConsecutive(
-                ['<info>some item</info>'],
-                ['<error>some item</error>']
-            );
+            // withConsecutive() alternative.
+            ->willReturnCallback(function ($args) {
+                static $series = [
+                    '<info>some item</info>',
+                    '<error>some item</error>'
+                ];
+                $expectedArgs = array_shift($series);
+                $this->assertSame($expectedArgs, $args);
+            });
 
         $this->outputFormatter->writeResult(
             $this->outputMock,

@@ -96,22 +96,28 @@ class ProcessorTest extends TestCase
             ->willReturn(['steps' => $steps, 'actions' => [$action]]);
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
-            ->withConsecutive(
-                [
-                    sprintf(
+            // withConsecutive() alternative.
+            ->with(self::callback(function (string $message) use ($scenarios) {
+                static $i = 0;
+                return match (++$i) {
+                    1 => $message === sprintf(
                         'Starting scenario(s): %s 1.0.0',
                         implode(', ', $scenarios)
-                    )
-                ],
-                ['Scenario(s) finished']
-            );
+                    ),
+                    2 => $message === 'Scenario(s) finished',
+                };
+            }));
         $this->loggerMock->method('debug')
-            ->withConsecutive(
-                ['Running step: step1'],
-                ['Step "step1" finished'],
-                ['Running step: step2'],
-                ['Step "step2" finished']
-            );
+            // withConsecutive() alternative.
+            ->with(self::callback(function (string $message) {
+                static $i = 0;
+                return match (++$i) {
+                    1 => $message === 'Running step: step1',
+                    2 => $message === 'Step "step1" finished',
+                    3 => $message === 'Running step: step2',
+                    4 => $message === 'Step "step2" finished',
+                };
+            }));
 
         $this->processor->execute($scenarios);
     }
@@ -151,22 +157,34 @@ class ProcessorTest extends TestCase
             ->with($scenarios)
             ->willReturn(['steps' => $steps, 'actions' => ['on-fail' => $action]]);
         $this->loggerMock->method('info')
-            ->withConsecutive(
-                [
-                    sprintf(
+            // withConsecutive() alternative.
+            ->with(self::callback(function (string $message) use ($scenarios) {
+                static $i = 0;
+                return match (++$i) {
+                    1 => $message === sprintf(
                         'Starting scenario(s): %s 1.0.0',
                         implode(', ', $scenarios)
-                    )
-                ]
-            );
+                    ),
+                };
+            }));
         $this->loggerMock->method('debug')
-            ->withConsecutive(
-                ['Running step: step1'],
-                ['Running on fail action: on-fail'],
-                ['On fail action "on-fail" finished']
-            );
+            // withConsecutive() alternative.
+            ->with(self::callback(function (string $message) {
+                static $i = 0;
+                return match (++$i) {
+                    1 => $message === 'Running step: step1',
+                    2 => $message === 'Running on fail action: on-fail',
+                    3 => $message === 'On fail action "on-fail" finished',
+                };
+            }));
         $this->loggerMock->method('error')
-            ->withConsecutive(['Some error']);
+            // withConsecutive() alternative.
+            ->with(self::callback(function (string $message) {
+                static $i = 0;
+                return match (++$i) {
+                    1 => $message === 'Some error',
+                };
+            }));
 
         $this->processor->execute($scenarios);
     }
@@ -208,24 +226,34 @@ class ProcessorTest extends TestCase
             ->with($scenarios)
             ->willReturn(['steps' => $steps, 'actions' => ['on-fail' => $action]]);
         $this->loggerMock->method('info')
-            ->withConsecutive(
-                [
-                    sprintf(
+            // withConsecutive() alternative.
+            ->with(self::callback(function (string $message) use ($scenarios) {
+                static $i = 0;
+                return match (++$i) {
+                    1 => $message === sprintf(
                         'Starting scenario(s): %s 1.0.0',
                         implode(', ', $scenarios)
-                    )
-                ]
-            );
+                    ),
+                };
+            }));
         $this->loggerMock->method('debug')
-            ->withConsecutive(
-                ['Running step: step1'],
-                ['Running on fail action: on-fail']
-            );
+            // withConsecutive() alternative.
+            ->with(self::callback(function (string $message) {
+                static $i = 0;
+                return match (++$i) {
+                    1 => $message === 'Running step: step1',
+                    2 => $message === 'Running on fail action: on-fail',
+                };
+            }));
         $this->loggerMock->method('error')
-            ->withConsecutive(
-                ['Action error'],
-                ['Step error']
-            );
+            // withConsecutive() alternative.
+            ->with(self::callback(function (string $message) {
+                static $i = 0;
+                return match (++$i) {
+                    1 => $message === 'Action error',
+                    2 => $message === 'Step error',
+                };
+            }));
 
         $this->processor->execute($scenarios);
     }
@@ -250,14 +278,16 @@ class ProcessorTest extends TestCase
             ->method('merge')
             ->willThrowException(new \RuntimeException('Some error', 10));
         $this->loggerMock->method('info')
-            ->withConsecutive(
-                [
-                    sprintf(
+            // withConsecutive() alternative.
+            ->with(self::callback(function (string $message) use ($scenarios) {
+                static $i = 0;
+                return match (++$i) {
+                    1 => $message === sprintf(
                         'Starting scenario(s): %s 1.0.0',
                         implode(', ', $scenarios)
-                    )
-                ]
-            );
+                    ),
+                };
+            }));
 
         $step1 = $this->getMockForAbstractClass(StepInterface::class);
         $step1->expects($this->never())
@@ -270,7 +300,13 @@ class ProcessorTest extends TestCase
         $this->loggerMock->expects($this->never())
             ->method('debug');
         $this->loggerMock->method('error')
-            ->withConsecutive(['Unhandled error: Some error']);
+            // withConsecutive() alternative.
+            ->with(self::callback(function (string $message) {
+                static $i = 0;
+                return match (++$i) {
+                    1 => $message === 'Unhandled error: Some error',
+                };
+            }));
 
         $this->processor->execute($scenarios);
     }

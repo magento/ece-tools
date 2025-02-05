@@ -35,7 +35,7 @@ class ThemeResolverTest extends TestCase
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
 
         $this->themeResolver = $this->getMockBuilder(ThemeResolver::class)
-            ->setMethods(['getThemes'])
+            ->onlyMethods(['getThemes'])
             ->setConstructorArgs([
                 $this->loggerMock,
             ])->getMock();

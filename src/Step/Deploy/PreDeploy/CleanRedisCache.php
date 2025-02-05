@@ -18,8 +18,8 @@ use CredisException;
 /**
  * Cleans Redis cache.
  *
- * @SuppressWarnings(PHPMD.CyclomaticComplexity)
- * @SuppressWarnings(PHPMD.NPathComplexity)
+ * @SuppressWarnings("PHPMD.CyclomaticComplexity")
+ * @SuppressWarnings("PHPMD.NPathComplexity")
  */
 class CleanRedisCache implements StepInterface
 {

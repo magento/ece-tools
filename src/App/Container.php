@@ -21,7 +21,7 @@ use Exception;
 /**
  * @inheritdoc
  * @codeCoverageIgnore
- * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
+ * @SuppressWarnings("PHPMD.CouplingBetweenObjects")
  */
 class Container implements ContainerInterface
 {

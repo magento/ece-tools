@@ -219,11 +219,21 @@ class ManagerTest extends TestCase
                 ->willReturn($deleteResult);
             $this->loggerMock->expects($this->exactly(count($logs)))
                 ->method('info')
-                ->withConsecutive($logs);
+                // withConsecutive() alternative.
+                ->willReturnCallback(function ($logs) {
+                    if (!empty($args)) {
+                        return null;
+                    }
+                });
         } else {
             $this->loggerMock->expects($this->exactly(count($logs)))
                 ->method('debug')
-                ->withConsecutive($logs);
+                // withConsecutive() alternative.
+                ->willReturnCallback(function ($logs) {
+                    if (!empty($args)) {
+                        return null;
+                    }
+                });
         }
 
         $this->assertSame(

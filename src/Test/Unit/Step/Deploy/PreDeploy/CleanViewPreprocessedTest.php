@@ -95,10 +95,15 @@ class CleanViewPreprocessedTest extends TestCase
             ->willReturn(true);
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
-            ->withConsecutive(
-                ['Skip copying directory ./var/view_preprocessed.'],
-                ['Clearing ./var/view_preprocessed']
-            );
+            // withConsecutive() alternative.
+            ->willReturnCallback(function ($args) {
+                static $series = [
+                    'Skip copying directory ./var/view_preprocessed.',
+                    'Clearing ./var/view_preprocessed'
+                ];
+                $expectedArgs = array_shift($series);
+                $this->assertSame($expectedArgs, $args);
+            });
         $this->directoryListMock->expects($this->once())
             ->method('getPath')
             ->willReturn('magento_root/var/view_preprocessed');

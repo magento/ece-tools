@@ -82,11 +82,15 @@ class InstallUpdateTest extends TestCase
             ->willReturn(false);
         $this->loggerMock->expects($this->exactly(2))
             ->method('notice')
-            ->withConsecutive(
-                ['Starting install.'],
-                ['End of install.']
-            );
-
+            // withConsecutive() alternative.
+            ->willReturnCallback(function ($args) {
+                static $series = [
+                    'Starting install.',
+                    'End of install.'
+                ];
+                $expectedArgs = array_shift($series);
+                $this->assertSame($expectedArgs, $args);
+            });
         $this->stepInstallMock->expects($this->once())
             ->method('execute');
         $this->stepUpdateMock->expects($this->never())
@@ -142,10 +146,15 @@ class InstallUpdateTest extends TestCase
             ->willReturn(true);
         $this->loggerMock->expects($this->exactly(2))
             ->method('notice')
-            ->withConsecutive(
-                ['Starting update.'],
-                ['End of update.']
-            );
+            // withConsecutive() alternative.
+            ->willReturnCallback(function ($args) {
+                static $series = [
+                    'Starting update.',
+                    'End of update.'
+                ];
+                $expectedArgs = array_shift($series);
+                $this->assertSame($expectedArgs, $args);
+            });
         $this->stepInstallMock->expects($this->never())
             ->method('execute');
         $this->stepUpdateMock->expects($this->once())

@@ -140,11 +140,11 @@ class BuildDirCopierTest extends TestCase
             ->willReturn($copyStrategy);
         $fileMock->expects($this->exactly(2))
             ->method('isExists')
-            ->withConsecutive(
-                [$rootInitDir],
-                [$rootDir . '/' . $dir]
-            )
-            ->willReturnOnConsecutiveCalls(true, false);
+            // withConsecutive() alternative.
+            ->willReturnCallback(fn($param) => match ([$param]) {
+                [$rootInitDir] => true,
+                [$rootDir . '/' . $dir] => false
+            });
         $fileMock->expects($this->once())
             ->method('createDirectory')
             ->with($rootDir . '/' . $dir);

@@ -91,19 +91,27 @@ class GenerateTest extends TestCase
             ->method('getThreadCount')
             ->willReturn(3);
         $this->loggerMock->method('info')
-            ->withConsecutive(
-                ["Generating static content for locales: ua_UA fr_FR es_ES en_US\nUsing 3 Threads"]
-            );
+            // withConsecutive() alternative.
+            ->with(self::callback(function (string $message) {
+                static $i = 0;
+                return match (++$i) {
+                    1 => $message === "Generating static content for locales: ua_UA fr_FR es_ES en_US\nUsing 3 Threads"
+                };
+            }));
         $this->commandFactoryMock->expects($this->once())
             ->method('matrix')
             ->with($this->optionMock, ['some_matrix'])
             ->willReturn($commands);
         $this->shellMock->expects($this->exactly(2))
             ->method('execute')
-            ->withConsecutive(
-                ['setup:static-content:deploy with locales'],
-                ['setup:static-content:deploy with locales en_US']
-            );
+            // withConsecutive() alternative.
+            ->with(self::callback(function (string $message) {
+                static $i = 0;
+                return match (++$i) {
+                    1 => $message === 'setup:static-content:deploy with locales',
+                    2 => $message === 'setup:static-content:deploy with locales en_US',
+                };
+            }));
         $this->buildConfigMock->expects($this->once())
             ->method('get')
             ->with(BuildInterface::VAR_SCD_MATRIX)
@@ -131,18 +139,25 @@ class GenerateTest extends TestCase
             ->method('getThreadCount')
             ->willReturn(3);
         $this->loggerMock->method('info')
-            ->withConsecutive(
-                ["Generating static content for locales: ua_UA fr_FR es_ES en_US\nUsing 3 Threads"]
-            );
+            // withConsecutive() alternative.
+            ->with(self::callback(function (string $message) {
+                static $i = 0;
+                return match (++$i) {
+                    1 => $message === "Generating static content for locales: ua_UA fr_FR es_ES en_US\nUsing 3 Threads"
+                };
+            }));
         $this->commandFactoryMock->expects($this->once())
             ->method('matrix')
             ->with($this->optionMock, ['some_matrix'])
             ->willReturn($commands);
         $this->shellMock->expects($this->once())
             ->method('execute')
-            ->withConsecutive(
-                ['setup:static-content:deploy with locales']
-            )->willThrowException(new ShellException('Some error'));
+            // withConsecutive() alternative.
+            ->willReturnCallback(function ($arg1) {
+                if ($arg1 == 'setup:static-content:deploy with locales') {
+                    throw new ShellException('Some error');
+                }
+            });
         $this->buildConfigMock->expects($this->once())
             ->method('get')
             ->with(BuildInterface::VAR_SCD_MATRIX)

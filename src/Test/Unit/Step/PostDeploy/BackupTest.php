@@ -79,12 +79,16 @@ class BackupTest extends TestCase
         $this->loggerMock->expects($this->once())
             ->method('notice')
             ->with('File ' . $configPath . ' does not exist. Skipped.');
+        $series = [
+            'Create backup of important files.',
+            'Successfully created backup ' . $envPath . BackupList::BACKUP_SUFFIX . ' for ' . $envPath . '.'
+        ];
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
-            ->withConsecutive(
-                ['Create backup of important files.'],
-                ['Successfully created backup ' . $envPath . BackupList::BACKUP_SUFFIX . ' for ' . $envPath . '.']
-            );
+            // withConsecutive() alternative.
+            ->willReturnCallback(function ($args) use (&$series) {
+                $this->assertSame(array_shift($series), $args);
+            });
         $this->fileMock->expects($this->once())
             ->method('copy')
             ->with($envPath, $envPath . BackupList::BACKUP_SUFFIX)

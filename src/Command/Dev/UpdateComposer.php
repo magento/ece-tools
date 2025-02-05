@@ -102,7 +102,7 @@ class UpdateComposer extends Command
      * @throws ConfigException
      * @throws FileSystemException
      *
-     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     * @SuppressWarnings("PHPMD.UnusedFormalParameter")
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {

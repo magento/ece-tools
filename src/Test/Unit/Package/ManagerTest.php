@@ -85,16 +85,18 @@ class ManagerTest extends TestCase
             ->method('getPrettyVersion')
             ->willReturn('v2.0.0');
 
+        $series = [
+            [['magento/ece-tools', '*'], $packageOneMock],
+            [['magento/magento2-base', '*'], $packageTwoMock],
+        ];
         $this->repositoryMock->expects($this->exactly(2))
             ->method('findPackage')
-            ->withConsecutive(
-                ['magento/ece-tools', '*'],
-                ['magento/magento2-base', '*']
-            )
-            ->willReturnOnConsecutiveCalls(
-                $packageOneMock,
-                $packageTwoMock
-            );
+            ->willReturnCallback(function (...$args) use (&$series) {
+                [$expectedArgs, $return] = array_shift($series);
+                $this->assertSame($expectedArgs, $args);
+
+                return $return;
+            });
 
         $this->assertEquals(
             '(magento/ece-tools version: v1.0.0, magento/magento2-base version: v2.0.0)',
@@ -112,17 +114,18 @@ class ManagerTest extends TestCase
         $packageOneMock->expects($this->once())
             ->method('getPrettyVersion')
             ->willReturn('v1.0.0');
-
+        $series = [
+            [['vendor/package1', '*'], $packageOneMock],
+            [['vendor/not-exists-package', '*'], null],
+        ];
         $this->repositoryMock->expects($this->exactly(2))
             ->method('findPackage')
-            ->withConsecutive(
-                ['vendor/package1', '*'],
-                ['vendor/not-exists-package', '*']
-            )
-            ->willReturnOnConsecutiveCalls(
-                $packageOneMock,
-                null
-            );
+            ->willReturnCallback(function (...$args) use (&$series) {
+                [$expectedArgs, $return] = array_shift($series);
+                $this->assertSame($expectedArgs, $args);
+
+                return $return;
+            });
 
         $this->assertEquals(
             '(vendor/package1 version: v1.0.0)',
@@ -160,15 +163,17 @@ class ManagerTest extends TestCase
 
     public function testHas(): void
     {
+        $series = [
+            [['some_package', '*'], $this->packageMock],
+            [['some_package', '0.1'], null],
+        ];
         $this->repositoryMock->method('findPackage')
-            ->withConsecutive(
-                ['some_package', '*'],
-                ['some_package', '0.1']
-            )
-            ->willReturnOnConsecutiveCalls(
-                $this->packageMock,
-                null
-            );
+            ->willReturnCallback(function (...$args) use (&$series) {
+                [$expectedArgs, $return] = array_shift($series);
+                $this->assertSame($expectedArgs, $args);
+
+                return $return;
+            });
 
         $this->assertTrue($this->packageManager->has('some_package'));
         $this->assertFalse($this->packageManager->has('some_package', '0.1'));

@@ -171,13 +171,17 @@ class ConnectionTest extends TestCase
             ':name' => 'John',
             ':age' => 2
         ];
-
         $this->statementMock->expects($this->exactly(2))
             ->method('bindValue')
-            ->withConsecutive(
-                [':name', 'John', \PDO::PARAM_STR],
-                [':age', 2, \PDO::PARAM_INT]
-            );
+            // withConsecutive() alternative.
+            ->willReturnCallback(function ($arg1, $arg2, $arg3) {
+                if ($arg1 == ':name' && $arg2 == 'John' && $arg3 == \PDO::PARAM_STR) {
+                    return true;
+                } elseif ($arg1 == ':age' && $arg2 == 2 && $arg3 == \PDO::PARAM_INT) {
+                    return true;
+                }
+            });
+
         $this->statementMock->expects($this->once())
             ->method('rowCount')
             ->willReturn(1);
@@ -194,10 +198,14 @@ class ConnectionTest extends TestCase
 
         $this->statementMock->expects($this->exactly(2))
             ->method('bindValue')
-            ->withConsecutive(
-                [':name', 'John', \PDO::PARAM_STR],
-                [':age', 2, \PDO::PARAM_INT]
-            );
+            // withConsecutive() alternative.
+            ->willReturnCallback(function ($arg1, $arg2, $arg3) {
+                if ($arg1 == ':name' && $arg2 == 'John' && $arg3 == \PDO::PARAM_STR) {
+                    return true;
+                } elseif ($arg1 == ':age' && $arg2 == 2 && $arg3 == \PDO::PARAM_INT) {
+                    return true;
+                }
+            });
         $this->statementMock->expects($this->once())
             ->method('execute')
             ->willReturn(true);
@@ -242,5 +250,18 @@ class ConnectionTest extends TestCase
                 'ece_table',
             ],
         ];
+    }
+
+    private function resolveInvocations(\PHPUnit\Framework\MockObject\Rule\InvocationOrder $matcher): int
+    {
+        if (method_exists($matcher, 'numberOfInvocations')) { // PHPUnit 10+ (including PHPUnit 12)
+            return $matcher->numberOfInvocations();
+        }
+
+        if (method_exists($matcher, 'getInvocationCount')) { // before PHPUnit 10
+            return $matcher->getInvocationCount();
+        }
+
+        $this->fail('Cannot count the number of invocations.');
     }
 }

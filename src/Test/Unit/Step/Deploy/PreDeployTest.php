@@ -55,10 +55,15 @@ class PreDeployTest extends TestCase
     {
         $this->loggerMock->expects($this->exactly(2))
             ->method('notice')
-            ->withConsecutive(
-                ['Starting pre-deploy.'],
-                ['End of pre-deploy.']
-            );
+            // withConsecutive() alternative.
+            ->willReturnCallback(function ($args) {
+                static $series = [
+                    'Starting pre-deploy.',
+                    'End of pre-deploy.'
+                ];
+                $expectedArgs = array_shift($series);
+                $this->assertSame($expectedArgs, $args);
+            });
         $this->stepMock->expects($this->once())
             ->method('execute');
 

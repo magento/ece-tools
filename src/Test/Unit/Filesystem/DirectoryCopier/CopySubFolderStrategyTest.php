@@ -47,14 +47,11 @@ class CopySubFolderStrategyTest extends TestCase
     {
         $this->fileMock->expects($this->exactly(2))
             ->method('isExists')
-            ->withConsecutive(
-                ['fromDir'],
-                ['toDir']
-            )
-            ->willReturnOnConsecutiveCalls(
-                true,
-                false
-            );
+            // withConsecutive() alternative.
+            ->willReturnCallback(fn($param) => match ([$param]) {
+                ['fromDir'] => true,
+                ['toDir'] => false
+            });
         $this->fileMock->expects($this->once())
             ->method('isLink')
             ->with('toDir')
@@ -75,14 +72,11 @@ class CopySubFolderStrategyTest extends TestCase
     {
         $this->fileMock->expects($this->exactly(2))
             ->method('isExists')
-            ->withConsecutive(
-                ['fromDir'],
-                ['toDir']
-            )
-            ->willReturnOnConsecutiveCalls(
-                true,
-                false
-            );
+            // withConsecutive() alternative.
+            ->willReturnCallback(fn($param) => match ([$param]) {
+                ['fromDir'] => true,
+                ['toDir'] => false
+            });
         $this->fileMock->expects($this->once())
             ->method('isLink')
             ->with('toDir')
@@ -147,14 +141,11 @@ class CopySubFolderStrategyTest extends TestCase
 
         $this->fileMock->expects($this->exactly(2))
             ->method('isExists')
-            ->withConsecutive(
-                ['fromDir'],
-                ['toDir']
-            )
-            ->willReturnOnConsecutiveCalls(
-                true,
-                true
-            );
+            // withConsecutive() alternative.
+            ->willReturnCallback(fn($param) => match ([$param]) {
+                ['fromDir'] => true,
+                ['toDir'] => true
+            });
         $this->fileMock->expects($this->once())
             ->method('isLink')
             ->with('toDir')
@@ -165,13 +156,26 @@ class CopySubFolderStrategyTest extends TestCase
             ->method('getDirectoryIterator')
             ->with('fromDir')
             ->willReturn($directoryIteratorMock);
-        $this->fileMock->expects($this->exactly(2))
+        $series = [
+            ['fromDir/file1', 'toDir/file1'],
+            ['fromDir/file2', 'toDir/file2']
+        ];
+        $matcher = $this->exactly(2);
+        $this->fileMock->expects($matcher)
             ->method('copy')
-            ->withConsecutive(
-                ['fromDir/file1', 'toDir/file1'],
-                ['fromDir/file2', 'toDir/file2']
+            // withConsecutive() alternative.
+            ->with(
+                $this->callback(function ($param) use ($series, $matcher) {
+                    $arguments = $series[$this->resolveInvocations($matcher) - 1];  // retrieves arguments
+                    $this->assertStringContainsString($arguments[0], $param); // performs assertion on the argument
+                    return true;
+                }),
+                $this->callback(function ($param) use ($series, $matcher) {
+                    $arguments = $series[$this->resolveInvocations($matcher) - 1];  // retrieves arguments
+                    $this->assertStringContainsString($arguments[1], $param); // performs assertion on the argument
+                    return true;
+                }),
             );
-
         $this->assertTrue($this->copySubFolderStrategy->copy('fromDir', 'toDir'));
     }
 
@@ -262,5 +266,18 @@ class CopySubFolderStrategyTest extends TestCase
             );
 
         return $iteratorMock;
+    }
+
+    private function resolveInvocations(\PHPUnit\Framework\MockObject\Rule\InvocationOrder $matcher): int
+    {
+        if (method_exists($matcher, 'numberOfInvocations')) { // PHPUnit 10+ (including PHPUnit 12)
+            return $matcher->numberOfInvocations();
+        }
+
+        if (method_exists($matcher, 'getInvocationCount')) { // before PHPUnit 10
+            return $matcher->getInvocationCount();
+        }
+
+        $this->fail('Cannot count the number of invocations.');
     }
 }

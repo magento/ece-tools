@@ -81,11 +81,14 @@ class ConfigValidateTest extends TestCase
             ->willReturn($errorMock);
         $this->outputMock->expects($this->exactly(2))
             ->method('writeln')
-            ->withConsecutive(
-                ['Error message'],
-                ['Error suggestion']
-            );
+            ->willReturnCallback(function (string $axis) {
+                static $series = [
+                    'Error message',
+                    'Error suggestion',
+                ];
 
+                $this->assertSame(array_shift($series), $axis);
+            });
         $this->assertEquals(
             Cli::FAILURE,
             $this->command->execute($this->inputMock, $this->outputMock)
@@ -99,11 +102,14 @@ class ConfigValidateTest extends TestCase
             ->willThrowException(new ValidatorException('some error'));
         $this->outputMock->expects($this->exactly(2))
             ->method('writeln')
-            ->withConsecutive(
-                ['Command execution failed:'],
-                ['some error']
-            );
+            ->willReturnCallback(function (string $axis) {
+                static $series = [
+                    'Command execution failed:',
+                    'some error',
+                ];
 
+                $this->assertSame(array_shift($series), $axis);
+            });
         $this->assertEquals(
             Cli::FAILURE,
             $this->command->execute($this->inputMock, $this->outputMock)

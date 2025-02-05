@@ -190,13 +190,18 @@ class StateTest extends TestCase
     {
         $date = 'Wed, 12 Sep 2017 10:40:30 +0000';
         $config = ['install' => ['date' => $date]];
-
+        $series = [
+            'Checking if db exists and has tables',
+            'Magento was installed on ' . $date
+        ];
+  
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
-            ->withConsecutive(
-                ['Checking if db exists and has tables'],
-                ['Magento was installed on ' . $date]
-            );
+            // withConsecutive() alternative.
+            ->willReturnCallback(function ($args) use (&$series) {
+                $expectedArgs = array_shift($series);
+                $this->assertSame($expectedArgs, $args);
+            });
         $this->mockForTablesExist($config);
         $this->environmentMock->expects($this->once())
             ->method('getCryptKey')
@@ -217,13 +222,18 @@ class StateTest extends TestCase
             'install' => ['date' => $date],
             'crypt' => ['key' => 'crypt_key_value']
         ];
+        $series = [
+            'Checking if db exists and has tables',
+            'Magento was installed on ' . $date
+        ];
 
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
-            ->withConsecutive(
-                ['Checking if db exists and has tables'],
-                ['Magento was installed on ' . $date]
-            );
+            // withConsecutive() alternative.
+            ->willReturnCallback(function ($args) use (&$series) {
+                $expectedArgs = array_shift($series);
+                $this->assertSame($expectedArgs, $args);
+            });
         $this->mockForTablesExist($config);
         $this->writerMock->expects($this->never())
             ->method('update');
@@ -238,8 +248,11 @@ class StateTest extends TestCase
             ->willReturn(['core_config_data', 'setup_module']);
         $this->connectionMock->expects($this->exactly(2))
             ->method('getTableName')
-            ->withConsecutive(['core_config_data'], ['setup_module'])
-            ->willReturnOnConsecutiveCalls('core_config_data', 'setup_module');
+            // withConsecutive() alternative.
+            ->willReturnCallback(fn($param) => match ([$param]) {
+                ['core_config_data'] => 'core_config_data',
+                ['setup_module'] => 'setup_module'
+            });
         $this->readerMock->expects($this->once())
             ->method('read')
             ->willReturn($config);

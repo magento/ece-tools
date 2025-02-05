@@ -53,6 +53,7 @@ class JsonErrorFormatter extends JsonFormatter
     public function format(\Monolog\LogRecord|array $record): string
     {
         // Monolog version 3 or higher.
+        /** @phpstan-ignore-next-line */
         if (\Monolog\Logger::API == 3) {
             try {
                 /** @phpstan-ignore-next-line */
