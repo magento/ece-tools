@@ -146,13 +146,18 @@ class MagentoVersionTest extends TestCase
      */
     public function testGetVersionFromGit(): void
     {
+        $series = [
+            [[GlobalConfig::VAR_DEPLOYED_MAGENTO_VERSION_FROM_GIT], '2.2.1'],
+            [[GlobalConfig::VAR_DEPLOYED_MAGENTO_VERSION_FROM_GIT], '2.2.1'],
+        ];
         $this->globalConfigMock->expects(self::exactly(2))
             ->method('get')
-            ->withConsecutive(
-                [GlobalConfig::VAR_DEPLOYED_MAGENTO_VERSION_FROM_GIT],
-                [GlobalConfig::VAR_DEPLOYED_MAGENTO_VERSION_FROM_GIT]
-            )
-            ->willReturn('2.2.1', '2.2.1');
+            ->willReturnCallback(function (...$args) use (&$series) {
+                [$expectedArgs, $return] = array_shift($series);
+                $this->assertSame($expectedArgs, $args);
+
+                return $return;
+            });
         $this->managerMock->expects(self::never())
             ->method('get');
         $this->packageMock->expects(self::never())

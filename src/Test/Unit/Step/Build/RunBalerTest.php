@@ -114,11 +114,16 @@ class RunBalerTest extends TestCase
             ));
         $this->loggerMock->expects($this->exactly(3))
             ->method('warning')
-            ->withConsecutive(
-                ['Baler validation failed'],
-                [" - Maybe baler isn't installed"],
-                [' - Maybe config is wrong']
-            );
+            // withConsecutive() alternative.
+            ->willReturnCallback(function ($args) {
+                static $series = [
+                    'Baler validation failed',
+                    " - Maybe baler isn't installed",
+                    ' - Maybe config is wrong'
+                ];
+                $expectedArgs = array_shift($series);
+                $this->assertSame($expectedArgs, $args);
+            });
 
         $this->step->execute();
     }
@@ -135,7 +140,15 @@ class RunBalerTest extends TestCase
             ->willReturn(new Result\Success());
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
-            ->withConsecutive(['Running Baler JS bundler.'], ['Baler JS bundling complete.']);
+            // withConsecutive() alternative.
+            ->willReturnCallback(function ($args) {
+                static $series = [
+                    'Running Baler JS bundler.',
+                    'Baler JS bundling complete.'
+                ];
+                $expectedArgs = array_shift($series);
+                $this->assertSame($expectedArgs, $args);
+            });
         $this->shellMock->expects($this->once())
             ->method('execute')
             ->with('baler');

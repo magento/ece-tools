@@ -102,13 +102,11 @@ class OptionTest extends TestCase
     {
         $this->stageConfigMock->expects($this->once())
             ->method('get')
-            ->withConsecutive(
-                [BuildInterface::VAR_SCD_STRATEGY]
-            )
-            ->willReturn(
-                'strategy',
-                ['strategy']
-            );
+            // withConsecutive() alternative.
+            ->willReturnCallback(fn($param) => match ([$param]) {
+                [BuildInterface::VAR_SCD_STRATEGY] => 'strategy',
+                [BuildInterface::VAR_SCD_STRATEGY] => ['strategy']
+            });
 
         $this->assertEquals('strategy', $this->option->getStrategy());
     }

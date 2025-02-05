@@ -78,10 +78,15 @@ class RestoreWritableDirectoriesTest extends TestCase
             ]);
         $this->buildDirCopierMock->expects($this->exactly(2))
             ->method('copy')
-            ->withConsecutive(
-                ['app/etc', 'copy'],
-                ['pub/media', 'copy']
-            );
+            // withConsecutive() alternative.
+            ->willReturnCallback(function (...$args) {
+                static $series = [
+                    ['app/etc', 'copy'],
+                    ['pub/media', 'copy']
+                ];
+                $expectedArgs = array_shift($series);
+                $this->assertSame($expectedArgs, $args);
+            });
         $this->loggerMock->expects($this->once())
             ->method('notice')
             ->with('Recoverable directories were copied back.');

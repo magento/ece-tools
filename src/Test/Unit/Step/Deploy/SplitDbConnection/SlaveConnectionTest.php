@@ -191,18 +191,18 @@ class SlaveConnectionTest extends TestCase
             ]);
         $this->loggerMock->expects($this->exactly(2))
             ->method('warning')
-            ->withConsecutive(
-                [
+            // withConsecutive() alternative.
+            ->willReturnCallback(function (string $axis) {
+                static $series = [
                     'Slave connection for \'checkout\' connection not set.'
                     . ' The `relationships` configuration in the .magento.app.yaml file'
-                    . ' is missing the configuration for this slave connection'
-                ],
-                [
+                    . ' is missing the configuration for this slave connection',
                     'Slave connection for \'sales\' connection not set.'
                     . ' The `relationships` configuration in the .magento.app.yaml file'
                     . ' is missing the configuration for this slave connection'
-                ]
-            );
+                ];
+                $this->assertSame(array_shift($series), $axis);
+            });
         $this->configWriterMock->create($mageConfig);
         $this->slaveConnection->update();
     }
@@ -245,10 +245,14 @@ class SlaveConnectionTest extends TestCase
             ]);
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
-            ->withConsecutive(
-                ['Slave connection for \'checkout\' connection was set'],
-                ['Slave connection for \'sales\' connection was set']
-            );
+            // withConsecutive() alternative.
+            ->willReturnCallback(function (string $axis) {
+                static $series = [
+                    'Slave connection for \'checkout\' connection was set',
+                    'Slave connection for \'sales\' connection was set'
+                ];
+                $this->assertSame(array_shift($series), $axis);
+            });
 
         $this->configWriterMock->create([
             'db' => [

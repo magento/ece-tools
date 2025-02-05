@@ -77,12 +77,18 @@ class CommandFactoryTest extends TestCase
             ->expects($this->exactly(3))
             ->method('satisfies')
             ->willReturn($useScdStrategy);
+        $arguments = array_chunk($optionConfig['excluded_themes'], 1);
+        $results = $optionConfig['resolve_return'];
         $this->themeResolverMock
             ->expects($this->exactly(count($optionConfig['excluded_themes'])))
             ->method('resolve')
-            ->withConsecutive(...array_chunk($optionConfig['excluded_themes'], 1))
-            ->willReturnOnConsecutiveCalls(...$optionConfig['resolve_return']);
-
+            // withConsecutive() alternative.
+            ->willReturnCallback(function ($arguments) use ($results) {
+                static $callCount = 0;
+                $returnValue = $results[$callCount] ?? null;
+                $callCount++;
+                return $returnValue;
+            });
         $this->assertEquals(
             $expected,
             $this->commandFactory->create(
@@ -274,12 +280,18 @@ class CommandFactoryTest extends TestCase
             ->expects($this->any())
             ->method('satisfies')
             ->willReturn(true);
+        $arguments = $optionConfig['resolve_pass'];
+        $results = $optionConfig['resolve_return'];
         $this->themeResolverMock
             ->expects($this->exactly(count($optionConfig['resolve_pass'])))
             ->method('resolve')
-            ->withConsecutive(...$optionConfig['resolve_pass'])
-            ->willReturnOnConsecutiveCalls(...$optionConfig['resolve_return']);
-
+            // withConsecutive() alternative.
+            ->willReturnCallback(function ($arguments) use ($results) {
+                static $callCount = 0;
+                $returnValue = $results[$callCount] ?? null;
+                $callCount++;
+                return $returnValue;
+            });
         $this->assertSame(
             $expected,
             $this->commandFactory->matrix($optionMock, $matrix)
@@ -390,11 +402,18 @@ class CommandFactoryTest extends TestCase
             ->expects($this->exactly(3))
             ->method('satisfies')
             ->willReturn($useScdStrategy);
+        $arguments = array_chunk($excludedThemes, 1);
+        $results = $optionConfig['resolve_return'];
         $this->themeResolverMock
             ->expects($this->exactly($this->count($excludedThemes)))
             ->method('resolve')
-            ->withConsecutive(...array_chunk($excludedThemes, 1))
-            ->willReturnOnConsecutiveCalls(...$optionConfig['resolve_return']);
+            // withConsecutive() alternative.
+            ->willReturnCallback(function ($arguments) use ($results) {
+                static $callCount = 0;
+                $returnValue = $results[$callCount] ?? null;
+                $callCount++;
+                return $returnValue;
+            });
 
         $this->assertEquals(
             $expected,
@@ -436,14 +455,11 @@ class CommandFactoryTest extends TestCase
         $this->themeResolverMock
             ->expects($this->exactly(2))
             ->method('resolve')
-            ->withConsecutive(
-                ['Magento/Backend'],
-                ['Magento/Backend']
-            )
-            ->willReturnOnConsecutiveCalls(
-                '',
-                ''
-            );
+            // withConsecutive() alternative.
+            ->willReturnCallback(fn($param) => match ([$param]) {
+                ['Magento/Backend'] => '',
+                ['Magento/Backend'] => ''
+            });
         $this->loggerMock
             ->expects($this->once())
             ->method('warning')

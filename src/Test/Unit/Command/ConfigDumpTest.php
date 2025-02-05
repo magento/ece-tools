@@ -19,6 +19,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Tester\CommandTester;
+use Magento\MagentoCloud\Shell\ProcessInterface;
 
 /**
  * @inheritdoc
@@ -72,6 +73,11 @@ class ConfigDumpTest extends TestCase
     private $stageConfigMock;
 
     /**
+     * @var ProcessInterface|MockObject
+     */
+    private $processMock;
+
+    /**
      * @inheritdoc
      */
     protected function setUp(): void
@@ -84,6 +90,7 @@ class ConfigDumpTest extends TestCase
         $this->writerMock = $this->getMockForAbstractClass(WriterInterface::class);
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
         $this->stageConfigMock = $this->createMock(PostDeployInterface::class);
+        $this->processMock = $this->getMockForAbstractClass(ProcessInterface::class);
 
         $this->shellFactoryMock->method('createMagento')
             ->willReturn($this->shellMock);
@@ -95,7 +102,8 @@ class ConfigDumpTest extends TestCase
             $this->readerMock,
             $this->writerMock,
             $this->magentoVersionMock,
-            $this->stageConfigMock
+            $this->stageConfigMock,
+            $this->processMock
         );
     }
 
@@ -103,10 +111,11 @@ class ConfigDumpTest extends TestCase
     {
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
-            ->withConsecutive(
-                ['Starting dump.'],
-                ['Dump completed.']
-            );
+            // withConsecutive() alternative.
+            ->willReturnCallback(fn($param) => match ([$param]) {
+                ['Starting dump.'] => $this->loggerMock,
+                ['Dump completed.'] => $this->loggerMock
+            });
         $this->generateMock->expects($this->once())
             ->method('execute');
         $this->readerMock->expects($this->once())
@@ -118,7 +127,11 @@ class ConfigDumpTest extends TestCase
             ->willReturn(true);
         $this->shellMock->expects($this->exactly(2))
             ->method('execute')
-            ->withConsecutive(['app:config:dump'], ['app:config:import']);
+            // withConsecutive() alternative.
+            ->willReturnCallback(fn($param) => match ([$param]) {
+                ['app:config:dump'] => $this->processMock,
+                ['app:config:import'] => $this->processMock
+            });
 
         $tester = new CommandTester(
             $this->command
@@ -135,10 +148,11 @@ class ConfigDumpTest extends TestCase
             ->willReturn('-v');
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
-            ->withConsecutive(
-                ['Starting dump.'],
-                ['Dump completed.']
-            );
+            // withConsecutive() alternative.
+            ->willReturnCallback(fn($param) => match ([$param]) {
+                ['Starting dump.'] => $this->loggerMock,
+                ['Dump completed.'] => $this->loggerMock
+            });
         $this->generateMock->expects($this->once())
             ->method('execute');
         $this->readerMock->expects($this->once())

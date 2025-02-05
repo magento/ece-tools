@@ -64,8 +64,8 @@ class RemoteStorage implements StepInterface
      * Enables or disables remote storage.
      *
      * @throws StepException
-     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
-     * @SuppressWarnings(PHPMD.NPathComplexity)
+     * @SuppressWarnings("PHPMD.CyclomaticComplexity")
+     * @SuppressWarnings("PHPMD.NPathComplexity")
      */
     public function execute(): void
     {

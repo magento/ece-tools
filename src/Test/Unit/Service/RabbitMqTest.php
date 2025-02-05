@@ -55,17 +55,17 @@ class RabbitMqTest extends TestCase
     {
         $this->environmentMock->expects($this->exactly(3))
             ->method('getRelationship')
-            ->withConsecutive(['rabbitmq'], ['mq'], ['amqp'])
-            ->willReturnOnConsecutiveCalls(
-                [],
-                [],
-                [
+            // withConsecutive() alternative.
+            ->willReturnCallback(fn($param) => match ([$param]) {
+                ['rabbitmq'] => [],
+                ['mq'] => [],
+                ['amqp'] => [
                     [
                         'host' => '127.0.0.1',
                         'port' => '5672',
                     ]
                 ]
-            );
+            });
 
         $this->assertSame(
             [
@@ -80,18 +80,18 @@ class RabbitMqTest extends TestCase
     {
         $this->environmentMock->expects($this->exactly(3))
             ->method('getRelationship')
-            ->withConsecutive(['rabbitmq'], ['mq'], ['amqp'])
-            ->willReturnOnConsecutiveCalls(
-                [],
-                [],
-                [
+            // withConsecutive() alternative.
+            ->willReturnCallback(fn($param) => match ([$param]) {
+                ['rabbitmq'] => [],
+                ['mq'] => [],
+                ['amqp'] => [
                     [
                         'host' => '127.0.0.1',
                         'port' => '5672',
                         'type' => 'rabbitmq:3.7',
                     ]
                 ]
-            );
+            });
 
         $this->shellMock->expects($this->never())
             ->method('execute');
@@ -103,14 +103,19 @@ class RabbitMqTest extends TestCase
      */
     public function testGetVersionNotInstalled(): void
     {
+        $series = [
+            [['rabbitmq'], []],
+            [['mq'], []],
+            [['amqp'], []]
+        ];
         $this->environmentMock->expects($this->exactly(3))
             ->method('getRelationship')
-            ->withConsecutive(['rabbitmq'], ['mq'], ['amqp'])
-            ->willReturnOnConsecutiveCalls(
-                [],
-                [],
-                []
-            );
+            // withConsecutive() alternative.
+            ->willReturnCallback(fn($param) => match ([$param]) {
+                ['rabbitmq'] => [],
+                ['mq'] => [],
+                ['amqp'] => []
+            });
 
         $this->shellMock->expects($this->never())
             ->method('execute');

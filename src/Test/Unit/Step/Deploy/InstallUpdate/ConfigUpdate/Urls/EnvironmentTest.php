@@ -80,11 +80,16 @@ class EnvironmentTest extends TestCase
     ): void {
         $this->loggerMock->expects($loggerInfoExpects)
             ->method('info')
-            ->withConsecutive(
-                ['Updating secure and unsecure URLs in app/etc/env.php file'],
-                ['Host was replaced: [example1.com] => [example2.com]'],
-                ['Write the updating base URLs configuration in the app/etc/env.php file']
-            );
+            // withConsecutive() alternative.
+            ->willReturnCallback(function ($args) {
+                static $series = [
+                    'Updating secure and unsecure URLs in app/etc/env.php file',
+                    'Host was replaced: [example1.com] => [example2.com]',
+                    'Write the updating base URLs configuration in the app/etc/env.php file'
+                ];
+                $expectedArgs = array_shift($series);
+                $this->assertSame($expectedArgs, $args);
+            });
         $this->readerMock->expects($this->once())
             ->method('read')
             ->willReturn([
@@ -156,9 +161,14 @@ class EnvironmentTest extends TestCase
     {
         $this->loggerMock->expects($this->once())
             ->method('info')
-            ->withConsecutive(
-                ['Updating secure and unsecure URLs in app/etc/env.php file']
-            );
+            // withConsecutive() alternative.
+            ->willReturnCallback(function ($args) {
+                static $series = [
+                    'Updating secure and unsecure URLs in app/etc/env.php file'
+                ];
+                $expectedArgs = array_shift($series);
+                $this->assertSame($expectedArgs, $args);
+            });
         $this->readerMock->expects($this->once())
             ->method('read')
             ->willReturn([

@@ -57,10 +57,15 @@ class RefreshModulesTest extends TestCase
     {
         $this->loggerMock->expects($this->exactly(2))
             ->method('notice')
-            ->withConsecutive(
-                ['Reconciling installed modules with shared config.'],
-                ['End of reconciling modules.']
-            );
+            // withConsecutive() alternative.
+            ->willReturnCallback(function ($args) {
+                static $series = [
+                    'Reconciling installed modules with shared config.',
+                    'End of reconciling modules.'
+                ];
+                $expectedArgs = array_shift($series);
+                $this->assertSame($expectedArgs, $args);
+            });
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('The following modules have been enabled:' . PHP_EOL . 'module1' . PHP_EOL . 'module2');
@@ -75,10 +80,15 @@ class RefreshModulesTest extends TestCase
     {
         $this->loggerMock->expects($this->exactly(2))
             ->method('notice')
-            ->withConsecutive(
-                ['Reconciling installed modules with shared config.'],
-                ['End of reconciling modules.']
-            );
+            // withConsecutive() alternative.
+            ->willReturnCallback(function ($args) {
+                static $series = [
+                    'Reconciling installed modules with shared config.',
+                    'End of reconciling modules.'
+                ];
+                $expectedArgs = array_shift($series);
+                $this->assertSame($expectedArgs, $args);
+            });
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('No modules were changed.');

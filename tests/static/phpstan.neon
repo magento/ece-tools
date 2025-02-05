@@ -6,6 +6,9 @@ parameters:
         - ../../src/Test/*
     reportUnmatchedIgnoredErrors: false
     treatPhpDocTypesAsCertain: false
+    exceptions:
+        check:
+            tooWideThrowType: false
     ignoreErrors:
         - message: "#.*ComponentRegistrar.*#"
           path: ../../src/StaticContent/ThemeResolver.php

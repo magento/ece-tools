@@ -102,10 +102,15 @@ class GenerateTest extends TestCase
             ->with('magento_root/pub/static/deployed_version.txt')
             ->willReturn(true);
         $this->loggerMock->method('info')
-            ->withConsecutive(
-                ['Extracting locales'],
-                ['Generating static content']
-            );
+            // withConsecutive() alternative.
+            ->willReturnCallback(function ($args) {
+                static $series = [
+                    'Extracting locales',
+                    'Generating static content'
+                ];
+                $expectedArgs = array_shift($series);
+                $this->assertSame($expectedArgs, $args);
+            });
         $this->commandFactoryMock->expects($this->once())
             ->method('matrix')
             ->willReturn([
@@ -138,10 +143,15 @@ class GenerateTest extends TestCase
             ->with('magento_root/pub/static/deployed_version.txt')
             ->willReturn(true);
         $this->loggerMock->method('info')
-            ->withConsecutive(
-                ['Extracting locales'],
-                ['Generating static content for locales: en_GB']
-            );
+            // withConsecutive() alternative.
+            ->willReturnCallback(function ($args) {
+                static $series = [
+                    'Extracting locales',
+                    'Generating static content for locales: en_GB'
+                ];
+                $expectedArgs = array_shift($series);
+                $this->assertSame($expectedArgs, $args);
+            });
         $this->commandFactoryMock->expects($this->once())
             ->method('matrix')
             ->willReturn([
@@ -175,10 +185,15 @@ class GenerateTest extends TestCase
             ->with('magento_root/pub/static/deployed_version.txt')
             ->willReturn(true);
         $this->loggerMock->method('notice')
-            ->withConsecutive(
-                ['Extracting locales'],
-                ['Generating static content for locales: en_GB fr_FR']
-            );
+            // withConsecutive() alternative.
+            ->willReturnCallback(function ($args) {
+                static $series = [
+                    'Extracting locales',
+                    'Generating static content for locales: en_GB fr_FR'
+                ];
+                $expectedArgs = array_shift($series);
+                $this->assertSame($expectedArgs, $args);
+            });
         $this->commandFactoryMock->expects($this->once())
             ->method('matrix')
             ->willReturn([

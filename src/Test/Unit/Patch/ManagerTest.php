@@ -73,10 +73,15 @@ class ManagerTest extends TestCase
             ->with('php ./vendor/bin/ece-patches apply --no-interaction')
             ->willReturn($processMock);
         $this->loggerMock->method('notice')
-            ->withConsecutive(
-                ['Applying patches'],
-                ['End of applying patches']
-            );
+            // withConsecutive() alternative.
+            ->willReturnCallback(function ($args) {
+                static $series = [
+                    'Applying patches',
+                    'End of applying patches'
+                ];
+                $expectedArgs = array_shift($series);
+                $this->assertSame($expectedArgs, $args);
+            });
 
         $this->manager->apply();
     }
@@ -129,9 +134,14 @@ class ManagerTest extends TestCase
             ->with('php ./vendor/bin/ece-patches apply --no-interaction')
             ->willThrowException(new ShellException('Some error'));
         $this->loggerMock->method('notice')
-            ->withConsecutive(
-                ['Applying patches']
-            );
+            // withConsecutive() alternative.
+            ->willReturnCallback(function ($args) {
+                static $series = [
+                    'Applying patches'
+                ];
+                $expectedArgs = array_shift($series);
+                $this->assertSame($expectedArgs, $args);
+            });
         $this->loggerMock->expects(self::once())
             ->method('error')
             ->with('Some error');

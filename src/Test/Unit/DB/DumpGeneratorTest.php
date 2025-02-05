@@ -113,13 +113,18 @@ class DumpGeneratorTest extends TestCase
     public function testCreate(bool $removeDefiners)
     {
         $dumpFilePath = $this->getDumpFilePath('main');
+        $series = [
+            'Waiting for lock on db dump.',
+            'Start creation DB dump for main database...',
+            'Finished DB dump for main database, it can be found here: ' . $dumpFilePath
+        ];
         $this->loggerMock->expects($this->exactly(3))
             ->method('info')
-            ->withConsecutive(
-                ['Waiting for lock on db dump.'],
-                ['Start creation DB dump for main database...'],
-                ['Finished DB dump for main database, it can be found here: ' . $dumpFilePath]
-            );
+            // withConsecutive() alternative.
+            ->willReturnCallback(function ($args) use (&$series) {
+                $expectedArgs = array_shift($series);
+                $this->assertSame($expectedArgs, $args);
+            });
         $dumpCommand = $this->getDumpCommand('main');
         $this->dumpMock->expects($this->once())
             ->method('getCommand')
@@ -154,10 +159,15 @@ class DumpGeneratorTest extends TestCase
         $dumpCommand = $this->getDumpCommand('main');
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
-            ->withConsecutive(
-                ['Waiting for lock on db dump.'],
-                ['Start creation DB dump for main database...']
-            );
+            // withConsecutive() alternative.
+            ->willReturnCallback(function ($args) {
+                static $series = [
+                    'Waiting for lock on db dump.',
+                    'Start creation DB dump for main database...'
+                ];
+                $expectedArgs = array_shift($series);
+                $this->assertSame($expectedArgs, $args);
+            });
         $this->dumpMock->expects($this->once())
             ->method('getCommand')
             ->with($this->connectionDataMock)
@@ -201,10 +211,15 @@ class DumpGeneratorTest extends TestCase
             ->willReturn(false);
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
-            ->withConsecutive(
-                ['Waiting for lock on db dump.'],
-                ['Dump process is locked!']
-            );
+            // withConsecutive() alternative.
+            ->willReturnCallback(function ($args) {
+                static $series = [
+                    'Waiting for lock on db dump.',
+                    'Dump process is locked!'
+                ];
+                $expectedArgs = array_shift($series);
+                $this->assertSame($expectedArgs, $args);
+            });
         $this->shellMock->expects($this->never())
             ->method('execute');
         $this->dumpGenerator->create('main', $this->connectionDataMock, false, '');

@@ -59,12 +59,9 @@ class HandlerFactoryTest extends TestCase
 
         $this->repositoryMock->expects($this->exactly(2))
             ->method('get')
-            ->withConsecutive(
-                ['transport'],
-                ['additional']
-            )
-            ->willReturnOnConsecutiveCalls(
-                [
+            // withConsecutive() alternative.
+            ->willReturnCallback(fn($param) => match ([$param]) {
+                ['transport'] => [
                     'http' => [
                         'host' => 'localhost'
                     ],
@@ -72,20 +69,22 @@ class HandlerFactoryTest extends TestCase
                         'host' => '127.0.0.1'
                     ]
                 ],
-                [
+                ['additional'] => [
                     'project' => 'some_project'
                 ]
-            );
+            });
+        $series = [
+            [['http', ['host' => 'localhost']], $httpTransportMock],
+            [['tcp', ['host' => '127.0.0.1']], $tcpTransportMock],
+        ];
         $this->transportFactoryMock->expects($this->exactly(2))
             ->method('create')
-            ->withConsecutive(
-                ['http', ['host' => 'localhost']],
-                ['tcp', ['host' => '127.0.0.1']]
-            )
-            ->willReturnOnConsecutiveCalls(
-                $httpTransportMock,
-                $tcpTransportMock
-            );
+            // withConsecutive() alternative.
+            ->willReturnCallback(function (...$args) use (&$series) {
+                [$expectedArgs, $return] = array_shift($series);
+                $this->assertSame($expectedArgs, $args);
+                return $return;
+            });
 
         $this->handlerFactory->create($this->repositoryMock, Logger::INFO);
     }

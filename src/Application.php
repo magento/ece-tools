@@ -15,7 +15,7 @@ use Magento\MagentoCloud\Command;
 /**
  * @inheritdoc
  *
- * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
+ * @SuppressWarnings("PHPMD.CouplingBetweenObjects")
  */
 class Application extends \Symfony\Component\Console\Application
 {

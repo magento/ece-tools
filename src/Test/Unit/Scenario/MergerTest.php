@@ -92,11 +92,31 @@ class MergerTest extends TestCase
             '@type' => 'Magento\MagentoCloud\OnFail\Action\CreateDeployFailedFlag',
         ];
 
+        $series = [
+            [['scenario1.xml'], [
+                '@xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance',
+                '@xsi:noNamespaceSchemaLocation' => '../../config/scenario.xsd',
+                'step' => [
+                    $step1,
+                    $step2
+                ],
+                'onFail' => [
+                    'action' => $action,
+                ]
+            ]],
+            [['scenario2.xml'], [
+                '@xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance',
+                '@xsi:noNamespaceSchemaLocation' => '../../config/scenario.xsd',
+                'step' => [
+                    $step1Over,
+                ],
+            ]],
+        ];
         $this->scenarioCollectorMock->expects($this->exactly(2))
             ->method('collect')
-            ->withConsecutive(['scenario1.xml'], ['scenario2.xml'])
-            ->willReturnOnConsecutiveCalls(
-                [
+            // withConsecutive() alternative.
+            ->willReturnCallback(fn($param) => match ([$param]) {
+                ['scenario1.xml'] => [
                     '@xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance',
                     '@xsi:noNamespaceSchemaLocation' => '../../config/scenario.xsd',
                     'step' => [
@@ -107,34 +127,34 @@ class MergerTest extends TestCase
                         'action' => $action,
                     ]
                 ],
-                [
+                ['scenario2.xml'] => [
                     '@xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance',
                     '@xsi:noNamespaceSchemaLocation' => '../../config/scenario.xsd',
                     'step' => [
                         $step1Over,
                     ],
                 ]
-            );
+            });
         $this->stepCollectorMock->expects($this->exactly(3))
             ->method('collect')
-            ->withConsecutive([$step1], [$step2], [$step1Over])
-            ->willReturnOnConsecutiveCalls(
-                [
+            // withConsecutive() alternative.
+            ->willReturnCallback(fn($param) => match ([$param]) {
+                [$step1] => [
                     'name' => 'clear-init-directory',
                     'priority' => 100,
                     'type' => 'Magento\MagentoCloud\Step\Build\ClearInitDirectory',
                 ],
-                [
+                [$step2] => [
                     'name' => 'compress-static-content',
                     'priority' => 200,
                     'type' => 'Magento\MagentoCloud\Step\Build\CompressStaticContent',
                 ],
-                [
+                [$step1Over] => [
                     'name' => 'clear-init-directory',
                     'priority' => 300,
                     'type' => 'customType',
                 ]
-            );
+            });
         $this->actionCollectorMock->expects($this->once())
             ->method('collect')
             ->with($action)

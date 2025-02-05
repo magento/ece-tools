@@ -341,20 +341,28 @@ class SplitDbConnectionTest extends TestCase
             ->willReturn(['db' => ['connection' => []]]);
         $this->magentoShellMock->expects($this->exactly(2))
             ->method('execute')
-            ->withConsecutive(
-                ['setup:db-schema:split-quote --host="checkout.host" --dbname="checkout.dbname"'
-                    . ' --username="checkout.username" --password="checkout.password"'],
-                ['setup:db-schema:split-sales --host="sales.host" --dbname="sales.dbname"'
-                    . ' --username="sales.username" --password="sales.password"']
-            );
+            // withConsecutive() alternative.
+            ->with(self::callback(function (string $message) {
+                static $i = 0;
+                return match (++$i) {
+                    1 => $message === 'setup:db-schema:split-quote --host="checkout.host" --dbname="checkout.dbname"'
+                    . ' --username="checkout.username" --password="checkout.password"',
+                    2 => $message === 'setup:db-schema:split-sales --host="sales.host" --dbname="sales.dbname"'
+                        . ' --username="sales.username" --password="sales.password"',
+                };
+            }));
         $this->upgradeProcessMock->expects($this->exactly(2))
             ->method('execute');
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
-            ->withConsecutive(
-                ['Quote tables were split to DB checkout.dbname in checkout.host'],
-                ['Sales tables were split to DB sales.dbname in sales.host']
-            );
+            // withConsecutive() alternative.
+            ->with(self::callback(function (string $message) {
+                static $i = 0;
+                return match (++$i) {
+                    1 => $message === 'Quote tables were split to DB checkout.dbname in checkout.host',
+                    2 => $message === 'Sales tables were split to DB sales.dbname in sales.host',
+                };
+            }));
         $this->slaveConnectionMock->expects($this->once())
             ->method('update');
 

@@ -58,7 +58,7 @@ class SessionCredentialsTest extends TestCase
     public function testValidate(
         array $sessionConfig,
         string $expectedResultType,
-        string $expectedErrorMessage = null
+        string | null $expectedErrorMessage = null
     ): void {
         $this->sessionConfigMock->expects($this->once())
             ->method('get')

@@ -55,7 +55,7 @@ class DbDumpTest extends TestCase
         $this->dumpProcessorMock = $this->createMock(DumpProcessor::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->questionMock = $this->getMockBuilder(QuestionHelper::class)
-            ->setMethods(['ask'])
+            ->onlyMethods(['ask'])
             ->getMock();
         $this->helperSetMock = $this->createMock(HelperSet::class);
 
@@ -78,10 +78,14 @@ class DbDumpTest extends TestCase
             ->willReturn(true);
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
-            ->withConsecutive(
-                ['Starting backup.'],
-                ['Backup completed.']
-            );
+            ->willReturnCallback(function (string $axis) {
+                static $series = [
+                    'Starting backup.',
+                    'Backup completed.',
+                ];
+
+                $this->assertSame(array_shift($series), $axis);
+            });
         $this->dumpProcessorMock->expects($this->once())
             ->method('execute')
             ->with(false, []);
@@ -130,10 +134,14 @@ class DbDumpTest extends TestCase
             ->willReturn(true);
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
-            ->withConsecutive(
-                ['Starting backup.'],
-                ['Backup completed.']
-            );
+            ->willReturnCallback(function (string $axis) {
+                static $series = [
+                    'Starting backup.',
+                    'Backup completed.',
+                ];
+
+                $this->assertSame(array_shift($series), $axis);
+            });
         $this->dumpProcessorMock->expects($this->once())
             ->method('execute')
             ->with(true, []);
@@ -197,10 +205,14 @@ class DbDumpTest extends TestCase
             ->willReturn(true);
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
-            ->withConsecutive(
-                ['Starting backup.'],
-                ['Backup completed.']
-            );
+            ->willReturnCallback(function (string $axis) {
+                static $series = [
+                    'Starting backup.',
+                    'Backup completed.',
+                ];
+
+                $this->assertSame(array_shift($series), $axis);
+            });
         $this->dumpProcessorMock->expects($this->once())
             ->method('execute')
             ->with(false, ['main', 'sales', 'quote']);

@@ -76,10 +76,14 @@ class CompileDiTest extends TestCase
             ->willReturn('-vvv');
         $this->loggerMock->expects($this->exactly(2))
             ->method('notice')
-            ->withConsecutive(
-                ['Running DI compilation'],
-                ['End of running DI compilation']
-            );
+            // withConsecutive() alternative.
+            ->willReturnCallback(function (string $axis) {
+                static $series = [
+                    'Running DI compilation',
+                    'End of running DI compilation'
+                ];
+                $this->assertSame(array_shift($series), $axis);
+            });
         $this->magentoShellMock->expects($this->once())
             ->method('execute')
             ->with('setup:di:compile', ['-vvv']);

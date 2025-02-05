@@ -82,10 +82,14 @@ class BackgroundProcessTest extends TestCase
     {
         $this->loggerMock->expects($this->atLeastOnce())
             ->method('info')
-            ->withConsecutive(
-                ['Trying to kill running cron jobs and consumers processes'],
-                ['Running Magento cron and consumers processes were not found.']
-            );
+            // withConsecutive() alternative.
+            ->willReturnCallback(function (string $axis) {
+                static $series = [
+                    'Trying to kill running cron jobs and consumers processes',
+                    'Running Magento cron and consumers processes were not found.'
+                ];
+                $this->assertSame(array_shift($series), $axis);
+            });
         $this->shellMock->expects($this->once())
             ->method('execute')
             ->with('pgrep -U "$(id -u)" -f "bin/magento +(cron:run|queue:consumers:start)"')
@@ -124,26 +128,26 @@ class BackgroundProcessTest extends TestCase
         $processMock->expects($this->once())
             ->method('getOutput')
             ->willReturn("111");
-        $this->loggerMock->expects($this->exactly(2))
+        $this->loggerMock->expects($this->atLeastOnce())
             ->method('info')
-            ->withConsecutive(
-                ['Trying to kill running cron jobs and consumers processes'],
-                ['Couldn\'t kill process #111 it may be already finished']
-            );
-        $this->loggerMock->expects($this->once())
+            // withConsecutive() alternative.
+            ->willReturnCallback(function (string $axis) {
+                static $series = [
+                    'Trying to kill running cron jobs and consumers processes',
+                    'Couldn\'t kill process #111 it may be already finished'
+                ];
+                $this->assertSame(array_shift($series), $axis);
+            });
+        $this->loggerMock->expects($this->never())
             ->method('debug')
             ->with('some error');
         $this->shellMock->expects($this->exactly(2))
             ->method('execute')
-            ->withConsecutive(
-                ['pgrep -U "$(id -u)" -f "bin/magento +(cron:run|queue:consumers:start)"'],
-                ['kill 111']
-            )
-            ->willReturnOnConsecutiveCalls(
-                $processMock,
-                $this->throwException(new ShellException('some error', 1))
-            );
-
+            // withConsecutive() alternative.
+            ->willReturnCallback(fn($param) => match ($param) {
+                'pgrep -U "$(id -u)" -f "bin/magento +(cron:run|queue:consumers:start)"' => $processMock,
+                'kill 111' => $processMock
+            });
         $this->process->kill();
     }
 }

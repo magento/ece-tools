@@ -72,10 +72,18 @@ class ComposerFileTest extends TestCase
      */
     public function testValidateCorrectComposerJson(): void
     {
+        $series = [
+            [['2.3'], true],
+            [['2.4.3'], false],
+        ];
         $this->magentoVersionMock->expects($this->exactly(2))
             ->method('isGreaterOrEqual')
-            ->withConsecutive(['2.3'], ['2.4.3'])
-            ->willReturnOnConsecutiveCalls(true, false);
+            ->willReturnCallback(function (...$args) use (&$series) {
+                [$expectedArgs, $return] = array_shift($series);
+                $this->assertSame($expectedArgs, $args);
+
+                return $return;
+            });
         $this->fileListMock->expects($this->once())
             ->method('getMagentoComposer')
             ->willReturn(__DIR__ . '/_files/correct_composer_2.3.json');
@@ -90,10 +98,18 @@ class ComposerFileTest extends TestCase
      */
     public function testValidateCorrectLaminasComposerJson(): void
     {
+        $series = [
+            [['2.3'], true],
+            [['2.4.3'], false],
+        ];
         $this->magentoVersionMock->expects($this->exactly(2))
             ->method('isGreaterOrEqual')
-            ->withConsecutive(['2.3'], ['2.4.3'])
-            ->willReturnOnConsecutiveCalls(true, false);
+            ->willReturnCallback(function (...$args) use (&$series) {
+                [$expectedArgs, $return] = array_shift($series);
+                $this->assertSame($expectedArgs, $args);
+
+                return $return;
+            });
         $this->fileListMock->expects($this->once())
             ->method('getMagentoComposer')
             ->willReturn(__DIR__ . '/_files/correct_composer_2.3_2.json');
@@ -108,10 +124,18 @@ class ComposerFileTest extends TestCase
      */
     public function testValidateCorrectAutoload243ComposerJson(): void
     {
+        $series = [
+            [['2.3'], true],
+            [['2.4.3'], false],
+        ];
         $this->magentoVersionMock->expects($this->exactly(2))
             ->method('isGreaterOrEqual')
-            ->withConsecutive(['2.3'], ['2.4.3'])
-            ->willReturnOnConsecutiveCalls(true, false);
+            ->willReturnCallback(function (...$args) use (&$series) {
+                [$expectedArgs, $return] = array_shift($series);
+                $this->assertSame($expectedArgs, $args);
+
+                return $return;
+            });
         $this->fileListMock->expects($this->once())
             ->method('getMagentoComposer')
             ->willReturn(__DIR__ . '/_files/correct_composer_2.3_2.json');
@@ -126,10 +150,18 @@ class ComposerFileTest extends TestCase
      */
     public function testValidateWrongComposerJson(): void
     {
+        $series = [
+            [['2.3'], true],
+            [['2.4.3'], false],
+        ];
         $this->magentoVersionMock->expects($this->exactly(2))
             ->method('isGreaterOrEqual')
-            ->withConsecutive(['2.3'], ['2.4.3'])
-            ->willReturnOnConsecutiveCalls(true, false);
+            ->willReturnCallback(function (...$args) use (&$series) {
+                [$expectedArgs, $return] = array_shift($series);
+                $this->assertSame($expectedArgs, $args);
+
+                return $return;
+            });
         $this->fileListMock->expects($this->once())
             ->method('getMagentoComposer')
             ->willReturn(__DIR__ . '/_files/wrong_composer_2.3.json');
@@ -155,10 +187,17 @@ class ComposerFileTest extends TestCase
      */
     public function testValidateMagentoLower23(): void
     {
+        $series = [
+            [['2.3'], false],
+        ];
         $this->magentoVersionMock->expects($this->exactly(1))
             ->method('isGreaterOrEqual')
-            ->withConsecutive(['2.3'])
-            ->willReturnOnConsecutiveCalls(false);
+            ->willReturnCallback(function (...$args) use (&$series) {
+                [$expectedArgs, $return] = array_shift($series);
+                $this->assertSame($expectedArgs, $args);
+
+                return $return;
+            });
         $this->fileListMock->expects($this->never())
             ->method('getMagentoComposer');
         $this->resultFactoryMock->expects($this->once())
@@ -172,10 +211,18 @@ class ComposerFileTest extends TestCase
      */
     public function testValidateMagentoHigherEqual243(): void
     {
+        $series = [
+            [['2.3'], true],
+            [['2.4.3'], true],
+        ];
         $this->magentoVersionMock->expects($this->exactly(2))
             ->method('isGreaterOrEqual')
-            ->withConsecutive(['2.3'], ['2.4.3'])
-            ->willReturnOnConsecutiveCalls(true, true);
+            ->willReturnCallback(function (...$args) use (&$series) {
+                [$expectedArgs, $return] = array_shift($series);
+                $this->assertSame($expectedArgs, $args);
+
+                return $return;
+            });
         $this->fileListMock->expects($this->never())
             ->method('getMagentoComposer');
         $this->resultFactoryMock->expects($this->once())
@@ -189,10 +236,18 @@ class ComposerFileTest extends TestCase
      */
     public function testValidateComposerFileNotExists(): void
     {
+        $series = [
+            [['2.3'], true],
+            [['2.4.3'], false],
+        ];
         $this->magentoVersionMock->expects($this->exactly(2))
             ->method('isGreaterOrEqual')
-            ->withConsecutive(['2.3'], ['2.4.3'])
-            ->willReturnOnConsecutiveCalls(true, false);
+            ->willReturnCallback(function (...$args) use (&$series) {
+                [$expectedArgs, $return] = array_shift($series);
+                $this->assertSame($expectedArgs, $args);
+
+                return $return;
+            });
         $this->fileListMock->expects($this->once())
             ->method('getMagentoComposer')
             ->willReturn(__DIR__ . '/_files/file_not_exists.json');

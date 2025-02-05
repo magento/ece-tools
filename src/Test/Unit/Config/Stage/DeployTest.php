@@ -59,7 +59,7 @@ class DeployTest extends TestCase
      *
      * @throws ConfigException
      */
-    public function testGet(string $name, $expectedValue, array $mergedConfig, array $schema = null): void
+    public function testGet(string $name, $expectedValue, array $mergedConfig, array | null $schema = null): void
     {
         $this->mergedConfigMock->expects($this->once())
             ->method('get')

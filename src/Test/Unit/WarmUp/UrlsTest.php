@@ -100,17 +100,17 @@ class UrlsTest extends TestCase
             ->with('Found 2 urls for pattern "category:*:*"');
         $this->loggerMock->expects($this->exactly(3))
             ->method('error')
-            ->withConsecutive(
-                [
+            // withConsecutive() alternative.
+            ->willReturnCallback(function (string $axis) {
+                static $series = [
                     'Page "http://site3.com/" can\'t be warmed-up because such domain ' .
-                    'is not registered in current Magento installation'
-                ],
-                [
+                    'is not registered in current Magento installation',
                     'Page "http://site4.com/" can\'t be warmed-up because such domain ' .
-                    'is not registered in current Magento installation'
-                ],
-                ['Page "category:*" isn\'t correct and can\'t be warmed-up']
-            );
+                    'is not registered in current Magento installation',
+                    'Page "category:*" isn\'t correct and can\'t be warmed-up'
+                ];
+                $this->assertSame(array_shift($series), $axis);
+            });
 
         $this->assertEquals(
             [

@@ -114,7 +114,7 @@ class Renderer
         $table = new Table($output);
         $table->setHeaders($header)
             ->setRows($rows);
-        if (method_exists($table, 'setColumnWidth')) {
+        if (method_exists($table, 'setColumnWidth')) { // @phpstan-ignore-line
             $table->setColumnWidth(0, 40);
             $table->setColumnWidth(1, 60);
         }

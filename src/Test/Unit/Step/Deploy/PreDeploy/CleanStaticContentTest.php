@@ -105,10 +105,15 @@ class CleanStaticContentTest extends TestCase
             ->with('magento_root/pub/static');
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
-            ->withConsecutive(
-                ['Static content deployment was performed during build hook, cleaning old content.'],
-                ['Clearing pub/static']
-            );
+            // withConsecutive() alternative.
+            ->willReturnCallback(function ($args) {
+                static $series = [
+                    'Static content deployment was performed during build hook, cleaning old content.',
+                    'Clearing pub/static'
+                ];
+                $expectedArgs = array_shift($series);
+                $this->assertSame($expectedArgs, $args);
+            });
         $this->environmentMock->method('hasMount')
             ->with(Environment::MOUNT_PUB_STATIC)
             ->willReturn(true);

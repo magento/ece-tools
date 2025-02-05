@@ -78,11 +78,17 @@ class UrlsTest extends TestCase
             ->willReturn(false);
         $this->stageConfigMock->expects($this->exactly(2))
             ->method('get')
-            ->withConsecutive(
-                [DeployInterface::VAR_FORCE_UPDATE_URLS],
-                [DeployInterface::VAR_UPDATE_URLS]
-            )
-            ->willReturnOnConsecutiveCalls(false, true);
+            ->willReturnCallback(function (...$args) {
+                static $series = [
+                    [[DeployInterface::VAR_FORCE_UPDATE_URLS], false],
+                    [[DeployInterface::VAR_UPDATE_URLS], true],
+                ];
+
+                [$expectedArgs, $return] = array_shift($series);
+                $this->assertSame($expectedArgs, $args);
+
+                return $return;
+            });
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Updating secure and unsecure URLs');
@@ -140,11 +146,17 @@ class UrlsTest extends TestCase
             ->willReturn(false);
         $this->stageConfigMock->expects($this->exactly(2))
             ->method('get')
-            ->withConsecutive(
-                [DeployInterface::VAR_FORCE_UPDATE_URLS],
-                [DeployInterface::VAR_UPDATE_URLS]
-            )
-            ->willReturnOnConsecutiveCalls(false, false);
+            ->willReturnCallback(function (...$args) {
+                static $series = [
+                    [[DeployInterface::VAR_FORCE_UPDATE_URLS], false],
+                    [[DeployInterface::VAR_UPDATE_URLS], false],
+                ];
+
+                [$expectedArgs, $return] = array_shift($series);
+                $this->assertSame($expectedArgs, $args);
+
+                return $return;
+            });
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with($this->stringContains('Skipping URL updates because the URL_UPDATES variable is set to false.'));

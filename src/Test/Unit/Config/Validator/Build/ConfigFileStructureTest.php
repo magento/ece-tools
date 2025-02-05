@@ -63,6 +63,10 @@ class ConfigFileStructureTest extends TestCase
      */
     public function testRun(): void
     {
+        $series = [
+            [[['scopes/websites/key' => 'value'], 'scopes/websites', false], ['scopes/websites/key' => 'value']],
+            [[['scopes/websites/key' => 'value'], 'scopes/stores', false], []],
+        ];
         $this->configResolverMock->expects($this->once())
             ->method('getPath')
             ->willReturn('magento_root/app/etc/config.php');
@@ -71,14 +75,12 @@ class ConfigFileStructureTest extends TestCase
             ->willReturn(['scopes/websites/key' => 'value']);
         $this->arrayManagerMock->expects($this->exactly(2))
             ->method('filter')
-            ->withConsecutive(
-                [['scopes/websites/key' => 'value'], 'scopes/websites', false],
-                [['scopes/websites/key' => 'value'], 'scopes/stores', false]
-            )
-            ->willReturnOnConsecutiveCalls(
-                ['scopes/websites/key' => 'value'],
-                []
-            );
+            ->willReturnCallback(function (...$args) use (&$series) {
+                [$expectedArgs, $return] = array_shift($series);
+                $this->assertSame($expectedArgs, $args);
+
+                return $return;
+            });
         $this->resultFactoryMock->expects($this->once())
             ->method('create')
             ->with(ResultInterface::SUCCESS)

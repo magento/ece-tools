@@ -64,11 +64,12 @@ class RemoveDeployFailedFlagTest extends TestCase
         $filePath = 'file/path/name.txt';
         $this->flagManagerMock->expects($this->exactly(3))
             ->method('delete')
-            ->withConsecutive(
-                [Manager::FLAG_DEPLOY_HOOK_IS_FAILED],
-                [Manager::FLAG_IGNORE_SPLIT_DB],
-                [Manager::FLAG_ENV_FILE_ABSENCE]
-            );
+            // withConsecutive() alternative.
+            ->willReturnCallback(fn($param) => match ([$param]) {
+                [Manager::FLAG_DEPLOY_HOOK_IS_FAILED] => true,
+                [Manager::FLAG_IGNORE_SPLIT_DB] => true,
+                [Manager::FLAG_ENV_FILE_ABSENCE] => true
+            });
         $this->fileListMock->expects($this->once())
             ->method('getCloudErrorLog')
             ->willReturn($filePath);

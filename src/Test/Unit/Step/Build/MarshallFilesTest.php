@@ -81,11 +81,25 @@ class MarshallFilesTest extends TestCase
             ->method('createDirectory')
             ->with($enterpriseFolder, 0777)
             ->willReturn(true);
-        $this->fileMock->expects($this->exactly(2))
+        $matcher = $this->exactly(2);
+        $series = [
+            ['magento_root/app/etc/di.xml', 'magento_root/app/di.xml'],
+            ['magento_root/app/etc/enterprise/di.xml', 'magento_root/app/enterprise/di.xml']
+        ];
+        $this->fileMock->expects($matcher)
             ->method('copy')
-            ->withConsecutive(
-                ['magento_root/app/etc/di.xml', 'magento_root/app/di.xml'],
-                ['magento_root/app/etc/enterprise/di.xml', 'magento_root/app/enterprise/di.xml']
+            // withConsecutive() alternative.
+            ->with(
+                $this->callback(function ($param) use ($series, $matcher) {
+                    $arguments = $series[$this->resolveInvocations($matcher) - 1];  // retrieves arguments
+                    $this->assertStringContainsString($arguments[0], $param); // performs assertion on the argument
+                    return true;
+                }),
+                $this->callback(function ($param) use ($series, $matcher) {
+                    $arguments = $series[$this->resolveInvocations($matcher) - 1];  // retrieves arguments
+                    $this->assertStringContainsString($arguments[1], $param); // performs assertion on the argument
+                    return true;
+                }),
             );
         $this->fileMock->expects($this->exactly(3))
             ->method('isExists')
@@ -129,5 +143,18 @@ class MarshallFilesTest extends TestCase
             ->method('copy');
 
         $this->step->execute();
+    }
+
+    private function resolveInvocations(\PHPUnit\Framework\MockObject\Rule\InvocationOrder $matcher): int
+    {
+        if (method_exists($matcher, 'numberOfInvocations')) { // PHPUnit 10+ (including PHPUnit 12)
+            return $matcher->numberOfInvocations();
+        }
+
+        if (method_exists($matcher, 'getInvocationCount')) { // before PHPUnit 10
+            return $matcher->getInvocationCount();
+        }
+
+        $this->fail('Cannot count the number of invocations.');
     }
 }
