@@ -5,10 +5,6 @@
   "version": "2002.2.1",
   "license": "OSL-3.0",
   "repositories": {
-    "mcd": {
-      "type": "vcs",
-      "url": "https://github.com/magento-commerce/magento-cloud-docker.git"
-    },
     "repo.magento.com": {
       "type": "composer",
       "url": "https://repo.magento.com/"
