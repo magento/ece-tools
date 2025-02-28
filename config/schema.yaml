@@ -270,6 +270,20 @@ variables:
       - stage:
           deploy:
             REDIS_USE_SLAVE_CONNECTION: true
+  VALKEY_USE_SLAVE_CONNECTION:
+    description: Set to true to automatically use a read-only connection to a Valkey instance to receive read-only
+      traffic on a non-master node. This improves performance through load balancing because only one node needs to
+      handle read-write traffic.
+    type: boolean
+    stages:
+      - global
+      - deploy
+    default:
+      deploy: false
+    examples:
+      - stage:
+          deploy:
+            VALKEY_USE_SLAVE_CONNECTION: true
   MYSQL_USE_SLAVE_CONNECTION:
     description: Set to true to automatically use a read-only connection to the database to receive read-only traffic on
       a non-master node. This improves performance through load balancing, because only one node needs to
@@ -446,6 +460,21 @@ variables:
       - stage:
           deploy:
             REDIS_BACKEND: '\Magento\Framework\Cache\Backend\Redis'
+  VAKEY_BACKEND:
+    description: "Configuration the backend model for valkey cache."
+    type: string
+    allowed:
+      - 'Cm_Cache_Backend_Valkey'
+      - '\Magento\Framework\Cache\Backend\Valkey'
+      - '\Magento\Framework\Cache\Backend\RemoteSynchronizedCache'
+    stages:
+      - deploy
+    default:
+      deploy: 'Cm_Cache_Backend_Valkey'
+    examples:
+      - stage:
+          deploy:
+            VALKEY_BACKEND: '\Magento\Framework\Cache\Backend\Valkey'
   CACHE_CONFIGURATION:
     description: "Replace or modify the Magento cache configuration generated during the deployment process.
       To replace the existing configuration, specify values for each configuration option required for your environment.
