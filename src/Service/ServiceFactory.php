@@ -20,6 +20,8 @@ class ServiceFactory
     private $serviceMap = [
         ServiceInterface::NAME_REDIS => Redis::class,
         ServiceInterface::NAME_REDIS_SESSION => RedisSession::class,
+        ServiceInterface::NAME_VALKEY => Valkey::class,
+        ServiceInterface::NAME_VALKEY_SESSION => ValkeySession::class,
         ServiceInterface::NAME_ELASTICSEARCH => ElasticSearch::class,
         ServiceInterface::NAME_OPENSEARCH => OpenSearch::class,
         ServiceInterface::NAME_RABBITMQ => RabbitMq::class,
