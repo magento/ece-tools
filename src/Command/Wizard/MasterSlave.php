@@ -69,6 +69,9 @@ class MasterSlave extends Command
             $errors[] = 'Redis slave connection is not configured';
         }
 
+        if (!$this->deployConfig->get(DeployInterface::VAR_VALKEY_USE_SLAVE_CONNECTION)) {
+            $errors[] = 'Valkey slave connection is not configured';
+        }
         foreach ($errors as $error) {
             $this->outputFormatter->writeItem($output, $error);
         }
