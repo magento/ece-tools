@@ -5,19 +5,24 @@
  */
 declare(strict_types=1);
 
-namespace Magento\MagentoCloud\Service;
+namespace Magento\MagentoCloud\Service\Cache;
 
+use Magento\MagentoCloud\App\Error;
+use Magento\MagentoCloud\Service\ServiceException;
+use Magento\MagentoCloud\Service\ServiceInterface;
 use Magento\MagentoCloud\Config\Environment;
-use Magento\MagentoCloud\Service\Valkey\Version;
-use Magento\MagentoCloud\Service\Cache\AbstractService;
+use Magento\MagentoCloud\Http\ClientFactory;
+use Psr\Log\LoggerInterface;
+use Throwable;
 
 /**
- * Returns Valkey service configurations.
+ * Returns search service configurations for ElasticSearch family engines.
  */
-class Valkey extends AbstractService implements ServiceInterface
+abstract class AbstractService implements ServiceInterface
 {
-    const RELATIONSHIP_KEY = 'valkey';
-    const RELATIONSHIP_SLAVE_KEY = 'valkey-slave';
+
+    const RELATIONSHIP_KEY = 'abstract';
+    const RELATIONSHIP_SLAVE_KEY = 'abstract-slave';
 
     /**
      * @var Environment
@@ -75,4 +80,5 @@ class Valkey extends AbstractService implements ServiceInterface
 
         return $this->version;
     }
+    
 }

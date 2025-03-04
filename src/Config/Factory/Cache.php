@@ -10,7 +10,7 @@ namespace Magento\MagentoCloud\Config\Factory;
 use Magento\MagentoCloud\Config\ConfigException;
 use Magento\MagentoCloud\Config\ConfigMerger;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
-use Magento\MagentoCloud\Service\Redis;
+use Magento\MagentoCloud\Service\AbstractService;
 use Psr\Log\LoggerInterface;
 
 /**

@@ -70,7 +70,7 @@ class ServiceVersion implements ValidatorInterface
     }
 
     /**
-     * Validates compatibility Redis,Valky and RabbitMq services with installed Magento version.
+     * Validates compatibility Redis,Valkey and RabbitMq services with installed Magento version.
      *
      * {@inheritdoc}
      */
