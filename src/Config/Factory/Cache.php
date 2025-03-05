@@ -10,7 +10,9 @@ namespace Magento\MagentoCloud\Config\Factory;
 use Magento\MagentoCloud\Config\ConfigException;
 use Magento\MagentoCloud\Config\ConfigMerger;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
-use Magento\MagentoCloud\Service\AbstractService;
+use Magento\MagentoCloud\Service\Redis;
+use Magento\MagentoCloud\Service\Valkey;
+use Magento\MagentoCloud\Service\Cache\AbstractService as AbstractCacheService;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -43,6 +45,12 @@ class Cache
      */
     private $redis;
 
+
+    /**
+     * @var Valkey
+     */
+    private $valkey;
+
     /**
      * @var DeployInterface
      */
@@ -59,6 +67,7 @@ class Cache
     private $configMerger;
 
     /**
+     * @param Valkey $valkey
      * @param Redis $redis
      * @param DeployInterface $stageConfig
      * @param LoggerInterface $logger
@@ -66,11 +75,13 @@ class Cache
      */
     public function __construct(
         Redis $redis,
+        Valkey $valkey,
         DeployInterface $stageConfig,
         LoggerInterface $logger,
         ConfigMerger $configMerger
     ) {
         $this->redis = $redis;
+        $this->valkey = $valkey;
         $this->stageConfig = $stageConfig;
         $this->logger = $logger;
         $this->configMerger = $configMerger;

@@ -13,6 +13,8 @@ use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Package\Manager;
 use Magento\MagentoCloud\Service\Redis;
 use Magento\MagentoCloud\Service\RedisSession;
+use Magento\MagentoCloud\Service\Valkey;
+use Magento\MagentoCloud\Service\ValkeySession;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -34,6 +36,16 @@ class Config
      * @var RedisSession
      */
     private $redisSession;
+
+    /**
+     * @var Valkey
+     */
+    private $valkey;
+
+    /**
+     * @var ValkeySession
+     */
+    private $valkeySession;
 
     /**
      * @var DeployInterface
@@ -72,6 +84,8 @@ class Config
     public function __construct(
         Redis $redis,
         RedisSession $redisSession,
+        Valkey $valkey,
+        ValkeySession $valkeySession,
         DeployInterface $stageConfig,
         ConfigMerger $configMerger,
         Manager $manager,
@@ -80,6 +94,8 @@ class Config
     ) {
         $this->redis = $redis;
         $this->redisSession = $redisSession;
+        $this->valkey = $valkey;
+        $this->valkeySession = $valkeySession;
         $this->stageConfig = $stageConfig;
         $this->configMerger = $configMerger;
         $this->manager = $manager;
