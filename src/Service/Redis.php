@@ -9,12 +9,11 @@ namespace Magento\MagentoCloud\Service;
 
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Service\Redis\Version;
-use Magento\MagentoCloud\Service\Cache\AbstractService;
 
 /**
  * Returns Redis service configurations.
  */
-class Redis extends AbstractService implements ServiceInterface
+class Redis implements ServiceInterface
 {
     const RELATIONSHIP_KEY = 'redis';
     const RELATIONSHIP_SLAVE_KEY = 'redis-slave';

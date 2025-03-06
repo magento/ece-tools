@@ -9,12 +9,11 @@ namespace Magento\MagentoCloud\Service;
 
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Service\Valkey\Version;
-use Magento\MagentoCloud\Service\Cache\AbstractService;
 
 /**
  * Returns Valkey service configurations.
  */
-class Valkey extends AbstractService implements ServiceInterface
+class Valkey implements ServiceInterface
 {
     const RELATIONSHIP_KEY = 'valkey';
     const RELATIONSHIP_SLAVE_KEY = 'valkey-slave';
