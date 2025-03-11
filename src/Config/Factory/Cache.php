@@ -12,7 +12,6 @@ use Magento\MagentoCloud\Config\ConfigMerger;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Service\Redis;
 use Magento\MagentoCloud\Service\Valkey;
-use Magento\MagentoCloud\Service\Cache\AbstractService as AbstractCacheService;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -338,7 +337,7 @@ class Cache
           $backendClass = $backendConfig['backend_type'] === 'valkey'
         ? '\Magento\Framework\Cache\Backend\Valkey'
         : '\Magento\Framework\Cache\Backend\Redis';
-        
+
         $config = [
             'backend' => $cacheBackendModel,
             'backend_options' => [
