@@ -34,14 +34,14 @@ class CleanValkeyCache implements StepInterface
     private $cacheConfig;
 
     /**
-     * @var CredisFactory
+     * @var CvalkeyFactory
      */
-    private $credisFactory;
+    private $cvalkeyFactory;
 
     /**
      * @param LoggerInterface $logger
      * @param CacheConfig $cacheConfig
-     * @param CredisFactory $credisFactory
+     * @param CvalkeyFactory $cvalkeyFactory
      */
     public function __construct(
         LoggerInterface $logger,
@@ -50,7 +50,7 @@ class CleanValkeyCache implements StepInterface
     ) {
         $this->logger = $logger;
         $this->cacheConfig = $cacheConfig;
-        $this->credisFactory = $credisFactory;
+        $this->cvalkeyFactory = $cvalkeyFactory;
     }
 
     /**
@@ -80,7 +80,7 @@ class CleanValkeyCache implements StepInterface
 
             $this->logger->info('Clearing redis cache: ' . $cacheType);
 
-            $client = $this->credisFactory->create(
+            $client = $this->cvalkeyFactory->create(
                 isset($redisConfig['server']) ? (string)$redisConfig['server'] : '127.0.0.1',
                 isset($redisConfig['port']) ? (int)$redisConfig['port'] : 6379,
                 isset($redisConfig['database']) ? (int)$redisConfig['database'] : 0,
