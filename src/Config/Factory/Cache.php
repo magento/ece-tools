@@ -108,7 +108,6 @@ class Cache
      */
     public function get(): array
     {
-         $this->logger->notice('get method indside call');
          $envCacheConfiguration = (array)$this->stageConfig->get(DeployInterface::VAR_CACHE_CONFIGURATION);
         $envCacheRadisBackendModel = (string)$this->stageConfig->get(DeployInterface::VAR_CACHE_REDIS_BACKEND);
         $envCacheValkeyBackendModel = (string)$this->stageConfig->get(DeployInterface::VAR_CACHE_VALKEY_BACKEND);
@@ -336,7 +335,7 @@ class Cache
      */
     private function getSynchronizedConfigStructure(string $cacheBackendModel, array $backendConfig): array
     {
-          $backendClass = $backendConfig['backend_type'] === 'valkey'
+          $backendClass = $backendConfig['backend_type'] === 'valkeycache'
         ? '\Magento\Framework\Cache\Backend\Valkey'
         : '\Magento\Framework\Cache\Backend\Redis';
 

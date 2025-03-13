@@ -71,14 +71,14 @@ class SessionCredentials implements ValidatorInterface
             }
         }
 
-        if ($sessionConfig['save'] === 'valkey') {
-            if (!isset($sessionConfig['valkey'])) {
+        if ($sessionConfig['save'] === 'valkeycache') {
+            if (!isset($sessionConfig['valkeycache'])) {
                 return $this->resultFactory->create(Validator\ResultInterface::ERROR, [
                     'error' => 'Missed valkey options in session configuration'
                 ]);
             }
 
-            if (!isset($sessionConfig['valkey']['host'])) {
+            if (!isset($sessionConfig['valkeycache']['host'])) {
                 return $this->resultFactory->create(Validator\ResultInterface::ERROR, [
                     'error' => 'Missed host option for valkey in session configuration'
                 ]);
