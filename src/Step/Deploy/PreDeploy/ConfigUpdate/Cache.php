@@ -87,6 +87,8 @@ class Cache implements StepInterface
         try {
             $config = $this->configReader->read();
             $cacheConfig = $this->cacheConfig->get();
+            $this->logger->info('Cache Configuration debug ' . json_encode($cacheConfig, JSON_PRETTY_PRINT));
+
             $graphqlConfig = $config['cache']['graphql'] ?? [];
             $luaConfig = (boolean)$this->stageConfig->get(DeployInterface::VAR_USE_LUA);
             $luaConfigKey = (boolean)$this->stageConfig->get(DeployInterface::VAR_LUA_KEY);
