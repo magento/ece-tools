@@ -35,7 +35,9 @@ class Cache
     public const VALKEY_BACKEND_CM_CACHE = 'Cm_Cache_Backend_Valkey';
     public const VALKEY_BACKEND_VALKEY_CACHE = '\Magento\Framework\Cache\Backend\Valkey';
 
-    public const CACHE_BACKEND_REMOTE_SYNCHRONIZED_CACHE = '\Magento\Framework\Cache\Backend\RemoteSynchronizedCache';
+    public const VALKEY_BACKEND_REMOTE_SYNCHRONIZED_CACHE = '\Magento\Framework\Cache\Backend\RemoteSynchronizedCache';
+    public const REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE = '\Magento\Framework\Cache\Backend\RemoteSynchronizedCache';
+
 
     public const AVAILABLE_REDIS_BACKEND = [
         self::REDIS_BACKEND_CM_CACHE,
@@ -46,7 +48,7 @@ class Cache
     public const AVAILABLE_VALKEY_BACKEND = [
         self::VALKEY_BACKEND_CM_CACHE,
         self::VALKEY_BACKEND_VALKEY_CACHE,
-        self::CACHE_BACKEND_REMOTE_SYNCHRONIZED_CACHE
+        self::VALKEY_BACKEND_REMOTE_SYNCHRONIZED_CACHE
     ];
 
     /**
