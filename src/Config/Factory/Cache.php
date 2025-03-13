@@ -376,13 +376,12 @@ class Cache
      * @return bool
      * @throws ConfigException
      */
-  private function isSynchronizedConfigStructure(): bool
-  {
-    $model = (string)$this->stageConfig->get(DeployInterface::VAR_CACHE_REDIS_BACKEND);
+private function isSynchronizedConfigStructure(): bool
+{
+    $redisModel = (string)$this->stageConfig->get(DeployInterface::VAR_CACHE_REDIS_BACKEND);
+    $valkeyModel = (string)$this->stageConfig->get(DeployInterface::VAR_CACHE_VALKEY_BACKEND);
 
-    return in_array($model, [
-      self::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE,
-      self::VALKEY_BACKEND_REMOTE_SYNCHRONIZED_CACHE
-    ], true);
-  }
+    return in_array($redisModel, [self::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE], true) ||
+           in_array($valkeyModel, [self::VALKEY_BACKEND_REMOTE_SYNCHRONIZED_CACHE], true);
+}
 }
