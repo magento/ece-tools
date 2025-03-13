@@ -79,7 +79,5 @@ redis:
   - version: '7.2'
     eol: 2025-08-31
 valkey:
-  - version: '7.2'
-    eol: 2029-04-16
   - version: '8.0'
     eol: 2029-04-16

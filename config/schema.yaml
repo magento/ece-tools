@@ -460,7 +460,7 @@ variables:
       - stage:
           deploy:
             REDIS_BACKEND: '\Magento\Framework\Cache\Backend\Redis'
-  VAKEY_BACKEND:
+  VALKEY_BACKEND:
     description: "Configuration the backend model for valkey cache."
     type: string
     allowed:
