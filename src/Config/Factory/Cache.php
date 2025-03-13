@@ -108,7 +108,8 @@ class Cache
      */
     public function get(): array
     {
-        $envCacheConfiguration = (array)$this->stageConfig->get(DeployInterface::VAR_CACHE_CONFIGURATION);
+         $this->logger->notice('get method indside call');
+         $envCacheConfiguration = (array)$this->stageConfig->get(DeployInterface::VAR_CACHE_CONFIGURATION);
         $envCacheRadisBackendModel = (string)$this->stageConfig->get(DeployInterface::VAR_CACHE_REDIS_BACKEND);
         $envCacheValkeyBackendModel = (string)$this->stageConfig->get(DeployInterface::VAR_CACHE_VALKEY_BACKEND);
 
@@ -145,6 +146,7 @@ class Cache
         $valkeyConfig = $this->valkey->getConfiguration();
 
     if (empty($redisConfig) && empty($valkeyConfig)) {
+        $this->logger->notice('return from both empty');
         return [];
     }
 
