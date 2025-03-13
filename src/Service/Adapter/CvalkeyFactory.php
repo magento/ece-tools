@@ -7,12 +7,12 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Service\Adapter;
 
-use Cvalkey_Client;
+use Credis_Client;
 
 /**
  * Factory for Cvalkey Client
  *
- * @see Cvalkey_Client
+ * @see Credis_Client
  *
  * @codeCoverageIgnore
  */
@@ -23,11 +23,11 @@ class CvalkeyFactory
      * @param int $port
      * @param int $database
      * @param string|null $password
-     * @return Cvalkey_Client
+     * @return Credis_Client
      */
-    public function create(string $server, int $port, int $database, string | null $password = null): Cvalkey_Client
+    public function create(string $server, int $port, int $database, string | null $password = null): Credis_Client
     {
-        return new Cvalkey_Client(
+        return new Credis_Client(
             $server,
             $port,
             null,
