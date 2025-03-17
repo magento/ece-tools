@@ -20,8 +20,8 @@ use Psr\Log\LoggerInterface;
 class Cache
 {
      /**
-     * Redis database to store default cache data
-     */
+      * Redis database to store default cache data
+      */
     public const CACHE_DATABASE_DEFAULT = 1;
 
     /**
@@ -38,7 +38,6 @@ class Cache
     public const VALKEY_BACKEND_REMOTE_SYNCHRONIZED_CACHE = '\Magento\Framework\Cache\Backend\RemoteSynchronizedCache';
     public const REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE = '\Magento\Framework\Cache\Backend\RemoteSynchronizedCache';
 
-
     public const AVAILABLE_REDIS_BACKEND = [
         self::REDIS_BACKEND_CM_CACHE,
         self::REDIS_BACKEND_REDIS_CACHE,
@@ -54,28 +53,27 @@ class Cache
     /**
      * @var Redis
      */
-    private $redis;
-
+    private Redis $redis;
 
     /**
      * @var Valkey
      */
-    private $valkey;
+    private Valkey $valkey;
 
     /**
      * @var DeployInterface
      */
-    private $stageConfig;
+    private DeployInterface $stageConfig;
 
     /**
      * @var LoggerInterface
      */
-    private $logger;
+    private LoggerInterface $logger;
 
     /**
      * @var ConfigMerger
      */
-    private $configMerger;
+    private ConfigMerger $configMerger;
 
     /**
      * @param Valkey $valkey
@@ -126,9 +124,7 @@ class Cache
                         DeployInterface::VAR_CACHE_CONFIGURATION
                     )
                 );
-            }
-
-           else if($this->stageConfig->get(DeployInterface::VAR_VALKEY_USE_SLAVE_CONNECTION)) {
+            } elseif ($this->stageConfig->get(DeployInterface::VAR_VALKEY_USE_SLAVE_CONNECTION)) {
                 $this->logger->notice(
                     sprintf(
                         'The variables \'%s\', \'%s\' are ignored as you set your own cache connection in \'%s\'',
@@ -146,14 +142,13 @@ class Cache
 
         $valkeyConfig = $this->valkey->getConfiguration();
 
-    if (empty($redisConfig) && empty($valkeyConfig)) {
-        $this->logger->notice('return from both empty');
-        return [];
-    }
+        if (empty($redisConfig) && empty($valkeyConfig)) {
+            return [];
+        }
 
-    // Determine backend based on available configuration
-    $backendConfig = !empty($redisConfig) ? $redisConfig : $valkeyConfig;
-    $cacheBackendModel = !empty($redisConfig) ? $envCacheRadisBackendModel :$envCacheValkeyBackendModel;
+        // Determine backend based on available configuration
+        $backendConfig = !empty($redisConfig) ? $redisConfig : $valkeyConfig;
+        $cacheBackendModel = !empty($redisConfig) ? $envCacheRadisBackendModel :$envCacheValkeyBackendModel;
 
         if ($this->isSynchronizedConfigStructure()) {
             $cacheCache = $this->getSynchronizedConfigStructure($cacheBackendModel, $backendConfig);
@@ -197,9 +192,10 @@ class Cache
     }
 
     /**
-     * Retrieves Redis or Valkey read connection data if it exists and variable REDIS_USE_SLAVE_CONNECTION or VALKEY_USE_SLAVE_CONNECTION was set as true,
+     * Retrieves Redis or Valkey read connection data if it exists and variable
+     * REDIS_USE_SLAVE_CONNECTION or VALKEY_USE_SLAVE_CONNECTION was set as true,
      * also if CACHE_CONFIGURATION is compatible with slave connections.
-     * Otherwise retrieves an empty array.
+     * Otherwise, retrieves an empty array.
      *
      * @param array $envCacheConfiguration
      * @param array $backendConfig
@@ -210,42 +206,41 @@ class Cache
     {
          $config = [];
 
-    $useRedisSlave = $this->stageConfig->get(DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION);
-    $useValkeySlave = $this->stageConfig->get(DeployInterface::VAR_VALKEY_USE_SLAVE_CONNECTION);
+        $useRedisSlave = $this->stageConfig->get(DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION);
+        $useValkeySlave = $this->stageConfig->get(DeployInterface::VAR_VALKEY_USE_SLAVE_CONNECTION);
 
-    if ($useRedisSlave) {
-        $slaveConfig = $this->redis->getSlaveConfiguration();
-        $backendType = 'Redis';
-    } elseif ($useValkeySlave) {
-        $slaveConfig = $this->valkey->getSlaveConfiguration();
-        $backendType = 'Valkey';
-    } else {
-        return $config; // No slave connection requested
-    }
-     $slaveHost = $slaveConfig['host'] ?? null;
-
-    if ($slaveHost) {
-        if ($this->isConfigurationCompatibleWithSlaveConnection($envCacheConfiguration, $backendConfig)) {
-            $config['load_from_slave']['server'] = $slaveHost;
-            $config['load_from_slave']['port'] = $slaveConfig['port'] ?? '';
-            $config['read_timeout'] = 1;
-            $config['retry_reads_on_master'] = 1;
-
-            if (!empty($slaveConfig['password'])) {
-                $config['load_from_slave']['password'] = $slaveConfig['password'];
-            }
-
-            $this->logger->info(sprintf('Set %s slave connection', $backendType));
+        if ($useRedisSlave) {
+            $slaveConfig = $this->redis->getSlaveConfiguration();
+            $backendType = 'Redis';
+        } elseif ($useValkeySlave) {
+            $slaveConfig = $this->valkey->getSlaveConfiguration();
+            $backendType = 'Valkey';
         } else {
-            $this->logger->notice(
-                sprintf(
-                    'The variable \'%s\' is ignored as you\'ve changed cache connection settings in \'%s\'',
-                    $useRedisSlave ? DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION : DeployInterface::VAR_VALKEY_USE_SLAVE_CONNECTION,
-                    DeployInterface::VAR_CACHE_CONFIGURATION
-                )
-            );
+            return $config; // No slave connection requested
         }
-    }
+        $slaveHost = $slaveConfig['host'] ?? null;
+
+        if ($slaveHost) {
+            if ($this->isConfigurationCompatibleWithSlaveConnection($envCacheConfiguration, $backendConfig)) {
+                  $config['load_from_slave']['server'] = $slaveHost;
+                  $config['load_from_slave']['port'] = $slaveConfig['port'] ?? '';
+                  $config['read_timeout'] = 1;
+                  $config['retry_reads_on_master'] = 1;
+                if (!empty($slaveConfig['password'])) {
+                      $config['load_from_slave']['password'] = $slaveConfig['password'];
+                }
+
+                  $this->logger->info(sprintf('Set %s slave connection', $backendType));
+            } else {
+                  $this->logger->notice(
+                      sprintf(
+                          'The variable \'%s\' is ignored as you\'ve changed cache connection settings in \'%s\'',
+                         $useRedisSlave ? DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION : DeployInterface::VAR_VALKEY_USE_SLAVE_CONNECTION,
+                          DeployInterface::VAR_CACHE_CONFIGURATION
+                      )
+                  );
+            }
+        }
 
 
         return $config;
@@ -376,12 +371,12 @@ class Cache
      * @return bool
      * @throws ConfigException
      */
-private function isSynchronizedConfigStructure(): bool
-{
-    $redisModel = (string)$this->stageConfig->get(DeployInterface::VAR_CACHE_REDIS_BACKEND);
-    $valkeyModel = (string)$this->stageConfig->get(DeployInterface::VAR_CACHE_VALKEY_BACKEND);
+    private function isSynchronizedConfigStructure(): bool
+    {
+        $redisModel = (string)$this->stageConfig->get(DeployInterface::VAR_CACHE_REDIS_BACKEND);
+        $valkeyModel = (string)$this->stageConfig->get(DeployInterface::VAR_CACHE_VALKEY_BACKEND);
 
-    return in_array($redisModel, [self::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE], true) ||
-           in_array($valkeyModel, [self::VALKEY_BACKEND_REMOTE_SYNCHRONIZED_CACHE], true);
-}
+        return $redisModel === self::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE ||
+          $valkeyModel === self::VALKEY_BACKEND_REMOTE_SYNCHRONIZED_CACHE;
+    }
 }
