@@ -28,32 +28,32 @@ class Cache implements StepInterface
     /**
      * @var LoggerInterface
      */
-    private $logger;
+    private LoggerInterface $logger;
 
     /**
      * @var ConfigWriter
      */
-    private $configWriter;
+    private ConfigWriter $configWriter;
 
     /**
      * @var ConfigReader
      */
-    private $configReader;
+    private ConfigReader $configReader;
 
     /**
      * @var CacheFactory
      */
-    private $cacheConfig;
+    private CacheFactory $cacheConfig;
 
     /**
      * @var MagentoVersion
      */
-    private $magentoVersion;
+    private MagentoVersion $magentoVersion;
 
     /**
      * @var DeployInterface
      */
-    private $stageConfig;
+    private DeployInterface $stageConfig;
 
     /**
      * @param ConfigReader $configReader
@@ -87,8 +87,6 @@ class Cache implements StepInterface
         try {
             $config = $this->configReader->read();
             $cacheConfig = $this->cacheConfig->get();
-            $this->logger->info('Cache Configuration debug ' . json_encode($cacheConfig, JSON_PRETTY_PRINT));
-
             $graphqlConfig = $config['cache']['graphql'] ?? [];
             $luaConfig = (boolean)$this->stageConfig->get(DeployInterface::VAR_USE_LUA);
             $luaConfigKey = (boolean)$this->stageConfig->get(DeployInterface::VAR_LUA_KEY);
@@ -96,25 +94,25 @@ class Cache implements StepInterface
             if (isset($cacheConfig['frontend'])) {
                 $cacheConfig['frontend'] = array_filter($cacheConfig['frontend'], function ($cacheFrontend) {
                     $backend = $cacheFrontend['backend'];
-                    $customCacheBackend = $cacheFrontend['_custom_valkey_backend'] 
-    ?? $cacheFrontend['_custom_redis_backend'] 
-    ?? false;
+                    $customCacheBackend = $cacheFrontend['_custom_valkey_backend']
+                        ?? $cacheFrontend['_custom_redis_backend']
+                        ?? false;
                     $this->checkBackendModel($backend);
 
-                    if (
-            !$customCacheBackend && !in_array($backend, array_merge(CacheFactory::AVAILABLE_REDIS_BACKEND, CacheFactory::AVAILABLE_VALKEY_BACKEND), true) ) {
-                    return true;
-                }
+                    if (!$customCacheBackend
+                        && !in_array($backend, array_merge(CacheFactory::AVAILABLE_REDIS_BACKEND,
+                        CacheFactory::AVAILABLE_VALKEY_BACKEND),true)) {
+                        return true;
+                    }
 
                     $backendOptions = (in_array($backend, [
-                        CacheFactory::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE, 
+                        CacheFactory::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE,
                         CacheFactory::VALKEY_BACKEND_REMOTE_SYNCHRONIZED_CACHE
                     ], true))
                     ? $cacheFrontend['backend_options']['remote_backend_options']
                     : $cacheFrontend['backend_options'];
 
                     return $this->testCacheConnection($backendOptions);
-
                 });
 
                 foreach (array_keys($cacheConfig['frontend']) as $cacheConfigType) {
@@ -127,27 +125,28 @@ class Cache implements StepInterface
                 $this->logger->info('Cache configuration was not found. Removing cache configuration.');
                 unset($config['cache']);
             } elseif (empty($cacheConfig['frontend'])) {
-                
                   $isRedisConfigured = !empty($cacheConfig['frontend']['default']['_custom_redis_backend']);
                    $isValkeyConfigured = !empty($cacheConfig['frontend']['default']['_custom_valkey_backend']);
-
-                    if ($isRedisConfigured) {
+                if ($isRedisConfigured) {
                         $this->logger->warning(
-                            'Cache is configured for a Redis service that is not available. Configuration will be ignored.',
+                            'Cache is configured for a Redis service that is not available.
+                             Configuration will be ignored.',
                             ['errorCode' => Error::WARN_REDIS_SERVICE_NOT_AVAILABLE]
                         );
-                    }
+                }
 
-                    if ($isValkeyConfigured) {
+                if ($isValkeyConfigured) {
                         $this->logger->warning(
-                            'Cache is configured for a Valkey service that is not available. Configuration will be ignored.',
+                            'Cache is configured for a Valkey service that is not available. 
+                            Configuration will be ignored.',
                             ['errorCode' => Error::WARN_VALKEY_SERVICE_NOT_AVAILABLE]
                         );
-                    }
+                }
                         $this->logger->warning(
-                        'Cache is configured for a Redis service that is not available. Configuration will be ignored.',
-                        ['errorCode' => Error::WARN_REDIS_SERVICE_NOT_AVAILABLE]
-                       );
+                            'Cache is configured for a Redis service that is not available.
+                            Configuration will be ignored.',
+                            ['errorCode' => Error::WARN_REDIS_SERVICE_NOT_AVAILABLE]
+                        );
 
                 unset($config['cache']);
             } else {
@@ -187,7 +186,8 @@ class Cache implements StepInterface
         ];
 
         try {
-            if (in_array($backend, $notAllowedValkeyBackend, true) && !$this->magentoVersion->isGreaterOrEqual('2.4.8')) {
+            if (in_array($backend, $notAllowedValkeyBackend, true)
+              && !$this->magentoVersion->isGreaterOrEqual('2.4.8')) {
                 throw new StepException(
                     sprintf(
                         'Magento version \'%s\' does not support Valkey backend model \'%s\'',
@@ -196,7 +196,8 @@ class Cache implements StepInterface
                     )
                 );
             }
-            if (in_array($backend, $notAllowedRedisBackend, true) && !$this->magentoVersion->isGreaterOrEqual('2.3.0')) {
+            if (in_array($backend, $notAllowedRedisBackend, true)
+              && !$this->magentoVersion->isGreaterOrEqual('2.3.0')) {
                 throw new StepException(
                     sprintf(
                         'Magento version \'%s\' does not support Redis backend model \'%s\'',
