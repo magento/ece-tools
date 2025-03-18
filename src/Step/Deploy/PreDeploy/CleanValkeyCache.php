@@ -26,17 +26,17 @@ class CleanValkeyCache implements StepInterface
     /**
      * @var LoggerInterface
      */
-    private $logger;
+    private LoggerInterface $logger;
 
     /**
      * @var CacheConfig
      */
-    private $cacheConfig;
+    private CacheConfig $cacheConfig;
 
     /**
      * @var CvalkeyFactory
      */
-    private $cvalkeyFactory;
+    private CvalkeyFactory $cvalkeyFactory;
 
     /**
      * @param LoggerInterface $logger
@@ -74,24 +74,24 @@ class CleanValkeyCache implements StepInterface
                 continue;
             }
 
-            $redisConfig = ($backend === CacheConfig::VALKEY_BACKEND_REMOTE_SYNCHRONIZED_CACHE)
+            $valkeyConfig = ($backend === CacheConfig::VALKEY_BACKEND_REMOTE_SYNCHRONIZED_CACHE)
                 ? $cacheConfig['backend_options']['remote_backend_options']
                 : $cacheConfig['backend_options'];
 
-            $this->logger->info('Clearing redis cache: ' . $cacheType);
+            $this->logger->info('Clearing valkey cache: ' . $cacheType);
 
             $client = $this->cvalkeyFactory->create(
-                isset($redisConfig['server']) ? (string)$redisConfig['server'] : '127.0.0.1',
-                isset($redisConfig['port']) ? (int)$redisConfig['port'] : 6379,
-                isset($redisConfig['database']) ? (int)$redisConfig['database'] : 0,
-                !empty($redisConfig['password']) ? (string)$redisConfig['password'] : null
+                isset($valkeyConfig['server']) ? (string)$valkeyConfig['server'] : '127.0.0.1',
+                isset($valkeyConfig['port']) ? (int)$valkeyConfig['port'] : 6379,
+                isset($valkeyConfig['database']) ? (int)$valkeyConfig['database'] : 0,
+                !empty($valkeyConfig['password']) ? (string)$valkeyConfig['password'] : null
             );
 
             try {
                 $client->connect();
                 $client->flushDb();
             } catch (CredisException $e) {
-                throw new StepException($e->getMessage(), Error::DEPLOY_REDIS_CACHE_CLEAN_FAILED, $e);
+                throw new StepException($e->getMessage(), Error::DEPLOY_VALKEY_CACHE_CLEAN_FAILED, $e);
             }
         }
     }
