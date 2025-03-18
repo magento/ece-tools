@@ -95,6 +95,14 @@ class ServiceVersionTest extends TestCase
         $serviceRedisSession->expects($this->once())
             ->method('getVersion')
             ->willReturn('3.2');
+      $serviceValkey = $this->createMock(ServiceInterface::class);
+      $serviceValkey->expects($this->once())
+        ->method('getVersion')
+        ->willReturn('8.0');
+      $serviceValkeySession = $this->createMock(ServiceInterface::class);
+      $serviceValkeySession->expects($this->once())
+        ->method('getVersion')
+        ->willReturn('8.0');
         $serviceES = $this->createMock(ServiceInterface::class);
         $serviceES->expects($this->once())
             ->method('getVersion')
@@ -113,6 +121,8 @@ class ServiceVersionTest extends TestCase
                 $serviceRmq,
                 $serviceRedis,
                 $serviceRedisSession,
+                $serviceValkey,
+                $serviceValkeySession,
                 $serviceES,
                 $serviceOS,
                 $serviceMariaDB
@@ -121,6 +131,8 @@ class ServiceVersionTest extends TestCase
             ['Version of service \'rabbitmq\' is not detected', []],
             ['Version of service \'redis\' is 3.2', []],
             ['Version of service \'redis-session\' is 3.2', []],
+            ['Version of service \'valkey\' is 8.0', []],
+            ['Version of service \'valkey-session\' is 8.0', []],
             ['Version of service \'elasticsearch\' is 7.7', []],
             ['Version of service \'opensearch\' is 1.2', []],
             ['Version of service \'mariadb\' is 10.2', []]
@@ -200,6 +212,10 @@ class ServiceVersionTest extends TestCase
                     } elseif ($arg1 == ServiceInterface::NAME_REDIS && $arg2 == '2.2') {
                         return $errorMessages[1];
                     } elseif ($arg1 == ServiceInterface::NAME_REDIS_SESSION && $arg2 == '2.2') {
+                        return $errorMessages[2];
+                    } elseif ($arg1 == ServiceInterface::NAME_VALKEY && $arg2 == '8.0') {
+                        return $errorMessages[1];
+                    } elseif ($arg1 == ServiceInterface::NAME_VALKEY_SESSION && $arg2 == '8.0') {
                         return $errorMessages[2];
                     } elseif ($arg1 == ServiceInterface::NAME_ELASTICSEARCH && $arg2 == '7.7') {
                         return $errorMessages[3];

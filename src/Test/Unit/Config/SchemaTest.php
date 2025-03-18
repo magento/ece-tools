@@ -13,6 +13,7 @@ use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Config\Stage\PostDeployInterface;
 use Magento\MagentoCloud\Config\StageConfigInterface;
 use Magento\MagentoCloud\Config\SystemConfigInterface;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Filesystem\SystemList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -63,6 +64,9 @@ class SchemaTest extends TestCase
         );
     }
 
+  /**
+   * @throws FileSystemException
+   */
     public function testGetDefaultsForBuild(): void
     {
         $this->assertEquals(
@@ -85,6 +89,9 @@ class SchemaTest extends TestCase
         );
     }
 
+  /**
+   * @throws FileSystemException
+   */
     public function testGetDefaultsForDeploy(): void
     {
         $this->assertEquals(
@@ -108,6 +115,7 @@ class SchemaTest extends TestCase
                 DeployInterface::VAR_SCD_THREADS => -1,
                 DeployInterface::VAR_GENERATED_CODE_SYMLINK => true,
                 DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION => false,
+                DeployInterface::VAR_VALKEY_USE_SLAVE_CONNECTION => false,
                 DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION => false,
                 DeployInterface::VAR_ENABLE_GOOGLE_ANALYTICS => false,
                 DeployInterface::VAR_SCD_MATRIX => [],
@@ -116,6 +124,7 @@ class SchemaTest extends TestCase
                 DeployInterface::VAR_CONSUMERS_WAIT_FOR_MAX_MESSAGES => false,
                 DeployInterface::VAR_SPLIT_DB => [],
                 DeployInterface::VAR_CACHE_REDIS_BACKEND => 'Cm_Cache_Backend_Redis',
+                DeployInterface::VAR_CACHE_VALKEY_BACKEND => 'Cm_Cache_Backend_Valkey',
                 DeployInterface::VAR_REMOTE_STORAGE => [],
                 DeployInterface::VAR_SCD_NO_PARENT => false,
                 DeployInterface::VAR_USE_LUA => false,
@@ -125,6 +134,9 @@ class SchemaTest extends TestCase
         );
     }
 
+  /**
+   * @throws FileSystemException
+   */
     public function testGetDefaultsForPostDeploy(): void
     {
         $this->assertEquals(
@@ -205,6 +217,7 @@ class SchemaTest extends TestCase
             DeployInterface::VAR_CLEAN_STATIC_FILES,
             DeployInterface::VAR_UPDATE_URLS,
             DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION,
+            DeployInterface::VAR_VALKEY_USE_SLAVE_CONNECTION,
             DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION,
             DeployInterface::VAR_GENERATED_CODE_SYMLINK,
             DeployInterface::VAR_SPLIT_DB,
