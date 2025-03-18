@@ -109,7 +109,7 @@ class HandlerFactory
                         : Logger::INFO;
                     $handlerInstance = new StreamHandler(
                         $configuration->get('stream'),
-                        $minLevel ?: $defaultLevelStream
+                        $minLevel ?: Logger::INFO
                     );
                     break;
                 case static::HANDLER_EMAIL:

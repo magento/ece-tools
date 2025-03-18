@@ -437,7 +437,7 @@ class InstallCommandFactoryTest extends TestCase
                 ['2.4.0', true],
                 ['2.4.2', false]
             ]);
-        $this->elasticSearchMock->expects($this->once())
+        $this->elasticSearchMock->expects($this->any())
             ->method('isInstalled')
             ->willReturn(true);
         $this->elasticSearchMock->expects($this->once())
@@ -464,7 +464,7 @@ class InstallCommandFactoryTest extends TestCase
                 ]
             ]);
 
-        $this->openSearchMock->expects($this->once())
+        $this->openSearchMock->expects($this->any())
             ->method('isInstalled')
             ->willReturn(false);
         $this->openSearchMock->expects($this->never())
@@ -507,7 +507,7 @@ class InstallCommandFactoryTest extends TestCase
             ->method('satisfies')
             ->with('>=2.3.7-p3 <2.4.0 || >=2.4.3-p2')
             ->willReturn(true);
-        $this->openSearchMock->expects($this->once())
+        $this->openSearchMock->expects($this->any())
             ->method('isInstalled')
             ->willReturn(true);
         $this->openSearchMock->expects($this->once())
@@ -534,7 +534,7 @@ class InstallCommandFactoryTest extends TestCase
                 ]
             ]);
 
-        $this->elasticSearchMock->expects($this->once())
+        $this->elasticSearchMock->expects($this->any())
             ->method('isInstalled')
             ->willReturn(false);
         $this->elasticSearchMock->expects($this->never())

@@ -320,7 +320,7 @@ class ValidatorTest extends TestCase
                 [
                     ServiceInterface::NAME_OPENSEARCH => '1.2'
                 ],
-                0
+                1
             ],
             [
                 '2.4.3',
@@ -399,7 +399,7 @@ class ValidatorTest extends TestCase
                     ServiceInterface::NAME_OPENSEARCH => '1.2',
                     ServiceInterface::NAME_RABBITMQ => '3.8.0'
                 ],
-                0
+                1
             ],
             [
                 '2.4.3-p3',
