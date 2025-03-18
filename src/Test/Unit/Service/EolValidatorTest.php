@@ -172,6 +172,14 @@ class EolValidatorTest extends TestCase
         $service6->expects($this->once())
             ->method('getVersion')
             ->willReturn('10.2');
+      $service7 = $this->createMock(ServiceInterface::class);
+      $service7->expects($this->once())
+        ->method('getVersion')
+        ->willReturn('8.0');
+      $service8 = $this->createMock(ServiceInterface::class);
+      $service8->expects($this->once())
+        ->method('getVersion')
+        ->willReturn('8.0');
         // withConsecutive() alternative.
         $this->serviceFactoryMock->expects($this->exactly(6))
             ->method('create')
@@ -181,7 +189,9 @@ class EolValidatorTest extends TestCase
                 'rabbitmq' => $service3,
                 'redis' => $service4,
                 'redis-session' => $service5,
-                'mariadb' => $service6
+                'mariadb' => $service6,
+                'valkey' => $service7,
+                'valkey-session' => $service8,
             });
 
         $this->assertEquals(
