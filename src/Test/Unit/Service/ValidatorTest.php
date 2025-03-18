@@ -332,7 +332,7 @@ class ValidatorTest extends TestCase
             [
                 '2.4.4',
                 [
-                    ServiceInterface::NAME_OPENSEARCH => '1.2.2',
+                    ServiceInterface::NAME_OPENSEARCH => '2.3.0',
                     ServiceInterface::NAME_REDIS => '6.2',
                     ServiceInterface::NAME_REDIS_SESSION => '6.2',
                     ServiceInterface::NAME_RABBITMQ => '3.9'
@@ -416,7 +416,7 @@ class ValidatorTest extends TestCase
                     ServiceInterface::NAME_NGINX => '1.18.0',
                     ServiceInterface::NAME_VARNISH => '7.0.0',
                     ServiceInterface::NAME_REDIS => '6.2.6',
-                    ServiceInterface::NAME_OPENSEARCH => '1.2',
+                    ServiceInterface::NAME_OPENSEARCH => '2.3.0',
                     ServiceInterface::NAME_RABBITMQ => '3.9.0'
                 ],
                 0
@@ -449,7 +449,7 @@ class ValidatorTest extends TestCase
                     ServiceInterface::NAME_NGINX => '1.18.0',
                     ServiceInterface::NAME_VARNISH => '7.0.0',
                     ServiceInterface::NAME_REDIS => '6.2.6',
-                    ServiceInterface::NAME_OPENSEARCH => '1.2',
+                    ServiceInterface::NAME_OPENSEARCH => '2.3.0',
                     ServiceInterface::NAME_RABBITMQ => '3.9.0'
                 ],
                 0
