@@ -320,7 +320,7 @@ class ValidatorTest extends TestCase
                 [
                     ServiceInterface::NAME_OPENSEARCH => '1.2'
                 ],
-                1
+                0
             ],
             [
                 '2.4.3',
@@ -337,7 +337,7 @@ class ValidatorTest extends TestCase
                     ServiceInterface::NAME_REDIS_SESSION => '6.2',
                     ServiceInterface::NAME_RABBITMQ => '3.9'
                 ],
-                0
+                1
             ],
             [
                 '2.3.7-p2',
@@ -399,7 +399,7 @@ class ValidatorTest extends TestCase
                     ServiceInterface::NAME_OPENSEARCH => '1.2',
                     ServiceInterface::NAME_RABBITMQ => '3.8.0'
                 ],
-                1
+                0
             ],
             [
                 '2.4.3-p3',
@@ -416,7 +416,7 @@ class ValidatorTest extends TestCase
                     ServiceInterface::NAME_NGINX => '1.18.0',
                     ServiceInterface::NAME_VARNISH => '7.0.0',
                     ServiceInterface::NAME_REDIS => '6.2.6',
-                    ServiceInterface::NAME_OPENSEARCH => '2.3.0',
+                    ServiceInterface::NAME_OPENSEARCH => '1.2',
                     ServiceInterface::NAME_RABBITMQ => '3.9.0'
                 ],
                 0
@@ -436,7 +436,7 @@ class ValidatorTest extends TestCase
                     ServiceInterface::NAME_DB_MARIA => '10.5.0', //wrong
                     ServiceInterface::NAME_VARNISH => '7.1.0', //wrong
                     ServiceInterface::NAME_REDIS => '6.1.3', //wrong
-                    ServiceInterface::NAME_OPENSEARCH => '1.0.0', //wrong
+                    ServiceInterface::NAME_OPENSEARCH => '2.3.0', //wrong
                     ServiceInterface::NAME_RABBITMQ => '3.8.1' //wrong
                 ],
                 6
@@ -449,7 +449,7 @@ class ValidatorTest extends TestCase
                     ServiceInterface::NAME_NGINX => '1.18.0',
                     ServiceInterface::NAME_VARNISH => '7.0.0',
                     ServiceInterface::NAME_REDIS => '6.2.6',
-                    ServiceInterface::NAME_OPENSEARCH => '2.3.0',
+                    ServiceInterface::NAME_OPENSEARCH => '1.2',
                     ServiceInterface::NAME_RABBITMQ => '3.9.0'
                 ],
                 0
