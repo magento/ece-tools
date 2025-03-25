@@ -70,6 +70,29 @@ class SessionCredentialsTest extends TestCase
         $this->sessionCredentials->validate();
     }
 
+
+  /**
+   * @param array $sessionConfig
+   * @param string $expectedResultType
+   * @param string|null $expectedErrorMessage
+   *
+   * @dataProvider validateDataProviderValkey
+   */
+  public function testValidateValkey(
+    array $sessionConfig,
+    string $expectedResultType,
+    string | null $expectedErrorMessage = null
+  ): void {
+    $this->sessionConfigMock->expects($this->once())
+      ->method('get')
+      ->willReturn($sessionConfig);
+    $this->resultFactoryMock->expects($this->once())
+      ->method('create')
+      ->with($expectedResultType, $expectedErrorMessage ? ['error' => $expectedErrorMessage] : $this->anything());
+
+    $this->sessionCredentials->validate();
+  }
+
     /**
      * @return array
      */
@@ -97,4 +120,32 @@ class SessionCredentialsTest extends TestCase
             ]
         ];
     }
+
+  /**
+   * @return array
+   */
+  public function validateDataProviderValkey(): array
+  {
+    return [
+      [
+        [],
+        ResultInterface::SUCCESS
+      ],
+      [
+        ['some' => 'option'],
+        ResultInterface::ERROR,
+        'Missed required parameter \'save\' in session configuration'
+      ],
+      [
+        ['save' => 'valkey'],
+        ResultInterface::ERROR,
+        'Missed valkey options in session configuration'
+      ],
+      [
+        ['save' => 'valkey', 'valkey' => []],
+        ResultInterface::ERROR,
+        'Missed host option for valkey in session configuration'
+      ]
+    ];
+  }
 }

@@ -87,6 +87,22 @@ class SessionConfigurationTest extends TestCase
         $this->assertInstanceOf($expectedResultClass, $this->validator->validate());
     }
 
+
+  /**
+   * @param array $sessionConfiguration
+   * @param string $expectedResultClass
+   * @dataProvider validateDataProviderValkey
+   */
+  public function testValidateValkey(array $sessionConfiguration, string $expectedResultClass): void
+  {
+    $this->stageConfigMock->expects($this->once())
+      ->method('get')
+      ->with(DeployInterface::VAR_SESSION_CONFIGURATION)
+      ->willReturn($sessionConfiguration);
+
+    $this->assertInstanceOf($expectedResultClass, $this->validator->validate());
+  }
+
     /**
      * @return array
      */
@@ -141,4 +157,59 @@ class SessionConfigurationTest extends TestCase
             ],
         ];
     }
+
+  /**
+   * @return array
+   */
+  public function validateDataProviderValkey(): array
+  {
+    return [
+      [
+        [],
+        Success::class,
+      ],
+      [
+        [
+          'valkey' => ['max_connection' => 10],
+        ],
+        Error::class,
+      ],
+      [
+        [
+          'valkey' => ['max_connection' => 10],
+          '_merge' => true,
+        ],
+        Success::class,
+      ],
+      [
+        [
+          'valkey' => ['max_connection' => 10],
+          '_merge' => false,
+        ],
+        Error::class,
+      ],
+      [
+        [
+          'save' => 'valkey',
+          'valkey' => ['max_connection' => 10],
+          '_merge' => false,
+        ],
+        Success::class,
+      ],
+      [
+        [
+          'save' => 'valkey',
+          'valkey' => ['max_connection' => 10],
+          '_merge' => true,
+        ],
+        Success::class,
+      ],
+      [
+        [
+          'save' => 'valkey'
+        ],
+        Success::class,
+      ],
+    ];
+  }
 }

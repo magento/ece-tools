@@ -80,6 +80,7 @@ class ServiceFactoryTest extends TestCase
     {
         return [
             [ServiceInterface::NAME_REDIS, Redis::class],
+            [ServiceInterface::NAME_VALKEY, Valkey::class],
             [ServiceInterface::NAME_RABBITMQ, RabbitMq::class],
             [ServiceInterface::NAME_ELASTICSEARCH, ElasticSearch::class],
             [ServiceInterface::NAME_DB_MARIA, Database::class],
