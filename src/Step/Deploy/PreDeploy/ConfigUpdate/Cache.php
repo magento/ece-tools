@@ -179,11 +179,11 @@ class Cache implements StepInterface
     {
         $notAllowedRedisBackend = [
             CacheFactory::REDIS_BACKEND_REDIS_CACHE,
-            CacheFactory::CACHE_BACKEND_REMOTE_SYNCHRONIZED_CACHE
+            CacheFactory::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE
         ];
         $notAllowedValkeyBackend = [
             CacheFactory::VALKEY_BACKEND_VALKEY_CACHE,
-            CacheFactory::CACHE_BACKEND_REMOTE_SYNCHRONIZED_CACHE
+            CacheFactory::VALKEY_BACKEND_REMOTE_SYNCHRONIZED_CACHE
         ];
 
         try {

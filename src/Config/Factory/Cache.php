@@ -42,7 +42,7 @@ class Cache
     public const AVAILABLE_REDIS_BACKEND = [
         self::REDIS_BACKEND_CM_CACHE,
         self::REDIS_BACKEND_REDIS_CACHE,
-        self::CACHE_BACKEND_REMOTE_SYNCHRONIZED_CACHE
+        self::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE
     ];
 
     public const AVAILABLE_VALKEY_BACKEND = [
@@ -376,10 +376,12 @@ class Cache
      * @return bool
      * @throws ConfigException
      */
-    private function isSynchronizedConfigStructure(): bool
-    {
-        $model = (string)$this->stageConfig->get(DeployInterface::VAR_CACHE_REDIS_BACKEND);
+private function isSynchronizedConfigStructure(): bool
+{
+    $redisModel = (string)$this->stageConfig->get(DeployInterface::VAR_CACHE_REDIS_BACKEND);
+    $valkeyModel = (string)$this->stageConfig->get(DeployInterface::VAR_CACHE_VALKEY_BACKEND);
 
-        return $model === self::CACHE_BACKEND_REMOTE_SYNCHRONIZED_CACHE;
-    }
+    return $redisModel === self::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE ||
+      $valkeyModel === self::VALKEY_BACKEND_REMOTE_SYNCHRONIZED_CACHE;
+}
 }
