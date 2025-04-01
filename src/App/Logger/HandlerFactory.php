@@ -81,9 +81,6 @@ class HandlerFactory
             $levelOverride = $this->globalConfig->get(GlobalSection::VAR_MIN_LOGGING_LEVEL);
             $minLevel = !empty($levelOverride) ? $this->normalizeLevel($levelOverride) : self::UNDEFINED_LEVEL;
             $configuration = $this->logConfig->get($handler);
-            $defaultLevelStream = !empty($levelOverride) ?
-                        $this->normalizeLevel($levelOverride)
-                        : Logger::INFO;
         } catch (ConfigException $exception) {
             throw new LoggerException($exception->getMessage(), $exception->getCode(), $exception);
         }
