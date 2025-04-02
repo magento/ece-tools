@@ -332,11 +332,11 @@ class Cache
      */
     private function getSynchronizedConfigStructure(string $cacheBackendModel, array $backendConfig): array
     {
-      $backendClass = isset($backendConfig['host']) && strpos($backendConfig['host'], 'valkey') !== false
+          $backendClass = $backendConfig['host'] === 'valkey'
         ? '\Magento\Framework\Cache\Backend\Valkey'
         : '\Magento\Framework\Cache\Backend\Redis';
 
-      $config = [
+        $config = [
             'backend' => $cacheBackendModel,
             'backend_options' => [
                 'remote_backend' => $backendClass,
