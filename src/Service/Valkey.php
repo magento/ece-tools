@@ -15,8 +15,8 @@ use Magento\MagentoCloud\Service\Valkey\Version;
  */
 class Valkey implements ServiceInterface
 {
-    const RELATIONSHIP_KEY = 'valkeycache';
-    const RELATIONSHIP_SLAVE_KEY = 'valkeycache-slave';
+    const RELATIONSHIP_KEY = 'valkey';
+    const RELATIONSHIP_SLAVE_KEY = 'valkey-slave';
 
     /**
      * @var Environment

@@ -71,7 +71,7 @@ class SessionCredentials implements ValidatorInterface
             }
         }
 
-        if ($sessionConfig['save'] === 'valkeycache') {
+      if (isset($sessionConfig['save']) && strpos($sessionConfig['save'], 'valkey') !== false) {
             if (!isset($sessionConfig['valkeycache'])) {
                 return $this->resultFactory->create(Validator\ResultInterface::ERROR, [
                     'error' => 'Missed valkey options in session configuration'
