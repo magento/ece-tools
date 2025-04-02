@@ -104,12 +104,9 @@ class HandlerFactory
                     );
                     break;
                 case static::HANDLER_STREAM:
-                    $defaultLevelStream = !empty($levelOverride) ?
-                        $this->normalizeLevel($levelOverride)
-                        : Logger::INFO;
                     $handlerInstance = new StreamHandler(
                         $configuration->get('stream'),
-                        $minLevel ?: $defaultLevelStream
+                        $minLevel ?: Logger::INFO
                     );
                     break;
                 case static::HANDLER_EMAIL:
