@@ -124,7 +124,7 @@ class SchemaTest extends TestCase
                 DeployInterface::VAR_CONSUMERS_WAIT_FOR_MAX_MESSAGES => false,
                 DeployInterface::VAR_SPLIT_DB => [],
                 DeployInterface::VAR_CACHE_REDIS_BACKEND => 'Cm_Cache_Backend_Redis',
-                DeployInterface::VAR_CACHE_VALKEY_BACKEND => 'Cm_Cache_Backend_Valkey',
+                DeployInterface::VAR_CACHE_VALKEY_BACKEND => 'Cm_Cache_Backend_Redis',
                 DeployInterface::VAR_REMOTE_STORAGE => [],
                 DeployInterface::VAR_SCD_NO_PARENT => false,
                 DeployInterface::VAR_USE_LUA => false,

@@ -56,7 +56,7 @@ abstract class ValkeyCest extends AbstractCest
         $config = $this->getConfig($I);
 
         $I->assertSame(
-            'Cm_Cache_Backend_Valkey',
+            'Cm_Cache_Backend_Redis',
             $config['cache']['frontend']['default']['backend'],
             'Wrong backend model'
         );
@@ -72,7 +72,7 @@ abstract class ValkeyCest extends AbstractCest
             $I
         );
         $I->assertSame(
-            'Cm_Cache_Backend_Valkey',
+            'Cm_Cache_Backend_Redis',
             $config['cache']['frontend']['page_cache']['backend'],
             'Wrong backend model'
         );

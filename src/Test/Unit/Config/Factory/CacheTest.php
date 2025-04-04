@@ -728,7 +728,7 @@ class CacheTest extends TestCase
         $resultMasterOnlyConnection = [
             'frontend' => [
                 'default' => [
-                    'backend' => 'Cm_Cache_Backend_Valkey',
+                    'backend' => 'Cm_Cache_Backend_Redis',
                     'backend_options' => [
                         'server' => 'master.host',
                         'port' => 'master.port',
@@ -737,7 +737,7 @@ class CacheTest extends TestCase
                     ],
                 ],
                 'page_cache' => [
-                    'backend' => 'Cm_Cache_Backend_Valkey',
+                    'backend' => 'Cm_Cache_Backend_Redis',
                     'backend_options' => [
                         'server' => 'master.host',
                         'password' => 'master.password',
@@ -1150,7 +1150,7 @@ class CacheTest extends TestCase
                 ],
                 [
                     DeployInterface::VAR_CACHE_VALKEY_BACKEND,
-                    'Cm_Cache_Backend_Valkey',
+                    'Cm_Cache_Backend_Redis',
                 ],
             ]);
         $this->valkeyMock->expects(self::any())
@@ -1183,7 +1183,7 @@ class CacheTest extends TestCase
         $result = [
             'frontend' => [
                 'default' => [
-                    'backend' => 'Cm_Cache_Backend_Valkey',
+                    'backend' => 'Cm_Cache_Backend_Redis',
                     'backend_options' => [
                         'server' => 'master.host',
                         'port' => 'master.port',
@@ -1192,7 +1192,7 @@ class CacheTest extends TestCase
                     ],
                 ],
                 'page_cache' => [
-                    'backend' => 'Cm_Cache_Backend_Valkey',
+                    'backend' => 'Cm_Cache_Backend_Redis',
                     'backend_options' => [
                         'server' => 'master.host',
                         'port' => 'master.port',

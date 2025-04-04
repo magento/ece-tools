@@ -32,7 +32,7 @@ class Cache
     public const REDIS_BACKEND_CM_CACHE = 'Cm_Cache_Backend_Redis';
     public const REDIS_BACKEND_REDIS_CACHE = '\Magento\Framework\Cache\Backend\Redis';
 
-    public const VALKEY_BACKEND_CM_CACHE = 'Cm_Cache_Backend_Valkey';
+    public const VALKEY_BACKEND_CM_CACHE = 'Cm_Cache_Backend_Redis';
     public const VALKEY_BACKEND_VALKEY_CACHE = '\Magento\Framework\Cache\Backend\Valkey';
 
     public const VALKEY_BACKEND_REMOTE_SYNCHRONIZED_CACHE = '\Magento\Framework\Cache\Backend\RemoteSynchronizedCache';
