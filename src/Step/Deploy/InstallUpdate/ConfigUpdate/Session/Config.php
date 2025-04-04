@@ -120,6 +120,7 @@ class Config
     public function get(): array
     {
         $envSessionConfiguration = (array)$this->stageConfig->get(DeployInterface::VAR_SESSION_CONFIGURATION);
+        $cacheBackend = 'redis';
 
         if (!$this->configMerger->isEmpty($envSessionConfiguration)
             && !$this->configMerger->isMergeRequired($envSessionConfiguration)
@@ -132,29 +133,25 @@ class Config
                 ValkeySession::NAME_VALKEY_SESSION . ' will be used for session if it was not override by '
                 . DeployInterface::VAR_SESSION_CONFIGURATION
             );
-          $cacheBackend = 'valkey';
-          $cacheConfig = $valkeyConfig;
+            $cacheConfig = $valkeyConfig;
         } elseif ($valkeyConfig = $this->valkey->getConfiguration()) {
             $this->logger->info(
                 VALKEY::NAME_VALKEY . ' will be used for session if it was not override by '
                 . DeployInterface::VAR_SESSION_CONFIGURATION
             );
-          $cacheBackend = 'valkey';
-          $cacheConfig = $valkeyConfig;
+            $cacheConfig = $valkeyConfig;
         } elseif ($redisConfig = $this->redisSession->getConfiguration()) {
             $this->logger->info(
                 RedisSession::NAME_REDIS_SESSION . ' will be used for session if it was not override by '
                 .DeployInterface::VAR_SESSION_CONFIGURATION
             );
-          $cacheBackend = 'redis';
-          $cacheConfig = $redisConfig;
+            $cacheConfig = $redisConfig;
         } elseif ($redisConfig = $this->redis->getConfiguration()) {
             $this->logger->info(
                 Redis::NAME_REDIS . ' will be used for session if it was not override by '
                 . DeployInterface::VAR_SESSION_CONFIGURATION
             );
-          $cacheBackend = 'redis';
-          $cacheConfig = $redisConfig;
+            $cacheConfig = $redisConfig;
         } else {
             return [];
         }

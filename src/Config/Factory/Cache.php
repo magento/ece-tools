@@ -45,7 +45,7 @@ class Cache
     ];
 
     public const AVAILABLE_VALKEY_BACKEND = [
-        self::VALKEY_BACKEND_CM_CACHE,
+        self::REDIS_BACKEND_CM_CACHE,
         self::VALKEY_BACKEND_VALKEY_CACHE,
         self::VALKEY_BACKEND_REMOTE_SYNCHRONIZED_CACHE
     ];
