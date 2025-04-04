@@ -158,7 +158,7 @@ class Cache
             );
             $finalConfig = [
                 'frontend' => [
-                    'default' => $backendConfig,
+                    'default' => $cacheCache,
                 ],
                 'type' => [
                     'default' => ['frontend' => 'default'],
@@ -308,8 +308,9 @@ class Cache
      */
     private function getUnsyncedConfigStructure(string $cacheBackendModel, array $backendConfig): array
     {
-        $config = [
-            'backend' => $cacheBackendModel,
+      $cacheBackendModelRedis='Cm_Cache_Backend_Redis';
+      $config = [
+            'backend' => $cacheBackendModelRedis,
             'backend_options' => [
                 'server' => $backendConfig['host'],
                 'port' => $backendConfig['port'],
