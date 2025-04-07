@@ -109,8 +109,8 @@ class Cache
     public function get(): array
     {
          $envCacheConfiguration = (array)$this->stageConfig->get(DeployInterface::VAR_CACHE_CONFIGURATION);
-        $envCacheRadisBackendModel = (string)$this->stageConfig->get(DeployInterface::VAR_CACHE_REDIS_BACKEND);
-        $envCacheValkeyBackendModel = (string)$this->stageConfig->get(DeployInterface::VAR_CACHE_VALKEY_BACKEND);
+         $envCacheRadisBackendModel = (string)$this->stageConfig->get(DeployInterface::VAR_CACHE_REDIS_BACKEND);
+         $envCacheValkeyBackendModel = (string)$this->stageConfig->get(DeployInterface::VAR_CACHE_VALKEY_BACKEND);
 
         if ($this->isCacheConfigurationValid($envCacheConfiguration)
             && !$this->configMerger->isMergeRequired($envCacheConfiguration)

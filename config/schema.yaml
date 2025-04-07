@@ -464,13 +464,13 @@ variables:
     description: "Configuration the backend model for valkey cache."
     type: string
     allowed:
-      - 'Cm_Cache_Backend_Valkey'
+      - 'Cm_Cache_Backend_Redis'
       - '\Magento\Framework\Cache\Backend\Valkey'
       - '\Magento\Framework\Cache\Backend\RemoteSynchronizedCache'
     stages:
       - deploy
     default:
-      deploy: 'Cm_Cache_Backend_Valkey'
+      deploy: 'Cm_Cache_Backend_Redis'
     examples:
       - stage:
           deploy:
