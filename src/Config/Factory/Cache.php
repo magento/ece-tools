@@ -148,10 +148,10 @@ class Cache
 
         // Determine backend based on available configuration
         $backendConfig = !empty($redisConfig) ? $redisConfig : $valkeyConfig;
-        $cacheBackendModel = !empty($redisConfig) ? $envCacheRadisBackendModel :$envCacheValkeyBackendModel;
+         $envCacheBackendModel = (string)$this->stageConfig->get(DeployInterface::VAR_CACHE_REDIS_BACKEND);
 
         if ($this->isSynchronizedConfigStructure()) {
-            $cacheCache = $this->getSynchronizedConfigStructure($cacheBackendModel, $backendConfig);
+            $cacheCache = $this->getSynchronizedConfigStructure($envCacheBackendModel, $backendConfig);
             $cacheCache['backend_options']['remote_backend_options'] = array_merge(
                 $cacheCache['backend_options']['remote_backend_options'],
                 $this->getSlaveConnection($envCacheConfiguration, $backendConfig)
@@ -165,7 +165,7 @@ class Cache
                 ],
             ];
         } else {
-            $cacheCache = $this->getUnsyncedConfigStructure($cacheBackendModel, $backendConfig);
+            $cacheCache = $this->getUnsyncedConfigStructure($envCacheBackendModel, $backendConfig);
             $slaveConnection = $this->getSlaveConnection($envCacheConfiguration, $backendConfig);
             if ($slaveConnection) {
                 $cacheCache['frontend_options']['write_control'] = false;
@@ -302,11 +302,11 @@ class Cache
     /**
      * Returns backend config for unsynced cache implementation.
      *
-     * @param string $cacheBackendModel
+     * @param string $envCacheBackendModel
      * @param array $backendConfig
      * @return array
      */
-    private function getUnsyncedConfigStructure(string $cacheBackendModel, array $backendConfig): array
+    private function getUnsyncedConfigStructure(string $envCacheBackendModel, array $backendConfig): array
     {
       $cacheBackendModelRedis='Cm_Cache_Backend_Redis';
       $config = [
@@ -327,18 +327,18 @@ class Cache
     /**
      * Returns backend config for synchronized cache implementation.
      *
-     * @param string $cacheBackendModel
+     * @param string $envCacheBackendModel
      * @param array $backendConfig
      * @return array
      */
-    private function getSynchronizedConfigStructure(string $cacheBackendModel, array $backendConfig): array
+    private function getSynchronizedConfigStructure(string $envCacheBackendModel, array $backendConfig): array
     {
           $backendClass = $backendConfig['host'] === 'valkey'
         ? '\Magento\Framework\Cache\Backend\Valkey'
         : '\Magento\Framework\Cache\Backend\Redis';
 
         $config = [
-            'backend' => $cacheBackendModel,
+            'backend' => $envCacheBackendModel,
             'backend_options' => [
                 'remote_backend' => $backendClass,
                 'remote_backend_options' => [
