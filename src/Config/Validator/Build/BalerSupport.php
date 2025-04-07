@@ -47,7 +47,7 @@ class BalerSupport implements ValidatorInterface
 
     /**
      * {@inheritdoc}
-     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+     * @SuppressWarnings("PHPMD.CyclomaticComplexity")
      */
     public function validate(): Validator\ResultInterface
     {

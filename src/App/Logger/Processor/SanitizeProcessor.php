@@ -33,7 +33,7 @@ class SanitizeProcessor
     public function __invoke(\Monolog\LogRecord|array $record)
     {
         // Monolog version 3 or higher.
-        if (\Monolog\Logger::API == 3) {
+        if (\Monolog\Logger::API == 3) { // @phpstan-ignore-line
             $message = $this->sanitizer->sanitize($record->message); // @phpstan-ignore-line
             // Create new LogRecord from existing and update the message,
             // since message is read only

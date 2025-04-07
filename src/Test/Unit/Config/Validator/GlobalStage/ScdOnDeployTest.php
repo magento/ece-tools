@@ -98,12 +98,18 @@ class ScdOnDeployTest extends TestCase
         $this->scdOnBuildMock->expects($this->once())
             ->method('validate')
             ->willReturn($resultMock);
+        $messages = [
+            'SCD_ON_DEMAND variable is enabled',
+            'SKIP_SCD variable is enabled',
+            'SCD on build is enabled'
+        ];
         $this->resultFactoryMock->expects($this->exactly(3))
             ->method('error')
-            ->withConsecutive(
-                ['SCD_ON_DEMAND variable is enabled'],
-                ['SKIP_SCD variable is enabled'],
-                ['SCD on build is enabled']
+            // withConsecutive() alternative.
+            ->with(
+                $this->callback(function (string $message) use (&$messages) {
+                    return array_shift($messages) === $message;
+                })
             );
 
         $this->assertCount(3, $this->validator->getErrors());

@@ -128,15 +128,22 @@ class UpdateComposerTest extends TestCase
                     ],
                 ],
             ]);
+        $scripts = [
+            'script2',
+            'script3',
+            'script4',
+            'script5',
+            'composer update --ansi --no-interaction'
+        ];
         $this->shellMock->expects($this->exactly(5))
             ->method('execute')
-            ->withConsecutive(
-                ['script2'],
-                ['script3'],
-                ['script4'],
-                ['script5'],
-                ['composer update --ansi --no-interaction']
+            // withConsecutive() alternative.
+            ->with(
+                $this->callback(function (string $script) use (&$scripts) {
+                    return array_shift($scripts) === $script;
+                })
             );
+        
         $this->fileListMock->expects($this->once())
             ->method('getMagentoComposer')
             ->willReturn('/magento_root/composer.json');

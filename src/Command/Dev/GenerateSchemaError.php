@@ -17,7 +17,7 @@ use Symfony\Component\Yaml\Yaml;
 
 /**
  * @codeCoverageIgnore
- * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
+ * @SuppressWarnings("PHPMD.CouplingBetweenObjects")
  */
 class GenerateSchemaError extends Command
 {
@@ -60,7 +60,7 @@ class GenerateSchemaError extends Command
     /**
      * @inheritdoc
      *
-     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     * @SuppressWarnings("PHPMD.UnusedFormalParameter")
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {

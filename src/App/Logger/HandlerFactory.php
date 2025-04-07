@@ -23,7 +23,7 @@ use Monolog\Logger;
 /**
  * The handler factory.
  *
- * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
+ * @SuppressWarnings("PHPMD.CouplingBetweenObjects")
  */
 class HandlerFactory
 {
@@ -73,7 +73,7 @@ class HandlerFactory
      * @return AbstractProcessingHandler
      * @throws LoggerException
      *
-     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+     * @SuppressWarnings("PHPMD.CyclomaticComplexity")
      */
     public function create(string $handler): AbstractProcessingHandler
     {
@@ -104,12 +104,9 @@ class HandlerFactory
                     );
                     break;
                 case static::HANDLER_STREAM:
-                    $defaultLevelStream = !empty($levelOverride) ?
-                        $this->normalizeLevel($levelOverride)
-                        : Logger::INFO;
                     $handlerInstance = new StreamHandler(
                         $configuration->get('stream'),
-                        $minLevel ?: $defaultLevelStream
+                        $minLevel ?: Logger::INFO
                     );
                     break;
                 case static::HANDLER_EMAIL:
@@ -172,6 +169,7 @@ class HandlerFactory
         /** @phpstan-ignore-next-line */
         $normalizedLevel = Logger::toMonologLevel($level);
 
+        /** @phpstan-ignore-next-line */
         if (\Monolog\Logger::API == 3) {
             /** @phpstan-ignore-next-line */
             $normalizedLevel =  $normalizedLevel->value;

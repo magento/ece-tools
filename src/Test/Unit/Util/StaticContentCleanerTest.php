@@ -59,14 +59,31 @@ class StaticContentCleanerTest extends TestCase
     {
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
-            ->withConsecutive(['Clearing pub/static'], ['Clearing var/view_preprocessed']);
+            // withConsecutive() alternative.
+            ->willReturnCallback(function (string $axis) {
+                static $series = [
+                    'Clearing pub/static',
+                    'Clearing var/view_preprocessed'
+                ];
+                $this->assertSame(array_shift($series), $axis);
+            });
         $this->directoryListMock->expects($this->exactly(2))
             ->method('getPath')
-            ->withConsecutive([DirectoryList::DIR_STATIC], [DirectoryList::DIR_VIEW_PREPROCESSED])
-            ->willReturnOnConsecutiveCalls('pub/static', 'var/view_preprocessed');
+            // withConsecutive() alternative.
+            ->willReturnCallback(fn($param) => match ([$param]) {
+                [DirectoryList::DIR_STATIC] => 'pub/static',
+                [DirectoryList::DIR_VIEW_PREPROCESSED] => 'var/view_preprocessed'
+            });
         $this->fileMock->expects($this->exactly(2))
             ->method('backgroundClearDirectory')
-            ->withConsecutive(['pub/static'], ['var/view_preprocessed']);
+            // withConsecutive() alternative.
+            ->willReturnCallback(function (string $axis) {
+                static $series = [
+                    'pub/static',
+                    'var/view_preprocessed'
+                ];
+                $this->assertSame(array_shift($series), $axis);
+            });
 
         $this->staticContentCleaner->clean();
     }

@@ -13,6 +13,7 @@ use Magento\MagentoCloud\Config\Factory\Cache;
 use Magento\MagentoCloud\Config\StageConfigInterface;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Service\Redis;
+use Magento\MagentoCloud\Service\Valkey;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -28,6 +29,11 @@ class CacheTest extends TestCase
     private $redisMock;
 
     /**
+     * @var Valkey|MockObject
+     */
+    private $valkeyMock;
+
+    /**
      * @var DeployInterface|MockObject
      */
     private $stageConfigMock;
@@ -40,7 +46,7 @@ class CacheTest extends TestCase
     /**
      * @var Cache
      */
-    private $config;
+    private Cache $config;
 
     /**
      * @inheritDoc
@@ -48,12 +54,14 @@ class CacheTest extends TestCase
     protected function setUp(): void
     {
         $this->redisMock = $this->createMock(Redis::class);
+        $this->valkeyMock = $this->createMock(Valkey::class);
         $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
         $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
             ->getMockForAbstractClass();
 
         $this->config = new Cache(
             $this->redisMock,
+            $this->valkeyMock,
             $this->stageConfigMock,
             $this->loggerMock,
             new ConfigMerger()
@@ -75,6 +83,32 @@ class CacheTest extends TestCase
                 ],
             ]);
         $this->redisMock->expects(self::never())
+            ->method('getConfiguration');
+
+        $this->loggerMock->expects(self::never())
+            ->method('notice');
+
+        self::assertEquals(
+            ['frontend' => ['cache_option' => 'value']],
+            $this->config->get()
+        );
+    }
+
+    public function testGetWithValidEnvConfigValkey(): void
+    {
+        $this->stageConfigMock->expects(self::exactly(3))
+            ->method('get')
+            ->willReturnMap([
+                [
+                    DeployInterface::VAR_CACHE_CONFIGURATION,
+                    ['frontend' => ['cache_option' => 'value']],
+                ],
+                [
+                    DeployInterface::VAR_VALKEY_USE_SLAVE_CONNECTION,
+                    false,
+                ],
+            ]);
+        $this->valkeyMock->expects(self::never())
             ->method('getConfiguration');
 
         $this->loggerMock->expects(self::never())
@@ -115,13 +149,64 @@ class CacheTest extends TestCase
         );
     }
 
+    /**
+     * @throws ConfigException
+     */
+    public function testGetWithValidEnvConfigWithEnabledValkeySlave(): void
+    {
+        $this->stageConfigMock->expects(self::exactly(3))
+            ->method('get')
+            ->willReturnMap([
+                [
+                    DeployInterface::VAR_CACHE_CONFIGURATION,
+                    ['frontend' => ['cache_option' => 'value']],
+                ],
+                [
+                    DeployInterface::VAR_VALKEY_USE_SLAVE_CONNECTION,
+                    true,
+                ],
+            ]);
+        $this->valkeyMock->expects(self::never())
+            ->method('getConfiguration');
+
+        $this->loggerMock->expects(self::once())
+            ->method('notice')
+            ->with('The variables \'' . DeployInterface::VAR_VALKEY_USE_SLAVE_CONNECTION . '\', \''
+                . DeployInterface::VAR_CACHE_VALKEY_BACKEND . '\' are ignored'
+                . ' as you set your own cache connection in \'' . DeployInterface::VAR_CACHE_CONFIGURATION . '\'');
+
+        self::assertEquals(
+            ['frontend' => ['cache_option' => 'value']],
+            $this->config->get()
+        );
+    }
+
     public function testGetWithoutRedisAndWithNotValidEnvConfig(): void
     {
         $this->stageConfigMock->expects(self::exactly(2))
             ->method('get')
-            ->withConsecutive([DeployInterface::VAR_CACHE_CONFIGURATION], [DeployInterface::VAR_CACHE_REDIS_BACKEND])
-            ->willReturnOnConsecutiveCalls([], '');
+            // withConsecutive() alternative.
+            ->willReturnCallback(fn($param) => match ([$param]) {
+                [DeployInterface::VAR_CACHE_CONFIGURATION] => [],
+                [DeployInterface::VAR_CACHE_REDIS_BACKEND] => ''
+            });
         $this->redisMock->expects(self::once())
+            ->method('getConfiguration')
+            ->willReturn([]);
+
+        self::assertEmpty($this->config->get());
+    }
+
+    public function testGetWithoutValkeyAndWithNotValidEnvConfig(): void
+    {
+        $this->stageConfigMock->expects(self::exactly(2))
+            ->method('get')
+            // withConsecutive() alternative.
+            ->willReturnCallback(fn($param) => match ([$param]) {
+                [DeployInterface::VAR_CACHE_CONFIGURATION] => [],
+                [DeployInterface::VAR_CACHE_VALKEY_BACKEND] => ''
+            });
+        $this->valkeyMock->expects(self::once())
             ->method('getConfiguration')
             ->willReturn([]);
 
@@ -138,6 +223,7 @@ class CacheTest extends TestCase
      * @param array $expectedResult
      *
      * @dataProvider getFromRelationshipsDataProvider
+     * @throws ConfigException
      */
     public function testGetFromRelationships(
         $envCacheConfig,
@@ -168,6 +254,56 @@ class CacheTest extends TestCase
             ->method('getConfiguration')
             ->willReturn($masterConnection);
         $this->redisMock->expects(self::once())
+            ->method('getSlaveConfiguration')
+            ->willReturn($slaveConnection);
+
+        self::assertEquals(
+            $expectedResult,
+            $this->config->get()
+        );
+    }
+
+    /**
+     * @param array $envCacheConfig
+     * @param array $masterConnection
+     * @param array $slaveConnection
+     * @param boolean $useSlave
+     * @param string $backendModel
+     * @param int $callingGetStageConfig
+     * @param array $expectedResult
+     *
+     * @dataProvider getFromRelationshipsDataProviderValkey
+     * @throws ConfigException
+     */
+    public function testGetFromRelationshipsValkey(
+        $envCacheConfig,
+        $masterConnection,
+        $slaveConnection,
+        $useSlave,
+        $backendModel,
+        $callingGetStageConfig,
+        $expectedResult
+    ) {
+        $this->stageConfigMock->expects(self::exactly($callingGetStageConfig))
+            ->method('get')
+            ->willReturnMap([
+                [
+                    DeployInterface::VAR_CACHE_CONFIGURATION,
+                    $envCacheConfig,
+                ],
+                [
+                    DeployInterface::VAR_VALKEY_USE_SLAVE_CONNECTION,
+                    $useSlave,
+                ],
+                [
+                    DeployInterface::VAR_CACHE_VALKEY_BACKEND,
+                    $backendModel,
+                ],
+            ]);
+        $this->valkeyMock->expects(self::once())
+            ->method('getConfiguration')
+            ->willReturn($masterConnection);
+        $this->valkeyMock->expects(self::once())
             ->method('getSlaveConfiguration')
             ->willReturn($slaveConnection);
 
@@ -213,7 +349,7 @@ class CacheTest extends TestCase
                         'server' => 'master.host',
                         'port' => 'master.port',
                         'password' => 'master.password',
-                        'database' => Cache::REDIS_DATABASE_DEFAULT,
+                        'database' => Cache::CACHE_DATABASE_DEFAULT,
                     ],
                 ],
                 'page_cache' => [
@@ -222,7 +358,7 @@ class CacheTest extends TestCase
                         'server' => 'master.host',
                         'password' => 'master.password',
                         'port' => 'master.port',
-                        'database' => Cache::REDIS_DATABASE_PAGE_CACHE,
+                        'database' => Cache::CACHE_DATABASE_PAGE_CACHE,
                     ],
                 ],
             ],
@@ -239,7 +375,7 @@ class CacheTest extends TestCase
                         'remote_backend_options' => [
                             'server' => 'master.host',
                             'port' => 'master.port',
-                            'database' => Cache::REDIS_DATABASE_DEFAULT,
+                            'database' => Cache::CACHE_DATABASE_DEFAULT,
                             'persistent' => 0,
                             'password' => 'master.password',
                             'compress_data' => '1',
@@ -562,6 +698,390 @@ class CacheTest extends TestCase
     }
 
     /**
+     * Data provider for testGetFromRelationshipsValkey.
+     *
+     * Results value for next data:
+     * 1 - cache configuration from CACHE_CONFIGURATION variable
+     * 2 - data for 'valkey' relationships
+     * 3 - data for 'valkey-slave' relationships
+     * 4 - value for VALKEY_USE_SLAVE_CONNECTION variable
+     * 5 - expected result
+     *
+     * @return array
+     * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
+     */
+    public function getFromRelationshipsDataProviderValkey(): array
+    {
+        $valkeyConfiguration = [
+            'host' => 'master.host',
+            'port' => 'master.port',
+            'password' => 'master.password',
+            'scheme' => 'redis',
+        ];
+        $valkeySlaveConfiguration = [
+            'host' => 'slave.host',
+            'port' => 'slave.port',
+            'password' => 'slave.password',
+            'scheme' => 'redis',
+        ];
+
+        $resultMasterOnlyConnection = [
+            'frontend' => [
+                'default' => [
+                    'backend' => 'Cm_Cache_Backend_Redis',
+                    'backend_options' => [
+                        'server' => 'master.host',
+                        'port' => 'master.port',
+                        'password' => 'master.password',
+                        'database' => Cache::CACHE_DATABASE_DEFAULT,
+                    ],
+                ],
+                'page_cache' => [
+                    'backend' => 'Cm_Cache_Backend_Redis',
+                    'backend_options' => [
+                        'server' => 'master.host',
+                        'password' => 'master.password',
+                        'port' => 'master.port',
+                        'database' => Cache::CACHE_DATABASE_PAGE_CACHE,
+                    ],
+                ],
+            ],
+        ];
+        $resultMasterOnlyConnectionValkeyCache = $resultMasterOnlyConnection;
+        $resultMasterOnlyConnectionValkeyCache['frontend']['default']['backend'] = Cache::VALKEY_BACKEND_CM_CACHE;
+        $resultMasterOnlyConnectionValkeyCache['frontend']['page_cache']['backend'] = Cache::VALKEY_BACKEND_VALKEY_CACHE;
+        $resultMasterOnlyConnectionSyncCache = [
+            'frontend' => [
+                'default' => [
+                    'backend' => Cache::VALKEY_BACKEND_REMOTE_SYNCHRONIZED_CACHE,
+                    'backend_options' => [
+                        'remote_backend' => Cache::VALKEY_BACKEND_VALKEY_CACHE,
+                        'remote_backend_options' => [
+                            'server' => 'master.host',
+                            'port' => 'master.port',
+                            'database' => Cache::CACHE_DATABASE_DEFAULT,
+                            'persistent' => 0,
+                            'password' => 'master.password',
+                            'compress_data' => '1',
+                        ],
+                        'local_backend' => 'Cm_Cache_Backend_File',
+                        'local_backend_options' => [
+                            'cache_dir' => '/dev/shm/',
+                        ],
+                    ],
+                    'frontend_options' => [
+                        'write_control' => false,
+                    ],
+                ],
+            ],
+            'type' => [
+                'default' => ['frontend' => 'default'],
+            ],
+        ];
+
+        $backendOptions = [
+            'load_from_slave' => [
+                'server' => 'slave.host',
+                'port' => 'slave.port',
+                'password' => 'slave.password'
+            ],
+            'read_timeout' => 1,
+            'retry_reads_on_master' => 1,
+        ];
+
+        $slaveConfiguration = [
+            'backend_options' => $backendOptions,
+            'frontend_options' => [
+                'write_control' => false,
+            ],
+        ];
+
+        $slaveConfigurationSyncCache = [
+            'backend_options' => [
+                'remote_backend_options' => $backendOptions,
+            ],
+        ];
+
+        $resultMasterSlaveConnection = $resultMasterOnlyConnection;
+        $resultMasterSlaveConnection['frontend']['default'] = array_merge_recursive(
+            $resultMasterSlaveConnection['frontend']['default'],
+            $slaveConfiguration
+        );
+        $resultMasterSlaveConnection['frontend']['page_cache'] = array_merge_recursive(
+            $resultMasterSlaveConnection['frontend']['page_cache'],
+            $slaveConfiguration
+        );
+        $resultMasterSlaveConnectionValkeyCache = $resultMasterSlaveConnection;
+        $resultMasterSlaveConnectionValkeyCache['frontend']['default']['backend'] = Cache::VALKEY_BACKEND_VALKEY_CACHE;
+        $resultMasterSlaveConnectionValkeyCache['frontend']['page_cache']['backend'] = Cache::VALKEY_BACKEND_VALKEY_CACHE;
+        $resultMasterSlaveConnectionSyncCache = $resultMasterOnlyConnectionSyncCache;
+        $resultMasterSlaveConnectionSyncCache['frontend']['default'] = array_merge_recursive(
+            $resultMasterSlaveConnectionSyncCache['frontend']['default'],
+            $slaveConfigurationSyncCache
+        );
+
+        $resultMasterSlaveConnectionWithMergedValue = $resultMasterSlaveConnection;
+        $resultMasterSlaveConnectionWithMergedValue['frontend']['default']['backend_options']['value'] = 'key';
+        $resultMasterSlaveConnectionWithMergedValueValkeyCache = $resultMasterSlaveConnectionWithMergedValue;
+        $resultMasterSlaveConnectionWithMergedValueValkeyCache['frontend']['default']['backend'] =
+            Cache::VALKEY_BACKEND_VALKEY_CACHE;
+        $resultMasterSlaveConnectionWithMergedValueValkeyCache['frontend']['page_cache']['backend'] =
+            Cache::VALKEY_BACKEND_VALKEY_CACHE;
+        $resultMasterSlaveConnectionWithMergedValueSyncCache = $resultMasterSlaveConnectionSyncCache;
+        $resultMasterSlaveConnectionWithMergedValueSyncCache['frontend']['default']['backend_options']['value'] = 'key';
+
+        $resultMasterSlaveConnectionWithDiffHost = $resultMasterOnlyConnection;
+        $resultMasterSlaveConnectionWithDiffHost['frontend']['default']['backend_options']['value'] = 'key';
+        $resultMasterSlaveConnectionWithDiffHost['frontend']['default']['backend_options']['server'] = 'new.host';
+        $resultMasterSlaveConnectionWithDiffHostValkeyCache = $resultMasterSlaveConnectionWithDiffHost;
+        $resultMasterSlaveConnectionWithDiffHostValkeyCache['frontend']['default']['backend'] =
+            Cache::VALKEY_BACKEND_VALKEY_CACHE;
+        $resultMasterSlaveConnectionWithDiffHostValkeyCache['frontend']['page_cache']['backend'] =
+            Cache::VALKEY_BACKEND_VALKEY_CACHE;
+        $resultMasterSlaveConnectionWithDiffHostSyncCache = $resultMasterOnlyConnectionSyncCache;
+        $remoteBackendOptionsDiffHostSync = [
+            'frontend' => [
+                'default' => [
+                    'backend_options' => [
+                        'remote_backend_options' => [
+                            'value' => 'key',
+                            'server' => 'new.host',
+                        ],
+                    ],
+                ],
+            ],
+        ];
+        $resultMasterSlaveConnectionWithDiffHostSyncCache = array_replace_recursive(
+            $resultMasterSlaveConnectionWithDiffHostSyncCache,
+            $remoteBackendOptionsDiffHostSync
+        );
+
+        return [
+            [
+                [],
+                $valkeyConfiguration,
+                [],
+                false,
+                Cache::REDIS_BACKEND_CM_CACHE,
+                4,
+                $resultMasterOnlyConnection,
+            ],
+            [
+                [],
+                $valkeyConfiguration,
+                $valkeySlaveConfiguration,
+                false,
+                Cache::VALKEY_BACKEND_CM_CACHE,
+                4,
+                $resultMasterOnlyConnection,
+            ],
+            [
+                [],
+                $valkeyConfiguration,
+                [],
+                true,
+                Cache::VALKEY_BACKEND_CM_CACHE,
+                4,
+                $resultMasterOnlyConnection,
+            ],
+            [
+                [],
+                $valkeyConfiguration,
+                $valkeySlaveConfiguration,
+                true,
+                Cache::VALKEY_BACKEND_CM_CACHE,
+                5,
+                $resultMasterSlaveConnection,
+            ],
+            [
+                [
+                    'frontend' => [
+                        'default' => [
+                            'backend_options' => [
+                                'value' => 'key',
+                            ],
+                        ],
+                    ],
+                    StageConfigInterface::OPTION_MERGE => true,
+                ],
+                $valkeyConfiguration,
+                $valkeySlaveConfiguration,
+                true,
+                Cache::VALKEY_BACKEND_CM_CACHE,
+                5,
+                $resultMasterSlaveConnectionWithMergedValue,
+            ],
+            [
+                [
+                    'frontend' => [
+                        'default' => [
+                            'backend_options' => [
+                                'server' => 'new.host',
+                                'value' => 'key',
+                            ],
+                        ],
+                    ],
+                    StageConfigInterface::OPTION_MERGE => true,
+                ],
+                $valkeyConfiguration,
+                $valkeySlaveConfiguration,
+                true,
+                Cache::VALKEY_BACKEND_CM_CACHE,
+                5,
+                $resultMasterSlaveConnectionWithDiffHost,
+            ],
+            [
+                [],
+                $valkeyConfiguration,
+                [],
+                false,
+                Cache::VALKEY_BACKEND_VALKEY_CACHE,
+                4,
+                $resultMasterOnlyConnectionValkeyCache,
+            ],
+            [
+                [],
+                $valkeyConfiguration,
+                $valkeySlaveConfiguration,
+                false,
+                Cache::VALKEY_BACKEND_VALKEY_CACHE,
+                4,
+                $resultMasterOnlyConnectionValkeyCache,
+            ],
+            [
+                [],
+                $valkeyConfiguration,
+                [],
+                true,
+                Cache::VALKEY_BACKEND_VALKEY_CACHE,
+                4,
+                $resultMasterOnlyConnectionValkeyCache,
+            ],
+            [
+                [],
+                $valkeyConfiguration,
+                $valkeySlaveConfiguration,
+                true,
+                Cache::VALKEY_BACKEND_VALKEY_CACHE,
+                5,
+                $resultMasterOnlyConnectionValkeyCache,
+            ],
+            [
+                [
+                    'frontend' => [
+                        'default' => [
+                            'backend_options' => [
+                                'value' => 'key',
+                            ],
+                        ],
+                    ],
+                    StageConfigInterface::OPTION_MERGE => true,
+                ],
+                $valkeyConfiguration,
+                $valkeySlaveConfiguration,
+                true,
+                Cache::VALKEY_BACKEND_VALKEY_CACHE,
+                5,
+                $resultMasterSlaveConnectionWithMergedValueValkeyCache,
+            ],
+            [
+                [
+                    'frontend' => [
+                        'default' => [
+                            'backend_options' => [
+                                'server' => 'new.host',
+                                'value' => 'key',
+                            ],
+                        ],
+                    ],
+                    StageConfigInterface::OPTION_MERGE => true,
+                ],
+                $valkeyConfiguration,
+                $valkeySlaveConfiguration,
+                true,
+                Cache::VALKEY_BACKEND_VALKEY_CACHE,
+                5,
+                $resultMasterSlaveConnectionWithDiffHostValkeyCache,
+            ],
+            [
+                [],
+                $valkeyConfiguration,
+                [],
+                false,
+                Cache::VALKEY_BACKEND_REMOTE_SYNCHRONIZED_CACHE,
+                4,
+                $resultMasterOnlyConnectionSyncCache,
+            ],
+            [
+                [],
+                $valkeyConfiguration,
+                $valkeySlaveConfiguration,
+                false,
+                Cache::VALKEY_BACKEND_REMOTE_SYNCHRONIZED_CACHE,
+                4,
+                $resultMasterOnlyConnectionSyncCache,
+            ],
+            [
+                [],
+                $valkeyConfiguration,
+                [],
+                true,
+                Cache::VALKEY_BACKEND_REMOTE_SYNCHRONIZED_CACHE,
+                4,
+                $resultMasterOnlyConnectionSyncCache,
+            ],
+            [
+                [],
+                $valkeyConfiguration,
+                $valkeySlaveConfiguration,
+                true,
+                Cache::VALKEY_BACKEND_REMOTE_SYNCHRONIZED_CACHE,
+                5,
+                $resultMasterSlaveConnectionSyncCache,
+            ],
+            [
+                [
+                    'frontend' => [
+                        'default' => [
+                            'backend_options' => [
+                                'value' => 'key',
+                            ],
+                        ],
+                    ],
+                    StageConfigInterface::OPTION_MERGE => true,
+                ],
+                $valkeyConfiguration,
+                $valkeySlaveConfiguration,
+                true,
+                Cache::VALKEY_BACKEND_REMOTE_SYNCHRONIZED_CACHE,
+                5,
+                $resultMasterSlaveConnectionWithMergedValueSyncCache,
+            ],
+            [
+                [
+                    'frontend' => [
+                        'default' => [
+                            'backend_options' => [
+                                'remote_backend_options' => [
+                                    'server' => 'new.host',
+                                    'value' => 'key',
+                                ],
+                            ],
+                        ],
+                    ],
+                    StageConfigInterface::OPTION_MERGE => true,
+                ],
+                $valkeyConfiguration,
+                $valkeySlaveConfiguration,
+                true,
+                Cache::VALKEY_BACKEND_REMOTE_SYNCHRONIZED_CACHE,
+                5,
+                $resultMasterSlaveConnectionWithDiffHostSyncCache,
+            ],
+        ];
+    }
+
+    /**
      * @param array $envCacheConfiguration
      * @param array $redisConfiguration
      * @param array $expected
@@ -603,17 +1123,61 @@ class CacheTest extends TestCase
         );
     }
 
+
+    /**
+     * @param array $envCacheConfiguration
+     * @param array $valkeyConfiguration
+     * @param array $expected
+     * @throws ConfigException
+     *
+     * @dataProvider envConfigurationMergingDataProviderValkey
+     */
+    public function testEnvConfigurationMergingValkey(
+        array $envCacheConfiguration,
+        array $valkeyConfiguration,
+        array $expected
+    ): void {
+        $this->stageConfigMock
+            ->method('get')
+            ->willReturnMap([
+                [
+                    DeployInterface::VAR_CACHE_CONFIGURATION,
+                    $envCacheConfiguration,
+                ],
+                [
+                    DeployInterface::VAR_VALKEY_USE_SLAVE_CONNECTION,
+                    false,
+                ],
+                [
+                    DeployInterface::VAR_CACHE_VALKEY_BACKEND,
+                    'Cm_Cache_Backend_Redis',
+                ],
+            ]);
+        $this->valkeyMock->expects(self::any())
+            ->method('getConfiguration')
+            ->willReturn($valkeyConfiguration);
+        $this->valkeyMock->expects(self::any())
+            ->method('getSlaveConfiguration')
+            ->willReturn([]);
+
+        self::assertEquals(
+            $expected,
+            $this->config->get()
+        );
+    }
+
+
     /**
      * @return array
      * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
-    public function envConfigurationMergingDataProvider(): array
+    public function envConfigurationMergingDataProviderValkey(): array
     {
-        $redisConfiguration = [
+        $valkeyConfiguration = [
             'host' => 'master.host',
             'port' => 'master.port',
             'password' => 'master.password',
-            'scheme' => 'redis',
+            'scheme' => 'valkey',
         ];
 
         $result = [
@@ -624,7 +1188,7 @@ class CacheTest extends TestCase
                         'server' => 'master.host',
                         'port' => 'master.port',
                         'password' => 'master.password',
-                        'database' => Cache::REDIS_DATABASE_DEFAULT,
+                        'database' => Cache::CACHE_DATABASE_DEFAULT,
                     ],
                 ],
                 'page_cache' => [
@@ -633,7 +1197,7 @@ class CacheTest extends TestCase
                         'server' => 'master.host',
                         'port' => 'master.port',
                         'password' => 'master.password',
-                        'database' => Cache::REDIS_DATABASE_PAGE_CACHE,
+                        'database' => Cache::CACHE_DATABASE_PAGE_CACHE,
                     ],
                 ],
             ],
@@ -650,12 +1214,12 @@ class CacheTest extends TestCase
         return [
             [
                 [],
-                $redisConfiguration,
+                $valkeyConfiguration,
                 $result,
             ],
             [
                 [StageConfigInterface::OPTION_MERGE => true],
-                $redisConfiguration,
+                $valkeyConfiguration,
                 $result,
             ],
             [
@@ -663,7 +1227,7 @@ class CacheTest extends TestCase
                     StageConfigInterface::OPTION_MERGE => true,
                     'key' => 'value',
                 ],
-                $redisConfiguration,
+                $valkeyConfiguration,
                 $resultWithMergedKey,
             ],
             [
@@ -679,7 +1243,7 @@ class CacheTest extends TestCase
                         ],
                     ],
                 ],
-                $redisConfiguration,
+                $valkeyConfiguration,
                 $resultWithMergedHostAndPort,
             ],
             [
@@ -695,7 +1259,7 @@ class CacheTest extends TestCase
                         ],
                     ],
                 ],
-                $redisConfiguration,
+                $valkeyConfiguration,
                 [
                     'frontend' => [
                         'default' => [

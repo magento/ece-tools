@@ -24,6 +24,13 @@ class Validator
     ];
 
     /**
+     * Supported version constraints of Valkey services
+     */
+    private const VALKEY_SUPPORT_VERSIONS = [
+        '*' => ' ~7.2.0 || ~8.0.0',
+    ];
+
+    /**
      * Supported version constraints of services for every Magento version.
      * Magento version constraint is a key in every element of service array
      * and value of its element is the service version constraint
@@ -70,6 +77,8 @@ class Validator
         ],
         ServiceInterface::NAME_REDIS => self::REDIS_SUPPORT_VERSIONS,
         ServiceInterface::NAME_REDIS_SESSION => self::REDIS_SUPPORT_VERSIONS,
+        ServiceInterface::NAME_VALKEY => self::VALKEY_SUPPORT_VERSIONS,
+        ServiceInterface::NAME_VALKEY_SESSION => self::VALKEY_SUPPORT_VERSIONS,
         ServiceInterface::NAME_ELASTICSEARCH => [
             '<2.2.0' => '~1.7.0 || ~2.4.0',
             '>=2.2.0 <2.2.8 || 2.3.0' => '~1.7.0 || ~2.4.0 || ~5.2.0',
@@ -85,8 +94,8 @@ class Validator
             '>=2.4.4' => '~7.10.0', // Greater than 7.10 isn't supported on cloud infrastructure.
         ],
         ServiceInterface::NAME_OPENSEARCH => [
-            '>=2.3.7-p3 <2.4.0 || >=2.4.3-p2 <2.4.6' => '~1.1.0 || 1.2.*',
-            '>=2.4.6' => '^2',
+            '>=2.3.7-p3 <2.4.0 || >=2.4.3-p2 <2.4.4-p13 || 2.4.5 || >=2.4.5-p1 <2.4.5-p12' => '~1.1.0 || 1.2.*',
+            '2.4.4-p13 || >=2.4.5-p12' => '^2'
         ],
         ServiceInterface::NAME_RABBITMQ => [
             '<2.3.0' => '~3.5.0',

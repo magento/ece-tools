@@ -12,14 +12,14 @@ use Throwable;
 /**
  * Base exception for general purposes.
  *
- * @SuppressWarnings(PHPMD.NumberOfChildren)
+ * @SuppressWarnings("PHPMD.NumberOfChildren")
  */
 class GenericException extends \Exception
 {
     /**
      * @inheritDoc
      */
-    public function __construct(string $message, int $code = 0, Throwable $previous = null)
+    public function __construct(string $message, int $code = 0, Throwable | null $previous = null)
     {
         parent::__construct($message, $code, $previous);
     }

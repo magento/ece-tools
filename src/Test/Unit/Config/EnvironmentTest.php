@@ -134,9 +134,9 @@ class EnvironmentTest extends TestCase
     {
         $this->environmentDataMock->expects($this->once())
             ->method('getRelationships')
-            ->willReturn(['some' => ['relationships' => ['redis', 'mysql']]]);
+            ->willReturn(['some' => ['relationships' => ['redis','valkey', 'mysql']]]);
 
-        $this->assertSame(['relationships' => ['redis', 'mysql']], $this->environment->getRelationship('some'));
+        $this->assertSame(['relationships' => ['redis','valkey', 'mysql']], $this->environment->getRelationship('some'));
     }
 
     public function testGetEnvVarMageErrorReportDirNestingLevel(): void

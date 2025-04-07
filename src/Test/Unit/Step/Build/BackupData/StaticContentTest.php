@@ -76,7 +76,7 @@ class StaticContentTest extends TestCase
     {
         $this->fileMock = $this->createMock(File::class);
         $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
-            ->setMethods(['info'])
+            ->onlyMethods(['info'])
             ->getMockForAbstractClass();
         $this->directoryListMock = $this->createMock(DirectoryList::class);
         $this->flagManagerMock = $this->createMock(FlagManager::class);
@@ -112,16 +112,21 @@ class StaticContentTest extends TestCase
             ]);
         $this->fileMock->expects($this->once())
             ->method('isExists')
-            ->withConsecutive(
-                [$this->initPubStaticPath]
-            )->willReturn(true);
+            // withConsecutive() alternative.
+            ->willReturnCallback(fn($param) => match ([$param]) {
+                [$this->initPubStaticPath] => true,
+            });
         $this->loggerMock->expects($this->exactly(3))
             ->method('info')
-            ->withConsecutive(
-                ['Clear ./init/pub/static'],
-                ['Moving static content to init directory'],
-                ['Recreating pub/static directory']
-            );
+            // withConsecutive() alternative.
+            ->willReturnCallback(function (string $axis) {
+                static $series = [
+                    'Clear ./init/pub/static',
+                    'Moving static content to init directory',
+                    'Recreating pub/static directory'
+                ];
+                $this->assertSame(array_shift($series), $axis);
+            });
         $this->fileMock->expects($this->once())
             ->method('backgroundClearDirectory')
             ->with($this->initPubStaticPath);
@@ -158,26 +163,32 @@ class StaticContentTest extends TestCase
             ]);
         $this->fileMock->expects($this->once())
             ->method('isExists')
-            ->withConsecutive(
-                [$this->initPubStaticPath]
-            )
-            ->willReturnOnConsecutiveCalls(false, true);
+            // withConsecutive() alternative.
+            ->willReturnCallback(fn($param) => match ([$param]) {
+                [$this->initPubStaticPath] => false,
+                [$this->initPubStaticPath] => true
+            });
         $this->loggerMock->expects($this->exactly(3))
             ->method('info')
-            ->withConsecutive(
-                ['Create ./init/pub/static'],
-                ['Moving static content to init directory'],
-                ['Recreating pub/static directory']
-            );
+            // withConsecutive() alternative.
+            ->willReturnCallback(function (string $axis) {
+                static $series = [
+                    'Create ./init/pub/static',
+                    'Moving static content to init directory',
+                    'Recreating pub/static directory'
+                ];
+                $this->assertSame(array_shift($series), $axis);
+            });
         $this->fileMock->expects($this->never())
             ->method('backgroundClearDirectory')
             ->with($this->initPubStaticPath);
         $this->fileMock->expects($this->exactly(2))
             ->method('createDirectory')
-            ->withConsecutive(
-                [$this->initPubStaticPath],
-                [$this->originalPubStaticPath]
-            );
+            // withConsecutive() alternative.
+            ->willReturnCallback(fn($param) => match ([$param]) {
+                [$this->initPubStaticPath] => true,
+                [$this->originalPubStaticPath] => true
+            });
         $this->fileMock->expects($this->once())
             ->method('rename')
             ->with($this->originalPubStaticPath, $this->initPubStaticPath);
@@ -208,25 +219,32 @@ class StaticContentTest extends TestCase
             ]);
         $this->fileMock->expects($this->once())
             ->method('isExists')
-            ->withConsecutive(
-                [$this->initPubStaticPath]
-            )->willReturnOnConsecutiveCalls(false, false);
+            // withConsecutive() alternative.
+            ->willReturnCallback(fn($param) => match ([$param]) {
+                [$this->initPubStaticPath] => false,
+                [$this->initPubStaticPath] => false
+            });
         $this->loggerMock->expects($this->exactly(3))
             ->method('info')
-            ->withConsecutive(
-                ['Create ./init/pub/static'],
-                ['Moving static content to init directory'],
-                ['Recreating pub/static directory']
-            );
+            // withConsecutive() alternative.
+            ->willReturnCallback(function (string $axis) {
+                static $series = [
+                    'Create ./init/pub/static',
+                    'Moving static content to init directory',
+                    'Recreating pub/static directory'
+                ];
+                $this->assertSame(array_shift($series), $axis);
+            });
         $this->fileMock->expects($this->never())
             ->method('backgroundClearDirectory')
             ->with($this->initPubStaticPath);
         $this->fileMock->expects($this->exactly(2))
             ->method('createDirectory')
-            ->withConsecutive(
-                [$this->initPubStaticPath],
-                [$this->originalPubStaticPath]
-            )->willReturn(true);
+            // withConsecutive() alternative.
+            ->willReturnCallback(fn($param) => match ([$param]) {
+                [$this->initPubStaticPath] => true,
+                [$this->originalPubStaticPath] => true
+            });
         $this->fileMock->expects($this->once())
             ->method('rename')
             ->with($this->originalPubStaticPath, $this->initPubStaticPath);
@@ -315,18 +333,24 @@ class StaticContentTest extends TestCase
             ]);
         $this->fileMock->expects($this->once())
             ->method('isExists')
-            ->withConsecutive(
-                [$this->initPubStaticPath]
-            )->willReturn(false, true);
+            // withConsecutive() alternative.
+            ->willReturnCallback(fn($param) => match ([$param]) {
+                [$this->initPubStaticPath] => false,
+                [$this->initPubStaticPath] => true
+            });
         $this->loggerMock->expects($this->once())
             ->method('notice')
             ->with('Can\'t move static content. Copying static content to init directory');
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
-            ->withConsecutive(
-                ['Create ./init/pub/static'],
-                ['Moving static content to init directory']
-            );
+            // withConsecutive() alternative.
+            ->willReturnCallback(function (string $axis) {
+                static $series = [
+                    'Create ./init/pub/static',
+                    'Moving static content to init directory',
+                ];
+                $this->assertSame(array_shift($series), $axis);
+            });
         $this->fileMock->expects($this->never())
             ->method('backgroundClearDirectory')
             ->with($this->initPubStaticPath);
@@ -385,9 +409,13 @@ class StaticContentTest extends TestCase
             ->willReturn(true);
         $this->loggerMock->expects(self::once())
             ->method('info')
-            ->withConsecutive(
-                ['Static content was not moved to ./init directory']
-            );
+            // withConsecutive() alternative.
+            ->willReturnCallback(function (string $axis) {
+                static $series = [
+                    'Static content was not moved to ./init directory',
+                ];
+                $this->assertSame(array_shift($series), $axis);
+            });
         $this->environment->expects($this->once())
             ->method('hasMount')
             ->with(Environment::MOUNT_PUB_STATIC)

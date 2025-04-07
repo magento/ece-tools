@@ -49,7 +49,7 @@ abstract class AdminCredentialCest extends AbstractCest
         $I->see('Home page');
         $I->see('CMS homepage content goes here.');
 
-        $log = $I->grabFileContent('/var/log/cloud.log');
+        $log = $I->grabFileContent('/init/var/log/cloud.log');
         $I->assertStringContainsString($data['installMessage'], $log);
         $I->assertStringNotContainsString('--admin-user', $log);
         $I->assertStringNotContainsString('--admin-firstname', $log);

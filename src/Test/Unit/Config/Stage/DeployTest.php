@@ -59,7 +59,7 @@ class DeployTest extends TestCase
      *
      * @throws ConfigException
      */
-    public function testGet(string $name, $expectedValue, array $mergedConfig, array $schema = null): void
+    public function testGet(string $name, $expectedValue, array $mergedConfig, array | null $schema = null): void
     {
         $this->mergedConfigMock->expects($this->once())
             ->method('get')
@@ -77,10 +77,127 @@ class DeployTest extends TestCase
         $this->assertEquals($expectedValue, $this->deployConfig->get($name));
     }
 
-    /**
+
+  /**
+   * @param string $name
+   * @param mixed $expectedValue
+   * @param array $mergedConfig
+   * @param array|null $schema
+   * @dataProvider getDataProviderValkey
+   *
+   * @throws ConfigException
+   */
+  public function testGetValkey(string $name, $expectedValue, array $mergedConfig, array | null $schema = null): void
+  {
+    $this->mergedConfigMock->expects($this->once())
+      ->method('get')
+      ->willReturn($mergedConfig);
+
+    if ($schema !== null) {
+      $this->schemaMock->expects($this->once())
+        ->method('getVariables')
+        ->willReturn($schema);
+    } else {
+      $this->schemaMock->expects($this->never())
+        ->method('getVariables');
+    }
+
+    $this->assertEquals($expectedValue, $this->deployConfig->get($name));
+  }
+
+
+  /**
+   * @return array
+   */
+  public function getDataProvider(): array
+  {
+    return [
+      'integer config value' => [
+        Deploy::VAR_SCD_STRATEGY,
+        3,
+        [Deploy::VAR_SCD_STRATEGY => 3],
+      ],
+      'array config value' => [
+        Deploy::VAR_SESSION_CONFIGURATION,
+        [
+          'save' => 'redis'
+        ],
+        [
+          Deploy::VAR_SESSION_CONFIGURATION => ['save' => 'redis']
+        ],
+      ],
+      'null config value' => [
+        Deploy::VAR_SCD_MAX_EXEC_TIME,
+        null,
+        [Deploy::VAR_SCD_MAX_EXEC_TIME => null],
+      ],
+      'string value not a json' => [
+        Deploy::VAR_SCD_STRATEGY,
+        'compact',
+        [
+          Deploy::VAR_SCD_STRATEGY => 'compact'
+        ],
+        [
+          DeployInterface::VAR_SCD_STRATEGY => [
+            Schema::SCHEMA_TYPE => ['string'],
+          ],
+        ],
+      ],
+      'string value wrong json format and not array-type config' => [
+        Deploy::VAR_SCD_STRATEGY,
+        '{compact}',
+        [
+          Deploy::VAR_SCD_STRATEGY => '{compact}'
+        ],
+        [
+          DeployInterface::VAR_SCD_STRATEGY => [
+            Schema::SCHEMA_TYPE => ['string'],
+          ],
+        ],
+      ],
+      'correct json format value and array-type config' => [
+        Deploy::VAR_SESSION_CONFIGURATION,
+        [
+          'save' => 'redis',
+          'redis' => [
+            'host' => 'localhost',
+            'port' => 6372,
+            'database' => 25
+          ],
+        ],
+        [
+          Deploy::VAR_SESSION_CONFIGURATION =>
+            '{"save": "redis","redis": {"host": "localhost","port": "6372","database": 25}}'
+        ],
+        [
+          DeployInterface::VAR_SESSION_CONFIGURATION => [
+            Schema::SCHEMA_TYPE => ['array'],
+          ],
+        ],
+      ],
+      'wrong json format value and array-type config (default value usage)' => [
+        Deploy::VAR_SESSION_CONFIGURATION,
+        ['default' => 'value'],
+        [
+          Deploy::VAR_SESSION_CONFIGURATION =>
+            '{"save": "redis","redis": {"host": "localhost","port": "6372","database": 25,}}'
+        ],
+        [
+          DeployInterface::VAR_SESSION_CONFIGURATION => [
+            Schema::SCHEMA_TYPE => ['array'],
+            Schema::SCHEMA_DEFAULT_VALUE => [
+              StageConfigInterface::STAGE_DEPLOY => ['default' => 'value'],
+            ],
+          ],
+        ],
+      ],
+    ];
+  }
+
+  /**
      * @return array
      */
-    public function getDataProvider(): array
+    public function getDataProviderValkey(): array
     {
         return [
             'integer config value' => [
@@ -91,10 +208,10 @@ class DeployTest extends TestCase
             'array config value' => [
                 Deploy::VAR_SESSION_CONFIGURATION,
                 [
-                    'save' => 'redis'
+                    'save' => 'valkey'
                 ],
                 [
-                    Deploy::VAR_SESSION_CONFIGURATION => ['save' => 'redis']
+                    Deploy::VAR_SESSION_CONFIGURATION => ['save' => 'valkey']
                 ],
             ],
             'null config value' => [
@@ -129,8 +246,8 @@ class DeployTest extends TestCase
             'correct json format value and array-type config' => [
                 Deploy::VAR_SESSION_CONFIGURATION,
                 [
-                    'save' => 'redis',
-                    'redis' => [
+                    'save' => 'valkey',
+                    'valkey' => [
                         'host' => 'localhost',
                         'port' => 6372,
                         'database' => 25
@@ -138,7 +255,7 @@ class DeployTest extends TestCase
                 ],
                 [
                     Deploy::VAR_SESSION_CONFIGURATION =>
-                        '{"save": "redis","redis": {"host": "localhost","port": "6372","database": 25}}'
+                        '{"save": "valkey","valkey": {"host": "localhost","port": "6372","database": 25}}'
                 ],
                 [
                     DeployInterface::VAR_SESSION_CONFIGURATION => [
@@ -151,7 +268,7 @@ class DeployTest extends TestCase
                 ['default' => 'value'],
                 [
                     Deploy::VAR_SESSION_CONFIGURATION =>
-                        '{"save": "redis","redis": {"host": "localhost","port": "6372","database": 25,}}'
+                        '{"save": "valkey","valkey": {"host": "localhost","port": "6372","database": 25,}}'
                 ],
                 [
                     DeployInterface::VAR_SESSION_CONFIGURATION => [

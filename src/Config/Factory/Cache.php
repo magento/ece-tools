@@ -11,6 +11,7 @@ use Magento\MagentoCloud\Config\ConfigException;
 use Magento\MagentoCloud\Config\ConfigMerger;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Service\Redis;
+use Magento\MagentoCloud\Service\Valkey;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -18,18 +19,23 @@ use Psr\Log\LoggerInterface;
  */
 class Cache
 {
-    /**
-     * Redis database to store default cache data
-     */
-    public const REDIS_DATABASE_DEFAULT = 1;
+     /**
+      * Redis database to store default cache data
+      */
+    public const CACHE_DATABASE_DEFAULT = 1;
 
     /**
      * Redis database to store page cache data
      */
-    public const REDIS_DATABASE_PAGE_CACHE = 2;
+    public const CACHE_DATABASE_PAGE_CACHE = 2;
 
     public const REDIS_BACKEND_CM_CACHE = 'Cm_Cache_Backend_Redis';
     public const REDIS_BACKEND_REDIS_CACHE = '\Magento\Framework\Cache\Backend\Redis';
+
+    public const VALKEY_BACKEND_CM_CACHE = 'Cm_Cache_Backend_Redis';
+    public const VALKEY_BACKEND_VALKEY_CACHE = '\Magento\Framework\Cache\Backend\Valkey';
+
+    public const VALKEY_BACKEND_REMOTE_SYNCHRONIZED_CACHE = '\Magento\Framework\Cache\Backend\RemoteSynchronizedCache';
     public const REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE = '\Magento\Framework\Cache\Backend\RemoteSynchronizedCache';
 
     public const AVAILABLE_REDIS_BACKEND = [
@@ -38,27 +44,39 @@ class Cache
         self::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE
     ];
 
+    public const AVAILABLE_VALKEY_BACKEND = [
+        self::REDIS_BACKEND_CM_CACHE,
+        self::VALKEY_BACKEND_VALKEY_CACHE,
+        self::VALKEY_BACKEND_REMOTE_SYNCHRONIZED_CACHE
+    ];
+
     /**
      * @var Redis
      */
-    private $redis;
+    private Redis $redis;
+
+    /**
+     * @var Valkey
+     */
+    private Valkey $valkey;
 
     /**
      * @var DeployInterface
      */
-    private $stageConfig;
+    private DeployInterface $stageConfig;
 
     /**
      * @var LoggerInterface
      */
-    private $logger;
+    private LoggerInterface $logger;
 
     /**
      * @var ConfigMerger
      */
-    private $configMerger;
+    private ConfigMerger $configMerger;
 
     /**
+     * @param Valkey $valkey
      * @param Redis $redis
      * @param DeployInterface $stageConfig
      * @param LoggerInterface $logger
@@ -66,11 +84,13 @@ class Cache
      */
     public function __construct(
         Redis $redis,
+        Valkey $valkey,
         DeployInterface $stageConfig,
         LoggerInterface $logger,
         ConfigMerger $configMerger
     ) {
         $this->redis = $redis;
+        $this->valkey = $valkey;
         $this->stageConfig = $stageConfig;
         $this->logger = $logger;
         $this->configMerger = $configMerger;
@@ -88,8 +108,9 @@ class Cache
      */
     public function get(): array
     {
-        $envCacheConfiguration = (array)$this->stageConfig->get(DeployInterface::VAR_CACHE_CONFIGURATION);
-        $envCacheBackendModel = (string)$this->stageConfig->get(DeployInterface::VAR_CACHE_REDIS_BACKEND);
+         $envCacheConfiguration = (array)$this->stageConfig->get(DeployInterface::VAR_CACHE_CONFIGURATION);
+         $envCacheRadisBackendModel = (string)$this->stageConfig->get(DeployInterface::VAR_CACHE_REDIS_BACKEND);
+         $envCacheValkeyBackendModel = (string)$this->stageConfig->get(DeployInterface::VAR_CACHE_VALKEY_BACKEND);
 
         if ($this->isCacheConfigurationValid($envCacheConfiguration)
             && !$this->configMerger->isMergeRequired($envCacheConfiguration)
@@ -103,6 +124,15 @@ class Cache
                         DeployInterface::VAR_CACHE_CONFIGURATION
                     )
                 );
+            } elseif ($this->stageConfig->get(DeployInterface::VAR_VALKEY_USE_SLAVE_CONNECTION)) {
+                $this->logger->notice(
+                    sprintf(
+                        'The variables \'%s\', \'%s\' are ignored as you set your own cache connection in \'%s\'',
+                        DeployInterface::VAR_VALKEY_USE_SLAVE_CONNECTION,
+                        DeployInterface::VAR_CACHE_VALKEY_BACKEND,
+                        DeployInterface::VAR_CACHE_CONFIGURATION
+                    )
+                );
             }
 
             return $this->configMerger->clear($envCacheConfiguration);
@@ -110,43 +140,49 @@ class Cache
 
         $redisConfig = $this->redis->getConfiguration();
 
-        if (empty($redisConfig)) {
+        $valkeyConfig = $this->valkey->getConfiguration();
+
+        if (empty($redisConfig) && empty($valkeyConfig)) {
             return [];
         }
 
+        // Determine backend based on available configuration
+        $backendConfig = !empty($redisConfig) ? $redisConfig : $valkeyConfig;
+         $envCacheBackendModel = (string)$this->stageConfig->get(DeployInterface::VAR_CACHE_REDIS_BACKEND);
+
         if ($this->isSynchronizedConfigStructure()) {
-            $redisCache = $this->getSynchronizedConfigStructure($envCacheBackendModel, $redisConfig);
-            $redisCache['backend_options']['remote_backend_options'] = array_merge(
-                $redisCache['backend_options']['remote_backend_options'],
-                $this->getSlaveConnection($envCacheConfiguration, $redisConfig)
-            );
+               $cacheCacheBackend = $this->getSynchronizedConfigStructure($envCacheBackendModel, $backendConfig);
+                $cacheCacheBackend['backend_options']['remote_backend_options'] = array_merge(
+                    $cacheCacheBackend['backend_options']['remote_backend_options'],
+                    $this->getSlaveConnection($envCacheConfiguration, $backendConfig)
+                );
             $finalConfig = [
                 'frontend' => [
-                    'default' => $redisCache,
+                    'default' => $cacheCacheBackend,
                 ],
                 'type' => [
                     'default' => ['frontend' => 'default'],
                 ],
             ];
         } else {
-            $redisCache = $this->getUnsyncedConfigStructure($envCacheBackendModel, $redisConfig);
-            $slaveConnection = $this->getSlaveConnection($envCacheConfiguration, $redisConfig);
+            $cacheCacheBackend = $this->getUnsyncedConfigStructure($envCacheBackendModel, $backendConfig);
+            $slaveConnection = $this->getSlaveConnection($envCacheConfiguration, $backendConfig);
             if ($slaveConnection) {
-                $redisCache['frontend_options']['write_control'] = false;
-                $redisCache['backend_options'] = array_merge(
-                    $redisCache['backend_options'],
-                    $slaveConnection
-                );
+                  $cacheCacheBackend['frontend_options']['write_control'] = false;
+                  $cacheCacheBackend['backend_options'] = array_merge(
+                      $cacheCacheBackend['backend_options'],
+                      $slaveConnection
+                  );
             }
             $finalConfig = [
                 'frontend' => [
                     'default' => array_replace_recursive(
-                        $redisCache,
-                        ['backend_options' => ['database' => self::REDIS_DATABASE_DEFAULT]]
+                        $cacheCacheBackend,
+                        ['backend_options' => ['database' => self::CACHE_DATABASE_DEFAULT]]
                     ),
                     'page_cache' => array_replace_recursive(
-                        $redisCache,
-                        ['backend_options' => ['database' => self::REDIS_DATABASE_PAGE_CACHE]]
+                        $cacheCacheBackend,
+                        ['backend_options' => ['database' => self::CACHE_DATABASE_PAGE_CACHE]]
                     ),
                 ]
             ];
@@ -156,43 +192,56 @@ class Cache
     }
 
     /**
-     * Retrieves Redis read connection data if it exists and variable REDIS_USE_SLAVE_CONNECTION was set as true,
+     * Retrieves Redis or Valkey read connection data if it exists and variable
+     * REDIS_USE_SLAVE_CONNECTION or VALKEY_USE_SLAVE_CONNECTION was set as true,
      * also if CACHE_CONFIGURATION is compatible with slave connections.
-     * Otherwise retrieves an empty array.
+     * Otherwise, retrieves an empty array.
      *
      * @param array $envCacheConfiguration
-     * @param array $redisConfig
+     * @param array $backendConfig
      * @return array
      * @throws ConfigException
      */
-    private function getSlaveConnection(array $envCacheConfiguration, array $redisConfig): array
+    private function getSlaveConnection(array $envCacheConfiguration, array $backendConfig): array
     {
-        $config = [];
-        $redisSlaveConfig = $this->redis->getSlaveConfiguration();
-        $slaveHost = $redisSlaveConfig['host'] ?? null;
+         $config = [];
 
-        if ($this->stageConfig->get(DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION) && $slaveHost) {
-            if ($this->isConfigurationCompatibleWithSlaveConnection($envCacheConfiguration, $redisConfig)) {
-                $config['load_from_slave']['server'] = $slaveHost;
-                $config['load_from_slave']['port'] = $redisSlaveConfig['port'] ?? '';
-                $config['read_timeout'] = 1;
-                $config['retry_reads_on_master'] = 1;
+        $useRedisSlave = $this->stageConfig->get(DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION);
+        $useValkeySlave = $this->stageConfig->get(DeployInterface::VAR_VALKEY_USE_SLAVE_CONNECTION);
 
-                if (!empty($redisSlaveConfig['password'])) {
-                    $config['load_from_slave']['password'] = $redisSlaveConfig['password'];
+        if ($useRedisSlave) {
+            $slaveConfig = $this->redis->getSlaveConfiguration();
+            $backendType = 'Redis';
+        } elseif ($useValkeySlave) {
+            $slaveConfig = $this->valkey->getSlaveConfiguration();
+            $backendType = 'Valkey';
+        } else {
+            return $config; // No slave connection requested
+        }
+        $slaveHost = $slaveConfig['host'] ?? null;
+
+        if ($slaveHost) {
+            if ($this->isConfigurationCompatibleWithSlaveConnection($envCacheConfiguration, $backendConfig)) {
+                  $config['load_from_slave']['server'] = $slaveHost;
+                  $config['load_from_slave']['port'] = $slaveConfig['port'] ?? '';
+                  $config['read_timeout'] = 1;
+                  $config['retry_reads_on_master'] = 1;
+                if (!empty($slaveConfig['password'])) {
+                      $config['load_from_slave']['password'] = $slaveConfig['password'];
                 }
 
-                $this->logger->info('Set Redis slave connection');
+                  $this->logger->info(sprintf('Set %s slave connection', $backendType));
             } else {
-                $this->logger->notice(
-                    sprintf(
-                        'The variable \'%s\' is ignored as you\'ve changed cache connection settings in \'%s\'',
-                        DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION,
-                        DeployInterface::VAR_CACHE_CONFIGURATION
-                    )
-                );
+                  $this->logger->notice(
+                      sprintf(
+                          'The variable \'%s\' is ignored as you\'ve changed cache connection settings in \'%s\'',
+                         $useRedisSlave ? DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION : DeployInterface::VAR_VALKEY_USE_SLAVE_CONNECTION,
+                          DeployInterface::VAR_CACHE_CONFIGURATION
+                      )
+                  );
             }
         }
+
 
         return $config;
     }
@@ -215,14 +264,14 @@ class Cache
      * Returns false if server or port was changed in merged configuration otherwise false.
      *
      * @param array $envCacheConfig
-     * @param array $redisConfig
+     * @param array $backendConfig
      * @return bool
      * @throws ConfigException
-     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+     * @SuppressWarnings("PHPMD.CyclomaticComplexity")
      */
     private function isConfigurationCompatibleWithSlaveConnection(
         array $envCacheConfig,
-        array $redisConfig
+        array $backendConfig
     ): bool {
         if ($this->isSynchronizedConfigStructure()) {
             $host = $envCacheConfig['frontend']['default']['backend_options']['remote_backend_options']['server']
@@ -231,8 +280,8 @@ class Cache
             $port = $envCacheConfig['frontend']['default']['backend_options']['remote_backend_options']['port']
                 ?? null;
 
-            if (($host !== null && $host !== $redisConfig['host'])
-                || ($port !== null && $port !== $redisConfig['port'])) {
+            if (($host !== null && $host !== $backendConfig['host'])
+                || ($port !== null && $port !== $backendConfig['port'])) {
                 return false;
             }
         } else {
@@ -240,8 +289,8 @@ class Cache
                 $host = $envCacheConfig['frontend'][$type]['backend_options']['server'] ?? null;
                 $port = $envCacheConfig['frontend'][$type]['backend_options']['port'] ?? null;
 
-                if (($host !== null && $host !== $redisConfig['host'])
-                    || ($port !== null && $port !== $redisConfig['port'])) {
+                if (($host !== null && $host !== $backendConfig['host'])
+                    || ($port !== null && $port !== $backendConfig['port'])) {
                     return false;
                 }
             }
@@ -254,21 +303,22 @@ class Cache
      * Returns backend config for unsynced cache implementation.
      *
      * @param string $envCacheBackendModel
-     * @param array $redisConfig
+     * @param array $backendConfig
      * @return array
      */
-    private function getUnsyncedConfigStructure(string $envCacheBackendModel, array $redisConfig): array
+    private function getUnsyncedConfigStructure(string $envCacheBackendModel, array $backendConfig): array
     {
-        $config = [
-            'backend' => $envCacheBackendModel,
+      $cacheBackendModelRedis='Cm_Cache_Backend_Redis';
+      $config = [
+            'backend' => $cacheBackendModelRedis,
             'backend_options' => [
-                'server' => $redisConfig['host'],
-                'port' => $redisConfig['port'],
+                'server' => $backendConfig['host'],
+                'port' => $backendConfig['port'],
             ]
         ];
 
-        if (!empty($redisConfig['password'])) {
-            $config['backend_options']['password'] = (string)$redisConfig['password'];
+        if (!empty($backendConfig['password'])) {
+            $config['backend_options']['password'] = (string)$backendConfig['password'];
         }
 
         return $config;
@@ -278,19 +328,23 @@ class Cache
      * Returns backend config for synchronized cache implementation.
      *
      * @param string $envCacheBackendModel
-     * @param array $redisConfig
+     * @param array $backendConfig
      * @return array
      */
-    private function getSynchronizedConfigStructure(string $envCacheBackendModel, array $redisConfig): array
+    private function getSynchronizedConfigStructure(string $envCacheBackendModel, array $backendConfig): array
     {
+          $backendClass = $backendConfig['host'] === 'valkey'
+        ? '\Magento\Framework\Cache\Backend\Valkey'
+        : '\Magento\Framework\Cache\Backend\Redis';
+
         $config = [
             'backend' => $envCacheBackendModel,
             'backend_options' => [
-                'remote_backend' => '\Magento\Framework\Cache\Backend\Redis',
+                'remote_backend' => $backendClass,
                 'remote_backend_options' => [
-                    'server' => $redisConfig['host'],
-                    'port' => $redisConfig['port'],
-                    'database' => self::REDIS_DATABASE_DEFAULT,
+                    'server' => $backendConfig['host'],
+                    'port' => $backendConfig['port'],
+                    'database' => self::CACHE_DATABASE_DEFAULT,
                     'persistent' => 0,
                     'password' => '',
                     'compress_data' => '1',
@@ -305,8 +359,8 @@ class Cache
             ]
         ];
 
-        if (!empty($redisConfig['password'])) {
-            $config['backend_options']['remote_backend_options']['password'] = (string)$redisConfig['password'];
+        if (!empty($backendConfig['password'])) {
+            $config['backend_options']['remote_backend_options']['password'] = (string)$backendConfig['password'];
         }
 
         return $config;
@@ -320,8 +374,9 @@ class Cache
      */
     private function isSynchronizedConfigStructure(): bool
     {
-        $model = (string)$this->stageConfig->get(DeployInterface::VAR_CACHE_REDIS_BACKEND);
-
-        return $model === self::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE;
+        $redisModel = (string)$this->stageConfig->get(DeployInterface::VAR_CACHE_REDIS_BACKEND);
+        $valkeyModel = (string)$this->stageConfig->get(DeployInterface::VAR_CACHE_VALKEY_BACKEND);
+        return $redisModel === self::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE ||
+          $valkeyModel === self::VALKEY_BACKEND_REMOTE_SYNCHRONIZED_CACHE;
     }
 }

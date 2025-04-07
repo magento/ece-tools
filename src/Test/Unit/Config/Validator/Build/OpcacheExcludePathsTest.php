@@ -85,8 +85,11 @@ EXCLUDE;
             ->willReturn($excludeListPath);
         $this->fileMock->expects($this->exactly(2))
             ->method('isExists')
-            ->withConsecutive([$phpIniPath], [$excludeListPath])
-            ->willReturn(true);
+            // withConsecutive() alternative.
+            ->willReturnCallback(fn($param) => match ([$param]) {
+                [$phpIniPath] => true,
+                [$excludeListPath] => true
+            });
         $this->fileMock->expects($this->once())
             ->method('parseIni')
             ->with($phpIniPath)
@@ -132,8 +135,11 @@ EXCLUDE;
             ->willReturn($excludeListPath);
         $this->fileMock->expects($this->exactly($invokeCount))
             ->method('isExists')
-            ->withConsecutive([$phpIniPath], [$excludeListPath])
-            ->willReturnOnConsecutiveCalls($phpIniExists, $opCacheExcludeListExists);
+            // withConsecutive() alternative.
+            ->willReturnCallback(fn($param) => match ([$param]) {
+                [$phpIniPath] => $phpIniExists,
+                [$excludeListPath] => $opCacheExcludeListExists
+            });
         $this->resultFactoryMock->expects($this->never())
             ->method('create');
         $this->resultFactoryMock->expects($this->once())
@@ -194,8 +200,11 @@ EXCLUDE;
             ->willReturn($excludeListPath);
         $this->fileMock->expects($this->exactly(2))
             ->method('isExists')
-            ->withConsecutive([$phpIniPath], [$excludeListPath])
-            ->willReturn(true);
+            // withConsecutive() alternative.
+            ->willReturnCallback(fn($param) => match ([$param]) {
+                [$phpIniPath] => true,
+                [$excludeListPath] => true
+            });
         $this->fileMock->expects($this->once())
             ->method('parseIni')
             ->with($phpIniPath)
@@ -254,8 +263,11 @@ EXCLUDE;
             ->willReturn($excludeListPath);
         $this->fileMock->expects($this->exactly(2))
             ->method('isExists')
-            ->withConsecutive([$phpIniPath], [$excludeListPath])
-            ->willReturn(true);
+            // withConsecutive() alternative.
+            ->willReturnCallback(fn($param) => match ([$param]) {
+                [$phpIniPath] => true,
+                [$excludeListPath] => true
+            });
         $this->fileMock->expects($this->once())
             ->method('parseIni')
             ->with($phpIniPath)

@@ -19,7 +19,7 @@ use Magento\MagentoCloud\Package\UndefinedPackageException;
 /**
  * @inheritdoc
  */
-class Logger extends \Monolog\Logger
+class Logger extends \Monolog\Logger // @phpstan-ignore-line
 {
     /**
      * @var File

@@ -75,6 +75,11 @@ class IdealStateTest extends TestCase
         $error1 = new Error('First error');
         $error2 = new Error('Second error');
 
+        $series = [
+            [$outputMock, $error1],
+            [$outputMock, $error2]
+        ];
+
         $this->validatorMock->expects($this->once())
             ->method('validate')
             ->willReturn(new Error('State is not ideal'));
@@ -85,9 +90,15 @@ class IdealStateTest extends TestCase
             ]);
         $this->outputFormatterMock->expects($this->exactly(2))
             ->method('writeItem')
-            ->withConsecutive(
-                [$outputMock, $error1],
-                [$outputMock, $error2]
+            // withConsecutive() alternative.
+            ->willReturnCallback(
+                function ($arg1, $arg2) use ($outputMock, $error1, $error2) {
+                    if ($arg1 == $outputMock && $arg2 == $error1) {
+                        return $this->outputFormatterMock;
+                    } elseif ($arg1 == $outputMock && $arg2 == $error2) {
+                        return $this->outputFormatterMock;
+                    }
+                }
             );
         $this->outputFormatterMock->expects($this->once())
             ->method('writeResult')

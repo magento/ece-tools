@@ -122,10 +122,17 @@ class ErrorLogFileTest extends TestCase
         $this->fileMock->expects($this->exactly(2))
             ->method('isExists')
             ->willReturn(true);
+        $series = [
+            [['/init/var/log/cloud.error.log'], 'some build log'],
+            [['/var/log/cloud.error.log'], 'some deploy log'],
+        ];
         $this->fileMock->expects($this->exactly(2))
             ->method('fileGetContents')
-            ->withConsecutive(['/init/var/log/cloud.error.log'], ['/var/log/cloud.error.log'])
-            ->willReturnOnConsecutiveCalls('some build log', 'some deploy log');
+            // withConsecutive() alternative.
+            ->willReturnCallback(fn($param) => match ([$param]) {
+                ['/init/var/log/cloud.error.log'] => 'some build log',
+                ['/var/log/cloud.error.log'] => 'some deploy log'
+            });
 
         $this->fileMock->expects($this->once())
             ->method('copy')
@@ -142,8 +149,11 @@ class ErrorLogFileTest extends TestCase
             ->willReturn(true);
         $this->fileMock->expects($this->exactly(2))
             ->method('fileGetContents')
-            ->withConsecutive(['/init/var/log/cloud.error.log'], ['/var/log/cloud.error.log'])
-            ->willReturnOnConsecutiveCalls('some build log', 'some build log, some deploy log');
+            // withConsecutive() alternative.
+            ->willReturnCallback(fn($param) => match ([$param]) {
+                ['/init/var/log/cloud.error.log'] => 'some build log',
+                ['/var/log/cloud.error.log'] => 'some build log, some deploy log'
+            });
 
         $this->fileMock->expects($this->never())
             ->method('copy');

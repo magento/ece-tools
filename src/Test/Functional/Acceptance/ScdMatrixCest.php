@@ -41,5 +41,12 @@ abstract class ScdMatrixCest extends AbstractCest
     /**
      * @return array
      */
-    abstract protected function scdOnDeployDataProvider(): array;
+    protected function scdOnDeployDataProvider(): array
+    {
+        return [
+            ['env_yaml' => 'files/scd/env_matrix_1.yaml'],
+            ['env_yaml' => 'files/scd/env_matrix_2.yaml'],
+            ['env_yaml' => 'files/scd/env_matrix_3.yaml'],
+        ];
+    }
 }

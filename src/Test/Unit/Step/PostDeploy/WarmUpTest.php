@@ -184,14 +184,17 @@ class WarmUpTest extends TestCase
             'http://base-url.com/index.php/customer/account/create'
         ];
         $concurrency = 2;
-
+        $series = [
+            'Starting page warmup',
+            'Warmup concurrency set to ' . $concurrency . ' as specified by the '
+            . PostDeployInterface::VAR_WARM_UP_CONCURRENCY . ' configuration'
+        ];
         $this->loggerMock->expects($this->any())
             ->method('info')
-            ->withConsecutive(
-                ['Starting page warmup'],
-                ['Warmup concurrency set to ' . $concurrency . ' as specified by the '
-                    . PostDeployInterface::VAR_WARM_UP_CONCURRENCY . ' configuration']
-            );
+            // withConsecutive() alternative.
+            ->willReturnCallback(function ($args) use (&$series) {
+                $this->assertSame(array_shift($series), $args);
+            });
 
         $this->urlsMock->method('getAll')
             ->willReturn($urls);

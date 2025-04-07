@@ -129,11 +129,11 @@ class PreBuildTest extends TestCase
 
         $this->fileMock->expects($this->exactly($callCount))
             ->method('clearDirectory')
-            ->withConsecutive(
-                [$generatedCode],
-                [$generatedMetadata]
-            )
-            ->willReturn(true);
+            // withConsecutive() alternative.
+            ->willReturnCallback(fn($param) => match ([$param]) {
+                [$generatedCode] => true,
+                [$generatedMetadata] => true
+            });
 
         $this->fileMock->expects($this->exactly(2))
             ->method('isExists')

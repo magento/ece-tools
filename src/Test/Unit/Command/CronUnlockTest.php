@@ -60,11 +60,15 @@ class CronUnlockTest extends TestCase
     {
         $this->loggerMock->expects($this->exactly(3))
             ->method('info')
-            ->withConsecutive(
-                ['Starting unlocking.'],
-                ['Unlocking all cron jobs.'],
-                ['Unlocking completed.']
-            );
+            // withConsecutive() alternative.
+            ->willReturnCallback(function (string $axis) {
+                static $series = [
+                    'Starting unlocking.',
+                    'Unlocking all cron jobs.',
+                    'Unlocking completed.'
+                ];
+                $this->assertSame(array_shift($series), $axis);
+            });
         $this->jobUnlockerMock->expects($this->once())
             ->method('unlockAll')
             ->with(CronUnlock::UNLOCK_MESSAGE);
@@ -83,19 +87,31 @@ class CronUnlockTest extends TestCase
     {
         $this->loggerMock->expects($this->exactly(4))
             ->method('info')
-            ->withConsecutive(
-                ['Starting unlocking.'],
-                ['Unlocking cron jobs with code #code1.'],
-                ['Unlocking cron jobs with code #code2.'],
-                ['Unlocking completed.']
-            );
+            // withConsecutive() alternative.
+            ->willReturnCallback(function (string $axis) {
+                static $series = [
+                    'Starting unlocking.',
+                    'Unlocking cron jobs with code #code1.',
+                    'Unlocking cron jobs with code #code2.',
+                    'Unlocking completed.'
+                ];
+
+                $this->assertSame(array_shift($series), $axis);
+            });
         $this->jobUnlockerMock->expects($this->never())
             ->method('unlockAll');
+        $codes = [
+            'code1',
+            'code2'
+        ];
         $this->jobUnlockerMock->expects($this->exactly(2))
             ->method('unlockByJobCode')
-            ->withConsecutive(
-                ['code1', CronUnlock::UNLOCK_MESSAGE],
-                ['code2', CronUnlock::UNLOCK_MESSAGE]
+            // withConsecutive() alternative.
+            ->with(
+                $this->callback(function (string $code) use (&$codes) {
+                    return array_shift($codes) === $code;
+                }),
+                CronUnlock::UNLOCK_MESSAGE
             );
 
         $tester = new CommandTester(

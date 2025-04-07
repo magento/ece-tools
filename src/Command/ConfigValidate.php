@@ -53,7 +53,7 @@ class ConfigValidate extends Command
      * @param OutputInterface $output
      * @return int
      *
-     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     * @SuppressWarnings("PHPMD.UnusedFormalParameter")
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {

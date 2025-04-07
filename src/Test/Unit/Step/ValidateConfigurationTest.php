@@ -44,10 +44,14 @@ class ValidateConfigurationTest extends TestCase
 
         $this->loggerMock->expects($this->exactly(2))
             ->method('notice')
-            ->withConsecutive(
-                ['Validating configuration'],
-                ['End of validation']
-            );
+            // withConsecutive() alternative.
+            ->willReturnCallback(function (string $axis) {
+                static $series = [
+                    'Validating configuration',
+                    'End of validation'
+                ];
+                $this->assertSame(array_shift($series), $axis);
+            });
         $this->loggerMock->expects($this->never())
             ->method('critical');
 
@@ -69,10 +73,14 @@ class ValidateConfigurationTest extends TestCase
 
         $this->loggerMock->expects($this->exactly(2))
             ->method('notice')
-            ->withConsecutive(
-                ['Validating configuration'],
-                ['Fix configuration with given suggestions:']
-            );
+            // withConsecutive() alternative.
+            ->willReturnCallback(function (string $axis) {
+                static $series = [
+                    'Validating configuration',
+                    'Fix configuration with given suggestions:'
+                ];
+                $this->assertSame(array_shift($series), $axis);
+            });
         $this->loggerMock->expects($this->once())
             ->method('log')
             ->with(ValidatorInterface::LEVEL_CRITICAL, 'some error');
@@ -123,11 +131,15 @@ class ValidateConfigurationTest extends TestCase
     {
         $this->loggerMock->expects($this->exactly(3))
             ->method('notice')
-            ->withConsecutive(
-                ['Validating configuration'],
-                ['Fix configuration with given suggestions:'],
-                ['End of validation']
-            );
+            // withConsecutive() alternative.
+            ->willReturnCallback(function (string $axis) {
+                static $series = [
+                    'Validating configuration',
+                    'Fix configuration with given suggestions:',
+                    'End of validation'
+                ];
+                $this->assertSame(array_shift($series), $axis);
+            });
         $this->loggerMock->expects($this->once())
             ->method('log')
             ->with(
@@ -152,6 +164,7 @@ class ValidateConfigurationTest extends TestCase
 
     /**
      * @throws StepException
+     * @SuppressWarnings("PHPMD.CyclomaticComplexity")
      */
     public function testExecuteWithWarningAndCriticalMessage(): void
     {
@@ -161,38 +174,38 @@ class ValidateConfigurationTest extends TestCase
 
         $this->loggerMock->expects($this->exactly(2))
             ->method('notice')
-            ->withConsecutive(
-                ['Validating configuration'],
-                ['Fix configuration with given suggestions:']
-            );
+            // withConsecutive() alternative.
+            ->willReturnCallback(function (string $axis) {
+                static $series = [
+                    'Validating configuration',
+                    'Fix configuration with given suggestions:'
+                ];
+                $this->assertSame(array_shift($series), $axis);
+            });
+        $suggestion1 = [
+            'suggestion' => 'some warning suggestion',
+            'errorCode' => 2001
+        ];
+        $suggestion2 = [
+            'suggestion' => 'some warning suggestion 2',
+            'errorCode' => 2002
+        ];
+        $suggestion3 = [
+            'suggestion' => 'some critical suggestion',
+            'errorCode' => 1
+        ];
         $this->loggerMock->expects($this->exactly(3))
             ->method('log')
-            ->withConsecutive(
-                [
-                    Logger::WARNING,
-                    'some warning',
-                    [
-                        'suggestion' => 'some warning suggestion',
-                        'errorCode' => 2001
-                    ],
-                ],
-                [
-                    Logger::WARNING,
-                    'some warning 2',
-                    [
-                        'suggestion' => 'some warning suggestion 2',
-                        'errorCode' => 2002
-                    ],
-                ],
-                [
-                    Logger::CRITICAL,
-                    'Critical error',
-                    [
-                        'suggestion' => 'some critical suggestion',
-                        'errorCode' => 1
-                    ],
-                ]
-            );
+            // withConsecutive() alternative.
+            ->willReturnCallback(function ($arg1, $arg2, $arg3) use ($suggestion1, $suggestion2, $suggestion3) {
+                if ($arg1 == Logger::WARNING && $arg2 == 'some warning' && $arg3 == $suggestion1) {
+                    return true;
+                } elseif ($arg1 == Logger::WARNING && $arg2 == 'some warning 2' && $arg3 == $suggestion2) {
+                    return true;
+                } elseif ($arg1 == Logger::CRITICAL && $arg2 == 'Critical error' && $arg3 == $suggestion3) {
+                    return true;
+                }
+            });
 
         $step = new ValidateConfiguration(
             $this->loggerMock,
@@ -212,6 +225,7 @@ class ValidateConfigurationTest extends TestCase
 
     /**
      * @throws StepException
+     * @SuppressWarnings("PHPMD.CyclomaticComplexity")
      */
     public function testExecuteTypeStringLevel(): void
     {
@@ -221,38 +235,63 @@ class ValidateConfigurationTest extends TestCase
 
         $this->loggerMock->expects($this->exactly(2))
             ->method('notice')
-            ->withConsecutive(
-                ['Validating configuration'],
-                ['Fix configuration with given suggestions:']
-            );
+            // withConsecutive() alternative.
+            ->willReturnCallback(function (string $axis) {
+                static $series = [
+                    'Validating configuration',
+                    'Fix configuration with given suggestions:'
+                ];
+                $this->assertSame(array_shift($series), $axis);
+            });
+        $series = [
+            [
+                Logger::NOTICE,
+                'some notice',
+                [
+                    'suggestion' => 'some notice suggestion',
+                    'errorCode' => null
+                ]
+            ],
+            [
+                Logger::WARNING,
+                'some warning',
+                [
+                    'suggestion' => 'some warning suggestion',
+                    'errorCode' => 1001
+                ]
+            ],
+            [
+                Logger::CRITICAL,
+                'Critical error',
+                [
+                    'suggestion' => 'some critical suggestion',
+                    'errorCode' => 10
+                ]
+            ]];
+        $suggestion1 = [
+            'suggestion' => 'some notice suggestion',
+            'errorCode' => null
+        ];
+        $suggestion2 = [
+            'suggestion' => 'some warning suggestion',
+            'errorCode' => 1001
+        ];
+        $suggestion3 = [
+            'suggestion' => 'some critical suggestion',
+            'errorCode' => 10
+        ];
         $this->loggerMock->expects($this->exactly(3))
             ->method('log')
-            ->withConsecutive(
-                [
-                    Logger::NOTICE,
-                    'some notice',
-                    [
-                        'suggestion' => 'some notice suggestion',
-                        'errorCode' => null
-                    ]
-                ],
-                [
-                    Logger::WARNING,
-                    'some warning',
-                    [
-                        'suggestion' => 'some warning suggestion',
-                        'errorCode' => 1001
-                    ]
-                ],
-                [
-                    Logger::CRITICAL,
-                    'Critical error',
-                    [
-                        'suggestion' => 'some critical suggestion',
-                        'errorCode' => 10
-                    ]
-                ]
-            );
+            // withConsecutive() alternative.
+            ->willReturnCallback(function ($arg1, $arg2, $arg3) use ($suggestion1, $suggestion2, $suggestion3) {
+                if ($arg1 == Logger::WARNING && $arg2 == 'some notice' && $arg3 == $suggestion1) {
+                    return true;
+                } elseif ($arg1 == Logger::WARNING && $arg2 == 'some warning' && $arg3 == $suggestion2) {
+                    return true;
+                } elseif ($arg1 == Logger::CRITICAL && $arg2 == 'Critical error' && $arg3 == $suggestion3) {
+                    return true;
+                }
+            });
 
         $step = new ValidateConfiguration(
             $this->loggerMock,
@@ -278,8 +317,11 @@ class ValidateConfigurationTest extends TestCase
      * @return MockObject|ValidatorInterface
      * @throws \ReflectionException
      */
-    private function createValidatorWithError(string $error, string $suggestion, int $errorCode = null): MockObject
-    {
+    private function createValidatorWithError(
+        string $error,
+        string $suggestion,
+        int | null $errorCode = null
+    ): MockObject {
         $warningValidator = $this->getMockForAbstractClass(ValidatorInterface::class);
         $warningResultMock = $this->createMock(Result\Error::class);
 

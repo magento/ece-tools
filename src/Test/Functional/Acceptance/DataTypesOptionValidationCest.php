@@ -36,12 +36,32 @@ abstract class DataTypesOptionValidationCest extends AbstractCest
         $I->startEnvironment();
         $I->runDockerComposeCommand('run deploy cloud-deploy');
 
-        $log = $I->grabFileContent('/var/log/cloud.log');
+        $log = $I->grabFileContent('/init/var/log/cloud.log');
         $I->assertStringContainsString($data['expectedError'], $log);
     }
 
     /**
      * @return array
      */
-    abstract protected function dataTypesDataProvider(): array;
+    protected function dataTypesDataProvider(): array
+    {
+        return [
+            'string_instead_integer' => [
+                'variables' => [
+                    'MAGENTO_CLOUD_VARIABLES' => [
+                        'SCD_THREADS' => 'one',
+                    ],
+                ],
+                'expectedError' => 'SCD_THREADS has wrong value',
+            ],
+            'integer_instead_boolean' => [
+                'variables' => [
+                    'MAGENTO_CLOUD_VARIABLES' => [
+                        'CLEAN_STATIC_FILES' => 1,
+                    ],
+                ],
+                'expectedError' => 'CLEAN_STATIC_FILES has wrong value',
+            ],
+        ];
+    }
 }

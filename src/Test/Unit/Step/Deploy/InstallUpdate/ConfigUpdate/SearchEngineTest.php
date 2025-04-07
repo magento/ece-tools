@@ -120,10 +120,15 @@ class SearchEngineTest extends TestCase
             ->willReturn('mysql');
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
-            ->withConsecutive(
-                ['Updating search engine configuration.'],
-                ['Set search engine to: mysql']
-            );
+            // withConsecutive() alternative.
+            ->willReturnCallback(function ($args) {
+                static $series = [
+                    'Updating search engine configuration.',
+                    'Set search engine to: mysql'
+                ];
+                $expectedArgs = array_shift($series);
+                $this->assertSame($expectedArgs, $args);
+            });
         $this->magentoVersionMock->expects($this->once())
             ->method('satisfies')
             ->with('2.1.*')
@@ -304,10 +309,15 @@ class SearchEngineTest extends TestCase
             ->willReturn('mysql');
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
-            ->withConsecutive(
-                ['Updating search engine configuration.'],
-                ['Set search engine to: mysql']
-            );
+            // withConsecutive() alternative.
+            ->willReturnCallback(function ($args) {
+                static $series = [
+                    'Updating search engine configuration.',
+                    'Set search engine to: mysql'
+                ];
+                $expectedArgs = array_shift($series);
+                $this->assertSame($expectedArgs, $args);
+            });
         $this->magentoVersionMock->expects($this->once())
             ->method('satisfies')
             ->with('2.1.*')
@@ -341,10 +351,15 @@ class SearchEngineTest extends TestCase
             ->willReturn('mysql');
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
-            ->withConsecutive(
-                ['Updating search engine configuration.'],
-                ['Set search engine to: mysql']
-            );
+            // withConsecutive() alternative.
+            ->willReturnCallback(function ($args) {
+                static $series = [
+                    'Updating search engine configuration.',
+                    'Set search engine to: mysql'
+                ];
+                $expectedArgs = array_shift($series);
+                $this->assertSame($expectedArgs, $args);
+            });
         $this->magentoVersionMock->expects($this->once())
             ->method('satisfies')
             ->with('2.1.*')

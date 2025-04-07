@@ -18,6 +18,7 @@ use Magento\MagentoCloud\Step\StepException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
+use Magento\MagentoCloud\Shell\ProcessInterface;
 
 /**
  * @inheritDoc
@@ -45,6 +46,11 @@ class EnableEventingTest extends TestCase
     private $globalConfigMock;
 
     /**
+     * @var ProcessInterface|MockObject
+     */
+    private $processMock;
+
+    /**
      * @inheritdoc
      */
     protected function setUp(): void
@@ -63,6 +69,7 @@ class EnableEventingTest extends TestCase
             $shellFactoryMock,
             $this->globalConfigMock
         );
+        $this->processMock = $this->getMockForAbstractClass(ProcessInterface::class);
     }
 
     /**
@@ -124,13 +131,15 @@ class EnableEventingTest extends TestCase
             ->method('get')
             ->with(StageConfigInterface::VAR_ENABLE_EVENTING)
             ->willReturn(true);
-        $this->magentoShellMock->expects(self::at(0))
-            ->method('execute')
-            ->with('events:generate:module');
-        $this->magentoShellMock->expects(self::at(1))
-            ->method('execute')
-            ->with('module:enable Magento_AdobeCommerceEvents')
-            ->willThrowException(new ShellException('error during module enablement'));
+        $this->magentoShellMock->expects(self::exactly(2))
+        ->method('execute')
+        ->willReturnCallback(function ($arg1) {
+            if ($arg1 == 'events:generate:module') {
+                return $this->processMock;
+            } elseif ($arg1 == 'module:enable Magento_AdobeCommerceEvents') {
+                throw new ShellException('error during module enablement');
+            }
+        });
         $this->loggerMock->expects(self::exactly(2))
             ->method('notice');
         $this->loggerMock->expects(self::once())
@@ -149,12 +158,13 @@ class EnableEventingTest extends TestCase
             ->method('get')
             ->with(StageConfigInterface::VAR_ENABLE_EVENTING)
             ->willReturn(true);
-        $this->magentoShellMock->expects(self::at(0))
+        $this->magentoShellMock->expects(self::any())
             ->method('execute')
-            ->with('events:generate:module');
-        $this->magentoShellMock->expects(self::at(1))
-            ->method('execute')
-            ->with('module:enable Magento_AdobeCommerceEvents');
+            ->willReturnCallback(function ($arg1) {
+                if ($arg1 == 'events:generate:module' || $arg1 == 'module:enable Magento_AdobeCommerceEvents') {
+                    return $this->processMock;
+                }
+            });
         $this->loggerMock->expects(self::exactly(2))
             ->method('notice');
         $this->loggerMock->expects(self::never())

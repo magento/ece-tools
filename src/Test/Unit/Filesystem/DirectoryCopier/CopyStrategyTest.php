@@ -50,11 +50,11 @@ class CopyStrategyTest extends TestCase
     {
         $this->fileMock->expects($this->exactly(2))
             ->method('isExists')
-            ->withConsecutive(
-                ['fromDir'],
-                ['toDir']
-            )
-            ->willReturn(true);
+            // withConsecutive() alternative.
+            ->willReturnCallback(fn($param) => match ([$param]) {
+                ['fromDir'] => true,
+                ['toDir'] => true
+            });
         $this->fileMock->expects($this->once())
             ->method('isLink')
             ->with('toDir')
@@ -72,14 +72,11 @@ class CopyStrategyTest extends TestCase
     {
         $this->fileMock->expects($this->exactly(2))
             ->method('isExists')
-            ->withConsecutive(
-                ['fromDir'],
-                ['toDir']
-            )
-            ->willReturnOnConsecutiveCalls(
-                true,
-                false
-            );
+            // withConsecutive() alternative.
+            ->willReturnCallback(fn($param) => match ([$param]) {
+                ['fromDir'] => true,
+                ['toDir'] => false
+            });
         $this->fileMock->expects($this->once())
             ->method('isLink')
             ->with('toDir')

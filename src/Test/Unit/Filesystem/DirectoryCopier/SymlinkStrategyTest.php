@@ -57,14 +57,17 @@ class SymlinkStrategyTest extends TestCase
     {
         $this->fileMock->expects($this->exactly(2))
             ->method('isExists')
-            ->withConsecutive(
-                ['realFromDir'],
-                ['toDir']
-            )
-            ->willReturnOnConsecutiveCalls(
-                true,
-                false
-            );
+            ->willReturnCallback(function (...$args) {
+                static $series = [
+                    [['realFromDir'], true],
+                    [['toDir'], false],
+                ];
+
+                [$expectedArgs, $return] = array_shift($series);
+                $this->assertSame($expectedArgs, $args);
+
+                return $return;
+            });
         $this->fileMock->expects($this->once())
             ->method('symlink')
             ->with('realFromDir', 'toDir')
@@ -80,14 +83,17 @@ class SymlinkStrategyTest extends TestCase
     {
         $this->fileMock->expects($this->exactly(2))
             ->method('isExists')
-            ->withConsecutive(
-                ['realFromDir'],
-                ['toDir']
-            )
-            ->willReturnOnConsecutiveCalls(
-                true,
-                true
-            );
+            ->willReturnCallback(function (...$args) {
+                static $series = [
+                    [['realFromDir'], true],
+                    [['toDir'], true],
+                ];
+
+                [$expectedArgs, $return] = array_shift($series);
+                $this->assertSame($expectedArgs, $args);
+
+                return $return;
+            });
         $this->fileMock->expects($this->once())
             ->method('isLink')
             ->with('toDir')
@@ -112,14 +118,17 @@ class SymlinkStrategyTest extends TestCase
     {
         $this->fileMock->expects($this->exactly(2))
             ->method('isExists')
-            ->withConsecutive(
-                ['realFromDir'],
-                ['toDir']
-            )
-            ->willReturnOnConsecutiveCalls(
-                true,
-                true
-            );
+            ->willReturnCallback(function (...$args) {
+                static $series = [
+                    [['realFromDir'], true],
+                    [['toDir'], true],
+                ];
+
+                [$expectedArgs, $return] = array_shift($series);
+                $this->assertSame($expectedArgs, $args);
+
+                return $return;
+            });
         $this->fileMock->expects($this->once())
             ->method('isLink')
             ->with('toDir')

@@ -17,7 +17,7 @@ use Magento\MagentoCloud\Shell\ShellFactory;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
-
+ 
 /**
  * @inheritdoc
  */
@@ -73,10 +73,14 @@ class CleanCacheTest extends TestCase
     {
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
-            ->withConsecutive(
-                ['Flushing cache.'],
-                ['Cache flushed successfully.']
-            );
+            // withConsecutive() alternative.
+            ->willReturnCallback(function (string $axis) {
+                static $series = [
+                    'Flushing cache.',
+                    'Cache flushed successfully.'
+                ];
+                $this->assertSame(array_shift($series), $axis);
+            });
         $this->stageConfig->expects($this->once())
             ->method('get')
             ->with(DeployInterface::VAR_VERBOSE_COMMANDS)
@@ -137,10 +141,14 @@ class CleanCacheTest extends TestCase
     {
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
-            ->withConsecutive(
-                ['Flushing cache.'],
-                ['Cache flushed successfully.']
-            );
+            // withConsecutive() alternative.
+            ->willReturnCallback(function (string $axis) {
+                static $series = [
+                    'Flushing cache.',
+                    'Cache flushed successfully.'
+                ];
+                $this->assertSame(array_shift($series), $axis);
+            });
         $this->stageConfig->expects($this->once())
             ->method('get')
             ->with(DeployInterface::VAR_VERBOSE_COMMANDS)
@@ -159,10 +167,14 @@ class CleanCacheTest extends TestCase
     {
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
-            ->withConsecutive(
-                ['Flushing cache.'],
-                ['Cache flushed successfully.']
-            );
+            // withConsecutive() alternative.
+            ->willReturnCallback(function (string $axis) {
+                static $series = [
+                    'Flushing cache.',
+                    'Cache flushed successfully.'
+                ];
+                $this->assertSame(array_shift($series), $axis);
+            });
         $this->stageConfig->expects($this->once())
             ->method('get')
             ->willReturn('');

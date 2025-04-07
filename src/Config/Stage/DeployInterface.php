@@ -20,6 +20,7 @@ interface DeployInterface extends StageConfigInterface
     public const VAR_SEARCH_CONFIGURATION = 'SEARCH_CONFIGURATION';
     public const VAR_ELASTICSUITE_CONFIGURATION = 'ELASTICSUITE_CONFIGURATION';
     public const VAR_CACHE_REDIS_BACKEND = 'REDIS_BACKEND';
+    public const VAR_CACHE_VALKEY_BACKEND = 'VALKEY_BACKEND';
     public const VAR_CACHE_CONFIGURATION = 'CACHE_CONFIGURATION';
     public const VAR_SESSION_CONFIGURATION = 'SESSION_CONFIGURATION';
     public const VAR_DATABASE_CONFIGURATION = 'DATABASE_CONFIGURATION';
@@ -40,6 +41,11 @@ interface DeployInterface extends StageConfigInterface
      * The variable responsible to set Redis slave connection when it has true value.
      */
     public const VAR_REDIS_USE_SLAVE_CONNECTION = 'REDIS_USE_SLAVE_CONNECTION';
+
+    /**
+     * The variable responsible to set Valkey slave connection when it has true value.
+     */
+    public const VAR_VALKEY_USE_SLAVE_CONNECTION = 'VALKEY_USE_SLAVE_CONNECTION';
 
     /**
      * The variable responsible to set mysql slave connection when it has true value.

@@ -99,7 +99,7 @@ class EolValidatorTest extends TestCase
             ->willReturn(true);
 
         $serviceName = ServiceInterface::NAME_ELASTICSEARCH;
-        $serviceVersion = '6.5';
+        $serviceVersion = '8.11';
 
         $this->assertEquals([], $this->validator->validateService($serviceName, $serviceVersion));
     }
@@ -172,25 +172,27 @@ class EolValidatorTest extends TestCase
         $service6->expects($this->once())
             ->method('getVersion')
             ->willReturn('10.2');
-
+        $service7 = $this->createMock(ServiceInterface::class);
+        $service7->expects($this->once())
+        ->method('getVersion')
+        ->willReturn('8.0');
+        $service8 = $this->createMock(ServiceInterface::class);
+        $service8->expects($this->once())
+        ->method('getVersion')
+        ->willReturn('8.0');
+        // withConsecutive() alternative.
         $this->serviceFactoryMock->expects($this->exactly(6))
             ->method('create')
-            ->withConsecutive(
-                ['php'],
-                ['elasticsearch'],
-                ['rabbitmq'],
-                ['redis'],
-                ['redis-session'],
-                ['mariadb']
-            )
-            ->willReturnOnConsecutiveCalls(
-                $service1,
-                $service2,
-                $service3,
-                $service4,
-                $service5,
-                $service6
-            );
+            ->willReturnCallback(fn($param) => match ($param) {
+                'php' => $service1,
+                'elasticsearch' => $service2,
+                'rabbitmq' => $service3,
+                'redis' => $service4,
+                'redis-session' => $service5,
+                'mariadb' => $service6,
+                'valkey' => $service7,
+                'valkey-session' => $service8,
+            });
 
         $this->assertEquals(
             [],
