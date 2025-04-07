@@ -151,37 +151,37 @@ class Cache
          $envCacheBackendModel = (string)$this->stageConfig->get(DeployInterface::VAR_CACHE_REDIS_BACKEND);
 
         if ($this->isSynchronizedConfigStructure()) {
-            $cacheCache = $this->getSynchronizedConfigStructure($envCacheBackendModel, $backendConfig);
-            $cacheCache['backend_options']['remote_backend_options'] = array_merge(
-                $cacheCache['backend_options']['remote_backend_options'],
-                $this->getSlaveConnection($envCacheConfiguration, $backendConfig)
-            );
+               $cacheCacheBackend = $this->getSynchronizedConfigStructure($envCacheBackendModel, $backendConfig);
+                $cacheCacheBackend['backend_options']['remote_backend_options'] = array_merge(
+                    $cacheCacheBackend['backend_options']['remote_backend_options'],
+                    $this->getSlaveConnection($envCacheConfiguration, $backendConfig)
+                );
             $finalConfig = [
                 'frontend' => [
-                    'default' => $cacheCache,
+                    'default' => $cacheCacheBackend,
                 ],
                 'type' => [
                     'default' => ['frontend' => 'default'],
                 ],
             ];
         } else {
-            $cacheCache = $this->getUnsyncedConfigStructure($envCacheBackendModel, $backendConfig);
+            $cacheCacheBackend = $this->getUnsyncedConfigStructure($envCacheBackendModel, $backendConfig);
             $slaveConnection = $this->getSlaveConnection($envCacheConfiguration, $backendConfig);
             if ($slaveConnection) {
-                $cacheCache['frontend_options']['write_control'] = false;
-                $cacheCache['backend_options'] = array_merge(
-                    $cacheCache['backend_options'],
-                    $slaveConnection
-                );
+                  $cacheCacheBackend['frontend_options']['write_control'] = false;
+                  $cacheCacheBackend['backend_options'] = array_merge(
+                      $cacheCacheBackend['backend_options'],
+                      $slaveConnection
+                  );
             }
             $finalConfig = [
                 'frontend' => [
                     'default' => array_replace_recursive(
-                        $cacheCache,
+                        $cacheCacheBackend,
                         ['backend_options' => ['database' => self::CACHE_DATABASE_DEFAULT]]
                     ),
                     'page_cache' => array_replace_recursive(
-                        $cacheCache,
+                        $cacheCacheBackend,
                         ['backend_options' => ['database' => self::CACHE_DATABASE_PAGE_CACHE]]
                     ),
                 ]

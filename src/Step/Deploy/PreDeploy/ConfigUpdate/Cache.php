@@ -125,7 +125,7 @@ class Cache implements StepInterface
                 $this->logger->info('Cache configuration was not found. Removing cache configuration.');
                 unset($config['cache']);
             } elseif (empty($cacheConfig['frontend'])) {
-                  $isRedisConfigured = !empty($cacheConfig['frontend']['default']['_custom_redis_backend']);
+                   $isRedisConfigured = !empty($cacheConfig['frontend']['default']['_custom_redis_backend']);
                    $isValkeyConfigured = !empty($cacheConfig['frontend']['default']['_custom_valkey_backend']);
                 if ($isRedisConfigured) {
                         $this->logger->warning(

@@ -41,12 +41,12 @@ class Config
     /**
      * @var Valkey
      */
-    private $valkey;
+    private Valkey $valkey;
 
     /**
      * @var ValkeySession
      */
-    private $valkeySession;
+    private ValkeySession $valkeySession;
 
     /**
      * @var DeployInterface
