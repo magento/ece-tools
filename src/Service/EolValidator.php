@@ -88,6 +88,8 @@ class EolValidator
             ServiceInterface::NAME_RABBITMQ,
             ServiceInterface::NAME_REDIS,
             ServiceInterface::NAME_REDIS_SESSION,
+            ServiceInterface::NAME_VALKEY,
+            ServiceInterface::NAME_VALKEY_SESSION,
             $this->databaseType->getServiceName()
         ];
 
@@ -173,6 +175,7 @@ class EolValidator
      * Perform service name conversions.
      * Explicitly resetting 'mysql' to 'mariadb' for MariaDB validation
      * and 'redis-session' to 'redis' for Redis validation; getting the version
+     * and 'valkey-session' to 'valkey' for Valkey validation; getting the version
      * from relationship returns mysql:<version>.
      *
      * @param string $serviceName
@@ -186,6 +189,9 @@ class EolValidator
                 break;
             case ServiceInterface::NAME_REDIS_SESSION:
                 $serviceName = ServiceInterface::NAME_REDIS;
+                break;
+            case ServiceInterface::NAME_VALKEY_SESSION:
+                $serviceName = ServiceInterface::NAME_VALKEY;
                 break;
         }
 

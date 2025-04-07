@@ -19,6 +19,8 @@ interface ServiceInterface
     const NAME_NGINX = 'nginx';
     const NAME_REDIS = 'redis';
     const NAME_REDIS_SESSION = 'redis-session';
+    const NAME_VALKEY = 'valkey';
+    const NAME_VALKEY_SESSION = 'valkey-session';
     const NAME_ELASTICSEARCH = 'elasticsearch';
     const NAME_OPENSEARCH = 'opensearch';
     const NAME_RABBITMQ = 'rabbitmq';
