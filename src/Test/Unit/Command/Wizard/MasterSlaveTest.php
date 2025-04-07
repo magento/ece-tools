@@ -59,6 +59,7 @@ class MasterSlaveTest extends TestCase
             ->method('get')
             ->willReturnMap([
                 [DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION, true],
+                [DeployInterface::VAR_VALKEY_USE_SLAVE_CONNECTION, true],
                 [DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION, true],
             ]);
         $this->outputFormatterMock->expects($this->never())
@@ -77,13 +78,15 @@ class MasterSlaveTest extends TestCase
 
         $series = [
             [$outputMock, 'MySQL slave connection is not configured'],
-            [$outputMock, 'Redis slave connection is not configured']
+            [$outputMock, 'Redis slave connection is not configured'],
+            [$outputMock, 'Valkey slave connection is not configured']
         ];
 
         $this->deployConfigMock->expects($this->exactly(2))
             ->method('get')
             ->willReturnMap([
                 [DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION, false],
+                [DeployInterface::VAR_VALKEY_USE_SLAVE_CONNECTION, false],
                 [DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION, false],
             ]);
         $this->outputFormatterMock->expects($this->exactly(2))

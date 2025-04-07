@@ -70,7 +70,7 @@ class ServiceVersion implements ValidatorInterface
     }
 
     /**
-     * Validates compatibility Redis and RabbitMq services with installed Magento version.
+     * Validates compatibility Redis,Valkey and RabbitMq services with installed Magento version.
      *
      * {@inheritdoc}
      */
@@ -80,7 +80,9 @@ class ServiceVersion implements ValidatorInterface
             $services = [
                 ServiceInterface::NAME_RABBITMQ,
                 ServiceInterface::NAME_REDIS,
+                ServiceInterface::NAME_VALKEY,
                 ServiceInterface::NAME_REDIS_SESSION,
+                ServiceInterface::NAME_VALKEY_SESSION,
                 ServiceInterface::NAME_ELASTICSEARCH,
                 ServiceInterface::NAME_OPENSEARCH,
                 $this->databaseType->getServiceName()

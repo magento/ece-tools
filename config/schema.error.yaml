@@ -179,6 +179,12 @@
     step: 'pre-deploy: clean-redis-cache'
     stage: deploy
     type: critical
+!php/const Magento\MagentoCloud\App\Error::DEPLOY_VALKEY_CACHE_CLEAN_FAILED:
+    title: 'Failed to clean the Valkey cache'
+    suggestion: 'Failed to clean the Valkey cache. Check that the Valkey cache configuration is correct and that the Valkey service is available. See [Setup Valkey service](https://experienceleague.adobe.com/docs/commerce-cloud-service/user-guide/configure/service/valkey.html).'
+    step: 'pre-deploy: clean-valkey-cache'
+    stage: deploy
+    type: critical
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_MAINTENANCE_MODE_ENABLING_FAILED:
     step: 'pre-deploy: set-production-mode'
     title: 'Command `/bin/magento maintenance:enable` failed'
@@ -488,6 +494,11 @@
     type: warning
 !php/const Magento\MagentoCloud\App\Error::WARN_REDIS_SERVICE_NOT_AVAILABLE:
     title: 'Cache is configured for a Redis service that is not available. Configuration will be ignored.'
+    stage: deploy
+    step: 'pre-deploy:cache'
+    type: warning
+!php/const Magento\MagentoCloud\App\Error::WARN_VALKEY_SERVICE_NOT_AVAILABLE:
+    title: 'Cache is configured for a Valkey service that is not available. Configuration will be ignored.'
     stage: deploy
     step: 'pre-deploy:cache'
     type: warning

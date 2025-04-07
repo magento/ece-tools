@@ -28,32 +28,32 @@ class Cache implements StepInterface
     /**
      * @var LoggerInterface
      */
-    private $logger;
+    private LoggerInterface $logger;
 
     /**
      * @var ConfigWriter
      */
-    private $configWriter;
+    private ConfigWriter $configWriter;
 
     /**
      * @var ConfigReader
      */
-    private $configReader;
+    private ConfigReader $configReader;
 
     /**
      * @var CacheFactory
      */
-    private $cacheConfig;
+    private CacheFactory $cacheConfig;
 
     /**
      * @var MagentoVersion
      */
-    private $magentoVersion;
+    private MagentoVersion $magentoVersion;
 
     /**
      * @var DeployInterface
      */
-    private $stageConfig;
+    private DeployInterface $stageConfig;
 
     /**
      * @param ConfigReader $configReader
@@ -94,22 +94,30 @@ class Cache implements StepInterface
             if (isset($cacheConfig['frontend'])) {
                 $cacheConfig['frontend'] = array_filter($cacheConfig['frontend'], function ($cacheFrontend) {
                     $backend = $cacheFrontend['backend'];
-                    $customRedisBackend = $cacheFrontend['_custom_redis_backend'] ?? false;
+                    $customCacheBackend = $cacheFrontend['_custom_valkey_backend']
+                        ?? $cacheFrontend['_custom_redis_backend']
+                        ?? false;
                     $this->checkBackendModel($backend);
 
-                    if (!$customRedisBackend && !in_array($backend, CacheFactory::AVAILABLE_REDIS_BACKEND, true)) {
+                    if (!$customCacheBackend
+                        && !in_array($backend, array_merge(CacheFactory::AVAILABLE_REDIS_BACKEND,
+                        CacheFactory::AVAILABLE_VALKEY_BACKEND),true)) {
                         return true;
                     }
 
-                    $backendOptions = ($backend === CacheFactory::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE)
-                            ? $cacheFrontend['backend_options']['remote_backend_options']
-                            : $cacheFrontend['backend_options'];
+                    $backendOptions = (in_array($backend, [
+                        CacheFactory::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE,
+                        CacheFactory::VALKEY_BACKEND_REMOTE_SYNCHRONIZED_CACHE
+                    ], true))
+                    ? $cacheFrontend['backend_options']['remote_backend_options']
+                    : $cacheFrontend['backend_options'];
 
-                    return $this->testRedisConnection($backendOptions);
+                    return $this->testCacheConnection($backendOptions);
                 });
 
                 foreach (array_keys($cacheConfig['frontend']) as $cacheConfigType) {
                     unset($cacheConfig['frontend'][$cacheConfigType]['_custom_redis_backend']);
+                    unset($cacheConfig['frontend'][$cacheConfigType]['_custom_valkey_backend']);
                 }
             }
 
@@ -117,10 +125,29 @@ class Cache implements StepInterface
                 $this->logger->info('Cache configuration was not found. Removing cache configuration.');
                 unset($config['cache']);
             } elseif (empty($cacheConfig['frontend'])) {
-                $this->logger->warning(
-                    'Cache is configured for a Redis service that is not available. Configuration will be ignored.',
-                    ['errorCode' => Error::WARN_REDIS_SERVICE_NOT_AVAILABLE]
-                );
+                   $isRedisConfigured = !empty($cacheConfig['frontend']['default']['_custom_redis_backend']);
+                   $isValkeyConfigured = !empty($cacheConfig['frontend']['default']['_custom_valkey_backend']);
+                if ($isRedisConfigured) {
+                        $this->logger->warning(
+                            'Cache is configured for a Redis service that is not available.
+                             Configuration will be ignored.',
+                            ['errorCode' => Error::WARN_REDIS_SERVICE_NOT_AVAILABLE]
+                        );
+                }
+
+                if ($isValkeyConfigured) {
+                        $this->logger->warning(
+                            'Cache is configured for a Valkey service that is not available. 
+                            Configuration will be ignored.',
+                            ['errorCode' => Error::WARN_VALKEY_SERVICE_NOT_AVAILABLE]
+                        );
+                }
+                        $this->logger->warning(
+                            'Cache is configured for a Redis service that is not available.
+                            Configuration will be ignored.',
+                            ['errorCode' => Error::WARN_REDIS_SERVICE_NOT_AVAILABLE]
+                        );
+
                 unset($config['cache']);
             } else {
                 if (isset($cacheConfig['frontend']['default'])) {
@@ -149,13 +176,28 @@ class Cache implements StepInterface
      */
     private function checkBackendModel(string $backend): void
     {
-        $notAllowedBackend = [
+        $notAllowedRedisBackend = [
             CacheFactory::REDIS_BACKEND_REDIS_CACHE,
             CacheFactory::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE
         ];
+        $notAllowedValkeyBackend = [
+            CacheFactory::VALKEY_BACKEND_VALKEY_CACHE,
+            CacheFactory::VALKEY_BACKEND_REMOTE_SYNCHRONIZED_CACHE
+        ];
 
         try {
-            if (in_array($backend, $notAllowedBackend, true) && !$this->magentoVersion->isGreaterOrEqual('2.3.0')) {
+            if (in_array($backend, $notAllowedValkeyBackend, true)
+              && !$this->magentoVersion->isGreaterOrEqual('2.4.8')) {
+                throw new StepException(
+                    sprintf(
+                        'Magento version \'%s\' does not support Valkey backend model \'%s\'',
+                        $this->magentoVersion->getVersion(),
+                        $backend
+                    )
+                );
+            }
+            if (in_array($backend, $notAllowedRedisBackend, true)
+              && !$this->magentoVersion->isGreaterOrEqual('2.3.0')) {
                 throw new StepException(
                     sprintf(
                         'Magento version \'%s\' does not support Redis backend model \'%s\'',
@@ -181,11 +223,11 @@ class Cache implements StepInterface
      * @return bool
      * @throws StepException
      */
-    private function testRedisConnection(array $backendOptions): bool
+    private function testCacheConnection(array $backendOptions): bool
     {
         if (empty($backendOptions['server'])) {
             throw new StepException(
-                'Missing required Redis configuration \'server\'!',
+                'Missing required Redis or Valkey configuration \'server\'!',
                 Error::DEPLOY_WRONG_CACHE_CONFIGURATION
             );
         }
@@ -194,7 +236,7 @@ class Cache implements StepInterface
             preg_match('#^(.{1,4}://)?([^:]+)(:([0-9]+))?#', $address, $matches);
             if (!isset($matches[4])) {
                 throw new StepException(
-                    'Missing required Redis configuration \'port\'!',
+                    'Missing required Redis or Valkey configuration \'port\'!',
                     Error::DEPLOY_WRONG_CACHE_CONFIGURATION
                 );
             }
@@ -214,4 +256,6 @@ class Cache implements StepInterface
 
         return $connected;
     }
+
+
 }

@@ -79,6 +79,7 @@ class Error
     public const DEPLOY_OS_CANNOT_CONNECT = 137;
     public const DEPLOY_OS_SERVICE_NOT_INSTALLED = 138;
     public const DEPLOY_MAGENTO_VERSION_DOES_NOT_SUPPORT_OS = 139;
+    public const DEPLOY_VALKEY_CACHE_CLEAN_FAILED = 140;
 
     public const PD_DEPLOY_IS_FAILED = 201;
     public const PD_ENV_PHP_IS_NOT_WRITABLE = 202;
@@ -145,6 +146,7 @@ class Error
     public const WARN_DEPRECATED_SPLIT_DB = 2029;
     public const WARN_OS_ES_SERVICES_BOTH_INSTALLED = 2030;
     public const WARN_REMOTE_STORAGE_CANNOT_BE_DISABLED = 2031;
+    public const WARN_VALKEY_SERVICE_NOT_AVAILABLE = 2032;
 
     /**
      * Post-deploy
