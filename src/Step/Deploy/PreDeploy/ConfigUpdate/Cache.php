@@ -186,6 +186,8 @@ class Cache implements StepInterface
         ];
 
         try {
+          print_r($backend);
+          print_r($notAllowedValkeyBackend);
             if (in_array($backend, $notAllowedValkeyBackend, true)
               && !$this->magentoVersion->isGreaterOrEqual('2.4.8')) {
                 throw new StepException(
