@@ -182,8 +182,7 @@ class Cache implements StepInterface
             CacheFactory::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE
         ];
         $notAllowedValkeyBackend = [
-            CacheFactory::VALKEY_BACKEND_VALKEY_CACHE,
-            CacheFactory::VALKEY_BACKEND_REMOTE_SYNCHRONIZED_CACHE
+            CacheFactory::VALKEY_BACKEND_VALKEY_CACHE
         ];
 
         try {
