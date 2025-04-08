@@ -94,7 +94,6 @@ class Cache implements StepInterface
             if (isset($cacheConfig['frontend'])) {
                 $cacheConfig['frontend'] = array_filter($cacheConfig['frontend'], function ($cacheFrontend) {
                     $backend = $cacheFrontend['backend'];
-                    print_r($cacheFrontend);
                     $customCacheBackend = $cacheFrontend['_custom_valkey_backend']
                         ?? $cacheFrontend['_custom_redis_backend']
                         ?? false;
@@ -186,10 +185,6 @@ class Cache implements StepInterface
         ];
 
         try {
-          print_r($backend);
-          var_dump($backend);
-         echo 'debug code';
-          print_r($notAllowedValkeyBackend);
             if (in_array($backend, $notAllowedValkeyBackend, true)
               && !$this->magentoVersion->isGreaterOrEqual('2.4.8')) {
                 throw new StepException(
