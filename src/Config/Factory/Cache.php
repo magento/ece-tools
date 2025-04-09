@@ -379,4 +379,13 @@ class Cache
         return $redisModel === self::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE ||
           $valkeyModel === self::VALKEY_BACKEND_REMOTE_SYNCHRONIZED_CACHE;
     }
+
+  /**
+   * @return array
+   */
+  public function isValkeyEnabled()
+  {
+    return $this->valkey->getConfiguration();
+  }
+
 }

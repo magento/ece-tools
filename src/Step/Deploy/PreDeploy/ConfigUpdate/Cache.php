@@ -181,10 +181,9 @@ class Cache implements StepInterface
             CacheFactory::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE
         ];
         $notAllowedValkeyBackend = [
-            CacheFactory::VALKEY_BACKEND_VALKEY_CACHE,
-            CacheFactory::VALKEY_BACKEND_REMOTE_SYNCHRONIZED_CACHE
+            CacheFactory::VALKEY_BACKEND_VALKEY_CACHE
         ];
-
+     //   $isValkeyEnabled=  $this->cacheConfig->isValkeyEnabled();  // @TODO
         try {
             if (in_array($backend, $notAllowedValkeyBackend, true)
               && !$this->magentoVersion->isGreaterOrEqual('2.4.8')) {
