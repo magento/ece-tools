@@ -93,6 +93,10 @@ class Cache implements StepInterface
 
             if (isset($cacheConfig['frontend'])) {
                 $cacheConfig['frontend'] = array_filter($cacheConfig['frontend'], function ($cacheFrontend) {
+                  print_r($this->configReader->read());
+                  echo 'debug code';
+                  print_r($cacheFrontend);
+                  echo 'debug code end here';
                     $backend = $cacheFrontend['backend'];
                     $customCacheBackend = $cacheFrontend['_custom_valkey_backend']
                         ?? $cacheFrontend['_custom_redis_backend']
