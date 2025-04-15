@@ -183,7 +183,8 @@ class Cache implements StepInterface
         $notAllowedValkeyBackend = [
             CacheFactory::VALKEY_BACKEND_VALKEY_CACHE
         ];
-     //   $isValkeyEnabled=  $this->cacheConfig->isValkeyEnabled();  // @TODO
+        $isValkeyEnabled=  $this->cacheConfig->isValkeyEnabled();  // @TODO
+      print_r($isValkeyEnabled);
         try {
             if (in_array($backend, $notAllowedValkeyBackend, true)
               && !$this->magentoVersion->isGreaterOrEqual('2.4.8')) {
