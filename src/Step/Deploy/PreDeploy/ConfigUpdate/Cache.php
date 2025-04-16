@@ -173,12 +173,9 @@ class Cache implements StepInterface
             CacheFactory::VALKEY_BACKEND_VALKEY_CACHE
         ];
         $isValkeyEnabled=  $this->cacheConfig->isValkeyEnabled();  // @TODO
-      echo 'debug code';
-      print_r($isValkeyEnabled);
-      print_r($isValkeyEnabled['scheme']);
         try {
             if (in_array($backend, $notAllowedValkeyBackend, true)
-              && !$this->magentoVersion->isGreaterOrEqual('2.4.8')) {
+              && !$this->magentoVersion->isGreaterOrEqual('2.4.8') && $isValkeyEnabled['scheme']=='valkey') {
                 throw new StepException(
                     sprintf(
                         'Magento version \'%s\' does not support Valkey backend model \'%s\'',
