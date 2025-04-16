@@ -99,16 +99,10 @@ class Cache implements StepInterface
                         ?? false;
                     $this->checkBackendModel($backend);
 
-                    if (!$customCacheBackend
-                        && !in_array($backend, array_merge(CacheFactory::AVAILABLE_REDIS_BACKEND,
-                        CacheFactory::AVAILABLE_VALKEY_BACKEND),true)) {
-                        return true;
+                    if (!$customCacheBackend && !in_array($backend, CacheFactory::AVAILABLE_REDIS_BACKEND, true)) {
+                      return true;
                     }
-
-                    $backendOptions = (in_array($backend, [
-                        CacheFactory::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE,
-                        CacheFactory::VALKEY_BACKEND_REMOTE_SYNCHRONIZED_CACHE
-                    ], true))
+                  $backendOptions = ($backend === CacheFactory::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE)
                     ? $cacheFrontend['backend_options']['remote_backend_options']
                     : $cacheFrontend['backend_options'];
 
@@ -142,11 +136,6 @@ class Cache implements StepInterface
                             ['errorCode' => Error::WARN_VALKEY_SERVICE_NOT_AVAILABLE]
                         );
                 }
-                        $this->logger->warning(
-                            'Cache is configured for a Redis service that is not available.
-                            Configuration will be ignored.',
-                            ['errorCode' => Error::WARN_REDIS_SERVICE_NOT_AVAILABLE]
-                        );
 
                 unset($config['cache']);
             } else {
@@ -184,7 +173,9 @@ class Cache implements StepInterface
             CacheFactory::VALKEY_BACKEND_VALKEY_CACHE
         ];
         $isValkeyEnabled=  $this->cacheConfig->isValkeyEnabled();  // @TODO
+      echo 'debug code';
       print_r($isValkeyEnabled);
+      print_r($isValkeyEnabled['scheme']);
         try {
             if (in_array($backend, $notAllowedValkeyBackend, true)
               && !$this->magentoVersion->isGreaterOrEqual('2.4.8')) {
