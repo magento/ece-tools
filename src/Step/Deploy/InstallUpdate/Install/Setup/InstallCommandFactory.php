@@ -268,7 +268,9 @@ class InstallCommandFactory
                 $configuration = $this->openSearch->getConfiguration();
                 $isAuthEnabled = $this->openSearch->isAuthEnabled();
 
-                if ($this->magentoVersion->isGreaterOrEqual('2.4.6')) {
+                ($this->magentoVersion->isGreaterOrEqual('2.4.6')
+                || $this->magentoVersion->getVersion() == '2.4.4-p13'
+                || $this->magentoVersion->getVersion() == '2.4.5-p12') {
                     $enginePrefixName = 'opensearch';
                 }
             } else {
