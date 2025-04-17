@@ -85,7 +85,7 @@ class InstallCommandFactoryTest extends TestCase
     /**
      * @var OpenSearch|MockObject
      */
-    private $©Mock;
+    private $openSearchMock;
 
     /**
      * @var RemoteStorage|MockObject
