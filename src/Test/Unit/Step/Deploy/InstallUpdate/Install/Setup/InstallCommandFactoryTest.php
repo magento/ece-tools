@@ -85,7 +85,7 @@ class InstallCommandFactoryTest extends TestCase
     /**
      * @var OpenSearch|MockObject
      */
-    private $openSearchMock;
+    private $©Mock;
 
     /**
      * @var RemoteStorage|MockObject
@@ -501,7 +501,8 @@ class InstallCommandFactoryTest extends TestCase
             ->willReturnMap([
                 ['2.4.0', true],
                 ['2.4.2', true],
-                ['2.4.4', $greaterOrEqual],
+                ['2.4.4', true],
+                ['2.4.6', $greaterOrEqual],
             ]);
         $this->magentoVersionMock->expects($this->once())
             ->method('satisfies')
