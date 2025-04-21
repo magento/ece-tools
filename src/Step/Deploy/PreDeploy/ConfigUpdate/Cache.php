@@ -102,6 +102,7 @@ class Cache implements StepInterface
                     if (!$customCacheBackend && !in_array($backend, CacheFactory::AVAILABLE_REDIS_BACKEND, true)) {
                       return true;
                     }
+                    print_r($backend);
                   $backendOptions = ($backend === CacheFactory::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE)
                     ? $cacheFrontend['backend_options']['remote_backend_options']
                     : $cacheFrontend['backend_options'];
