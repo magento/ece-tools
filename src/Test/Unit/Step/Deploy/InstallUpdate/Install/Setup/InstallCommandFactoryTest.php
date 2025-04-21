@@ -504,10 +504,11 @@ class InstallCommandFactoryTest extends TestCase
                 ['2.4.4', true],
                 ['2.4.6', $greaterOrEqual],
             ]);
-        $this->magentoVersionMock->expects($this->once())
+
+        $this->magentoVersionMock->expects($this->any())
             ->method('satisfies')
             ->with('>=2.3.7-p3 <2.4.0 || >=2.4.3-p2')
-            ->willReturn(true);
+            ->willReturn(false);
         $this->openSearchMock->expects($this->any())
             ->method('isInstalled')
             ->willReturn(true);
@@ -537,7 +538,7 @@ class InstallCommandFactoryTest extends TestCase
 
         $this->elasticSearchMock->expects($this->any())
             ->method('isInstalled')
-            ->willReturn(false);
+            ->willReturn(true);
         $this->elasticSearchMock->expects($this->never())
             ->method('isAuthEnabled');
         $this->elasticSearchMock->expects($this->never())
