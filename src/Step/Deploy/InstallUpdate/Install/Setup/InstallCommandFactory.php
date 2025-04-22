@@ -260,17 +260,17 @@ class InstallCommandFactory
             $enginePrefixName = 'elasticsearch';
 
             if ($this->openSearch->isInstalled()
-                && $this->magentoVersion->satisfies('>=2.3.7-p3 <2.4.0 || >=2.4.3-p2')
+                && $this->magentoVersion->satisfies('>=2.4.4-p13 <2.4.5 || >=2.4.5-p12 <2.4.6 || >=2.4.6')
             ) {
                 $engine = $this->openSearch->getFullEngineName();
                 $host = $this->openSearch->getHost();
                 $port = $this->openSearch->getPort();
                 $configuration = $this->openSearch->getConfiguration();
                 $isAuthEnabled = $this->openSearch->isAuthEnabled();
-
-                if ($this->magentoVersion->satisfies('>=2.4.4-p13 <2.4.5 || >=2.4.5-p12 <2.4.6 || >=2.4.6')) {
-                    $enginePrefixName = 'opensearch';
-                }
+                $enginePrefixName = 'opensearch';
+                // if ($this->magentoVersion->satisfies('>=2.4.4-p13 <2.4.5 || >=2.4.5-p12 <2.4.6 || >=2.4.6')) {
+                //     $enginePrefixName = 'opensearch';
+                // }
             } else {
                 $engine = $this->elasticSearch->getFullEngineName();
                 $host = $this->elasticSearch->getHost();
