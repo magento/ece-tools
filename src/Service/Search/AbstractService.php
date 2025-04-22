@@ -117,7 +117,7 @@ abstract class AbstractService implements ServiceInterface
             }
         }
 
-        return preg_replace('/-.*/', '', $this->version); // Removes any suffix after '-'
+        return $this->version;
     }
 
     /**

@@ -51,7 +51,7 @@ class OpenSearch extends AbstractService implements ServiceInterface
      */
     public function getFullEngineName(): string
     {
-        if ($this->magentoVersion->satisfies('>=2.4.4-p13 <2.4.5 || >=2.4.5-p12 <2.4.6 || >=2.4.6')) {
+        if ($this->magentoVersion->satisfies('2.4.4-p13 || >=2.4.5-p12')) {
             return static::ENGINE_NAME;
         }
 
