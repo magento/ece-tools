@@ -151,6 +151,7 @@ class Cache
          $envCacheBackendModel = (string)$this->stageConfig->get(DeployInterface::VAR_CACHE_REDIS_BACKEND);
 
         if ($this->isSynchronizedConfigStructure()) {
+          echo 'true call';
                $cacheCacheBackend = $this->getSynchronizedConfigStructure($envCacheBackendModel, $backendConfig);
                 $cacheCacheBackend['backend_options']['remote_backend_options'] = array_merge(
                     $cacheCacheBackend['backend_options']['remote_backend_options'],
@@ -165,6 +166,7 @@ class Cache
                 ],
             ];
         } else {
+          echo 'false call';
             $cacheCacheBackend = $this->getUnsyncedConfigStructure($envCacheBackendModel, $backendConfig);
             $slaveConnection = $this->getSlaveConnection($envCacheConfiguration, $backendConfig);
             if ($slaveConnection) {
@@ -308,9 +310,8 @@ class Cache
      */
     private function getUnsyncedConfigStructure(string $envCacheBackendModel, array $backendConfig): array
     {
-      $cacheBackendModelRedis='Cm_Cache_Backend_Redis';
       $config = [
-            'backend' => $cacheBackendModelRedis,
+            'backend' => $envCacheBackendModel,
             'backend_options' => [
                 'server' => $backendConfig['host'],
                 'port' => $backendConfig['port'],
@@ -333,14 +334,11 @@ class Cache
      */
     private function getSynchronizedConfigStructure(string $envCacheBackendModel, array $backendConfig): array
     {
-          $backendClass = $backendConfig['host'] === 'valkey'
-        ? '\Magento\Framework\Cache\Backend\Valkey'
-        : '\Magento\Framework\Cache\Backend\Redis';
 
         $config = [
             'backend' => $envCacheBackendModel,
             'backend_options' => [
-                'remote_backend' => $backendClass,
+                'remote_backend' => '\Magento\Framework\Cache\Backend\Redis',
                 'remote_backend_options' => [
                     'server' => $backendConfig['host'],
                     'port' => $backendConfig['port'],
@@ -376,6 +374,9 @@ class Cache
     {
         $redisModel = (string)$this->stageConfig->get(DeployInterface::VAR_CACHE_REDIS_BACKEND);
         $valkeyModel = (string)$this->stageConfig->get(DeployInterface::VAR_CACHE_VALKEY_BACKEND);
+        echo 'check model';
+        var_dump( $redisModel);
+      var_dump( $valkeyModel);
         return $redisModel === self::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE ||
           $valkeyModel === self::VALKEY_BACKEND_REMOTE_SYNCHRONIZED_CACHE;
     }
@@ -383,7 +384,7 @@ class Cache
   /**
    * @return array
    */
-  public function isValkeyEnabled()
+  public function isValkeyEnabled(): array
   {
     return $this->valkey->getConfiguration();
   }
