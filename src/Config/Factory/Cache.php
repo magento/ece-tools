@@ -375,10 +375,9 @@ class Cache
         $redisModel = (string)$this->stageConfig->get(DeployInterface::VAR_CACHE_REDIS_BACKEND);
         $valkeyModel = (string)$this->stageConfig->get(DeployInterface::VAR_CACHE_VALKEY_BACKEND);
         echo 'check model';
-        var_dump( $redisModel);
-      var_dump( $valkeyModel);
-        return $redisModel === self::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE ||
-          $valkeyModel === self::VALKEY_BACKEND_REMOTE_SYNCHRONIZED_CACHE;
+        var_dump($redisModel);
+      var_dump($valkeyModel);
+        return $valkeyModel === self::VALKEY_BACKEND_REMOTE_SYNCHRONIZED_CACHE;
     }
 
   /**
