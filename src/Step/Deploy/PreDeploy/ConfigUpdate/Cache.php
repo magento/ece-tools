@@ -87,7 +87,6 @@ class Cache implements StepInterface
         try {
             $config = $this->configReader->read();
             $cacheConfig = $this->cacheConfig->get();
-            print_r($cacheConfig);
             $graphqlConfig = $config['cache']['graphql'] ?? [];
             $luaConfig = (boolean)$this->stageConfig->get(DeployInterface::VAR_USE_LUA);
             $luaConfigKey = (boolean)$this->stageConfig->get(DeployInterface::VAR_LUA_KEY);
@@ -103,13 +102,9 @@ class Cache implements StepInterface
                     if (!$customCacheBackend && !in_array($backend, CacheFactory::AVAILABLE_REDIS_BACKEND, true)) {
                       return true;
                     }
-                    print_r($backend);
-                    echo 'call before';
                   $backendOptions = ($backend === CacheFactory::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE)
                     ? $cacheFrontend['backend_options']['remote_backend_options']
                     : $cacheFrontend['backend_options'];
-                  print_r($backendOptions);
-                  echo 'call after';
                     return $this->testCacheConnection($backendOptions);
                 });
 
