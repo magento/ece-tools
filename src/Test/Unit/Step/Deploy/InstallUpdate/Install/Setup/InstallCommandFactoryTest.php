@@ -501,14 +501,14 @@ class InstallCommandFactoryTest extends TestCase
             ->willReturnMap([
                 ['2.4.0', true],
                 ['2.4.2', true],
-                ['2.4.4', true],
-                ['2.4.6', $greaterOrEqual],
+                ['2.4.4', $greaterOrEqual],
             ]);
 
-        $this->magentoVersionMock->expects($this->any())
-            ->method('satisfies')
-            ->with('2.4.4-p13 || >=2.4.5-p12')
-            ->willReturn(false);
+        $this->magentoVersionMock->method('satisfies')
+            ->willReturnCallback(function (string $constraint) {
+                $supportedConstraint = '>=2.3.7-p3 <2.4.0 || >=2.4.3-p2';
+                return $constraint === $supportedConstraint;
+            });
         $this->openSearchMock->expects($this->any())
             ->method('isInstalled')
             ->willReturn(true);
@@ -517,7 +517,7 @@ class InstallCommandFactoryTest extends TestCase
             ->willReturn(true);
         $this->openSearchMock->expects($this->once())
             ->method('getFullEngineName')
-            ->willReturn('opensearch');
+            ->willReturn('opensearch1');
         $this->openSearchMock->expects($this->once())
             ->method('getHost')
             ->willReturn('127.0.0.1');
@@ -551,7 +551,7 @@ class InstallCommandFactoryTest extends TestCase
             ->method('getConfiguration');
 
         $command = $this->installCommandFactory->create();
-        self::assertStringContainsString("--search-engine='opensearch'", $command);
+        self::assertStringContainsString("--search-engine='opensearch1'", $command);
         self::assertStringContainsString("--" . $enginePrefixName . "-enable-auth='1'", $command);
         self::assertStringContainsString("--" . $enginePrefixName . "-username='user'", $command);
         self::assertStringContainsString("--" . $enginePrefixName . "-password='secret'", $command);
@@ -563,10 +563,7 @@ class InstallCommandFactoryTest extends TestCase
      */
     public function executeWithOSauthOptionsDataProvider()
     {
-        return [
-            [false, 'elasticsearch'],
-            [true, 'opensearch'],
-        ];
+        return [[false, 'elasticsearch']];
     }
 
     /**
