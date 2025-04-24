@@ -260,14 +260,17 @@ class InstallCommandFactory
             $enginePrefixName = 'elasticsearch';
 
             if ($this->openSearch->isInstalled()
-                && $this->magentoVersion->satisfies('2.4.4-p13 || >=2.4.5-p12')
+                && $this->magentoVersion->satisfies('>=2.3.7-p3 <2.4.0 || >=2.4.3-p2')
             ) {
                 $engine = $this->openSearch->getFullEngineName();
                 $host = $this->openSearch->getHost();
                 $port = $this->openSearch->getPort();
                 $configuration = $this->openSearch->getConfiguration();
                 $isAuthEnabled = $this->openSearch->isAuthEnabled();
-                $enginePrefixName = 'opensearch';
+
+                if ($this->magentoVersion->satisfies('2.4.4-p13 || >=2.4.5-p12')) {
+                    $enginePrefixName = 'opensearch';
+                }
             } else {
                 $engine = $this->elasticSearch->getFullEngineName();
                 $host = $this->elasticSearch->getHost();
