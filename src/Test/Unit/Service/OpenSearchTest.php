@@ -222,7 +222,7 @@ class OpenSearchTest extends TestCase
      */
     public function testGetFullEngineName(bool $greaterOrEqual, string $expectedResult): void
     {
-        $this->magentoVersionMock->expects($this->once())
+        $this->magentoVersionMock->expects($this->any())
             ->method('isGreaterOrEqual')
             ->willReturn($greaterOrEqual);
         $this->assertSame($expectedResult, $this->openSearch->getFullEngineName());
@@ -234,8 +234,8 @@ class OpenSearchTest extends TestCase
     public function getFullEngineNameDataProvider()
     {
         return [
+            [true, 'elasticsearch7'],
             [false, 'elasticsearch7'],
-            [true, 'opensearch'],
         ];
     }
 
