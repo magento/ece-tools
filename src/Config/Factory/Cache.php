@@ -148,13 +148,9 @@ class Cache
 
         // Determine backend based on available configuration
          $backendConfig = !empty($redisConfig) ? $redisConfig : $valkeyConfig;
-        print_r($redisConfig);
-        print_r($valkeyConfig);
-         $envCacheBackendModel = (string)$this->stageConfig->get(DeployInterface::VAR_CACHE_VALKEY_BACKEND);
-
+         $cacheBackendModel = !empty($redisConfig) ? $envCacheRadisBackendModel :$envCacheValkeyBackendModel;
         if ($this->isSynchronizedConfigStructure()) {
-          echo 'true call';
-               $cacheCacheBackend = $this->getSynchronizedConfigStructure($envCacheBackendModel, $backendConfig);
+               $cacheCacheBackend = $this->getSynchronizedConfigStructure($cacheBackendModel, $backendConfig);
                 $cacheCacheBackend['backend_options']['remote_backend_options'] = array_merge(
                     $cacheCacheBackend['backend_options']['remote_backend_options'],
                     $this->getSlaveConnection($envCacheConfiguration, $backendConfig)
@@ -168,8 +164,7 @@ class Cache
                 ],
             ];
         } else {
-          echo 'false call';
-            $cacheCacheBackend = $this->getUnsyncedConfigStructure($envCacheBackendModel, $backendConfig);
+            $cacheCacheBackend = $this->getUnsyncedConfigStructure($cacheBackendModel, $backendConfig);
             $slaveConnection = $this->getSlaveConnection($envCacheConfiguration, $backendConfig);
             if ($slaveConnection) {
                   $cacheCacheBackend['frontend_options']['write_control'] = false;
@@ -376,10 +371,8 @@ class Cache
     {
         $redisModel = (string)$this->stageConfig->get(DeployInterface::VAR_CACHE_REDIS_BACKEND);
         $valkeyModel = (string)$this->stageConfig->get(DeployInterface::VAR_CACHE_VALKEY_BACKEND);
-        echo 'check model';
-        var_dump($redisModel);
-      var_dump($valkeyModel);
-        return $valkeyModel === self::VALKEY_BACKEND_REMOTE_SYNCHRONIZED_CACHE;
+      return $redisModel === self::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE ||
+        $valkeyModel === self::VALKEY_BACKEND_REMOTE_SYNCHRONIZED_CACHE;
     }
 
   /**
