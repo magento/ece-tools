@@ -148,7 +148,7 @@ class Cache
 
         // Determine backend based on available configuration
         $backendConfig = !empty($redisConfig) ? $redisConfig : $valkeyConfig;
-         $envCacheBackendModel = (string)$this->stageConfig->get(DeployInterface::VAR_CACHE_REDIS_BACKEND);
+         $envCacheBackendModel = (string)$this->stageConfig->get(DeployInterface::VAR_CACHE_VALKEY_BACKEND);
 
         if ($this->isSynchronizedConfigStructure()) {
           echo 'true call';
