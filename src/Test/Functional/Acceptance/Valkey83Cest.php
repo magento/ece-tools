@@ -12,7 +12,7 @@ namespace Magento\MagentoCloud\Test\Functional\Acceptance;
  *
  * @group php83
  */
-class Valkey84Cest extends ValkeyCest
+class Valkey83Cest extends ValkeyCest
 {
     /**
      * @return array
