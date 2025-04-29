@@ -94,7 +94,8 @@ class Validator
             '>=2.4.4' => '~7.10.0', // Greater than 7.10 isn't supported on cloud infrastructure.
         ],
         ServiceInterface::NAME_OPENSEARCH => [
-            '>=2.3.7-p3 <2.4.0 || >=2.4.3-p2 <2.4.4-p13 || 2.4.5 || >=2.4.5-p1 <2.4.5-p12' => '~1.1.0 || 1.2.*',
+            '>=2.3.7-p3 <2.4.0 || >=2.4.3-p2 <2.4.4-p7 || >=2.4.5 <2.4.5-p7' => '~1.1.0 || 1.2.*',
+            '>=2.4.4-p8 <2.4.4-p12 || >=2.4.5-p6 <2.4.5-p11'  => '1.3.*',
             '2.4.4-p13 || >=2.4.5-p12' => '^2'
         ],
         ServiceInterface::NAME_RABBITMQ => [
