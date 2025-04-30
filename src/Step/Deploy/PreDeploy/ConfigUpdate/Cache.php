@@ -171,10 +171,9 @@ class Cache implements StepInterface
         $notAllowedValkeyBackend = [
             CacheFactory::VALKEY_BACKEND_VALKEY_CACHE
         ];
-        $isValkeyEnabled=  $this->cacheConfig->isValkeyEnabled();  // @TODO
+        $isValkeyEnabled=  $this->cacheConfig->isValkeyEnabled();
         try {
-            if (in_array($backend, $notAllowedValkeyBackend, true)
-              && !$this->magentoVersion->isGreaterOrEqual('2.4.8') && $isValkeyEnabled['scheme']=='valkey') {
+            if (!$this->magentoVersion->isGreaterOrEqual('2.4.8') && $isValkeyEnabled['scheme']=='valkey') {
                 throw new StepException(
                     sprintf(
                         'Magento version \'%s\' does not support Valkey backend model \'%s\'',
@@ -183,6 +182,17 @@ class Cache implements StepInterface
                     )
                 );
             }
+             if (in_array($backend, $notAllowedRedisBackend, true)
+              && $this->magentoVersion->isGreaterOrEqual('2.4.8')) {
+              $this->logger->warning(
+                sprintf(
+                  'Magento version \'%s\' recommends using Valkey as the cache backend instead of \'%s\'',
+                  $this->magentoVersion->getVersion(),
+                  $backend
+                )
+              );
+            }
+
             if (in_array($backend, $notAllowedRedisBackend, true)
               && !$this->magentoVersion->isGreaterOrEqual('2.3.0')) {
                 throw new StepException(

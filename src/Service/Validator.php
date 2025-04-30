@@ -27,7 +27,10 @@ class Validator
      * Supported version constraints of Valkey services
      */
     private const VALKEY_SUPPORT_VERSIONS = [
-        '*' => ' ~8.0.0 || ~8.0.1',
+        '>=2.4.8' => ' ~8.0.0 || ~8.0.1',
+        '2.4.7-p6' => '~8.0.0 || ~8.0.1',
+        '2.4.6-p11' => '~8.0.0 || ~8.0.1',
+        '2.4.5-p13' => '~8.0.0 || ~8.0.1',
     ];
 
     /**
