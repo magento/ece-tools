@@ -184,7 +184,7 @@ class Cache implements StepInterface
             }
              if (in_array($backend, $notAllowedRedisBackend, true)
               && $this->magentoVersion->isGreaterOrEqual('2.4.8')) {
-              $this->logger->warning(
+               throw new StepException(
                 sprintf(
                   'Magento version \'%s\' recommends using Valkey as the cache backend instead of \'%s\'',
                   $this->magentoVersion->getVersion(),
