@@ -151,6 +151,7 @@ class Cache
          $cacheBackendModel = !empty($redisConfig) ? $envCacheRadisBackendModel :$envCacheValkeyBackendModel;
          print_r($redisConfig);
          print_r($valkeyConfig);
+         print_r($cacheBackendModel);
         if ($this->isSynchronizedConfigStructure()) {
                $cacheCacheBackend = $this->getSynchronizedConfigStructure($cacheBackendModel, $backendConfig);
                 $cacheCacheBackend['backend_options']['remote_backend_options'] = array_merge(
