@@ -434,7 +434,7 @@ class CacheTest extends TestCase
             ->with(['cache' => [
                 'frontend' => ['frontName' => [
                     'backend' => 'Cm_Cache_Backend_Redis',
-                    'backend_options' => ['server' => 'redis.server', 'port' => 6379,],
+                    'backend_options' => ['server' => 'redis.server', 'port' => 6379],
                 ]],
             ]]);
         $this->loggerMock->expects($this->once())
