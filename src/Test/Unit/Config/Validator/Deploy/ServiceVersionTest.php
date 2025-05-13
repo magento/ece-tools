@@ -8,6 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit\Config\Validator\Deploy;
 
 use Magento\MagentoCloud\Config\Validator\Deploy\ServiceVersion;
+use Magento\MagentoCloud\Config\ValidatorException;
 use Magento\MagentoCloud\Service\Detector\DatabaseType;
 use Magento\MagentoCloud\Service\ServiceMismatchException;
 use Magento\MagentoCloud\Service\ServiceInterface;
@@ -16,6 +17,7 @@ use Magento\MagentoCloud\Service\Validator as ServiceVersionValidator;
 use Magento\MagentoCloud\Config\Validator\Result\Error;
 use Magento\MagentoCloud\Config\Validator\Result\Success;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
+use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -55,9 +57,10 @@ class ServiceVersionTest extends TestCase
      */
     private $databaseTypeMock;
 
-    /**
-     * @inheritdoc
-     */
+  /**
+   * @inheritdoc
+   * @throws Exception
+   */
     protected function setUp(): void
     {
         $this->resultFactoryMock = $this->createConfiguredMock(ResultFactory::class, [
@@ -78,7 +81,11 @@ class ServiceVersionTest extends TestCase
         );
     }
 
-    public function testValidate(): void
+  /**
+   * @throws ValidatorException
+   * @throws Exception
+   */
+  public function testValidate(): void
     {
         $this->databaseTypeMock->expects($this->once())
             ->method('getServiceName')
@@ -159,9 +166,11 @@ class ServiceVersionTest extends TestCase
         $this->validator->validate();
     }
 
-    /**
-     * @SuppressWarnings("PHPMD.CyclomaticComplexity")
-     */
+  /**
+   * @SuppressWarnings("PHPMD.CyclomaticComplexity")
+   * @throws ValidatorException
+   * @throws Exception
+   */
     public function testValidateWithErrors(): void
     {
         $this->databaseTypeMock->expects($this->once())
@@ -233,7 +242,10 @@ class ServiceVersionTest extends TestCase
         $this->validator->validate();
     }
 
-    public function testValidateWithException(): void
+  /**
+   * @throws ValidatorException
+   */
+  public function testValidateWithException(): void
     {
         $this->serviceFactory->expects($this->any())
             ->method('create')

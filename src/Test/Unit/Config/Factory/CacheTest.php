@@ -14,6 +14,7 @@ use Magento\MagentoCloud\Config\StageConfigInterface;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Service\Redis;
 use Magento\MagentoCloud\Service\Valkey;
+use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -50,6 +51,7 @@ class CacheTest extends TestCase
 
     /**
      * @inheritDoc
+     * @throws Exception
      */
     protected function setUp(): void
     {
@@ -68,7 +70,10 @@ class CacheTest extends TestCase
         );
     }
 
-    public function testGetWithValidEnvConfig(): void
+  /**
+   * @throws ConfigException
+   */
+  public function testGetWithValidEnvConfig(): void
     {
         $this->stageConfigMock->expects(self::exactly(3))
             ->method('get')
@@ -94,7 +99,10 @@ class CacheTest extends TestCase
         );
     }
 
-    public function testGetWithValidEnvConfigValkey(): void
+  /**
+   * @throws ConfigException
+   */
+  public function testGetWithValidEnvConfigValkey(): void
     {
         $this->stageConfigMock->expects(self::exactly(3))
             ->method('get')
@@ -120,7 +128,10 @@ class CacheTest extends TestCase
         );
     }
 
-    public function testGetWithValidEnvConfigWithEnabledRedisSlave(): void
+  /**
+   * @throws ConfigException
+   */
+  public function testGetWithValidEnvConfigWithEnabledRedisSlave(): void
     {
         $this->stageConfigMock->expects(self::exactly(3))
             ->method('get')
@@ -181,7 +192,10 @@ class CacheTest extends TestCase
         );
     }
 
-    public function testGetWithoutRedisAndWithNotValidEnvConfig(): void
+  /**
+   * @throws ConfigException
+   */
+  public function testGetWithoutRedisAndWithNotValidEnvConfig(): void
     {
         $this->stageConfigMock->expects(self::exactly(2))
             ->method('get')
@@ -197,14 +211,18 @@ class CacheTest extends TestCase
         self::assertEmpty($this->config->get());
     }
 
-    public function testGetWithoutValkeyAndWithNotValidEnvConfig(): void
+  /**
+   * @throws ConfigException
+   */
+  public function testGetWithoutValkeyAndWithNotValidEnvConfig(): void
     {
         $this->stageConfigMock->expects(self::exactly(2))
             ->method('get')
             // withConsecutive() alternative.
             ->willReturnCallback(fn($param) => match ([$param]) {
                 [DeployInterface::VAR_CACHE_CONFIGURATION] => [],
-                [DeployInterface::VAR_CACHE_VALKEY_BACKEND] => ''
+                [DeployInterface::VAR_CACHE_VALKEY_BACKEND] => '',
+                default => null
             });
         $this->valkeyMock->expects(self::once())
             ->method('getConfiguration')
@@ -1166,7 +1184,113 @@ class CacheTest extends TestCase
         );
     }
 
+  /**
+   * @return array
+   * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
+   */
+  public function envConfigurationMergingDataProvider(): array
+  {
+    $redisConfiguration = [
+      'host' => 'master.host',
+      'port' => 'master.port',
+      'password' => 'master.password',
+      'scheme' => 'redis',
+    ];
 
+    $result = [
+      'frontend' => [
+        'default' => [
+          'backend' => 'Cm_Cache_Backend_Redis',
+          'backend_options' => [
+            'server' => 'master.host',
+            'port' => 'master.port',
+            'password' => 'master.password',
+            'database' => Cache::CACHE_DATABASE_DEFAULT,
+          ],
+        ],
+        'page_cache' => [
+          'backend' => 'Cm_Cache_Backend_Redis',
+          'backend_options' => [
+            'server' => 'master.host',
+            'port' => 'master.port',
+            'password' => 'master.password',
+            'database' => Cache::CACHE_DATABASE_PAGE_CACHE,
+          ],
+        ],
+      ],
+    ];
+
+    $resultWithMergedKey = $result;
+    $resultWithMergedKey['key'] = 'value';
+
+    $resultWithMergedHostAndPort = $result;
+    $resultWithMergedHostAndPort['frontend']['default']['backend_options']['server'] = 'merged.server';
+    $resultWithMergedHostAndPort['frontend']['default']['backend_options']['port'] = 'merged.port';
+    $resultWithMergedHostAndPort['frontend']['default']['backend_options']['database'] = '10';
+
+    return [
+      [
+        [],
+        $redisConfiguration,
+        $result,
+      ],
+      [
+        [StageConfigInterface::OPTION_MERGE => true],
+        $redisConfiguration,
+        $result,
+      ],
+      [
+        [
+          StageConfigInterface::OPTION_MERGE => true,
+          'key' => 'value',
+        ],
+        $redisConfiguration,
+        $resultWithMergedKey,
+      ],
+      [
+        [
+          StageConfigInterface::OPTION_MERGE => true,
+          'frontend' => [
+            'default' => [
+              'backend_options' => [
+                'server' => 'merged.server',
+                'port' => 'merged.port',
+                'database' => 10,
+              ],
+            ],
+          ],
+        ],
+        $redisConfiguration,
+        $resultWithMergedHostAndPort,
+      ],
+      [
+        [
+          StageConfigInterface::OPTION_MERGE => false,
+          'frontend' => [
+            'default' => [
+              'backend_options' => [
+                'server' => 'merged.server',
+                'port' => 'merged.port',
+                'database' => 10,
+              ],
+            ],
+          ],
+        ],
+        $redisConfiguration,
+        [
+          'frontend' => [
+            'default' => [
+              'backend_options' => [
+                'server' => 'merged.server',
+                'port' => 'merged.port',
+                'database' => 10,
+              ],
+            ],
+          ],
+        ],
+      ],
+    ];
+  }
     /**
      * @return array
      * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
