@@ -51,7 +51,7 @@ class CacheTest extends TestCase
 
     /**
      * @inheritDoc
-     * @throws Exception
+     * @throws     Exception
      */
     protected function setUp(): void
     {
@@ -70,14 +70,15 @@ class CacheTest extends TestCase
         );
     }
 
-  /**
-   * @throws ConfigException
-   */
-  public function testGetWithValidEnvConfig(): void
+    /**
+     * @throws ConfigException
+     */
+    public function testGetWithValidEnvConfig(): void
     {
         $this->stageConfigMock->expects(self::exactly(3))
             ->method('get')
-            ->willReturnMap([
+            ->willReturnMap(
+                [
                 [
                     DeployInterface::VAR_CACHE_CONFIGURATION,
                     ['frontend' => ['cache_option' => 'value']],
@@ -86,7 +87,8 @@ class CacheTest extends TestCase
                     DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION,
                     false,
                 ],
-            ]);
+                ]
+            );
         $this->redisMock->expects(self::never())
             ->method('getConfiguration');
 
@@ -99,14 +101,15 @@ class CacheTest extends TestCase
         );
     }
 
-  /**
-   * @throws ConfigException
-   */
-  public function testGetWithValidEnvConfigValkey(): void
+    /**
+     * @throws ConfigException
+     */
+    public function testGetWithValidEnvConfigValkey(): void
     {
         $this->stageConfigMock->expects(self::exactly(3))
             ->method('get')
-            ->willReturnMap([
+            ->willReturnMap(
+                [
                 [
                     DeployInterface::VAR_CACHE_CONFIGURATION,
                     ['frontend' => ['cache_option' => 'value']],
@@ -115,7 +118,8 @@ class CacheTest extends TestCase
                     DeployInterface::VAR_VALKEY_USE_SLAVE_CONNECTION,
                     false,
                 ],
-            ]);
+                ]
+            );
         $this->valkeyMock->expects(self::never())
             ->method('getConfiguration');
 
@@ -128,14 +132,15 @@ class CacheTest extends TestCase
         );
     }
 
-  /**
-   * @throws ConfigException
-   */
-  public function testGetWithValidEnvConfigWithEnabledRedisSlave(): void
+    /**
+     * @throws ConfigException
+     */
+    public function testGetWithValidEnvConfigWithEnabledRedisSlave(): void
     {
         $this->stageConfigMock->expects(self::exactly(3))
             ->method('get')
-            ->willReturnMap([
+            ->willReturnMap(
+                [
                 [
                     DeployInterface::VAR_CACHE_CONFIGURATION,
                     ['frontend' => ['cache_option' => 'value']],
@@ -144,15 +149,18 @@ class CacheTest extends TestCase
                     DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION,
                     true,
                 ],
-            ]);
+                ]
+            );
         $this->redisMock->expects(self::never())
             ->method('getConfiguration');
 
         $this->loggerMock->expects(self::once())
             ->method('notice')
-            ->with('The variables \'' . DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION . '\', \''
+            ->with(
+                'The variables \'' . DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION . '\', \''
                 . DeployInterface::VAR_CACHE_REDIS_BACKEND . '\' are ignored'
-                . ' as you set your own cache connection in \'' . DeployInterface::VAR_CACHE_CONFIGURATION . '\'');
+                . ' as you set your own cache connection in \'' . DeployInterface::VAR_CACHE_CONFIGURATION . '\''
+            );
 
         self::assertEquals(
             ['frontend' => ['cache_option' => 'value']],
@@ -167,7 +175,8 @@ class CacheTest extends TestCase
     {
         $this->stageConfigMock->expects(self::exactly(3))
             ->method('get')
-            ->willReturnMap([
+            ->willReturnMap(
+                [
                 [
                     DeployInterface::VAR_CACHE_CONFIGURATION,
                     ['frontend' => ['cache_option' => 'value']],
@@ -176,15 +185,18 @@ class CacheTest extends TestCase
                     DeployInterface::VAR_VALKEY_USE_SLAVE_CONNECTION,
                     true,
                 ],
-            ]);
+                ]
+            );
         $this->valkeyMock->expects(self::never())
             ->method('getConfiguration');
 
         $this->loggerMock->expects(self::once())
             ->method('notice')
-            ->with('The variables \'' . DeployInterface::VAR_VALKEY_USE_SLAVE_CONNECTION . '\', \''
+            ->with(
+                'The variables \'' . DeployInterface::VAR_VALKEY_USE_SLAVE_CONNECTION . '\', \''
                 . DeployInterface::VAR_CACHE_VALKEY_BACKEND . '\' are ignored'
-                . ' as you set your own cache connection in \'' . DeployInterface::VAR_CACHE_CONFIGURATION . '\'');
+                . ' as you set your own cache connection in \'' . DeployInterface::VAR_CACHE_CONFIGURATION . '\''
+            );
 
         self::assertEquals(
             ['frontend' => ['cache_option' => 'value']],
@@ -192,18 +204,20 @@ class CacheTest extends TestCase
         );
     }
 
-  /**
-   * @throws ConfigException
-   */
-  public function testGetWithoutRedisAndWithNotValidEnvConfig(): void
+    /**
+     * @throws ConfigException
+     */
+    public function testGetWithoutRedisAndWithNotValidEnvConfig(): void
     {
         $this->stageConfigMock->expects(self::exactly(2))
             ->method('get')
             // withConsecutive() alternative.
-            ->willReturnCallback(fn($param) => match ([$param]) {
+            ->willReturnCallback(
+                fn($param) => match ([$param]) {
                 [DeployInterface::VAR_CACHE_CONFIGURATION] => [],
                 [DeployInterface::VAR_CACHE_REDIS_BACKEND] => ''
-            });
+                }
+            );
         $this->redisMock->expects(self::once())
             ->method('getConfiguration')
             ->willReturn([]);
@@ -211,19 +225,21 @@ class CacheTest extends TestCase
         self::assertEmpty($this->config->get());
     }
 
-  /**
-   * @throws ConfigException
-   */
-  public function testGetWithoutValkeyAndWithNotValidEnvConfig(): void
+    /**
+     * @throws ConfigException
+     */
+    public function testGetWithoutValkeyAndWithNotValidEnvConfig(): void
     {
         $this->stageConfigMock->expects(self::exactly(2))
             ->method('get')
             // withConsecutive() alternative.
-            ->willReturnCallback(fn($param) => match ([$param]) {
+            ->willReturnCallback(
+                fn($param) => match ([$param]) {
                 [DeployInterface::VAR_CACHE_CONFIGURATION] => [],
                 [DeployInterface::VAR_CACHE_VALKEY_BACKEND] => '',
                 default => null
-            });
+                }
+            );
         $this->valkeyMock->expects(self::once())
             ->method('getConfiguration')
             ->willReturn([]);
@@ -232,16 +248,16 @@ class CacheTest extends TestCase
     }
 
     /**
-     * @param array $envCacheConfig
-     * @param array $masterConnection
-     * @param array $slaveConnection
+     * @param array   $envCacheConfig
+     * @param array   $masterConnection
+     * @param array   $slaveConnection
      * @param boolean $useSlave
-     * @param string $backendModel
-     * @param int $callingGetStageConfig
-     * @param array $expectedResult
+     * @param string  $backendModel
+     * @param int     $callingGetStageConfig
+     * @param array   $expectedResult
      *
      * @dataProvider getFromRelationshipsDataProvider
-     * @throws ConfigException
+     * @throws       ConfigException
      */
     public function testGetFromRelationships(
         $envCacheConfig,
@@ -254,7 +270,8 @@ class CacheTest extends TestCase
     ) {
         $this->stageConfigMock->expects(self::exactly($callingGetStageConfig))
             ->method('get')
-            ->willReturnMap([
+            ->willReturnMap(
+                [
                 [
                     DeployInterface::VAR_CACHE_CONFIGURATION,
                     $envCacheConfig,
@@ -267,7 +284,8 @@ class CacheTest extends TestCase
                     DeployInterface::VAR_CACHE_REDIS_BACKEND,
                     $backendModel,
                 ],
-            ]);
+                ]
+            );
         $this->redisMock->expects(self::once())
             ->method('getConfiguration')
             ->willReturn($masterConnection);
@@ -282,16 +300,16 @@ class CacheTest extends TestCase
     }
 
     /**
-     * @param array $envCacheConfig
-     * @param array $masterConnection
-     * @param array $slaveConnection
+     * @param array   $envCacheConfig
+     * @param array   $masterConnection
+     * @param array   $slaveConnection
      * @param boolean $useSlave
-     * @param string $backendModel
-     * @param int $callingGetStageConfig
-     * @param array $expectedResult
+     * @param string  $backendModel
+     * @param int     $callingGetStageConfig
+     * @param array   $expectedResult
      *
      * @dataProvider getFromRelationshipsDataProviderValkey
-     * @throws ConfigException
+     * @throws       ConfigException
      */
     public function testGetFromRelationshipsValkey(
         $envCacheConfig,
@@ -304,7 +322,8 @@ class CacheTest extends TestCase
     ) {
         $this->stageConfigMock->expects(self::exactly($callingGetStageConfig))
             ->method('get')
-            ->willReturnMap([
+            ->willReturnMap(
+                [
                 [
                     DeployInterface::VAR_CACHE_CONFIGURATION,
                     $envCacheConfig,
@@ -317,7 +336,8 @@ class CacheTest extends TestCase
                     DeployInterface::VAR_CACHE_VALKEY_BACKEND,
                     $backendModel,
                 ],
-            ]);
+                ]
+            );
         $this->valkeyMock->expects(self::once())
             ->method('getConfiguration')
             ->willReturn($masterConnection);
@@ -341,7 +361,7 @@ class CacheTest extends TestCase
      * 4 - value for REDIS_USE_SLAVE_CONNECTION variable
      * 5 - expected result
      *
-     * @return array
+     * @return                                        array
      * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
     public function getFromRelationshipsDataProvider(): array
@@ -725,7 +745,7 @@ class CacheTest extends TestCase
      * 4 - value for VALKEY_USE_SLAVE_CONNECTION variable
      * 5 - expected result
      *
-     * @return array
+     * @return                                        array
      * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
     public function getFromRelationshipsDataProviderValkey(): array
@@ -767,7 +787,8 @@ class CacheTest extends TestCase
         ];
         $resultMasterOnlyConnectionValkeyCache = $resultMasterOnlyConnection;
         $resultMasterOnlyConnectionValkeyCache['frontend']['default']['backend'] = Cache::VALKEY_BACKEND_CM_CACHE;
-        $resultMasterOnlyConnectionValkeyCache['frontend']['page_cache']['backend'] = Cache::VALKEY_BACKEND_VALKEY_CACHE;
+        $resultMasterOnlyConnectionValkeyCache['frontend']['page_cache']['backend'] =
+          Cache::VALKEY_BACKEND_VALKEY_CACHE;
         $resultMasterOnlyConnectionSyncCache = [
             'frontend' => [
                 'default' => [
@@ -830,8 +851,10 @@ class CacheTest extends TestCase
             $slaveConfiguration
         );
         $resultMasterSlaveConnectionValkeyCache = $resultMasterSlaveConnection;
-        $resultMasterSlaveConnectionValkeyCache['frontend']['default']['backend'] = Cache::VALKEY_BACKEND_VALKEY_CACHE;
-        $resultMasterSlaveConnectionValkeyCache['frontend']['page_cache']['backend'] = Cache::VALKEY_BACKEND_VALKEY_CACHE;
+        $resultMasterSlaveConnectionValkeyCache['frontend']['default']['backend'] =
+          Cache::VALKEY_BACKEND_VALKEY_CACHE;
+        $resultMasterSlaveConnectionValkeyCache['frontend']['page_cache']['backend'] =
+          Cache::VALKEY_BACKEND_VALKEY_CACHE;
         $resultMasterSlaveConnectionSyncCache = $resultMasterOnlyConnectionSyncCache;
         $resultMasterSlaveConnectionSyncCache['frontend']['default'] = array_merge_recursive(
             $resultMasterSlaveConnectionSyncCache['frontend']['default'],
@@ -1100,9 +1123,9 @@ class CacheTest extends TestCase
     }
 
     /**
-     * @param array $envCacheConfiguration
-     * @param array $redisConfiguration
-     * @param array $expected
+     * @param  array $envCacheConfiguration
+     * @param  array $redisConfiguration
+     * @param  array $expected
      * @throws ConfigException
      *
      * @dataProvider envConfigurationMergingDataProvider
@@ -1114,7 +1137,8 @@ class CacheTest extends TestCase
     ): void {
         $this->stageConfigMock
             ->method('get')
-            ->willReturnMap([
+            ->willReturnMap(
+                [
                 [
                     DeployInterface::VAR_CACHE_CONFIGURATION,
                     $envCacheConfiguration,
@@ -1127,7 +1151,8 @@ class CacheTest extends TestCase
                     DeployInterface::VAR_CACHE_REDIS_BACKEND,
                     'Cm_Cache_Backend_Redis',
                 ],
-            ]);
+                ]
+            );
         $this->redisMock->expects(self::any())
             ->method('getConfiguration')
             ->willReturn($redisConfiguration);
@@ -1141,11 +1166,10 @@ class CacheTest extends TestCase
         );
     }
 
-
     /**
-     * @param array $envCacheConfiguration
-     * @param array $valkeyConfiguration
-     * @param array $expected
+     * @param  array $envCacheConfiguration
+     * @param  array $valkeyConfiguration
+     * @param  array $expected
      * @throws ConfigException
      *
      * @dataProvider envConfigurationMergingDataProviderValkey
@@ -1157,7 +1181,8 @@ class CacheTest extends TestCase
     ): void {
         $this->stageConfigMock
             ->method('get')
-            ->willReturnMap([
+            ->willReturnMap(
+                [
                 [
                     DeployInterface::VAR_CACHE_CONFIGURATION,
                     $envCacheConfiguration,
@@ -1170,7 +1195,8 @@ class CacheTest extends TestCase
                     DeployInterface::VAR_CACHE_VALKEY_BACKEND,
                     'Cm_Cache_Backend_Redis',
                 ],
-            ]);
+                ]
+            );
         $this->valkeyMock->expects(self::any())
             ->method('getConfiguration')
             ->willReturn($valkeyConfiguration);
@@ -1184,21 +1210,21 @@ class CacheTest extends TestCase
         );
     }
 
-  /**
-   * @return array
-   * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
-   */
-  public function envConfigurationMergingDataProvider(): array
-  {
-    $redisConfiguration = [
-      'host' => 'master.host',
-      'port' => 'master.port',
-      'password' => 'master.password',
-      'scheme' => 'redis',
-    ];
+    /**
+     * @return                                        array
+     * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
+     */
+    public function envConfigurationMergingDataProvider(): array
+    {
+        $redisConfiguration = [
+        'host' => 'master.host',
+        'port' => 'master.port',
+        'password' => 'master.password',
+        'scheme' => 'redis',
+        ];
 
-    $result = [
-      'frontend' => [
+        $result = [
+        'frontend' => [
         'default' => [
           'backend' => 'Cm_Cache_Backend_Redis',
           'backend_options' => [
@@ -1217,37 +1243,37 @@ class CacheTest extends TestCase
             'database' => Cache::CACHE_DATABASE_PAGE_CACHE,
           ],
         ],
-      ],
-    ];
+        ],
+        ];
 
-    $resultWithMergedKey = $result;
-    $resultWithMergedKey['key'] = 'value';
+        $resultWithMergedKey = $result;
+        $resultWithMergedKey['key'] = 'value';
 
-    $resultWithMergedHostAndPort = $result;
-    $resultWithMergedHostAndPort['frontend']['default']['backend_options']['server'] = 'merged.server';
-    $resultWithMergedHostAndPort['frontend']['default']['backend_options']['port'] = 'merged.port';
-    $resultWithMergedHostAndPort['frontend']['default']['backend_options']['database'] = '10';
+        $resultWithMergedHostAndPort = $result;
+        $resultWithMergedHostAndPort['frontend']['default']['backend_options']['server'] = 'merged.server';
+        $resultWithMergedHostAndPort['frontend']['default']['backend_options']['port'] = 'merged.port';
+        $resultWithMergedHostAndPort['frontend']['default']['backend_options']['database'] = '10';
 
-    return [
-      [
+        return [
+        [
         [],
         $redisConfiguration,
         $result,
-      ],
-      [
+        ],
+        [
         [StageConfigInterface::OPTION_MERGE => true],
         $redisConfiguration,
         $result,
-      ],
-      [
+        ],
+        [
         [
           StageConfigInterface::OPTION_MERGE => true,
           'key' => 'value',
         ],
         $redisConfiguration,
         $resultWithMergedKey,
-      ],
-      [
+        ],
+        [
         [
           StageConfigInterface::OPTION_MERGE => true,
           'frontend' => [
@@ -1262,8 +1288,8 @@ class CacheTest extends TestCase
         ],
         $redisConfiguration,
         $resultWithMergedHostAndPort,
-      ],
-      [
+        ],
+        [
         [
           StageConfigInterface::OPTION_MERGE => false,
           'frontend' => [
@@ -1288,11 +1314,11 @@ class CacheTest extends TestCase
             ],
           ],
         ],
-      ],
-    ];
-  }
+        ],
+        ];
+    }
     /**
-     * @return array
+     * @return                                        array
      * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
     public function envConfigurationMergingDataProviderValkey(): array

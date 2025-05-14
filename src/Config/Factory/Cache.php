@@ -76,11 +76,11 @@ class Cache
     private ConfigMerger $configMerger;
 
     /**
-     * @param Valkey $valkey
-     * @param Redis $redis
+     * @param Valkey          $valkey
+     * @param Redis           $redis
      * @param DeployInterface $stageConfig
      * @param LoggerInterface $logger
-     * @param ConfigMerger $configMerger
+     * @param ConfigMerger    $configMerger
      */
     public function __construct(
         Redis $redis,
@@ -168,10 +168,10 @@ class Cache
             $slaveConnection = $this->getSlaveConnection($envCacheConfiguration, $backendConfig);
             if ($slaveConnection) {
                   $cacheCacheBackend['frontend_options']['write_control'] = false;
-                  $cacheCacheBackend['backend_options'] = array_merge(
-                      $cacheCacheBackend['backend_options'],
-                      $slaveConnection
-                  );
+                $cacheCacheBackend['backend_options'] = array_merge(
+                    $cacheCacheBackend['backend_options'],
+                    $slaveConnection
+                );
             }
             $finalConfig = [
                 'frontend' => [
@@ -196,8 +196,8 @@ class Cache
      * also if CACHE_CONFIGURATION is compatible with slave connections.
      * Otherwise, retrieves an empty array.
      *
-     * @param array $envCacheConfiguration
-     * @param array $backendConfig
+     * @param  array $envCacheConfiguration
+     * @param  array $backendConfig
      * @return array
      * @throws ConfigException
      */
@@ -231,16 +231,17 @@ class Cache
 
                   $this->logger->info(sprintf('Set %s slave connection', $backendType));
             } else {
-                  $this->logger->notice(
-                      sprintf(
-                          'The variable \'%s\' is ignored as you\'ve changed cache connection settings in \'%s\'',
-                         $useRedisSlave ? DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION : DeployInterface::VAR_VALKEY_USE_SLAVE_CONNECTION,
-                          DeployInterface::VAR_CACHE_CONFIGURATION
-                      )
-                  );
+                $this->logger->notice(
+                    sprintf(
+                        'The variable \'%s\' is ignored as you\'ve changed cache connection settings in \'%s\'',
+                        $useRedisSlave ?
+                          DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION :
+                          DeployInterface::VAR_VALKEY_USE_SLAVE_CONNECTION,
+                        DeployInterface::VAR_CACHE_CONFIGURATION
+                    )
+                );
             }
         }
-
 
         return $config;
     }
@@ -248,7 +249,7 @@ class Cache
     /**
      * Checks that given cache configuration is valid.
      *
-     * @param array $cacheConfiguration
+     * @param  array $cacheConfiguration
      * @return bool
      */
     private function isCacheConfigurationValid(array $cacheConfiguration): bool
@@ -262,10 +263,10 @@ class Cache
      *
      * Returns false if server or port was changed in merged configuration otherwise false.
      *
-     * @param array $envCacheConfig
-     * @param array $backendConfig
-     * @return bool
-     * @throws ConfigException
+     * @param                                          array $envCacheConfig
+     * @param                                          array $backendConfig
+     * @return                                         bool
+     * @throws                                         ConfigException
      * @SuppressWarnings("PHPMD.CyclomaticComplexity")
      */
     private function isConfigurationCompatibleWithSlaveConnection(
@@ -280,7 +281,8 @@ class Cache
                 ?? null;
 
             if (($host !== null && $host !== $backendConfig['host'])
-                || ($port !== null && $port !== $backendConfig['port'])) {
+                || ($port !== null && $port !== $backendConfig['port'])
+            ) {
                 return false;
             }
         } else {
@@ -289,7 +291,8 @@ class Cache
                 $port = $envCacheConfig['frontend'][$type]['backend_options']['port'] ?? null;
 
                 if (($host !== null && $host !== $backendConfig['host'])
-                    || ($port !== null && $port !== $backendConfig['port'])) {
+                    || ($port !== null && $port !== $backendConfig['port'])
+                ) {
                     return false;
                 }
             }
@@ -301,13 +304,13 @@ class Cache
     /**
      * Returns backend config for unsynced cache implementation.
      *
-     * @param string $envCacheBackendModel
-     * @param array $backendConfig
+     * @param  string $envCacheBackendModel
+     * @param  array  $backendConfig
      * @return array
      */
     private function getUnsyncedConfigStructure(string $envCacheBackendModel, array $backendConfig): array
     {
-      $config = [
+        $config = [
             'backend' => $envCacheBackendModel,
             'backend_options' => [
                 'server' => $backendConfig['host'],
@@ -325,8 +328,8 @@ class Cache
     /**
      * Returns backend config for synchronized cache implementation.
      *
-     * @param string $envCacheBackendModel
-     * @param array $backendConfig
+     * @param  string $envCacheBackendModel
+     * @param  array  $backendConfig
      * @return array
      */
     private function getSynchronizedConfigStructure(string $envCacheBackendModel, array $backendConfig): array
@@ -371,16 +374,15 @@ class Cache
     {
         $redisModel = (string)$this->stageConfig->get(DeployInterface::VAR_CACHE_REDIS_BACKEND);
         $valkeyModel = (string)$this->stageConfig->get(DeployInterface::VAR_CACHE_VALKEY_BACKEND);
-      return $redisModel === self::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE ||
+        return $redisModel === self::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE ||
         $valkeyModel === self::VALKEY_BACKEND_REMOTE_SYNCHRONIZED_CACHE;
     }
 
-  /**
-   * @return array
-   */
-  public function isValkeyEnabled(): array
-  {
-    return $this->valkey->getConfiguration();
-  }
-
+    /**
+     * @return array
+     */
+    public function isValkeyEnabled(): array
+    {
+        return $this->valkey->getConfiguration();
+    }
 }

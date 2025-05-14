@@ -14,25 +14,25 @@ namespace Magento\MagentoCloud\Test\Functional\Acceptance;
  */
 class Valkey82Cest extends ValkeyCest
 {
-  /**
-   * @return array
-   */
-  protected function defaultConfigurationDataProvider(): array
-  {
-    return [
-      [
+    /**
+     * @return array
+     */
+    protected function defaultConfigurationDataProvider(): array
+    {
+        return [
+        [
         'version' => '2.4.6',
-      ],
-    ];
-  }
+        ],
+        ];
+    }
 
-  /**
-   * @return array
-   */
-  protected function wrongConfigurationValkeyBackendDataProvider(): array
-  {
-    return [
-      [
+    /**
+     * @return array
+     */
+    protected function wrongConfigurationValkeyBackendDataProvider(): array
+    {
+        return [
+        [
         'version' => '2.4.6',
         'wrongConfiguration' => [
           'stage' => [
@@ -48,17 +48,17 @@ class Valkey82Cest extends ValkeyCest
           . ' \Magento\Framework\Cache\Backend\Redis,'
           . ' \Magento\Framework\Cache\Backend\RemoteSynchronizedCache.',
         'errorDeployMessage' => '',
-      ],
-    ];
-  }
+        ],
+        ];
+    }
 
-  /**
-   * @return array
-   */
-  protected function valkeyWrongConnectionDataProvider(): array
-  {
-    return [
-      [
+    /**
+     * @return array
+     */
+    protected function valkeyWrongConnectionDataProvider(): array
+    {
+        return [
+        [
         'version' => '2.4.6',
         'configuration' => [
           'stage' => [
@@ -77,8 +77,8 @@ class Valkey82Cest extends ValkeyCest
             ],
           ],
         ],
-      ],
-      [
+        ],
+        [
         'version' => '2.4.6',
         'configuration' => [
           'stage' => [
@@ -98,18 +98,18 @@ class Valkey82Cest extends ValkeyCest
             ],
           ],
         ],
-      ],
-    ];
-  }
+        ],
+        ];
+    }
 
-  /**
-   * @return array
-   * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
-   */
-  protected function goodConfigurationDataProvider(): array
-  {
-    return [
-      [
+    /**
+     * @return                                        array
+     * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
+     */
+    protected function goodConfigurationDataProvider(): array
+    {
+        return [
+        [
         'version' => '2.4.6',
         'configuration' => [
           'stage' => [
@@ -126,8 +126,8 @@ class Valkey82Cest extends ValkeyCest
             'database' => 1,
           ]
         ],
-      ],
-      [
+        ],
+        [
         'version' => '2.4.6',
         'configuration' => [
           'stage' => [
@@ -146,8 +146,8 @@ class Valkey82Cest extends ValkeyCest
         ],
         'expectedBackend' => '\CustomValkeyModel',
         'expectedConfig' => [],
-      ],
-      [
+        ],
+        [
         'version' => '2.4.6',
         'configuration' => [
           'stage' => [
@@ -174,7 +174,7 @@ class Valkey82Cest extends ValkeyCest
             ],
           ],
         ],
-      ],
-    ];
-  }
+        ],
+        ];
+    }
 }
