@@ -26,6 +26,7 @@ use Psr\Log\LoggerInterface;
 
 /**
  * @inheritdoc
+ * @SuppressWarnings("CouplingBetweenObjects")
  */
 class ConfigTest extends TestCase
 {

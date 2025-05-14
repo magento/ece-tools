@@ -59,7 +59,7 @@ class ValidatorTest extends TestCase
 
     /**
      * @throws UndefinedPackageException
-     * @throws \Magento\MagentoCloud\Service\ServiceMismatchException
+     * @throws ServiceMismatchException
      */
     public function testValidateFailMessage()
     {

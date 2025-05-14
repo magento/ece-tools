@@ -24,6 +24,7 @@ use Psr\Log\LoggerInterface;
 
 /**
  * @inheritdoc
+ * @SuppressWarnings("CouplingBetweenObjects")
  */
 class ServiceVersionTest extends TestCase
 {

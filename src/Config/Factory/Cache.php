@@ -103,6 +103,7 @@ class Cache
      * configuration in relationships and if so, makes cache configuration for redis.
      * Returns an empty array in other case.
      *
+     * @SuppressWarnings("CyclomaticComplexity")
      * @return array
      * @throws ConfigException
      */
