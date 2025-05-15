@@ -63,7 +63,7 @@ class ValidatorTest extends TestCase
      */
     public function testValidateFailMessage()
     {
-        $magentoVersion = '2.4.5-p13';
+        $magentoVersion = '2.2.2';
         $version = '6.5';
         $message = sprintf(
             'Magento %s does not support version "%s" for service "%s". '
@@ -88,7 +88,7 @@ class ValidatorTest extends TestCase
      */
     public function testValidateNonexistentService()
     {
-        $magentoVersion = '2.4.5-p13';
+        $magentoVersion = '2.2.2';
         $serviceName = 'nonexistent';
         $message = sprintf(
             'Service "%s" is not supported for Magento "%s"',
