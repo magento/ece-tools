@@ -208,7 +208,7 @@ class ConfigTest extends TestCase
         $this->valkeyMock->expects($this->exactly($valkeyCallTime))
           ->method('getConfiguration')
           ->willReturn($valkeyConfig);
-        $this->redisSessionMock->expects($this->once())
+        $this->valkeySessionMock->expects($this->once())
           ->method('getConfiguration')
           ->willReturn($valkeySessionConfig);
         $package = $this->getMockForAbstractClass(PackageInterface::class);
@@ -261,7 +261,7 @@ class ConfigTest extends TestCase
                 $redisConfig,
                 1,
                 $result,
-                'redis/valkey will be used for session if it was not override by SESSION_CONFIGURATION',
+                'redis will be used for session if it was not override by SESSION_CONFIGURATION',
             ],
             [
                 [StageConfigInterface::OPTION_MERGE => true],
@@ -269,7 +269,7 @@ class ConfigTest extends TestCase
                 $redisConfig,
                 1,
                 $result,
-                'redis/valkey will be used for session if it was not override by SESSION_CONFIGURATION',
+                'redis will be used for session if it was not override by SESSION_CONFIGURATION',
             ],
             [
                 [
@@ -280,7 +280,7 @@ class ConfigTest extends TestCase
                 $redisConfig,
                 1,
                 $resultWithMergedKey,
-                'redis/valkey will be used for session if it was not override by SESSION_CONFIGURATION',
+                'redis will be used for session if it was not override by SESSION_CONFIGURATION',
             ],
             [
                 [
@@ -294,7 +294,7 @@ class ConfigTest extends TestCase
                 $redisConfig,
                 0,
                 $resultWithMergedHostAndPort,
-                'redis-session/valkey-session will be used for session if it was not override by SESSION_CONFIGURATION',
+                'redis-session will be used for session if it was not override by SESSION_CONFIGURATION',
             ],
         ];
     }

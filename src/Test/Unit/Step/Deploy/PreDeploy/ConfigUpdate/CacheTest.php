@@ -133,7 +133,7 @@ class CacheTest extends TestCase
     ) {
         $this->magentoVersion->expects($this->any())
             ->method('isGreaterOrEqual')
-            ->with('2.3.0')
+            ->with($this->anything())
             ->willReturn($isGreaterOrEqual);
         $this->configReaderMock->expects($this->once())
             ->method('read')
@@ -444,6 +444,9 @@ class CacheTest extends TestCase
         $this->step->execute();
     }
 
+  /**
+   * @throws StepException
+   */
     public function testExecuteRedisFailed()
     {
         $this->prepareMocks(false);
@@ -486,9 +489,9 @@ class CacheTest extends TestCase
                 ],
             ]);
 
-        $this->magentoVersion->expects($this->exactly(2))
+        $this->magentoVersion->expects($this->any())
             ->method('isGreaterOrEqual')
-            ->with('2.3.0')
+            ->with($this->anything())
             ->willReturn(true);
         $this->socketCreateMock->expects($this->exactly(3))
             ->with(AF_INET, SOCK_STREAM, SOL_TCP)

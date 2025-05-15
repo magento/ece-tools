@@ -126,7 +126,7 @@ class ServiceVersionTest extends TestCase
         $serviceMariaDB->expects($this->once())
             ->method('getVersion')
             ->willReturn('10.2');
-        $this->serviceFactory->expects($this->exactly(6))
+        $this->serviceFactory->expects($this->exactly(8))
             ->method('create')
             ->willReturnOnConsecutiveCalls(
                 $serviceRmq,
@@ -148,7 +148,7 @@ class ServiceVersionTest extends TestCase
             ['Version of service \'opensearch\' is 1.2', []],
             ['Version of service \'mariadb\' is 10.2', []]
         ];
-        $matcher = $this->exactly(6);
+        $matcher = $this->exactly(8);
         $this->loggerMock->expects($matcher)
             ->method('info')
             // withConsecutive() alternative.
