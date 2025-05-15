@@ -222,7 +222,11 @@ class Validator
                     }
                 }
                 if (!isset($this->supportedVersionList[$serviceName])
-                    && $serviceName !== ServiceInterface::NAME_OPENSEARCH) {
+                    && !in_array($serviceName, [
+                        ServiceInterface::NAME_OPENSEARCH,
+                        ServiceInterface::NAME_VALKEY,
+                        ServiceInterface::NAME_VALKEY_SESSION
+                    ], true)) {
                     throw new ServiceMismatchException(sprintf(
                         'Service "%s" does not have defined configurations for "%s" Magento version',
                         $serviceName,
