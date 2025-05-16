@@ -208,12 +208,12 @@ class ServiceVersionTest extends TestCase
             ->willReturn('2.2');
         $service4 = $this->createMock(ServiceInterface::class);
         $service4->expects($this->once())
-                ->method('getVersion')
-                ->willReturn('8.0');
+            ->method('getVersion')
+            ->willReturn('8.0');
         $service5 = $this->createMock(ServiceInterface::class);
         $service5->expects($this->once())
-                ->method('getVersion')
-                ->willReturn('8.0');
+            ->method('getVersion')
+            ->willReturn('8.0');
         $service6 = $this->createMock(ServiceInterface::class);
         $service6->expects($this->once())
             ->method('getVersion')
@@ -237,7 +237,7 @@ class ServiceVersionTest extends TestCase
                 $service6,
                 $service7,
                 $service8,
-        );
+            );
         $this->serviceVersionValidatorMock->expects($this->exactly(8))
             ->method('validateService')
             // withConsecutive() alternative.
