@@ -1,7 +1,7 @@
 # Critical errors
 !php/const Magento\MagentoCloud\App\Error::BUILD_ENV_PHP_IS_NOT_WRITABLE:
-    title: 'Can not write to the `./app/etc/env.php` file'
-    suggestion: 'Deployment script can not make required changes to the `/app/etc/env.php` file. Check your filesystem permissions.'
+    title: 'Cannot write to the `./app/etc/env.php` file'
+    suggestion: 'Deployment script cannot make required changes to the `/app/etc/env.php` file. Check your filesystem permissions.'
     stage: build
     type: critical
 !php/const Magento\MagentoCloud\App\Error::BUILD_CONFIG_NOT_DEFINED:
@@ -26,13 +26,13 @@
     type: critical
 !php/const Magento\MagentoCloud\App\Error::BUILD_CONFIG_PHP_IS_NOT_WRITABLE:
     step: refresh-modules
-    title: 'Can not write to the `./app/etc/config.php` file'
-    suggestion: 'The deployment script can not make required changes to the `/app/etc/config.php` file. Check your filesystem permissions.'
+    title: 'Cannot write to the `./app/etc/config.php` file'
+    suggestion: 'The deployment script cannot make required changes to the `/app/etc/config.php` file. Check your filesystem permissions.'
     stage: build
     type: critical
 !php/const Magento\MagentoCloud\App\Error::BUILD_CANT_READ_COMPOSER_JSON:
     step: validate-config
-    title: 'Can not read the `composer.json` file'
+    title: 'Cannot read the `composer.json` file'
     suggestion: 'Unable to read the `./composer.json` file. Check file permissions.'
     stage: build
     type: critical
@@ -62,7 +62,7 @@
     type: critical
 !php/const Magento\MagentoCloud\App\Error::BUILD_FILE_LOCAL_XML_IS_NOT_WRITABLE:
     step: set-report-dir-nesting-level
-    title: 'Can not write to the file `/pub/errors/local.xml`'
+    title: 'Cannot write to the file `/pub/errors/local.xml`'
     suggestion: ''
     stage: build
     type: critical
@@ -86,7 +86,7 @@
     type: critical
 !php/const Magento\MagentoCloud\App\Error::BUILD_BALER_NOT_FOUND:
     step: run-baler
-    title: 'The command to run `Baler` for Javascript bundling failed'
+    title: 'The command to run `Baler` for JavaScript bundling failed'
     suggestion: 'Check the `SCD_USE_BALER` environment variable to verify that the Baler module is configured and enabled for JS bundling. If you do not need the Baler module, set `SCD_USE_BALER: false`.'
     stage: build
     type: critical
@@ -99,7 +99,7 @@
 !php/const Magento\MagentoCloud\App\Error::BUILD_SCD_FAILED:
     step: deploy-static-content
     title: 'Command `/bin/magento setup:static-content:deploy` failed'
-    suggestion: 'Check the `cloud.log` for more information. For more detailed command output, add the `VERBOSE_COMMANDS: ''-vvv''` option to  the `.magento.env.yaml` file.'
+    suggestion: 'Check the `cloud.log` for more information. For more detailed command output, add the `VERBOSE_COMMANDS: ''-vvv''` option to the `.magento.env.yaml` file.'
     stage: build
     type: critical
 !php/const Magento\MagentoCloud\App\Error::BUILD_SCD_COMPRESSION_FAILED:
@@ -132,7 +132,7 @@
     stage: build
     type: critical
 !php/const Magento\MagentoCloud\App\Error::BUILD_COMPOSER_PACKAGE_NOT_FOUND:
-    title: 'Can not find the Composer package'
+    title: 'Cannot find the Composer package'
     suggestion: 'If you installed the Adobe Commerce application version directly from the GitHub repository, verify that the `DEPLOYED_MAGENTO_VERSION_FROM_GIT` environment variable is configured.'
     stage: build
     type: critical
@@ -149,8 +149,8 @@
     stage: deploy
     type: critical
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_ENV_PHP_IS_NOT_WRITABLE:
-    title: 'Can not write to the `./app/etc/env.php` file'
-    suggestion: 'Deployment script can not make required changes to the `/app/etc/env.php` file. Check your filesystem permissions.'
+    title: 'Cannot write to the `./app/etc/env.php` file'
+    suggestion: 'Deployment script cannot make required changes to the `/app/etc/env.php` file. Check your filesystem permissions.'
     stage: deploy
     type: critical
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_CONFIG_NOT_DEFINED:
@@ -263,8 +263,8 @@
     type: critical
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_SCD_CANNOT_UPDATE_VERSION:
     step: 'deploy-static-content:generate'
-    title: 'Can not update the deployed version'
-    suggestion: 'Can not update the `./pub/static/deployed_version.txt` file. Check your filesystem permissions.'
+    title: 'Cannot update the deployed version'
+    suggestion: 'Cannot update the `./pub/static/deployed_version.txt` file. Check your filesystem permissions.'
     stage: deploy
     type: critical
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_SCD_CLEAN_FAILED:
@@ -324,16 +324,16 @@
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_CRYPT_KEY_IS_ABSENT:
     step: install-update
     title: 'The `crypt/key`  key value does not exist in the `./app/etc/env.php` file or the `CRYPT_KEY` cloud environment variable'
-    suggestion: "This error occurs if the `./app/etc/env.php` file is not present when Adobe Commerce deployment begins, or if the `crypt/key` value is undefined. If you migrated the database from another environment, retrieve the crypt key value from that environment. Then, add the value to the [CRYPT_KEY](https://experienceleague.adobe.com/docs/commerce-cloud-service/user-guide/configure/env/stage/variables-deploy.html#crypt_key) cloud environment variable in your current environment. See [Adobe Commerce encryption key](https://experienceleague.adobe.com/docs/commerce-cloud-service/user-guide/develop/overview.html#gather-credentials). If you accidentally removed the `./app/etc/env.php` file, use the following command to restore it from the backup files created from a previous deployment: `./vendor/bin/ece-tools backup:restore` CLI command .\""
+    suggestion: "This error occurs if the `./app/etc/env.php` file is not present when Adobe Commerce deployment begins, or if the `crypt/key` value is undefined. If you migrated the database from another environment, retrieve the crypt key value from that environment. Then, add the value to the [CRYPT_KEY](https://experienceleague.adobe.com/docs/commerce-cloud-service/user-guide/configure/env/stage/variables-deploy.html#crypt_key) cloud environment variable in your current environment. See [Adobe Commerce encryption key](https://experienceleague.adobe.com/docs/commerce-cloud-service/user-guide/develop/overview.html#gather-credentials). If you accidentally removed the `./app/etc/env.php` file, use the following command to restore it from the backup files created from a previous deployment: `./vendor/bin/ece-tools backup:restore` CLI command.\""
     stage: deploy
     type: critical
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_ES_CANNOT_CONNECT:
-    title: 'Can not connect to the Elasticsearch service'
+    title: 'Cannot connect to the Elasticsearch service'
     suggestion: 'Check for valid Elasticsearch credentials and verify that the service is running'
     stage: deploy
     type: critical
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_OS_CANNOT_CONNECT:
-    title: 'Can not connect to the OpenSearch service'
+    title: 'Cannot connect to the OpenSearch service'
     suggestion: 'Check for valid OpenSearch credentials and verify that the service is running'
     stage: deploy
     type: critical
@@ -364,7 +364,7 @@
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_REMOVED_SPLIT_DB:
     step: validate-config
     title: 'Split Database was removed starting from Adobe Commerce and Magento Open Source 2.5.0.'
-    suggestion: 'If you use split database you have to revert to or migrate to a single database or use an alternative approach.'
+    suggestion: 'If you use a split database you have to revert to or migrate to a single database or use an alternative approach.'
     stage: deploy
     type: critical
 !php/const Magento\MagentoCloud\App\Error::PD_DEPLOY_IS_FAILED:
@@ -375,7 +375,7 @@
     type: critical
 !php/const Magento\MagentoCloud\App\Error::PD_ENV_PHP_IS_NOT_WRITABLE:
     title: 'The `./app/etc/env.php` file is not writable'
-    suggestion: 'Deployment script can not make required changes to the `/app/etc/env.php` file. Check your filesystem permissions.'
+    suggestion: 'Deployment script cannot make required changes to the `/app/etc/env.php` file. Check your filesystem permissions.'
     stage: post-deploy
     type: critical
 !php/const Magento\MagentoCloud\App\Error::PD_CONFIG_NOT_DEFINED:
@@ -488,17 +488,17 @@
     step: validate-config
     type: warning
 !php/const Magento\MagentoCloud\App\Error::WARN_BALER_CANNOT_BE_USED:
-    title: 'Baler JS bundling can not be used'
+    title: 'Baler JS bundling cannot be used'
     stage: build
     step: run-baler
     type: warning
 !php/const Magento\MagentoCloud\App\Error::WARN_REDIS_SERVICE_NOT_AVAILABLE:
-    title: 'Cache is configured for a Redis service that is not available. Configuration will be ignored.'
+    title: 'Cache is configured for a Redis service that is not available. Configuration is ignored.'
     stage: deploy
     step: 'pre-deploy:cache'
     type: warning
 !php/const Magento\MagentoCloud\App\Error::WARN_VALKEY_SERVICE_NOT_AVAILABLE:
-    title: 'Cache is configured for a Valkey service that is not available. Configuration will be ignored.'
+    title: 'Cache is configured for a Valkey service that is not available. Configuration is ignored.'
     stage: deploy
     step: 'pre-deploy:cache'
     type: warning
@@ -525,7 +525,7 @@
     type: warning
 !php/const Magento\MagentoCloud\App\Error::WARN_ADMIN_EMAIL_NOT_SET:
     title: 'Admin user was not created as admin email was not set'
-    suggestion: 'After installation, you can create an admin user manually:  Use ssh to connect to your environment. Then, run the `bin/magento admin:user:create` command.'
+    suggestion: 'After installation, you can create an admin user manually: Use ssh to connect to your environment. Then, run the `bin/magento admin:user:create` command.'
     stage: deploy
     step: validate-config
     type: warning
@@ -545,13 +545,13 @@
     step: validate-config
     type: warning
 !php/const Magento\MagentoCloud\App\Error::WARN_ES_INSTALLED_BUT_NOT_USED:
-    title: 'Elasticsearch service is installed at infrastructure layer, but it is not used as a search engine.'
+    title: 'Elasticsearch service is installed at the infrastructure layer, but it is not used as a search engine.'
     suggestion: 'Consider removing the Elasticsearch service from the infrastructure layer to optimize resource usage.'
     stage: deploy
     step: validate-config
     type: warning
 !php/const Magento\MagentoCloud\App\Error::WARN_ES_VERSION_MISMATCH:
-    title: 'Elasticsearch service version on infrastructure layer is not compatible with current version of the elasticsearch/elasticsearch module, used by your Adobe Commerce application.'
+    title: 'Elasticsearch service version on infrastructure layer is not compatible with the current version of the elasticsearch/elasticsearch module, used by your Adobe Commerce application.'
     stage: deploy
     step: validate-config
     type: warning
@@ -576,7 +576,7 @@
     step: validate-config
     type: warning
 !php/const Magento\MagentoCloud\App\Error::WARN_CONFIG_WRONG_JSON_FORMAT:
-    title: 'JSON type configuration can not be decoded'
+    title: 'JSON type configuration cannot be decoded'
     stage: deploy
     step: validate-config
     type: warning
@@ -599,12 +599,12 @@
 !php/const Magento\MagentoCloud\App\Error::WARN_DEPRECATED_SPLIT_DB:
     title: 'Split Database was deprecated in the Adobe Commerce and Magento Open Source 2.4.2 and will be removed in 2.5.'
     stage: deploy
-    suggestion: 'If you use split database you should start planning to revert to or migrate to a single database or use an alternative approach.'
+    suggestion: 'If you use a split database you should start planning to revert to or migrate to a single database or use an alternative approach.'
     step: validate-config
     type: warning
 !php/const Magento\MagentoCloud\App\Error::WARN_ENV_PHP_MISSED:
     title: 'Adobe Commerce installation completed, but the `app/etc/env.php` configuration file was missing or empty.'
-    suggestion: 'Required data will be restored from environment configurations and from the .magento.env.yaml file.'
+    suggestion: 'Required data is restored from environment configurations and from the .magento.env.yaml file.'
     stage: deploy
     step: install-update
     type: warning
@@ -619,7 +619,7 @@
     step: 'install-update:db-connection'
     type: warning
 !php/const Magento\MagentoCloud\App\Error::WARN_SPLIT_DB_ENABLING_SKIPPED:
-    title: 'Enabling a split database will be skipped.'
+    title: 'Enabling a split database is skipped.'
     stage: deploy
     step: 'install-update:split-db'
     type: warning
@@ -658,22 +658,22 @@
     step: validate-config
     type: warning
 !php/const Magento\MagentoCloud\App\Error::WARN_CANNOT_FETCH_STORE_URLS:
-    title: 'Can not fetch store urls'
+    title: 'Cannot fetch store urls'
     stage: post-deploy
     step: warm-up
     type: warning
 !php/const Magento\MagentoCloud\App\Error::WARN_CANNOT_FETCH_STORE_URL:
-    title: 'Can not fetch store url'
+    title: 'Cannot fetch store url'
     stage: post-deploy
     step: warm-up
     type: warning
 !php/const Magento\MagentoCloud\App\Error::WARN_CREATE_CONFIG_BACKUP_FAILED:
-    title: 'Can not create backup files'
+    title: 'Cannot create backup files'
     stage: post-deploy
     step: backup
     type: warning
 !php/const Magento\MagentoCloud\App\Error::WARN_CANNOT_GET_PROC_COUNT:
-    title: 'Can not get system processor count:'
+    title: 'Cannot get system processor count:'
     type: warning
     stage: general
 !php/const Magento\MagentoCloud\App\Error::WARN_OS_ES_SERVICES_BOTH_INSTALLED:
@@ -685,6 +685,6 @@
 !php/const Magento\MagentoCloud\App\Error::DEPLOY_MAGENTO_VERSION_DOES_NOT_SUPPORT_OS:
     step: validate-config
     title: 'Incorrect search engine'
-    suggestion: 'This Adobe Commerce or Magento Open Source version does not support OpenSearch. You must use versions 2.3.7-p3, 2.4.3-p2, or later'
+    suggestion: 'This Adobe Commerce or Magento Open Source version does not support OpenSearch. Use versions 2.3.7-p3, 2.4.3-p2, or later'
     stage: deploy
     type: critical
