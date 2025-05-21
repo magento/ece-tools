@@ -171,9 +171,12 @@ class Cache implements StepInterface
             CacheFactory::REDIS_BACKEND_REDIS_CACHE,
             CacheFactory::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE
         ];
-        $notAllowedValkeyBackend = [
-            CacheFactory::VALKEY_BACKEND_VALKEY_CACHE
+        $AllowedRedisBackendCheck = [
+            CacheFactory::REDIS_BACKEND_CM_CACHE,
+            CacheFactory::REDIS_BACKEND_REDIS_CACHE,
+            CacheFactory::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE
         ];
+
         $isValkeyEnabled=  $this->cacheConfig->isValkeyEnabled();
         try {
             if (!$this->magentoVersion->isGreaterOrEqual('2.4.5') && ($isValkeyEnabled['scheme'] ?? '') === 'valkey') {
@@ -185,7 +188,7 @@ class Cache implements StepInterface
                     )
                 );
             }
-            if (in_array($backend, $notAllowedRedisBackend, true)
+            if (in_array($backend, $AllowedRedisBackendCheck, true)
                 && $this->magentoVersion->isGreaterOrEqual('2.4.8')
             ) {
                 $this->logger->warning(
