@@ -20,7 +20,7 @@ class Validator
      * Supported version constraints of Redis services
      */
     private const REDIS_SUPPORT_VERSIONS = [
-        '*' => '~3.2.0 || ~4.0.0 || ~5.0.0 || ~6.0.0 || ~6.2.0 || ~7.0.0 || ~7.2.0',
+      '<=2.4.8' => '~3.2.0 || ~4.0.0 || ~5.0.0 || ~6.0.0 || ~6.2.0 || ~7.0.0 || ~7.2.0',
     ];
 
     /**
