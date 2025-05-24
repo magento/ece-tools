@@ -9,12 +9,12 @@ namespace Magento\MagentoCloud\Config\Validator\Deploy;
 
 use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\App\GenericException;
+use Magento\MagentoCloud\Config\Validator;
+use Magento\MagentoCloud\Config\ValidatorInterface;
 use Magento\MagentoCloud\Service\Detector\DatabaseType;
 use Magento\MagentoCloud\Service\ServiceInterface;
 use Magento\MagentoCloud\Service\ServiceFactory;
 use Magento\MagentoCloud\Service\Validator as ServiceVersionValidator;
-use Magento\MagentoCloud\Config\Validator;
-use Magento\MagentoCloud\Config\ValidatorInterface;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -80,8 +80,8 @@ class ServiceVersion implements ValidatorInterface
             $services = [
                 ServiceInterface::NAME_RABBITMQ,
                 ServiceInterface::NAME_REDIS,
-                ServiceInterface::NAME_VALKEY,
                 ServiceInterface::NAME_REDIS_SESSION,
+                ServiceInterface::NAME_VALKEY,
                 ServiceInterface::NAME_VALKEY_SESSION,
                 ServiceInterface::NAME_ELASTICSEARCH,
                 ServiceInterface::NAME_OPENSEARCH,

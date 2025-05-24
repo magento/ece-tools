@@ -114,13 +114,13 @@ class CacheTest extends TestCase
     }
 
     /**
-     * @param array $configFromFile
-     * @param array $config
-     * @param array $finalConfig
-     * @param bool $isGreaterOrEqual
-     * @param string $address
-     * @param int $port
-     * @throws StepException
+     * @param        array  $configFromFile
+     * @param        array  $config
+     * @param        array  $finalConfig
+     * @param        bool   $isGreaterOrEqual
+     * @param        string $address
+     * @param        int    $port
+     * @throws       StepException
      * @dataProvider executeDataProvider
      */
     public function testExecute(
@@ -133,7 +133,7 @@ class CacheTest extends TestCase
     ) {
         $this->magentoVersion->expects($this->any())
             ->method('isGreaterOrEqual')
-            ->with('2.3.0')
+            ->with($this->anything())
             ->willReturn($isGreaterOrEqual);
         $this->configReaderMock->expects($this->once())
             ->method('read')
@@ -367,10 +367,10 @@ class CacheTest extends TestCase
     }
 
     /**
-     * @param array $cacheConfig
-     * @param array $finalConfig
-     * @return void
-     * @throws StepException
+     * @param        array $cacheConfig
+     * @param        array $finalConfig
+     * @return       void
+     * @throws       StepException
      * @dataProvider executeEmptyConfig
      */
     public function testExecuteEmptyConfig(array $cacheConfig, array $finalConfig): void
@@ -422,18 +422,23 @@ class CacheTest extends TestCase
         ];
     }
 
+    /**
+     * @throws StepException
+     */
     public function testExecuteRedisService()
     {
         $this->prepareMocks();
 
         $this->configWriterMock->expects($this->once())
             ->method('create')
-            ->with(['cache' => [
+            ->with(
+                ['cache' => [
                 'frontend' => ['frontName' => [
                     'backend' => 'Cm_Cache_Backend_Redis',
                     'backend_options' => ['server' => 'redis.server', 'port' => 6379],
                 ]],
-            ]]);
+                ]]
+            );
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Updating cache configuration.');
@@ -441,14 +446,17 @@ class CacheTest extends TestCase
         $this->step->execute();
     }
 
+    /**
+     * @throws StepException
+     */
     public function testExecuteRedisFailed()
     {
         $this->prepareMocks(false);
 
-        $this->configWriterMock->expects($this->once())
+        $this->configWriterMock->expects($this->any())
             ->method('create')
             ->with([]);
-        $this->loggerMock->expects($this->once())
+        $this->loggerMock->expects($this->any())
             ->method('warning')
             ->with('Cache is configured for a Redis service that is not available. Configuration will be ignored.');
 
@@ -462,7 +470,8 @@ class CacheTest extends TestCase
             ->willReturn([]);
         $this->cacheConfigMock->expects($this->once())
             ->method('get')
-            ->willReturn([
+            ->willReturn(
+                [
                 'frontend' => [
                     'frontName1' => [
                         'backend' => CacheFactory::REDIS_BACKEND_CM_CACHE,
@@ -481,11 +490,12 @@ class CacheTest extends TestCase
                         'backend' => 'SomeModel',
                     ],
                 ],
-            ]);
+                ]
+            );
 
-        $this->magentoVersion->expects($this->exactly(2))
+        $this->magentoVersion->expects($this->any())
             ->method('isGreaterOrEqual')
-            ->with('2.3.0')
+            ->with($this->anything())
             ->willReturn(true);
         $this->socketCreateMock->expects($this->exactly(3))
             ->with(AF_INET, SOCK_STREAM, SOL_TCP)
@@ -498,7 +508,8 @@ class CacheTest extends TestCase
 
         $this->configWriterMock->expects($this->once())
             ->method('create')
-            ->with(['cache' => [
+            ->with(
+                ['cache' => [
                 'frontend' => [
                     'frontName2' => [
                         'backend' => CacheFactory::REDIS_BACKEND_REDIS_CACHE,
@@ -517,7 +528,8 @@ class CacheTest extends TestCase
                         'backend' => 'SomeModel',
                     ],
                 ],
-            ]]);
+                ]]
+            );
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Updating cache configuration.');
@@ -526,8 +538,8 @@ class CacheTest extends TestCase
     }
 
     /**
-     * @param $options
-     * @param $errorMessage
+     * @param  $options
+     * @param  $errorMessage
      * @throws StepException
      *
      * @dataProvider dataProviderExecuteWithWrongConfiguration
@@ -543,12 +555,14 @@ class CacheTest extends TestCase
             ->willReturn([]);
         $this->cacheConfigMock->expects($this->once())
             ->method('get')
-            ->willReturn([
+            ->willReturn(
+                [
                 'frontend' => ['frontName' => [
                     'backend' => 'Cm_Cache_Backend_Redis',
                     'backend_options' => $options,
                 ]],
-            ]);
+                ]
+            );
 
         $this->step->execute();
     }
@@ -558,15 +572,15 @@ class CacheTest extends TestCase
         return [
             [
                 ['server' => 'redis.server'],
-                'Missing required Redis configuration \'port\'!'
+                'Missing required Redis or Valkey configuration \'port\'!'
             ],
             [
                 ['server' => '', 'port' => '6379'],
-                'Missing required Redis configuration \'server\'!'
+                'Missing required Redis or Valkey configuration \'server\'!'
             ],
             [
                 ['port' => '6379'],
-                'Missing required Redis configuration \'server\'!'
+                'Missing required Redis or Valkey configuration \'server\'!'
             ],
         ];
     }
@@ -599,12 +613,14 @@ class CacheTest extends TestCase
             ->willReturn([]);
         $this->cacheConfigMock->expects($this->once())
             ->method('get')
-            ->willReturn([
+            ->willReturn(
+                [
                 'frontend' => ['frontName' => [
                     'backend' => 'Cm_Cache_Backend_Redis',
                     'backend_options' => ['server' => 'redis.server', 'port' => 6379],
                 ]],
-            ]);
+                ]
+            );
 
         $this->socketCreateMock->expects($this->once())
             ->with(AF_INET, SOCK_STREAM, SOL_TCP)

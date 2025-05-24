@@ -231,14 +231,14 @@ class ValidatorTest extends TestCase
                     'Use the following type: boolean.'
                 )
             ],
-          [
+            [
             DeployInterface::VAR_VALKEY_USE_SLAVE_CONNECTION,
             0,
             new Error(
-              'The VALKEY_USE_SLAVE_CONNECTION variable contains an invalid value of type integer. ' .
-              'Use the following type: boolean.'
+                'The VALKEY_USE_SLAVE_CONNECTION variable contains an invalid value of type integer. ' .
+                 'Use the following type: boolean.'
             )
-          ],
+            ],
             [
                 DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION,
                 0,
