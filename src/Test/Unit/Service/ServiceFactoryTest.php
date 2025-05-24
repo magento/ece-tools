@@ -13,6 +13,7 @@ use Magento\MagentoCloud\Service\Database;
 use Magento\MagentoCloud\Service\ElasticSearch;
 use Magento\MagentoCloud\Service\RabbitMq;
 use Magento\MagentoCloud\Service\Redis;
+use Magento\MagentoCloud\Service\Valkey;
 use Magento\MagentoCloud\Service\ServiceFactory;
 use Magento\MagentoCloud\Service\ServiceInterface;
 use Magento\MagentoCloud\Service\ServiceMismatchException;

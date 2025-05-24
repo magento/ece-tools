@@ -8,20 +8,23 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit\Config\Validator\Deploy;
 
 use Magento\MagentoCloud\Config\Validator\Deploy\ServiceVersion;
+use Magento\MagentoCloud\Config\ValidatorException;
 use Magento\MagentoCloud\Service\Detector\DatabaseType;
-use Magento\MagentoCloud\Service\ServiceMismatchException;
-use Magento\MagentoCloud\Service\ServiceInterface;
 use Magento\MagentoCloud\Service\ServiceFactory;
+use Magento\MagentoCloud\Service\ServiceInterface;
+use Magento\MagentoCloud\Service\ServiceMismatchException;
 use Magento\MagentoCloud\Service\Validator as ServiceVersionValidator;
 use Magento\MagentoCloud\Config\Validator\Result\Error;
 use Magento\MagentoCloud\Config\Validator\Result\Success;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
+use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
 /**
  * @inheritdoc
+ * @SuppressWarnings("CouplingBetweenObjects")
  */
 class ServiceVersionTest extends TestCase
 {
@@ -57,13 +60,17 @@ class ServiceVersionTest extends TestCase
 
     /**
      * @inheritdoc
+     * @throws     Exception
      */
     protected function setUp(): void
     {
-        $this->resultFactoryMock = $this->createConfiguredMock(ResultFactory::class, [
+        $this->resultFactoryMock = $this->createConfiguredMock(
+            ResultFactory::class,
+            [
             'success' => $this->createMock(Success::class),
             'error' => $this->createMock(Error::class)
-        ]);
+            ]
+        );
         $this->serviceVersionValidatorMock = $this->createMock(ServiceVersionValidator::class);
         $this->serviceFactory = $this->createMock(ServiceFactory::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
@@ -78,6 +85,10 @@ class ServiceVersionTest extends TestCase
         );
     }
 
+    /**
+     * @throws ValidatorException
+     * @throws Exception
+     */
     public function testValidate(): void
     {
         $this->databaseTypeMock->expects($this->once())
@@ -95,14 +106,14 @@ class ServiceVersionTest extends TestCase
         $serviceRedisSession->expects($this->once())
             ->method('getVersion')
             ->willReturn('3.2');
-      $serviceValkey = $this->createMock(ServiceInterface::class);
-      $serviceValkey->expects($this->once())
-        ->method('getVersion')
-        ->willReturn('8.0');
-      $serviceValkeySession = $this->createMock(ServiceInterface::class);
-      $serviceValkeySession->expects($this->once())
-        ->method('getVersion')
-        ->willReturn('8.0');
+        $serviceValkey = $this->createMock(ServiceInterface::class);
+        $serviceValkey->expects($this->once())
+            ->method('getVersion')
+            ->willReturn('8.0');
+        $serviceValkeySession = $this->createMock(ServiceInterface::class);
+        $serviceValkeySession->expects($this->once())
+            ->method('getVersion')
+            ->willReturn('8.0');
         $serviceES = $this->createMock(ServiceInterface::class);
         $serviceES->expects($this->once())
             ->method('getVersion')
@@ -115,7 +126,7 @@ class ServiceVersionTest extends TestCase
         $serviceMariaDB->expects($this->once())
             ->method('getVersion')
             ->willReturn('10.2');
-        $this->serviceFactory->expects($this->exactly(6))
+        $this->serviceFactory->expects($this->exactly(8))
             ->method('create')
             ->willReturnOnConsecutiveCalls(
                 $serviceRmq,
@@ -137,21 +148,25 @@ class ServiceVersionTest extends TestCase
             ['Version of service \'opensearch\' is 1.2', []],
             ['Version of service \'mariadb\' is 10.2', []]
         ];
-        $matcher = $this->exactly(6);
+        $matcher = $this->exactly(8);
         $this->loggerMock->expects($matcher)
             ->method('info')
             // withConsecutive() alternative.
             ->with(
-                $this->callback(function ($param) use ($series, $matcher) {
-                    $arguments = $series[$this->resolveInvocations($matcher) - 1];  // retrieves arguments
-                    $this->assertStringContainsString($arguments[0], $param); // performs assertion on the argument
-                    return true;
-                }),
-                $this->callback(function ($param) use ($series, $matcher) {
-                    $arguments = $series[$this->resolveInvocations($matcher) - 1];  // retrieves arguments
-                    $this->assertSame($arguments[1], $param); // performs assertion on the argument
-                    return true;
-                }),
+                $this->callback(
+                    function ($param) use ($series, $matcher) {
+                        $arguments = $series[$this->resolveInvocations($matcher) - 1];  // retrieves arguments
+                        $this->assertStringContainsString($arguments[0], $param); // performs assertion on the argument
+                        return true;
+                    }
+                ),
+                $this->callback(
+                    function ($param) use ($series, $matcher) {
+                        $arguments = $series[$this->resolveInvocations($matcher) - 1];  // retrieves arguments
+                        $this->assertSame($arguments[1], $param); // performs assertion on the argument
+                        return true;
+                    }
+                ),
             );
         $this->resultFactoryMock->expects($this->once())
             ->method('success');
@@ -161,6 +176,8 @@ class ServiceVersionTest extends TestCase
 
     /**
      * @SuppressWarnings("PHPMD.CyclomaticComplexity")
+     * @throws                                         ValidatorException
+     * @throws                                         Exception
      */
     public function testValidateWithErrors(): void
     {
@@ -173,7 +190,9 @@ class ServiceVersionTest extends TestCase
             'error message 3',
             'error message 4',
             'error message 5',
-            'error message 6'
+            'error message 6',
+            'error message 7',
+            'error message 8',
         ];
         $service1 = $this->createMock(ServiceInterface::class);
         $service1->expects($this->once())
@@ -190,19 +209,36 @@ class ServiceVersionTest extends TestCase
         $service4 = $this->createMock(ServiceInterface::class);
         $service4->expects($this->once())
             ->method('getVersion')
-            ->willReturn('7.7');
+            ->willReturn('8.0');
         $service5 = $this->createMock(ServiceInterface::class);
         $service5->expects($this->once())
             ->method('getVersion')
-            ->willReturn('1.2');
+            ->willReturn('8.0');
         $service6 = $this->createMock(ServiceInterface::class);
         $service6->expects($this->once())
             ->method('getVersion')
+            ->willReturn('7.7');
+        $service7 = $this->createMock(ServiceInterface::class);
+        $service7->expects($this->once())
+            ->method('getVersion')
+            ->willReturn('1.2');
+        $service8 = $this->createMock(ServiceInterface::class);
+        $service8->expects($this->once())
+            ->method('getVersion')
             ->willReturn('5.7');
-        $this->serviceFactory->expects($this->exactly(6))
+        $this->serviceFactory->expects($this->exactly(8))
             ->method('create')
-            ->willReturnOnConsecutiveCalls($service1, $service2, $service3, $service4, $service5, $service6);
-        $this->serviceVersionValidatorMock->expects($this->exactly(6))
+            ->willReturnOnConsecutiveCalls(
+                $service1,
+                $service2,
+                $service3,
+                $service4,
+                $service5,
+                $service6,
+                $service7,
+                $service8,
+            );
+        $this->serviceVersionValidatorMock->expects($this->exactly(8))
             ->method('validateService')
             // withConsecutive() alternative.
             ->willReturnCallback(
@@ -214,16 +250,18 @@ class ServiceVersionTest extends TestCase
                     } elseif ($arg1 == ServiceInterface::NAME_REDIS_SESSION && $arg2 == '2.2') {
                         return $errorMessages[2];
                     } elseif ($arg1 == ServiceInterface::NAME_VALKEY && $arg2 == '8.0') {
-                        return $errorMessages[1];
-                    } elseif ($arg1 == ServiceInterface::NAME_VALKEY_SESSION && $arg2 == '8.0') {
-                        return $errorMessages[2];
-                    } elseif ($arg1 == ServiceInterface::NAME_ELASTICSEARCH && $arg2 == '7.7') {
                         return $errorMessages[3];
-                    } elseif ($arg1 == ServiceInterface::NAME_OPENSEARCH && $arg2 == '1.2') {
+                    } elseif ($arg1 == ServiceInterface::NAME_VALKEY_SESSION && $arg2 == '8.0') {
                         return $errorMessages[4];
-                    } elseif ($arg1 == ServiceInterface::NAME_DB_MYSQL && $arg2 == '5.7') {
+                    } elseif ($arg1 == ServiceInterface::NAME_ELASTICSEARCH && $arg2 == '7.7') {
                         return $errorMessages[5];
+                    } elseif ($arg1 == ServiceInterface::NAME_OPENSEARCH && $arg2 == '1.2') {
+                        return $errorMessages[6];
+                    } elseif ($arg1 == ServiceInterface::NAME_DB_MYSQL && $arg2 == '5.7') {
+                        return $errorMessages[7];
                     }
+
+                    return '';
                 }
             );
         $this->resultFactoryMock->expects($this->once())
@@ -233,6 +271,9 @@ class ServiceVersionTest extends TestCase
         $this->validator->validate();
     }
 
+    /**
+     * @throws ValidatorException
+     */
     public function testValidateWithException(): void
     {
         $this->serviceFactory->expects($this->any())

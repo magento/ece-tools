@@ -63,7 +63,7 @@ abstract class ValkeyCest extends AbstractCest
         $this->checkArraySubset(
             [
                 'backend_options' => [
-                    'server' => 'valkeycache',
+                    'server' => 'valkey',
                     'port' => '6379',
                     'database' => 1,
                 ]
@@ -79,7 +79,7 @@ abstract class ValkeyCest extends AbstractCest
         $this->checkArraySubset(
             [
                 'backend_options' => [
-                    'server' => 'valkeycache',
+                    'server' => 'valkey',
                     'port' => '6379',
                     'database' => 2,
                 ]

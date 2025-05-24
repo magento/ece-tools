@@ -55,7 +55,7 @@ class MasterSlaveTest extends TestCase
         $inputMock = $this->getMockForAbstractClass(InputInterface::class);
         $outputMock = $this->getMockForAbstractClass(OutputInterface::class);
 
-        $this->deployConfigMock->expects($this->exactly(2))
+        $this->deployConfigMock->expects($this->exactly(3))
             ->method('get')
             ->willReturnMap([
                 [DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION, true],
@@ -82,14 +82,14 @@ class MasterSlaveTest extends TestCase
             [$outputMock, 'Valkey slave connection is not configured']
         ];
 
-        $this->deployConfigMock->expects($this->exactly(2))
+        $this->deployConfigMock->expects($this->exactly(3))
             ->method('get')
             ->willReturnMap([
                 [DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION, false],
                 [DeployInterface::VAR_VALKEY_USE_SLAVE_CONNECTION, false],
                 [DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION, false],
             ]);
-        $this->outputFormatterMock->expects($this->exactly(2))
+        $this->outputFormatterMock->expects($this->exactly(3))
             ->method('writeItem')
             ->willReturnCallback(function (...$args) use (&$series) {
                 $expectedArgs = array_shift($series);

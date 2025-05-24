@@ -44,8 +44,8 @@ class Valkey84Cest extends ValkeyCest
                 'buildSuccess' => false,
                 'deploySuccess' => false,
                 'errorBuildMessage' => 'The VALKEY_BACKEND variable contains an invalid value TestVALKEYModel.'
-                    . ' Use one of the available value options: Cm_Cache_Backend_VALKEY,'
-                    . ' \Magento\Framework\Cache\Backend\VALKEY,'
+                    . ' Use one of the available value options: Cm_Cache_Backend_Redis,'
+                    . ' \Magento\Framework\Cache\Backend\Redis,'
                     . ' \Magento\Framework\Cache\Backend\RemoteSynchronizedCache.',
                 'errorDeployMessage' => '',
             ],
@@ -67,7 +67,7 @@ class Valkey84Cest extends ValkeyCest
                                 '_merge' => true,
                                 'frontend' => [
                                     'default' => [
-                                        'backend' => '\Magento\Framework\Cache\Backend\Valkey',
+                                        'backend' => '\Magento\Framework\Cache\Backend\Redis',
                                         'backend_options' => [
                                             'port' => 9999,
                                         ],
@@ -114,14 +114,14 @@ class Valkey84Cest extends ValkeyCest
                 'configuration' => [
                     'stage' => [
                         'deploy' => [
-                            'VALKEY_BACKEND' => '\Magento\Framework\Cache\Backend\Valkey',
+                            'VALKEY_BACKEND' => '\Magento\Framework\Cache\Backend\Redis',
                         ],
                     ],
                 ],
-                'expectedBackend' => '\Magento\Framework\Cache\Backend\Valkey',
+                'expectedBackend' => '\Magento\Framework\Cache\Backend\Redis',
                 'expectedConfig' => [
                     'backend_options' => [
-                        'server' => 'valkeycache',
+                        'server' => 'valkey',
                         'port' => '6379',
                         'database' => 1,
                     ]
@@ -159,10 +159,10 @@ class Valkey84Cest extends ValkeyCest
                 'expectedBackend' => '\Magento\Framework\Cache\Backend\RemoteSynchronizedCache',
                 'expectedConfig' => [
                     'backend_options' => [
-                        'remote_backend' => '\Magento\Framework\Cache\Backend\Valkey',
+                        'remote_backend' => '\Magento\Framework\Cache\Backend\Redis',
                         'remote_backend_options' => [
                             'persistent' => 0,
-                            'server' => 'valkeycache',
+                            'server' => 'valkey',
                             'database' => 1,
                             'port' => '6379',
                             'password' => '',
