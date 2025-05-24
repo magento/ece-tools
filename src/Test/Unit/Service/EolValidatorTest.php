@@ -181,7 +181,7 @@ class EolValidatorTest extends TestCase
         ->method('getVersion')
         ->willReturn('8.0');
         // withConsecutive() alternative.
-        $this->serviceFactoryMock->expects($this->exactly(6))
+        $this->serviceFactoryMock->expects($this->exactly(8))
             ->method('create')
             ->willReturnCallback(fn($param) => match ($param) {
                 'php' => $service1,

@@ -51,10 +51,10 @@ class DeployTest extends TestCase
     }
 
     /**
-     * @param string $name
-     * @param mixed $expectedValue
-     * @param array $mergedConfig
-     * @param array|null $schema
+     * @param        string     $name
+     * @param        mixed      $expectedValue
+     * @param        array      $mergedConfig
+     * @param        array|null $schema
      * @dataProvider getDataProvider
      *
      * @throws ConfigException
@@ -77,47 +77,45 @@ class DeployTest extends TestCase
         $this->assertEquals($expectedValue, $this->deployConfig->get($name));
     }
 
+    /**
+     * @param        string     $name
+     * @param        mixed      $expectedValue
+     * @param        array      $mergedConfig
+     * @param        array|null $schema
+     * @dataProvider getDataProviderValkey
+     *
+     * @throws ConfigException
+     */
+    public function testGetValkey(string $name, $expectedValue, array $mergedConfig, array | null $schema = null): void
+    {
+        $this->mergedConfigMock->expects($this->once())
+            ->method('get')
+            ->willReturn($mergedConfig);
 
-  /**
-   * @param string $name
-   * @param mixed $expectedValue
-   * @param array $mergedConfig
-   * @param array|null $schema
-   * @dataProvider getDataProviderValkey
-   *
-   * @throws ConfigException
-   */
-  public function testGetValkey(string $name, $expectedValue, array $mergedConfig, array | null $schema = null): void
-  {
-    $this->mergedConfigMock->expects($this->once())
-      ->method('get')
-      ->willReturn($mergedConfig);
+        if ($schema !== null) {
+            $this->schemaMock->expects($this->once())
+                ->method('getVariables')
+                ->willReturn($schema);
+        } else {
+            $this->schemaMock->expects($this->never())
+                ->method('getVariables');
+        }
 
-    if ($schema !== null) {
-      $this->schemaMock->expects($this->once())
-        ->method('getVariables')
-        ->willReturn($schema);
-    } else {
-      $this->schemaMock->expects($this->never())
-        ->method('getVariables');
+        $this->assertEquals($expectedValue, $this->deployConfig->get($name));
     }
 
-    $this->assertEquals($expectedValue, $this->deployConfig->get($name));
-  }
-
-
-  /**
-   * @return array
-   */
-  public function getDataProvider(): array
-  {
-    return [
-      'integer config value' => [
+    /**
+     * @return array
+     */
+    public function getDataProvider(): array
+    {
+        return [
+        'integer config value' => [
         Deploy::VAR_SCD_STRATEGY,
         3,
         [Deploy::VAR_SCD_STRATEGY => 3],
-      ],
-      'array config value' => [
+        ],
+        'array config value' => [
         Deploy::VAR_SESSION_CONFIGURATION,
         [
           'save' => 'redis'
@@ -125,13 +123,13 @@ class DeployTest extends TestCase
         [
           Deploy::VAR_SESSION_CONFIGURATION => ['save' => 'redis']
         ],
-      ],
-      'null config value' => [
+        ],
+        'null config value' => [
         Deploy::VAR_SCD_MAX_EXEC_TIME,
         null,
         [Deploy::VAR_SCD_MAX_EXEC_TIME => null],
-      ],
-      'string value not a json' => [
+        ],
+        'string value not a json' => [
         Deploy::VAR_SCD_STRATEGY,
         'compact',
         [
@@ -142,8 +140,8 @@ class DeployTest extends TestCase
             Schema::SCHEMA_TYPE => ['string'],
           ],
         ],
-      ],
-      'string value wrong json format and not array-type config' => [
+        ],
+        'string value wrong json format and not array-type config' => [
         Deploy::VAR_SCD_STRATEGY,
         '{compact}',
         [
@@ -154,8 +152,8 @@ class DeployTest extends TestCase
             Schema::SCHEMA_TYPE => ['string'],
           ],
         ],
-      ],
-      'correct json format value and array-type config' => [
+        ],
+        'correct json format value and array-type config' => [
         Deploy::VAR_SESSION_CONFIGURATION,
         [
           'save' => 'redis',
@@ -174,8 +172,8 @@ class DeployTest extends TestCase
             Schema::SCHEMA_TYPE => ['array'],
           ],
         ],
-      ],
-      'wrong json format value and array-type config (default value usage)' => [
+        ],
+        'wrong json format value and array-type config (default value usage)' => [
         Deploy::VAR_SESSION_CONFIGURATION,
         ['default' => 'value'],
         [
@@ -190,11 +188,11 @@ class DeployTest extends TestCase
             ],
           ],
         ],
-      ],
-    ];
-  }
+        ],
+        ];
+    }
 
-  /**
+    /**
      * @return array
      */
     public function getDataProviderValkey(): array

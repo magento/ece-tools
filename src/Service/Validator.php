@@ -20,14 +20,17 @@ class Validator
      * Supported version constraints of Redis services
      */
     private const REDIS_SUPPORT_VERSIONS = [
-        '*' => '~3.2.0 || ~4.0.0 || ~5.0.0 || ~6.0.0 || ~6.2.0 || ~7.0.0 || ~7.2.0',
+      '<=2.4.8' => '~3.2.0 || ~4.0.0 || ~5.0.0 || ~6.0.0 || ~6.2.0 || ~7.0.0 || ~7.2.0',
     ];
 
     /**
      * Supported version constraints of Valkey services
      */
     private const VALKEY_SUPPORT_VERSIONS = [
-        '*' => ' ~7.2.0 || ~8.0.0',
+        '2.4.5-p13 <2.4.6' => '~8.0.0 || ~8.0.1',
+        '2.4.6-p11 <2.4.7' => '~8.0.0 || ~8.0.1',
+        '2.4.7-p6 <2.4.8' => '~8.0.0 || ~8.0.1',
+        '>=2.4.8' => ' ~8.0.0 || ~8.0.1',
     ];
 
     /**
@@ -219,7 +222,11 @@ class Validator
                     }
                 }
                 if (!isset($this->supportedVersionList[$serviceName])
-                    && $serviceName !== ServiceInterface::NAME_OPENSEARCH) {
+                    && !in_array($serviceName, [
+                        ServiceInterface::NAME_OPENSEARCH,
+                        ServiceInterface::NAME_VALKEY,
+                        ServiceInterface::NAME_VALKEY_SESSION
+                    ], true)) {
                     throw new ServiceMismatchException(sprintf(
                         'Service "%s" does not have defined configurations for "%s" Magento version',
                         $serviceName,

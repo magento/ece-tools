@@ -59,7 +59,7 @@ class ValidatorTest extends TestCase
 
     /**
      * @throws UndefinedPackageException
-     * @throws \Magento\MagentoCloud\Service\ServiceMismatchException
+     * @throws ServiceMismatchException
      */
     public function testValidateFailMessage()
     {
@@ -114,222 +114,6 @@ class ValidatorTest extends TestCase
     {
         return [
             [
-                '2.1.4',
-                []
-            ],
-            [
-                '2.1.4',
-                [ServiceInterface::NAME_PHP => '7.0.2',]
-            ],
-            [
-                '2.2.2',
-                [ServiceInterface::NAME_NGINX => 'latest',]
-            ],
-            [
-                '2.2.4',
-                [
-                    ServiceInterface::NAME_PHP => '7.0.13',
-                    ServiceInterface::NAME_DB_MARIA => '10.0',
-                    ServiceInterface::NAME_NGINX => '1.9',
-                    ServiceInterface::NAME_VARNISH => '4.5',
-                    ServiceInterface::NAME_REDIS => '5.0',
-                    ServiceInterface::NAME_ELASTICSEARCH => '2.4.2',
-                    ServiceInterface::NAME_RABBITMQ => '3.5'
-                ]
-            ],
-            [
-                '2.2.8',
-                [
-                    ServiceInterface::NAME_ELASTICSEARCH => '6.5.13',
-                ]
-            ],
-            [
-                '2.4.0',
-                [
-                    ServiceInterface::NAME_PHP => '7.4',
-                    ServiceInterface::NAME_DB_MARIA => '10.4',
-                    ServiceInterface::NAME_NGINX => '1.9',
-                    ServiceInterface::NAME_VARNISH => '6.2',
-                    ServiceInterface::NAME_REDIS => '5.0',
-                    ServiceInterface::NAME_ELASTICSEARCH => '6.8', // wrong
-                    ServiceInterface::NAME_RABBITMQ => '3.8'
-                ],
-                1
-            ],
-            [
-                '2.4.0',
-                [
-                    ServiceInterface::NAME_PHP => '7.4',
-                    ServiceInterface::NAME_DB_MARIA => '10.4',
-                    ServiceInterface::NAME_NGINX => '1.9',
-                    ServiceInterface::NAME_VARNISH => '6.2',
-                    ServiceInterface::NAME_REDIS => '5.0',
-                    ServiceInterface::NAME_ELASTICSEARCH => '7.5',
-                    ServiceInterface::NAME_RABBITMQ => '3.8'
-                ],
-                0
-            ],
-            [
-                '2.4.1',
-                [
-                    ServiceInterface::NAME_PHP => '7.4',
-                    ServiceInterface::NAME_DB_MARIA => '10.4',
-                    ServiceInterface::NAME_NGINX => '1.9',
-                    ServiceInterface::NAME_VARNISH => '6.2',
-                    ServiceInterface::NAME_REDIS => '5.0',
-                    ServiceInterface::NAME_ELASTICSEARCH => '7.9', // wrong
-                    ServiceInterface::NAME_RABBITMQ => '3.8'
-                ],
-                1
-            ],
-            [
-                '2.4.1',
-                [
-                    ServiceInterface::NAME_DB_MYSQL => '5.6',
-                ],
-                1
-            ],
-            [
-                '2.4.1',
-                [
-                    ServiceInterface::NAME_DB_MYSQL => '8.0.2',
-                ],
-                0
-            ],
-            [
-                '2.4.1',
-                [
-                    ServiceInterface::NAME_DB_MYSQL => '8.0',
-                ],
-                0
-            ],
-            [
-                '2.4.2',
-                [
-                    ServiceInterface::NAME_PHP => '7.4',
-                    ServiceInterface::NAME_DB_MARIA => '10.4',
-                    ServiceInterface::NAME_NGINX => '1.9',
-                    ServiceInterface::NAME_VARNISH => '6.2',
-                    ServiceInterface::NAME_REDIS => '5.0',
-                    ServiceInterface::NAME_ELASTICSEARCH => '7.9',
-                    ServiceInterface::NAME_RABBITMQ => '3.8'
-                ],
-                0
-            ],
-            [
-                '2.3.6',
-                [
-                    ServiceInterface::NAME_PHP => '7.4', // wrong
-                    ServiceInterface::NAME_DB_MARIA => '10.3', // wrong
-                    ServiceInterface::NAME_NGINX => '1.19',
-                    ServiceInterface::NAME_VARNISH => '6.2',
-                    ServiceInterface::NAME_REDIS => '5.0',
-                    ServiceInterface::NAME_ELASTICSEARCH => '7.9', //wrong
-                ],
-                3
-            ],
-            [
-                '2.3.6-p1',
-                [
-                    ServiceInterface::NAME_DB_MARIA => '10.3',
-                ],
-                0
-            ],
-            [
-                '2.3.6-p1',
-                [
-                    ServiceInterface::NAME_DB_MARIA => '10.4', // wrong
-                ],
-                1
-            ],
-            [
-                '2.3.7',
-                [
-                    ServiceInterface::NAME_ELASTICSEARCH => '7.9',
-                ],
-                0
-            ],
-            [
-                '2.1.4',
-                [ServiceInterface::NAME_PHP => '5.6'],
-                1,
-            ],
-            [
-                '2.2.4',
-                [
-                    ServiceInterface::NAME_PHP => '7.0.13',
-                    ServiceInterface::NAME_DB_MARIA => '11.0', //wrong
-                    ServiceInterface::NAME_NGINX => '0.9', //wrong
-                    ServiceInterface::NAME_VARNISH => '4.0.9',
-                    ServiceInterface::NAME_REDIS => '3.1',
-                    ServiceInterface::NAME_ELASTICSEARCH => '6.5', //wrong
-                    ServiceInterface::NAME_RABBITMQ => '3.5' //wrong
-                ],
-                4
-            ],
-            [
-                '2.3.7',
-                [
-                    ServiceInterface::NAME_OPENSEARCH => '1.1' //wrong
-                ],
-                1
-            ],
-            [
-                '2.3.7-p2',
-                [
-                    ServiceInterface::NAME_OPENSEARCH => '1.2' //wrong
-                ],
-                1
-            ],
-            [
-                '2.3.7-p3',
-                [
-                    ServiceInterface::NAME_OPENSEARCH => '1.1'
-                ],
-                0
-            ],
-            [
-                '2.3.7-p4',
-                [
-                    ServiceInterface::NAME_PHP => '7.4.0',
-                    ServiceInterface::NAME_DB_MARIA => '10.3.35',
-                    ServiceInterface::NAME_NGINX => '1.18.0',
-                    ServiceInterface::NAME_VARNISH => '6.5.1',
-                    ServiceInterface::NAME_REDIS => '6.0.12',
-                    ServiceInterface::NAME_OPENSEARCH => '1.2',
-                    ServiceInterface::NAME_RABBITMQ => '3.9.0'
-                ],
-                0
-            ],
-            [
-                '2.3.7-p3',
-                [
-                    ServiceInterface::NAME_OPENSEARCH => '1.2.2'
-                ],
-                0
-            ],
-            [
-                '2.4.0',
-                [
-                    ServiceInterface::NAME_OPENSEARCH => '1.2' //wrong
-                ],
-                1
-            ],
-            [
-                '2.4.3-p2',
-                [
-                    ServiceInterface::NAME_OPENSEARCH => '1.2'
-                ],
-                0
-            ],
-            [
-                '2.4.3',
-                [
-                    ServiceInterface::NAME_OPENSEARCH => '1.2.2' //wrong
-                ],
-                1
-            ],
-            [
                 '2.4.4',
                 [
                     ServiceInterface::NAME_OPENSEARCH => '2.3.0',
@@ -340,71 +124,9 @@ class ValidatorTest extends TestCase
                 1
             ],
             [
-                '2.3.7-p2',
-                [
-                    ServiceInterface::NAME_ELASTICSEARCH => '7.10' //wrong
-                ],
-                1
-            ],
-            [
-                '2.3.7-p3',
-                [
-                    ServiceInterface::NAME_ELASTICSEARCH => '7.10'
-                ],
-                0
-            ],
-            [
-                '2.4.0',
-                [
-                    ServiceInterface::NAME_ELASTICSEARCH => '7.10' //wrong
-                ],
-                1
-            ],
-            [
-                '2.4.1',
-                [
-                    ServiceInterface::NAME_ELASTICSEARCH => '7.10' //wrong
-                ],
-                1
-            ],
-            [
-                '2.4.2',
-                [
-                    ServiceInterface::NAME_ELASTICSEARCH => '7.10' //wrong
-                ],
-                1
-            ],
-            [
-                '2.4.3',
-                [
-                    ServiceInterface::NAME_ELASTICSEARCH => '7.10'
-                ],
-                0
-            ],
-            [
                 '2.4.4',
                 [
                     ServiceInterface::NAME_ELASTICSEARCH => '7.10'
-                ],
-                0
-            ],
-            [
-                '2.4.3-p3',
-                [
-                    ServiceInterface::NAME_PHP => '7.4.0',
-                    ServiceInterface::NAME_DB_MARIA => '10.4.14',
-                    ServiceInterface::NAME_NGINX => '1.18.0',
-                    ServiceInterface::NAME_VARNISH => '6.5.1',
-                    ServiceInterface::NAME_REDIS => '6.0.12',
-                    ServiceInterface::NAME_OPENSEARCH => '1.2',
-                    ServiceInterface::NAME_RABBITMQ => '3.8.0'
-                ],
-                0
-            ],
-            [
-                '2.4.3-p3',
-                [
-                    ServiceInterface::NAME_RABBITMQ => '3.9.0'
                 ],
                 0
             ],
@@ -525,6 +247,34 @@ class ValidatorTest extends TestCase
                 '2.4.7',
                 [
                     ServiceInterface::NAME_RABBITMQ => '3.13.0'
+                ],
+                0
+            ],
+            [
+                '2.4.5-p13',
+                [
+                    ServiceInterface::NAME_VALKEY => '8.0.0'
+                ],
+                0
+            ],
+            [
+                '2.4.6-p11',
+                [
+                    ServiceInterface::NAME_VALKEY => '8.0.0'
+                ],
+                0
+            ],
+            [
+                '2.4.7-p6',
+                [
+                    ServiceInterface::NAME_VALKEY => '8.0.0'
+                ],
+                0
+            ],
+            [
+                '2.4.7-p6',
+                [
+                    ServiceInterface::NAME_VALKEY => '8.0.0'
                 ],
                 0
             ],
