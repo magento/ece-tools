@@ -20,14 +20,17 @@ class Validator
      * Supported version constraints of Redis services
      */
     private const REDIS_SUPPORT_VERSIONS = [
-        '*' => '~3.2.0 || ~4.0.0 || ~5.0.0 || ~6.0.0 || ~6.2.0 || ~7.0.0 || ~7.2.0',
+      '<=2.4.8' => '~3.2.0 || ~4.0.0 || ~5.0.0 || ~6.0.0 || ~6.2.0 || ~7.0.0 || ~7.2.0',
     ];
 
     /**
      * Supported version constraints of Valkey services
      */
     private const VALKEY_SUPPORT_VERSIONS = [
-        '*' => ' ~7.2.0 || ~8.0.0',
+        '2.4.5-p13 <2.4.6' => '~8.0.0 || ~8.0.1',
+        '2.4.6-p11 <2.4.7' => '~8.0.0 || ~8.0.1',
+        '2.4.7-p6 <2.4.8' => '~8.0.0 || ~8.0.1',
+        '>=2.4.8' => ' ~8.0.0 || ~8.0.1',
     ];
 
     /**
@@ -52,7 +55,8 @@ class Validator
             '>=2.3.6-p1 <2.4.0' => '>=10.0 <10.4',
             '>=2.4.0 <=2.4.5-p7' => '>=10.2 <10.5',
             '>=2.4.5-p8 <2.4.6' => '>10.4 <10.6',
-            '>=2.4.6 <2.4.8' => '>=10.6 <10.7',
+            '>=2.4.6 <2.4.6-p11 || >=2.4.7 <2.4.7-p6' => '>=10.6 <10.7',
+            '>=2.4.6-p11 <2.4.7 || >=2.4.7-p6 <2.4.8' => '10.11',
             '>=2.4.8 <2.4.9' => '>=10.6 <11.5',
         ],
         ServiceInterface::NAME_DB_MYSQL => [
@@ -96,15 +100,16 @@ class Validator
         ServiceInterface::NAME_OPENSEARCH => [
             '>=2.3.7-p3 <2.4.0 || >=2.4.3-p2 <2.4.4-p7 || >=2.4.5 <2.4.5-p7' => '~1.1.0 || 1.2.*',
             '>=2.4.4-p8 <2.4.4-p12 || >=2.4.5-p6 <2.4.5-p11'  => '1.3.*',
-            '2.4.4-p13 || >=2.4.5-p12' => '^2'
+            '>=2.4.4-p13 <2.4.5 || >=2.4.5-p12' => '^2'
         ],
         ServiceInterface::NAME_RABBITMQ => [
             '<2.3.0' => '~3.5.0',
             '>=2.3.0 <2.3.7-p4 || >=2.4.0 <2.4.3-p3' => '~3.5.0 || ~3.7.0 || ~3.8.0',
             '>=2.4.3-p3 <2.4.5-p3 || ~2.3.7-p4' => '~3.5.0 || ~3.7.0 || ~3.8.0 || ~3.9.0',
-            '>=2.4.5-p3 <2.4.6-p6' => '~3.9.0 || ~3.11.0',
-            '>=2.4.6-p6 <2.4.8' => '~3.12.0 || ~3.13.0',
-            '>=2.4.8 <2.4.9' => '>=4.0 <4.1',
+            '>=2.4.5-p3 <2.4.5-p13 || >=2.4.6 <2.4.6-p6' => '~3.9.0 || ~3.11.0',
+            '>=2.4.6-p6 <2.4.6-p11 || >=2.4.7 <2.4.7-p6' => '~3.12.0 || ~3.13.0',
+            '>=2.4.5-p13 <2.4.6 || >=2.4.6-p11 <2.4.7 || >=2.4.7-p6 <2.4.8' => '3.13 || 4.1',
+            '>=2.4.8 <2.4.9' => '>4.0 <=4.1',
         ],
         ServiceInterface::NAME_NODE => [
             '*' => '^6 || ^8 || ^10 || ^11',
@@ -219,7 +224,11 @@ class Validator
                     }
                 }
                 if (!isset($this->supportedVersionList[$serviceName])
-                    && $serviceName !== ServiceInterface::NAME_OPENSEARCH) {
+                    && !in_array($serviceName, [
+                        ServiceInterface::NAME_OPENSEARCH,
+                        ServiceInterface::NAME_VALKEY,
+                        ServiceInterface::NAME_VALKEY_SESSION
+                    ], true)) {
                     throw new ServiceMismatchException(sprintf(
                         'Service "%s" does not have defined configurations for "%s" Magento version',
                         $serviceName,

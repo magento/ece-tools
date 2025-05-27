@@ -14,6 +14,7 @@ use Magento\MagentoCloud\Config\Validator\Deploy\SessionConfiguration;
 use Magento\MagentoCloud\Config\Validator\Result\Error;
 use Magento\MagentoCloud\Config\Validator\Result\Success;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
+use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -39,13 +40,17 @@ class SessionConfigurationTest extends TestCase
 
     /**
      * @inheritdoc
+     * @throws Exception
      */
     protected function setUp(): void
     {
-        $this->resultFactoryMock = $this->createConfiguredMock(ResultFactory::class, [
+        $this->resultFactoryMock = $this->createConfiguredMock(
+            ResultFactory::class,
+            [
             'success' => $this->createMock(Success::class),
             'error' => $this->createMock(Error::class)
-        ]);
+            ]
+        );
         $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
 
         $this->validator = new SessionConfiguration(
@@ -73,8 +78,8 @@ class SessionConfigurationTest extends TestCase
     }
 
     /**
-     * @param array $sessionConfiguration
-     * @param string $expectedResultClass
+     * @param        array  $sessionConfiguration
+     * @param        string $expectedResultClass
      * @dataProvider validateDataProvider
      */
     public function testValidate(array $sessionConfiguration, string $expectedResultClass): void
@@ -87,21 +92,20 @@ class SessionConfigurationTest extends TestCase
         $this->assertInstanceOf($expectedResultClass, $this->validator->validate());
     }
 
+    /**
+     * @param        array  $sessionConfiguration
+     * @param        string $expectedResultClass
+     * @dataProvider validateDataProviderValkey
+     */
+    public function testValidateValkey(array $sessionConfiguration, string $expectedResultClass): void
+    {
+        $this->stageConfigMock->expects($this->once())
+            ->method('get')
+            ->with(DeployInterface::VAR_SESSION_CONFIGURATION)
+            ->willReturn($sessionConfiguration);
 
-  /**
-   * @param array $sessionConfiguration
-   * @param string $expectedResultClass
-   * @dataProvider validateDataProviderValkey
-   */
-  public function testValidateValkey(array $sessionConfiguration, string $expectedResultClass): void
-  {
-    $this->stageConfigMock->expects($this->once())
-      ->method('get')
-      ->with(DeployInterface::VAR_SESSION_CONFIGURATION)
-      ->willReturn($sessionConfiguration);
-
-    $this->assertInstanceOf($expectedResultClass, $this->validator->validate());
-  }
+        $this->assertInstanceOf($expectedResultClass, $this->validator->validate());
+    }
 
     /**
      * @return array
@@ -158,58 +162,58 @@ class SessionConfigurationTest extends TestCase
         ];
     }
 
-  /**
-   * @return array
-   */
-  public function validateDataProviderValkey(): array
-  {
-    return [
-      [
+    /**
+     * @return array
+     */
+    public function validateDataProviderValkey(): array
+    {
+        return [
+        [
         [],
         Success::class,
-      ],
-      [
+        ],
+        [
         [
           'valkey' => ['max_connection' => 10],
         ],
         Error::class,
-      ],
-      [
+        ],
+        [
         [
           'valkey' => ['max_connection' => 10],
           '_merge' => true,
         ],
         Success::class,
-      ],
-      [
+        ],
+        [
         [
           'valkey' => ['max_connection' => 10],
           '_merge' => false,
         ],
         Error::class,
-      ],
-      [
+        ],
+        [
         [
           'save' => 'valkey',
           'valkey' => ['max_connection' => 10],
           '_merge' => false,
         ],
         Success::class,
-      ],
-      [
+        ],
+        [
         [
           'save' => 'valkey',
           'valkey' => ['max_connection' => 10],
           '_merge' => true,
         ],
         Success::class,
-      ],
-      [
+        ],
+        [
         [
           'save' => 'valkey'
         ],
         Success::class,
-      ],
-    ];
-  }
+        ],
+        ];
+    }
 }

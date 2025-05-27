@@ -18,93 +18,97 @@ use PHPUnit\Framework\TestCase;
  */
 class ValkeyTest extends TestCase
 {
-  /**
-   * @var Valkey
-   */
-  private $valkey;
+    /**
+     * @var Valkey
+     */
+    private $valkey;
 
-  /**
-   * @var Environment|MockObject
-   */
-  private $environmentMock;
+    /**
+     * @var Environment|MockObject
+     */
+    private $environmentMock;
 
-  /**
-   * @var Version|MockObject
-   */
-  private $versionRetrieverMock;
+    /**
+     * @var Version|MockObject
+     */
+    private $versionRetrieverMock;
 
-  /**
-   * @inheritdoc
-   */
-  public function setUp(): void
-  {
-    $this->environmentMock = $this->createMock(Environment::class);
-    $this->versionRetrieverMock = $this->createMock(Version::class);
+    /**
+     * @inheritdoc
+     */
+    public function setUp(): void
+    {
+        $this->environmentMock = $this->createMock(Environment::class);
+        $this->versionRetrieverMock = $this->createMock(Version::class);
 
-    $this->valkey = new Valkey(
-      $this->environmentMock,
-      $this->versionRetrieverMock
-    );
-  }
+        $this->valkey = new Valkey(
+            $this->environmentMock,
+            $this->versionRetrieverMock
+        );
+    }
 
-  public function testGetConfiguration(): void
-  {
-    $this->environmentMock->expects($this->once())
-      ->method('getRelationship')
-      ->with(Valkey::RELATIONSHIP_KEY)
-      ->willReturn([
-        [
-          'host' => '127.0.0.1',
-          'port' => '3306',
-        ]
-      ]);
+    public function testGetConfiguration(): void
+    {
+        $this->environmentMock->expects($this->once())
+            ->method('getRelationship')
+            ->with(Valkey::RELATIONSHIP_KEY)
+            ->willReturn(
+                [
+                [
+                'host' => '127.0.0.1',
+                'port' => '3306',
+                ]
+                ]
+            );
 
-    $this->assertSame(
-      [
-        'host' => '127.0.0.1',
-        'port' => '3306',
-      ],
-      $this->valkey->getConfiguration()
-    );
-  }
+        $this->assertSame(
+            [
+            'host' => '127.0.0.1',
+            'port' => '3306',
+            ],
+            $this->valkey->getConfiguration()
+        );
+    }
 
-  public function testGetSlaveConfiguration(): void
-  {
-    $this->environmentMock->expects($this->once())
-      ->method('getRelationship')
-      ->with(Valkey::RELATIONSHIP_SLAVE_KEY)
-      ->willReturn([
-        [
-          'host' => '127.0.0.1',
-          'port' => '3307',
-        ]
-      ]);
+    public function testGetSlaveConfiguration(): void
+    {
+        $this->environmentMock->expects($this->once())
+            ->method('getRelationship')
+            ->with(Valkey::RELATIONSHIP_SLAVE_KEY)
+            ->willReturn(
+                [
+                [
+                'host' => '127.0.0.1',
+                'port' => '3307',
+                ]
+                ]
+            );
 
-    $this->assertSame(
-      [
-        'host' => '127.0.0.1',
-        'port' => '3307',
-      ],
-      $this->valkey->getSlaveConfiguration()
-    );
-  }
+        $this->assertSame(
+            [
+            'host' => '127.0.0.1',
+            'port' => '3307',
+            ],
+            $this->valkey->getSlaveConfiguration()
+        );
+    }
 
-  public function testGetVersion(): void
-  {
-    $version = '1.1.1';
-    $config = [['some config']];
+    public function testGetVersion(): void
+    {
+        $version = '1.1.1';
+        $config = [['some config']];
 
-    $this->environmentMock->expects($this->once())
-      ->method('getRelationship')
-      ->willReturn($config);
+        $this->environmentMock->expects($this->once())
+            ->method('getRelationship')
+            ->willReturn($config);
 
-    $this->versionRetrieverMock->expects($this->once())
-      ->method('getVersion')
-      ->with($config[0])
-      ->willReturn($version);
-    $this->assertSame(
-      $version,
-      $this->valkey->getVersion()
-    );
-  }
+        $this->versionRetrieverMock->expects($this->once())
+            ->method('getVersion')
+            ->with($config[0])
+            ->willReturn($version);
+        $this->assertSame(
+            $version,
+            $this->valkey->getVersion()
+        );
+    }
 }

@@ -21,172 +21,174 @@ use PHPUnit\Framework\TestCase;
  */
 class VersionTest extends TestCase
 {
-  /**
-   * @var Version
-   */
-  private $version;
+    /**
+     * @var Version
+     */
+    private $version;
 
-  /**
-   * @var ShellInterface|MockObject
-   */
-  private $shellMock;
+    /**
+     * @var ShellInterface|MockObject
+     */
+    private $shellMock;
 
-  /**
-   * @inheritDoc
-   */
-  public function setUp(): void
-  {
-    $this->shellMock = $this->getMockForAbstractClass(ShellInterface::class);
-    $this->version = new Version($this->shellMock);
-  }
+    /**
+     * @inheritDoc
+     */
+    public function setUp(): void
+    {
+        $this->shellMock = $this->getMockForAbstractClass(ShellInterface::class);
+        $this->version = new Version($this->shellMock);
+    }
 
-  /**
-   * @param array $config
-   * @param string $expectedResult
-   * @throws ServiceException
-   * @dataProvider getVersionFromConfigDataProvider
-   */
-  public function testGetVersionFromConfig(array $config, string $expectedResult): void
-  {
-    $this->shellMock->expects($this->never())
-      ->method('execute');
+    /**
+     * @param        array  $config
+     * @param        string $expectedResult
+     * @throws       ServiceException
+     * @dataProvider getVersionFromConfigDataProvider
+     */
+    public function testGetVersionFromConfig(array $config, string $expectedResult): void
+    {
+        $this->shellMock->expects($this->never())
+            ->method('execute');
 
-    $this->assertEquals($expectedResult, $this->version->getVersion($config));
-  }
+        $this->assertEquals($expectedResult, $this->version->getVersion($config));
+    }
 
-  /**
-   * Data provider for testGetVersionFromConfig
-   *
-   * @return array
-   */
-  public function getVersionFromConfigDataProvider(): array
-  {
-    return [
-      [
+    /**
+     * Data provider for testGetVersionFromConfig
+     *
+     * @return array
+     */
+    public function getVersionFromConfigDataProvider(): array
+    {
+        return [
+        [
         [
           'host' => '127.0.0.1',
           'port' => '3306',
           'type' => 'valkey:8.2'
         ],
         '8.2'
-      ],
-      [
+        ],
+        [
         [
           'type' => 'valkey:8.2.5'
         ],
         '8.2.5'
-      ],
-      [
+        ],
+        [
         [],
         '0'
-      ],
-    ];
-  }
+        ],
+        ];
+    }
 
-  /**
-   * @param string $version
-   * @param string $expectedResult
-   * @throws ServiceException
-   * @throws \ReflectionException
-   * @dataProvider getVersionFromCliDataProvider
-   */
-  public function testGetVersionFromCli(string $version, string $expectedResult): void
-  {
-    $processMock = $this->getMockForAbstractClass(ProcessInterface::class);
-    $processMock->expects($this->once())
-      ->method('getOutput')
-      ->willReturn($version);
-    $this->shellMock->expects($this->once())
-      ->method('execute')
-      ->with('valkey-cli -p 6379 -h 127.0.0.1 info | grep valkey_version')
-      ->willReturn($processMock);
+    /**
+     * @param        string $version
+     * @param        string $expectedResult
+     * @throws       ServiceException
+     * @throws       \ReflectionException
+     * @dataProvider getVersionFromCliDataProvider
+     */
+    public function testGetVersionFromCli(string $version, string $expectedResult): void
+    {
+        $processMock = $this->getMockForAbstractClass(ProcessInterface::class);
+        $processMock->expects($this->once())
+            ->method('getOutput')
+            ->willReturn($version);
+        $this->shellMock->expects($this->once())
+            ->method('execute')
+            ->with('valkey-cli -p 6379 -h 127.0.0.1 info | grep valkey_version')
+            ->willReturn($processMock);
 
-    $this->assertEquals(
-      $expectedResult,
-      $this->version->getVersion(
-        [
-          'host' => '127.0.0.1',
-          'port' => '6379',
-        ]
-      )
-    );
-  }
+        $this->assertEquals(
+            $expectedResult,
+            $this->version->getVersion(
+                [
+                'host' => '127.0.0.1',
+                'port' => '6379',
+                ]
+            )
+        );
+    }
 
-  /**
-   * Data provider for testGetVersionFromCli
-   *
-   * @return array
-   */
-  public function getVersionFromCliDataProvider(): array
-  {
-    return [
-      ['valkey_version:5.3.6', '5.3'],
-      ['valkey_version:1.2.3.4.5', '1.2'],
-      ['valkey_version:abc', '0'],
-      ['valkey:5.3.6', '0'],
-      ['', '0'],
-      ['error', '0'],
-    ];
-  }
+    /**
+     * Data provider for testGetVersionFromCli
+     *
+     * @return array
+     */
+    public function getVersionFromCliDataProvider(): array
+    {
+        return [
+        ['valkey_version:5.3.6', '5.3'],
+        ['valkey_version:1.2.3.4.5', '1.2'],
+        ['valkey_version:abc', '0'],
+        ['valkey:5.3.6', '0'],
+        ['', '0'],
+        ['error', '0'],
+        ];
+    }
 
-  public function testGetVersionWithException()
-  {
-    $exceptionMessage = 'Some shell exception';
-    $this->expectException(ServiceException::class);
-    $this->expectExceptionMessage($exceptionMessage);
+    public function testGetVersionWithException()
+    {
+        $exceptionMessage = 'Some shell exception';
+        $this->expectException(ServiceException::class);
+        $this->expectExceptionMessage($exceptionMessage);
 
-    $this->shellMock->expects($this->once())
-      ->method('execute')
-      ->willThrowException(new ShellException($exceptionMessage));
-    $this->version->getVersion([
-      'host' => '127.0.0.1',
-      'port' => '3306',
-    ]);
-  }
+        $this->shellMock->expects($this->once())
+            ->method('execute')
+            ->willThrowException(new ShellException($exceptionMessage));
+        $this->version->getVersion(
+            [
+            'host' => '127.0.0.1',
+            'port' => '3306',
+            ]
+        );
+    }
 
-  /**
-   * @return array
-   */
-  public function getVersionWithPasswordDataProvider(): array
-  {
-    return [
-      ['valkey_version:5.3.6', '5.3'],
-      ['valkey_version:1.2.3.4.5', '1.2'],
-      ['valkey_version:abc', '0'],
-      ['valkey:5.3.6', '0'],
-      ['', '0'],
-      ['error', '0'],
-    ];
-  }
+    /**
+     * @return array
+     */
+    public function getVersionWithPasswordDataProvider(): array
+    {
+        return [
+        ['valkey_version:5.3.6', '5.3'],
+        ['valkey_version:1.2.3.4.5', '1.2'],
+        ['valkey_version:abc', '0'],
+        ['valkey:5.3.6', '0'],
+        ['', '0'],
+        ['error', '0'],
+        ];
+    }
 
-  /**
-   * @param string $version
-   * @param string $expectedResult
-   * @throws ReflectionException
-   * @throws ServiceException|\PHPUnit\Framework\MockObject\Exception
-   *
-   * @dataProvider getVersionWithPasswordDataProvider
-   */
-  public function testGetVersionWithPassword(string $version, string $expectedResult): void
-  {
-    $processMock = $this->getMockForAbstractClass(ProcessInterface::class);
-    $processMock->expects(self::once())
-      ->method('getOutput')
-      ->willReturn($version);
-    $this->shellMock->expects(self::once())
-      ->method('execute')
-      ->with('valkey-cli -p 6379 -h 127.0.0.1 -a test info | grep valkey_version')
-      ->willReturn($processMock);
+    /**
+     * @param  string $version
+     * @param  string $expectedResult
+     * @throws ReflectionException
+     * @throws ServiceException|\PHPUnit\Framework\MockObject\Exception
+     *
+     * @dataProvider getVersionWithPasswordDataProvider
+     */
+    public function testGetVersionWithPassword(string $version, string $expectedResult): void
+    {
+        $processMock = $this->getMockForAbstractClass(ProcessInterface::class);
+        $processMock->expects(self::once())
+            ->method('getOutput')
+            ->willReturn($version);
+        $this->shellMock->expects(self::once())
+            ->method('execute')
+            ->with('valkey-cli -p 6379 -h 127.0.0.1 -a test info | grep valkey_version')
+            ->willReturn($processMock);
 
-    self::assertEquals(
-      $expectedResult,
-      $this->version->getVersion(
-        [
-          'host' => '127.0.0.1',
-          'port' => '6379',
-          'password' => 'test'
-        ]
-      )
-    );
-  }
+        self::assertEquals(
+            $expectedResult,
+            $this->version->getVersion(
+                [
+                'host' => '127.0.0.1',
+                'port' => '6379',
+                'password' => 'test'
+                ]
+            )
+        );
+    }
 }
