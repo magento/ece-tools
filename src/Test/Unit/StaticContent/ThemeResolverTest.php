@@ -13,12 +13,12 @@ use Psr\Log\LoggerInterface;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @inheritdoc
+ * Test class for ThemeResolver
  */
 class ThemeResolverTest extends TestCase
 {
     /**
-     * @var ThemeResolver
+     * @var ThemeResolver|MockObject
      */
     private $themeResolver;
 
@@ -36,33 +36,45 @@ class ThemeResolverTest extends TestCase
 
         $this->themeResolver = $this->getMockBuilder(ThemeResolver::class)
             ->onlyMethods(['getThemes'])
-            ->setConstructorArgs([
-                $this->loggerMock,
-            ])->getMock();
+            ->setConstructorArgs([$this->loggerMock])
+            ->getMock();
     }
 
     /**
-     * @param string $expectedReturn
-     * @param string $passedTheme
-     *
+     * @param        string $expectedReturn
+     * @param        string $passedTheme
      * @dataProvider testResolveDataProvider
      */
     public function testResolve(string $expectedReturn, string $passedTheme): void
     {
-        $this->themeResolver->expects($this->once())
-            ->method('getThemes')
+        $this->themeResolver->method('getThemes')
             ->willReturn(['SomeVendor/sometheme']);
 
-        $this->loggerMock->expects($this->exactly(2))
-            ->method('warning')
-            ->willReturnOnConsecutiveCalls(
-                'Theme SomeVendor/Sometheme does not exist, attempting to resolve.',
-                'Theme found as SomeVendor/sometheme Using corrected name instead'
+        $messages = [];
+
+        $this->loggerMock->method('warning')
+            ->willReturnCallback(
+                function ($msg) use (&$messages) {
+                    $messages[] = $msg;
+                }
             );
+
+        $this->loggerMock->expects($this->never())
+            ->method('error');
 
         $this->assertEquals(
             $expectedReturn,
             $this->themeResolver->resolve($passedTheme)
+        );
+
+        $this->assertCount(2, $messages);
+        $this->assertSame(
+            'Theme ' . $passedTheme . ' does not exist, attempting to resolve.',
+            $messages[0]
+        );
+        $this->assertSame(
+            'Theme found as SomeVendor/sometheme.  Using corrected name instead.',
+            $messages[1]
         );
     }
 
@@ -82,9 +94,9 @@ class ThemeResolverTest extends TestCase
 
     public function testCorrect(): void
     {
-        $this->themeResolver->expects($this->once())
-            ->method('getThemes')
+        $this->themeResolver->method('getThemes')
             ->willReturn(['SomeVendor/sometheme']);
+
         $this->loggerMock->expects($this->never())
             ->method('warning');
         $this->loggerMock->expects($this->never())
@@ -98,19 +110,35 @@ class ThemeResolverTest extends TestCase
 
     public function testNoResolve(): void
     {
-        $this->themeResolver->expects($this->once())
-            ->method('getThemes')
+        $this->themeResolver->method('getThemes')
             ->willReturn(['SomeVendor/sometheme']);
-        $this->loggerMock->expects($this->once())
-            ->method('warning')
-            ->willReturn('Theme SomeVendor/doesntExist does not exist, attempting to resolve.');
-        $this->loggerMock->expects($this->once())
-            ->method('error')
-            ->willReturn('Unable to resolve theme.');
+
+        $warnings = [];
+        $errors = [];
+
+        $this->loggerMock->method('warning')
+            ->willReturnCallback(
+                function ($msg) use (&$warnings) {
+                    $warnings[] = $msg;
+                }
+            );
+
+        $this->loggerMock->method('error')
+            ->willReturnCallback(
+                function ($msg) use (&$errors) {
+                    $errors[] = $msg;
+                }
+            );
 
         $this->assertEquals(
             '',
             $this->themeResolver->resolve('SomeVendor/doesntExist')
         );
+
+        $this->assertCount(1, $warnings);
+        $this->assertSame('Theme SomeVendor/doesntExist does not exist, attempting to resolve.', $warnings[0]);
+
+        $this->assertCount(1, $errors);
+        $this->assertSame('Unable to resolve theme.', $errors[0]);
     }
 }
