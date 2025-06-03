@@ -57,11 +57,17 @@ class SetProductionModeTest extends TestCase
     {
         $this->loggerMock->expects($this->once())
             ->method('info')
-            ->willReturn("Set Magento application mode to 'production'");
+            ->willReturnCallback(
+                function (string $message): void {
+                    // Simulate logging without returning anything (void)
+                    $this->assertSame("Set Magento application mode to 'production'", $message);
+                }
+            );
+    
         $this->writer->expects($this->once())
             ->method('update')
             ->with(['MAGE_MODE' => 'production']);
-
+    
         $this->step->execute();
     }
 
@@ -71,15 +77,21 @@ class SetProductionModeTest extends TestCase
     public function testExecuteWitException(): void
     {
         $this->expectException(StepException::class);
-        $this->expectExceptionMessage('can\'t update file');
+        $this->expectExceptionMessage("can't update file");
         $this->expectExceptionCode(Error::BUILD_ENV_PHP_IS_NOT_WRITABLE);
 
         $this->loggerMock->expects($this->once())
             ->method('info')
-            ->willReturn("Set Magento application mode to 'production'");
+            ->willReturnCallback(
+                function (string $message): void {
+                    // Simulate logging without returning anything (void)
+                    $this->assertSame("Set Magento application mode to 'production'", $message);
+                }
+            );
+
         $this->writer->expects($this->once())
             ->method('update')
-            ->willThrowException(new FileSystemException('can\'t update file'));
+            ->willThrowException(new FileSystemException("can't update file"));
 
         $this->step->execute();
     }
