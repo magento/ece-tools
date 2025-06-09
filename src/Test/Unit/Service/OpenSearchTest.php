@@ -164,6 +164,11 @@ class OpenSearchTest extends TestCase
                 '{"version" : {"number" : "2.4.4"}}',
                 '2.4.4',
             ],
+            [
+                $relationships,
+                '{"version" : {"number" : "3.0.0"}}',
+                '3.0.0',
+            ],
         ];
     }
 
@@ -211,6 +216,12 @@ class OpenSearchTest extends TestCase
                 ],
                 '2.0'
             ],
+            [
+            [
+                ['host' => '127.0.0.1', 'port' => '1234', 'type' => 'opensearch:3.0']
+            ],
+            '3.0'
+        ],
         ];
     }
 
