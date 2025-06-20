@@ -57,7 +57,7 @@ class ScdOnDeploy extends Command
     /**
      * @inheritdoc
      */
-    public function execute(InputInterface $input, OutputInterface $output)
+    public function execute(InputInterface $input, OutputInterface $output): int
     {
         $errors = $this->scdOnDeployValidator->getErrors();
         $status = !$errors;
