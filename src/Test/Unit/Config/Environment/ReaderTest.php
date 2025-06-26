@@ -180,7 +180,7 @@ class ReaderTest extends TestCase
             ],
         ];
 
-        $this->assertNotEquals($expected, $result);
+        $this->assertEquals($expected, $result);
     }
 
     /**
@@ -195,6 +195,8 @@ class ReaderTest extends TestCase
      * Input: ['driver_options' => [new TaggedValue('php/const:\PDO::MYSQL_ATTR_INIT_COMMAND', 1)]]
      * Output: ['driver_options' => [1002 => 1]]
      *
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+     *
      * @param array $data The parsed YAML data potentially containing TaggedValue instances.
      * @return array The array with all `php/const:` TaggedValue keys and values resolved.
      */
@@ -207,7 +209,7 @@ class ReaderTest extends TestCase
             if ($key instanceof TaggedValue && strpos($key->getTag(), 'php/const:') === 0) {
                 $constName = str_replace('php/const:', '', $key->getTag());
                 $constName = ltrim($constName, '\\');
-                $resolvedKey = defined($constName) ? constant($constName) : $key->getValue();
+                echo $resolvedKey = defined($constName) ? constant($constName) : $key->getValue();
             } else {
                 $resolvedKey = $key;
             }
@@ -218,7 +220,21 @@ class ReaderTest extends TestCase
             } elseif ($value instanceof TaggedValue && strpos($value->getTag(), 'php/const:') === 0) {
                 $constName = str_replace('php/const:', '', $value->getTag());
                 $constName = ltrim($constName, '\\');
-                $resolved[$resolvedKey] = defined($constName) ? constant($constName) : $value->getValue();
+
+                $constKey = defined($constName) ? constant($constName) : $value->getValue();
+                $constVal = $value->getValue() ?? '';
+
+                if (defined($constName) && $constVal) {
+                    // Formatted the constant value since YAML parser is not able to parse ': 1' value and
+                    // if we make !php/const:\PDO::MYSQL_ATTR_LOCAL_INFILE : 1 to
+                    // !php/const:\PDO::MYSQL_ATTR_LOCAL_INFILE: 1 in
+                    // src/Test/Unit/Config/Environment/_file/.magento-with-constants.env.yaml file
+                    // then PDO::MYSQL_ATTR_LOCAL_INFILE constant is not recognized & not resolved to 1001
+                    $cleanVal = str_replace([':', ' '], '', $constVal);
+                    $constVal = is_numeric($cleanVal) ? (int) $cleanVal : $cleanVal;
+
+                    $resolved[$resolvedKey][$constKey] = $constVal;
+                }
             } else {
                 $resolved[$resolvedKey] = $value;
             }
