@@ -209,7 +209,7 @@ class ReaderTest extends TestCase
             if ($key instanceof TaggedValue && strpos($key->getTag(), 'php/const:') === 0) {
                 $constName = str_replace('php/const:', '', $key->getTag());
                 $constName = ltrim($constName, '\\');
-                echo $resolvedKey = defined($constName) ? constant($constName) : $key->getValue();
+                $resolvedKey = defined($constName) ? constant($constName) : $key->getValue();
             } else {
                 $resolvedKey = $key;
             }
