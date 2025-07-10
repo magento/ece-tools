@@ -207,8 +207,8 @@ class ReaderTest extends TestCase
         foreach ($data as $key => $value) {
             // Resolve tagged keys like !php/const:\PDO::MYSQL_ATTR_LOCAL_INFILE
             if ($key instanceof TaggedValue && strpos($key->getTag(), 'php/const:') === 0) {
-                $constName = str_replace('php/const:', '', $key->getTag());
-                $constName = ltrim($constName, '\\');
+                $constName   = str_replace('php/const:', '', $key->getTag());
+                $constName   = ltrim($constName, '\\');
                 $resolvedKey = defined($constName) ? constant($constName) : $key->getValue();
             } else {
                 $resolvedKey = $key;
