@@ -48,7 +48,7 @@ abstract class ValkeyCest extends AbstractCest
             $I->getExposedPort()
         ));
 
-        $I->assertTrue($I->runDockerComposeCommand('run build cloud-build'), 'Build phase was failed');
+        $I->assertTrue($I->runDockerComposeCommand('run -e COMPOSER_IGNORE_PLATFORM_REQS=1 build cloud-build'), 'Build phase was failed');
         $I->assertTrue($I->startEnvironment(), 'Docker could not start');
         $I->assertTrue($I->runDockerComposeCommand('run deploy cloud-deploy'), 'Deploy phase was failed');
         $I->assertTrue($I->runDockerComposeCommand('run deploy cloud-post-deploy'), 'Post Deploy phase was failed');
@@ -115,7 +115,7 @@ abstract class ValkeyCest extends AbstractCest
 
         $I->writeEnvMagentoYaml($data['wrongConfiguration']);
 
-        $I->assertSame($data['buildSuccess'], $I->runDockerComposeCommand('run build cloud-build'));
+        $I->assertSame($data['buildSuccess'], $I->runDockerComposeCommand('run -e COMPOSER_IGNORE_PLATFORM_REQS=1 build cloud-build'));
         $I->seeInOutput($data['errorBuildMessage']);
         $I->assertTrue($I->startEnvironment(), 'Docker could not start');
         $I->assertSame($data['deploySuccess'], $I->runDockerComposeCommand('run build cloud-deploy'));
@@ -143,7 +143,7 @@ abstract class ValkeyCest extends AbstractCest
 
         $I->writeEnvMagentoYaml($data['configuration']);
 
-        $I->assertTrue($I->runDockerComposeCommand('run build cloud-build'), 'Build phase was failed');
+        $I->assertTrue($I->runDockerComposeCommand('run -e COMPOSER_IGNORE_PLATFORM_REQS=1 build cloud-build'), 'Build phase was failed');
         $I->assertTrue($I->startEnvironment(), 'Docker could not start');
         $I->assertFalse($I->runDockerComposeCommand('run deploy cloud-deploy'), 'Deploy phase was successful');
     }
@@ -169,7 +169,7 @@ abstract class ValkeyCest extends AbstractCest
 
         $I->writeEnvMagentoYaml($data['configuration']);
 
-        $I->assertTrue($I->runDockerComposeCommand('run build cloud-build'), 'Build phase was failed');
+        $I->assertTrue($I->runDockerComposeCommand('run -e COMPOSER_IGNORE_PLATFORM_REQS=1 build cloud-build'), 'Build phase was failed');
         $I->assertTrue($I->startEnvironment(), 'Docker could not start');
         $I->assertTrue($I->runDockerComposeCommand('run deploy cloud-deploy'), 'Deploy phase was failed');
         $I->assertTrue($I->runDockerComposeCommand('run deploy cloud-post-deploy'), 'Post Deploy phase was failed');
