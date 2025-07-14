@@ -118,7 +118,7 @@ class Valkey83Cest extends ValkeyCest
                         ],
                     ],
                 ],
-                'expectedBackend' => '\Magento\Framework\Cache\Backend\Redis',
+                'expectedBackend' => 'Cm_Cache_Backend_Redis',
                 'expectedConfig' => [
                     'backend_options' => [
                         'server' => 'valkey',
