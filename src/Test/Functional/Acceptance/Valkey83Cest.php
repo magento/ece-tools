@@ -159,7 +159,7 @@ class Valkey83Cest extends ValkeyCest
                 'expectedBackend' => '\Magento\Framework\Cache\Backend\RemoteSynchronizedCache',
                 'expectedConfig' => [
                     'backend_options' => [
-                        'remote_backend' => '\Magento\Framework\Cache\Backend\Redis',
+                        'remote_backend' => 'Cm_Cache_Backend_Redis',
                         'remote_backend_options' => [
                             'persistent' => 0,
                             'server' => 'valkey',
