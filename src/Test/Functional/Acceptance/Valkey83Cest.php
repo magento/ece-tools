@@ -33,7 +33,7 @@ class Valkey83Cest extends ValkeyCest
     {
         return [
             [
-                'version' => '2.4.7',
+                'version' => '2.4.8',
                 'wrongConfiguration' => [
                     'stage' => [
                         'deploy' => [
@@ -59,7 +59,7 @@ class Valkey83Cest extends ValkeyCest
     {
         return [
             [
-                'version' => '2.4.7',
+                'version' => '2.4.8',
                 'configuration' => [
                     'stage' => [
                         'deploy' => [
@@ -79,7 +79,7 @@ class Valkey83Cest extends ValkeyCest
                 ],
             ],
             [
-                'version' => '2.4.7',
+                'version' => '2.4.8',
                 'configuration' => [
                     'stage' => [
                         'deploy' => [
@@ -110,7 +110,7 @@ class Valkey83Cest extends ValkeyCest
     {
         return [
             [
-                'version' => '2.4.7',
+                'version' => '2.4.8',
                 'configuration' => [
                     'stage' => [
                         'deploy' => [
@@ -128,7 +128,7 @@ class Valkey83Cest extends ValkeyCest
                 ],
             ],
             [
-                'version' => '2.4.7',
+                'version' => '2.4.8',
                 'configuration' => [
                     'stage' => [
                         'deploy' => [
@@ -148,7 +148,7 @@ class Valkey83Cest extends ValkeyCest
                 'expectedConfig' => [],
             ],
             [
-                'version' => '2.4.7',
+                'version' => '2.4.8',
                 'configuration' => [
                     'stage' => [
                         'deploy' => [
