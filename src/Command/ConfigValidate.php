@@ -55,7 +55,7 @@ class ConfigValidate extends Command
      *
      * @SuppressWarnings("PHPMD.UnusedFormalParameter")
      */
-    public function execute(InputInterface $input, OutputInterface $output)
+    public function execute(InputInterface $input, OutputInterface $output): int
     {
         try {
             if (($result = $this->stageConfig->validate()) instanceof Error) {
