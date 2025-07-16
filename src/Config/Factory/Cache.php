@@ -76,11 +76,11 @@ class Cache
     private ConfigMerger $configMerger;
 
     /**
-     * @param Valkey          $valkey
-     * @param Redis           $redis
-     * @param DeployInterface $stageConfig
-     * @param LoggerInterface $logger
-     * @param ConfigMerger    $configMerger
+     * @param Redis                 $redis
+     * @param Valkey                $valkey
+     * @param DeployInterface       $stageConfig
+     * @param LoggerInterface       $logger
+     * @param ConfigMerger          $configMerger
      */
     public function __construct(
         Redis $redis,
@@ -148,17 +148,13 @@ class Cache
         }
 
         // Determine backend based on configuration priority:
-        // 1. If VALKEY_BACKEND is configured and Valkey service is available, use Valkey
-        // 2. If REDIS_BACKEND is configured and Redis service is available, use Redis  
-        // 3. Otherwise, prefer Redis for backward compatibility
+        // 1. If VALKEY_BACKEND is explicitly configured and Valkey service is available, use Valkey
+        // 2. Otherwise, prefer Redis for backward compatibility
         if (!empty($envCacheValkeyBackendModel) && !empty($valkeyConfig)) {
             $backendConfig = $valkeyConfig;
             $cacheBackendModel = $envCacheValkeyBackendModel;
-        } elseif (!empty($envCacheRadisBackendModel) && !empty($redisConfig)) {
-            $backendConfig = $redisConfig;
-            $cacheBackendModel = $envCacheRadisBackendModel;
         } else {
-            // Fall back to previous logic - prefer redis for backward compatibility
+            // Default to Redis for backward compatibility
             $backendConfig = !empty($redisConfig) ? $redisConfig : $valkeyConfig;
             $cacheBackendModel = !empty($redisConfig) ? $envCacheRadisBackendModel : $envCacheValkeyBackendModel;
         }
