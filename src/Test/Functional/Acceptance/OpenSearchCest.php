@@ -12,7 +12,7 @@ use Magento\CloudDocker\Test\Functional\Codeception\Docker;
 /**
  * This test runs on the latest version of PHP
  *
- * @group php74
+ * @group php84
  */
 class OpenSearchCest extends AbstractCest
 {
@@ -29,7 +29,6 @@ class OpenSearchCest extends AbstractCest
      * @param \Codeception\Example $data
      * @throws \Robo\Exception\TaskException
      * @dataProvider openDataProvider
-     * @skip Skip Need to fix OpenSearch containers
      */
     public function testOpen(\CliTester $I, \Codeception\Example $data): void
     {
@@ -92,10 +91,11 @@ class OpenSearchCest extends AbstractCest
         $I->assertTrue($I->downloadFromContainer('/app/etc/env.php', $destination, Docker::DEPLOY_CONTAINER));
         return require $destination;
     }
+    
 
     /**
      * @param \CliTester $I
-     * @return array
+     * @return void
      */
     private function checkConfigurationIsNotRemoved(\CliTester $I): void
     {
@@ -114,12 +114,21 @@ class OpenSearchCest extends AbstractCest
     {
         return [
             [
-                'magento' => '2.4.3',
-                'removeES' => false,
+                'magento' => '2.4.8',
+                'removeES' => true,
                 'expectedResult' => [
-                    'engine' => 'opensearch6',
-                    'opensearch6_server_hostname' => 'opensearch',
-                    'opensearch6_server_port' => '9200'
+                    'engine' => 'opensearch',
+                    'opensearch_server_hostname' => 'opensearch', 
+                    'opensearch_server_port' => '9200'
+                ],
+            ],
+            [
+                'magento' => '2.4.9-alpha',
+                'removeES' => true,
+                'expectedResult' => [
+                    'engine' => 'opensearch',
+                    'opensearch_server_hostname' => 'opensearch', 
+                    'opensearch_server_port' => '9200'
                 ],
             ],
         ];
