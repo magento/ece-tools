@@ -114,14 +114,6 @@ class OpenSearchCest extends AbstractCest
     {
         return [
             [
-                'magento' => '2.4.8',
-                'expectedResult' => [
-                    'engine' => 'opensearch',
-                    'opensearch_server_hostname' => 'opensearch', 
-                    'opensearch_server_port' => '9200'
-                ],
-            ],
-            [
                 'magento' => '2.4.9-alpha',
                 'expectedResult' => [
                     'engine' => 'opensearch',

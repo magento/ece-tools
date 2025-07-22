@@ -58,7 +58,7 @@ class ScdOnDemand extends Command
     /**
      * @inheritdoc
      */
-    public function execute(InputInterface $input, OutputInterface $output)
+    public function execute(InputInterface $input, OutputInterface $output): int
     {
         $scdOnDemandEnabled = $this->globalStage->get(GlobalSection::VAR_SCD_ON_DEMAND);
         $scdOnDemandStatus = $scdOnDemandEnabled ? 'enabled' : 'disabled';
