@@ -61,7 +61,7 @@ class ScdOnBuild extends Command
     /**
      * @inheritdoc
      */
-    public function execute(InputInterface $input, OutputInterface $output)
+    public function execute(InputInterface $input, OutputInterface $output): int
     {
         $errors = $this->scdOnBuildValidator->getErrors();
         $status = !$errors;
