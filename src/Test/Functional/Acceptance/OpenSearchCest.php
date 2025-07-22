@@ -91,7 +91,6 @@ class OpenSearchCest extends AbstractCest
         $I->assertTrue($I->downloadFromContainer('/app/etc/env.php', $destination, Docker::DEPLOY_CONTAINER));
         return require $destination;
     }
-    
 
     /**
      * @param \CliTester $I
@@ -114,11 +113,11 @@ class OpenSearchCest extends AbstractCest
     {
         return [
             [
-                'magento' => '2.4.9-alpha',
+                'magento'        => '2.4.9-alpha',
                 'expectedResult' => [
-                    'engine' => 'opensearch',
-                    'opensearch_server_hostname' => 'opensearch', 
-                    'opensearch_server_port' => '9200'
+                    'engine'                     => 'opensearch',
+                    'opensearch_server_hostname' => 'opensearch',
+                    'opensearch_server_port'     => '9200'
                 ],
             ],
         ];
