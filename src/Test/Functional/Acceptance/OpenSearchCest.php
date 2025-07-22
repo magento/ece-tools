@@ -115,7 +115,6 @@ class OpenSearchCest extends AbstractCest
         return [
             [
                 'magento' => '2.4.8',
-                'removeES' => true,
                 'expectedResult' => [
                     'engine' => 'opensearch',
                     'opensearch_server_hostname' => 'opensearch', 
@@ -124,7 +123,6 @@ class OpenSearchCest extends AbstractCest
             ],
             [
                 'magento' => '2.4.9-alpha',
-                'removeES' => true,
                 'expectedResult' => [
                     'engine' => 'opensearch',
                     'opensearch_server_hostname' => 'opensearch', 
