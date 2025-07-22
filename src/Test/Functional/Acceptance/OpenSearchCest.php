@@ -28,12 +28,10 @@ class OpenSearchCest extends AbstractCest
      * @param \CliTester $I
      * @param \Codeception\Example $data
      * @throws \Robo\Exception\TaskException
-     * @dataProvider openDataProvider
+     * @dataProvider dataProvider
      */
     public function testOpen(\CliTester $I, \Codeception\Example $data): void
     {
-        $this->removeEs = $data['removeES'];
-
         $this->prepareWorkplace($I, $data['magento']);
 
         $I->generateDockerCompose('--mode=production');
@@ -109,7 +107,7 @@ class OpenSearchCest extends AbstractCest
     /**
      * @return array
      */
-    protected function openDataProvider(): array
+    protected function dataProvider(): array
     {
         return [
             [
