@@ -147,21 +147,9 @@ class Cache
             return [];
         }
 
-        // Determine backend based on configuration priority:
-        // 1. If VALKEY_BACKEND is configured and Valkey service is available, use Valkey
-        // 2. If REDIS_BACKEND is configured and Redis service is available, use Redis  
-        // 3. Otherwise, prefer Redis for backward compatibility
-        if (!empty($envCacheValkeyBackendModel) && !empty($valkeyConfig)) {
-            $backendConfig = $valkeyConfig;
-            $cacheBackendModel = $envCacheValkeyBackendModel;
-        } elseif (!empty($envCacheRadisBackendModel) && !empty($redisConfig)) {
-            $backendConfig = $redisConfig;
-            $cacheBackendModel = $envCacheRadisBackendModel;
-        } else {
-            // Fall back to previous logic - prefer redis for backward compatibility
-            $backendConfig = !empty($redisConfig) ? $redisConfig : $valkeyConfig;
-            $cacheBackendModel = !empty($redisConfig) ? $envCacheRadisBackendModel : $envCacheValkeyBackendModel;
-        }
+        // Determine backend based on available configuration
+        $backendConfig = !empty($redisConfig) ? $redisConfig : $valkeyConfig;
+        $cacheBackendModel = !empty($redisConfig) ? $envCacheRadisBackendModel :$envCacheValkeyBackendModel;
         if ($this->isSynchronizedConfigStructure()) {
                $cacheCacheBackend = $this->getSynchronizedConfigStructure($cacheBackendModel, $backendConfig);
                 $cacheCacheBackend['backend_options']['remote_backend_options'] = array_merge(
