@@ -121,7 +121,7 @@ class Valkey83Cest extends ValkeyCest
                 'expectedBackend' => '\Magento\Framework\Cache\Backend\Redis',
                 'expectedConfig' => [
                     'backend_options' => [
-                        'server' => 'valkey',
+                        'server' => 'cache',
                         'port' => '6379',
                         'database' => 1,
                     ]
@@ -162,7 +162,7 @@ class Valkey83Cest extends ValkeyCest
                         'remote_backend' => '\Magento\Framework\Cache\Backend\Redis',
                         'remote_backend_options' => [
                             'persistent' => 0,
-                            'server' => 'valkey',
+                            'server' => 'cache',
                             'database' => 1,
                             'port' => '6379',
                             'password' => '',
