@@ -56,7 +56,7 @@ abstract class ValkeyCest extends AbstractCest
         $config = $this->getConfig($I);
 
         $I->assertSame(
-            'Cm_Cache_Backend_Redis',
+            '\Magento\Framework\Cache\Backend\Redis',
             $config['cache']['frontend']['default']['backend'],
             'Wrong backend model'
         );
