@@ -228,7 +228,9 @@ class Validator
                     && !in_array($serviceName, [
                         ServiceInterface::NAME_OPENSEARCH,
                         ServiceInterface::NAME_VALKEY,
-                        ServiceInterface::NAME_VALKEY_SESSION
+                        ServiceInterface::NAME_VALKEY_SESSION,
+                        ServiceInterface::NAME_REDIS,
+                        ServiceInterface::NAME_REDIS_SESSION
                     ], true)) {
                     throw new ServiceMismatchException(sprintf(
                         'Service "%s" does not have defined configurations for "%s" Magento version',
