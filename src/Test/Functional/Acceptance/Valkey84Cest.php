@@ -15,77 +15,6 @@ namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 class Valkey84Cest extends ValkeyCest
 {
     /**
-     * @inheritdoc
-     */
-    public function _before(\CliTester $I): void
-    {
-        //Do nothing...
-    }
-
-    /**
-     * Change MySQL version from 11.4 to 10.8
-     */
-    private function setMySQLVersionTo108(\CliTester $I): void
-    {
-        $services = $I->readServicesYaml();
-        $services['mysql']['type'] = 'mysql:10.8';
-        $I->writeServicesYaml($services);
-    }
-
-
-
-    /**
-     * @param \CliTester $I
-     * @param \Codeception\Example $data
-     * @throws \Robo\Exception\TaskException
-     * @dataProvider goodConfigurationDataProvider
-     */
-    public function testGoodConfiguration(\CliTester $I, \Codeception\Example $data): void
-    {
-        $this->prepareWorkplace($I, $data['version']);
-        $this->setMySQLVersionTo108($I);
-        $I->generateDockerCompose(sprintf(
-            '--mode=production --expose-db-port=%s',
-            $I->getExposedPort()
-        ));
-
-        $I->writeEnvMagentoYaml($data['configuration']);
-
-        $I->assertTrue($I->runDockerComposeCommand('run -e COMPOSER_IGNORE_PLATFORM_REQS=1 build cloud-build'), 'Build phase was failed');
-        $I->assertTrue($I->startEnvironment(), 'Docker could not start');
-        $I->assertTrue($I->runDockerComposeCommand('run deploy cloud-deploy'), 'Deploy phase was failed');
-        $I->assertTrue($I->runDockerComposeCommand('run deploy cloud-post-deploy'), 'Post Deploy phase was failed');
-
-        $config = $this->getConfig($I);
-        $I->assertSame(
-            $data['expectedBackend'],
-            $config['cache']['frontend']['default']['backend'],
-            'Wrong backend model'
-        );
-
-        $this->checkArraySubset(
-            $data['expectedConfig'],
-            $config['cache']['frontend']['default'],
-            $I
-        );
-
-        $I->amOnPage('/');
-        $I->see('Home page');
-        $I->see('CMS homepage content goes here.');
-    }
-
-    /**
-     * @param \CliTester $I
-     * @return array
-     */
-    private function getConfig(\CliTester $I): array
-    {
-        $destination = sys_get_temp_dir() . '/app/etc/env.php';
-        $I->assertTrue($I->downloadFromContainer('/app/etc/env.php', $destination, \Magento\CloudDocker\Test\Functional\Codeception\Docker::DEPLOY_CONTAINER));
-        return require $destination;
-    }
-
-    /**
      * @return array
      */
     protected function defaultConfigurationDataProvider(): array
@@ -192,7 +121,7 @@ class Valkey84Cest extends ValkeyCest
                 'expectedBackend' => '\Magento\Framework\Cache\Backend\Redis',
                 'expectedConfig' => [
                     'backend_options' => [
-                        'server' => 'valkey',
+                        'server' => 'cache',
                         'port' => '6379',
                         'database' => 1,
                     ]
@@ -233,7 +162,7 @@ class Valkey84Cest extends ValkeyCest
                         'remote_backend' => '\Magento\Framework\Cache\Backend\Redis',
                         'remote_backend_options' => [
                             'persistent' => 0,
-                            'server' => 'valkey',
+                            'server' => 'cache',
                             'database' => 1,
                             'port' => '6379',
                             'password' => '',
