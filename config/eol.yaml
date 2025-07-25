@@ -1,83 +1,47 @@
 # Service EOLs (YYYY-MM-DD).
 php:
-  - version: '7.0'
-    eol: 2019-01-10
-  - version: '7.1'
-    eol: 2019-12-01
-  - version: '7.2'
-    eol: 2020-11-30
-  - version: '7.3'
-    eol: 2021-12-06
-  - version: '7.4'
-    eol: 2022-11-28
   - version: '8.1'
-    eol: 2023-11-25
+    eol: 2024-11-24
   - version: '8.2'
-    eol: 2024-12-08
+    eol: 2025-12-08
   - version: '8.3'
-    eol: 2025-11-23
+    eol: 2026-12-31
+  - version: '8.3'
+    eol: 2027-12-31
 mariadb:
-  - version: '10.0'
-    eol: 2019-03-31
-  - version: '10.1'
-    eol: 2020-10-17
-  - version: '10.2'
-    eol: 2022-05-23
-  - version: '10.3'
-    eol: 2023-05-25
   - version: '10.4'
-    eol: 2024-06-18
-  - version: '10.6'
-    eol: 2026-07-31
-elasticsearch:
-  - version: '1.7'
-    eol: 2017-01-16
-  - version: '2.4'
-    eol: 2018-02-28
-  - version: '5.2'
-    eol: 2018-07-31
-  - version: '6.5'
-    eol: 2020-05-14
-  - version: '6.8'
-    eol: 2020-11-20
-  - version: '7.2'
-    eol: 2020-12-25
-  - version: '7.5'
-    eol: 2021-06-02
-  - version: '7.6'
-    eol: 2021-08-11
-  - version: '7.7'
-    eol: 2021-11-13
-  - version: '7.9'
-    eol: 2022-02-18
-rabbitmq:
-  - version: '3.5'
-    eol: 2016-10-31
-  - version: '3.7'
-    eol: 2020-03-31
-  - version: '3.8'
-    eol: 2022-07-31
-  - version: '3.9'
-    eol: 2023-07-31
-  - version: '3.11'
     eol: 2024-06-30
+  - version: '10.5'
+    eol: 2025-05-30  
+  - version: '10.6'
+    eol: 2026-06-30
+  - version: '10.11'
+    eol: 2027-10-25
+  - version: '11.4'
+    eol: 2028-04-30
+opensearch:
+  - version: '1'
+    eol: 2024-09-30
+  - version: '2'
+    eol: 2025-02-28
+rabbitmq: 
+  - version: '3.9'
+    eol: 2024-10-31
+  - version: '3.11'
+    eol: 2025-11-30   
+  - version: '3.12'
+    eol: 2026-05-31
+  - version: '3.13'
+    eol: 2027-11-30
+  - version: '4.1'
+    eol: 2028-12-31    
 redis:
-  - version: '3.2'
-    eol: 2018-10-17
-  - version: '4.0'
-    eol: 2020-04-30
-  - version: '5.0'
-    eol: 2020-04-30
-  - version: '5.2'
-    eol: 2019-12-31
-  - version: '6.0'
-    eol: 2022-05-31
   - version: '6.2'
-    eol: 2024-08-31
+    eol: 2024-04-30
   - version: '7.0'
-    eol: 2023-08-15
+    eol: 2026-04-30
   - version: '7.2'
-    eol: 2025-08-31
+    eol: 2028-06-30
 valkey:
   - version: '8.0'
-    eol: 2029-04-16
+    eol: 2027-09-15
