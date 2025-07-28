@@ -6,7 +6,7 @@ php:
     eol: 2025-12-08
   - version: '8.3'
     eol: 2026-12-31
-  - version: '8.3'
+  - version: '8.4'
     eol: 2027-12-31
 mariadb:
   - version: '10.4'
@@ -24,6 +24,8 @@ opensearch:
     eol: 2024-09-30
   - version: '2'
     eol: 2025-02-28
+  - version: '3'
+    eol: 2026-05-06 
 rabbitmq: 
   - version: '3.9'
     eol: 2024-10-31
