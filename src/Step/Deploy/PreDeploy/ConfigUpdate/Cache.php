@@ -178,11 +178,22 @@ class Cache implements StepInterface
         ];
 
         $isValkeyEnabled=  $this->cacheConfig->isValkeyEnabled();
+        $isRedisEnabled=  $this->cacheConfig->isRedisEnabled();
         try {
             if (!$this->magentoVersion->isGreaterOrEqual('2.4.5') && ($isValkeyEnabled['scheme'] ?? '') === 'valkey') {
                 $this->logger->warning(
                     sprintf(
                         'Magento version \'%s\' does not support Valkey backend model \'%s\'',
+                        $this->magentoVersion->getVersion(),
+                        $backend
+                    )
+                );
+            }
+            if (($isRedisEnabled['scheme'] ?? '') === 'redis' && $this->magentoVersion->isGreaterOrEqual('2.4.8')
+            ) {
+                $this->logger->warning(
+                    sprintf(
+                        'Magento version \'%s\' recommends using Valkey as the cache backend instead of \'%s\'',
                         $this->magentoVersion->getVersion(),
                         $backend
                     )
