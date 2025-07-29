@@ -25,9 +25,9 @@ class OpenSearchCest extends AbstractCest
     }
 
     /**
-     * @param \CliTester $I
-     * @param \Codeception\Example $data
-     * @throws \Robo\Exception\TaskException
+     * @param        \CliTester           $I
+     * @param        \Codeception\Example $data
+     * @throws       \Robo\Exception\TaskException
      * @dataProvider dataProvider
      */
     public function testOpen(\CliTester $I, \Codeception\Example $data): void
@@ -60,18 +60,18 @@ class OpenSearchCest extends AbstractCest
     }
 
     /**
-     * @param \CliTester $I
+     * @param  \CliTester $I
      * @return array
      */
     private function getConfig(\CliTester $I): array
     {
         $destination = sys_get_temp_dir() . '/app/etc/env.php';
         $I->assertTrue($I->downloadFromContainer('/app/etc/env.php', $destination, Docker::DEPLOY_CONTAINER));
-        return require $destination;
+        return include $destination;
     }
 
     /**
-     * @param \CliTester $I
+     * @param  \CliTester $I
      * @return void
      */
     private function checkConfigurationIsNotRemoved(\CliTester $I): void

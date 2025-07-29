@@ -11,6 +11,7 @@ use Magento\MagentoCloud\Util\ArrayManager;
 
 /**
  * General Cest
+ *
  * @SuppressWarnings(PHPMD.NumberOfChildren)
  */
 abstract class AbstractCest
@@ -19,11 +20,6 @@ abstract class AbstractCest
      * @var boolean
      */
     protected bool $removeEs = true;
-
-  /**
-   * @var boolean
-   */
-    protected bool $removeOs = true;
 
     /**
      * @var boolean
@@ -58,7 +54,7 @@ abstract class AbstractCest
     }
 
     /**
-     * @param array $data
+     * @param  array $data
      * @return string
      */
     protected function convertEnvFromArrayToJson(array $data): string
@@ -68,7 +64,7 @@ abstract class AbstractCest
 
     /**
      * @param \CliTester $I
-     * @param string $templateVersion
+     * @param string     $templateVersion
      */
     protected function prepareWorkplace(\CliTester $I, string $templateVersion): void
     {
@@ -117,7 +113,7 @@ abstract class AbstractCest
     /**
      * Checks if we can remove ES configuration for tests.
      *
-     * @param string $templateVersion
+     * @param  string $templateVersion
      * @return bool
      */
     protected function canESbeRemoved(string $templateVersion): bool
@@ -130,23 +126,8 @@ abstract class AbstractCest
     }
 
     /**
-     * Checks if we can remove OpenSearch configuration for tests.
-     *
-     * @param string $templateVersion
-     * @return bool
-     */
-    protected function canOSbeRemoved(string $templateVersion): bool
-    {
-        if ($templateVersion === 'master') {
-            return false;
-        }
-
-        return (bool)version_compare($templateVersion, '2.4.0', '>=');
-    }
-
-    /**
      * @param \CliTester $I
-     * @param string $templateVersion
+     * @param string     $templateVersion
      */
     protected function removeESIfExists(\CliTester $I, string $templateVersion): void
     {
@@ -159,26 +140,6 @@ abstract class AbstractCest
 
                 $app = $I->readAppMagentoYaml();
                 unset($app['relationships']['elasticsearch']);
-                $I->writeAppMagentoYaml($app);
-            }
-        }
-    }
-
-  /**
-   * @param \CliTester $I
-   * @param string $templateVersion
-   */
-    protected function removeOSIfExists(\CliTester $I, string $templateVersion): void
-    {
-        if ($this->removeOs && $this->canOSbeRemoved($templateVersion)) {
-            $services = $I->readServicesYaml();
-
-            if (isset($services['opensearch'])) {
-                unset($services['opensearch']);
-                $I->writeServicesYaml($services);
-
-                $app = $I->readAppMagentoYaml();
-                unset($app['relationships']['opensearch']);
                 $I->writeAppMagentoYaml($app);
             }
         }
@@ -199,9 +160,9 @@ abstract class AbstractCest
     /**
      * Perform asserts for arrays to check that $array contains information from $subset
      *
-     * @param array $subset
-     * @param array $array
-     * @param \CliTester $I
+     * @param  array      $subset
+     * @param  array      $array
+     * @param  \CliTester $I
      * @return void
      */
     protected function checkArraySubset(array $subset, array $array, \CliTester $I): void
