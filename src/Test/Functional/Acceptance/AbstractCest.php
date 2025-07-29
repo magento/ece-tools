@@ -18,22 +18,27 @@ abstract class AbstractCest
     /**
      * @var boolean
      */
-    protected $removeEs = true;
+    protected bool $removeEs = true;
+
+  /**
+   * @var boolean
+   */
+    protected bool $removeOs = true;
 
     /**
      * @var boolean
      */
-    protected $runComposerUpdate = true;
+    protected bool $runComposerUpdate = true;
 
     /**
      * @var string
      */
-    protected $magentoCloudTemplate = 'master';
+    protected string $magentoCloudTemplate = 'master';
 
     /**
      * @var ArrayManager
      */
-    protected $arrayManager;
+    protected ArrayManager $arrayManager;
 
     /**
      * @param \CliTester $I
@@ -125,6 +130,21 @@ abstract class AbstractCest
     }
 
     /**
+     * Checks if we can remove OpenSearch configuration for tests.
+     *
+     * @param string $templateVersion
+     * @return bool
+     */
+    protected function canOSbeRemoved(string $templateVersion): bool
+    {
+        if ($templateVersion === 'master') {
+            return false;
+        }
+
+        return (bool)version_compare($templateVersion, '2.4.0', '>=');
+    }
+
+    /**
      * @param \CliTester $I
      * @param string $templateVersion
      */
@@ -148,21 +168,21 @@ abstract class AbstractCest
    * @param \CliTester $I
    * @param string $templateVersion
    */
-  protected function removeOSIfExists(\CliTester $I, string $templateVersion): void
-  {
-    if ($this->removeEs && $this->canESbeRemoved($templateVersion)) {
-      $services = $I->readServicesYaml();
+    protected function removeOSIfExists(\CliTester $I, string $templateVersion): void
+    {
+        if ($this->removeOs && $this->canOSbeRemoved($templateVersion)) {
+            $services = $I->readServicesYaml();
 
-      if (isset($services['opensearch'])) {
-        unset($services['opensearch']);
-        $I->writeServicesYaml($services);
+            if (isset($services['opensearch'])) {
+                unset($services['opensearch']);
+                $I->writeServicesYaml($services);
 
-        $app = $I->readAppMagentoYaml();
-        unset($app['relationships']['opensearch']);
-        $I->writeAppMagentoYaml($app);
-      }
+                $app = $I->readAppMagentoYaml();
+                unset($app['relationships']['opensearch']);
+                $I->writeAppMagentoYaml($app);
+            }
+        }
     }
-  }
 
     /**
      * @return ArrayManager
