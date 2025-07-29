@@ -144,6 +144,26 @@ abstract class AbstractCest
         }
     }
 
+  /**
+   * @param \CliTester $I
+   * @param string $templateVersion
+   */
+  protected function removeOSIfExists(\CliTester $I, string $templateVersion): void
+  {
+    if ($this->removeEs && $this->canESbeRemoved($templateVersion)) {
+      $services = $I->readServicesYaml();
+
+      if (isset($services['opensearch'])) {
+        unset($services['opensearch']);
+        $I->writeServicesYaml($services);
+
+        $app = $I->readAppMagentoYaml();
+        unset($app['relationships']['opensearch']);
+        $I->writeAppMagentoYaml($app);
+      }
+    }
+  }
+
     /**
      * @return ArrayManager
      */

@@ -58,7 +58,7 @@ class OpenSearchCest extends AbstractCest
         $I->assertTrue($I->cleanDirectories(['/vendor/*', '/setup/*']));
         $I->stopEnvironment(true);
         $this->removeEs = true;
-        $this->removeESIfExists($I);
+        $this->removeOSIfExists($I, $data['magento']);
 
         $I->generateDockerCompose('--mode=production');
 
