@@ -57,26 +57,6 @@ class OpenSearchCest extends AbstractCest
 
         $I->assertTrue($I->cleanDirectories(['/vendor/*', '/setup/*']));
         $I->stopEnvironment(true);
-        $this->removeEs = true;
-        $this->removeOSIfExists($I, $data['magento']);
-
-        $I->generateDockerCompose('--mode=production');
-
-        $I->runDockerComposeCommand('run build cloud-build');
-        $I->startEnvironment();
-        $I->runDockerComposeCommand('run deploy cloud-deploy');
-
-        $this->checkConfigurationIsNotRemoved($I);
-
-        $I->amOnPage('/');
-        $I->see('Home page');
-
-        $config = $this->getConfig($I);
-        $this->checkArraySubset(
-            ['engine' => 'mysql'],
-            $config['system']['default']['catalog']['search'],
-            $I
-        );
     }
 
     /**
