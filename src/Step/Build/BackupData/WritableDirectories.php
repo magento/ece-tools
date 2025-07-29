@@ -116,7 +116,7 @@ class WritableDirectories implements StepInterface
         } catch (StepException $e) {
             throw $e;
         } catch (GenericException $e) {
-            new StepException($e->getMessage(), $e->getCode(), $e);
+            throw new StepException($e->getMessage(), $e->getCode(), $e);
         }
     }
 
