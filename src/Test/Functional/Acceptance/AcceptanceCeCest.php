@@ -22,12 +22,12 @@ class AcceptanceCeCest extends AbstractCest
     /**
      * @var string
      */
-    protected $magentoCloudTemplate = '2.4.6';
+    protected string $magentoCloudTemplate = '2.4.6';
 
     /**
      * @var boolean
      */
-    protected $runComposerUpdate = false;
+    protected bool $runComposerUpdate = false;
 
     public function _before(\CliTester $I): void
     {
