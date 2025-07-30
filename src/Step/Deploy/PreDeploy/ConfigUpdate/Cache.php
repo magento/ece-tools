@@ -179,7 +179,6 @@ class Cache implements StepInterface
 
         $isValkeyEnabled=  $this->cacheConfig->isValkeyEnabled();
         $isRedisEnabled=  $this->cacheConfig->isRedisEnabled();
-        print_r($isRedisEnabled);
         try {
             if (!$this->magentoVersion->isGreaterOrEqual('2.4.5') && ($isValkeyEnabled['scheme'] ?? '') === 'valkey') {
                 $this->logger->warning(
