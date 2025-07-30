@@ -465,7 +465,7 @@ variables:
     type: string
     allowed:
       - 'Cm_Cache_Backend_Redis'
-      - '\Magento\Framework\Cache\Backend\Valkey'
+      - '\Magento\Framework\Cache\Backend\Redis'
       - '\Magento\Framework\Cache\Backend\RemoteSynchronizedCache'
     stages:
       - deploy
@@ -474,7 +474,7 @@ variables:
     examples:
       - stage:
           deploy:
-            VALKEY_BACKEND: '\Magento\Framework\Cache\Backend\Valkey'
+            VALKEY_BACKEND: '\Magento\Framework\Cache\Backend\Redis'
   CACHE_CONFIGURATION:
     description: "Replace or modify the Magento cache configuration generated during the deployment process.
       To replace the existing configuration, specify values for each configuration option required for your environment.

@@ -148,8 +148,8 @@ class Cache
         }
 
         // Determine backend based on available configuration
-         $backendConfig = !empty($redisConfig) ? $redisConfig : $valkeyConfig;
-         $cacheBackendModel = !empty($redisConfig) ? $envCacheRadisBackendModel :$envCacheValkeyBackendModel;
+        $backendConfig = !empty($redisConfig) ? $redisConfig : $valkeyConfig;
+        $cacheBackendModel = !empty($redisConfig) ? $envCacheRadisBackendModel :$envCacheValkeyBackendModel;
         if ($this->isSynchronizedConfigStructure()) {
                $cacheCacheBackend = $this->getSynchronizedConfigStructure($cacheBackendModel, $backendConfig);
                 $cacheCacheBackend['backend_options']['remote_backend_options'] = array_merge(
