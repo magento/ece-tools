@@ -85,6 +85,7 @@ class EolValidator
         $services = [
             ServiceInterface::NAME_PHP,
             ServiceInterface::NAME_ELASTICSEARCH,
+           ServiceInterface::NAME_OPENSEARCH,
             ServiceInterface::NAME_RABBITMQ,
             ServiceInterface::NAME_REDIS,
             ServiceInterface::NAME_REDIS_SESSION,
