@@ -97,7 +97,6 @@ class EolValidator
         foreach ($services as $serviceName) {
             $service = $this->serviceFactory->create($serviceName);
             $serviceVersion = $service->getVersion();
-            print_r( $serviceName.'--'.$serviceVersion."\n");
             if ($validationResult = $this->validateService(
                 $this->getConvertedServiceName($serviceName),
                 $serviceVersion
@@ -129,7 +128,14 @@ class EolValidator
             return [];
         }
 
-        $eolDate = Carbon::createFromTimestamp($versionConfigs[current(array_keys($versionConfigs))]['eol']);
+        $eolDateValue = $versionConfigs[current(array_keys($versionConfigs))]['eol'];
+        
+        // Handle both timestamp and date string formats
+        if (is_numeric($eolDateValue)) {
+            $eolDate = Carbon::createFromTimestamp($eolDateValue);
+        } else {
+            $eolDate = Carbon::createFromFormat('Y-m-d', $eolDateValue);
+        }
 
         if (!$eolDate->isFuture()) {
             return [ValidatorInterface::LEVEL_WARNING => sprintf(
