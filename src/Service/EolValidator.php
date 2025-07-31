@@ -97,7 +97,7 @@ class EolValidator
         foreach ($services as $serviceName) {
             $service = $this->serviceFactory->create($serviceName);
             $serviceVersion = $service->getVersion();
-
+            echo $service.'--'.$serviceVersion."\n";
             if ($validationResult = $this->validateService(
                 $this->getConvertedServiceName($serviceName),
                 $serviceVersion
