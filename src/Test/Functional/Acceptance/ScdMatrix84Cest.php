@@ -17,5 +17,5 @@ class ScdMatrix84Cest extends ScdMatrixCest
     /**
      * @var string
      */
-    protected $magentoCloudTemplate = '2.4.8';
+    protected string $magentoCloudTemplate = '2.4.8';
 }

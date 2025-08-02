@@ -16,5 +16,5 @@ class AdminCredential84Cest extends AdminCredentialCest
     /**
      * @var string
      */
-    protected $magentoCloudTemplate = '2.4.8';
+    protected string $magentoCloudTemplate = '2.4.8';
 }
