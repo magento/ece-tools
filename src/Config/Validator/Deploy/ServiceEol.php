@@ -60,7 +60,7 @@ class ServiceEol implements ValidatorInterface
 
             if (isset($errors[$this->errorLevel])) {
                 $message = $this->errorLevel == ValidatorInterface::LEVEL_WARNING ?
-                    'Some services have passed EOL.' :
+                    'Some services have passed EOL and are outdated.' :
                     'Some services are approaching EOL.';
                 return $this->resultFactory->error(
                     $message,

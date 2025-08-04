@@ -17,5 +17,5 @@ class DataTypesOptionValidation81Cest extends DataTypesOptionValidationCest
     /**
      * @var string
      */
-    protected $magentoCloudTemplate = '2.4.4';
+    protected string $magentoCloudTemplate = '2.4.4';
 }
