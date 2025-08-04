@@ -34,7 +34,7 @@ abstract class AbstractCest
     /**
      * @var ArrayManager
      */
-    protected $arrayManager;
+    protected ArrayManager $arrayManager;
 
     /**
      * @param \CliTester $I
