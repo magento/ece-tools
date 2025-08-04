@@ -19,5 +19,5 @@ class ReportDirNestingLevel83Cest extends ReportDirNestingLevelCest
     /**
      * @var string
      */
-    protected $magentoCloudTemplate = '2.4.7';
+    protected string $magentoCloudTemplate = '2.4.7';
 }
