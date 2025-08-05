@@ -17,5 +17,5 @@ class WizardScd81Cest extends WizardScdCest
     /**
      * @var string
      */
-    protected $magentoCloudTemplate = '2.4.4';
+    protected string $magentoCloudTemplate = '2.4.4';
 }

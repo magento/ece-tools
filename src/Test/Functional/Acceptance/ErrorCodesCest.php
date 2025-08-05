@@ -21,7 +21,7 @@ abstract class ErrorCodesCest extends AbstractCest
     /**
      * @var string
      */
-    protected $magentoCloudTemplate = '2.4.7';
+    protected string $magentoCloudTemplate = '2.4.7';
 
     /**
      * @param \CliTester $I

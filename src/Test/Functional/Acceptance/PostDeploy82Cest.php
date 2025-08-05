@@ -17,5 +17,5 @@ class PostDeploy82Cest extends PostDeployCest
     /**
      * @var string
      */
-    protected $magentoCloudTemplate = '2.4.6';
+    protected string $magentoCloudTemplate = '2.4.6';
 }

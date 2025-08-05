@@ -27,5 +27,5 @@ class Acceptance83Cest extends AcceptanceCest
     /**
      * @var string
      */
-    protected $magentoCloudTemplate = '2.4.7';
+    protected string $magentoCloudTemplate = '2.4.7';
 }

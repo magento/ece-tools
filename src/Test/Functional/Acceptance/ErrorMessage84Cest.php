@@ -19,5 +19,5 @@ class ErrorMessage84Cest extends ErrorMessageCest
     /**
      * @var string
      */
-    protected $magentoCloudTemplate = '2.4.8';
+    protected string $magentoCloudTemplate = '2.4.8';
 }

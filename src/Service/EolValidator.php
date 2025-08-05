@@ -85,6 +85,7 @@ class EolValidator
         $services = [
             ServiceInterface::NAME_PHP,
             ServiceInterface::NAME_ELASTICSEARCH,
+            ServiceInterface::NAME_OPENSEARCH,
             ServiceInterface::NAME_RABBITMQ,
             ServiceInterface::NAME_REDIS,
             ServiceInterface::NAME_REDIS_SESSION,
@@ -96,7 +97,6 @@ class EolValidator
         foreach ($services as $serviceName) {
             $service = $this->serviceFactory->create($serviceName);
             $serviceVersion = $service->getVersion();
-
             if ($validationResult = $this->validateService(
                 $this->getConvertedServiceName($serviceName),
                 $serviceVersion
@@ -128,7 +128,14 @@ class EolValidator
             return [];
         }
 
-        $eolDate = Carbon::createFromTimestamp($versionConfigs[current(array_keys($versionConfigs))]['eol']);
+        $eolDateValue = $versionConfigs[current(array_keys($versionConfigs))]['eol'];
+        
+        // Handle both timestamp and date string formats
+        if (is_numeric($eolDateValue)) {
+            $eolDate = Carbon::createFromTimestamp($eolDateValue);
+        } else {
+            $eolDate = Carbon::createFromFormat('Y-m-d', $eolDateValue);
+        }
 
         if (!$eolDate->isFuture()) {
             return [ValidatorInterface::LEVEL_WARNING => sprintf(
