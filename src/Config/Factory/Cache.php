@@ -386,4 +386,12 @@ class Cache
     {
         return $this->valkey->getConfiguration();
     }
+
+  /**
+   * @return array
+   */
+  public function isRedisEnabled(): array
+  {
+    return $this->redis->getConfiguration();
+  }
 }
