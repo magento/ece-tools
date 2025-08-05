@@ -32,9 +32,9 @@ abstract class AbstractCest
     protected string $magentoCloudTemplate = 'master';
 
     /**
-     * @var ArrayManager
+     * @var ArrayManager|null
      */
-    protected ArrayManager $arrayManager;
+    protected ?ArrayManager $arrayManager = null;
 
     /**
      * @param \CliTester $I
