@@ -390,8 +390,8 @@ class Cache
   /**
    * @return array
    */
-  public function isRedisEnabled(): array
-  {
-    return $this->redis->getConfiguration();
-  }
+    public function isRedisEnabled(): array
+    {
+        return $this->redis->getConfiguration();
+    }
 }
