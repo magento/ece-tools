@@ -12,9 +12,9 @@ use Magento\CloudDocker\Test\Functional\Codeception\Docker;
 /**
  * This test runs on the latest version of PHP
  *
- * @group php74
+ * @group php84
  */
-class ElasticSearchCest extends AbstractCest
+class OpenSearchCest extends AbstractCest
 {
     /**
      * @param \CliTester $I
@@ -25,16 +25,13 @@ class ElasticSearchCest extends AbstractCest
     }
 
     /**
-     * @param \CliTester $I
-     * @param \Codeception\Example $data
-     * @throws \Robo\Exception\TaskException
-     * @dataProvider elasticDataProvider
-     * @skip Skip Need to fix ElasticSearch containers
+     * @param        \CliTester           $I
+     * @param        \Codeception\Example $data
+     * @throws       \Robo\Exception\TaskException
+     * @dataProvider dataProvider
      */
-    public function testElastic(\CliTester $I, \Codeception\Example $data): void
+    public function testOpen(\CliTester $I, \Codeception\Example $data): void
     {
-        $this->removeEs = $data['removeES'];
-
         $this->prepareWorkplace($I, $data['magento']);
 
         $I->generateDockerCompose('--mode=production');
@@ -60,42 +57,22 @@ class ElasticSearchCest extends AbstractCest
 
         $I->assertTrue($I->cleanDirectories(['/vendor/*', '/setup/*']));
         $I->stopEnvironment(true);
-        $this->removeEs = true;
-        $this->removeESIfExists($I);
-
-        $I->generateDockerCompose('--mode=production');
-
-        $I->runDockerComposeCommand('run build cloud-build');
-        $I->startEnvironment();
-        $I->runDockerComposeCommand('run deploy cloud-deploy');
-
-        $this->checkConfigurationIsNotRemoved($I);
-
-        $I->amOnPage('/');
-        $I->see('Home page');
-
-        $config = $this->getConfig($I);
-        $this->checkArraySubset(
-            ['engine' => 'mysql'],
-            $config['system']['default']['catalog']['search'],
-            $I
-        );
     }
 
     /**
-     * @param \CliTester $I
+     * @param  \CliTester $I
      * @return array
      */
     private function getConfig(\CliTester $I): array
     {
         $destination = sys_get_temp_dir() . '/app/etc/env.php';
         $I->assertTrue($I->downloadFromContainer('/app/etc/env.php', $destination, Docker::DEPLOY_CONTAINER));
-        return require $destination;
+        return include $destination;
     }
 
     /**
-     * @param \CliTester $I
-     * @return array
+     * @param  \CliTester $I
+     * @return void
      */
     private function checkConfigurationIsNotRemoved(\CliTester $I): void
     {
@@ -110,16 +87,15 @@ class ElasticSearchCest extends AbstractCest
     /**
      * @return array
      */
-    protected function elasticDataProvider(): array
+    protected function dataProvider(): array
     {
         return [
             [
-                'magento' => '2.4.3',
-                'removeES' => false,
+                'magento'        => '2.4.9-alpha',
                 'expectedResult' => [
-                    'engine' => 'elasticsearch6',
-                    'elasticsearch6_server_hostname' => 'elasticsearch',
-                    'elasticsearch6_server_port' => '9200'
+                    'engine'                     => 'opensearch',
+                    'opensearch_server_hostname' => 'opensearch',
+                    'opensearch_server_port'     => '9200'
                 ],
             ],
         ];

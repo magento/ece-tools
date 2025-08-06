@@ -48,7 +48,8 @@ class Validator
             '>=2.4.0 <2.4.4 || ~2.3.7-p4' => '>=7.3 <7.5', // '~7.3.0||~7.4.0'
             '>=2.4.4 <2.4.6' => '>=8.1 <8.2', // '~8.1.0'
             '>=2.4.6 <2.4.7'=> '>=8.1 <8.3', // '~8.1.0 || ~8.2.0'
-            '>=2.4.7 <2.4.9' => '>=8.2 <8.4', // '~8.2.0 || ~8.3.0'
+            '>=2.4.7 <2.4.8' => '>=8.2 <8.4', // '~8.2.0 || ~8.3.0'
+            '>=2.4.8' => '>=8.3 <8.5', // '~8.3.0 || ~8.4.0'
         ],
         ServiceInterface::NAME_DB_MARIA => [
             '<2.3.6-p1' => '>=10.0 <10.3',
@@ -57,7 +58,7 @@ class Validator
             '>=2.4.5-p8 <2.4.6' => '>10.4 <10.6',
             '>=2.4.6 <2.4.6-p11 || >=2.4.7 <2.4.7-p6' => '>=10.6 <10.7',
             '>=2.4.6-p11 <2.4.7 || >=2.4.7-p6 <2.4.8' => '10.11',
-            '>=2.4.8 <2.4.9' => '>=10.6 <11.5',
+            '>=2.4.8' => '11.4 <11.5',
         ],
         ServiceInterface::NAME_DB_MYSQL => [
             '<2.3.0' => '~5.6.0 || ~5.7.0',
@@ -100,7 +101,8 @@ class Validator
         ServiceInterface::NAME_OPENSEARCH => [
             '>=2.3.7-p3 <2.4.0 || >=2.4.3-p2 <2.4.4-p7 || >=2.4.5 <2.4.5-p7' => '~1.1.0 || 1.2.*',
             '>=2.4.4-p8 <2.4.4-p12 || >=2.4.5-p6 <2.4.5-p11'  => '1.3.*',
-            '>=2.4.4-p13 <2.4.5 || >=2.4.5-p12' => '^2'
+            '>=2.4.4-p13 <2.4.5 || >=2.4.5-p12 <2.4.8-p2' => '^2',
+            '>=2.4.8-p2 || >=2.4.9' => '^3'
         ],
         ServiceInterface::NAME_RABBITMQ => [
             '<2.3.0' => '~3.5.0',
@@ -227,7 +229,9 @@ class Validator
                     && !in_array($serviceName, [
                         ServiceInterface::NAME_OPENSEARCH,
                         ServiceInterface::NAME_VALKEY,
-                        ServiceInterface::NAME_VALKEY_SESSION
+                        ServiceInterface::NAME_VALKEY_SESSION,
+                        ServiceInterface::NAME_REDIS,
+                        ServiceInterface::NAME_REDIS_SESSION
                     ], true)) {
                     throw new ServiceMismatchException(sprintf(
                         'Service "%s" does not have defined configurations for "%s" Magento version',

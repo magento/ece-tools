@@ -11,6 +11,7 @@ use Magento\MagentoCloud\Util\ArrayManager;
 
 /**
  * General Cest
+ *
  * @SuppressWarnings(PHPMD.NumberOfChildren)
  */
 abstract class AbstractCest
@@ -18,22 +19,22 @@ abstract class AbstractCest
     /**
      * @var boolean
      */
-    protected $removeEs = true;
+    protected bool $removeEs = true;
 
     /**
      * @var boolean
      */
-    protected $runComposerUpdate = true;
+    protected bool $runComposerUpdate = true;
 
     /**
      * @var string
      */
-    protected $magentoCloudTemplate = 'master';
+    protected string $magentoCloudTemplate = 'master';
 
     /**
-     * @var ArrayManager
+     * @var ArrayManager|null
      */
-    protected $arrayManager;
+    protected ?ArrayManager $arrayManager = null;
 
     /**
      * @param \CliTester $I
@@ -53,7 +54,7 @@ abstract class AbstractCest
     }
 
     /**
-     * @param array $data
+     * @param  array $data
      * @return string
      */
     protected function convertEnvFromArrayToJson(array $data): string
@@ -63,7 +64,7 @@ abstract class AbstractCest
 
     /**
      * @param \CliTester $I
-     * @param string $templateVersion
+     * @param string     $templateVersion
      */
     protected function prepareWorkplace(\CliTester $I, string $templateVersion): void
     {
@@ -112,7 +113,7 @@ abstract class AbstractCest
     /**
      * Checks if we can remove ES configuration for tests.
      *
-     * @param string $templateVersion
+     * @param  string $templateVersion
      * @return bool
      */
     protected function canESbeRemoved(string $templateVersion): bool
@@ -126,7 +127,7 @@ abstract class AbstractCest
 
     /**
      * @param \CliTester $I
-     * @param string $templateVersion
+     * @param string     $templateVersion
      */
     protected function removeESIfExists(\CliTester $I, string $templateVersion): void
     {
@@ -159,9 +160,9 @@ abstract class AbstractCest
     /**
      * Perform asserts for arrays to check that $array contains information from $subset
      *
-     * @param array $subset
-     * @param array $array
-     * @param \CliTester $I
+     * @param  array      $subset
+     * @param  array      $array
+     * @param  \CliTester $I
      * @return void
      */
     protected function checkArraySubset(array $subset, array $array, \CliTester $I): void

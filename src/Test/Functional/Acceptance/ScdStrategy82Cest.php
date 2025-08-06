@@ -17,5 +17,5 @@ class ScdStrategy82Cest extends ScdStrategyCest
     /**
      * @var string
      */
-    protected $magentoCloudTemplate = '2.4.6';
+    protected string $magentoCloudTemplate = '2.4.6';
 }

@@ -178,6 +178,7 @@ class Cache implements StepInterface
         ];
 
         $isValkeyEnabled=  $this->cacheConfig->isValkeyEnabled();
+        $isRedisEnabled=  $this->cacheConfig->isRedisEnabled();
         try {
             if (!$this->magentoVersion->isGreaterOrEqual('2.4.5') && ($isValkeyEnabled['scheme'] ?? '') === 'valkey') {
                 $this->logger->warning(
@@ -188,8 +189,7 @@ class Cache implements StepInterface
                     )
                 );
             }
-            if (in_array($backend, $AllowedRedisBackendCheck, true)
-                && $this->magentoVersion->isGreaterOrEqual('2.4.8')
+            if (($isRedisEnabled['scheme'] ?? '') === 'redis' && $this->magentoVersion->isGreaterOrEqual('2.4.8')
             ) {
                 $this->logger->warning(
                     sprintf(

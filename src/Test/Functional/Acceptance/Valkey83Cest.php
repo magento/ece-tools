@@ -21,7 +21,7 @@ class Valkey83Cest extends ValkeyCest
     {
         return [
             [
-                'version' => '2.4.7',
+                'version' => '2.4.8',
             ],
         ];
     }
@@ -33,7 +33,7 @@ class Valkey83Cest extends ValkeyCest
     {
         return [
             [
-                'version' => '2.4.7',
+                'version' => '2.4.8',
                 'wrongConfiguration' => [
                     'stage' => [
                         'deploy' => [
@@ -43,7 +43,7 @@ class Valkey83Cest extends ValkeyCest
                 ],
                 'buildSuccess' => false,
                 'deploySuccess' => false,
-                'errorBuildMessage' => 'The VALKEY_BACKEND variable contains an invalid value TestVALKEYModel.'
+                'errorBuildMessage' => 'The VALKEY_BACKEND variable contains an invalid value TestValkeyModel.'
                     . ' Use one of the available value options: Cm_Cache_Backend_Redis,'
                     . ' \Magento\Framework\Cache\Backend\Redis,'
                     . ' \Magento\Framework\Cache\Backend\RemoteSynchronizedCache.',
@@ -59,7 +59,7 @@ class Valkey83Cest extends ValkeyCest
     {
         return [
             [
-                'version' => '2.4.7',
+                'version' => '2.4.8',
                 'configuration' => [
                     'stage' => [
                         'deploy' => [
@@ -79,7 +79,7 @@ class Valkey83Cest extends ValkeyCest
                 ],
             ],
             [
-                'version' => '2.4.7',
+                'version' => '2.4.8',
                 'configuration' => [
                     'stage' => [
                         'deploy' => [
@@ -110,7 +110,7 @@ class Valkey83Cest extends ValkeyCest
     {
         return [
             [
-                'version' => '2.4.7',
+                'version' => '2.4.8',
                 'configuration' => [
                     'stage' => [
                         'deploy' => [
@@ -121,14 +121,14 @@ class Valkey83Cest extends ValkeyCest
                 'expectedBackend' => '\Magento\Framework\Cache\Backend\Redis',
                 'expectedConfig' => [
                     'backend_options' => [
-                        'server' => 'valkey',
+                        'server' => 'cache',
                         'port' => '6379',
                         'database' => 1,
                     ]
                 ],
             ],
             [
-                'version' => '2.4.7',
+                'version' => '2.4.8',
                 'configuration' => [
                     'stage' => [
                         'deploy' => [
@@ -148,7 +148,7 @@ class Valkey83Cest extends ValkeyCest
                 'expectedConfig' => [],
             ],
             [
-                'version' => '2.4.7',
+                'version' => '2.4.8',
                 'configuration' => [
                     'stage' => [
                         'deploy' => [
@@ -162,7 +162,7 @@ class Valkey83Cest extends ValkeyCest
                         'remote_backend' => '\Magento\Framework\Cache\Backend\Redis',
                         'remote_backend_options' => [
                             'persistent' => 0,
-                            'server' => 'valkey',
+                            'server' => 'cache',
                             'database' => 1,
                             'port' => '6379',
                             'password' => '',
