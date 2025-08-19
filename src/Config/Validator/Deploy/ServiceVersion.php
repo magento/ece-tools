@@ -19,6 +19,7 @@ use Psr\Log\LoggerInterface;
 
 /**
  * Validates installed service versions according to version mapping.
+ *
  * @see \Magento\MagentoCloud\Service\Validator::MAGENTO_SUPPORTED_SERVICE_VERSIONS
  */
 class ServiceVersion implements ValidatorInterface
@@ -51,9 +52,9 @@ class ServiceVersion implements ValidatorInterface
     /**
      * @param Validator\ResultFactory $resultFactory
      * @param ServiceVersionValidator $serviceVersionValidator
-     * @param ServiceFactory $serviceFactory
-     * @param LoggerInterface $logger
-     * @param DatabaseType $databaseType
+     * @param ServiceFactory          $serviceFactory
+     * @param LoggerInterface         $logger
+     * @param DatabaseType            $databaseType
      */
     public function __construct(
         Validator\ResultFactory $resultFactory,
@@ -78,6 +79,7 @@ class ServiceVersion implements ValidatorInterface
     {
         try {
             $services = [
+                ServiceInterface::NAME_ACTIVEMQ,
                 ServiceInterface::NAME_RABBITMQ,
                 ServiceInterface::NAME_REDIS,
                 ServiceInterface::NAME_REDIS_SESSION,
@@ -96,8 +98,8 @@ class ServiceVersion implements ValidatorInterface
                 $logMsq = $serviceVersion ? 'is ' . $serviceVersion : 'is not detected';
                 $this->logger->info(sprintf('Version of service \'%s\' %s', $serviceName, $logMsq));
 
-                if ($serviceVersion !== '0' &&
-                    $error = $this->serviceVersionValidator->validateService($serviceName, $serviceVersion)
+                if ($serviceVersion !== '0' 
+                    && $error = $this->serviceVersionValidator->validateService($serviceName, $serviceVersion)
                 ) {
                     $errors[] = $error;
                 }

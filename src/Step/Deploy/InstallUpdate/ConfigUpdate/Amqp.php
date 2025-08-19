@@ -25,28 +25,28 @@ class Amqp implements StepInterface
     /**
      * @var LoggerInterface
      */
-    private $logger;
+    private LoggerInterface $logger;
 
     /**
      * @var ConfigWriter
      */
-    private $configWriter;
+    private ConfigWriter $configWriter;
 
     /**
      * @var ConfigReader
      */
-    private $configReader;
+    private ConfigReader $configReader;
 
     /**
      * @var AmqpConfig
      */
-    private $amqpConfig;
+    private AmqpConfig $amqpConfig;
 
     /**
-     * @param ConfigReader $configReader
-     * @param ConfigWriter $configWriter
+     * @param ConfigReader    $configReader
+     * @param ConfigWriter    $configWriter
      * @param LoggerInterface $logger
-     * @param AmqpConfig $amqpConfig
+     * @param AmqpConfig      $amqpConfig
      */
     public function __construct(
         ConfigReader $configReader,
@@ -71,7 +71,7 @@ class Amqp implements StepInterface
      *
      * {@inheritdoc}
      */
-    public function execute()
+    public function execute(): void
     {
         try {
             $config = $this->configReader->read();

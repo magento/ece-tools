@@ -8,6 +8,8 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Config;
 
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
+use Magento\MagentoCloud\Package\UndefinedPackageException;
+use Magento\MagentoCloud\Service\ActiveMq;
 use Magento\MagentoCloud\Service\RabbitMq;
 use Magento\MagentoCloud\Package\MagentoVersion;
 
@@ -17,37 +19,45 @@ use Magento\MagentoCloud\Package\MagentoVersion;
 class Amqp
 {
     /**
+     * @var ActiveMq
+     */
+    private ActiveMq $activeMQ;
+
+    /**
      * @var RabbitMq
      */
-    private $rabbitMQ;
+    private RabbitMq $rabbitMQ;
 
     /**
      * @var DeployInterface
      */
-    private $stageConfig;
+    private DeployInterface $stageConfig;
 
     /**
      * @var ConfigMerger
      */
-    private $configMerger;
+    private ConfigMerger $configMerger;
 
     /**
      * @var MagentoVersion
      */
-    private $magentoVersion;
+    private MagentoVersion $magentoVersion;
 
     /**
-     * @param RabbitMq $rabbitMQ
+     * @param ActiveMq        $activeMQ
+     * @param RabbitMq        $rabbitMQ
      * @param DeployInterface $stageConfig
-     * @param ConfigMerger $configMerger
-     * @param MagentoVersion $magentoVersion
+     * @param ConfigMerger    $configMerger
+     * @param MagentoVersion  $magentoVersion
      */
     public function __construct(
+        ActiveMq $activeMQ,
         RabbitMq $rabbitMQ,
         DeployInterface $stageConfig,
         ConfigMerger $configMerger,
         MagentoVersion $magentoVersion
     ) {
+        $this->activeMQ = $activeMQ;
         $this->rabbitMQ = $rabbitMQ;
         $this->stageConfig = $stageConfig;
         $this->configMerger = $configMerger;
@@ -58,7 +68,7 @@ class Amqp
      * Returns queue configuration
      *
      * @return array
-     * @throws \Magento\MagentoCloud\Package\UndefinedPackageException
+     * @throws UndefinedPackageException|ConfigException
      */
     public function getConfig(): array
     {
@@ -77,6 +87,7 @@ class Amqp
      * Returns merged queue configuration
      *
      * @return array
+     * @throws ConfigException
      */
     private function getMergedConfig(): array
     {
@@ -96,11 +107,26 @@ class Amqp
 
     /**
      * Convert amqp service configuration to magento format.
+     * Prioritizes ActiveMQ first, then falls back to RabbitMQ.
      *
      * @return array
      */
     private function getAmqpConfig(): array
     {
+        // First priority: ActiveMQ
+        if ($amqpConfig = $this->activeMQ->getConfiguration()) {
+            return [
+                'amqp' => [
+                    'host' => $amqpConfig['host'],
+                    'port' => $amqpConfig['port'],
+                    'user' => $amqpConfig['username'] ?? $amqpConfig['user'] ?? '',
+                    'password' => $amqpConfig['password'],
+                    'virtualhost' => $amqpConfig['vhost'] ?? '/',
+                ]
+            ];
+        }
+
+        // Fallback: RabbitMQ
         if ($amqpConfig = $this->rabbitMQ->getConfiguration()) {
             return [
                 'amqp' => [
@@ -108,7 +134,7 @@ class Amqp
                     'port' => $amqpConfig['port'],
                     'user' => $amqpConfig['username'],
                     'password' => $amqpConfig['password'],
-                    'virtualhost' => isset($amqpConfig['vhost']) ? $amqpConfig['vhost'] : '/',
+                    'virtualhost' => $amqpConfig['vhost'] ?? '/',
                 ]
             ];
         }
