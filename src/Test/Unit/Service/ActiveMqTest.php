@@ -123,7 +123,7 @@ class ActiveMqTest extends TestCase
                     [
                         'host' => '127.0.0.1',
                         'port' => '61616',
-                        'type' => 'activemq:5.16',
+                        'type' => 'activemq:6.0',
                     ]
                 ]
                 }
@@ -131,7 +131,7 @@ class ActiveMqTest extends TestCase
 
         $this->_shellMock->expects($this->never())
             ->method('execute');
-        $this->assertEquals('5.16', $this->_activeMq->getVersion());
+        $this->assertEquals('6.0', $this->_activeMq->getVersion());
     }
 
     /**
@@ -202,12 +202,12 @@ class ActiveMqTest extends TestCase
     public static function getVersionFromCliDataProvider(): array
     {
         return [
-          ['Version: 5.16.5', '5.16'],
-          ['Version:5.16.5', '5.16'],
-          ['Version: 5.17.1', '5.17'],
+          ['Version: 6.0.1', '6.0'],
+          ['Version:6.0.1', '6.0'],
+          ['Version: 6.0.5', '6.0'],
           ['Version: some version', '0'],
           ['redis_version:abc', '0'],
-          ['activemq:5.16.6', '0'],
+          ['activemq:6.0.6', '0'],
           ['', '0'],
           ['error', '0'],
         ];
@@ -266,8 +266,8 @@ class ActiveMqTest extends TestCase
     public static function getVersionFromActiveMqCommandDataProvider(): array
     {
         return [
-          ['ActiveMQ 5.16.5', '5.16'],
-          ['ActiveMQ 5.17.1', '5.17'],
+          ['ActiveMQ 6.0.1', '6.0'],
+          ['ActiveMQ 6.0.5', '6.0'],
           ['ActiveMQ 6.0.0', '6.0'],
           ['Some other output', '0'],
           ['', '0'],

@@ -105,7 +105,7 @@ class Validator
             '>=2.4.8-p2 || >=2.4.9' => '^3'
         ],
         ServiceInterface::NAME_ACTIVEMQ => [
-            '>=2.4.8' => '~5.18.0 || ~6.0.0 || ~6.1.0',
+            '>=2.4.8' => '~6.0.0',
         ],
         ServiceInterface::NAME_RABBITMQ => [
             '<2.3.0' => '~3.5.0',
