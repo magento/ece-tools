@@ -131,7 +131,7 @@ class Validator
      *
      * @var array
      */
-    private array $supportedVersionList;
+    private $supportedVersionList;
 
     /**
      * @param MagentoVersion $magentoVersion

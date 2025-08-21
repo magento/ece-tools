@@ -21,22 +21,22 @@ class ActiveMq implements ServiceInterface
      *
      * @var array
      */
-    private array $possibleRelationshipNames = ['activemq', 'amq', 'jms'];
+    private $possibleRelationshipNames = ['activemq', 'amq', 'jms'];
 
     /**
      * @var Environment
      */
-    private Environment $environment;
+    private $environment;
 
     /**
      * @var ShellInterface
      */
-    private ShellInterface $shell;
+    private $shell;
 
     /**
-     * @var string|null
+     * @var string
      */
-    private ?string $version = null;
+    private $version;
 
     /**
      * @param Environment    $environment
