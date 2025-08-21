@@ -34,9 +34,9 @@ class ActiveMq implements ServiceInterface
     private ShellInterface $shell;
 
     /**
-     * @var string
+     * @var string|null
      */
-    private string $version;
+    private ?string $version = null;
 
     /**
      * @param Environment    $environment
