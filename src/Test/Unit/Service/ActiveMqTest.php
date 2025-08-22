@@ -202,12 +202,12 @@ class ActiveMqTest extends TestCase
     public static function getVersionFromCliDataProvider(): array
     {
         return [
-          ['Version: 6.0.1', '6.0'],
-          ['Version:6.0.1', '6.0'],
-          ['Version: 6.0.5', '6.0'],
+                          ['Version: 2.42.1', '2.42'],
+                ['Version:2.42.1', '2.42'],
+                ['Version: 2.42.0', '2.42'],
           ['Version: some version', '0'],
           ['redis_version:abc', '0'],
-          ['activemq:6.0.6', '0'],
+          ['activemq:2.42.6', '0'],
           ['', '0'],
           ['error', '0'],
         ];
@@ -266,9 +266,9 @@ class ActiveMqTest extends TestCase
     public static function getVersionFromActiveMqCommandDataProvider(): array
     {
         return [
-          ['ActiveMQ 6.0.1', '6.0'],
-          ['ActiveMQ 6.0.5', '6.0'],
-          ['ActiveMQ 6.0.0', '6.0'],
+                          ['ActiveMQ Artemis 2.42.1', '2.42'],
+                ['ActiveMQ Artemis 2.42.0', '2.42'],
+                ['ActiveMQ 2.42.5', '2.42'],
           ['Some other output', '0'],
           ['', '0'],
         ];

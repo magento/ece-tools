@@ -105,7 +105,7 @@ class Validator
             '>=2.4.8-p2 || >=2.4.9' => '^3'
         ],
         ServiceInterface::NAME_ACTIVEMQ => [
-            '>=2.4.8' => '~6.0.0',
+            '>=2.4.7' => '~2.42.0',
         ],
         ServiceInterface::NAME_RABBITMQ => [
             '<2.3.0' => '~3.5.0',
@@ -143,7 +143,7 @@ class Validator
 
     /**
      * Validates provided services version for current Magento.
-     * Returns empty array if all provided versions are supported. Otherwise, returns warning message for
+     * Returns empty array if all provided ver sions are supported. Otherwise, returns warning message for
      * every unsupported service in separate array elements.
      *
      * Example of $serviceVersions argument:

@@ -32,7 +32,7 @@ class ActiveMq84Cest extends ActiveMqCest
     protected function defaultConfigurationDataProvider(): array
     {
         return [
-            'activemq-latest-magento-2.4.8' => [
+            'artemis-2.42-magento-2.4.8' => [
                 'version' => '2.4.8',
                 'expectedHost' => 'activemq',
                 'expectedPort' => 61616,
@@ -50,7 +50,7 @@ class ActiveMq84Cest extends ActiveMqCest
     protected function customConfigurationDataProvider(): array
     {
         return [
-            'custom-activemq-config-2.4.8' => [
+            'custom-artemis-config-2.4.8' => [
                 'version' => '2.4.8',
                 'configuration' => [
                     'stage' => [
@@ -79,7 +79,7 @@ class ActiveMq84Cest extends ActiveMqCest
                     'consumers_wait_for_messages' => 0,
                 ],
             ],
-            'merge-activemq-config-2.4.8' => [
+            'merge-artemis-config-2.4.8' => [
                 'version' => '2.4.8',
                 'configuration' => [
                     'stage' => [
@@ -205,7 +205,7 @@ class ActiveMq84Cest extends ActiveMqCest
     protected function fallbackToRabbitMqDataProvider(): array
     {
         return [
-            'activemq-unavailable-rabbitmq-available-2.4.8' => [
+            'artemis-unavailable-rabbitmq-available-2.4.8' => [
                 'version' => '2.4.8',
                 'configuration' => [
                     'stage' => [
@@ -231,7 +231,7 @@ class ActiveMq84Cest extends ActiveMqCest
     protected function noMessageBrokerDataProvider(): array
     {
         return [
-            'no-activemq-no-rabbitmq-2.4.8' => [
+            'no-artemis-no-rabbitmq-2.4.8' => [
                 'version' => '2.4.8',
             ],
         ];

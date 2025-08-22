@@ -12,16 +12,16 @@ use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Shell\ShellInterface;
 
 /**
- * Service class for ActiveMQ
+ * Service class for ActiveMQ Artemis
  */
 class ActiveMq implements ServiceInterface
 {
     /**
-     * Possible names for activemq relationship
+     * Possible names for activemq/artemis relationship
      *
      * @var array
      */
-    private $possibleRelationshipNames = ['activemq', 'amq', 'jms'];
+    private $possibleRelationshipNames = ['activemq', 'artemis', 'amq', 'jms'];
 
     /**
      * @var Environment
