@@ -34,7 +34,7 @@ class ActiveMq84Cest extends ActiveMqCest
         return [
             'artemis-2.42-magento-2.4.8' => [
                 'version' => '2.4.8',
-                'expectedHost' => 'activemq',
+                'expectedHost' => 'activemq-artemis',
                 'expectedPort' => 61616,
                 'expectedUser' => 'guest',
                 'expectedPassword' => 'guest',
@@ -96,7 +96,7 @@ class ActiveMq84Cest extends ActiveMqCest
                 ],
                 'expectedQueueConfig' => [
                     'amqp' => [
-                        'host' => 'activemq',
+                        'host' => 'activemq-artemis',
                         'port' => 61616,
                         'user' => 'merged_user',
                         'password' => 'merged_password',
@@ -121,7 +121,7 @@ class ActiveMq84Cest extends ActiveMqCest
                         'deploy' => [
                             'QUEUE_CONFIGURATION' => [
                                 'amqp' => [
-                                    'host' => 'activemq',
+                                    'host' => 'activemq-artemis',
                                     'port' => 'invalid_port',
                                     'user' => 'guest',
                                     'password' => 'guest',
@@ -186,7 +186,7 @@ class ActiveMq84Cest extends ActiveMqCest
                         'deploy' => [
                             'QUEUE_CONFIGURATION' => [
                                 'amqp' => [
-                                    'host' => 'activemq',
+                                    'host' => 'activemq-artemis',
                                     'port' => 99999,
                                     'user' => 'guest',
                                     'password' => 'guest',

@@ -21,7 +21,7 @@ class ActiveMq implements ServiceInterface
      *
      * @var array
      */
-    private $possibleRelationshipNames = ['activemq', 'artemis', 'amq', 'jms'];
+    private $possibleRelationshipNames = ['activemq-artemis', 'artemis', 'amq', 'jms'];
 
     /**
      * @var Environment
@@ -85,12 +85,34 @@ class ActiveMq implements ServiceInterface
                 $this->version = explode(':', $config['type'])[1];
             } elseif (isset($config['host']) && isset($config['port'])) {
                 try {
-                    // Try to get ActiveMQ version from dpkg first
-                    $process = $this->shell->execute('dpkg -s activemq | grep Version');
+                    // Try to get ActiveMQ version from dpkg first (for ActiveMQ)
+                    $process = $this->shell->execute('dpkg -s activemq-artemis | grep Version');
                     preg_match('/^(?:Version:(?:\s)?)(\d+\.\d+)/', $process->getOutput(), $matches);
                     $this->version = $matches[1] ?? '0';
                 } catch (ShellException $exception) {
-                        throw new ServiceException($exception->getMessage());
+                    try {
+                        // Try artemis package if activemq package not found
+                        $process = $this->shell->execute('dpkg -s artemis | grep Version');
+                        preg_match('/^(?:Version:(?:\s)?)(\d+\.\d+)/', $process->getOutput(), $matches);
+                        $this->version = $matches[1] ?? '0';
+                    } catch (ShellException $artemisException) {
+                        try {
+                            // Fallback: Try ActiveMQ CLI command
+                            $process = $this->shell->execute('activemq-artemis --version 2>/dev/null | head -1');
+                            preg_match('/(?:ActiveMQ|Artemis)\s+(\d+\.\d+)/', $process->getOutput(), $matches);
+                            $this->version = $matches[1] ?? '0';
+                        } catch (ShellException $cliException) {
+                            try {
+                                // Try artemis CLI command
+                                $process = $this->shell->execute('artemis version 2>/dev/null | head -1');
+                                preg_match('/(?:ActiveMQ|Artemis)\s+(\d+\.\d+)/', $process->getOutput(), $matches);
+                                $this->version = $matches[1] ?? '0';
+                            } catch (ShellException $fallbackException) {
+                                // If all methods fail, default to '0' (don't throw exception)
+                                $this->version = '0';
+                            }
+                        }
+                    }
                 }
             }
         }

@@ -87,7 +87,7 @@ class ActiveMqTest extends TestCase
             // withConsecutive() alternative.
             ->willReturnCallback(
                 fn($param) => match ([$param]) {
-                ['activemq'], ['amq'] => [],
+                ['activemq-artemis'], ['amq'] => [],
                 ['jms'] => [
                     [
                         'host' => '127.0.0.1',
@@ -118,7 +118,7 @@ class ActiveMqTest extends TestCase
             // withConsecutive() alternative.
             ->willReturnCallback(
                 fn($param) => match ([$param]) {
-                ['activemq'], ['amq'] => [],
+                ['activemq-artemis'], ['amq'] => [],
                 ['jms'] => [
                     [
                         'host' => '127.0.0.1',
@@ -147,7 +147,7 @@ class ActiveMqTest extends TestCase
             // withConsecutive() alternative.
             ->willReturnCallback(
                 fn($param) => match ([$param]) {
-                ['activemq'], ['amq'], ['jms'] => []
+                ['activemq-artemis'], ['amq'], ['jms'] => []
                 }
             );
 
@@ -172,7 +172,7 @@ class ActiveMqTest extends TestCase
     ): void {
         $this->_environmentMock->expects($this->once())
             ->method('getRelationship')
-            ->with('activemq')
+            ->with('activemq-artemis')
             ->willReturn(
                 [[
                 'host' => '127.0.0.1',
@@ -188,7 +188,7 @@ class ActiveMqTest extends TestCase
             ->willReturn($version);
         $this->_shellMock->expects($this->once())
             ->method('execute')
-            ->with('dpkg -s activemq | grep Version')
+            ->with('dpkg -s activemq-artemis | grep Version')
             ->willReturn($processMock);
 
         $this->assertEquals($expectedResult, $this->_activeMq->getVersion());
@@ -229,7 +229,7 @@ class ActiveMqTest extends TestCase
     ): void {
         $this->_environmentMock->expects($this->once())
             ->method('getRelationship')
-            ->with('activemq')
+            ->with('activemq-artemis')
             ->willReturn(
                 [[
                 'host' => '127.0.0.1',
@@ -244,14 +244,20 @@ class ActiveMqTest extends TestCase
             ->method('getOutput')
             ->willReturn($version);
         
-        $this->_shellMock->expects($this->exactly(2))
+        $this->_shellMock->expects($this->exactly(3))
             ->method('execute')
             ->willReturnCallback(
                 function ($command) use ($processMock) {
-                    if ($command === 'dpkg -s activemq | grep Version') {
+                    if ($command === 'dpkg -s activemq-artemis | grep Version') {
                         throw new ShellException('Package not found');
                     }
-                    return $processMock;
+                    if ($command === 'dpkg -s artemis | grep Version') {
+                        throw new ShellException('Package not found');
+                    }
+                    if ($command === 'activemq-artemis --version 2>/dev/null | head -1') {
+                        return $processMock;
+                    }
+                    throw new ShellException('Command not found');
                 }
             );
 
@@ -275,19 +281,15 @@ class ActiveMqTest extends TestCase
     }
 
     /**
-     * Test ActiveMQ version retrieval with exception handling
+     * Test ActiveMQ version retrieval when all detection methods fail
      *
      * @return void
      */
-    public function testGetVersionWithException(): void
+    public function testGetVersionAllMethodsFail(): void
     {
-        $exceptionMessage = 'Some shell exception';
-        $this->expectException(ServiceException::class);
-        $this->expectExceptionMessage($exceptionMessage);
-
         $this->_environmentMock->expects($this->once())
             ->method('getRelationship')
-            ->with('activemq')
+            ->with('activemq-artemis')
             ->willReturn(
                 [[
                 'host' => '127.0.0.1',
@@ -295,9 +297,99 @@ class ActiveMqTest extends TestCase
                 ]]
             );
 
+        $this->_shellMock->expects($this->exactly(4))
+            ->method('execute')
+            ->willThrowException(new ShellException('Command failed'));
+        
+        // Should return '0' instead of throwing exception
+        $this->assertEquals('0', $this->_activeMq->getVersion());
+    }
+
+    /**
+     * Test ActiveMQ version retrieval from artemis dpkg package
+     *
+     * @return void
+     */
+    public function testGetVersionFromArtemisDpkg(): void
+    {
+        $this->_environmentMock->expects($this->once())
+            ->method('getRelationship')
+            ->with('activemq-artemis')
+            ->willReturn(
+                [[
+                'host' => '127.0.0.1',
+                'port' => '61616',
+                ]]
+            );
+
+        $processMock = $this->getMockBuilder(ProcessInterface::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+        $processMock->expects($this->once())
+            ->method('getOutput')
+            ->willReturn('Version: 2.42.1');
+
         $this->_shellMock->expects($this->exactly(2))
             ->method('execute')
-            ->willThrowException(new ShellException($exceptionMessage));
-        $this->_activeMq->getVersion();
+            ->willReturnCallback(
+                function ($command) use ($processMock) {
+                    if ($command === 'dpkg -s activemq-artemis | grep Version') {
+                        throw new ShellException('Package not found');
+                    }
+                    if ($command === 'dpkg -s artemis | grep Version') {
+                        return $processMock;
+                    }
+                    throw new ShellException('Command not found');
+                }
+            );
+
+        $this->assertEquals('2.42', $this->_activeMq->getVersion());
+    }
+
+    /**
+     * Test ActiveMQ version retrieval from artemis CLI command  
+     *
+     * @return void
+     */
+    public function testGetVersionFromArtemisCli(): void
+    {
+        $this->_environmentMock->expects($this->once())
+            ->method('getRelationship')
+            ->with('activemq-artemis')
+            ->willReturn(
+                [[
+                'host' => '127.0.0.1',
+                'port' => '61616',
+                ]]
+            );
+
+        $processMock = $this->getMockBuilder(ProcessInterface::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+        $processMock->expects($this->once())
+            ->method('getOutput')
+            ->willReturn('ActiveMQ Artemis 2.42.0');
+
+        $this->_shellMock->expects($this->exactly(4))
+            ->method('execute')
+            ->willReturnCallback(
+                function ($command) use ($processMock) {
+                    if ($command === 'dpkg -s activemq-artemis | grep Version') {
+                        throw new ShellException('Package not found');
+                    }
+                    if ($command === 'dpkg -s artemis | grep Version') {
+                        throw new ShellException('Package not found');
+                    }
+                    if ($command === 'activemq-artemis --version 2>/dev/null | head -1') {
+                        throw new ShellException('Command not found');
+                    }
+                    if ($command === 'artemis version 2>/dev/null | head -1') {
+                        return $processMock;
+                    }
+                    throw new ShellException('Command not found');
+                }
+            );
+
+        $this->assertEquals('2.42', $this->_activeMq->getVersion());
     }
 }
