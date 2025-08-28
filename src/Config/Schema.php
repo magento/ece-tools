@@ -80,10 +80,9 @@ class Schema
         }
 
         foreach ($this->getVariables() as $itemName => $itemOptions) {
-            if (
-                isset($itemOptions[self::SCHEMA_DEFAULT_VALUE]) &&
-                is_array($itemOptions[self::SCHEMA_DEFAULT_VALUE]) &&
-                array_key_exists($stage, $itemOptions[self::SCHEMA_DEFAULT_VALUE])
+            if (isset($itemOptions[self::SCHEMA_DEFAULT_VALUE])
+                && is_array($itemOptions[self::SCHEMA_DEFAULT_VALUE])
+                && array_key_exists($stage, $itemOptions[self::SCHEMA_DEFAULT_VALUE])
             ) {
                 $this->defaults[$stage][$itemName] = $itemOptions[self::SCHEMA_DEFAULT_VALUE][$stage];
             }
@@ -122,7 +121,7 @@ class Schema
     /**
      * Build YAML parse flags that are supported in current Symfony version.
      *
-     * @return int
+     * @return int-mask-of<Yaml::PARSE_CONSTANT | Yaml::PARSE_CUSTOM_TAGS>
      */
     private function getYamlParseFlags(): int
     {
