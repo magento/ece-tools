@@ -127,15 +127,12 @@ class Schema
     private function getYamlParseFlags(): int
     {
         $flags = 0;
-
         if (defined(Yaml::class . '::PARSE_CONSTANT')) {
             $flags |= Yaml::PARSE_CONSTANT;
         }
-
         if (defined(Yaml::class . '::PARSE_CUSTOM_TAGS')) {
             $flags |= Yaml::PARSE_CUSTOM_TAGS;
         }
-
         return $flags;
     }
 }
