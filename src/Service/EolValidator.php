@@ -32,26 +32,26 @@ class EolValidator
     /**
      * @var FileList
      */
-    private FileList $fileList;
+    private $fileList;
 
     /**
      * @var File
      */
-    private File $file;
+    private $file;
 
     /**
      * @var ServiceFactory
      */
-    private ServiceFactory $serviceFactory;
+    private $serviceFactory;
 
     /**
      * @var array
      */
-    private array $eolConfigs;
+    private $eolConfigs;
     /**
      * @var DatabaseType
      */
-    private DatabaseType $databaseType;
+    private $databaseType;
 
     /**
      * @param FileList $fileList
@@ -71,15 +71,14 @@ class EolValidator
         $this->databaseType = $databaseType;
     }
 
-  /**
-   * Validate the EOL of a given service and version by error level.
-   *
-   * @return array
-   * @throws FileSystemException
-   * @throws ServiceMismatchException
-   * @throws ServiceException
-   * @throws ContainerException
-   */
+    /**
+     * Validate the EOL of a given service and version by error level.
+     *
+     * @return array
+     * @throws FileSystemException
+     * @throws ServiceMismatchException
+     * @throws ServiceException|ContainerException
+     */
     public function validateServiceEol(): array
     {
         $errors = [];
