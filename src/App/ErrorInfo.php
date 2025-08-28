@@ -64,9 +64,17 @@ class ErrorInfo
     private function loadErrors(): void
     {
         if (empty($this->errors)) {
-            $this->errors = Yaml::parse(
+            $parseFlags = 0;
+            if (defined(Yaml::class . '::PARSE_CONSTANT')) {
+                $parseFlags |= Yaml::PARSE_CONSTANT;
+            }
+            if (defined(Yaml::class . '::PARSE_CUSTOM_TAGS')) {
+                $parseFlags |= Yaml::PARSE_CUSTOM_TAGS;
+            }
+
+            $this->errors = (array) Yaml::parse(
                 $this->file->fileGetContents($this->fileList->getErrorSchema()),
-                Yaml::PARSE_CONSTANT
+                $parseFlags
             );
         }
     }

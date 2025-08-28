@@ -80,12 +80,16 @@ class Schema
         }
 
         foreach ($this->getVariables() as $itemName => $itemOptions) {
-            if (array_key_exists($stage, $itemOptions[self::SCHEMA_DEFAULT_VALUE])) {
+            if (
+                isset($itemOptions[self::SCHEMA_DEFAULT_VALUE]) &&
+                is_array($itemOptions[self::SCHEMA_DEFAULT_VALUE]) &&
+                array_key_exists($stage, $itemOptions[self::SCHEMA_DEFAULT_VALUE])
+            ) {
                 $this->defaults[$stage][$itemName] = $itemOptions[self::SCHEMA_DEFAULT_VALUE][$stage];
             }
         }
 
-        return $this->defaults[$stage];
+        return $this->defaults[$stage] ?? [];
     }
 
     /**
@@ -102,11 +106,36 @@ class Schema
      */
     public function getVariables(): array
     {
+        $schemaFile = $this->systemList->getConfig() . '/schema.yaml';
+        $schemaContents = $this->file->fileGetContents($schemaFile);
+        if ($schemaContents === false) {
+            throw new FileSystemException("Failed to read schema file: {$schemaFile}");
+        }
         $schema = $this->parser->parse(
-            $this->file->fileGetContents($this->systemList->getConfig() . '/schema.yaml'),
-            Yaml::PARSE_CONSTANT
+            $schemaContents,
+            $this->getYamlParseFlags()
         );
 
         return $schema['variables'] ?? [];
+    }
+
+    /**
+     * Build YAML parse flags that are supported in current Symfony version.
+     *
+     * @return int
+     */
+    private function getYamlParseFlags(): int
+    {
+        $flags = 0;
+
+        if (defined(Yaml::class . '::PARSE_CONSTANT')) {
+            $flags |= Yaml::PARSE_CONSTANT;
+        }
+
+        if (defined(Yaml::class . '::PARSE_CUSTOM_TAGS')) {
+            $flags |= Yaml::PARSE_CUSTOM_TAGS;
+        }
+
+        return $flags;
     }
 }

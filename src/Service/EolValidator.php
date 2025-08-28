@@ -171,7 +171,18 @@ class EolValidator
             $this->eolConfigs = [];
             $configsPath = $this->fileList->getServiceEolsConfig();
             if ($this->file->isExists($configsPath)) {
-                $this->eolConfigs = Yaml::parse($this->file->fileGetContents($configsPath));
+                $parseFlags = 0;
+                if (defined(Yaml::class . '::PARSE_CONSTANT')) {
+                    $parseFlags |= Yaml::PARSE_CONSTANT;
+                }
+                if (defined(Yaml::class . '::PARSE_CUSTOM_TAGS')) {
+                    $parseFlags |= Yaml::PARSE_CUSTOM_TAGS;
+                }
+
+                $this->eolConfigs = (array)Yaml::parse(
+                    $this->file->fileGetContents($configsPath),
+                    $parseFlags
+                );
             }
         }
 

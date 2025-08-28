@@ -166,7 +166,18 @@ class EnvironmentData implements EnvironmentDataInterface
 
         if ($this->file->isExists($configFile)) {
             try {
-                return Yaml::parse($this->file->fileGetContents($configFile));
+                $parseFlags = 0;
+                if (defined(Yaml::class . '::PARSE_CONSTANT')) {
+                    $parseFlags |= Yaml::PARSE_CONSTANT;
+                }
+                if (defined(Yaml::class . '::PARSE_CUSTOM_TAGS')) {
+                    $parseFlags |= Yaml::PARSE_CUSTOM_TAGS;
+                }
+
+                return (array) Yaml::parse(
+                    $this->file->fileGetContents($configFile),
+                    $parseFlags
+                );
             } catch (FileSystemException $exception) {
                 // Do nothing as $application needs to be empty
             }

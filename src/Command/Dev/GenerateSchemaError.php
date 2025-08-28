@@ -64,9 +64,16 @@ class GenerateSchemaError extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $errors = Yaml::parse(
+        $parseFlags = 0;
+        if (defined(Yaml::class . '::PARSE_CONSTANT')) {
+            $parseFlags |= Yaml::PARSE_CONSTANT;
+        }
+        if (defined(Yaml::class . '::PARSE_CUSTOM_TAGS')) {
+            $parseFlags |= Yaml::PARSE_CUSTOM_TAGS;
+        }
+        $errors = (array) Yaml::parse(
             $this->file->fileGetContents($this->fileList->getErrorSchema()),
-            Yaml::PARSE_CONSTANT
+            $parseFlags
         );
 
         $errors = $this->groupErrors($errors);
