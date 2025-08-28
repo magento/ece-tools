@@ -9,6 +9,7 @@ namespace Magento\MagentoCloud\Service;
 
 use Carbon\Carbon;
 use Composer\Semver\Semver;
+use Magento\MagentoCloud\App\ContainerException;
 use Magento\MagentoCloud\Config\ValidatorInterface;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileList;
@@ -31,26 +32,26 @@ class EolValidator
     /**
      * @var FileList
      */
-    private $fileList;
+    private FileList $fileList;
 
     /**
      * @var File
      */
-    private $file;
+    private File $file;
 
     /**
      * @var ServiceFactory
      */
-    private $serviceFactory;
+    private ServiceFactory $serviceFactory;
 
     /**
      * @var array
      */
-    private $eolConfigs;
+    private array $eolConfigs;
     /**
      * @var DatabaseType
      */
-    private $databaseType;
+    private DatabaseType $databaseType;
 
     /**
      * @param FileList $fileList
@@ -70,14 +71,15 @@ class EolValidator
         $this->databaseType = $databaseType;
     }
 
-    /**
-     * Validate the EOL of a given service and version by error level.
-     *
-     * @return array
-     * @throws FileSystemException
-     * @throws ServiceMismatchException
-     * @throws ServiceException
-     */
+  /**
+   * Validate the EOL of a given service and version by error level.
+   *
+   * @return array
+   * @throws FileSystemException
+   * @throws ServiceMismatchException
+   * @throws ServiceException
+   * @throws ContainerException
+   */
     public function validateServiceEol(): array
     {
         $errors = [];
@@ -91,6 +93,7 @@ class EolValidator
             ServiceInterface::NAME_REDIS_SESSION,
             ServiceInterface::NAME_VALKEY,
             ServiceInterface::NAME_VALKEY_SESSION,
+            ServiceInterface::NAME_ACTIVEMQ,
             $this->databaseType->getServiceName()
         ];
 
