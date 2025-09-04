@@ -32,7 +32,7 @@ class ThemeResolverTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
 
         $this->themeResolver = $this->getMockBuilder(ThemeResolver::class)
             ->onlyMethods(['getThemes'])
@@ -43,7 +43,7 @@ class ThemeResolverTest extends TestCase
     /**
      * @param        string $expectedReturn
      * @param        string $passedTheme
-     * @dataProvider testResolveDataProvider
+     * @dataProvider resolveDataProvider
      */
     public function testResolve(string $expectedReturn, string $passedTheme): void
     {
@@ -78,7 +78,7 @@ class ThemeResolverTest extends TestCase
         );
     }
 
-    public function testResolveDataProvider(): array
+    public function resolveDataProvider(): array
     {
         return [
             'Incorrect Theme' => [
