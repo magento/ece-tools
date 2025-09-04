@@ -392,4 +392,62 @@ class ActiveMqTest extends TestCase
 
         $this->assertEquals('2.42', $this->_activeMq->getVersion());
     }
+
+    /**
+     * Test STOMP availability detection (simplified - any ActiveMQ config enables STOMP)
+     *
+     * @return void
+     * @dataProvider isStompEnabledDataProvider
+     */
+    public function testIsStompEnabled(array $config, bool $expected): void
+    {
+        $this->_environmentMock
+            ->method('getRelationship')
+            ->willReturnMap([
+                ['activemq-artemis', $config ? [$config] : []],
+                ['artemis', []],
+                ['amq', []],
+                ['jms', []],
+            ]);
+
+        $result = $this->_activeMq->isStompEnabled();
+        $this->assertEquals($expected, $result);
+    }
+
+    /**
+     * Data provider for STOMP availability tests
+     *
+     * @return array
+     */
+    public function isStompEnabledDataProvider(): array
+    {
+        return [
+            'any activemq configuration enables stomp' => [
+                [
+                    'host' => 'activemq.example.com',
+                    'port' => 61616,
+                    'username' => 'admin',
+                    'password' => 'secret'
+                ],
+                true
+            ],
+            'different activemq config also enables stomp' => [
+                [
+                    'host' => '127.0.0.1',
+                    'port' => 5672
+                ],
+                true
+            ],
+            'minimal activemq config enables stomp' => [
+                [
+                    'host' => 'localhost'
+                ],
+                true
+            ],
+            'empty configuration disables stomp' => [
+                [],
+                false
+            ]
+        ];
+    }
 }

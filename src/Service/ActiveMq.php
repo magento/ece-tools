@@ -24,6 +24,13 @@ class ActiveMq implements ServiceInterface
     private $possibleRelationshipNames = ['activemq-artemis', 'artemis', 'amq', 'jms'];
 
     /**
+     * Cache for configuration to avoid multiple relationship lookups
+     *
+     * @var array|null
+     */
+    private $cachedConfiguration;
+
+    /**
      * @var Environment
      */
     private $environment;
@@ -58,14 +65,18 @@ class ActiveMq implements ServiceInterface
      */
     public function getConfiguration(): array
     {
-        foreach ($this->possibleRelationshipNames as $relationshipName) {
-            $mqConfig = $this->environment->getRelationship($relationshipName);
-            if (count($mqConfig)) {
-                return $mqConfig[0];
+        if ($this->cachedConfiguration === null) {
+            $this->cachedConfiguration = [];
+            foreach ($this->possibleRelationshipNames as $relationshipName) {
+                $mqConfig = $this->environment->getRelationship($relationshipName);
+                if (count($mqConfig)) {
+                    $this->cachedConfiguration = $mqConfig[0];
+                    break;
+                }
             }
         }
 
-        return [];
+        return $this->cachedConfiguration;
     }
 
     /**
@@ -118,5 +129,17 @@ class ActiveMq implements ServiceInterface
         }
 
         return $this->version;
+    }
+
+    /**
+     * Check if ActiveMQ is available (any configuration present)
+     * This determines if STOMP should be used with hardcoded values
+     *
+     * @return bool
+     */
+    public function isStompEnabled(): bool
+    {
+        $config = $this->getConfiguration();
+        return !empty($config);
     }
 }
