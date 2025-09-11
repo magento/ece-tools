@@ -98,22 +98,27 @@ class Stomp
 
     /**
      * Convert ActiveMQ service configuration to STOMP format for Magento.
-     * Uses hardcoded connection details as specified by AC team.
+     * Uses the working connection details that match the manual configuration.
      *
      * @return array
      */
     private function getStompConfig(): array
     {
         if ($this->activeMQ->getConfiguration()) {
-            return [
+            $config = [
                 'stomp' => [
-                    'host' => 'localhost',
+                    'host' => 'activemq-artemis',
                     'port' => '61613',
-                    'user' => 'artemis',
-                    'password' => 'artemis'
+                    'user' => 'admin',
+                    'password' => 'admin'
                 ],
                 'default_connection' => 'stomp'
             ];
+            
+            // Debug logging to verify configuration
+            error_log('ECE-Tools: Generated STOMP configuration: ' . json_encode($config));
+            
+            return $config;
         }
 
         return [];
@@ -128,6 +133,15 @@ class Stomp
     public function isStompEnabled(): bool
     {
         $config = $this->activeMQ->getConfiguration();
-        return !empty($config);
+        $isEnabled = !empty($config);
+        
+        // Debug logging to help with deployment troubleshooting
+        if ($isEnabled) {
+            error_log('ECE-Tools: ActiveMQ detected, STOMP configuration will be used');
+        } else {
+            error_log('ECE-Tools: No ActiveMQ found, will check for RabbitMQ AMQP fallback');
+        }
+        
+        return $isEnabled;
     }
 }

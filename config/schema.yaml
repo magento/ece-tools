@@ -449,10 +449,10 @@ variables:
             QUEUE_CONFIGURATION:
               _merge: false
               stomp:
-                host: localhost
+                host: activemq-artemis
                 port: 61613
-                user: artemis
-                password: artemis
+                user: admin
+                password: admin
               default_connection: stomp
       - comment: Multiple queue configurations
         stage:
@@ -463,8 +463,10 @@ variables:
                 host: rabbitmq.host
                 port: 5672
               stomp:
-                host: activemq.host
+                host: activemq-artemis
                 port: 61613
+                user: admin
+                password: admin
   REDIS_BACKEND:
     description: "Configuration the backend model for redis cache."
     type: string
