@@ -24,6 +24,7 @@ use Magento\MagentoCloud\Util\UrlManager;
 use Magento\MagentoCloud\Util\PasswordGenerator;
 use Magento\MagentoCloud\Config\RemoteStorage;
 use Magento\MagentoCloud\Config\Amqp as AmqpConfig;
+use Magento\MagentoCloud\Service\ActiveMq;
 
 /**
  * Generates command for magento installation
@@ -98,6 +99,11 @@ class InstallCommandFactory
     private $amqpConfig;
 
     /**
+     * @var ActiveMq
+     */
+    private $activeMq;
+
+    /**
      * @param UrlManager $urlManager
      * @param AdminDataInterface $adminData
      * @param ConnectionFactory $connectionFactory
@@ -110,6 +116,7 @@ class InstallCommandFactory
      * @param OpenSearch $openSearch
      * @param RemoteStorage $remoteStorage
      * @param AmqpConfig $amqpConfig
+     * @param ActiveMq $activeMq
      *
      * @SuppressWarnings("PHPMD.ExcessiveParameterList")
      */
@@ -125,7 +132,8 @@ class InstallCommandFactory
         ElasticSearch $elasticSearch,
         OpenSearch $openSearch,
         RemoteStorage $remoteStorage,
-        AmqpConfig $amqpConfig
+        AmqpConfig $amqpConfig,
+        ActiveMq $activeMq
     ) {
         $this->urlManager = $urlManager;
         $this->adminData = $adminData;
@@ -139,6 +147,7 @@ class InstallCommandFactory
         $this->openSearch = $openSearch;
         $this->remoteStorage = $remoteStorage;
         $this->amqpConfig = $amqpConfig;
+        $this->activeMq = $activeMq;
     }
 
     /**
@@ -159,7 +168,8 @@ class InstallCommandFactory
                 $this->getAdminOptions(),
                 $this->getEsOptions(),
                 $this->getRemoteStorageOptions(),
-                $this->getAmqpOptions()
+                $this->getAmqpOptions(),
+                $this->getStompOptions()
             );
         } catch (GenericException $exception) {
             throw new ConfigException($exception->getMessage(), $exception->getCode(), $exception);
@@ -361,6 +371,13 @@ class InstallCommandFactory
     private function getAmqpOptions(): array
     {
         $options = [];
+        
+        // Check if ActiveMQ is available - if so, skip AMQP
+        $activeMqConfig = $this->activeMq->getConfiguration();
+        if (!empty($activeMqConfig)) {
+            return $options; // Return empty options when ActiveMQ is available
+        }
+        
         $config = $this->amqpConfig->getConfig();
         $map = ['host', 'port', 'user', 'password', 'virtualhost'];
 
@@ -370,6 +387,30 @@ class InstallCommandFactory
                     $options['--amqp-' . $option] = (string)$config['amqp'][$option];
                 }
             }
+        }
+
+        return $options;
+    }
+
+    /**
+     * Returns STOMP optional config options when ActiveMQ is available.
+     *
+     * @return array
+     * @throws UndefinedPackageException
+     */
+    private function getStompOptions(): array
+    {
+        $options = [];
+        
+        // Check if ActiveMQ is available
+        $activeMqConfig = $this->activeMq->getConfiguration();
+        
+        if (!empty($activeMqConfig)) {
+            // Generate STOMP parameters for ActiveMQ
+            $options['--stomp-host'] = 'activemq-artemis';
+            $options['--stomp-port'] = '61613';
+            $options['--stomp-user'] = 'admin';
+            $options['--stomp-password'] = 'admin';
         }
 
         return $options;
