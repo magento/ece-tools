@@ -406,11 +406,20 @@ class InstallCommandFactory
         $activeMqConfig = $this->activeMq->getConfiguration();
         
         if (!empty($activeMqConfig)) {
-            // Generate STOMP parameters for ActiveMQ
-            $options['--stomp-host'] = 'activemq-artemis';
-            $options['--stomp-port'] = '61613';
-            $options['--stomp-user'] = 'admin';
-            $options['--stomp-password'] = 'admin';
+            // Generate STOMP parameters dynamically from ActiveMQ configuration
+            $map = ['host', 'port', 'user', 'password'];
+            
+            foreach ($map as $option) {
+                $configKey = $option;
+                // Handle username mapping (similar to AMQP config)
+                if ($option === 'user') {
+                    $configKey = 'username';
+                }
+                
+                if (!empty($activeMqConfig[$configKey])) {
+                    $options['--stomp-' . $option] = (string)$activeMqConfig[$configKey];
+                }
+            }
         }
 
         return $options;

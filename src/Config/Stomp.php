@@ -98,25 +98,24 @@ class Stomp
 
     /**
      * Convert ActiveMQ service configuration to STOMP format for Magento.
-     * Uses the working connection details that match the manual configuration.
+     * Uses dynamic connection details from ActiveMQ configuration.
      *
      * @return array
      */
     private function getStompConfig(): array
     {
-        if ($this->activeMQ->getConfiguration()) {
+        $activeMqConfig = $this->activeMQ->getConfiguration();
+        
+        if ($activeMqConfig) {
             $config = [
                 'stomp' => [
-                    'host' => 'activemq-artemis',
-                    'port' => '61613',
-                    'user' => 'admin',
-                    'password' => 'admin'
+                    'host' => $activeMqConfig['host'],
+                    'port' => $activeMqConfig['port'],
+                    'user' => $activeMqConfig['username'] ?? $activeMqConfig['user'] ?? '',
+                    'password' => $activeMqConfig['password']
                 ],
                 'default_connection' => 'stomp'
             ];
-            
-            // Debug logging to verify configuration
-            error_log('ECE-Tools: Generated STOMP configuration: ' . json_encode($config));
             
             return $config;
         }
@@ -126,22 +125,13 @@ class Stomp
 
     /**
      * Check if ActiveMQ is available for STOMP protocol
-     * Since we're using hardcoded STOMP values, just check if ActiveMQ is configured
+     * Uses dynamic STOMP values directly from ActiveMQ configuration
      *
      * @return bool
      */
     public function isStompEnabled(): bool
     {
         $config = $this->activeMQ->getConfiguration();
-        $isEnabled = !empty($config);
-        
-        // Debug logging to help with deployment troubleshooting
-        if ($isEnabled) {
-            error_log('ECE-Tools: ActiveMQ detected, STOMP configuration will be used');
-        } else {
-            error_log('ECE-Tools: No ActiveMQ found, will check for RabbitMQ AMQP fallback');
-        }
-        
-        return $isEnabled;
+        return !empty($config);
     }
 }
