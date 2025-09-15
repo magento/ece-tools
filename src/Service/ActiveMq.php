@@ -21,7 +21,7 @@ class ActiveMq implements ServiceInterface
      *
      * @var array
      */
-    private $possibleRelationshipNames = ['activemq-artemis', 'artemis', 'amq', 'jms'];
+    private $possibleRelationshipNames = ['activemq', 'activemq-artemis', 'artemis', 'amq', 'jms'];
 
     /**
      * Cache for configuration to avoid multiple relationship lookups
