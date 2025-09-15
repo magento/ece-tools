@@ -406,20 +406,9 @@ class InstallCommandFactory
         $activeMqConfig = $this->activeMq->getConfiguration();
         
         if (!empty($activeMqConfig)) {
-            // Generate STOMP parameters dynamically from ActiveMQ configuration
-            $map = ['host', 'port', 'user', 'password'];
-            
-            foreach ($map as $option) {
-                $configKey = $option;
-                // Handle username mapping (similar to AMQP config)
-                if ($option === 'user') {
-                    $configKey = 'username';
-                }
-                
-                if (!empty($activeMqConfig[$configKey])) {
-                    $options['--stomp-' . $option] = (string)$activeMqConfig[$configKey];
-                }
-            }
+            // Set STOMP as the default queue connection during install
+            // STOMP parameters will be configured in env.php during deployment
+            $options['--queue-default-connection'] = 'stomp';
         }
 
         return $options;

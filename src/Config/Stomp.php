@@ -110,7 +110,7 @@ class Stomp
             $config = [
                 'stomp' => [
                     'host' => $activeMqConfig['host'],
-                    'port' => $activeMqConfig['port'],
+                    'port' => '61613',  // STOMP port, not AMQP port (61616)
                     'user' => $activeMqConfig['username'] ?? $activeMqConfig['user'] ?? '',
                     'password' => $activeMqConfig['password']
                 ],
