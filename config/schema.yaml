@@ -450,7 +450,7 @@ variables:
               _merge: false
               stomp:
                 host: activemq-artemis
-                port: 61613
+                port: 61616
                 user: admin
                 password: admin
               default_connection: stomp
@@ -464,7 +464,7 @@ variables:
                 port: 5672
               stomp:
                 host: activemq-artemis
-                port: 61613
+                port: 61616
                 user: admin
                 password: admin
   REDIS_BACKEND:
