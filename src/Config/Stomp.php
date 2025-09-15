@@ -107,8 +107,8 @@ class Stomp
         $activeMqConfig = $this->activeMQ->getConfiguration();
 
         if ($activeMqConfig) {
-            // Map web console host to proper messaging host
-            $stompHost = $activeMqConfig['host'] === 'localhost' ? 'activemq' : $activeMqConfig['host'];
+            // Use the actual host from ActiveMQ configuration
+            $stompHost = $activeMqConfig['host'];
 
             $config = [
                 'stomp' => [
