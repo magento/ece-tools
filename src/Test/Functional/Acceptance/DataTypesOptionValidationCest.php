@@ -35,8 +35,7 @@ abstract class DataTypesOptionValidationCest extends AbstractCest
         $I->runDockerComposeCommand('run build cloud-build');
         $I->startEnvironment();
         $I->runDockerComposeCommand('run deploy cloud-deploy');
-
-        $log = $I->grabFileContent('/init/var/log/cloud.log');
+        $log = $I->grabFileContent('/var/log/cloud.error.log');
         $I->assertStringContainsString($data['expectedError'], $log);
     }
 
