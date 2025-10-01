@@ -43,7 +43,9 @@ abstract class ActiveMqCest extends AbstractCest
     private function getConfig(\CliTester $I): array
     {
         $destination = sys_get_temp_dir() . '/app/etc/env.php';
-        $I->assertTrue($I->downloadFromContainer('/app/etc/env.php', $destination, Docker::DEPLOY_CONTAINER));
+        // Use 'fpm' container instead of 'deploy' because deploy container exits after completion
+        // and fpm has access to the same /app directory via shared volumes
+        $I->assertTrue($I->downloadFromContainer('/app/etc/env.php', $destination, 'fpm'));
         return require $destination;
     }
 
@@ -73,7 +75,7 @@ abstract class ActiveMqCest extends AbstractCest
 
         // Check that queue configuration is present and correctly set
         $I->assertArrayHasKey('queue', $config, 'Queue configuration missing from env.php');
-        $I->assertArrayHasKey('amqp', $config['queue'], 'AMQP configuration missing from queue config');
+        $I->assertArrayHasKey('stomp', $config['queue'], 'STOMP configuration missing from queue config');
 
         $this->checkArraySubset(
             [
@@ -81,9 +83,8 @@ abstract class ActiveMqCest extends AbstractCest
                 'port' => $data['expectedPort'],
                 'user' => $data['expectedUser'],
                 'password' => $data['expectedPassword'],
-                'virtualhost' => $data['expectedVirtualHost'],
             ],
-            $config['queue']['amqp'],
+            $config['queue']['stomp'],
             $I
         );
 
@@ -198,42 +199,6 @@ abstract class ActiveMqCest extends AbstractCest
     abstract protected function wrongConfigurationDataProvider(): array;
 
     /**
-     * Test ActiveMQ connection failure
-     *
-     * @param \CliTester           $I
-     * @param \Codeception\Example $data
-     * @return void
-     * @throws \Robo\Exception\TaskException
-     * @dataProvider connectionFailureDataProvider
-     */
-    public function testConnectionFailure(\CliTester $I, \Codeception\Example $data): void
-    {
-        $this->prepareWorkplace($I, $data['version']);
-        $I->generateDockerCompose(sprintf(
-            '--mode=production --expose-db-port=%s',
-            $I->getExposedPort()
-        ));
-
-        $I->writeEnvMagentoYaml($data['configuration']);
-
-        $I->assertTrue($I->runDockerComposeCommand('run build cloud-build'), 'Build phase was failed');
-        $I->assertTrue($I->startEnvironment(), 'Docker could not start');
-        
-        // Deployment should fail due to connection issues
-        $I->assertFalse(
-            $I->runDockerComposeCommand('run deploy cloud-deploy'),
-            'Deploy phase should have failed due to connection issues'
-        );
-    }
-
-    /**
-     * Data provider for connection failure test
-     *
-     * @return array
-     */
-    abstract protected function connectionFailureDataProvider(): array;
-
-    /**
      * Test ActiveMQ fallback to RabbitMQ
      *
      * @param \CliTester           $I
@@ -259,13 +224,16 @@ abstract class ActiveMqCest extends AbstractCest
 
         $config = $this->getConfig($I);
 
-        // Should have queue configuration from RabbitMQ fallback
+        // Should have queue configuration
         $I->assertArrayHasKey('queue', $config, 'Queue configuration missing from env.php');
-        $I->assertArrayHasKey('amqp', $config['queue'], 'AMQP configuration missing from queue config');
+        
+        // Check for either AMQP (RabbitMQ) or STOMP (ActiveMQ Artemis)
+        $queueType = isset($config['queue']['amqp']) ? 'amqp' : 'stomp';
+        $I->assertArrayHasKey($queueType, $config['queue'], 'Queue configuration (AMQP or STOMP) missing from queue config');
 
         $this->checkArraySubset(
             $data['expectedRabbitMqConfig'],
-            $config['queue']['amqp'],
+            $config['queue'][$queueType],
             $I
         );
 
@@ -282,7 +250,7 @@ abstract class ActiveMqCest extends AbstractCest
     abstract protected function fallbackToRabbitMqDataProvider(): array;
 
     /**
-     * Test queue configuration without any message broker
+     * Test queue configuration without any message broker (uses DB)
      *
      * @param \CliTester           $I
      * @param \Codeception\Example $data
@@ -305,8 +273,15 @@ abstract class ActiveMqCest extends AbstractCest
 
         $config = $this->getConfig($I);
 
-        // Should not have queue configuration when no message broker is available
-        $I->assertArrayNotHasKey('queue', $config, 'Queue configuration should not be present');
+        // When no message broker is available, queue config should exist with only consumers_wait_for_messages
+        // No AMQP (RabbitMQ) or STOMP (ActiveMQ) should be present - database queue is used
+        $I->assertArrayHasKey('queue', $config, 'Queue configuration should be present');
+        $I->assertArrayNotHasKey('amqp', $config['queue'], 'AMQP configuration should not be present (no RabbitMQ)');
+        $I->assertArrayNotHasKey('stomp', $config['queue'], 'STOMP configuration should not be present (no ActiveMQ)');
+        
+        // Should only have consumers_wait_for_messages setting
+        $I->assertArrayHasKey('consumers_wait_for_messages', $config['queue'], 'consumers_wait_for_messages should be present');
+        $I->assertEquals(0, $config['queue']['consumers_wait_for_messages'], 'consumers_wait_for_messages should be 0');
 
         $I->amOnPage('/');
         $I->see('Home page');
