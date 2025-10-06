@@ -13,8 +13,6 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 
-use Magento\CloudDocker\Test\Functional\Codeception\Docker;
-
 /**
  * Checks ActiveMQ queue configuration
  *
@@ -37,7 +35,7 @@ abstract class ActiveMqCest extends AbstractCest
     /**
      * Get configuration from deployed environment
      *
-     * @param \CliTester $I
+     * @param  \CliTester $I
      * @return array
      */
     private function getConfig(\CliTester $I): array
@@ -46,25 +44,27 @@ abstract class ActiveMqCest extends AbstractCest
         // Use 'fpm' container instead of 'deploy' because deploy container exits after completion
         // and fpm has access to the same /app directory via shared volumes
         $I->assertTrue($I->downloadFromContainer('/app/etc/env.php', $destination, 'fpm'));
-        return require $destination;
+        return include $destination;
     }
 
     /**
      * Test default ActiveMQ configuration
      *
-     * @param \CliTester           $I
-     * @param \Codeception\Example $data
-     * @return void
-     * @throws \Robo\Exception\TaskException
+     * @param        \CliTester           $I
+     * @param        \Codeception\Example $data
+     * @return       void
+     * @throws       \Robo\Exception\TaskException
      * @dataProvider defaultConfigurationDataProvider
      */
     public function testDefaultConfiguration(\CliTester $I, \Codeception\Example $data): void
     {
         $this->prepareWorkplace($I, $data['version']);
-        $I->generateDockerCompose(sprintf(
-            '--mode=production --expose-db-port=%s',
-            $I->getExposedPort()
-        ));
+        $I->generateDockerCompose(
+            sprintf(
+                '--mode=production --expose-db-port=%s',
+                $I->getExposedPort()
+            )
+        );
 
         $I->assertTrue($I->runDockerComposeCommand('run build cloud-build'), 'Build phase was failed');
         $I->assertTrue($I->startEnvironment(), 'Docker could not start');
@@ -117,19 +117,21 @@ abstract class ActiveMqCest extends AbstractCest
     /**
      * Test ActiveMQ configuration with custom settings
      *
-     * @param \CliTester           $I
-     * @param \Codeception\Example $data
-     * @return void
-     * @throws \Robo\Exception\TaskException
+     * @param        \CliTester           $I
+     * @param        \Codeception\Example $data
+     * @return       void
+     * @throws       \Robo\Exception\TaskException
      * @dataProvider customConfigurationDataProvider
      */
     public function testCustomConfiguration(\CliTester $I, \Codeception\Example $data): void
     {
         $this->prepareWorkplace($I, $data['version']);
-        $I->generateDockerCompose(sprintf(
-            '--mode=production --expose-db-port=%s',
-            $I->getExposedPort()
-        ));
+        $I->generateDockerCompose(
+            sprintf(
+                '--mode=production --expose-db-port=%s',
+                $I->getExposedPort()
+            )
+        );
 
         $I->writeEnvMagentoYaml($data['configuration']);
 
@@ -162,19 +164,21 @@ abstract class ActiveMqCest extends AbstractCest
     /**
      * Test ActiveMQ wrong configuration
      *
-     * @param \CliTester           $I
-     * @param \Codeception\Example $data
-     * @return void
-     * @throws \Robo\Exception\TaskException
+     * @param        \CliTester           $I
+     * @param        \Codeception\Example $data
+     * @return       void
+     * @throws       \Robo\Exception\TaskException
      * @dataProvider wrongConfigurationDataProvider
      */
     public function testWrongConfiguration(\CliTester $I, \Codeception\Example $data): void
     {
         $this->prepareWorkplace($I, $data['version']);
-        $I->generateDockerCompose(sprintf(
-            '--mode=production --expose-db-port=%s',
-            $I->getExposedPort()
-        ));
+        $I->generateDockerCompose(
+            sprintf(
+                '--mode=production --expose-db-port=%s',
+                $I->getExposedPort()
+            )
+        );
 
         $I->writeEnvMagentoYaml($data['wrongConfiguration']);
 
@@ -201,19 +205,21 @@ abstract class ActiveMqCest extends AbstractCest
     /**
      * Test ActiveMQ fallback to RabbitMQ
      *
-     * @param \CliTester           $I
-     * @param \Codeception\Example $data
-     * @return void
-     * @throws \Robo\Exception\TaskException
+     * @param        \CliTester           $I
+     * @param        \Codeception\Example $data
+     * @return       void
+     * @throws       \Robo\Exception\TaskException
      * @dataProvider fallbackToRabbitMqDataProvider
      */
     public function testFallbackToRabbitMq(\CliTester $I, \Codeception\Example $data): void
     {
         $this->prepareWorkplace($I, $data['version']);
-        $I->generateDockerCompose(sprintf(
-            '--mode=production --expose-db-port=%s',
-            $I->getExposedPort()
-        ));
+        $I->generateDockerCompose(
+            sprintf(
+                '--mode=production --expose-db-port=%s',
+                $I->getExposedPort()
+            )
+        );
 
         $I->writeEnvMagentoYaml($data['configuration']);
 
@@ -229,7 +235,11 @@ abstract class ActiveMqCest extends AbstractCest
         
         // Check for either AMQP (RabbitMQ) or STOMP (ActiveMQ Artemis)
         $queueType = isset($config['queue']['amqp']) ? 'amqp' : 'stomp';
-        $I->assertArrayHasKey($queueType, $config['queue'], 'Queue configuration (AMQP or STOMP) missing from queue config');
+        $I->assertArrayHasKey(
+            $queueType,
+            $config['queue'],
+            'Queue configuration (AMQP or STOMP) missing from queue config'
+        );
 
         $this->checkArraySubset(
             $data['expectedRabbitMqConfig'],
@@ -252,19 +262,21 @@ abstract class ActiveMqCest extends AbstractCest
     /**
      * Test queue configuration without any message broker (uses DB)
      *
-     * @param \CliTester           $I
-     * @param \Codeception\Example $data
-     * @return void
-     * @throws \Robo\Exception\TaskException
+     * @param        \CliTester           $I
+     * @param        \Codeception\Example $data
+     * @return       void
+     * @throws       \Robo\Exception\TaskException
      * @dataProvider noMessageBrokerDataProvider
      */
     public function testNoMessageBroker(\CliTester $I, \Codeception\Example $data): void
     {
         $this->prepareWorkplace($I, $data['version']);
-        $I->generateDockerCompose(sprintf(
-            '--mode=production --expose-db-port=%s',
-            $I->getExposedPort()
-        ));
+        $I->generateDockerCompose(
+            sprintf(
+                '--mode=production --expose-db-port=%s',
+                $I->getExposedPort()
+            )
+        );
 
         $I->assertTrue($I->runDockerComposeCommand('run build cloud-build'), 'Build phase was failed');
         $I->assertTrue($I->startEnvironment(), 'Docker could not start');
@@ -280,8 +292,16 @@ abstract class ActiveMqCest extends AbstractCest
         $I->assertArrayNotHasKey('stomp', $config['queue'], 'STOMP configuration should not be present (no ActiveMQ)');
         
         // Should only have consumers_wait_for_messages setting
-        $I->assertArrayHasKey('consumers_wait_for_messages', $config['queue'], 'consumers_wait_for_messages should be present');
-        $I->assertEquals(0, $config['queue']['consumers_wait_for_messages'], 'consumers_wait_for_messages should be 0');
+        $I->assertArrayHasKey(
+            'consumers_wait_for_messages',
+            $config['queue'],
+            'consumers_wait_for_messages should be present'
+        );
+        $I->assertEquals(
+            0,
+            $config['queue']['consumers_wait_for_messages'],
+            'consumers_wait_for_messages should be 0'
+        );
 
         $I->amOnPage('/');
         $I->see('Home page');

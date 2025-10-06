@@ -98,7 +98,7 @@ class ServiceVersion implements ValidatorInterface
                 $logMsq = $serviceVersion ? 'is ' . $serviceVersion : 'is not detected';
                 $this->logger->info(sprintf('Version of service \'%s\' %s', $serviceName, $logMsq));
 
-                if ($serviceVersion !== '0' 
+                if ($serviceVersion !== '0'
                     && $error = $this->serviceVersionValidator->validateService($serviceName, $serviceVersion)
                 ) {
                     $errors[] = $error;

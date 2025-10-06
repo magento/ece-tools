@@ -18,6 +18,7 @@ use Magento\MagentoCloud\Config\Magento\Env\WriterInterface as ConfigWriter;
 use Psr\Log\LoggerInterface;
 use Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\Amqp;
 use Magento\MagentoCloud\Config\Amqp as AmqpConfig;
+use Magento\MagentoCloud\Config\Stomp as StompConfig;
 
 /**
  * @inheritdoc
@@ -50,6 +51,11 @@ class AmqpTest extends TestCase
     private $amqpConfigMock;
 
     /**
+     * @var StompConfig|MockObject
+     */
+    private $stompConfigMock;
+
+    /**
      * @inheritdoc
      */
     protected function setUp(): void
@@ -58,12 +64,14 @@ class AmqpTest extends TestCase
         $this->configWriterMock = $this->createMock(ConfigWriter::class);
         $this->configReaderMock = $this->createMock(ConfigReader::class);
         $this->amqpConfigMock = $this->createMock(AmqpConfig::class);
+        $this->stompConfigMock = $this->createMock(StompConfig::class);
 
         $this->step = new Amqp(
             $this->configReaderMock,
             $this->configWriterMock,
             $this->loggerMock,
-            $this->amqpConfigMock
+            $this->amqpConfigMock,
+            $this->stompConfigMock
         );
     }
 
@@ -77,6 +85,9 @@ class AmqpTest extends TestCase
         $this->configReaderMock->expects($this->once())
             ->method('read')
             ->willReturn($config);
+        $this->stompConfigMock->expects($this->once())
+            ->method('isStompEnabled')
+            ->willReturn(false);
         $this->amqpConfigMock->expects($this->once())
             ->method('getConfig')
             ->willReturn([]);
@@ -112,12 +123,15 @@ class AmqpTest extends TestCase
         $this->configReaderMock->expects($this->once())
             ->method('read')
             ->willReturn($config);
+        $this->stompConfigMock->expects($this->once())
+            ->method('isStompEnabled')
+            ->willReturn(false);
         $this->amqpConfigMock->expects($this->once())
             ->method('getConfig')
             ->willReturn($amqpConfig);
         $this->loggerMock->expects($this->once())
             ->method('info')
-            ->with('Updating env.php AMQP configuration.');
+            ->with('Updating env.php AMQP queue configuration.');
         $this->configWriterMock->expects($this->once())
             ->method('create')
             ->with($resultConfig);
@@ -147,6 +161,12 @@ class AmqpTest extends TestCase
         $this->configReaderMock->expects($this->once())
             ->method('read')
             ->willReturn($config);
+        $this->stompConfigMock->expects($this->once())
+            ->method('isStompEnabled')
+            ->willReturn(false);
+        $this->amqpConfigMock->expects($this->once())
+            ->method('getConfig')
+            ->willReturn([]);
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Removing queue configuration from env.php.');
@@ -190,6 +210,12 @@ class AmqpTest extends TestCase
         $this->configReaderMock->expects($this->once())
             ->method('read')
             ->willReturn(['queue' => ['some data']]);
+        $this->stompConfigMock->expects($this->once())
+            ->method('isStompEnabled')
+            ->willReturn(false);
+        $this->amqpConfigMock->expects($this->once())
+            ->method('getConfig')
+            ->willReturn([]);
 
         $this->configWriterMock->expects($this->once())
             ->method('create')
@@ -198,3 +224,4 @@ class AmqpTest extends TestCase
         $this->step->execute();
     }
 }
+

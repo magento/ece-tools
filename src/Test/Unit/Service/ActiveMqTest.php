@@ -20,7 +20,6 @@ use Magento\MagentoCloud\Shell\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use PHPUnit\Framework\MockObject\Exception;
-use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -38,23 +37,23 @@ class ActiveMqTest extends TestCase
     /**
      * ActiveMQ service instance
      *
-     * @var ActiveMq|MockObject
+     * @var ActiveMq
      */
-    private ActiveMq|MockObject $_activeMq;
+    private ActiveMq $activeMq;
 
     /**
      * Environment mock instance
      *
-     * @var Environment|MockObject
+     * @var Environment
      */
-    private $_environmentMock;
+    private $environmentMock;
 
     /**
      * Shell interface mock instance
      *
-     * @var ShellInterface|MockObject
+     * @var ShellInterface
      */
-    private $_shellMock;
+    private $shellMock;
 
     /**
      * Set up test environment
@@ -64,14 +63,14 @@ class ActiveMqTest extends TestCase
      */
     public function setUp(): void
     {
-        $this->_environmentMock = $this->createMock(Environment::class);
-        $this->_shellMock = $this->getMockBuilder(ShellInterface::class)
+        $this->environmentMock = $this->createMock(Environment::class);
+        $this->shellMock = $this->getMockBuilder(ShellInterface::class)
             ->disableOriginalConstructor()
             ->getMock();
 
-        $this->_activeMq = new ActiveMq(
-            $this->_environmentMock,
-            $this->_shellMock
+        $this->activeMq = new ActiveMq(
+            $this->environmentMock,
+            $this->shellMock
         );
     }
 
@@ -82,13 +81,13 @@ class ActiveMqTest extends TestCase
      */
     public function testGetConfiguration(): void
     {
-        $this->_environmentMock->expects($this->exactly(3))
+        $this->environmentMock->expects($this->exactly(4))
             ->method('getRelationship')
             // withConsecutive() alternative.
             ->willReturnCallback(
                 fn($param) => match ([$param]) {
-                ['activemq-artemis'], ['amq'] => [],
-                ['jms'] => [
+                ['activemq'], ['activemq-artemis'], ['artemis'] => [],
+                ['amq'] => [
                     [
                         'host' => '127.0.0.1',
                         'port' => '61616',
@@ -102,23 +101,24 @@ class ActiveMqTest extends TestCase
                 'host' => '127.0.0.1',
                 'port' => '61616',
             ],
-            $this->_activeMq->getConfiguration()
+            $this->activeMq->getConfiguration()
         );
     }
 
-    /**
-     * Test ActiveMQ version retrieval
-     *
-     * @return void
-     */
+  /**
+   * Test ActiveMQ version retrieval
+   *
+   * @return void
+   * @throws ServiceException
+   */
     public function testGetVersion(): void
     {
-        $this->_environmentMock->expects($this->exactly(3))
+        $this->environmentMock->expects($this->exactly(5))
             ->method('getRelationship')
             // withConsecutive() alternative.
             ->willReturnCallback(
                 fn($param) => match ([$param]) {
-                ['activemq-artemis'], ['amq'] => [],
+                ['activemq'], ['activemq-artemis'], ['artemis'], ['amq'] => [],
                 ['jms'] => [
                     [
                         'host' => '127.0.0.1',
@@ -129,9 +129,9 @@ class ActiveMqTest extends TestCase
                 }
             );
 
-        $this->_shellMock->expects($this->never())
+        $this->shellMock->expects($this->never())
             ->method('execute');
-        $this->assertEquals('6.0', $this->_activeMq->getVersion());
+        $this->assertEquals('6.0', $this->activeMq->getVersion());
     }
 
     /**
@@ -142,18 +142,18 @@ class ActiveMqTest extends TestCase
      */
     public function testGetVersionNotInstalled(): void
     {
-        $this->_environmentMock->expects($this->exactly(3))
+        $this->environmentMock->expects($this->exactly(5))
             ->method('getRelationship')
             // withConsecutive() alternative.
             ->willReturnCallback(
                 fn($param) => match ([$param]) {
-                ['activemq-artemis'], ['amq'], ['jms'] => []
+                ['activemq'], ['activemq-artemis'], ['artemis'], ['amq'], ['jms'] => []
                 }
             );
 
-        $this->_shellMock->expects($this->never())
+        $this->shellMock->expects($this->never())
             ->method('execute');
-        $this->assertEquals('0', $this->_activeMq->getVersion());
+        $this->assertEquals('0', $this->activeMq->getVersion());
     }
 
     /**
@@ -170,15 +170,15 @@ class ActiveMqTest extends TestCase
         string $version,
         string $expectedResult
     ): void {
-        $this->_environmentMock->expects($this->once())
+        $this->environmentMock->expects($this->exactly(2))
             ->method('getRelationship')
-            ->with('activemq-artemis')
-            ->willReturn(
-                [[
-                'host' => '127.0.0.1',
-                'port' => '61616',
+            ->willReturnCallback(fn($param) => match ([$param]) {
+                ['activemq'] => [],
+                ['activemq-artemis'] => [[
+                    'host' => '127.0.0.1',
+                    'port' => '61616',
                 ]]
-            );
+            });
 
         $processMock = $this->getMockBuilder(ProcessInterface::class)
             ->disableOriginalConstructor()
@@ -186,12 +186,12 @@ class ActiveMqTest extends TestCase
         $processMock->expects($this->once())
             ->method('getOutput')
             ->willReturn($version);
-        $this->_shellMock->expects($this->once())
+        $this->shellMock->expects($this->once())
             ->method('execute')
             ->with('dpkg -s activemq-artemis | grep Version')
             ->willReturn($processMock);
 
-        $this->assertEquals($expectedResult, $this->_activeMq->getVersion());
+        $this->assertEquals($expectedResult, $this->activeMq->getVersion());
     }
 
     /**
@@ -227,15 +227,15 @@ class ActiveMqTest extends TestCase
         string $version,
         string $expectedResult
     ): void {
-        $this->_environmentMock->expects($this->once())
+        $this->environmentMock->expects($this->exactly(2))
             ->method('getRelationship')
-            ->with('activemq-artemis')
-            ->willReturn(
-                [[
-                'host' => '127.0.0.1',
-                'port' => '61616',
+            ->willReturnCallback(fn($param) => match ([$param]) {
+                ['activemq'] => [],
+                ['activemq-artemis'] => [[
+                    'host' => '127.0.0.1',
+                    'port' => '61616',
                 ]]
-            );
+            });
 
         $processMock = $this->getMockBuilder(ProcessInterface::class)
             ->disableOriginalConstructor()
@@ -244,7 +244,7 @@ class ActiveMqTest extends TestCase
             ->method('getOutput')
             ->willReturn($version);
         
-        $this->_shellMock->expects($this->exactly(3))
+        $this->shellMock->expects($this->exactly(3))
             ->method('execute')
             ->willReturnCallback(
                 function ($command) use ($processMock) {
@@ -261,7 +261,7 @@ class ActiveMqTest extends TestCase
                 }
             );
 
-        $this->assertEquals($expectedResult, $this->_activeMq->getVersion());
+        $this->assertEquals($expectedResult, $this->activeMq->getVersion());
     }
 
     /**
@@ -280,47 +280,49 @@ class ActiveMqTest extends TestCase
         ];
     }
 
-    /**
-     * Test ActiveMQ version retrieval when all detection methods fail
-     *
-     * @return void
-     */
+  /**
+   * Test ActiveMQ version retrieval when all detection methods fail
+   *
+   * @return void
+   * @throws ServiceException
+   */
     public function testGetVersionAllMethodsFail(): void
     {
-        $this->_environmentMock->expects($this->once())
+        $this->environmentMock->expects($this->exactly(2))
             ->method('getRelationship')
-            ->with('activemq-artemis')
-            ->willReturn(
-                [[
-                'host' => '127.0.0.1',
-                'port' => '61616',
+            ->willReturnCallback(fn($param) => match ([$param]) {
+                ['activemq'] => [],
+                ['activemq-artemis'] => [[
+                    'host' => '127.0.0.1',
+                    'port' => '61616',
                 ]]
-            );
+            });
 
-        $this->_shellMock->expects($this->exactly(4))
+        $this->shellMock->expects($this->exactly(4))
             ->method('execute')
             ->willThrowException(new ShellException('Command failed'));
         
         // Should return '0' instead of throwing exception
-        $this->assertEquals('0', $this->_activeMq->getVersion());
+        $this->assertEquals('0', $this->activeMq->getVersion());
     }
 
-    /**
-     * Test ActiveMQ version retrieval from artemis dpkg package
-     *
-     * @return void
-     */
+  /**
+   * Test ActiveMQ version retrieval from artemis dpkg package
+   *
+   * @return void
+   * @throws ServiceException
+   */
     public function testGetVersionFromArtemisDpkg(): void
     {
-        $this->_environmentMock->expects($this->once())
+        $this->environmentMock->expects($this->exactly(2))
             ->method('getRelationship')
-            ->with('activemq-artemis')
-            ->willReturn(
-                [[
-                'host' => '127.0.0.1',
-                'port' => '61616',
+            ->willReturnCallback(fn($param) => match ([$param]) {
+                ['activemq'] => [],
+                ['activemq-artemis'] => [[
+                    'host' => '127.0.0.1',
+                    'port' => '61616',
                 ]]
-            );
+            });
 
         $processMock = $this->getMockBuilder(ProcessInterface::class)
             ->disableOriginalConstructor()
@@ -329,7 +331,7 @@ class ActiveMqTest extends TestCase
             ->method('getOutput')
             ->willReturn('Version: 2.42.1');
 
-        $this->_shellMock->expects($this->exactly(2))
+        $this->shellMock->expects($this->exactly(2))
             ->method('execute')
             ->willReturnCallback(
                 function ($command) use ($processMock) {
@@ -343,25 +345,26 @@ class ActiveMqTest extends TestCase
                 }
             );
 
-        $this->assertEquals('2.42', $this->_activeMq->getVersion());
+        $this->assertEquals('2.42', $this->activeMq->getVersion());
     }
 
-    /**
-     * Test ActiveMQ version retrieval from artemis CLI command  
-     *
-     * @return void
-     */
+  /**
+   * Test ActiveMQ version retrieval from artemis CLI command
+   *
+   * @return void
+   * @throws ServiceException
+   */
     public function testGetVersionFromArtemisCli(): void
     {
-        $this->_environmentMock->expects($this->once())
+        $this->environmentMock->expects($this->exactly(2))
             ->method('getRelationship')
-            ->with('activemq-artemis')
-            ->willReturn(
-                [[
-                'host' => '127.0.0.1',
-                'port' => '61616',
+            ->willReturnCallback(fn($param) => match ([$param]) {
+                ['activemq'] => [],
+                ['activemq-artemis'] => [[
+                    'host' => '127.0.0.1',
+                    'port' => '61616',
                 ]]
-            );
+            });
 
         $processMock = $this->getMockBuilder(ProcessInterface::class)
             ->disableOriginalConstructor()
@@ -370,7 +373,7 @@ class ActiveMqTest extends TestCase
             ->method('getOutput')
             ->willReturn('ActiveMQ Artemis 2.42.0');
 
-        $this->_shellMock->expects($this->exactly(4))
+        $this->shellMock->expects($this->exactly(4))
             ->method('execute')
             ->willReturnCallback(
                 function ($command) use ($processMock) {
@@ -390,27 +393,32 @@ class ActiveMqTest extends TestCase
                 }
             );
 
-        $this->assertEquals('2.42', $this->_activeMq->getVersion());
+        $this->assertEquals('2.42', $this->activeMq->getVersion());
     }
 
-    /**
-     * Test STOMP availability detection (simplified - any ActiveMQ config enables STOMP)
-     *
-     * @return void
-     * @dataProvider isStompEnabledDataProvider
-     */
+  /**
+   * Test STOMP availability detection (simplified - any ActiveMQ config enables STOMP)
+   *
+   * @param array $config
+   * @param bool $expected
+   * @return       void
+   * @dataProvider isStompEnabledDataProvider
+   */
     public function testIsStompEnabled(array $config, bool $expected): void
     {
-        $this->_environmentMock
+        $this->environmentMock
             ->method('getRelationship')
-            ->willReturnMap([
-                ['activemq-artemis', $config ? [$config] : []],
+            ->willReturnMap(
+                [
+                ['activemq', $config ? [$config] : []],
+                ['activemq-artemis', []],
                 ['artemis', []],
                 ['amq', []],
                 ['jms', []],
-            ]);
+                ]
+            );
 
-        $result = $this->_activeMq->isStompEnabled();
+        $result = $this->activeMq->isStompEnabled();
         $this->assertEquals($expected, $result);
     }
 
@@ -419,35 +427,36 @@ class ActiveMqTest extends TestCase
      *
      * @return array
      */
-    public function isStompEnabledDataProvider(): array
+    public static function isStompEnabledDataProvider(): array
     {
         return [
-            'any activemq configuration enables stomp' => [
-                [
-                    'host' => 'activemq.example.com',
-                    'port' => 61616,
-                    'username' => 'admin',
-                    'password' => 'secret'
-                ],
-                true
-            ],
-            'different activemq config also enables stomp' => [
-                [
-                    'host' => '127.0.0.1',
-                    'port' => 5672
-                ],
-                true
-            ],
-            'minimal activemq config enables stomp' => [
-                [
-                    'host' => 'localhost'
-                ],
-                true
-            ],
-            'empty configuration disables stomp' => [
-                [],
-                false
-            ]
+          'any activemq configuration enables stomp' => [
+              [
+                  'host' => 'activemq.example.com',
+                  'port' => 61616,
+                  'username' => 'admin',
+                  'password' => 'secret'
+              ],
+              true
+          ],
+          'different activemq config also enables stomp' => [
+              [
+                  'host' => '127.0.0.1',
+                  'port' => 5672
+              ],
+              true
+          ],
+          'minimal activemq config enables stomp' => [
+              [
+                  'host' => 'localhost'
+              ],
+              true
+          ],
+          'empty configuration disables stomp' => [
+              [],
+              false
+          ]
         ];
     }
 }
+

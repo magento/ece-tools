@@ -17,7 +17,6 @@ use Magento\MagentoCloud\Config\Magento\Env\WriterInterface as ConfigWriter;
 use Psr\Log\LoggerInterface;
 use Magento\MagentoCloud\Config\Amqp as AmqpConfig;
 use Magento\MagentoCloud\Config\Stomp as StompConfig;
-use Magento\MagentoCloud\Service\ActiveMq;
 
 /**
  * @inheritdoc
@@ -50,32 +49,24 @@ class Amqp implements StepInterface
     private StompConfig $stompConfig;
 
     /**
-     * @var ActiveMq
-     */
-    private ActiveMq $activeMq;
-
-    /**
      * @param ConfigReader    $configReader
      * @param ConfigWriter    $configWriter
      * @param LoggerInterface $logger
      * @param AmqpConfig      $amqpConfig
      * @param StompConfig     $stompConfig
-     * @param ActiveMq        $activeMq
      */
     public function __construct(
         ConfigReader $configReader,
         ConfigWriter $configWriter,
         LoggerInterface $logger,
         AmqpConfig $amqpConfig,
-        StompConfig $stompConfig,
-        ActiveMq $activeMq
+        StompConfig $stompConfig
     ) {
         $this->configReader = $configReader;
         $this->configWriter = $configWriter;
         $this->logger = $logger;
         $this->amqpConfig = $amqpConfig;
         $this->stompConfig = $stompConfig;
-        $this->activeMq = $activeMq;
     }
 
     /**

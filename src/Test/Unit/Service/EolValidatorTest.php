@@ -184,8 +184,12 @@ class EolValidatorTest extends TestCase
         $service9->expects($this->once())
         ->method('getVersion')
         ->willReturn('2');
+        $service10 = $this->createMock(ServiceInterface::class);
+        $service10->expects($this->once())
+        ->method('getVersion')
+        ->willReturn('2.42');
         // withConsecutive() alternative.
-        $this->serviceFactoryMock->expects($this->exactly(9))
+        $this->serviceFactoryMock->expects($this->exactly(10))
             ->method('create')
             ->willReturnCallback(fn($param) => match ($param) {
                 'php' => $service1,
@@ -197,6 +201,7 @@ class EolValidatorTest extends TestCase
                 'valkey' => $service7,
                 'valkey-session' => $service8,
                 'opensearch' => $service9,
+                'activemq-artemis' => $service10,
             });
 
         $this->assertEquals(

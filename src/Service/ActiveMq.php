@@ -21,29 +21,29 @@ class ActiveMq implements ServiceInterface
      *
      * @var array
      */
-    private $possibleRelationshipNames = ['activemq', 'activemq-artemis', 'artemis', 'amq', 'jms'];
+    private array $possibleRelationshipNames = ['activemq', 'activemq-artemis', 'artemis', 'amq', 'jms'];
 
     /**
      * Cache for configuration to avoid multiple relationship lookups
      *
      * @var array|null
      */
-    private $cachedConfiguration;
+    private ?array $cachedConfiguration = null;
 
     /**
      * @var Environment
      */
-    private $environment;
+    private Environment $environment;
 
     /**
      * @var ShellInterface
      */
-    private $shell;
+    private ShellInterface $shell;
 
     /**
-     * @var string
+     * @var string|null
      */
-    private $version;
+    private ?string $version = null;
 
     /**
      * @param Environment    $environment

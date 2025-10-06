@@ -110,17 +110,15 @@ class Stomp
             // Use the actual host from ActiveMQ configuration
             $stompHost = $activeMqConfig['host'];
 
-            $config = [
-                'stomp' => [
-                    'host' => $stompHost,
-                    'port' => '61616',  // STOMP messaging port (8161 is web console)
-                    'user' => $activeMqConfig['username'] ?? $activeMqConfig['user'] ?? '',
-                    'password' => $activeMqConfig['password']
-                ],
-                'default_connection' => 'stomp'
+            return [
+              'stomp' => [
+                  'host' => $stompHost,
+                  'port' => '61616',  // STOMP messaging port (8161 is web console)
+                  'user' => $activeMqConfig['username'] ?? $activeMqConfig['user'] ?? '',
+                  'password' => $activeMqConfig['password']
+              ],
+              'default_connection' => 'stomp'
             ];
-
-            return $config;
         }
 
         return [];

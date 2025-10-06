@@ -143,7 +143,7 @@ class Validator
 
     /**
      * Validates provided services version for current Magento.
-     * Returns empty array if all provided ver sions are supported. Otherwise, returns warning message for
+     * Returns empty array if all provided versions are supported. Otherwise, returns warning message for
      * every unsupported service in separate array elements.
      *
      * Example of $serviceVersions argument:
@@ -230,13 +230,16 @@ class Validator
                 }
                 if (!isset($this->supportedVersionList[$serviceName])
                     && !in_array(
-                        $serviceName, [
+                        $serviceName,
+                        [
                         ServiceInterface::NAME_OPENSEARCH,
                         ServiceInterface::NAME_VALKEY,
                         ServiceInterface::NAME_VALKEY_SESSION,
                         ServiceInterface::NAME_REDIS,
-                        ServiceInterface::NAME_REDIS_SESSION
-                        ], true
+                        ServiceInterface::NAME_REDIS_SESSION,
+                        ServiceInterface::NAME_ACTIVEMQ
+                        ],
+                        true
                     )
                 ) {
                     throw new ServiceMismatchException(
