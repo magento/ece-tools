@@ -10,23 +10,17 @@ namespace Magento\MagentoCloud\Config;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Package\UndefinedPackageException;
 use Magento\MagentoCloud\Service\ActiveMq;
-use Magento\MagentoCloud\Service\RabbitMq;
 use Magento\MagentoCloud\Package\MagentoVersion;
 
 /**
- * Returns queue configuration.
+ * Returns STOMP queue configuration for ActiveMQ Artemis.
  */
-class Amqp
+class Stomp
 {
     /**
      * @var ActiveMq
      */
     private ActiveMq $activeMQ;
-
-    /**
-     * @var RabbitMq
-     */
-    private RabbitMq $rabbitMQ;
 
     /**
      * @var DeployInterface
@@ -45,27 +39,24 @@ class Amqp
 
     /**
      * @param ActiveMq        $activeMQ
-     * @param RabbitMq        $rabbitMQ
      * @param DeployInterface $stageConfig
      * @param ConfigMerger    $configMerger
      * @param MagentoVersion  $magentoVersion
      */
     public function __construct(
         ActiveMq $activeMQ,
-        RabbitMq $rabbitMQ,
         DeployInterface $stageConfig,
         ConfigMerger $configMerger,
         MagentoVersion $magentoVersion
     ) {
         $this->activeMQ = $activeMQ;
-        $this->rabbitMQ = $rabbitMQ;
         $this->stageConfig = $stageConfig;
         $this->configMerger = $configMerger;
         $this->magentoVersion = $magentoVersion;
     }
 
     /**
-     * Returns queue configuration
+     * Returns STOMP queue configuration
      *
      * @return array
      * @throws UndefinedPackageException|ConfigException
@@ -84,7 +75,7 @@ class Amqp
     }
 
     /**
-     * Returns merged queue configuration
+     * Returns merged STOMP queue configuration
      *
      * @return array
      * @throws ConfigException
@@ -92,53 +83,56 @@ class Amqp
     private function getMergedConfig(): array
     {
         $envQueueConfig = $this->stageConfig->get(DeployInterface::VAR_QUEUE_CONFIGURATION);
-        $mqConfig = $this->getAmqpConfig();
+        $stompConfig = $this->getStompConfig();
 
         if ($this->configMerger->isEmpty($envQueueConfig)) {
-            return $mqConfig;
+            return $stompConfig;
         }
 
         if ($this->configMerger->isMergeRequired($envQueueConfig)) {
-            return $this->configMerger->merge($mqConfig, $envQueueConfig);
+            return $this->configMerger->merge($stompConfig, $envQueueConfig);
         }
 
         return $this->configMerger->clear($envQueueConfig);
     }
 
     /**
-     * Convert amqp service configuration to magento format.
-     * Prioritizes ActiveMQ first, then falls back to RabbitMQ.
+     * Convert ActiveMQ service configuration to STOMP format for Magento.
+     * Uses dynamic connection details from ActiveMQ configuration.
      *
      * @return array
      */
-    private function getAmqpConfig(): array
+    private function getStompConfig(): array
     {
-        // First priority: ActiveMQ
-        if ($amqpConfig = $this->activeMQ->getConfiguration()) {
-            return [
-                'amqp' => [
-                    'host' => $amqpConfig['host'],
-                    'port' => $amqpConfig['port'],
-                    'user' => $amqpConfig['username'] ?? $amqpConfig['user'] ?? '',
-                    'password' => $amqpConfig['password'],
-                    'virtualhost' => $amqpConfig['vhost'] ?? '/',
-                ]
-            ];
-        }
+        $activeMqConfig = $this->activeMQ->getConfiguration();
 
-        // Fallback: RabbitMQ
-        if ($amqpConfig = $this->rabbitMQ->getConfiguration()) {
+        if ($activeMqConfig) {
+            // Use the actual host from ActiveMQ configuration
+            $stompHost = $activeMqConfig['host'];
+
             return [
-                'amqp' => [
-                    'host' => $amqpConfig['host'],
-                    'port' => $amqpConfig['port'],
-                    'user' => $amqpConfig['username'],
-                    'password' => $amqpConfig['password'],
-                    'virtualhost' => $amqpConfig['vhost'] ?? '/',
-                ]
+              'stomp' => [
+                  'host' => $stompHost,
+                  'port' => '61616',  // STOMP messaging port (8161 is web console)
+                  'user' => $activeMqConfig['username'] ?? $activeMqConfig['user'] ?? '',
+                  'password' => $activeMqConfig['password']
+              ],
+              'default_connection' => 'stomp'
             ];
         }
 
         return [];
+    }
+
+    /**
+     * Check if ActiveMQ is available for STOMP protocol
+     * Uses dynamic STOMP values directly from ActiveMQ configuration
+     *
+     * @return bool
+     */
+    public function isStompEnabled(): bool
+    {
+        $config = $this->activeMQ->getConfiguration();
+        return !empty($config);
     }
 }

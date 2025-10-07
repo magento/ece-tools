@@ -19,5 +19,5 @@ class Upgrade81Cest extends UpgradeCest
             ['from' => '2.4.4', 'to' => '>=2.4.5 <2.4.6']
             
         ];
-}
+    }
 }
