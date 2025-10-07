@@ -105,7 +105,7 @@ class Validator
             '>=2.4.8-p2 || >=2.4.9' => '^3'
         ],
         ServiceInterface::NAME_ACTIVEMQ => [
-            '>=2.4.7' => '~2.42.0',
+            '>=2.4.6-p13 <2.4.7 || >=2.4.7-p8 <2.4.8 || >=2.4.8-p3 <2.4.9 || >=2.4.9-alpha3' => '2.42.*',
         ],
         ServiceInterface::NAME_RABBITMQ => [
             '<2.3.0' => '~3.5.0',
@@ -232,12 +232,12 @@ class Validator
                     && !in_array(
                         $serviceName,
                         [
-                        ServiceInterface::NAME_OPENSEARCH,
-                        ServiceInterface::NAME_VALKEY,
-                        ServiceInterface::NAME_VALKEY_SESSION,
-                        ServiceInterface::NAME_REDIS,
-                        ServiceInterface::NAME_REDIS_SESSION,
-                        ServiceInterface::NAME_ACTIVEMQ
+                            ServiceInterface::NAME_OPENSEARCH,
+                            ServiceInterface::NAME_VALKEY,
+                            ServiceInterface::NAME_VALKEY_SESSION,
+                            ServiceInterface::NAME_REDIS,
+                            ServiceInterface::NAME_REDIS_SESSION,
+                            ServiceInterface::NAME_ACTIVEMQ
                         ],
                         true
                     )

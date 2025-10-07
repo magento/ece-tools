@@ -208,14 +208,14 @@ class ActiveMqTest extends TestCase
     public static function getVersionFromCliDataProvider(): array
     {
         return [
-                          ['Version: 2.42.1', '2.42'],
-                ['Version:2.42.1', '2.42'],
-                ['Version: 2.42.0', '2.42'],
-          ['Version: some version', '0'],
-          ['redis_version:abc', '0'],
-          ['activemq:2.42.6', '0'],
-          ['', '0'],
-          ['error', '0'],
+            ['Version: 2.42.1', '2.42'],
+            ['Version:2.42.1', '2.42'],
+            ['Version: 2.42.0', '2.42'],
+            ['Version: some version', '0'],
+            ['redis_version:abc', '0'],
+            ['activemq:2.42.6', '0'],
+            ['', '0'],
+            ['error', '0'],
         ];
     }
 
@@ -282,11 +282,11 @@ class ActiveMqTest extends TestCase
     public static function getVersionFromActiveMqCommandDataProvider(): array
     {
         return [
-                          ['ActiveMQ Artemis 2.42.1', '2.42'],
-                ['ActiveMQ Artemis 2.42.0', '2.42'],
-                ['ActiveMQ 2.42.5', '2.42'],
-          ['Some other output', '0'],
-          ['', '0'],
+            ['ActiveMQ Artemis 2.42.1', '2.42'],
+            ['ActiveMQ Artemis 2.42.0', '2.42'],
+            ['ActiveMQ 2.42.5', '2.42'],
+            ['Some other output', '0'],
+            ['', '0'],
         ];
     }
 
@@ -421,11 +421,11 @@ class ActiveMqTest extends TestCase
             ->method('getRelationship')
             ->willReturnMap(
                 [
-                ['activemq', $config ? [$config] : []],
-                ['activemq-artemis', []],
-                ['artemis', []],
-                ['amq', []],
-                ['jms', []],
+                  ['activemq', $config ? [$config] : []],
+                  ['activemq-artemis', []],
+                  ['artemis', []],
+                  ['amq', []],
+                  ['jms', []],
                 ]
             );
 

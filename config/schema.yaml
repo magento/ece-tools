@@ -432,13 +432,19 @@ variables:
     default:
       deploy: []
     examples:
-      - comment: AMQP configuration example (RabbitMQ or ActiveMQ with AMQP)
+      - comment: If `_merge` is true configuration is being merged with the default
         stage:
           deploy:
             QUEUE_CONFIGURATION:
               _merge: false
               amqp:
                 host: test.host
+                port: 1234
+              amqp2:
+                host: test.host2
+                port: 12345
+              mq:
+                host: mq.host
                 port: 1234
                 user: username
                 password: password
@@ -454,19 +460,6 @@ variables:
                 user: admin
                 password: admin
               default_connection: stomp
-      - comment: Multiple queue configurations
-        stage:
-          deploy:
-            QUEUE_CONFIGURATION:
-              _merge: false
-              amqp:
-                host: rabbitmq.host
-                port: 5672
-              stomp:
-                host: activemq-artemis
-                port: 61616
-                user: admin
-                password: admin
   REDIS_BACKEND:
     description: "Configuration the backend model for redis cache."
     type: string
