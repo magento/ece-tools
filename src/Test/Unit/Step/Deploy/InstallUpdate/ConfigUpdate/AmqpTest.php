@@ -224,4 +224,3 @@ class AmqpTest extends TestCase
         $this->step->execute();
     }
 }
-

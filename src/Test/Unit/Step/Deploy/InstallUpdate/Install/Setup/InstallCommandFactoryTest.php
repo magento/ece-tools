@@ -18,6 +18,7 @@ use Magento\MagentoCloud\DB\Data\ConnectionInterface;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Service\ElasticSearch;
 use Magento\MagentoCloud\Service\OpenSearch;
+use Magento\MagentoCloud\Service\ActiveMq;
 use Magento\MagentoCloud\Config\Amqp as AmqpConfig;
 use Magento\MagentoCloud\Step\Deploy\InstallUpdate\Install\Setup\InstallCommandFactory;
 use Magento\MagentoCloud\Util\PasswordGenerator;
@@ -98,6 +99,11 @@ class InstallCommandFactoryTest extends TestCase
     private $amqpConfigMock;
 
     /**
+     * @var ActiveMq|MockObject
+     */
+    private $activeMqMock;
+
+    /**
      * @inheritdoc
      */
     protected function setUp(): void
@@ -119,6 +125,7 @@ class InstallCommandFactoryTest extends TestCase
         $this->openSearchMock = $this->createMock(OpenSearch::class);
         $this->remoteStorageMock = $this->createMock(RemoteStorage::class);
         $this->amqpConfigMock = $this->createMock(AmqpConfig::class);
+        $this->activeMqMock = $this->createMock(ActiveMq::class);
 
         $this->installCommandFactory = new InstallCommandFactory(
             $this->urlManagerMock,
@@ -132,7 +139,8 @@ class InstallCommandFactoryTest extends TestCase
             $this->elasticSearchMock,
             $this->openSearchMock,
             $this->remoteStorageMock,
-            $this->amqpConfigMock
+            $this->amqpConfigMock,
+            $this->activeMqMock
         );
     }
 
