@@ -88,47 +88,93 @@ class ActiveMq implements ServiceInterface
     public function getVersion(): string
     {
         if ($this->version === null) {
-            $this->version = '0';
-
-            $config = $this->getConfiguration();
-
-            if (isset($config['type']) && strpos($config['type'], ':') !== false) {
-                $this->version = explode(':', $config['type'])[1];
-            } elseif (isset($config['host']) && isset($config['port'])) {
-                try {
-                    // Try to get ActiveMQ version from dpkg first (for ActiveMQ)
-                    $process = $this->shell->execute('dpkg -s activemq-artemis | grep Version');
-                    preg_match('/^(?:Version:(?:\s)?)(\d+\.\d+)/', $process->getOutput(), $matches);
-                    $this->version = $matches[1] ?? '0';
-                } catch (ShellException $exception) {
-                    try {
-                        // Try artemis package if activemq package not found
-                        $process = $this->shell->execute('dpkg -s artemis | grep Version');
-                        preg_match('/^(?:Version:(?:\s)?)(\d+\.\d+)/', $process->getOutput(), $matches);
-                        $this->version = $matches[1] ?? '0';
-                    } catch (ShellException $artemisException) {
-                        try {
-                            // Fallback: Try ActiveMQ CLI command
-                            $process = $this->shell->execute('activemq-artemis --version 2>/dev/null | head -1');
-                            preg_match('/(?:ActiveMQ|Artemis)\s+(\d+\.\d+)/', $process->getOutput(), $matches);
-                            $this->version = $matches[1] ?? '0';
-                        } catch (ShellException $cliException) {
-                            try {
-                                // Try artemis CLI command
-                                $process = $this->shell->execute('artemis version 2>/dev/null | head -1');
-                                preg_match('/(?:ActiveMQ|Artemis)\s+(\d+\.\d+)/', $process->getOutput(), $matches);
-                                $this->version = $matches[1] ?? '0';
-                            } catch (ShellException $fallbackException) {
-                                // If all methods fail, default to '0' (don't throw exception)
-                                $this->version = '0';
-                            }
-                        }
-                    }
-                }
-            }
+            $this->version = $this->detectVersion();
         }
 
         return $this->version;
+    }
+
+    /**
+     * Detect ActiveMQ version from configuration or system
+     *
+     * @return string
+     */
+    private function detectVersion(): string
+    {
+        $config = $this->getConfiguration();
+
+        if (isset($config['type']) && strpos($config['type'], ':') !== false) {
+            return explode(':', $config['type'])[1];
+        }
+
+        if (isset($config['host']) && isset($config['port'])) {
+            return $this->detectVersionFromSystem();
+        }
+
+        return '0';
+    }
+
+    /**
+     * Detect ActiveMQ version from system using various methods
+     *
+     * @return string
+     */
+    private function detectVersionFromSystem(): string
+    {
+        // Try dpkg for activemq-artemis package
+        $version = $this->getVersionFromDpkg('activemq-artemis');
+        if ($version !== '0') {
+            return $version;
+        }
+
+        // Try dpkg for artemis package
+        $version = $this->getVersionFromDpkg('artemis');
+        if ($version !== '0') {
+            return $version;
+        }
+
+        // Try CLI commands
+        $version = $this->getVersionFromCli('activemq-artemis --version 2>/dev/null | head -1');
+        if ($version !== '0') {
+            return $version;
+        }
+
+        // Try artemis CLI command
+        return $this->getVersionFromCli('artemis version 2>/dev/null | head -1');
+    }
+
+    /**
+     * Get version from dpkg package info
+     *
+     * @param string $packageName
+     * @return string
+     */
+    private function getVersionFromDpkg(string $packageName): string
+    {
+        try {
+            $process = $this->shell->execute("dpkg -s {$packageName} | grep Version");
+            preg_match('/^(?:Version:(?:\s)?)(\d+\.\d+)/', $process->getOutput(), $matches);
+            return $matches[1] ?? '0';
+        } catch (ShellException $exception) {
+            return '0';
+        }
+    }
+
+    /**
+     * Get version from CLI command
+     *
+     * @param string $command
+     * @return string
+     */
+    private function getVersionFromCli(string $command): string
+    {
+        try {
+            $process = $this->shell->execute($command);
+            preg_match('/(?:ActiveMQ|Artemis)\s+(\d+\.\d+)/', $process->getOutput(), $matches);
+            return $matches[1] ?? '0';
+        } catch (ShellException $exception) {
+            return '0';
+        }
     }
 
     /**
