@@ -11,10 +11,8 @@ use Magento\CloudDocker\Test\Functional\Codeception\Docker;
 
 /**
  * This test runs on the latest version of PHP
- *
- * @group php84
  */
-class OpenSearchCest extends AbstractCest
+abstract class OpenSearchCest extends AbstractCest
 {
     /**
      * @param \CliTester $I
@@ -91,7 +89,7 @@ class OpenSearchCest extends AbstractCest
     {
         return [
             [
-                'magento'        => '2.4.9-alpha',
+                'magento'        => $this->magentoCloudTemplate,
                 'expectedResult' => [
                     'engine'                     => 'opensearch',
                     'opensearch_server_hostname' => 'opensearch',

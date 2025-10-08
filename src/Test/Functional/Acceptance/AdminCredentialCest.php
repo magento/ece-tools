@@ -49,7 +49,7 @@ abstract class AdminCredentialCest extends AbstractCest
         $I->see('Home page');
         $I->see('CMS homepage content goes here.');
 
-        $log = $I->grabFileContent('/init/var/log/cloud.log');
+        $log = $I->grabFileContent('/var/log/cloud.log');
         $I->assertStringContainsString($data['installMessage'], $log);
         $I->assertStringNotContainsString('--admin-user', $log);
         $I->assertStringNotContainsString('--admin-firstname', $log);
@@ -116,12 +116,11 @@ abstract class AdminCredentialCest extends AbstractCest
         $I->assertStringContainsString('--admin-lastname', $log);
         $I->assertStringContainsString('--admin-email', $log);
         $I->assertStringContainsString('--admin-password', $log);
+        $logError = $I->grabFileContent('/var/log/cloud.error.log');
         $I->assertStringNotContainsString(
             'The following admin data was ignored and an admin was not created because admin email is not set',
-            $log
+            $logError
         );
-
-        // Upgrade
         $I->runDockerComposeCommand('run deploy cloud-deploy');
 
         $I->assertStringNotContainsString(
