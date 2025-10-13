@@ -47,3 +47,6 @@ redis:
 valkey:
   - version: '8.0'
     eol: 2027-09-15
+activemq-artemis:
+  - version: '2.42.0'
+    eol: 2026-07-17

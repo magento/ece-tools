@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Service;
 
+use Magento\MagentoCloud\App\ContainerException;
 use Magento\MagentoCloud\App\ContainerInterface;
 
 /**
@@ -17,13 +18,14 @@ class ServiceFactory
     /**
      * @var array
      */
-    private $serviceMap = [
+    private array $serviceMap = [
         ServiceInterface::NAME_REDIS => Redis::class,
         ServiceInterface::NAME_REDIS_SESSION => RedisSession::class,
         ServiceInterface::NAME_VALKEY => Valkey::class,
         ServiceInterface::NAME_VALKEY_SESSION => ValkeySession::class,
         ServiceInterface::NAME_ELASTICSEARCH => ElasticSearch::class,
         ServiceInterface::NAME_OPENSEARCH => OpenSearch::class,
+        ServiceInterface::NAME_ACTIVEMQ => ActiveMq::class,
         ServiceInterface::NAME_RABBITMQ => RabbitMq::class,
         ServiceInterface::NAME_DB_MYSQL => Database::class,
         ServiceInterface::NAME_DB_MARIA => Database::class,
@@ -34,7 +36,7 @@ class ServiceFactory
     /**
      * @var ContainerInterface
      */
-    private $container;
+    private ContainerInterface $container;
 
     /**
      * @param ContainerInterface $container
@@ -47,17 +49,19 @@ class ServiceFactory
     /**
      * Creates instance of ServiceInterface
      *
-     * @param string $serviceName
+     * @param  string $serviceName
      * @return ServiceInterface
-     * @throws ServiceMismatchException when service isn't defined in service map
+     * @throws ServiceMismatchException|ContainerException when service isn't defined in service map
      */
     public function create(string $serviceName): ServiceInterface
     {
         if (!array_key_exists($serviceName, $this->serviceMap)) {
-            throw new ServiceMismatchException(sprintf(
-                'Service "%s" is not supported',
-                $serviceName
-            ));
+            throw new ServiceMismatchException(
+                sprintf(
+                    'Service "%s" is not supported',
+                    $serviceName
+                )
+            );
         }
 
         return $this->container->create($this->serviceMap[$serviceName]);

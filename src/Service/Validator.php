@@ -104,6 +104,9 @@ class Validator
             '>=2.4.4-p13 <2.4.5 || >=2.4.5-p12 <2.4.8-p2' => '^2',
             '>=2.4.8-p2 || >=2.4.9' => '^3'
         ],
+        ServiceInterface::NAME_ACTIVEMQ => [
+            '>=2.4.6-p13 <2.4.7 || >=2.4.7-p8 <2.4.8 || >=2.4.8-p3 <2.4.9 || >=2.4.9-alpha3' => '2.42.0',
+        ],
         ServiceInterface::NAME_RABBITMQ => [
             '<2.3.0' => '~3.5.0',
             '>=2.3.0 <2.3.7-p4 || >=2.4.0 <2.4.3-p3' => '~3.5.0 || ~3.7.0 || ~3.8.0',
@@ -121,7 +124,7 @@ class Validator
     /**
      * @var MagentoVersion
      */
-    private $magentoVersion;
+    private MagentoVersion $magentoVersion;
 
     /**
      * List of allowed service versions for current Magento version
@@ -152,7 +155,7 @@ class Validator
      *  ];
      * ```
      *
-     * @param array $serviceVersions List of services and their names which should be validated.
+     * @param  array $serviceVersions List of services and their names which should be validated.
      * @return array List of warning messages. One message for one unsupported service.
      *
      * @throws ServiceMismatchException
@@ -173,8 +176,8 @@ class Validator
     /**
      * Validates service version whether it is supported by current Magento version or not.
      *
-     * @param string $serviceName Service name
-     * @param string $version Service version for validation
+     * @param  string $serviceName Service name
+     * @param  string $version     Service version for validation
      * @return string Failed validation message
      *
      * @throws ServiceMismatchException
@@ -226,18 +229,26 @@ class Validator
                     }
                 }
                 if (!isset($this->supportedVersionList[$serviceName])
-                    && !in_array($serviceName, [
-                        ServiceInterface::NAME_OPENSEARCH,
-                        ServiceInterface::NAME_VALKEY,
-                        ServiceInterface::NAME_VALKEY_SESSION,
-                        ServiceInterface::NAME_REDIS,
-                        ServiceInterface::NAME_REDIS_SESSION
-                    ], true)) {
-                    throw new ServiceMismatchException(sprintf(
-                        'Service "%s" does not have defined configurations for "%s" Magento version',
+                    && !in_array(
                         $serviceName,
-                        $this->magentoVersion->getVersion()
-                    ));
+                        [
+                            ServiceInterface::NAME_OPENSEARCH,
+                            ServiceInterface::NAME_VALKEY,
+                            ServiceInterface::NAME_VALKEY_SESSION,
+                            ServiceInterface::NAME_REDIS,
+                            ServiceInterface::NAME_REDIS_SESSION,
+                            ServiceInterface::NAME_ACTIVEMQ
+                        ],
+                        true
+                    )
+                ) {
+                    throw new ServiceMismatchException(
+                        sprintf(
+                            'Service "%s" does not have defined configurations for "%s" Magento version',
+                            $serviceName,
+                            $this->magentoVersion->getVersion()
+                        )
+                    );
                 }
             }
         }

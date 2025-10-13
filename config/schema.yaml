@@ -420,11 +420,12 @@ variables:
                 number_of_shards: 3
                 number_of_replicas: 3
   QUEUE_CONFIGURATION:
-    description: "Replace or modify the AMQP configuration generated during the deployment process. This configuration
-      is generated only if your project has been configured with a RabbitMQ service. To replace the existing
-      configuration, specify values for each configuration option required for your environment.
-      To modify the existing configuration, specify values only for the options to add or update.
-      Then, add the `_merge: true` option."
+    description: "Replace or modify the queue configuration generated during the deployment process. This configuration
+      supports both AMQP (for RabbitMQ) and STOMP (for ActiveMQ Artemis) protocols. The configuration is automatically
+      generated based on the configured service and protocol. For ActiveMQ configured with STOMP protocol, STOMP
+      configuration will be used; otherwise, AMQP configuration is used. To replace the existing configuration,
+      specify values for each configuration option required for your environment. To modify the existing configuration,
+      specify values only for the options to add or update. Then, add the `_merge: true` option."
     type: array
     stages:
       - deploy
@@ -445,6 +446,20 @@ variables:
               mq:
                 host: mq.host
                 port: 1234
+                user: username
+                password: password
+                virtualhost: /
+      - comment: STOMP configuration example (ActiveMQ Artemis - uses hardcoded values when ActiveMQ is available)
+        stage:
+          deploy:
+            QUEUE_CONFIGURATION:
+              _merge: false
+              stomp:
+                host: activemq-artemis
+                port: 61616
+                user: admin
+                password: admin
+              default_connection: stomp
   REDIS_BACKEND:
     description: "Configuration the backend model for redis cache."
     type: string

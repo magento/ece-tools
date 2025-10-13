@@ -16,6 +16,7 @@ use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface as ConfigReader;
 use Magento\MagentoCloud\Config\Magento\Env\WriterInterface as ConfigWriter;
 use Psr\Log\LoggerInterface;
 use Magento\MagentoCloud\Config\Amqp as AmqpConfig;
+use Magento\MagentoCloud\Config\Stomp as StompConfig;
 
 /**
  * @inheritdoc
@@ -25,39 +26,47 @@ class Amqp implements StepInterface
     /**
      * @var LoggerInterface
      */
-    private $logger;
+    private LoggerInterface $logger;
 
     /**
      * @var ConfigWriter
      */
-    private $configWriter;
+    private ConfigWriter $configWriter;
 
     /**
      * @var ConfigReader
      */
-    private $configReader;
+    private ConfigReader $configReader;
 
     /**
      * @var AmqpConfig
      */
-    private $amqpConfig;
+    private AmqpConfig $amqpConfig;
 
     /**
-     * @param ConfigReader $configReader
-     * @param ConfigWriter $configWriter
+     * @var StompConfig
+     */
+    private StompConfig $stompConfig;
+
+    /**
+     * @param ConfigReader    $configReader
+     * @param ConfigWriter    $configWriter
      * @param LoggerInterface $logger
-     * @param AmqpConfig $amqpConfig
+     * @param AmqpConfig      $amqpConfig
+     * @param StompConfig     $stompConfig
      */
     public function __construct(
         ConfigReader $configReader,
         ConfigWriter $configWriter,
         LoggerInterface $logger,
-        AmqpConfig $amqpConfig
+        AmqpConfig $amqpConfig,
+        StompConfig $stompConfig
     ) {
         $this->configReader = $configReader;
         $this->configWriter = $configWriter;
         $this->logger = $logger;
         $this->amqpConfig = $amqpConfig;
+        $this->stompConfig = $stompConfig;
     }
 
     /**
@@ -66,24 +75,35 @@ class Amqp implements StepInterface
      * This method set queue configuration from environment variable QUEUE_CONFIGURATION.
      * If QUEUE_CONFIGURATION variable is not set then configuration gets from relationships.
      *
+     * Prioritizes STOMP configuration for ActiveMQ when STOMP is enabled, otherwise uses AMQP.
+     *
      * Removes old queue configuration from env.php if there is no any queue configuration in
      * relationships or environment variable.
      *
      * {@inheritdoc}
      */
-    public function execute()
+    public function execute(): void
     {
         try {
             $config = $this->configReader->read();
-            $amqpConfig = $this->amqpConfig->getConfig();
+            
+            // Priority 1: Check if ActiveMQ is available for STOMP
+            if ($this->stompConfig->isStompEnabled()) {
+                $queueConfig = $this->stompConfig->getConfig();
+                $protocol = 'STOMP';
+            } else {
+                // Fallback: Use AMQP configuration (RabbitMQ or other AMQP brokers)
+                $queueConfig = $this->amqpConfig->getConfig();
+                $protocol = 'AMQP';
+            }
         } catch (GenericException $e) {
             throw new StepException($e->getMessage(), $e->getCode(), $e);
         }
 
         try {
-            if (count($amqpConfig)) {
-                $this->logger->info('Updating env.php AMQP configuration.');
-                $config['queue'] = $amqpConfig;
+            if (count($queueConfig)) {
+                $this->logger->info("Updating env.php {$protocol} queue configuration.");
+                $config['queue'] = $queueConfig;
                 $this->configWriter->create($config);
             } elseif (isset($config['queue'])) {
                 $this->logger->info('Removing queue configuration from env.php.');

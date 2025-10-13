@@ -94,6 +94,10 @@ class ServiceVersionTest extends TestCase
         $this->databaseTypeMock->expects($this->once())
             ->method('getServiceName')
             ->willReturn(ServiceInterface::NAME_DB_MARIA);
+        $serviceActiveMq = $this->createMock(ServiceInterface::class);
+        $serviceActiveMq->expects($this->once())
+            ->method('getVersion')
+            ->willReturn('2.42');
         $serviceRmq = $this->createMock(ServiceInterface::class);
         $serviceRmq->expects($this->once())
             ->method('getVersion')
@@ -126,9 +130,10 @@ class ServiceVersionTest extends TestCase
         $serviceMariaDB->expects($this->once())
             ->method('getVersion')
             ->willReturn('10.2');
-        $this->serviceFactory->expects($this->exactly(8))
+        $this->serviceFactory->expects($this->exactly(9))
             ->method('create')
             ->willReturnOnConsecutiveCalls(
+                $serviceActiveMq,
                 $serviceRmq,
                 $serviceRedis,
                 $serviceRedisSession,
@@ -139,6 +144,7 @@ class ServiceVersionTest extends TestCase
                 $serviceMariaDB
             );
         $series = [
+            ['Version of service \'activemq-artemis\' is 2.42', []],
             ['Version of service \'rabbitmq\' is not detected', []],
             ['Version of service \'redis\' is 3.2', []],
             ['Version of service \'redis-session\' is 3.2', []],
@@ -148,7 +154,7 @@ class ServiceVersionTest extends TestCase
             ['Version of service \'opensearch\' is 1.2', []],
             ['Version of service \'mariadb\' is 10.2', []]
         ];
-        $matcher = $this->exactly(8);
+        $matcher = $this->exactly(9);
         $this->loggerMock->expects($matcher)
             ->method('info')
             // withConsecutive() alternative.
@@ -193,15 +199,16 @@ class ServiceVersionTest extends TestCase
             'error message 6',
             'error message 7',
             'error message 8',
+            'error message 9',
         ];
         $service1 = $this->createMock(ServiceInterface::class);
         $service1->expects($this->once())
             ->method('getVersion')
-            ->willReturn('1.5');
+            ->willReturn('2.42');
         $service2 = $this->createMock(ServiceInterface::class);
         $service2->expects($this->once())
             ->method('getVersion')
-            ->willReturn('2.2');
+            ->willReturn('1.5');
         $service3 = $this->createMock(ServiceInterface::class);
         $service3->expects($this->once())
             ->method('getVersion')
@@ -209,7 +216,7 @@ class ServiceVersionTest extends TestCase
         $service4 = $this->createMock(ServiceInterface::class);
         $service4->expects($this->once())
             ->method('getVersion')
-            ->willReturn('8.0');
+            ->willReturn('2.2');
         $service5 = $this->createMock(ServiceInterface::class);
         $service5->expects($this->once())
             ->method('getVersion')
@@ -217,16 +224,20 @@ class ServiceVersionTest extends TestCase
         $service6 = $this->createMock(ServiceInterface::class);
         $service6->expects($this->once())
             ->method('getVersion')
-            ->willReturn('7.7');
+            ->willReturn('8.0');
         $service7 = $this->createMock(ServiceInterface::class);
         $service7->expects($this->once())
             ->method('getVersion')
-            ->willReturn('1.2');
+            ->willReturn('7.7');
         $service8 = $this->createMock(ServiceInterface::class);
         $service8->expects($this->once())
             ->method('getVersion')
+            ->willReturn('1.2');
+        $service9 = $this->createMock(ServiceInterface::class);
+        $service9->expects($this->once())
+            ->method('getVersion')
             ->willReturn('5.7');
-        $this->serviceFactory->expects($this->exactly(8))
+        $this->serviceFactory->expects($this->exactly(9))
             ->method('create')
             ->willReturnOnConsecutiveCalls(
                 $service1,
@@ -237,28 +248,31 @@ class ServiceVersionTest extends TestCase
                 $service6,
                 $service7,
                 $service8,
+                $service9,
             );
-        $this->serviceVersionValidatorMock->expects($this->exactly(8))
+        $this->serviceVersionValidatorMock->expects($this->exactly(9))
             ->method('validateService')
             // withConsecutive() alternative.
             ->willReturnCallback(
                 function ($arg1, $arg2) use ($errorMessages) {
-                    if ($arg1 == ServiceInterface::NAME_RABBITMQ && $arg2 == '1.5') {
+                    if ($arg1 == ServiceInterface::NAME_ACTIVEMQ && $arg2 == '2.42') {
                         return $errorMessages[0];
-                    } elseif ($arg1 == ServiceInterface::NAME_REDIS && $arg2 == '2.2') {
+                    } elseif ($arg1 == ServiceInterface::NAME_RABBITMQ && $arg2 == '1.5') {
                         return $errorMessages[1];
-                    } elseif ($arg1 == ServiceInterface::NAME_REDIS_SESSION && $arg2 == '2.2') {
+                    } elseif ($arg1 == ServiceInterface::NAME_REDIS && $arg2 == '2.2') {
                         return $errorMessages[2];
-                    } elseif ($arg1 == ServiceInterface::NAME_VALKEY && $arg2 == '8.0') {
+                    } elseif ($arg1 == ServiceInterface::NAME_REDIS_SESSION && $arg2 == '2.2') {
                         return $errorMessages[3];
-                    } elseif ($arg1 == ServiceInterface::NAME_VALKEY_SESSION && $arg2 == '8.0') {
+                    } elseif ($arg1 == ServiceInterface::NAME_VALKEY && $arg2 == '8.0') {
                         return $errorMessages[4];
-                    } elseif ($arg1 == ServiceInterface::NAME_ELASTICSEARCH && $arg2 == '7.7') {
+                    } elseif ($arg1 == ServiceInterface::NAME_VALKEY_SESSION && $arg2 == '8.0') {
                         return $errorMessages[5];
-                    } elseif ($arg1 == ServiceInterface::NAME_OPENSEARCH && $arg2 == '1.2') {
+                    } elseif ($arg1 == ServiceInterface::NAME_ELASTICSEARCH && $arg2 == '7.7') {
                         return $errorMessages[6];
-                    } elseif ($arg1 == ServiceInterface::NAME_DB_MYSQL && $arg2 == '5.7') {
+                    } elseif ($arg1 == ServiceInterface::NAME_OPENSEARCH && $arg2 == '1.2') {
                         return $errorMessages[7];
+                    } elseif ($arg1 == ServiceInterface::NAME_DB_MYSQL && $arg2 == '5.7') {
+                        return $errorMessages[8];
                     }
 
                     return '';

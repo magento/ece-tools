@@ -23,6 +23,7 @@ interface ServiceInterface
     const NAME_VALKEY_SESSION = 'valkey-session';
     const NAME_ELASTICSEARCH = 'elasticsearch';
     const NAME_OPENSEARCH = 'opensearch';
+    const NAME_ACTIVEMQ = 'activemq-artemis';
     const NAME_RABBITMQ = 'rabbitmq';
     const NAME_NODE = 'node';
     const NAME_VARNISH = 'varnish';
