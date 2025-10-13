@@ -11,6 +11,7 @@ use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Symfony\Component\Yaml\Yaml;
+use Symfony\Component\Yaml\Tag\TaggedValue;
 
 /**
  * Returns info about errors from ./config/schema.error.yaml file
@@ -76,6 +77,57 @@ class ErrorInfo
                 $this->file->fileGetContents($this->fileList->getErrorSchema()),
                 $parseFlags
             );
+
+            $this->errors = $this->normalizeYamlData($this->errors) ?? [];
         }
+    }
+
+    /**
+     * Recursively unwrap Symfony YAML TaggedValue objects and handle common tags.
+     *
+     * This method handles !env, !include, !php/const, and unknown tags,
+     * ensuring all YAML values are normalized to arrays or scalars for safe merging.
+     *
+     * @param mixed $data
+     * @return mixed
+     *
+     * @SuppressWarnings("PHPMD.CyclomaticComplexity") Method is intentionally complex due to tag handling.
+     */
+    private function normalizeYamlData(mixed $data): mixed
+    {
+        if ($data instanceof TaggedValue) {
+            $tag = $data->getTag();
+            $value = $data->getValue();
+
+            switch ($tag) {
+                case '!env':
+                    $envValue = getenv((string)$value);
+                    return $envValue !== false ? $envValue : null;
+
+                case '!include':
+                    if (file_exists((string)$value)) {
+                        $included = Yaml::parseFile((string)$value);
+                        return $this->normalizeYamlData($included);
+                    }
+                    return null;
+
+                case '!php/const':
+                    // Evaluate the PHP constant
+                    return defined($value) ? constant($value) : null;
+
+                default:
+                    $val = $this->normalizeYamlData($value);
+                    return is_array($val) ? $val : [$val];
+            }
+        }
+
+        if (is_array($data)) {
+            foreach ($data as $key => $value) {
+                $data[$key] = $this->normalizeYamlData($value);
+            }
+            return $data;
+        }
+
+        return $data;
     }
 }
