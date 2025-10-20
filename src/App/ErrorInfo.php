@@ -10,8 +10,8 @@ namespace Magento\MagentoCloud\App;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
-use Symfony\Component\Yaml\Yaml;
 use Symfony\Component\Yaml\Tag\TaggedValue;
+use Symfony\Component\Yaml\Yaml;
 
 /**
  * Returns info about errors from ./config/schema.error.yaml file
