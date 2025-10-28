@@ -9,6 +9,7 @@ namespace Magento\MagentoCloud\Test\Unit\Step\Deploy\PreDeploy;
 
 use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Service\Adapter\CredisFactory;
+use Magento\MagentoCloud\Service\Redis as RedisService;
 use Magento\MagentoCloud\Step\Deploy\PreDeploy\CleanRedisCache;
 use Magento\MagentoCloud\Config\Factory\Cache as CacheConfig;
 use Magento\MagentoCloud\Step\StepException;
@@ -43,6 +44,11 @@ class CleanRedisCacheTest extends TestCase
     private $credisFactoryMock;
 
     /**
+     * @var RedisService|MockObject
+     */
+    private $redisServiceMock;
+
+    /**
      * @inheritDoc
      */
     protected function setUp(): void
@@ -51,11 +57,14 @@ class CleanRedisCacheTest extends TestCase
             ->getMockForAbstractClass();
         $this->cacheConfigMock = $this->createMock(CacheConfig::class);
         $this->credisFactoryMock = $this->createMock(CredisFactory::class);
+        $this->redisServiceMock = $this->createMock(RedisService::class);
+        $this->redisServiceMock->method('getConfiguration')->willReturn(['host' => 'redis']);
 
         $this->step = new CleanRedisCache(
             $this->loggerMock,
             $this->cacheConfigMock,
-            $this->credisFactoryMock
+            $this->credisFactoryMock,
+            $this->redisServiceMock
         );
     }
 
