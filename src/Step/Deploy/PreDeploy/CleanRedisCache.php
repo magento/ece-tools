@@ -9,6 +9,7 @@ namespace Magento\MagentoCloud\Step\Deploy\PreDeploy;
 
 use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\Factory\Cache as CacheConfig;
+use Magento\MagentoCloud\Service\Redis as RedisService;
 use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
 use Magento\MagentoCloud\Service\Adapter\CredisFactory;
@@ -39,18 +40,26 @@ class CleanRedisCache implements StepInterface
     private $credisFactory;
 
     /**
+     * @var RedisService
+     */
+    private $redisService;
+
+    /**
      * @param LoggerInterface $logger
      * @param CacheConfig $cacheConfig
      * @param CredisFactory $credisFactory
+     * @param RedisService $redisService
      */
     public function __construct(
         LoggerInterface $logger,
         CacheConfig $cacheConfig,
-        CredisFactory $credisFactory
+        CredisFactory $credisFactory,
+        RedisService $redisService
     ) {
         $this->logger = $logger;
         $this->cacheConfig = $cacheConfig;
         $this->credisFactory = $credisFactory;
+        $this->redisService = $redisService;
     }
 
     /**
@@ -60,6 +69,11 @@ class CleanRedisCache implements StepInterface
      */
     public function execute(): void
     {
+        // Run only when Redis service relationship exists (service active)
+        if (empty($this->redisService->getConfiguration())) {
+            return;
+        }
+
         $cacheConfigs = $this->cacheConfig->get();
 
         if (!isset($cacheConfigs['frontend'])) {
