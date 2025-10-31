@@ -159,7 +159,7 @@ class UrlsTest extends TestCase
             });
         $this->loggerMock->expects($this->once())
             ->method('info')
-            ->with($this->stringContains('Skipping URL updates because the URL_UPDATES variable is set to false.'));
+            ->with($this->stringContains('Skipping URL updates because the UPDATE_URLS variable is set to false.'));
         $this->databaseUrlMock->expects($this->never())
             ->method('execute');
         $this->environmentUrlMock->expects($this->never())
