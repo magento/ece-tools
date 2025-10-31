@@ -81,13 +81,13 @@ class Urls implements StepInterface
                 if ($this->environment->isMasterBranch()) {
                     $this->logger->info(
                         'Skipping URL updates because we are deploying to a Production or Staging environment.'
-                        . ' You can override this behavior by setting the FORCE_URL_UPDATES variable to true.'
+                        . ' You can override this behavior by setting the FORCE_UPDATE_URLS variable to true.'
                     );
                     return;
                 }
 
                 if (!$this->stageConfig->get(DeployInterface::VAR_UPDATE_URLS)) {
-                    $this->logger->info('Skipping URL updates because the URL_UPDATES variable is set to false.');
+                    $this->logger->info('Skipping URL updates because the UPDATE_URLS variable is set to false.');
                     return;
                 }
             }
