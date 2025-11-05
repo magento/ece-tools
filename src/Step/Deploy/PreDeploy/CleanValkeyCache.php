@@ -9,6 +9,7 @@ namespace Magento\MagentoCloud\Step\Deploy\PreDeploy;
 
 use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\Factory\Cache as CacheConfig;
+use Magento\MagentoCloud\Service\Valkey as ValkeyService;
 use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
 use Magento\MagentoCloud\Service\Adapter\CvalkeyFactory;
@@ -39,18 +40,26 @@ class CleanValkeyCache implements StepInterface
     private CvalkeyFactory $cvalkeyFactory;
 
     /**
+     * @var ValkeyService
+     */
+    private ValkeyService $valkeyService;
+
+    /**
      * @param LoggerInterface $logger
      * @param CacheConfig $cacheConfig
      * @param CvalkeyFactory $cvalkeyFactory
+     * @param ValkeyService $valkeyService
      */
     public function __construct(
         LoggerInterface $logger,
         CacheConfig $cacheConfig,
-        CvalkeyFactory $cvalkeyFactory
+        CvalkeyFactory $cvalkeyFactory,
+        ValkeyService $valkeyService
     ) {
         $this->logger = $logger;
         $this->cacheConfig = $cacheConfig;
         $this->cvalkeyFactory = $cvalkeyFactory;
+        $this->valkeyService = $valkeyService;
     }
 
     /**
@@ -60,6 +69,11 @@ class CleanValkeyCache implements StepInterface
      */
     public function execute(): void
     {
+        // Run only when Valkey service relationship exists (service active)
+        if (empty($this->valkeyService->getConfiguration())) {
+            return;
+        }
+
         $cacheConfigs = $this->cacheConfig->get();
 
         if (!isset($cacheConfigs['frontend'])) {
