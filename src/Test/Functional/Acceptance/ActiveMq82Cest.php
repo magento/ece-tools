@@ -8,11 +8,11 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 
 /**
- * Checks ActiveMQ configuration for PHP 8.4 and Magento 2.4.9-alpha
+ * Checks ActiveMQ configuration for PHP 8.2 and Magento 2.4.6
  *
- * @group php84
+ * @group php82
  */
-class ActiveMq84Cest extends ActiveMqCest
+class ActiveMq82Cest extends ActiveMqCest
 {
     /**
      * @inheritdoc
@@ -20,8 +20,8 @@ class ActiveMq84Cest extends ActiveMqCest
     protected function defaultConfigurationDataProvider(): array
     {
         return [
-            'artemis-2.42' => [
-                'version' => '2.4.9-alpha',
+            'artemis-2.42-php82' => [
+                'version' => '2.4.6',
                 'expectedHost' => 'activemq-artemis',
                 'expectedPort' => 61616,
                 'expectedUser' => 'admin',
@@ -38,8 +38,8 @@ class ActiveMq84Cest extends ActiveMqCest
     protected function customConfigurationDataProvider(): array
     {
         return [
-            'custom-artemis-config' => [
-                'version' => '2.4.9-alpha',
+            'custom-artemis-config-php82' => [
+                'version' => '2.4.6',
                 'configuration' => [
                     'stage' => [
                         'deploy' => [
@@ -66,8 +66,8 @@ class ActiveMq84Cest extends ActiveMqCest
                     'consumers_wait_for_messages' => 0,
                 ],
             ],
-            'merge-artemis-config' => [
-                'version' => '2.4.9-alpha',
+            'merge-artemis-config-php82' => [
+                'version' => '2.4.6',
                 'configuration' => [
                     'stage' => [
                         'deploy' => [
@@ -101,8 +101,8 @@ class ActiveMq84Cest extends ActiveMqCest
     protected function wrongConfigurationDataProvider(): array
     {
         return [
-            'invalid-port' => [
-                'version' => '2.4.9-alpha',
+            'invalid-port-php82' => [
+                'version' => '2.4.6',
                 'wrongConfiguration' => [
                     'stage' => [
                         'deploy' => [
@@ -122,8 +122,8 @@ class ActiveMq84Cest extends ActiveMqCest
                 'deploySuccess' => true,
                 'errorDeployMessage' => '',
             ],
-            'missing-host' => [
-                'version' => '2.4.9-alpha',
+            'missing-host-php82' => [
+                'version' => '2.4.6',
                 'wrongConfiguration' => [
                     'stage' => [
                         'deploy' => [
@@ -151,10 +151,9 @@ class ActiveMq84Cest extends ActiveMqCest
      */
     protected function fallbackToRabbitMqDataProvider(): array
     {
-        // Test with RabbitMQ version to verify AMQP configuration
         return [
-            'rabbitmq-default-config-2.4.9-alpha' => [
-                'version' => '2.4.9-alpha',
+            'rabbitmq-default-config-php82' => [
+                'version' => '2.4.6',
                 'configuration' => [
                     'stage' => [
                         'deploy' => [
@@ -177,10 +176,9 @@ class ActiveMq84Cest extends ActiveMqCest
      */
     protected function noMessageBrokerDataProvider(): array
     {
-        // Test with no ActiveMQ and no RabbitMQ - validates database queue usage
         return [
-            'db-queue-only-2.4.9-alpha' => [
-                'version' => '2.4.9-alpha',
+            'db-queue-only-php82' => [
+                'version' => '2.4.6',
             ],
         ];
     }

@@ -25,11 +25,20 @@ namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 abstract class ActiveMqCest extends AbstractCest
 {
     /**
+     * Flag to determine which service to add: 'activemq', 'rabbitmq', or 'none'
+     *
+     * @var string
+     */
+    protected string $serviceToAdd = 'activemq';
+
+    /**
      * @inheritdoc
      */
     public function _before(\CliTester $I): void
     {
-        //Do nothing...
+        // Reset to default service for each test
+        $this->serviceToAdd = 'activemq';
+        parent::_before($I);
     }
 
     /**
@@ -38,7 +47,7 @@ abstract class ActiveMqCest extends AbstractCest
      * @param  \CliTester $I
      * @return array
      */
-    private function getConfig(\CliTester $I): array
+    protected function getConfig(\CliTester $I): array
     {
         $destination = sys_get_temp_dir() . '/app/etc/env.php';
         // Use 'fpm' container instead of 'deploy' because deploy container exits after completion
@@ -186,9 +195,9 @@ abstract class ActiveMqCest extends AbstractCest
         if (isset($data['errorBuildMessage'])) {
             $I->seeInOutput($data['errorBuildMessage']);
         }
-        
+
         $I->assertTrue($I->startEnvironment(), 'Docker could not start');
-        
+
         $I->assertSame($data['deploySuccess'], $I->runDockerComposeCommand('run deploy cloud-deploy'));
         if (isset($data['errorDeployMessage'])) {
             $I->seeInOutput($data['errorDeployMessage']);
@@ -232,7 +241,7 @@ abstract class ActiveMqCest extends AbstractCest
 
         // Should have queue configuration
         $I->assertArrayHasKey('queue', $config, 'Queue configuration missing from env.php');
-        
+
         // Check for either AMQP (RabbitMQ) or STOMP (ActiveMQ Artemis)
         $queueType = isset($config['queue']['amqp']) ? 'amqp' : 'stomp';
         $I->assertArrayHasKey(
@@ -290,7 +299,7 @@ abstract class ActiveMqCest extends AbstractCest
         $I->assertArrayHasKey('queue', $config, 'Queue configuration should be present');
         $I->assertArrayNotHasKey('amqp', $config['queue'], 'AMQP configuration should not be present (no RabbitMQ)');
         $I->assertArrayNotHasKey('stomp', $config['queue'], 'STOMP configuration should not be present (no ActiveMQ)');
-        
+
         // Should only have consumers_wait_for_messages setting
         $I->assertArrayHasKey(
             'consumers_wait_for_messages',
@@ -314,4 +323,84 @@ abstract class ActiveMqCest extends AbstractCest
      * @return array
      */
     abstract protected function noMessageBrokerDataProvider(): array;
+
+    /**
+     * Override prepareWorkplace to add ActiveMQ or RabbitMQ service based on test scenario
+     *
+     * @param \CliTester $I
+     * @param string     $templateVersion
+     * @return void
+     */
+    protected function prepareWorkplace(\CliTester $I, string $templateVersion): void
+    {
+        parent::prepareWorkplace($I, $templateVersion);
+
+        // Add the appropriate service based on the test scenario
+        if ($this->serviceToAdd === 'activemq') {
+            $this->addActiveMqService($I);
+        } elseif ($this->serviceToAdd === 'rabbitmq') {
+            $this->addRabbitMqService($I);
+        }
+        // If serviceToAdd is null or empty, no message broker service is added
+    }
+
+    /**
+     * Add ActiveMQ Artemis service to services.yaml and .magento.app.yaml
+     *
+     * @param \CliTester $I
+     * @return void
+     */
+    protected function addActiveMqService(\CliTester $I): void
+    {
+        // Read current services.yaml
+        $services = $I->readServicesYaml();
+
+        // Add ActiveMQ Artemis service if not present
+        if (!isset($services['activemq-artemis'])) {
+            $services['activemq-artemis'] = [
+                'type' => 'activemq-artemis:2.42.0',
+                'disk' => 1024,
+            ];
+            $I->writeServicesYaml($services);
+        }
+
+        // Read current .magento.app.yaml
+        $app = $I->readAppMagentoYaml();
+
+        // Add ActiveMQ Artemis relationship if not present
+        if (!isset($app['relationships']['activemq-artemis'])) {
+            $app['relationships']['activemq-artemis'] = 'activemq-artemis:activemq-artemis';
+            $I->writeAppMagentoYaml($app);
+        }
+    }
+
+    /**
+     * Add RabbitMQ service to services.yaml and .magento.app.yaml
+     *
+     * @param \CliTester $I
+     * @return void
+     */
+    protected function addRabbitMqService(\CliTester $I): void
+    {
+        // Read current services.yaml
+        $services = $I->readServicesYaml();
+
+        // Add RabbitMQ service if not present
+        if (!isset($services['rabbitmq'])) {
+            $services['rabbitmq'] = [
+                'type' => 'rabbitmq:4.1',
+                'disk' => 1024,
+            ];
+            $I->writeServicesYaml($services);
+        }
+
+        // Read current .magento.app.yaml
+        $app = $I->readAppMagentoYaml();
+
+        // Add RabbitMQ relationship if not present
+        if (!isset($app['relationships']['rabbitmq'])) {
+            $app['relationships']['rabbitmq'] = 'rabbitmq:rabbitmq';
+            $I->writeAppMagentoYaml($app);
+        }
+    }
 }
