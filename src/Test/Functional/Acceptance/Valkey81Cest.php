@@ -7,16 +7,12 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 
-use CliTester;
-use Codeception\Example;
-use Magento\CloudDocker\Test\Functional\Codeception\Docker;
-
 /**
- * Checks Redis configuration
+ * Checks Valkey configuration
  *
  * @group php81
  */
-class Redis81Cest extends RedisCest
+class Valkey81Cest extends ValkeyCest
 {
     /**
      * @return array
@@ -25,10 +21,10 @@ class Redis81Cest extends RedisCest
     {
         return [
             [
-                'version' => '2.4.4',
+                'version' => '2.4.5',
             ],
             [
-                'version' => '2.4.5',
+                'version' => '2.4.6',
             ],
         ];
     }
@@ -36,38 +32,38 @@ class Redis81Cest extends RedisCest
     /**
      * @return array
      */
-    protected function wrongConfigurationDataProvider(): array
+    protected function wrongConfigurationValkeyBackendDataProvider(): array
     {
         return [
             [
-                'version' => '2.4.4',
+                'version' => '2.4.5',
                 'wrongConfiguration' => [
                     'stage' => [
                         'deploy' => [
-                            'REDIS_BACKEND' => 'TestRedisModel'
+                            'VALKEY_BACKEND' => 'TestValkeyModel'
                         ]
                     ]
                 ],
                 'buildSuccess' => false,
                 'deploySuccess' => false,
-                'errorBuildMessage' => 'The REDIS_BACKEND variable contains an invalid value TestRedisModel.'
+                'errorBuildMessage' => 'The VALKEY_BACKEND variable contains an invalid value TestValkeyModel.'
                     . ' Use one of the available value options: Cm_Cache_Backend_Redis,'
                     . ' \Magento\Framework\Cache\Backend\Redis,'
                     . ' \Magento\Framework\Cache\Backend\RemoteSynchronizedCache.',
                 'errorDeployMessage' => '',
             ],
             [
-                'version' => '2.4.5',
+                'version' => '2.4.6',
                 'wrongConfiguration' => [
                     'stage' => [
                         'deploy' => [
-                            'REDIS_BACKEND' => 'TestRedisModel'
+                            'VALKEY_BACKEND' => 'TestValkeyModel'
                         ]
                     ]
                 ],
                 'buildSuccess' => false,
                 'deploySuccess' => false,
-                'errorBuildMessage' => 'The REDIS_BACKEND variable contains an invalid value TestRedisModel.'
+                'errorBuildMessage' => 'The VALKEY_BACKEND variable contains an invalid value TestValkeyModel.'
                     . ' Use one of the available value options: Cm_Cache_Backend_Redis,'
                     . ' \Magento\Framework\Cache\Backend\Redis,'
                     . ' \Magento\Framework\Cache\Backend\RemoteSynchronizedCache.',
@@ -78,31 +74,122 @@ class Redis81Cest extends RedisCest
 
     /**
      * @return array
+     */
+    protected function valkeyWrongConnectionDataProvider(): array
+    {
+        return [
+            [
+                'version' => '2.4.5',
+                'configuration' => [
+                    'stage' => [
+                        'deploy' => [
+                            'CACHE_CONFIGURATION' => [
+                                '_merge' => true,
+                                'frontend' => [
+                                    'default' => [
+                                        'backend' => '\Magento\Framework\Cache\Backend\Redis',
+                                        'backend_options' => [
+                                            'port' => 9999,
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+            [
+                'version' => '2.4.5',
+                'configuration' => [
+                    'stage' => [
+                        'deploy' => [
+                            'CACHE_CONFIGURATION' => [
+                                '_merge' => true,
+                                'frontend' => [
+                                    'default' => [
+                                        '_custom_valkey_backend' => true,
+                                        'backend' => '\CustomValkeyModel',
+                                        'backend_options' => [
+                                            'port' => 9999,
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+            [
+                'version' => '2.4.6',
+                'configuration' => [
+                    'stage' => [
+                        'deploy' => [
+                            'CACHE_CONFIGURATION' => [
+                                '_merge' => true,
+                                'frontend' => [
+                                    'default' => [
+                                        'backend' => '\Magento\Framework\Cache\Backend\Redis',
+                                        'backend_options' => [
+                                            'port' => 9999,
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+            [
+                'version' => '2.4.6',
+                'configuration' => [
+                    'stage' => [
+                        'deploy' => [
+                            'CACHE_CONFIGURATION' => [
+                                '_merge' => true,
+                                'frontend' => [
+                                    'default' => [
+                                        '_custom_valkey_backend' => true,
+                                        'backend' => '\CustomValkeyModel',
+                                        'backend_options' => [
+                                            'port' => 9999,
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * @return                                        array
      * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
     protected function goodConfigurationDataProvider(): array
     {
         return [
             [
-                'version' => '2.4.4',
+                'version' => '2.4.5',
                 'configuration' => [
                     'stage' => [
                         'deploy' => [
-                            'REDIS_BACKEND' => '\Magento\Framework\Cache\Backend\Redis',
+                            'VALKEY_BACKEND' => '\Magento\Framework\Cache\Backend\Redis',
                         ],
                     ],
                 ],
                 'expectedBackend' => '\Magento\Framework\Cache\Backend\Redis',
                 'expectedConfig' => [
                     'backend_options' => [
-                        'server' => 'redis',
+                        'server' => 'cache',
                         'port' => '6379',
                         'database' => 1,
                     ]
                 ],
             ],
             [
-                'version' => '2.4.4',
+                'version' => '2.4.5',
                 'configuration' => [
                     'stage' => [
                         'deploy' => [
@@ -110,7 +197,7 @@ class Redis81Cest extends RedisCest
                                 '_merge' => true,
                                 'frontend' => [
                                     'default' => [
-                                        'backend' => '\CustomRedisModel',
+                                        'backend' => '\CustomValkeyModel',
                                         'backend_options' => [],
                                     ],
                                 ],
@@ -118,15 +205,15 @@ class Redis81Cest extends RedisCest
                         ],
                     ],
                 ],
-                'expectedBackend' => '\CustomRedisModel',
+                'expectedBackend' => '\CustomValkeyModel',
                 'expectedConfig' => [],
             ],
             [
-                'version' => '2.4.4',
+                'version' => '2.4.5',
                 'configuration' => [
                     'stage' => [
                         'deploy' => [
-                            'REDIS_BACKEND' => '\Magento\Framework\Cache\Backend\RemoteSynchronizedCache',
+                            'VALKEY_BACKEND' => '\Magento\Framework\Cache\Backend\RemoteSynchronizedCache',
                         ],
                     ],
                 ],
@@ -136,7 +223,7 @@ class Redis81Cest extends RedisCest
                         'remote_backend' => '\Magento\Framework\Cache\Backend\Redis',
                         'remote_backend_options' => [
                             'persistent' => 0,
-                            'server' => 'redis',
+                            'server' => 'cache',
                             'database' => 1,
                             'port' => '6379',
                             'password' => '',
@@ -150,25 +237,25 @@ class Redis81Cest extends RedisCest
                 ],
             ],
             [
-                'version' => '2.4.5',
+                'version' => '2.4.6',
                 'configuration' => [
                     'stage' => [
                         'deploy' => [
-                            'REDIS_BACKEND' => '\Magento\Framework\Cache\Backend\Redis',
+                            'VALKEY_BACKEND' => '\Magento\Framework\Cache\Backend\Redis',
                         ],
                     ],
                 ],
                 'expectedBackend' => '\Magento\Framework\Cache\Backend\Redis',
                 'expectedConfig' => [
                     'backend_options' => [
-                        'server' => 'redis',
+                        'server' => 'cache',
                         'port' => '6379',
                         'database' => 1,
                     ]
                 ],
             ],
             [
-                'version' => '2.4.5',
+                'version' => '2.4.6',
                 'configuration' => [
                     'stage' => [
                         'deploy' => [
@@ -176,7 +263,7 @@ class Redis81Cest extends RedisCest
                                 '_merge' => true,
                                 'frontend' => [
                                     'default' => [
-                                        'backend' => '\CustomRedisModel',
+                                        'backend' => '\CustomValkeyModel',
                                         'backend_options' => [],
                                     ],
                                 ],
@@ -184,15 +271,15 @@ class Redis81Cest extends RedisCest
                         ],
                     ],
                 ],
-                'expectedBackend' => '\CustomRedisModel',
+                'expectedBackend' => '\CustomValkeyModel',
                 'expectedConfig' => [],
             ],
             [
-                'version' => '2.4.5',
+                'version' => '2.4.6',
                 'configuration' => [
                     'stage' => [
                         'deploy' => [
-                            'REDIS_BACKEND' => '\Magento\Framework\Cache\Backend\RemoteSynchronizedCache',
+                            'VALKEY_BACKEND' => '\Magento\Framework\Cache\Backend\RemoteSynchronizedCache',
                         ],
                     ],
                 ],
@@ -202,7 +289,7 @@ class Redis81Cest extends RedisCest
                         'remote_backend' => '\Magento\Framework\Cache\Backend\Redis',
                         'remote_backend_options' => [
                             'persistent' => 0,
-                            'server' => 'redis',
+                            'server' => 'cache',
                             'database' => 1,
                             'port' => '6379',
                             'password' => '',
@@ -216,35 +303,5 @@ class Redis81Cest extends RedisCest
                 ],
             ],
         ];
-    }
-
-    /**
-     * @param CliTester $I
-     * @param Example $data
-     * @skip
-     */
-    public function testRedisWrongConnection(CliTester $I, Example $data): void
-    {
-        return;
-    }
-
-    /**
-     * @param CliTester $I
-     * @param Example $data
-     * @skip
-     */
-    public function testWrongConfigurationRedisBackend(CliTester $I, Example $data): void
-    {
-        return;
-    }
-
-    protected function wrongConfigurationRedisBackendDataProvider(): array
-    {
-        return [];
-    }
-
-    protected function redisWrongConnectionDataProvider(): array
-    {
-        return [];
     }
 }

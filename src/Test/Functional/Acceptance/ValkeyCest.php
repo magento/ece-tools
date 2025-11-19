@@ -7,46 +7,113 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 
+use CliTester;
+use Codeception\Example;
 use Magento\CloudDocker\Test\Functional\Codeception\Docker;
+use Robo\Exception\TaskException;
 
 /**
  * Checks Valkey configuration
- *
  */
 abstract class ValkeyCest extends AbstractCest
 {
     /**
      * @inheritdoc
      */
-    public function _before(\CliTester $I): void
+    public function _before(CliTester $I): void
     {
         //Do nothing...
     }
 
     /**
-     * @param \CliTester $I
+     * @param  CliTester $I
      * @return array
      */
-    private function getConfig(\CliTester $I): array
+    protected function getConfig(CliTester $I): array
     {
         $destination = sys_get_temp_dir() . '/app/etc/env.php';
         $I->assertTrue($I->downloadFromContainer('/app/etc/env.php', $destination, Docker::DEPLOY_CONTAINER));
-        return require $destination;
+        return include $destination;
     }
 
     /**
-     * @param \CliTester $I
-     * @param \Codeception\Example $data
-     * @throws \Robo\Exception\TaskException
+     * Override prepareWorkplace to replace Redis with Valkey service
+     *
+     * @param CliTester $I
+     * @param string    $templateVersion
+     * @return void
+     */
+    protected function prepareWorkplace(CliTester $I, string $templateVersion): void
+    {
+        parent::prepareWorkplace($I, $templateVersion);
+
+        // Check if replacement is needed by examining actual services
+        $services = $I->readServicesYaml();
+        
+        // Only replace if Redis exists and Valkey/cache doesn't exist
+        $hasRedis = isset($services['redis']);
+        $hasValkey = isset($services['valkey']) || isset($services['cache']);
+        
+        if ($hasRedis && !$hasValkey) {
+            // Template has Redis but not Valkey, so replace it
+            $this->replaceRedisWithValkey($I);
+        }
+        // If template already has Valkey (2.4.8+), do nothing
+    }
+
+    /**
+     * Replace Redis service with Valkey service in services.yaml and .magento.app.yaml
+     *
+     * @param CliTester $I
+     * @return void
+     */
+    protected function replaceRedisWithValkey(CliTester $I): void
+    {
+        // Read current services.yaml
+        $services = $I->readServicesYaml();
+
+        // Remove Redis service if present
+        if (isset($services['redis'])) {
+            unset($services['redis']);
+        }
+
+        // Add Valkey service
+        $services['valkey'] = [
+            'type' => 'valkey:8.0'
+        ];
+
+        $I->writeServicesYaml($services);
+
+        // Read current .magento.app.yaml
+        $app = $I->readAppMagentoYaml();
+
+        // Remove Redis relationship if present
+        if (isset($app['relationships']['redis'])) {
+            unset($app['relationships']['redis']);
+        }
+
+        // Add Valkey relationship (use 'redis' as the relationship name for compatibility)
+        // Magento expects 'redis' relationship name, but it will connect to Valkey
+        $app['relationships']['redis'] = 'valkey:valkey';
+
+        $I->writeAppMagentoYaml($app);
+    }
+
+    /**
+     * @param        CliTester $I
+     * @param        Example $data
+     * @throws       TaskException
      * @dataProvider defaultConfigurationDataProvider
      */
-    public function testDefaultConfiguration(\CliTester $I, \Codeception\Example $data): void
+    public function testDefaultConfiguration(CliTester $I, Example $data): void
     {
         $this->prepareWorkplace($I, $data['version']);
-        $I->generateDockerCompose(sprintf(
-            '--mode=production --expose-db-port=%s',
-            $I->getExposedPort()
-        ));
+        $I->generateDockerCompose(
+            sprintf(
+                '--mode=production --expose-db-port=%s',
+                $I->getExposedPort()
+            )
+        );
 
         $I->assertTrue($I->runDockerComposeCommand('run build cloud-build'), 'Build phase was failed');
         $I->assertTrue($I->startEnvironment(), 'Docker could not start');
@@ -100,18 +167,20 @@ abstract class ValkeyCest extends AbstractCest
     abstract protected function defaultConfigurationDataProvider(): array;
 
     /**
-     * @param \CliTester $I
-     * @param \Codeception\Example $data
-     * @throws \Robo\Exception\TaskException
+     * @param        CliTester $I
+     * @param        Example $data
+     * @throws       TaskException
      * @dataProvider wrongConfigurationValkeyBackendDataProvider
      */
-    public function testWrongConfigurationValkeyBackend(\CliTester $I, \Codeception\Example $data): void
+    public function testWrongConfigurationValkeyBackend(CliTester $I, Example $data): void
     {
         $this->prepareWorkplace($I, $data['version']);
-        $I->generateDockerCompose(sprintf(
-            '--mode=production --expose-db-port=%s',
-            $I->getExposedPort()
-        ));
+        $I->generateDockerCompose(
+            sprintf(
+                '--mode=production --expose-db-port=%s',
+                $I->getExposedPort()
+            )
+        );
 
         $I->writeEnvMagentoYaml($data['wrongConfiguration']);
 
@@ -128,18 +197,20 @@ abstract class ValkeyCest extends AbstractCest
     abstract protected function wrongConfigurationValkeyBackendDataProvider(): array;
 
     /**
-     * @param \CliTester $I
-     * @param \Codeception\Example $data
-     * @throws \Robo\Exception\TaskException
+     * @param        CliTester           $I
+     * @param        Example $data
+     * @throws       TaskException
      * @dataProvider valkeyWrongConnectionDataProvider
      */
-    public function testValkeyWrongConnection(\CliTester $I, \Codeception\Example $data): void
+    public function testValkeyWrongConnection(CliTester $I, Example $data): void
     {
         $this->prepareWorkplace($I, $data['version']);
-        $I->generateDockerCompose(sprintf(
-            '--mode=production --expose-db-port=%s',
-            $I->getExposedPort()
-        ));
+        $I->generateDockerCompose(
+            sprintf(
+                '--mode=production --expose-db-port=%s',
+                $I->getExposedPort()
+            )
+        );
 
         $I->writeEnvMagentoYaml($data['configuration']);
 
@@ -154,18 +225,20 @@ abstract class ValkeyCest extends AbstractCest
     abstract protected function valkeyWrongConnectionDataProvider(): array;
 
     /**
-     * @param \CliTester $I
-     * @param \Codeception\Example $data
-     * @throws \Robo\Exception\TaskException
+     * @param        CliTester $I
+     * @param        Example $data
+     * @throws       TaskException
      * @dataProvider goodConfigurationDataProvider
      */
-    public function testGoodConfiguration(\CliTester $I, \Codeception\Example $data): void
+    public function testGoodConfiguration(CliTester $I, Example $data): void
     {
         $this->prepareWorkplace($I, $data['version']);
-        $I->generateDockerCompose(sprintf(
-            '--mode=production --expose-db-port=%s',
-            $I->getExposedPort()
-        ));
+        $I->generateDockerCompose(
+            sprintf(
+                '--mode=production --expose-db-port=%s',
+                $I->getExposedPort()
+            )
+        );
 
         $I->writeEnvMagentoYaml($data['configuration']);
 
