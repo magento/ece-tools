@@ -12,10 +12,11 @@ use Magento\MagentoCloud\Config\EnvironmentData;
 use Magento\MagentoCloud\Config\Schema;
 use Magento\MagentoCloud\Config\System\Variables;
 use Magento\MagentoCloud\Config\SystemConfigInterface;
-use Magento\MagentoCloud\PlatformVariable\DecoderInterface;
-use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
+use Magento\MagentoCloud\PlatformVariable\DecoderInterface;
+use Magento\MagentoCloud\Util\YamlNormalizer;
 use phpmock\phpunit\PHPMock;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -53,12 +54,18 @@ class EnvironmentDataTest extends TestCase
     private $fileMock;
 
     /**
+     * @var YamlNormalizer|MockObject
+     */
+    private YamlNormalizer $yamlNormalizerMock;
+
+    /**
      * @inheritDoc
      */
     protected function setUp(): void
     {
         /** @var MockObject|ReaderInterface $environmentReaderMock */
-        $environmentReaderMock = $this->getMockForAbstractClass(ReaderInterface::class);
+        $environmentReaderMock = $this->createMock(ReaderInterface::class);
+
         /** @var MockObject|Schema $schemaMock */
         $schemaMock = $this->createMock(Schema::class);
 
@@ -77,18 +84,25 @@ class EnvironmentDataTest extends TestCase
             $schemaMock
         );
 
-        $this->decoderMock = $this->getMockForAbstractClass(DecoderInterface::class);
-        $this->fileListMock = $this->createMock(FileList::class);
-        $this->fileMock = $this->createMock(File::class);
+        $this->decoderMock        = $this->createMock(DecoderInterface::class);
+        $this->fileListMock       = $this->createMock(FileList::class);
+        $this->fileMock           = $this->createMock(File::class);
+        $this->yamlNormalizerMock = $this->createMock(YamlNormalizer::class);
 
         $this->environmentData = new EnvironmentData(
             $this->variable,
             $this->decoderMock,
             $this->fileListMock,
-            $this->fileMock
+            $this->fileMock,
+            $this->yamlNormalizerMock
         );
     }
 
+    /**
+     * Test for getEnv method
+     *
+     * @return void
+     */
     public function testGetEnv(): void
     {
         $_ENV = ['some_key' => 'some_value'];
@@ -96,6 +110,11 @@ class EnvironmentDataTest extends TestCase
         $this->assertEquals('some_value', $this->environmentData->getEnv('some_key'));
     }
 
+    /**
+     * Test for getEnv method when value is got from getenv function
+     *
+     * @return void
+     */
     public function testGetEnvFromFunction(): void
     {
         $_ENV = [];
@@ -108,9 +127,11 @@ class EnvironmentDataTest extends TestCase
     }
 
     /**
+     * Test for getVariables method
+     *
      * @param string $envVariableName
      * @param string $methodName
-     *
+     * @return void
      * @dataProvider getVariablesDataProvider
      */
     public function testGetVariables(string $envVariableName, string $methodName): void
@@ -129,6 +150,8 @@ class EnvironmentDataTest extends TestCase
     }
 
     /**
+     * Data provider for testGetVariables method
+     *
      * @return array
      */
     public function getVariablesDataProvider(): array
@@ -141,6 +164,11 @@ class EnvironmentDataTest extends TestCase
         ];
     }
 
+    /**
+     * Test for getBranchName method
+     *
+     * @return void
+     */
     public function testGetBranchName(): void
     {
         $_ENV['MAGENTO_CLOUD_ENVIRONMENT'] = 'production';
@@ -148,7 +176,13 @@ class EnvironmentDataTest extends TestCase
         $this->assertEquals('production', $this->environmentData->getBranchName());
     }
 
-    // Following tests to see if .magento.app.yaml can be read (includes file missing)
+    /**
+     * Test for getApplication method when .magento.app.yaml file exists
+     * Following tests to see if .magento.app.yaml can be read (includes file missing)
+     * and parsed correctly
+     *
+     * @return void
+     */
     public function testGetApplicationWithNoSystemVariablesFileExists(): void
     {
         $_ENV = null;
@@ -159,10 +193,18 @@ class EnvironmentDataTest extends TestCase
         $this->fileMock->expects($this->once())
             ->method('fileGetContents')
             ->willReturn('[]');
+        $this->yamlNormalizerMock
+            ->method('normalize')
+            ->willReturnCallback(fn($data) => $data);
 
         $this->assertEquals([], $this->environmentData->getApplication());
     }
 
+    /**
+     * Test for getApplication method when .magento.app.yaml file does not exist
+     *
+     * @return void
+     */
     public function testGetApplicationWithNoSystemVariablesFileNotExists(): void
     {
         $_ENV = null;
@@ -174,10 +216,18 @@ class EnvironmentDataTest extends TestCase
         $this->fileMock->expects($this->once())
             ->method('fileGetContents')
             ->willThrowException($exception);
+        $this->yamlNormalizerMock
+            ->expects($this->never())
+            ->method('normalize');
 
         $this->assertEquals([], $this->environmentData->getApplication());
     }
 
+    /**
+     * Test for getMageMode method
+     *
+     * @return void
+     */
     public function testGetMageMode(): void
     {
         $this->assertNull($this->environmentData->getMageMode());

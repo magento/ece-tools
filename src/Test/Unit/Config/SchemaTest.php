@@ -13,9 +13,10 @@ use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Config\Stage\PostDeployInterface;
 use Magento\MagentoCloud\Config\StageConfigInterface;
 use Magento\MagentoCloud\Config\SystemConfigInterface;
+use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Filesystem\SystemList;
-use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Util\YamlNormalizer;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Yaml\Parser;
@@ -31,7 +32,7 @@ class SchemaTest extends TestCase
     private $schema;
 
     /**
-     * @var SystemList
+     * @var SystemList|MockObject
      */
     private $systemListMock;
 
@@ -46,27 +47,37 @@ class SchemaTest extends TestCase
     private $fileMock;
 
     /**
+     * @var YamlNormalizer|MockObject
+     */
+    private YamlNormalizer $yamlNormalizerMock;
+
+    /**
      * @inheritdoc
      */
     protected function setUp(): void
     {
         $this->systemListMock = $this->createMock(SystemList::class);
-        $this->parserMock = $this->createTestProxy(Parser::class);
-        $this->fileMock = $this->createTestProxy(File::class);
+        $this->parserMock = new Parser();
+        $this->fileMock = new File();
+        $this->yamlNormalizerMock = new YamlNormalizer();
 
         $this->systemListMock->method('getConfig')
-            ->willReturn(ECE_BP . '/config');
+            ->willReturn(__DIR__ . '/../../../../config');
 
         $this->schema = new Schema(
             $this->systemListMock,
             $this->parserMock,
-            $this->fileMock
+            $this->fileMock,
+            $this->yamlNormalizerMock
         );
     }
 
-  /**
-   * @throws FileSystemException
-   */
+    /**
+     * Test for getDefaults method for build stage
+     *
+     * @return void
+     * @throws FileSystemException
+     */
     public function testGetDefaultsForBuild(): void
     {
         $this->assertEquals(
@@ -89,9 +100,12 @@ class SchemaTest extends TestCase
         );
     }
 
-  /**
-   * @throws FileSystemException
-   */
+    /**
+     * Test for getDefaults method for deploy stage
+     *
+     * @return void
+     * @throws FileSystemException
+     */
     public function testGetDefaultsForDeploy(): void
     {
         $this->assertEquals(
@@ -134,9 +148,12 @@ class SchemaTest extends TestCase
         );
     }
 
-  /**
-   * @throws FileSystemException
-   */
+    /**
+     * Test for getDefaults method for post-deploy stage
+     *
+     * @return void
+     * @throws FileSystemException
+     */
     public function testGetDefaultsForPostDeploy(): void
     {
         $this->assertEquals(
@@ -164,6 +181,12 @@ class SchemaTest extends TestCase
         );
     }
 
+    /**
+     * Test for getDefaults method for system variables
+     *
+     * @return void
+     * @throws FileSystemException
+     */
     public function testGetDefaultsForSystemVariables(): void
     {
         $this->assertEquals(
@@ -178,6 +201,12 @@ class SchemaTest extends TestCase
         );
     }
 
+    /**
+     * Test for getDefaults method for global section
+     *
+     * @return void
+     * @throws FileSystemException
+     */
     public function testGetDefaultsForGlobalSection(): void
     {
         $this->assertEquals(
@@ -195,6 +224,11 @@ class SchemaTest extends TestCase
         );
     }
 
+    /**
+     * Test for getSchemaItemsExists method
+     *
+     * @return void
+     */
     public function testGetSchemaItemsExists(): void
     {
         $requiredItems = [
