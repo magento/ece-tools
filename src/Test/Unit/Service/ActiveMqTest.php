@@ -151,6 +151,7 @@ class ActiveMqTest extends TestCase
                 }
             );
 
+        // No configuration found means no dpkg check is performed
         $this->shellMock->expects($this->never())
             ->method('execute');
         $this->assertEquals('0', $this->activeMq->getVersion());
@@ -220,19 +221,14 @@ class ActiveMqTest extends TestCase
     }
 
     /**
-     * Test ActiveMQ version retrieval from activemq command
+     * Test ActiveMQ version retrieval when dpkg packages not found
+     * (This test is no longer relevant as CLI commands were removed in refactoring)
      *
-     * @param  string $version        Version string from activemq command
-     * @param  string $expectedResult Expected parsed version
      * @return void
      * @throws ServiceException|Exception
-     *
-     * @dataProvider getVersionFromActiveMqCommandDataProvider
      */
-    public function testGetVersionFromActiveMqCommand(
-        string $version,
-        string $expectedResult
-    ): void {
+    public function testGetVersionWhenDpkgFails(): void
+    {
         $this->environmentMock->expects($this->exactly(2))
             ->method('getRelationship')
             ->willReturnCallback(fn($param) => match ([$param]) {
@@ -242,56 +238,18 @@ class ActiveMqTest extends TestCase
                     'port' => '61616',
                 ]]
             });
-
-        $processMock = $this->getMockBuilder(ProcessInterface::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-        $processMock->expects($this->any())
-            ->method('getOutput')
-            ->willReturn($version);
         
-        // With refactored code, it tries dpkg methods first, then CLI commands
-        $this->shellMock->expects($this->atLeastOnce())
+        // Both dpkg methods fail
+        $this->shellMock->expects($this->exactly(2))
             ->method('execute')
-            ->willReturnCallback(
-                function ($command) use ($processMock) {
-                    if ($command === 'dpkg -s activemq-artemis | grep Version') {
-                        throw new ShellException('Package not found');
-                    }
-                    if ($command === 'dpkg -s artemis | grep Version') {
-                        throw new ShellException('Package not found');
-                    }
-                    if ($command === 'activemq-artemis --version 2>/dev/null | head -1') {
-                        return $processMock;
-                    }
-                    if ($command === 'artemis version 2>/dev/null | head -1') {
-                        throw new ShellException('Command not found');
-                    }
-                    throw new ShellException('Command not found');
-                }
-            );
+            ->willThrowException(new ShellException('Package not found'));
 
-        $this->assertEquals($expectedResult, $this->activeMq->getVersion());
-    }
-
-    /**
-     * Data provider for testGetVersionFromActiveMqCommand
-     *
-     * @return array
-     */
-    public static function getVersionFromActiveMqCommandDataProvider(): array
-    {
-        return [
-            ['ActiveMQ Artemis 2.42.1', '2.42'],
-            ['ActiveMQ Artemis 2.42.0', '2.42'],
-            ['ActiveMQ 2.42.5', '2.42'],
-            ['Some other output', '0'],
-            ['', '0'],
-        ];
+        // Should return '0' when both dpkg methods fail
+        $this->assertEquals('0', $this->activeMq->getVersion());
     }
 
   /**
-   * Test ActiveMQ version retrieval when all detection methods fail
+   * Test ActiveMQ version retrieval when all dpkg methods fail
    *
    * @return void
    * @throws ServiceException
@@ -308,8 +266,8 @@ class ActiveMqTest extends TestCase
                 ]]
             });
 
-        // With refactored code, it tries all 4 methods: 2 dpkg + 2 CLI
-        $this->shellMock->expects($this->atLeastOnce())
+        // Both dpkg methods fail
+        $this->shellMock->expects($this->exactly(2))
             ->method('execute')
             ->willThrowException(new ShellException('Command failed'));
         
@@ -360,12 +318,12 @@ class ActiveMqTest extends TestCase
     }
 
   /**
-   * Test ActiveMQ version retrieval from artemis CLI command
+   * Test ActiveMQ version retrieval when only artemis dpkg succeeds (second package)
    *
    * @return void
    * @throws ServiceException
    */
-    public function testGetVersionFromArtemisCli(): void
+    public function testGetVersionFromArtemisSecondPackage(): void
     {
         $this->environmentMock->expects($this->exactly(2))
             ->method('getRelationship')
@@ -382,9 +340,9 @@ class ActiveMqTest extends TestCase
             ->getMock();
         $processMock->expects($this->any())
             ->method('getOutput')
-            ->willReturn('ActiveMQ Artemis 2.42.0');
+            ->willReturn('Version: 2.42.0');
 
-        $this->shellMock->expects($this->atLeastOnce())
+        $this->shellMock->expects($this->exactly(2))
             ->method('execute')
             ->willReturnCallback(
                 function ($command) use ($processMock) {
@@ -392,12 +350,6 @@ class ActiveMqTest extends TestCase
                         throw new ShellException('Package not found');
                     }
                     if ($command === 'dpkg -s artemis | grep Version') {
-                        throw new ShellException('Package not found');
-                    }
-                    if ($command === 'activemq-artemis --version 2>/dev/null | head -1') {
-                        throw new ShellException('Command not found');
-                    }
-                    if ($command === 'artemis version 2>/dev/null | head -1') {
                         return $processMock;
                     }
                     throw new ShellException('Command not found');
