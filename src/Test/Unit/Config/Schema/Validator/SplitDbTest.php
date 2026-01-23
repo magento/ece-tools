@@ -11,12 +11,14 @@ use Magento\MagentoCloud\Config\Schema\Validator\SplitDb;
 use Magento\MagentoCloud\Config\Validator\Result\Error;
 use Magento\MagentoCloud\Config\Validator\Result\Success;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @inheritDoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class SplitDbTest extends TestCase
 {
     /**

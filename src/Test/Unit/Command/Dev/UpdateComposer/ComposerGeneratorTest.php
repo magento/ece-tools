@@ -11,12 +11,14 @@ use Magento\MagentoCloud\Command\Dev\UpdateComposer\ComposerGenerator;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Package\MagentoVersion;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class ComposerGeneratorTest extends TestCase
 {
     /**

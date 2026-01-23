@@ -7,19 +7,21 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Config\Validator\Build;
 
+use Magento\MagentoCloud\Config\Environment\Reader as EnvironmentReader;
 use Magento\MagentoCloud\Config\StageConfigInterface;
 use Magento\MagentoCloud\Config\Validator\Build\ScdOptionsIgnorance;
-use Magento\MagentoCloud\Config\Environment\Reader as EnvironmentReader;
 use Magento\MagentoCloud\Config\Validator\GlobalStage\ScdOnBuild;
 use Magento\MagentoCloud\Config\Validator\Result\Error;
 use Magento\MagentoCloud\Config\Validator\Result\Success;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class ScdOptionsIgnoranceTest extends TestCase
 {
     /**

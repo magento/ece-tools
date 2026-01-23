@@ -10,15 +10,17 @@ namespace Magento\MagentoCloud\Test\Unit\Service;
 use Magento\MagentoCloud\DB\ConnectionInterface;
 use Magento\MagentoCloud\Service\Aurora;
 use Magento\MagentoCloud\Service\ServiceException;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @inheritDoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class AuroraTest extends TestCase
 {
-
     /**
      * @var Aurora
      */
@@ -34,11 +36,16 @@ class AuroraTest extends TestCase
      */
     public function setUp(): void
     {
-        $this->connectionMock = $this->getMockForAbstractClass(ConnectionInterface::class);
+        $this->connectionMock = $this->createMock(ConnectionInterface::class);
 
         $this->aurora = new Aurora($this->connectionMock);
     }
 
+    /**
+     * Test get configuration method.
+     *
+     * @return void
+     */
     public function testGetConfiguration(): void
     {
         $this->assertSame(
@@ -48,12 +55,15 @@ class AuroraTest extends TestCase
     }
 
     /**
+     * Test get version method.
+     *
      * @param array $version
      * @param string $expectedResult
-     * @throws ServiceException
-     *
      * @dataProvider getVersionDataProvider
+     * @return void
+     * @throws ServiceException
      */
+    #[DataProvider('getVersionDataProvider')]
     public function testGetVersion(array $version, string $expectedResult): void
     {
         $this->connectionMock->expects($this->once())
@@ -65,14 +75,35 @@ class AuroraTest extends TestCase
     }
 
     /**
+     * Data provider for get version method.
+     *
      * @return array
      */
-    public function getVersionDataProvider(): array
+    public static function getVersionDataProvider(): array
     {
         return [
-            [['version' => '2.07.2'], '2.07'],
-            [['version' => '1.0.16'], '1.0'],
-            [[], '0'],
+            [
+                [
+                    'version' => '2.07.2'
+                ],
+                '2.07'
+            ],
+            [
+                [
+                    'version' => '1.0.16'
+                ],
+                '1.0'
+            ],
+            [
+                [],
+                '0'
+            ],
+            [
+                [
+                    'version' => ''
+                ],
+                '0'
+            ],
         ];
     }
 }

@@ -9,18 +9,20 @@ namespace Magento\MagentoCloud\Test\Unit\Step\Deploy\InstallUpdate\ConfigUpdate;
 
 use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\App\GenericException;
+use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface as ConfigReader;
+use Magento\MagentoCloud\Config\Magento\Env\WriterInterface as ConfigWriter;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\Session;
 use Magento\MagentoCloud\Step\StepException;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Magento\MagentoCloud\Config\Magento\Env\WriterInterface as ConfigWriter;
-use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface as ConfigReader;
 use Psr\Log\LoggerInterface;
 
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class SessionTest extends TestCase
 {
     /**
@@ -53,7 +55,7 @@ class SessionTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
         $this->configWriterMock = $this->createMock(ConfigWriter::class);
         $this->configReaderMock = $this->createMock(ConfigReader::class);
         $this->sessionConfigMock = $this->createMock(Session\Config::class);

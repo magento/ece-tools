@@ -10,6 +10,8 @@ namespace Magento\MagentoCloud\Test\Unit\WarmUp;
 use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\WarmUp\UrlsPattern;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -17,6 +19,7 @@ use Psr\Log\LoggerInterface;
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class UrlsPatternTest extends TestCase
 {
     /**
@@ -39,7 +42,7 @@ class UrlsPatternTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
         $this->patternFactoryMock = $this->createMock(UrlsPattern\PatternFactory::class);
 
         $this->urlsPattern = new UrlsPattern(
@@ -48,9 +51,12 @@ class UrlsPatternTest extends TestCase
         );
     }
 
-    public function testGetWithGenericException()
+    /**
+     * Test get method with GenericException.
+     */
+    public function testGetWithGenericException(): void
     {
-        $patternInterfaceMock = $this->getMockForAbstractClass(UrlsPattern\PatternInterface::class);
+        $patternInterfaceMock = $this->createMock(UrlsPattern\PatternInterface::class);
         $patternInterfaceMock->expects($this->once())
             ->method('getUrls')
             ->with('product', '*', '*')
@@ -66,9 +72,12 @@ class UrlsPatternTest extends TestCase
         $this->urlsPattern->get('product:*:*');
     }
 
-    public function testGetWithShellException()
+    /**
+     * Test get method with ShellException.
+     */
+    public function testGetWithShellException(): void
     {
-        $patternInterfaceMock = $this->getMockForAbstractClass(UrlsPattern\PatternInterface::class);
+        $patternInterfaceMock = $this->createMock(UrlsPattern\PatternInterface::class);
         $patternInterfaceMock->expects($this->once())
             ->method('getUrls')
             ->with('product', '*', '*')
@@ -85,16 +94,23 @@ class UrlsPatternTest extends TestCase
     }
 
     /**
+     * Test get method.
+     *
      * @param string $pattern
      * @param array $patternParts
      * @param array $urlsFromPattern
      * @param array $expectedResult
-     * @throws \ReflectionException
      * @dataProvider getDataProvider
+     * @throws \ReflectionException
      */
-    public function testGet(string $pattern, array $patternParts, array $urlsFromPattern, array $expectedResult)
-    {
-        $patternInterfaceMock = $this->getMockForAbstractClass(UrlsPattern\PatternInterface::class);
+    #[DataProvider('getDataProvider')]
+    public function testGet(
+        string $pattern,
+        array $patternParts,
+        array $urlsFromPattern,
+        array $expectedResult
+    ): void {
+        $patternInterfaceMock = $this->createMock(UrlsPattern\PatternInterface::class);
         $patternInterfaceMock->expects($this->once())
             ->method('getUrls')
             ->with(...$patternParts)
@@ -109,9 +125,11 @@ class UrlsPatternTest extends TestCase
     }
 
     /**
+     * Test data provider for get method.
+     *
      * @return array
      */
-    public function getDataProvider(): array
+    public static function getDataProvider(): array
     {
         return [
             [
@@ -158,19 +176,24 @@ class UrlsPatternTest extends TestCase
     }
 
     /**
+     * Test isValid method.
+     *
      * @param string $pattern
      * @param bool $expected
      * @dataProvider isValidDataProvider
      */
-    public function testIsValid(string $pattern, bool $expected)
+    #[DataProvider('isValidDataProvider')]
+    public function testIsValid(string $pattern, bool $expected): void
     {
         $this->assertEquals($expected, $this->urlsPattern->isValid($pattern));
     }
 
     /**
+     * Test data provider for isValid method.
+     *
      * @return array
      */
-    public function isValidDataProvider(): array
+    public static function isValidDataProvider(): array
     {
         return [
             ['test', false],

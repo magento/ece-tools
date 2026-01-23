@@ -12,12 +12,14 @@ use Magento\MagentoCloud\Filesystem\ConfigFileList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Package\UndefinedPackageException;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class ResolverTest extends TestCase
 {
     /**

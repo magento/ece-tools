@@ -15,6 +15,7 @@ use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Step\Deploy\PreDeploy\CleanViewPreprocessed;
 use Magento\MagentoCloud\Step\StepException;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -22,6 +23,7 @@ use Psr\Log\LoggerInterface;
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class CleanViewPreprocessedTest extends TestCase
 {
     /**
@@ -54,7 +56,7 @@ class CleanViewPreprocessedTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
         $this->fileMock = $this->createMock(File::class);
         $this->directoryListMock = $this->createMock(DirectoryList::class);
         $this->globalConfigMock = $this->createMock(GlobalConfig::class);

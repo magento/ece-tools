@@ -43,7 +43,7 @@ class ValidatorFactoryTest extends TestCase
 
     public function testCreate()
     {
-        $validatorMock = $this->getMockForAbstractClass(ValidatorInterface::class);
+        $validatorMock = $this->createStub(ValidatorInterface::class);
 
         $this->containerMock->expects($this->once())
             ->method('create')

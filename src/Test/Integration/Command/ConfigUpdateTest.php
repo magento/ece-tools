@@ -16,6 +16,8 @@ use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Filesystem\ConfigFileList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Test\Integration\Container;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -23,6 +25,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * @inheritDoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class ConfigUpdateTest extends TestCase
 {
     /**
@@ -37,6 +40,7 @@ class ConfigUpdateTest extends TestCase
      * @throws \ReflectionException
      * @dataProvider executeDataProvider
      */
+    #[DataProvider('executeDataProvider')]
     public function testExecute(array $inputConfiguration, string $baseDir)
     {
         $tmpMagentoEnvYaml = file_get_contents($baseDir . '/.magento.env.yaml');
@@ -49,8 +53,8 @@ class ConfigUpdateTest extends TestCase
             $container->get(ReaderInterface::class)
         );
 
-        $inputMock = $this->getMockForAbstractClass(InputInterface::class);
-        $outputMock = $this->getMockForAbstractClass(OutputInterface::class);
+        $inputMock = $this->createMock(InputInterface::class);
+        $outputMock = $this->createMock(OutputInterface::class);
 
         $inputMock->expects($this->once())
             ->method('getArgument')
@@ -70,7 +74,7 @@ class ConfigUpdateTest extends TestCase
     /**
      * @return array
      */
-    public function executeDataProvider(): array
+    public static function executeDataProvider(): array
     {
         return [
             [
@@ -82,7 +86,7 @@ class ConfigUpdateTest extends TestCase
                         ],
                     ],
                 ],
-                $this->baseDir . '/scdupdate'
+                __DIR__ . '/_files/ConfigUpdate/scdupdate'
             ],
             [
                 [
@@ -103,7 +107,7 @@ class ConfigUpdateTest extends TestCase
                         ],
                     ]
                 ],
-                $this->baseDir . '/dbconfiguration'
+                __DIR__ . '/_files/ConfigUpdate/dbconfiguration'
             ],
         ];
     }

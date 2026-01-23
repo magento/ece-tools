@@ -8,18 +8,21 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit\Config\Validator\Deploy;
 
 use Magento\MagentoCloud\Config\Environment;
-use Magento\MagentoCloud\Config\Validator\Deploy\ElasticSearchUsage;
-use Magento\MagentoCloud\Config\Validator\Result\Success;
-use Magento\MagentoCloud\Config\Validator\Result\Error;
-use Magento\MagentoCloud\Config\Validator\ResultFactory;
 use Magento\MagentoCloud\Config\SearchEngine;
+use Magento\MagentoCloud\Config\Validator\Deploy\ElasticSearchUsage;
+use Magento\MagentoCloud\Config\Validator\Result\Error;
+use Magento\MagentoCloud\Config\Validator\Result\Success;
+use Magento\MagentoCloud\Config\Validator\ResultFactory;
 use Magento\MagentoCloud\Service\ElasticSearch;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class ElasticSearchUsageTest extends TestCase
 {
     /**
@@ -68,12 +71,16 @@ class ElasticSearchUsageTest extends TestCase
     }
 
     /**
+     * Test validate method.
+     *
      * @param bool $isInstalled
      * @param bool $isESFamily
      * @param string $expectedResultClass
      * @dataProvider validateDataProvider
+     * @return void
      */
-    public function testValidate(bool $isInstalled, bool $isESFamily, string $expectedResultClass)
+    #[DataProvider('validateDataProvider')]
+    public function testValidate(bool $isInstalled, bool $isESFamily, string $expectedResultClass): void
     {
         $this->elasticSearchMock->expects($this->once())
             ->method('isInstalled')
@@ -85,9 +92,11 @@ class ElasticSearchUsageTest extends TestCase
     }
 
     /**
+     * Data provider for validate method.
+     *
      * @return array
      */
-    public function validateDataProvider(): array
+    public static function validateDataProvider(): array
     {
         return [
             'ES is not installed' => [

@@ -50,9 +50,9 @@ class UrlsTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->postDeployMock = $this->getMockForAbstractClass(PostDeployInterface::class);
+        $this->postDeployMock = $this->createMock(PostDeployInterface::class);
         $this->urlManagerMock = $this->createMock(UrlManager::class);
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
         $this->urlsPatternMock = $this->createPartialMock(UrlsPattern::class, ['get']);
 
         $this->urls = new Urls(

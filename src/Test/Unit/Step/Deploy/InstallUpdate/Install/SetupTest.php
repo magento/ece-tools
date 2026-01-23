@@ -16,6 +16,7 @@ use Magento\MagentoCloud\Shell\UtilityManager;
 use Magento\MagentoCloud\Step\Deploy\InstallUpdate\Install\Setup;
 use Magento\MagentoCloud\Step\Deploy\InstallUpdate\Install\Setup\InstallCommandFactory;
 use Magento\MagentoCloud\Step\StepException;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -23,6 +24,7 @@ use Psr\Log\LoggerInterface;
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class SetupTest extends TestCase
 {
     /**
@@ -60,8 +62,8 @@ class SetupTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
-        $this->shellMock = $this->getMockForAbstractClass(ShellInterface::class);
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
+        $this->shellMock = $this->createMock(ShellInterface::class);
         $this->fileListMock = $this->createMock(FileList::class);
         $this->installCommandFactoryMock = $this->createMock(InstallCommandFactory::class);
         $this->utilityManagerMock = $this->createMock(UtilityManager::class);

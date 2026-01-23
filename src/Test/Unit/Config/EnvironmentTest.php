@@ -9,12 +9,15 @@ namespace Magento\MagentoCloud\Test\Unit\Config;
 
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\EnvironmentDataInterface;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class EnvironmentTest extends TestCase
 {
     /**
@@ -37,6 +40,11 @@ class EnvironmentTest extends TestCase
         $this->environment = new Environment($this->environmentDataMock);
     }
 
+    /**
+     * Test getEnv method.
+     *
+     * @return void
+     */
     public function testGetEnv(): void
     {
         $this->environmentDataMock->expects($this->once())
@@ -48,10 +56,14 @@ class EnvironmentTest extends TestCase
     }
 
     /**
+     * Test isMasterBranch method.
+     *
      * @param bool $expectedResult
      * @param string $branchName
+     * @param void
      * @dataProvider isMasterBranchDataProvider
      */
+    #[DataProvider('isMasterBranchDataProvider')]
     public function testIsMasterBranch(bool $expectedResult, string $branchName): void
     {
         $this->environmentDataMock->expects($this->once())
@@ -65,9 +77,11 @@ class EnvironmentTest extends TestCase
     }
 
     /**
+     * Data provider for testIsMasterBranch.
+     *
      * @return array
      */
-    public function isMasterBranchDataProvider(): array
+    public static function isMasterBranchDataProvider(): array
     {
         return [
             [false, 'branch213'],
@@ -94,6 +108,11 @@ class EnvironmentTest extends TestCase
         ];
     }
 
+    /**
+     * Test getCryptKey method.
+     *
+     * @return void
+     */
     public function testGetCryptKey(): void
     {
         $this->environmentDataMock->expects($this->once())
@@ -103,6 +122,11 @@ class EnvironmentTest extends TestCase
         $this->assertSame('secret-key', $this->environment->getCryptKey());
     }
 
+    /**
+     * Test getApplication method.
+     *
+     * @return void
+     */
     public function testGetApplication(): void
     {
         $this->environmentDataMock->expects($this->once())
@@ -112,6 +136,11 @@ class EnvironmentTest extends TestCase
         $this->assertSame(['some' => 'value'], $this->environment->getApplication());
     }
 
+    /**
+     * Test getRoutes method.
+     *
+     * @return void
+     */
     public function testGetRoutes(): void
     {
         $this->environmentDataMock->expects($this->once())
@@ -121,6 +150,11 @@ class EnvironmentTest extends TestCase
         $this->assertSame(['some' => 'routes'], $this->environment->getRoutes());
     }
 
+    /**
+     * Test getRelationships method.
+     *
+     * @return void
+     */
     public function testGetRelationships(): void
     {
         $this->environmentDataMock->expects($this->once())
@@ -130,6 +164,11 @@ class EnvironmentTest extends TestCase
         $this->assertSame(['some' => 'relationships'], $this->environment->getRelationships());
     }
 
+    /**
+     * Test getRelationship method.
+     *
+     * @return void
+     */
     public function testGetRelationship(): void
     {
         $this->environmentDataMock->expects($this->once())
@@ -142,6 +181,11 @@ class EnvironmentTest extends TestCase
         );
     }
 
+    /**
+     * Test getEnvVarMageErrorReportDirNestingLevel method.
+     *
+     * @return void
+     */
     public function testGetEnvVarMageErrorReportDirNestingLevel(): void
     {
         $this->environmentDataMock->expects($this->once())
@@ -152,6 +196,11 @@ class EnvironmentTest extends TestCase
         $this->assertSame(1, $this->environment->getEnvVarMageErrorReportDirNestingLevel());
     }
 
+    /**
+     * Test hasMount method.
+     *
+     * @return void
+     */
     public function testHasMount(): void
     {
         $this->environmentDataMock->method('getApplication')

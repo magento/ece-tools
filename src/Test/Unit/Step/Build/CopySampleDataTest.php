@@ -13,6 +13,7 @@ use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Step\Build\CopySampleData;
 use Magento\MagentoCloud\Step\StepException;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -20,6 +21,7 @@ use Psr\Log\LoggerInterface;
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class CopySampleDataTest extends TestCase
 {
     /**
@@ -47,14 +49,9 @@ class CopySampleDataTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
-            ->getMockForAbstractClass();
-        $this->fileMock = $this->getMockBuilder(File::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-        $this->directoryListMock = $this->getMockBuilder(DirectoryList::class)
-            ->disableOriginalConstructor()
-            ->getMock();
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
+        $this->fileMock = $this->createMock(File::class);
+        $this->directoryListMock = $this->createMock(DirectoryList::class);
 
         $this->directoryListMock->expects($this->any())
             ->method('getMagentoRoot')

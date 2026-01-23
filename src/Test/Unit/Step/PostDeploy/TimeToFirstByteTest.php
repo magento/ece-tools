@@ -17,13 +17,15 @@ use Magento\MagentoCloud\Http\TransferStatsHandler;
 use Magento\MagentoCloud\Step\PostDeploy\TimeToFirstByte;
 use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Util\UrlManager;
-use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class TimeToFirstByteTest extends TestCase
 {
     /**

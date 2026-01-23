@@ -9,6 +9,7 @@ namespace Magento\MagentoCloud\Test\Unit\Config\Application;
 
 use Magento\MagentoCloud\Config\Application\HookChecker;
 use Magento\MagentoCloud\Config\Environment;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -38,11 +39,14 @@ class HookCheckerTest extends TestCase
     }
 
     /**
+     * Test isPostDeployHookEnabled method.
+     *
      * @param array $hooks
      * @param bool $expectedResult
-     *
-     * @dataProvider  isPostDeployEnabledDataProvider
+     * @return void
+     * @dataProvider isPostDeployEnabledDataProvider
      */
+    #[DataProvider('isPostDeployEnabledDataProvider')]
     public function testIsPostDeployHookEnabled(array $hooks, bool $expectedResult): void
     {
         $this->environmentMock->expects($this->once())
@@ -53,9 +57,11 @@ class HookCheckerTest extends TestCase
     }
 
     /**
+     * Data provider for testIsPostDeployHookEnabled.
+     *
      * @return array
      */
-    public function isPostDeployEnabledDataProvider(): array
+    public static function isPostDeployEnabledDataProvider(): array
     {
         return [
             [

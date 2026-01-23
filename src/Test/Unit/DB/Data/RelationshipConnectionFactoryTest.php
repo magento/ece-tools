@@ -10,12 +10,15 @@ namespace Magento\MagentoCloud\Test\Unit\DB\Data;
 use Magento\MagentoCloud\DB\Data\ConnectionTypes;
 use Magento\MagentoCloud\DB\Data\RelationshipConnection;
 use Magento\MagentoCloud\DB\Data\RelationshipConnectionFactory;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class RelationshipConnectionFactoryTest extends TestCase
 {
     /**
@@ -41,11 +44,15 @@ class RelationshipConnectionFactoryTest extends TestCase
     }
 
     /**
+     * Test create method.
+     *
      * @param string $method
      * @param string $connectionType
      * @dataProvider dataProvider
+     * @return void
      */
-    public function testCreate(string $method, string $connectionType)
+    #[DataProvider('dataProvider')]
+    public function testCreate(string $method, string $connectionType): void
     {
         $this->connectionTypeMock->expects($this->once())
             ->method($method)
@@ -58,39 +65,46 @@ class RelationshipConnectionFactoryTest extends TestCase
     }
 
     /**
-     * Data provider for testCreate
+     * Data provider for testCreate method.
+     *
+     * @return array
      */
-    public function dataProvider(): array
+    public static function dataProvider(): array
     {
         return [
             [
-                'method' => 'getConfiguration',
+                'method'         => 'getConfiguration',
                 'connectionType' => RelationshipConnectionFactory::CONNECTION_MAIN,
             ],
             [
-                'method' => 'getSlaveConfiguration',
+                'method'         => 'getSlaveConfiguration',
                 'connectionType' => RelationshipConnectionFactory::CONNECTION_SLAVE,
             ],
             [
-                'method' => 'getQuoteConfiguration',
+                'method'         => 'getQuoteConfiguration',
                 'connectionType' => RelationshipConnectionFactory::CONNECTION_QUOTE_MAIN,
             ],
             [
-                'method' => 'getQuoteSlaveConfiguration',
+                'method'         => 'getQuoteSlaveConfiguration',
                 'connectionType' => RelationshipConnectionFactory::CONNECTION_QUOTE_SLAVE,
             ],
             [
-                'method' => 'getSalesConfiguration',
+                'method'         => 'getSalesConfiguration',
                 'connectionType' => RelationshipConnectionFactory::CONNECTION_SALES_MAIN,
             ],
             [
-                'method' => 'getSalesSlaveConfiguration',
+                'method'         => 'getSalesSlaveConfiguration',
                 'connectionType' => RelationshipConnectionFactory::CONNECTION_SALES_SLAVE,
             ]
         ];
     }
 
-    public function testCreateWithException()
+    /**
+     * Test create with exception method.
+     *
+     * @return void
+     */
+    public function testCreateWithException(): void
     {
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('Connection with type dummy does not exist');

@@ -8,6 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit\Util;
 
 use Magento\MagentoCloud\Util\ArrayManager;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -29,20 +30,26 @@ class ArrayManagerTest extends TestCase
     }
 
     /**
+     * Test flatten method.
+     *
      * @param array $value
      * @param string $prefix
      * @param array $expected
      * @dataProvider flattenDataProvider
+     * @return void
      */
-    public function testFlatten(array $value, string $prefix, array $expected)
+    #[DataProvider('flattenDataProvider')]
+    public function testFlatten(array $value, string $prefix, array $expected): void
     {
         $this->assertSame($expected, $this->manager->flatten($value, $prefix));
     }
 
     /**
+     * Data provider for flatten method.
+     *
      * @return array
      */
-    public function flattenDataProvider(): array
+    public static function flattenDataProvider(): array
     {
         return [
             [
@@ -91,21 +98,27 @@ class ArrayManagerTest extends TestCase
     }
 
     /**
+     * Test filter method.
+     *
      * @param array $value
      * @param string $pattern
      * @param bool $ending
      * @param array $expected
      * @dataProvider filterDataProvider
+     * @return void
      */
-    public function testFilter(array $value, string $pattern, bool $ending, array $expected)
+    #[DataProvider('filterDataProvider')]
+    public function testFilter(array $value, string $pattern, bool $ending, array $expected): void
     {
         $this->assertSame($expected, $this->manager->filter($value, $pattern, $ending));
     }
 
     /**
+     * Data provider for filter method.
+     *
      * @return array
      */
-    public function filterDataProvider(): array
+    public static function filterDataProvider(): array
     {
         return [
             [
@@ -144,21 +157,27 @@ class ArrayManagerTest extends TestCase
     }
 
     /**
+     * Test nest method.
+     *
      * @param array $expected
      * @param array $original
      * @param array $keys
      * @param string|int $val
      * @dataProvider nestDataProvider
+     * @return void
      */
-    public function testNest(array $expected, array $original, array $keys, $val)
+    #[DataProvider('nestDataProvider')]
+    public function testNest(array $expected, array $original, array $keys, $val): void
     {
         $this->assertSame($expected, $this->manager->nest($original, $keys, $val));
     }
 
     /**
+     * Data provider for nest method.
+     *
      * @return array
      */
-    public function nestDataProvider(): array
+    public static function nestDataProvider(): array
     {
         return [
             'simple' => [

@@ -11,18 +11,20 @@ use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\GlobalSection;
 use Magento\MagentoCloud\Config\StageConfigInterface;
 use Magento\MagentoCloud\Shell\MagentoShell;
+use Magento\MagentoCloud\Shell\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Shell\ShellFactory;
 use Magento\MagentoCloud\Step\Build\EnableWebhooks;
 use Magento\MagentoCloud\Step\StepException;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
-use Magento\MagentoCloud\Shell\ProcessInterface;
 
 /**
  * @inheritDoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class EnableWebhooksTest extends TestCase
 {
     /**
@@ -55,7 +57,7 @@ class EnableWebhooksTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
         $this->magentoShellMock = $this->createMock(MagentoShell::class);
         /** @var ShellFactory|MockObject $shellFactoryMock */
         $shellFactoryMock = $this->createMock(ShellFactory::class);
@@ -69,7 +71,7 @@ class EnableWebhooksTest extends TestCase
             $shellFactoryMock,
             $this->globalConfigMock
         );
-        $this->processMock = $this->getMockForAbstractClass(ProcessInterface::class);
+        $this->processMock = $this->createMock(ProcessInterface::class);
     }
 
     /**

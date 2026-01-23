@@ -8,17 +8,20 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit\Config\System;
 
 use Magento\MagentoCloud\Config\ConfigException;
+use Magento\MagentoCloud\Config\Environment\Reader as EnvironmentReader;
 use Magento\MagentoCloud\Config\Schema;
-use Magento\MagentoCloud\Config\SystemConfigInterface;
 use Magento\MagentoCloud\Config\System\Variables;
+use Magento\MagentoCloud\Config\SystemConfigInterface;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Magento\MagentoCloud\Config\Environment\Reader as EnvironmentReader;
 
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class VariablesTest extends TestCase
 {
     /**
@@ -60,13 +63,16 @@ class VariablesTest extends TestCase
     }
 
     /**
+     * Test get method.
+     *
      * @param string $name
      * @param array $envConfig
      * @param mixed $expectedValue
      * @dataProvider getDataProvider
-     *
+     * @return void
      * @throws ConfigException
      */
+    #[DataProvider('getDataProvider')]
     public function testGet(string $name, array $envConfig, $expectedValue): void
     {
         $this->environmentReaderMock->expects($this->once())
@@ -77,9 +83,11 @@ class VariablesTest extends TestCase
     }
 
     /**
+     * Data provider for getDataProvider method.
+     *
      * @return array
      */
-    public function getDataProvider(): array
+    public static function getDataProvider(): array
     {
         return [
             'default relationships' => [
@@ -111,6 +119,9 @@ class VariablesTest extends TestCase
     }
 
     /**
+     * Test not exists method.
+     *
+     * @return void
      * @throws ConfigException
      */
     public function testNotExists(): void
@@ -125,6 +136,9 @@ class VariablesTest extends TestCase
     }
 
     /**
+     * Test getWithFileSystemException method.
+     *
+     * @return void
      * @throws ConfigException
      */
     public function testGetWithFileSystemException(): void

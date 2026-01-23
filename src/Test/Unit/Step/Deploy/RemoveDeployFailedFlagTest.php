@@ -12,12 +12,14 @@ use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Filesystem\Flag\Manager;
 use Magento\MagentoCloud\Step\Deploy\RemoveDeployFailedFlag;
 use Magento\MagentoCloud\Step\StepException;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @inheritDoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class RemoveDeployFailedFlagTest extends TestCase
 {
     /**

@@ -11,9 +11,11 @@ use Magento\MagentoCloud\App\ErrorInfo;
 use Magento\MagentoCloud\App\Logger\Error\ReaderInterface;
 use Magento\MagentoCloud\App\Logger\Formatter\JsonErrorFormatter;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
+#[AllowMockObjectsWithoutExpectations]
 class JsonErrorFormatterTest extends TestCase
 {
     /**
@@ -37,7 +39,7 @@ class JsonErrorFormatterTest extends TestCase
     protected function setUp(): void
     {
         $this->errorInfoMock = $this->createMock(ErrorInfo::class);
-        $this->readerMock = $this->getMockForAbstractClass(ReaderInterface::class);
+        $this->readerMock = $this->createMock(ReaderInterface::class);
 
         $this->jsonErrorFormatter = new JsonErrorFormatter(
             $this->errorInfoMock,

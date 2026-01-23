@@ -14,12 +14,15 @@ use Magento\MagentoCloud\Config\Validator\Deploy\DatabaseSplitConnection;
 use Magento\MagentoCloud\Config\Validator\Result\Error;
 use Magento\MagentoCloud\Config\Validator\Result\Success;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
-use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject as Mock;
+use PHPUnit\Framework\TestCase;
 
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class DatabaseSplitConnectionTest extends TestCase
 {
     /**
@@ -46,7 +49,7 @@ class DatabaseSplitConnectionTest extends TestCase
             'success' => $this->createMock(Success::class),
             'error' => $this->createMock(Error::class)
         ]);
-        $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
+        $this->stageConfigMock = $this->createMock(DeployInterface::class);
 
         $this->validator = new DatabaseSplitConnection(
             $this->resultFactoryMock,
@@ -56,8 +59,10 @@ class DatabaseSplitConnectionTest extends TestCase
 
     /**
      * The test of validator messages
+     *
+     * @return void
      */
-    public function testMessageValidate()
+    public function testMessageValidate(): void
     {
         $dbConfiguration = [
             'connection' => [
@@ -97,12 +102,16 @@ class DatabaseSplitConnectionTest extends TestCase
     }
 
     /**
+     * Test validate method.
+     *
      * @param array $dbConfiguration
      * @param string $expectedResultClass
      * @dataProvider validateDataProvider
+     * @return void
      * @throws ConfigException
      */
-    public function testValidate(array $dbConfiguration, string $expectedResultClass)
+    #[DataProvider('validateDataProvider')]
+    public function testValidate(array $dbConfiguration, string $expectedResultClass): void
     {
         $this->stageConfigMock->expects($this->once())
             ->method('get')
@@ -113,9 +122,11 @@ class DatabaseSplitConnectionTest extends TestCase
     }
 
     /**
+     * Data provider for validate method.
+     *
      * @return array
      */
-    public function validateDataProvider(): array
+    public static function validateDataProvider(): array
     {
         return [
             [

@@ -7,11 +7,11 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Config\Validator\Deploy;
 
-use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\EnvironmentDataInterface;
 use Magento\MagentoCloud\Config\Validator\Deploy\MageModeVariable;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -50,11 +50,15 @@ class MageModeVariableTest extends TestCase
     }
 
     /**
+     * Test validate method.
+     *
      * @param $mageMode string|null
      * @throws FileSystemException
      * @dataProvider validateSuccessDataProvider
+     * @return void
      */
-    public function testValidateSuccess($mageMode)
+    #[DataProvider('validateSuccessDataProvider')]
+    public function testValidateSuccess($mageMode): void
     {
         $this->envDataMock->expects($this->once())
             ->method('getMageMode')
@@ -68,10 +72,11 @@ class MageModeVariableTest extends TestCase
     }
 
     /**
-     * Data provider for testValidateSuccess
+     * Data provider for testValidateSuccess.
+     *
      * @return array
      */
-    public function validateSuccessDataProvider()
+    public static function validateSuccessDataProvider(): array
     {
         return [
             [null],
@@ -81,11 +86,15 @@ class MageModeVariableTest extends TestCase
     }
 
     /**
+     * Test validate method.
+     *
      * @param $mageMode string
      * @throws FileSystemException
      * @dataProvider validateErrorDataProvider
+     * @return void
      */
-    public function testValidateError($mageMode)
+    #[DataProvider('validateErrorDataProvider')]
+    public function testValidateError($mageMode): void
     {
         $this->envDataMock->expects($this->once())
             ->method('getMageMode')
@@ -99,10 +108,11 @@ class MageModeVariableTest extends TestCase
     }
 
     /**
-     * Data provider for testValidateError
+     * Data provider for testValidateError.
+     *
      * @return array
      */
-    public function validateErrorDataProvider()
+    public static function validateErrorDataProvider(): array
     {
         return [
             ['developer'],

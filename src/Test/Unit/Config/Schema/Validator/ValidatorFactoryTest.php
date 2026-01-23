@@ -10,12 +10,14 @@ namespace Magento\MagentoCloud\Test\Unit\Config\Schema\Validator;
 use Magento\MagentoCloud\App\ContainerInterface;
 use Magento\MagentoCloud\Config\Schema\Validator\ValidatorFactory;
 use Magento\MagentoCloud\Config\Schema\Validator\ValidatorInterface;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @inheritDoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class ValidatorFactoryTest extends TestCase
 {
     /**
@@ -33,7 +35,7 @@ class ValidatorFactoryTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->containerMock = $this->getMockForAbstractClass(ContainerInterface::class);
+        $this->containerMock = $this->createMock(ContainerInterface::class);
 
         $this->validatorFactory = new ValidatorFactory(
             $this->containerMock
@@ -45,7 +47,7 @@ class ValidatorFactoryTest extends TestCase
         $this->containerMock->expects($this->once())
             ->method('create')
             ->with('some_class')
-            ->willReturn($this->getMockForAbstractClass(ValidatorInterface::class));
+            ->willReturn($this->createMock(ValidatorInterface::class));
 
         $this->validatorFactory->create('some_class');
     }

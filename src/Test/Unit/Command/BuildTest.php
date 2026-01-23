@@ -8,17 +8,19 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit\Command;
 
 use Magento\MagentoCloud\Command\Build;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use RuntimeException;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Helper\HelperSet;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use RuntimeException;
 
 /**
  * @see Build
  */
+#[AllowMockObjectsWithoutExpectations]
 class BuildTest extends TestCase
 {
     /**
@@ -37,9 +39,9 @@ class BuildTest extends TestCase
     public function testExecute(): void
     {
         /** @var InputInterface|MockObject $inputMock */
-        $inputMock = $this->createMock(InputInterface::class);
+        $inputMock = $this->createStub(InputInterface::class);
         /** @var OutputInterface|MockObject $outputMock */
-        $outputMock = $this->createMock(OutputInterface::class);
+        $outputMock = $this->createStub(OutputInterface::class);
         /** @var Application|MockObject $applicationMock */
         $applicationMock = $this->createMock(Application::class);
 
@@ -62,9 +64,9 @@ class BuildTest extends TestCase
         $this->expectException(RuntimeException::class);
 
         /** @var InputInterface|MockObject $inputMock */
-        $inputMock = $this->createMock(InputInterface::class);
+        $inputMock = $this->createStub(InputInterface::class);
         /** @var OutputInterface|MockObject $outputMock */
-        $outputMock = $this->createMock(OutputInterface::class);
+        $outputMock = $this->createStub(OutputInterface::class);
         /** @var Application|MockObject $applicationMock */
         $applicationMock = null;
 

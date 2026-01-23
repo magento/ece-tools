@@ -12,6 +12,7 @@ use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Package\UndefinedPackageException;
 use Magento\MagentoCloud\Step\Deploy\UnlockCronJobs;
 use Magento\MagentoCloud\Step\StepException;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -19,6 +20,7 @@ use Psr\Log\LoggerInterface;
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class UnlockCronJobsTest extends TestCase
 {
     /**
@@ -46,7 +48,7 @@ class UnlockCronJobsTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
         $this->jobUnlockerMock = $this->createMock(JobUnlocker::class);
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
 

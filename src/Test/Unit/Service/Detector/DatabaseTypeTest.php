@@ -10,6 +10,7 @@ namespace Magento\MagentoCloud\Test\Unit\Service\Detector;
 use Magento\MagentoCloud\DB\ConnectionInterface;
 use Magento\MagentoCloud\Service\Detector\DatabaseType;
 use Magento\MagentoCloud\Service\ServiceInterface;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -34,17 +35,20 @@ class DatabaseTypeTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->connectionMock = $this->getMockForAbstractClass(ConnectionInterface::class);
+        $this->connectionMock = $this->createMock(ConnectionInterface::class);
 
         $this->databaseType = new DatabaseType($this->connectionMock);
     }
 
     /**
+     * Test get service name method.
+     *
      * @param array $variables
      * @param string $expectedService
-     *
      * @dataProvider getServiceNameDataProvider
+     * @return void
      */
+    #[DataProvider('getServiceNameDataProvider')]
     public function testGetServiceName(array $variables, string $expectedService): void
     {
         $this->connectionMock->expects($this->once())
@@ -56,9 +60,11 @@ class DatabaseTypeTest extends TestCase
     }
 
     /**
+     * Data provider for get service name method.
+     *
      * @return array
      */
-    public function getServiceNameDataProvider(): array
+    public static function getServiceNameDataProvider(): array
     {
         return [
             [
@@ -87,6 +93,13 @@ class DatabaseTypeTest extends TestCase
         ];
     }
 
+    /**
+     * Test get service name method with exception.
+     *
+     * @return void
+     */
+    #[ExpectedException(PDOException::class)]
+    #[ExpectedExceptionMessage('connection error')]
     public function testGetServiceNameWithException(): void
     {
         $this->connectionMock->expects($this->once())

@@ -8,10 +8,10 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit\Command\Wizard;
 
 use Magento\MagentoCloud\Command\Wizard\ScdOnDemand;
-use Magento\MagentoCloud\Config\GlobalSection;
 use Magento\MagentoCloud\Command\Wizard\Util\OutputFormatter;
-use PHPUnit\Framework\TestCase;
+use Magento\MagentoCloud\Config\GlobalSection;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Input\Input;
 use Symfony\Component\Console\Output\Output;
 
@@ -51,8 +51,8 @@ class ScdOnDemandTest extends TestCase
 
     public function testExecute()
     {
-        $inputMock = $this->getMockForAbstractClass(Input::class);
-        $outputMock = $this->getMockForAbstractClass(Output::class);
+        $inputMock = $this->createStub(Input::class);
+        $outputMock = $this->createStub(Output::class);
 
         $this->globalStageMock->expects($this->once())
             ->method('get')
@@ -67,8 +67,8 @@ class ScdOnDemandTest extends TestCase
 
     public function testExecuteToBeDisabled()
     {
-        $inputMock = $this->getMockForAbstractClass(Input::class);
-        $outputMock = $this->getMockForAbstractClass(Output::class);
+        $inputMock = $this->createStub(Input::class);
+        $outputMock = $this->createStub(Output::class);
 
         $this->globalStageMock->expects($this->once())
             ->method('get')

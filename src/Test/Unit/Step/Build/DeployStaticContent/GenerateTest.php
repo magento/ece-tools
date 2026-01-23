@@ -10,12 +10,13 @@ namespace Magento\MagentoCloud\Test\Unit\Step\Build\DeployStaticContent;
 use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Config\Stage\BuildInterface;
-use Magento\MagentoCloud\Step\Build\DeployStaticContent\Generate;
-use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Magento\MagentoCloud\StaticContent\Build\Option;
 use Magento\MagentoCloud\StaticContent\CommandFactory;
+use Magento\MagentoCloud\Step\Build\DeployStaticContent\Generate;
+use Magento\MagentoCloud\Step\StepException;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -23,6 +24,7 @@ use Psr\Log\LoggerInterface;
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class GenerateTest extends TestCase
 {
     /**
@@ -60,11 +62,11 @@ class GenerateTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->shellMock = $this->getMockForAbstractClass(ShellInterface::class);
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->shellMock = $this->createMock(ShellInterface::class);
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
         $this->commandFactoryMock = $this->createMock(CommandFactory::class);
         $this->optionMock = $this->createMock(Option::class);
-        $this->buildConfigMock = $this->getMockForAbstractClass(BuildInterface::class);
+        $this->buildConfigMock = $this->createMock(BuildInterface::class);
 
         $this->step = new Generate(
             $this->shellMock,

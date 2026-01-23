@@ -1,8 +1,10 @@
 <?php
+
 /**
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+
 declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Http;
@@ -11,8 +13,9 @@ use GuzzleHttp\TransferStats;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Http\TransferStatsHandler;
-use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\UriInterface;
@@ -21,6 +24,7 @@ use Psr\Log\LoggerInterface;
 /**
  * {@inheritdoc}
  */
+#[AllowMockObjectsWithoutExpectations]
 class TransferStatsHandlerTest extends TestCase
 {
     /**
@@ -43,24 +47,32 @@ class TransferStatsHandlerTest extends TestCase
      */
     private $handler;
 
+    /**
+     * @inheritdoc
+     */
     public function setUp(): void
     {
         $this->fileMock = $this->createMock(File::class);
         $this->fileListMock = $this->createMock(FileList::class);
         $this->loggerMock = $this->createMock(LoggerInterface::class);
 
-        $this->handler = new TransferStatsHandler($this->fileMock, $this->fileListMock, $this->loggerMock);
+        $this->handler = new TransferStatsHandler(
+            $this->fileMock,
+            $this->fileListMock,
+            $this->loggerMock
+        );
     }
 
+    /**
+     * Test stat handler redirect.
+     *
+     * @return void
+     */
     public function testStatHandlerRedirect()
     {
         $mockUriInterface = $this->createMock(UriInterface::class);
-        $mockRequest = $this->getMockBuilder(RequestInterface::class)
-            ->disableOriginalConstructor()
-            ->onlyMethods(['getUri'])
-            ->getMockForAbstractClass();
-        $mockRequest->expects($this->any())
-            ->method('getUri')
+        $mockRequest = $this->createMock(RequestInterface::class);
+        $mockRequest->method('getUri')
             ->willReturn($mockUriInterface);
         $mockResponse = $this->createMock(ResponseInterface::class);
 
@@ -76,27 +88,23 @@ class TransferStatsHandlerTest extends TestCase
         call_user_func($this->handler, $stats);
     }
 
-    public function testStatHandlerTransferTime()
+    /**
+     * Test stat handler transfer time.
+     *
+     * @return void
+     */
+    public function testStatHandlerTransferTime(): void
     {
-        $mockUriInterface = $this->getMockBuilder(UriInterface::class)
-            ->disableOriginalConstructor()
-            ->onlyMethods(['__toString'])
-            ->getMockForAbstractClass();
+        $mockUriInterface = $this->createMock(UriInterface::class);
         $mockUriInterface->expects($this->any())
             ->method('__toString')
             ->willReturn('/');
-        $mockRequest = $this->getMockBuilder(RequestInterface::class)
-            ->disableOriginalConstructor()
-            ->onlyMethods(['getUri'])
-            ->getMockForAbstractClass();
+        $mockRequest = $this->createMock(RequestInterface::class);
         $mockRequest->expects($this->any())
             ->method('getUri')
             ->willReturn($mockUriInterface);
 
         $stats = new TransferStats($mockRequest, null, 3.1415926);
-
-        $mockRequest->method('getUri')
-            ->wilLReturn($mockUriInterface);
         $this->loggerMock->expects($this->once())
             ->method('debug')
             ->with('cURL stats are missing from the request; using total transfer time');
@@ -134,19 +142,18 @@ class TransferStatsHandlerTest extends TestCase
         call_user_func($this->handler, $stats);
     }
 
+    /**
+     * Test stat handler curl stats.
+     *
+     * @return void
+     */
     public function testStatHandlerCurlStats()
     {
-        $mockUriInterface = $this->getMockBuilder(UriInterface::class)
-            ->disableOriginalConstructor()
-            ->onlyMethods(['__toString'])
-            ->getMockForAbstractClass();
+        $mockUriInterface = $this->createMock(UriInterface::class);
         $mockUriInterface->expects($this->any())
             ->method('__toString')
             ->willReturn('/customer');
-        $mockRequest = $this->getMockBuilder(RequestInterface::class)
-            ->disableOriginalConstructor()
-            ->onlyMethods(['getUri'])
-            ->getMockForAbstractClass();
+        $mockRequest = $this->createMock(RequestInterface::class);
         $mockRequest->expects($this->any())
             ->method('getUri')
             ->willReturn($mockUriInterface);

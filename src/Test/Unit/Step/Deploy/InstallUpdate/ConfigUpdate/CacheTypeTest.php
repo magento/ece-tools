@@ -16,13 +16,15 @@ use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Shell\ShellFactory;
 use Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\CacheType;
 use Magento\MagentoCloud\Step\StepException;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
-use Psr\Log\LoggerInterface;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
 
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class CacheTypeTest extends TestCase
 {
     /**
@@ -56,14 +58,14 @@ class CacheTypeTest extends TestCase
     protected function setUp(): void
     {
         $this->flagManagerMock = $this->createMock(FlagManager::class);
-        $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
+        $this->stageConfigMock = $this->createMock(DeployInterface::class);
         $this->magentoShellMock = $this->createMock(MagentoShell::class);
         /** @var ShellFactory|MockObject $shellFactoryMock */
         $shellFactoryMock = $this->createMock(ShellFactory::class);
         $shellFactoryMock->expects($this->once())
             ->method('createMagento')
             ->willReturn($this->magentoShellMock);
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
 
         $this->cacheType = new CacheType(
             $this->flagManagerMock,

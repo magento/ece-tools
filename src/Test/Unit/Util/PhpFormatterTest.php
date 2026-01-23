@@ -10,6 +10,7 @@ namespace Magento\MagentoCloud\Test\Unit\Util;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Package\UndefinedPackageException;
 use Magento\MagentoCloud\Util\PhpFormatter;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -41,13 +42,16 @@ class PhpFormatterTest extends TestCase
     }
 
     /**
+     * Test format method.
+     *
      * @param string $expected
      * @param array $data
-     * @throws UndefinedPackageException
-     *
      * @dataProvider formatDataProvider
+     * @throws UndefinedPackageException
+     * @return void
      */
-    public function testFormat(string $expected, array $data)
+    #[DataProvider('formatDataProvider')]
+    public function testFormat(string $expected, array $data): void
     {
         $this->magentoVersionMock->expects($this->once())
             ->method('isGreaterOrEqual')
@@ -60,24 +64,30 @@ class PhpFormatterTest extends TestCase
         );
     }
 
-    public function formatDataProvider(): array
+    /**
+     * Data provider for format method.
+     *
+     * @return array
+     */
+    public static function formatDataProvider(): array
     {
         $expected1 = <<<TEXT
-<?php
-return [
-    'some' => 'data'
-];
+        <?php
+        return [
+            'some' => 'data'
+        ];
 
-TEXT;
+        TEXT;
+
         $expected2 = <<<TEXT
-<?php
-return [
-    'some' => [
-        'data' => 'value'
-    ]
-];
+        <?php
+        return [
+            'some' => [
+                'data' => 'value'
+            ]
+        ];
 
-TEXT;
+        TEXT;
 
         return [
             [
@@ -99,12 +109,12 @@ TEXT;
             ->willReturn(false);
 
         $expected = <<<TEXT
-<?php
-return array (
-  'some' => 'data',
-);
+        <?php
+        return array (
+          'some' => 'data',
+        );
 
-TEXT;
+        TEXT;
 
         $this->assertSame(
             $expected,

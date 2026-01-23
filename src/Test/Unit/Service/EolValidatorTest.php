@@ -17,12 +17,14 @@ use Magento\MagentoCloud\Service\ServiceFactory;
 use Magento\MagentoCloud\Service\ServiceInterface;
 use Magento\MagentoCloud\Util\YamlNormalizer;
 use phpmock\phpunit\PHPMock;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @inheritDoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class EolValidatorTest extends TestCase
 {
     use PHPMock;
@@ -473,7 +475,6 @@ YAML;
         // Access private method using reflection
         $reflection = new \ReflectionClass($this->validator);
         $method = $reflection->getMethod('getServiceConfigs');
-        $method->setAccessible(true);
 
         // Execute
         $result = $method->invokeArgs($this->validator, [$serviceName]);

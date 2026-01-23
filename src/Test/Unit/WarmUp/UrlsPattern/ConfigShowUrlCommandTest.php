@@ -51,7 +51,7 @@ class ConfigShowUrlCommandTest extends TestCase
         $arguments = ['--some-option=2'];
         $urls = ['www.example.com', 'www.example2.com'];
 
-        $processMock = $this->getMockForAbstractClass(ProcessInterface::class);
+        $processMock = $this->createMock(ProcessInterface::class);
         $processMock->expects($this->once())
             ->method('getOutput')
             ->willReturn(json_encode($urls));
@@ -73,7 +73,7 @@ class ConfigShowUrlCommandTest extends TestCase
 
         $arguments = ['--some-option=2'];
 
-        $processMock = $this->getMockForAbstractClass(ProcessInterface::class);
+        $processMock = $this->createMock(ProcessInterface::class);
         $processMock->expects($this->once())
             ->method('getOutput')
             ->willReturn('{bad: json');

@@ -8,6 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit\App\Logger\Formatter;
 
 use Magento\MagentoCloud\App\Logger\Formatter\LineFormatter;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -29,10 +30,13 @@ class LineFormatterTest extends TestCase
     }
 
     /**
-     * @dataProvider formatDataProvider
+     * Test format method.
+     *
      * @param string $expected
      * @param array $record
+     * @dataProvider formatDataProvider
      */
+    #[DataProvider('formatDataProvider')]
     public function testFormat(string $expected, array $record)
     {
         if (\Monolog\Logger::API == 3) {
@@ -49,9 +53,11 @@ class LineFormatterTest extends TestCase
     }
 
     /**
+     * Format data provider method.
+     *
      * @return array
      */
-    public function formatDataProvider(): array
+    public static function formatDataProvider(): array
     {
         if (\Monolog\Logger::API == 3) {
             return [

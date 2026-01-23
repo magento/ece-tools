@@ -8,18 +8,20 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit\Step\Deploy;
 
 use Magento\MagentoCloud\Config\Magento\Env\WriterInterface;
+use Magento\MagentoCloud\Config\RemoteStorage as Config;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Step\Deploy\RemoteStorage;
 use Magento\MagentoCloud\Step\StepException;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Magento\MagentoCloud\Config\RemoteStorage as Config;
 use Psr\Log\LoggerInterface;
 
 /**
  * @see RemoteStorage
  */
+#[AllowMockObjectsWithoutExpectations]
 class RemoteStorageTest extends TestCase
 {
     /**
@@ -54,8 +56,8 @@ class RemoteStorageTest extends TestCase
     {
         $this->configMock = $this->createMock(Config::class);
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
-        $this->writerMock = $this->getMockForAbstractClass(WriterInterface::class);
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
+        $this->writerMock = $this->createMock(WriterInterface::class);
 
         $this->step = new RemoteStorage(
             $this->configMock,

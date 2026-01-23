@@ -12,6 +12,7 @@ use Magento\MagentoCloud\Config\Database\ResourceConfig;
 use Magento\MagentoCloud\Config\Validator\Deploy\ResourceConfiguration as ResourceConfigurationValidator;
 use Magento\MagentoCloud\Config\Validator\Result;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -20,9 +21,9 @@ use PHPUnit\Framework\TestCase;
  */
 class ResourceConfigurationTest extends TestCase
 {
-   /**
-    * @var ResultFactory|MockObject
-    */
+    /**
+     * @var ResultFactory|MockObject
+     */
     private $resultFactoryMock;
 
     /**
@@ -42,10 +43,18 @@ class ResourceConfigurationTest extends TestCase
     {
         $this->resultFactoryMock = $this->createMock(ResultFactory::class);
         $this->resourceConfigMock = $this->createMock(ResourceConfig::class);
-        $this->validator = new ResourceConfigurationValidator($this->resultFactoryMock, $this->resourceConfigMock);
+        $this->validator = new ResourceConfigurationValidator(
+            $this->resultFactoryMock,
+            $this->resourceConfigMock
+        );
     }
 
-    public function testErrorCode()
+    /**
+     * Test error code method.
+     *
+     * @return void
+     */
+    public function testErrorCode(): void
     {
         $this->resourceConfigMock->expects($this->once())
             ->method('get')
@@ -62,29 +71,33 @@ class ResourceConfigurationTest extends TestCase
     }
 
     /**
+     * Test validate method.
+     *
      * @param array $resourcesConfig
-     * @param $successExpects
-     * @param $errorExpects
+     * @param bool $expectSuccess
+     * @param bool $expectError
      * @param string $expectedResultClass
+     * @return void
      * @dataProvider validateDataProvider
      */
+    #[DataProvider('validateDataProvider')]
     public function testValidate(
         array $resourcesConfig,
-        $successExpects,
-        $errorExpects,
+        bool $expectSuccess,
+        bool $expectError,
         string $expectedResultClass
-    ) {
+    ): void {
         /** @var Result\Success|MockObject $successMock */
-        $successMock = $this->createMock(Result\Success::class);
+        $successMock = $this->createStub(Result\Success::class);
         /** @var Result\Error|MockObject $errorMock */
-        $errorMock = $this->createMock(Result\Error::class);
+        $errorMock = $this->createStub(Result\Error::class);
         $this->resourceConfigMock->expects($this->once())
             ->method('get')
             ->willReturn($resourcesConfig);
-        $this->resultFactoryMock->expects($successExpects)
+        $this->resultFactoryMock->expects($expectSuccess ? $this->once() : $this->never())
             ->method('success')
             ->willReturn($successMock);
-        $this->resultFactoryMock->expects($errorExpects)
+        $this->resultFactoryMock->expects($expectError ? $this->once() : $this->never())
             ->method('error')
             ->willReturn($errorMock);
 
@@ -92,39 +105,41 @@ class ResourceConfigurationTest extends TestCase
     }
 
     /**
+     * Data provider for validate method.
+     *
      * @return array
      */
-    public function validateDataProvider(): array
+    public static function validateDataProvider(): array
     {
         return [
             [
-                'resourcesConfig'=> [],
-                'successExpects' => $this->once(),
-                'errorExpects' => $this->never(),
-                'expectedResult' => Result\Success::class,
+                'resourcesConfig'      => [],
+                'expectSuccess'        => true,
+                'expectError'          => false,
+                'expectedResultClass'  => Result\Success::class,
             ],
             [
-                'resourcesConfig'=> [
+                'resourcesConfig' => [
                     'default_setup' => [
                         'connection' => 'default',
                     ],
                 ],
-                'successExpects' => $this->once(),
-                'errorExpects' => $this->never(),
-                'expectedResult' => Result\Success::class,
+                'expectSuccess'       => true,
+                'expectError'         => false,
+                'expectedResultClass' => Result\Success::class,
             ],
             [
-                'resourcesConfig'=> [
+                'resourcesConfig' => [
                     'some_setup' => [
                         'connection' => 'value',
                     ],
                 ],
-                'successExpects' => $this->once(),
-                'errorExpects' => $this->never(),
-                'expectedResult' => Result\Success::class,
+                'expectSuccess'       => true,
+                'expectError'         => false,
+                'expectedResultClass' => Result\Success::class,
             ],
             [
-                'resourcesConfig'=> [
+                'resourcesConfig' => [
                     'default_setup' => [
                         'connection' => 'default',
                     ],
@@ -132,28 +147,28 @@ class ResourceConfigurationTest extends TestCase
                         'connection' => 'value',
                     ],
                 ],
-                'successExpects' => $this->once(),
-                'errorExpects' => $this->never(),
-                'expectedResult' => Result\Success::class,
+                'expectSuccess'       => true,
+                'expectError'         => false,
+                'expectedResultClass' => Result\Success::class,
             ],
             [
-                'resourcesConfig'=> [
+                'resourcesConfig' => [
                     'default_setup' => [],
                 ],
-                'successExpects' => $this->never(),
-                'errorExpects' => $this->once(),
-                'expectedResult' => Result\Error::class,
+                'expectSuccess'       => false,
+                'expectError'         => true,
+                'expectedResultClass' => Result\Error::class,
             ],
             [
-                'resourcesConfig'=> [
+                'resourcesConfig' => [
                     'default_setup' => [
                         'connection' => 'default',
                     ],
                     'some_setup' => [],
                 ],
-                'successExpects' => $this->never(),
-                'errorExpects' => $this->once(),
-                'expectedResult' => Result\Error::class,
+                'expectSuccess'       => false,
+                'expectError'         => true,
+                'expectedResultClass' => Result\Error::class,
             ],
         ];
     }

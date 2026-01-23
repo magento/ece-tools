@@ -10,9 +10,10 @@ namespace Magento\MagentoCloud\Test\Unit\Command;
 use Magento\MagentoCloud\Cli;
 use Magento\MagentoCloud\Command\ConfigValidate;
 use Magento\MagentoCloud\Config\Validator\Build\StageConfig;
-use Magento\MagentoCloud\Config\Validator\Result\Success;
 use Magento\MagentoCloud\Config\Validator\Result\Error;
+use Magento\MagentoCloud\Config\Validator\Result\Success;
 use Magento\MagentoCloud\Config\ValidatorException;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Input\InputInterface;
@@ -21,6 +22,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * @inheritDoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class ConfigValidateTest extends TestCase
 {
     /**
@@ -49,8 +51,8 @@ class ConfigValidateTest extends TestCase
     protected function setUp(): void
     {
         $this->stageConfigMock = $this->createMock(StageConfig::class);
-        $this->inputMock = $this->getMockForAbstractClass(InputInterface::class);
-        $this->outputMock = $this->getMockForAbstractClass(OutputInterface::class);
+        $this->inputMock = $this->createMock(InputInterface::class);
+        $this->outputMock = $this->createMock(OutputInterface::class);
 
         $this->command = new ConfigValidate($this->stageConfigMock);
     }

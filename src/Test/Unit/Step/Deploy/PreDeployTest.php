@@ -39,8 +39,8 @@ class PreDeployTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
-        $this->stepMock = $this->getMockForAbstractClass(StepInterface::class);
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
+        $this->stepMock = $this->createMock(StepInterface::class);
 
         $this->step = new PreDeploy(
             $this->loggerMock,

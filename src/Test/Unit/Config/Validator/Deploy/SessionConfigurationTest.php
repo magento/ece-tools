@@ -14,6 +14,8 @@ use Magento\MagentoCloud\Config\Validator\Deploy\SessionConfiguration;
 use Magento\MagentoCloud\Config\Validator\Result\Error;
 use Magento\MagentoCloud\Config\Validator\Result\Success;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -21,6 +23,7 @@ use PHPUnit\Framework\TestCase;
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class SessionConfigurationTest extends TestCase
 {
     /**
@@ -47,11 +50,11 @@ class SessionConfigurationTest extends TestCase
         $this->resultFactoryMock = $this->createConfiguredMock(
             ResultFactory::class,
             [
-            'success' => $this->createMock(Success::class),
-            'error' => $this->createMock(Error::class)
+                'success' => $this->createMock(Success::class),
+                'error' => $this->createMock(Error::class)
             ]
         );
-        $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
+        $this->stageConfigMock = $this->createMock(DeployInterface::class);
 
         $this->validator = new SessionConfiguration(
             $this->resultFactoryMock,
@@ -60,7 +63,12 @@ class SessionConfigurationTest extends TestCase
         );
     }
 
-    public function testErrorCode()
+    /**
+     * Test error code method.
+     *
+     * @return void
+     */
+    public function testErrorCode(): void
     {
         $this->stageConfigMock->expects($this->once())
             ->method('get')
@@ -78,10 +86,14 @@ class SessionConfigurationTest extends TestCase
     }
 
     /**
+     * Test validate method.
+     *
      * @param        array  $sessionConfiguration
      * @param        string $expectedResultClass
      * @dataProvider validateDataProvider
+     * @return void
      */
+    #[DataProvider('validateDataProvider')]
     public function testValidate(array $sessionConfiguration, string $expectedResultClass): void
     {
         $this->stageConfigMock->expects($this->once())
@@ -93,10 +105,14 @@ class SessionConfigurationTest extends TestCase
     }
 
     /**
+     * Test validate method with valkey configuration.
+     *
      * @param        array  $sessionConfiguration
      * @param        string $expectedResultClass
      * @dataProvider validateDataProviderValkey
+     * @return void
      */
+    #[DataProvider('validateDataProviderValkey')]
     public function testValidateValkey(array $sessionConfiguration, string $expectedResultClass): void
     {
         $this->stageConfigMock->expects($this->once())
@@ -108,9 +124,11 @@ class SessionConfigurationTest extends TestCase
     }
 
     /**
+     * Data provider for validate method.
+     *
      * @return array
      */
-    public function validateDataProvider(): array
+    public static function validateDataProvider(): array
     {
         return [
             [
@@ -163,57 +181,59 @@ class SessionConfigurationTest extends TestCase
     }
 
     /**
+     * Data provider for validate method.
+     *
      * @return array
      */
-    public function validateDataProviderValkey(): array
+    public static function validateDataProviderValkey(): array
     {
         return [
-        [
-        [],
-        Success::class,
-        ],
-        [
-        [
-          'valkey' => ['max_connection' => 10],
-        ],
-        Error::class,
-        ],
-        [
-        [
-          'valkey' => ['max_connection' => 10],
-          '_merge' => true,
-        ],
-        Success::class,
-        ],
-        [
-        [
-          'valkey' => ['max_connection' => 10],
-          '_merge' => false,
-        ],
-        Error::class,
-        ],
-        [
-        [
-          'save' => 'valkey',
-          'valkey' => ['max_connection' => 10],
-          '_merge' => false,
-        ],
-        Success::class,
-        ],
-        [
-        [
-          'save' => 'valkey',
-          'valkey' => ['max_connection' => 10],
-          '_merge' => true,
-        ],
-        Success::class,
-        ],
-        [
-        [
-          'save' => 'valkey'
-        ],
-        Success::class,
-        ],
+            [
+                [],
+                Success::class,
+            ],
+            [
+                [
+                    'valkey' => ['max_connection' => 10],
+                ],
+                Error::class,
+            ],
+            [
+                [
+                    'valkey' => ['max_connection' => 10],
+                    '_merge' => true,
+                ],
+                Success::class,
+            ],
+            [
+                [
+                    'valkey' => ['max_connection' => 10],
+                    '_merge' => false,
+                ],
+                Error::class,
+            ],
+            [
+                [
+                    'save' => 'valkey',
+                    'valkey' => ['max_connection' => 10],
+                    '_merge' => false,
+                ],
+                Success::class,
+            ],
+            [
+                [
+                    'save' => 'valkey',
+                    'valkey' => ['max_connection' => 10],
+                    '_merge' => true,
+                ],
+                Success::class,
+            ],
+            [
+                [
+                    'save' => 'valkey'
+                ],
+                Success::class,
+            ],
         ];
     }
 }

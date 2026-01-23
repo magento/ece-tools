@@ -7,25 +7,29 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Command\ConfigDump;
 
+use Magento\MagentoCloud\Command\ConfigDump\Generate;
 use Magento\MagentoCloud\Config\Magento\Shared\Resolver;
 use Magento\MagentoCloud\DB\ConnectionInterface;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Package\MagentoVersion;
-use Magento\MagentoCloud\Command\ConfigDump\Generate;
 use Magento\MagentoCloud\Package\UndefinedPackageException;
 use Magento\MagentoCloud\Util\ArrayManager;
 use Magento\MagentoCloud\Util\PhpFormatter;
+use phpmock\phpunit\PHPMock;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class GenerateTest extends TestCase
 {
-    use \phpmock\phpunit\PHPMock;
-
+    use PHPMock;
+    
     /**
      * @var Generate
      */
@@ -61,7 +65,7 @@ class GenerateTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->connectionMock = $this->getMockForAbstractClass(ConnectionInterface::class);
+        $this->connectionMock = $this->createMock(ConnectionInterface::class);
         $this->fileMock = $this->createMock(File::class);
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
         $this->resolverMock = $this->createMock(Resolver::class);
@@ -78,13 +82,16 @@ class GenerateTest extends TestCase
     }
 
     /**
+     * Test execute method.
+     *
      * @param bool $versionGreaterTwoDotTwo
      * @param string $generatedConfig
+     * @dataProvider executeDataProvider
+     * @return void
      * @throws FileSystemException
      * @throws UndefinedPackageException
-     *
-     * @dataProvider executeDataProvider
      */
+    #[DataProvider('executeDataProvider')]
     public function testExecute(bool $versionGreaterTwoDotTwo, string $generatedConfig): void
     {
         $this->magentoVersionMock->expects($this->once())
@@ -120,9 +127,11 @@ class GenerateTest extends TestCase
     }
 
     /**
+     * Data provider for testExecute.
+     *
      * @return array
      */
-    public function executeDataProvider(): array
+    public static function executeDataProvider(): array
     {
         return [
             'magento version greater 2.2' => [

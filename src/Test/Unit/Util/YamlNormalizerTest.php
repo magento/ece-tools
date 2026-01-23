@@ -36,8 +36,9 @@ class YamlNormalizerTest extends TestCase
         $data = new TaggedValue('php/const:\PDO::MYSQL_ATTR_LOCAL_INFILE', ' 1');
         $result = $this->normalizer->normalize($data);
 
-        $this->assertArrayHasKey(\PDO::MYSQL_ATTR_LOCAL_INFILE, $result);
-        $this->assertSame(1, $result[\PDO::MYSQL_ATTR_LOCAL_INFILE]);
+        $expectedKey = @constant('PDO::MYSQL_ATTR_LOCAL_INFILE');
+        $this->assertArrayHasKey($expectedKey, $result);
+        $this->assertSame(1, $result[$expectedKey]);
     }
 
     /**
@@ -132,7 +133,8 @@ class YamlNormalizerTest extends TestCase
         $firstElement = $result[0] ?? $result;
         $this->assertIsArray($firstElement);
         $this->assertArrayHasKey('nested', $firstElement);
-        $this->assertArrayHasKey(\PDO::MYSQL_ATTR_LOCAL_INFILE, $firstElement['nested']);
+        $expectedKey = @constant('PDO::MYSQL_ATTR_LOCAL_INFILE');
+        $this->assertArrayHasKey($expectedKey, $firstElement['nested']);
     }
 
     /**
@@ -150,7 +152,8 @@ class YamlNormalizerTest extends TestCase
         $result = $this->normalizer->normalize($data);
 
         $this->assertArrayHasKey('a', $result);
-        $this->assertArrayHasKey(\PDO::MYSQL_ATTR_LOCAL_INFILE, $result['a']);
+        $expectedKey = @constant('PDO::MYSQL_ATTR_LOCAL_INFILE');
+        $this->assertArrayHasKey($expectedKey, $result['a']);
         $this->assertSame('plain', $result['b']);
     }
 

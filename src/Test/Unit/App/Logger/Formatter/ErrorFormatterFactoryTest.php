@@ -8,16 +8,18 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit\App\Logger\Formatter;
 
 use Codeception\PHPUnit\TestCase;
+use Magento\MagentoCloud\App\ContainerInterface;
 use Magento\MagentoCloud\App\ErrorInfo;
 use Magento\MagentoCloud\App\Logger\Error\ReaderInterface;
 use Magento\MagentoCloud\App\Logger\Formatter\ErrorFormatterFactory;
-use Magento\MagentoCloud\App\ContainerInterface;
 use Magento\MagentoCloud\App\Logger\Formatter\JsonErrorFormatter;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 
 /**
  * @inheritDoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class ErrorFormatterFactoryTest extends TestCase
 {
     /**
@@ -43,7 +45,7 @@ class ErrorFormatterFactoryTest extends TestCase
     public function testCreate()
     {
         define("ERRORINFO", $this->createMock(ErrorInfo::class));
-        define("READERINTEFACE", $this->getMockForAbstractClass(ReaderInterface::class));
+        define("READERINTEFACE", $this->createMock(ReaderInterface::class));
         $this->containerMock->expects($this->exactly(2))
             ->method('get')
             // withConsecutive() alternative.

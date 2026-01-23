@@ -32,7 +32,7 @@ class JobUnlockerTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->connectionMock = $this->getMockForAbstractClass(ConnectionInterface::class);
+        $this->connectionMock = $this->createMock(ConnectionInterface::class);
 
         $this->cronJobUnlocker = new JobUnlocker($this->connectionMock);
     }

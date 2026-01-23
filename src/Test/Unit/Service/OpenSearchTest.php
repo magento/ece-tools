@@ -12,17 +12,21 @@ use GuzzleHttp\Psr7\Response;
 use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Http\ClientFactory;
+use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Service\OpenSearch;
 use Magento\MagentoCloud\Service\ServiceException;
-use Magento\MagentoCloud\Package\MagentoVersion;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\StreamInterface;
 use Psr\Log\LoggerInterface;
 
 /**
+ * @inheritdoc
  * @see OpenSearch
  */
+#[AllowMockObjectsWithoutExpectations]
 class OpenSearchTest extends TestCase
 {
     /**
@@ -55,9 +59,9 @@ class OpenSearchTest extends TestCase
      */
     public function setUp(): void
     {
-        $this->environmentMock = $this->createMock(Environment::class);
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
-        $this->clientFactoryMock = $this->createMock(ClientFactory::class);
+        $this->environmentMock    = $this->createMock(Environment::class);
+        $this->loggerMock         = $this->createMock(LoggerInterface::class);
+        $this->clientFactoryMock  = $this->createMock(ClientFactory::class);
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
 
         $this->openSearch = new OpenSearch(
@@ -69,6 +73,9 @@ class OpenSearchTest extends TestCase
     }
 
     /**
+     * Test get version elasticsearch not exist in relationships.
+     *
+     * @return void
      * @throws ServiceException
      */
     public function testGetVersionElasticSearchNotExistInRelationships(): void
@@ -83,19 +90,22 @@ class OpenSearchTest extends TestCase
     }
 
     /**
+     * Test get version method.
+     *
      * @param array $osRelationship
      * @param string $osConfiguration
      * @param string $expectedVersion
-     * @throws ServiceException
-     *
      * @dataProvider getVersionDataProvider
+     * @return void
+     * @throws ServiceException
      */
+    #[DataProvider('getVersionDataProvider')]
     public function testGetVersion(array $osRelationship, string $osConfiguration, string $expectedVersion): void
     {
         $esConfig = $osRelationship[0];
         $clientMock = $this->createPartialMock(Client::class, ['get']);
         $responseMock = $this->createMock(Response::class);
-        $streamMock = $this->getMockForAbstractClass(StreamInterface::class);
+        $streamMock = $this->createMock(StreamInterface::class);
 
         $this->environmentMock->expects($this->any())
             ->method('getRelationship')
@@ -120,14 +130,16 @@ class OpenSearchTest extends TestCase
     }
 
     /**
+     * Data provider for get version method.
+     *
      * @return array
      */
-    public function getVersionDataProvider(): array
+    public static function getVersionDataProvider(): array
     {
         $relationships = [
             [
-                'host' => '127.0.0.1',
-                'port' => '1234',
+                'host'     => '127.0.0.1',
+                'port'     => '1234',
                 'username' => 'user',
                 'password' => 'secret'
             ],
@@ -175,11 +187,12 @@ class OpenSearchTest extends TestCase
     /**
      * @param array $osRelationship
      * @param string $expectedVersion
-     * @throws ServiceException
-     *
      * @dataProvider getVersionFromTypeDataProvider
+     * @return void
+     * @throws ServiceException
      */
-    public function testGetVersionFromType($osRelationship, $expectedVersion)
+    #[DataProvider('getVersionFromTypeDataProvider')]
+    public function testGetVersionFromType(array $osRelationship, string $expectedVersion): void
     {
         $this->environmentMock->expects($this->any())
             ->method('getRelationship')
@@ -191,7 +204,12 @@ class OpenSearchTest extends TestCase
         $this->assertSame($expectedVersion, $this->openSearch->getVersion());
     }
 
-    public function getVersionFromTypeDataProvider()
+    /**
+     * Data provider for get version from type method.
+     *
+     * @return array
+     */
+    public static function getVersionFromTypeDataProvider(): array
     {
         return [
             [
@@ -200,25 +218,41 @@ class OpenSearchTest extends TestCase
             ],
             [
                 [
-                    ['host' => '127.0.0.1', 'port' => '1234', 'type' => 'opensearch:1.0']
+                    [
+                        'host' => '127.0.0.1',
+                        'port' => '1234',
+                        'type' => 'opensearch:1.0',
+                    ]
                 ],
                 '1.0'
             ],
             [
                 [
-                    ['host' => '127.0.0.1', 'port' => '1234', 'type' => 'opensearch:1.1']
+                    [
+                        'host' => '127.0.0.1',
+                        'port' => '1234',
+                        'type' => 'opensearch:1.1',
+                    ]
                 ],
                 '1.1'
             ],
             [
                 [
-                    ['host' => '127.0.0.1', 'port' => '1234', 'type' => 'opensearch:2.0']
+                    [
+                        'host' => '127.0.0.1',
+                        'port' => '1234',
+                        'type' => 'opensearch:2.0',
+                    ]
                 ],
                 '2.0'
             ],
             [
                 [
-                    ['host' => '127.0.0.1', 'port' => '1234', 'type' => 'opensearch:3.0']
+                    [
+                        'host' => '127.0.0.1',
+                        'port' => '1234',
+                        'type' => 'opensearch:3.0',
+                    ]
                 ],
                 '3.0'
             ],
@@ -226,11 +260,15 @@ class OpenSearchTest extends TestCase
     }
 
     /**
+     * Test get full engine name method.
+     *
      * @param bool $greaterOrEqual
      * @param string $expectedResult
-     * @throws ServiceException
      * @dataProvider getFullEngineNameDataProvider
+     * @return void
+     * @throws ServiceException
      */
+    #[DataProvider('getFullEngineNameDataProvider')]
     public function testGetFullEngineName(bool $greaterOrEqual, string $expectedResult): void
     {
         $this->magentoVersionMock->expects($this->any())
@@ -240,16 +278,30 @@ class OpenSearchTest extends TestCase
     }
 
     /**
+     * Data provider for get full engine name method.
+     *
      * @return array
      */
-    public function getFullEngineNameDataProvider()
+    public static function getFullEngineNameDataProvider(): array
     {
         return [
-            [true, 'elasticsearch7'],
-            [false, 'elasticsearch7'],
+            [
+                true,
+                'elasticsearch7'
+            ],
+            [
+                false,
+                'elasticsearch7'
+            ],
         ];
     }
 
+    /**
+     * Test get version with exception.
+     *
+     * @return void
+     * @throws ServiceException
+     */
     public function testGetVersionWithException(): void
     {
         $this->expectException(ServiceException::class);
@@ -275,6 +327,12 @@ class OpenSearchTest extends TestCase
         $this->assertEquals(0, $this->openSearch->getVersion());
     }
 
+    /**
+     * Test get template.
+     *
+     * @return void
+     * @throws ServiceException
+     */
     public function testGetTemplate(): void
     {
         $this->environmentMock->expects($this->any())
@@ -288,14 +346,14 @@ class OpenSearchTest extends TestCase
             ]);
         $clientMock = $this->createPartialMock(Client::class, ['get']);
         $responseMock = $this->createMock(Response::class);
-        $streamMock = $this->getMockForAbstractClass(StreamInterface::class);
+        $streamMock = $this->createMock(StreamInterface::class);
 
         $osConfiguration = json_encode(
             [
                 'default' => [
                     'settings' => [
                         'index' => [
-                            'number_of_shards' => 1,
+                            'number_of_shards'   => 1,
                             'number_of_replicas' => 2
                         ]
                     ]
@@ -321,7 +379,7 @@ class OpenSearchTest extends TestCase
         $this->assertSame(
             [
                 'index' => [
-                    'number_of_shards' => 1,
+                    'number_of_shards'   => 1,
                     'number_of_replicas' => 2,
                 ]
             ],
@@ -329,6 +387,11 @@ class OpenSearchTest extends TestCase
         );
     }
 
+    /**
+     * Test get template no config.
+     *
+     * @return void
+     */
     public function testGetTemplateNoConfig(): void
     {
         $this->environmentMock->expects($this->once())
@@ -339,6 +402,11 @@ class OpenSearchTest extends TestCase
         $this->assertSame([], $this->openSearch->getTemplate());
     }
 
+    /**
+     * Test get template no config.
+     *
+     * @return void
+     */
     public function testGetTemplateWithException(): void
     {
         $this->environmentMock->expects($this->any())
@@ -368,6 +436,12 @@ class OpenSearchTest extends TestCase
         $this->assertSame([], $this->openSearch->getTemplate());
     }
 
+    /**
+     * Test is installed.
+     *
+     * @return void
+     * @throws ServiceException
+     */
     public function testIsInstalled(): void
     {
         $this->environmentMock->expects($this->exactly(2))
@@ -387,7 +461,13 @@ class OpenSearchTest extends TestCase
         $this->assertFalse($this->openSearch->isInstalled());
     }
 
-    public function testAuthEnabledTrue()
+    /**
+     * Test auth enabled true.
+     *
+     * @return void
+     * @throws ServiceException
+     */
+    public function testAuthEnabledTrue(): void
     {
         $this->environmentMock->expects($this->exactly(2))
             ->method('getRelationship')
@@ -395,8 +475,8 @@ class OpenSearchTest extends TestCase
             ->willReturn(
                 [
                     [
-                        'host' => '127.0.0.1',
-                        'port' => '1234',
+                        'host'     => '127.0.0.1',
+                        'port'     => '1234',
                         'username' => 'test',
                         'password' => 'secret',
                     ],
@@ -406,7 +486,13 @@ class OpenSearchTest extends TestCase
         $this->assertTrue($this->openSearch->isAuthEnabled());
     }
 
-    public function testAuthEnabledFalse()
+    /**
+     * Test auth enabled false.
+     *
+     * @return void
+     * @throws ServiceException
+     */
+    public function testAuthEnabledFalse(): void
     {
         $this->environmentMock->expects($this->exactly(1))
             ->method('getRelationship')

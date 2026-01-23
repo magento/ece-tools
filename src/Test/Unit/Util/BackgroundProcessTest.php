@@ -7,10 +7,11 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Util;
 
-use Magento\MagentoCloud\Util\BackgroundProcess;
 use Magento\MagentoCloud\Shell\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Shell\ShellInterface;
+use Magento\MagentoCloud\Util\BackgroundProcess;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -18,6 +19,7 @@ use Psr\Log\LoggerInterface;
 /**
  * @inheritDoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class BackgroundProcessTest extends TestCase
 {
     /**
@@ -40,7 +42,7 @@ class BackgroundProcessTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
         $this->shellMock = $this->createMock(ShellInterface::class);
 
         $this->process = new BackgroundProcess(
@@ -51,11 +53,11 @@ class BackgroundProcessTest extends TestCase
 
     public function testKill()
     {
-        $processMock1 = $this->getMockForAbstractClass(ProcessInterface::class);
+        $processMock1 = $this->createMock(ProcessInterface::class);
         $processMock1->expects($this->once())
             ->method('getOutput')
             ->willReturn("111\n222");
-        $processMock2 = $this->getMockForAbstractClass(ProcessInterface::class);
+        $processMock2 = $this->createMock(ProcessInterface::class);
         $processMock2->expects($this->any())
             ->method('getOutput')
             ->willReturn([]);
@@ -124,7 +126,7 @@ class BackgroundProcessTest extends TestCase
      */
     public function testExecuteWithExeption()
     {
-        $processMock = $this->getMockForAbstractClass(ProcessInterface::class);
+        $processMock = $this->createMock(ProcessInterface::class);
         $processMock->expects($this->once())
             ->method('getOutput')
             ->willReturn("111");

@@ -8,15 +8,16 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit\Config\Validator\Deploy;
 
 use Magento\MagentoCloud\Config\Validator\Deploy\ServiceVersion;
+use Magento\MagentoCloud\Config\Validator\Result\Error;
+use Magento\MagentoCloud\Config\Validator\Result\Success;
+use Magento\MagentoCloud\Config\Validator\ResultFactory;
 use Magento\MagentoCloud\Config\ValidatorException;
 use Magento\MagentoCloud\Service\Detector\DatabaseType;
 use Magento\MagentoCloud\Service\ServiceFactory;
 use Magento\MagentoCloud\Service\ServiceInterface;
 use Magento\MagentoCloud\Service\ServiceMismatchException;
 use Magento\MagentoCloud\Service\Validator as ServiceVersionValidator;
-use Magento\MagentoCloud\Config\Validator\Result\Error;
-use Magento\MagentoCloud\Config\Validator\Result\Success;
-use Magento\MagentoCloud\Config\Validator\ResultFactory;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -26,6 +27,7 @@ use Psr\Log\LoggerInterface;
  * @inheritdoc
  * @SuppressWarnings("CouplingBetweenObjects")
  */
+#[AllowMockObjectsWithoutExpectations]
 class ServiceVersionTest extends TestCase
 {
     /**
@@ -73,7 +75,7 @@ class ServiceVersionTest extends TestCase
         );
         $this->serviceVersionValidatorMock = $this->createMock(ServiceVersionValidator::class);
         $this->serviceFactory = $this->createMock(ServiceFactory::class);
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
         $this->databaseTypeMock = $this->createMock(DatabaseType::class);
 
         $this->validator = new ServiceVersion(

@@ -11,6 +11,7 @@ use Magento\MagentoCloud\Command\CronDisable;
 use Magento\MagentoCloud\Cron\Switcher;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Util\BackgroundProcess;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -19,6 +20,7 @@ use Symfony\Component\Console\Tester\CommandTester;
 /**
  * @inheritDoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class CronDisableTest extends TestCase
 {
     /**
@@ -46,7 +48,7 @@ class CronDisableTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
         $this->cronSwitcherMock = $this->createMock(Switcher::class);
         $this->backgroundProcessMock = $this->createMock(BackgroundProcess::class);
 

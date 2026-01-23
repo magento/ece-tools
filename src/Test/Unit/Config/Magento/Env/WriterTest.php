@@ -1,23 +1,28 @@
 <?php
+
 /**
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+
 declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Config\Magento\Env;
 
 use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface;
 use Magento\MagentoCloud\Config\Magento\Env\Writer;
-use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class WriterTest extends TestCase
 {
     /**
@@ -45,7 +50,7 @@ class WriterTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->readerMock = $this->getMockForAbstractClass(ReaderInterface::class);
+        $this->readerMock = $this->createMock(ReaderInterface::class);
         $this->fileMock = $this->createMock(File::class);
         $this->fileListMock = $this->createMock(FileList::class);
 
@@ -57,12 +62,15 @@ class WriterTest extends TestCase
     }
 
     /**
+     * Test create method.
+     *
      * @param array $config
      * @param string $updatedConfig
      * @dataProvider createDataProvider
-     *
+     * @return void
      * @throws FileSystemException
      */
+    #[DataProvider('createDataProvider')]
     public function testCreate(array $config, $updatedConfig): void
     {
         $filePath = '/path/to/file';
@@ -77,9 +85,10 @@ class WriterTest extends TestCase
     }
 
     /**
+     * Data provider for testCreate method.
      * @return array
      */
-    public function createDataProvider(): array
+    public static function createDataProvider(): array
     {
         return [
             [
@@ -98,13 +107,15 @@ class WriterTest extends TestCase
     }
 
     /**
+     * Test update method.
+     *
      * @param array $config
      * @param array $currentConfig
      * @param string $updatedConfig
      * @dataProvider getUpdateDataProvider
-     *
      * @throws FileSystemException
      */
+    #[DataProvider('getUpdateDataProvider')]
     public function testUpdate(array $config, array $currentConfig, $updatedConfig): void
     {
         $filePath = '/path/to/file';
@@ -122,9 +133,11 @@ class WriterTest extends TestCase
     }
 
     /**
+     * Data provider for testUpdate method.
+     *
      * @return array
      */
-    public function getUpdateDataProvider(): array
+    public static function getUpdateDataProvider(): array
     {
         return [
             [
@@ -156,7 +169,7 @@ class WriterTest extends TestCase
                     ]
                 ],
                 "<?php\nreturn array (\n  'key1' => \n  array (\n    'key11' => 'value1',\n" .
-                "    'key12' => 'value2new',\n    'key13' => 'value3new',\n  ),\n);"
+                    "    'key12' => 'value2new',\n    'key13' => 'value3new',\n  ),\n);"
             ],
             [
                 [
@@ -193,33 +206,12 @@ class WriterTest extends TestCase
                         'key12' => 'value2',
                     ]
                 ],
-                "<?php
-return array (
-  'system' => 
-  array (
-    'default' => 
-    array (
-      'category' => 
-      array (
-        'option' => 'value',
-      ),
-      'catalog' => 
-      array (
-        'search' => 
-        array (
-          'engine' => 'elasticsearch',
-          'host' => 'localhost',
-        ),
-      ),
-    ),
-  ),
-  'key1' => 
-  array (
-    'key11' => 'value1',
-    'key12' => 'value2new',
-    'key13' => 'value3new',
-  ),
-);"
+                "<?php\nreturn array (\n  'system' => \n  array (\n    'default' => \n    array (\n" .
+                    "      'category' => \n      array (\n        'option' => 'value',\n      ),\n" .
+                    "      'catalog' => \n      array (\n        'search' => \n        array (\n" .
+                    "          'engine' => 'elasticsearch',\n          'host' => 'localhost',\n        ),\n      ),\n" .
+                    "    ),\n  ),\n  'key1' => \n  array (\n    'key11' => 'value1',\n" .
+                    "    'key12' => 'value2new',\n    'key13' => 'value3new',\n  ),\n);"
             ]
         ];
     }

@@ -11,11 +11,12 @@ use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\ConfigException;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Package\MagentoVersion;
-use Magento\MagentoCloud\Shell\ShellException;
-use Magento\MagentoCloud\Step\Deploy\InstallUpdate\Install\ConfigImport;
 use Magento\MagentoCloud\Shell\MagentoShell;
+use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Shell\ShellFactory;
+use Magento\MagentoCloud\Step\Deploy\InstallUpdate\Install\ConfigImport;
 use Magento\MagentoCloud\Step\StepException;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -23,6 +24,7 @@ use Psr\Log\LoggerInterface;
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class ConfigImportTest extends TestCase
 {
     /**
@@ -56,7 +58,7 @@ class ConfigImportTest extends TestCase
     protected function setUp(): void
     {
         $this->magentoShellMock = $this->createMock(MagentoShell::class);
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
         $this->stageConfigMock = $this->createMock(DeployInterface::class);
 

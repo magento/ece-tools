@@ -10,6 +10,7 @@ namespace Magento\MagentoCloud\Test\Unit\Command\ConfigShow;
 use Codeception\PHPUnit\TestCase;
 use Magento\MagentoCloud\Command\ConfigShow\Renderer;
 use Magento\MagentoCloud\Config\Environment;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Formatter\OutputFormatterInterface;
@@ -18,6 +19,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class RendererTest extends TestCase
 {
     /**
@@ -51,9 +53,9 @@ class RendererTest extends TestCase
     protected function setUp(): void
     {
         $this->environmentMock = $this->createMock(Environment::class);
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
-        $this->outputMock = $this->getMockForAbstractClass(OutputInterface::class);
-        $this->outputFormatterMock = $this->getMockForAbstractClass(OutputFormatterInterface::class);
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
+        $this->outputMock = $this->createMock(OutputInterface::class);
+        $this->outputFormatterMock = $this->createMock(OutputFormatterInterface::class);
         $this->outputMock->expects($this->any())
             ->method('getFormatter')
             ->willReturn($this->outputFormatterMock);

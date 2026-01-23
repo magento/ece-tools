@@ -10,6 +10,7 @@ namespace Magento\MagentoCloud\Test\Unit\Command;
 use Magento\MagentoCloud\Command\BackupList;
 use PHPUnit\Framework\MockObject\MockObject;
 use Symfony\Component\Console\Tester\CommandTester;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Magento\MagentoCloud\Command\Backup\FileList as BackupFilesList;
 use Psr\Log\LoggerInterface;
@@ -40,17 +41,23 @@ class BackupListTest extends TestCase
     protected function setUp(): void
     {
         $this->backupFilesListMock = $this->createMock(BackupFilesList::class);
-        $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
-            ->getMockForAbstractClass();
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
 
         $this->command = new BackupList($this->backupFilesListMock, $this->loggerMock);
     }
 
     /**
+     * Test execute method.
+     *
      * @param array $backupList
      * @param string $output
      * @dataProvider executeDataProvider
+     * @return void
+     *
+     * @throws \ReflectionException
+     * @throws \Exception
      */
+    #[DataProvider('executeDataProvider')]
     public function testExecute(array $backupList, string $output): void
     {
         $this->loggerMock->expects($this->never())
@@ -66,9 +73,11 @@ class BackupListTest extends TestCase
     }
 
     /**
+     * Execute data provider method.
+     *
      * @return array
      */
-    public function executeDataProvider(): array
+    public static function executeDataProvider(): array
     {
         return [
             [
@@ -83,6 +92,9 @@ class BackupListTest extends TestCase
         ];
     }
 
+    /**
+     * Test execute method with exception.
+     */
     public function testExecuteWithException(): void
     {
         $this->expectException(\Exception::class);

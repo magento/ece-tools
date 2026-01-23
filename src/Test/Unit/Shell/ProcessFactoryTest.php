@@ -48,7 +48,7 @@ class ProcessFactoryTest extends TestCase
     protected function setUp(): void
     {
         $this->repositoryMock = $this->createMock(LockArrayRepository::class);
-        $this->packageMock = $this->getMockForAbstractClass(PackageInterface::class);
+        $this->packageMock = $this->createMock(PackageInterface::class);
         $this->composerMock = $this->createMock(Composer::class);
 
         /** @var Locker|MockObject $lockerMock */

@@ -47,8 +47,7 @@ class BackupTest extends TestCase
     {
         $this->backupListMock = $this->createMock(BackupList::class);
         $this->fileMock = $this->createMock(File::class);
-        $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
-            ->getMockForAbstractClass();
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
 
         $this->backup = new Backup(
             $this->backupListMock,

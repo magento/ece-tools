@@ -8,6 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit\Step\Deploy;
 
 use Magento\MagentoCloud\App\Error;
+use Magento\MagentoCloud\Config\GlobalSection as GlobalConfig;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Shell\ShellException;
@@ -15,14 +16,15 @@ use Magento\MagentoCloud\Shell\UtilityException;
 use Magento\MagentoCloud\Step\Deploy\CompressStaticContent;
 use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Util\StaticContentCompressor;
-use Magento\MagentoCloud\Config\GlobalSection as GlobalConfig;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
-use Psr\Log\LoggerInterface;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
 
 /**
  * Unit test for deploy-time static content compressor.
  */
+#[AllowMockObjectsWithoutExpectations]
 class CompressStaticContentTest extends TestCase
 {
     /**
@@ -60,10 +62,10 @@ class CompressStaticContentTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
         $this->compressorMock = $this->createMock(StaticContentCompressor::class);
         $this->flagManagerMock = $this->createMock(FlagManager::class);
-        $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
+        $this->stageConfigMock = $this->createMock(DeployInterface::class);
         $this->globalConfigMock = $this->createMock(GlobalConfig::class);
 
         $this->step = new CompressStaticContent(

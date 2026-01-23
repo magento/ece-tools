@@ -10,16 +10,18 @@ namespace Magento\MagentoCloud\Test\Unit\Config\Validator\Build;
 use Magento\MagentoCloud\Config\Stage\BuildInterface;
 use Magento\MagentoCloud\Config\StageConfigInterface;
 use Magento\MagentoCloud\Config\Validator\Build\AppropriateVersion;
-use Magento\MagentoCloud\Config\Validator\Result\Success;
 use Magento\MagentoCloud\Config\Validator\Result\Error;
+use Magento\MagentoCloud\Config\Validator\Result\Success;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
 use Magento\MagentoCloud\Package\MagentoVersion;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class AppropriateVersionTest extends TestCase
 {
     /**
@@ -52,7 +54,7 @@ class AppropriateVersionTest extends TestCase
             'error' => $this->createMock(Error::class)
         ]);
         $this->magentoVersion = $this->createMock(MagentoVersion::class);
-        $this->stageConfigMock = $this->getMockForAbstractClass(BuildInterface::class);
+        $this->stageConfigMock = $this->createMock(BuildInterface::class);
 
         $this->validator = new AppropriateVersion(
             $this->resultFactoryMock,

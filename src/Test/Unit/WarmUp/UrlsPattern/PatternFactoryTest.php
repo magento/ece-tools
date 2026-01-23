@@ -15,11 +15,14 @@ use Magento\MagentoCloud\WarmUp\UrlsPattern\PatternFactory;
 use Magento\MagentoCloud\WarmUp\UrlsPattern\PatternInterface;
 use Magento\MagentoCloud\WarmUp\UrlsPattern\Product;
 use Magento\MagentoCloud\WarmUp\UrlsPattern\StorePage;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 
 /**
  * @inheritDoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class PatternFactoryTest extends TestCase
 {
     /**
@@ -43,24 +46,30 @@ class PatternFactoryTest extends TestCase
     }
 
     /**
+     * Test create method.
+     *
      * @param string $alias
      * @param string $expectedClass
      * @dataProvider createDataProvider
+     * @return void
      */
-    public function testCreate(string $alias, string $expectedClass)
+    #[DataProvider('createDataProvider')]
+    public function testCreate(string $alias, string $expectedClass): void
     {
         $this->containerMock->expects($this->once())
             ->method('create')
             ->with($expectedClass)
-            ->willReturn($this->getMockForAbstractClass(PatternInterface::class));
+            ->willReturn($this->createMock(PatternInterface::class));
 
         $this->patternFactory->create($alias);
     }
 
     /**
+     * Data provider for create method.
+     *
      * @return array
      */
-    public function createDataProvider(): array
+    public static function createDataProvider(): array
     {
         return [
             ['store-page', StorePage::class],
@@ -70,7 +79,12 @@ class PatternFactoryTest extends TestCase
         ];
     }
 
-    public function testCreateClassNotExists()
+    /**
+     * Test create method with class not exists.
+     *
+     * @return void
+     */
+    public function testCreateClassNotExists(): void
     {
         $this->expectException(ConfigurationMismatchException::class);
         $this->expectExceptionMessage('Class wrong_class is not registered');

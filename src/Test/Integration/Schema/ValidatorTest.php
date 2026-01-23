@@ -17,6 +17,7 @@ use Magento\MagentoCloud\Config\Validator\Result\Success;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
 use Magento\MagentoCloud\Config\Validator\ResultInterface;
 use Magento\MagentoCloud\Test\Integration\Container;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -30,6 +31,7 @@ class ValidatorTest extends TestCase
     private $validator;
 
     /**
+     * @inheritdoc
      * @throws ContainerException
      */
     protected function setUp(): void
@@ -44,12 +46,15 @@ class ValidatorTest extends TestCase
     }
 
     /**
+     * Test validate method.
+     *
      * @param string $key
      * @param string|int|bool|array $value
      * @param ResultInterface|null $expected
      * @param string $stage
      * @dataProvider validateDataProvider
      */
+    #[DataProvider('validateDataProvider')]
     public function testValidate(
         string $key,
         $value,
@@ -65,11 +70,13 @@ class ValidatorTest extends TestCase
     }
 
     /**
+     * Data provider for validate method.
+     *
      * @return array
      *
      * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
-    public function validateDataProvider(): array
+    public static function validateDataProvider(): array
     {
         return [
             ['keyNotExist', 'someValue', new Error('The keyNotExist variable is not allowed in configuration.')],

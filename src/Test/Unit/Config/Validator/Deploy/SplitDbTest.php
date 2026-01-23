@@ -7,11 +7,12 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Config\Validator\Deploy;
 
+use Magento\MagentoCloud\Config\ConfigException;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Config\Validator\Deploy\SplitDb;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Magento\MagentoCloud\Config\ConfigException;
 
 /**
  * Test for SplitDb class
@@ -33,19 +34,23 @@ class SplitDbTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
+        $this->stageConfigMock = $this->createMock(DeployInterface::class);
 
         $this->splitDb = new SplitDb($this->stageConfigMock);
     }
 
     /**
+     * Test validate method.
+     *
      * @param array $splitDb
      * @param array $dbConfig
      * @param bool $expectedResult
      * @throws ConfigException
      * @dataProvider validateDataProvider
+     * @return void
      */
-    public function testValidate(array $splitDb, array $dbConfig, bool $expectedResult)
+    #[DataProvider('validateDataProvider')]
+    public function testValidate(array $splitDb, array $dbConfig, bool $expectedResult): void
     {
         $this->stageConfigMock->expects($this->atLeast(1))
             ->method('get')
@@ -55,9 +60,11 @@ class SplitDbTest extends TestCase
     }
 
     /**
+     * Data provider for validate method.
+     *
      * @return array
      */
-    public function validateDataProvider(): array
+    public static function validateDataProvider(): array
     {
         return [
             [

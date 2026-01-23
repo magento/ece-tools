@@ -12,13 +12,17 @@ use Magento\MagentoCloud\DB\Connection;
 use Magento\MagentoCloud\DB\Data\ConnectionFactory;
 use Magento\MagentoCloud\DB\Data\ConnectionInterface;
 use Magento\MagentoCloud\DB\PDOException;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\MockObject\Rule\InvocationOrder;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class ConnectionTest extends TestCase
 {
     /**
@@ -61,8 +65,8 @@ class ConnectionTest extends TestCase
         $this->pdoMock = $this->createMock(\PDO::class);
         $this->statementMock = $this->createMock(\PDOStatement::class);
         $this->dbConfigMock = $this->createMock(DbConfig::class);
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
-        $this->connectionDataMock = $this->getMockForAbstractClass(ConnectionInterface::class);
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
+        $this->connectionDataMock = $this->createMock(ConnectionInterface::class);
 
         /** @var ConnectionFactory|MockObject $connectionFactoryMock */
         $connectionFactoryMock = $this->createMock(ConnectionFactory::class);
@@ -81,11 +85,19 @@ class ConnectionTest extends TestCase
 
         $reflection = new \ReflectionClass(get_class($this->connection));
         $property = $reflection->getProperty('pdo');
-        $property->setAccessible(true);
+
+        # Note: setAccessible(true) is deprecated in PHP 8.5 as properties are always accessible in PHP 8.1+
+        # so removed the call to setAccessible(true)
+
         $property->setValue($this->connection, $this->pdoMock);
     }
 
-    public function testSelect()
+    /**
+     * Test select method.
+     *
+     * @return void
+     */
+    public function testSelect(): void
     {
         $this->loggerMock->expects($this->once())
             ->method('debug')
@@ -100,7 +112,12 @@ class ConnectionTest extends TestCase
         );
     }
 
-    public function testSelectOne()
+    /**
+     * Test selectOne method.
+     *
+     * @return void
+     */
+    public function testSelectOne(): void
     {
         $this->loggerMock->expects($this->once())
             ->method('debug')
@@ -116,7 +133,12 @@ class ConnectionTest extends TestCase
         );
     }
 
-    public function testListTables()
+    /**
+     * Test listTables method.
+     *
+     * @return void
+     */
+    public function testListTables(): void
     {
         $this->loggerMock->expects($this->once())
             ->method('debug')
@@ -133,14 +155,23 @@ class ConnectionTest extends TestCase
     }
 
     /**
+     * Test getPdo method.
+     *
+     * @return void
      * @throws PDOException
      */
-    public function testGetPdo()
+    public function testGetPdo(): void
     {
         $this->assertSame($this->pdoMock, $this->connection->getPdo());
     }
 
-    public function testGetPdoWithException()
+    /**
+     * Test getPdo method with exception.
+     *
+     * @return void
+     * @throws \Exception
+     */
+    public function testGetPdoWithException(): void
     {
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage('Some exception');
@@ -160,12 +191,23 @@ class ConnectionTest extends TestCase
         $this->connection->getPdo();
     }
 
-    public function testClose()
+    /**
+     * Test close method.
+     *
+     * @return void
+     */
+    public function testClose(): void
     {
         $this->connection->close();
+        $this->expectNotToPerformAssertions();
     }
 
-    public function testAffectingQuery()
+    /**
+     * Test affectingQuery method.
+     *
+     * @return void
+     */
+    public function testAffectingQuery(): void
     {
         $bindings = [
             ':name' => 'John',
@@ -173,7 +215,6 @@ class ConnectionTest extends TestCase
         ];
         $this->statementMock->expects($this->exactly(2))
             ->method('bindValue')
-            // withConsecutive() alternative.
             ->willReturnCallback(function ($arg1, $arg2, $arg3) {
                 if ($arg1 == ':name' && $arg2 == 'John' && $arg3 == \PDO::PARAM_STR) {
                     return true;
@@ -189,7 +230,12 @@ class ConnectionTest extends TestCase
         $this->assertSame(1, $this->connection->affectingQuery('SELECT 1', $bindings));
     }
 
-    public function testQuery()
+    /**
+     * Test query method.
+     *
+     * @return void
+     */
+    public function testQuery(): void
     {
         $bindings = [
             ':name' => 'John',
@@ -198,7 +244,6 @@ class ConnectionTest extends TestCase
 
         $this->statementMock->expects($this->exactly(2))
             ->method('bindValue')
-            // withConsecutive() alternative.
             ->willReturnCallback(function ($arg1, $arg2, $arg3) {
                 if ($arg1 == ':name' && $arg2 == 'John' && $arg3 == \PDO::PARAM_STR) {
                     return true;
@@ -214,13 +259,20 @@ class ConnectionTest extends TestCase
     }
 
     /**
+     * Test getTableName method.
+     *
      * @param array $mergedConfig
      * @param string $tableName
      * @param string $expectedTableName
      * @dataProvider getTableNameDataProvider
+     * @return void
      */
-    public function testGetTableName(array $mergedConfig, string $tableName, string $expectedTableName)
-    {
+    #[DataProvider('getTableNameDataProvider')]
+    public function testGetTableName(
+        array $mergedConfig,
+        string $tableName,
+        string $expectedTableName
+    ): void {
         $this->dbConfigMock->expects($this->once())
             ->method('get')
             ->willReturn($mergedConfig);
@@ -232,9 +284,11 @@ class ConnectionTest extends TestCase
     }
 
     /**
+     * Data provider for getTableName method.
+     *
      * @return array
      */
-    public function getTableNameDataProvider(): array
+    public static function getTableNameDataProvider(): array
     {
         return [
             'empty prefix' => [
@@ -252,13 +306,21 @@ class ConnectionTest extends TestCase
         ];
     }
 
-    private function resolveInvocations(\PHPUnit\Framework\MockObject\Rule\InvocationOrder $matcher): int
+    /**
+     * Resolve invocations.
+     *
+     * @param InvocationOrder $matcher
+     * @return int
+     */
+    private function resolveInvocations(InvocationOrder $matcher): int
     {
-        if (method_exists($matcher, 'numberOfInvocations')) { // PHPUnit 10+ (including PHPUnit 12)
+        if (method_exists($matcher, 'numberOfInvocations')) {
+            // PHPUnit 10+ (including PHPUnit 12)
             return $matcher->numberOfInvocations();
         }
 
-        if (method_exists($matcher, 'getInvocationCount')) { // before PHPUnit 10
+        if (method_exists($matcher, 'getInvocationCount')) {
+            // before PHPUnit 10
             return $matcher->getInvocationCount();
         }
 

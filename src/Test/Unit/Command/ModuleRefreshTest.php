@@ -50,9 +50,9 @@ class ModuleRefreshTest extends TestCase
     public function testExecute(): void
     {
         /** @var InputInterface|MockObject $inputMock */
-        $inputMock = $this->getMockForAbstractClass(InputInterface::class);
+        $inputMock = $this->createStub(InputInterface::class);
         /** @var OutputInterface|MockObject $outputMock */
-        $outputMock = $this->getMockForAbstractClass(OutputInterface::class);
+        $outputMock = $this->createMock(OutputInterface::class);
 
         $outputMock->expects($this->once())
             ->method('writeln')
@@ -72,9 +72,9 @@ class ModuleRefreshTest extends TestCase
     public function testExecuteNoModules(): void
     {
         /** @var InputInterface|MockObject $inputMock */
-        $inputMock = $this->getMockForAbstractClass(InputInterface::class);
+        $inputMock = $this->createStub(InputInterface::class);
         /** @var OutputInterface|MockObject $outputMock */
-        $outputMock = $this->getMockForAbstractClass(OutputInterface::class);
+        $outputMock = $this->createMock(OutputInterface::class);
 
         $outputMock->expects($this->once())
             ->method('writeln')

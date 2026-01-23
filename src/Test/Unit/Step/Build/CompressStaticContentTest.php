@@ -16,6 +16,7 @@ use Magento\MagentoCloud\Shell\UtilityException;
 use Magento\MagentoCloud\Step\Build\CompressStaticContent;
 use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Util\StaticContentCompressor;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -23,6 +24,7 @@ use Psr\Log\LoggerInterface;
 /**
  * Unit test for build-time static content compressor.
  */
+#[AllowMockObjectsWithoutExpectations]
 class CompressStaticContentTest extends TestCase
 {
     /**
@@ -55,8 +57,8 @@ class CompressStaticContentTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
-        $this->stageConfigMock = $this->getMockForAbstractClass(BuildInterface::class);
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
+        $this->stageConfigMock = $this->createMock(BuildInterface::class);
         $this->compressorMock = $this->createMock(StaticContentCompressor::class);
         $this->flagManagerMock = $this->createMock(FlagManager::class);
 

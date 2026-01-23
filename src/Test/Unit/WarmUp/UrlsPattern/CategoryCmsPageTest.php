@@ -12,6 +12,7 @@ use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\WarmUp\UrlsPattern\CategoryCmsPage;
 use Magento\MagentoCloud\WarmUp\UrlsPattern\CommandArgumentBuilder;
 use Magento\MagentoCloud\WarmUp\UrlsPattern\ConfigShowUrlCommand;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 
 /**
@@ -46,12 +47,16 @@ class CategoryCmsPageTest extends TestCase
     }
 
     /**
+     * Test get URLs method.
+     *
      * @param string $pattern
      * @param array $expectedUrls
      * @dataProvider getUrlsDataProvider
+     * @return void
      * @throws GenericException
      */
-    public function testGetUrls(string $pattern, array $expectedUrls)
+    #[DataProvider('getUrlsDataProvider')]
+    public function testGetUrls(string $pattern, array $expectedUrls): void
     {
         $urls = [
             'http://example.com/example/',
@@ -77,14 +82,18 @@ class CategoryCmsPageTest extends TestCase
 
         $this->assertEquals(
             $expectedUrls,
-            array_values($this->categoryCmsPage->getUrls('cms-page', $pattern, '*'))
+            array_values(
+                $this->categoryCmsPage->getUrls('cms-page', $pattern, '*')
+            )
         );
     }
 
     /**
+     * Data provider for get URLs method.
+     *
      * @return array
      */
-    public function getUrlsDataProvider(): array
+    public static function getUrlsDataProvider(): array
     {
         return [
             [

@@ -13,6 +13,7 @@ use Magento\MagentoCloud\Filesystem\RecoverableDirectoryList;
 use Magento\MagentoCloud\Step\Deploy\PreDeploy\RestoreWritableDirectories;
 use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Util\BuildDirCopier;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -20,6 +21,7 @@ use Psr\Log\LoggerInterface;
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class RestoreWritableDirectoriesTest extends TestCase
 {
     /**
@@ -52,8 +54,7 @@ class RestoreWritableDirectoriesTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
-            ->getMockForAbstractClass();
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
         $this->buildDirCopierMock = $this->createMock(BuildDirCopier::class);
         $this->recoverableDirectoryListMock = $this->getMockBuilder(RecoverableDirectoryList::class)
             ->disableOriginalConstructor()
@@ -78,7 +79,6 @@ class RestoreWritableDirectoriesTest extends TestCase
             ]);
         $this->buildDirCopierMock->expects($this->exactly(2))
             ->method('copy')
-            // withConsecutive() alternative.
             ->willReturnCallback(function (...$args) {
                 static $series = [
                     ['app/etc', 'copy'],

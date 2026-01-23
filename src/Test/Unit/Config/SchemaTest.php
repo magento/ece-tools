@@ -17,6 +17,7 @@ use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Filesystem\SystemList;
 use Magento\MagentoCloud\Util\YamlNormalizer;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Yaml\Parser;
@@ -24,6 +25,7 @@ use Symfony\Component\Yaml\Parser;
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class SchemaTest extends TestCase
 {
     /**
@@ -56,13 +58,25 @@ class SchemaTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->systemListMock = $this->createMock(SystemList::class);
-        $this->parserMock = new Parser();
-        $this->fileMock = new File();
-        $this->yamlNormalizerMock = new YamlNormalizer();
+        $this->systemListMock     = $this->createMock(SystemList::class);
+        $this->parserMock         = $this->createMock(Parser::class);
+        $this->fileMock           = $this->createMock(File::class);
+        $this->yamlNormalizerMock = $this->createMock(YamlNormalizer::class);
 
         $this->systemListMock->method('getConfig')
             ->willReturn(__DIR__ . '/../../../../config');
+
+        $this->fileMock->method('fileGetContents')
+            ->willReturn(file_get_contents(ECE_BP . '/config/schema.yaml'));
+
+        $this->parserMock->method('parse')
+            ->willReturnCallback(function ($content) {
+                $parser = new Parser();
+                return $parser->parse($content);
+            });
+
+        $this->yamlNormalizerMock->method('normalize')
+            ->willReturnArgument(0);
 
         $this->schema = new Schema(
             $this->systemListMock,
@@ -73,7 +87,7 @@ class SchemaTest extends TestCase
     }
 
     /**
-     * Test for getDefaults method for build stage
+     * Test for getDefaults method for build stage.
      *
      * @return void
      * @throws FileSystemException
@@ -101,7 +115,7 @@ class SchemaTest extends TestCase
     }
 
     /**
-     * Test for getDefaults method for deploy stage
+     * Test for getDefaults method for deploy stage.
      *
      * @return void
      * @throws FileSystemException
@@ -149,7 +163,7 @@ class SchemaTest extends TestCase
     }
 
     /**
-     * Test for getDefaults method for post-deploy stage
+     * Test for getDefaults method for post-deploy stage.
      *
      * @return void
      * @throws FileSystemException
@@ -182,7 +196,7 @@ class SchemaTest extends TestCase
     }
 
     /**
-     * Test for getDefaults method for system variables
+     * Test get defaults for system variables method.
      *
      * @return void
      * @throws FileSystemException
@@ -202,7 +216,7 @@ class SchemaTest extends TestCase
     }
 
     /**
-     * Test for getDefaults method for global section
+     * Test get defaults for global section method.
      *
      * @return void
      * @throws FileSystemException
@@ -225,9 +239,10 @@ class SchemaTest extends TestCase
     }
 
     /**
-     * Test for getSchemaItemsExists method
+     * Test get schema items exists method.
      *
      * @return void
+     * @throws FileSystemException
      */
     public function testGetSchemaItemsExists(): void
     {

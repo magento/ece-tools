@@ -9,20 +9,22 @@ namespace Magento\MagentoCloud\Test\Unit\Step\Deploy\InstallUpdate\ConfigUpdate;
 
 use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\App\GenericException;
-use Magento\MagentoCloud\Filesystem\FileSystemException;
-use Magento\MagentoCloud\Step\StepException;
-use PHPUnit\Framework\MockObject\MockObject;
-use PHPUnit\Framework\TestCase;
+use Magento\MagentoCloud\Config\Amqp as AmqpConfig;
 use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface as ConfigReader;
 use Magento\MagentoCloud\Config\Magento\Env\WriterInterface as ConfigWriter;
-use Psr\Log\LoggerInterface;
-use Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\Amqp;
-use Magento\MagentoCloud\Config\Amqp as AmqpConfig;
 use Magento\MagentoCloud\Config\Stomp as StompConfig;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
+use Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\Amqp;
+use Magento\MagentoCloud\Step\StepException;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
 
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class AmqpTest extends TestCase
 {
     /**
@@ -60,7 +62,7 @@ class AmqpTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
         $this->configWriterMock = $this->createMock(ConfigWriter::class);
         $this->configReaderMock = $this->createMock(ConfigReader::class);
         $this->amqpConfigMock = $this->createMock(AmqpConfig::class);

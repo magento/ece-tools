@@ -47,12 +47,13 @@ class YamlNormalizer
                 $constName = ltrim($constName, '\\');
 
                 // Resolve the constant name to its value if defined
-                $constKey = defined($constName) ? constant($constName) : $constName;
+                // Suppress deprecation warnings for PHP 8.5+ (e.g., PDO::MYSQL_ATTR_LOCAL_INFILE)
+                $constKey = defined($constName) ? @constant($constName) : $constName;
 
                 // Handle YAML quirk where ": 1" is parsed literally
-                $raw = is_string($value) ? $value : (string)$value;
+                $raw      = is_string($value) ? $value : (string) $value;
                 $cleanVal = str_replace([':', ' '], '', $raw);
-                $constVal = is_numeric($cleanVal) ? (int)$cleanVal : $cleanVal;
+                $constVal = is_numeric($cleanVal) ? (int) $cleanVal : $cleanVal;
 
                 return [$constKey => $constVal];
             }

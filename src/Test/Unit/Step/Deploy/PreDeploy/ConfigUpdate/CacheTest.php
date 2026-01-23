@@ -8,22 +8,25 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit\Step\Deploy\PreDeploy\ConfigUpdate;
 
 use Magento\MagentoCloud\App\Error;
+use Magento\MagentoCloud\Config\Factory\Cache as CacheFactory;
 use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface as ConfigReader;
 use Magento\MagentoCloud\Config\Magento\Env\WriterInterface as ConfigWriter;
-use Magento\MagentoCloud\Config\Factory\Cache as CacheFactory;
+use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
+use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Step\Deploy\PreDeploy\ConfigUpdate\Cache;
 use Magento\MagentoCloud\Step\StepException;
 use phpmock\phpunit\PHPMock;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
-use Magento\MagentoCloud\Package\MagentoVersion;
-use Magento\MagentoCloud\Config\Stage\DeployInterface;
 
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class CacheTest extends TestCase
 {
     use PHPMock;
@@ -83,12 +86,12 @@ class CacheTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->loggerMock       = $this->createMock(LoggerInterface::class);
         $this->configWriterMock = $this->createMock(ConfigWriter::class);
         $this->configReaderMock = $this->createMock(ConfigReader::class);
-        $this->cacheConfigMock = $this->createMock(CacheFactory::class);
-        $this->magentoVersion = $this->createMock(MagentoVersion::class);
-        $this->stageConfig = $this->createMock(DeployInterface::class);
+        $this->cacheConfigMock  = $this->createMock(CacheFactory::class);
+        $this->magentoVersion   = $this->createMock(MagentoVersion::class);
+        $this->stageConfig      = $this->createMock(DeployInterface::class);
 
         $this->step = new Cache(
             $this->configReaderMock,
@@ -112,25 +115,29 @@ class CacheTest extends TestCase
             'socket_close'
         );
     }
-
+    
     /**
-     * @param        array  $configFromFile
-     * @param        array  $config
-     * @param        array  $finalConfig
-     * @param        bool   $isGreaterOrEqual
-     * @param        string $address
-     * @param        int    $port
-     * @throws       StepException
+     * Test execute method.
+     *
+     * @param array $configFromFile
+     * @param array $config
+     * @param array $finalConfig
+     * @param bool $isGreaterOrEqual
+     * @param string $address
+     * @param int $port
      * @dataProvider executeDataProvider
+     * @return void
+     * @throws StepException
      */
+    #[DataProvider('executeDataProvider')]
     public function testExecute(
         array $configFromFile,
         array $config,
         array $finalConfig,
         bool $isGreaterOrEqual,
-        $address,
-        $port
-    ) {
+        string $address,
+        int $port
+    ): void {
         $this->magentoVersion->expects($this->any())
             ->method('isGreaterOrEqual')
             ->with($this->anything())
@@ -162,11 +169,13 @@ class CacheTest extends TestCase
     }
 
     /**
+     * DataProvider for execute method.
+     *
      * @return array[]
      *
      * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
-    public function executeDataProvider(): array
+    public static function executeDataProvider(): array
     {
         return [
             'with qraphql config in file' => [
@@ -365,14 +374,17 @@ class CacheTest extends TestCase
             ],
         ];
     }
-
+    
     /**
-     * @param        array $cacheConfig
-     * @param        array $finalConfig
-     * @return       void
-     * @throws       StepException
+     * Test execute empty config method.
+     *
+     * @param array $cacheConfig
+     * @param array $finalConfig
      * @dataProvider executeEmptyConfig
+     * @return void
+     * @throws StepException
      */
+    #[DataProvider('executeEmptyConfig')]
     public function testExecuteEmptyConfig(array $cacheConfig, array $finalConfig): void
     {
         $this->configReaderMock->expects($this->once())
@@ -395,7 +407,12 @@ class CacheTest extends TestCase
         $this->step->execute();
     }
 
-    public function executeEmptyConfig(): array
+    /**
+     * DataProvider for execute empty config method.
+     *
+     * @return array
+     */
+    public static function executeEmptyConfig(): array
     {
         return [
             'without graphql in config' => [
@@ -423,9 +440,12 @@ class CacheTest extends TestCase
     }
 
     /**
+     * Test execute redis service method.
+     *
+     * @return void
      * @throws StepException
      */
-    public function testExecuteRedisService()
+    public function testExecuteRedisService(): void
     {
         $this->prepareMocks();
 
@@ -433,10 +453,10 @@ class CacheTest extends TestCase
             ->method('create')
             ->with(
                 ['cache' => [
-                'frontend' => ['frontName' => [
-                    'backend' => 'Cm_Cache_Backend_Redis',
-                    'backend_options' => ['server' => 'redis.server', 'port' => 6379],
-                ]],
+                    'frontend' => ['frontName' => [
+                        'backend' => 'Cm_Cache_Backend_Redis',
+                        'backend_options' => ['server' => 'redis.server', 'port' => 6379],
+                    ]],
                 ]]
             );
         $this->loggerMock->expects($this->once())
@@ -447,9 +467,12 @@ class CacheTest extends TestCase
     }
 
     /**
+     * Test execute redis failed method.
+     *
+     * @return void
      * @throws StepException
      */
-    public function testExecuteRedisFailed()
+    public function testExecuteRedisFailed(): void
     {
         $this->prepareMocks(false);
 
@@ -463,7 +486,13 @@ class CacheTest extends TestCase
         $this->step->execute();
     }
 
-    public function testExecuteMixedBackends()
+    /**
+     * Test execute mixed backends method.
+     *
+     * @return void
+     * @throws StepException
+     */
+    public function testExecuteMixedBackends(): void
     {
         $this->configReaderMock->expects($this->once())
             ->method('read')
@@ -472,24 +501,25 @@ class CacheTest extends TestCase
             ->method('get')
             ->willReturn(
                 [
-                'frontend' => [
-                    'frontName1' => [
-                        'backend' => CacheFactory::REDIS_BACKEND_CM_CACHE,
-                        'backend_options' => ['server' => 'redis.server', 'port' => 6379],
+                    'frontend' => [
+                        'frontName1' => [
+                            'backend' => CacheFactory::REDIS_BACKEND_CM_CACHE,
+                            'backend_options' => ['server' => 'redis.server', 'port' => 6379],
+                        ],
+                        'frontName2' => [
+                            'backend' => CacheFactory::REDIS_BACKEND_REDIS_CACHE,
+                            'backend_options' => ['server' => 'redis.server', 'port' => 6379],
+                        ],
+                        'frontName3' => [
+                            'backend' => CacheFactory::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE,
+                            'backend_options' => [
+                                'remote_backend_options' => ['server' => 'redis.server', 'port' => 6379],
+                            ],
+                        ],
+                        'frontName4' => [
+                            'backend' => 'SomeModel',
+                        ],
                     ],
-                    'frontName2' => [
-                        'backend' => CacheFactory::REDIS_BACKEND_REDIS_CACHE,
-                        'backend_options' => ['server' => 'redis.server', 'port' => 6379],
-                    ],
-                    'frontName3' => [
-                        'backend' => CacheFactory::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE,
-                        'backend_options' => [
-                            'remote_backend_options' => ['server' => 'redis.server', 'port' => 6379],],
-                    ],
-                    'frontName4' => [
-                        'backend' => 'SomeModel',
-                    ],
-                ],
                 ]
             );
 
@@ -510,24 +540,25 @@ class CacheTest extends TestCase
             ->method('create')
             ->with(
                 ['cache' => [
-                'frontend' => [
-                    'frontName2' => [
-                        'backend' => CacheFactory::REDIS_BACKEND_REDIS_CACHE,
-                        'backend_options' => ['server' => 'redis.server', 'port' => 6379],
+                    'frontend' => [
+                        'frontName2' => [
+                            'backend' => CacheFactory::REDIS_BACKEND_REDIS_CACHE,
+                            'backend_options' => ['server' => 'redis.server', 'port' => 6379],
+                        ],
+                        'frontName1' => [
+                            'backend' => CacheFactory::REDIS_BACKEND_CM_CACHE,
+                            'backend_options' => ['server' => 'redis.server', 'port' => 6379],
+                        ],
+                        'frontName3' => [
+                            'backend' => CacheFactory::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE,
+                            'backend_options' => [
+                                'remote_backend_options' => ['server' => 'redis.server', 'port' => 6379],
+                            ],
+                        ],
+                        'frontName4' => [
+                            'backend' => 'SomeModel',
+                        ],
                     ],
-                    'frontName1' => [
-                        'backend' => CacheFactory::REDIS_BACKEND_CM_CACHE,
-                        'backend_options' => ['server' => 'redis.server', 'port' => 6379],
-                    ],
-                    'frontName3' => [
-                        'backend' => CacheFactory::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE,
-                        'backend_options' => [
-                            'remote_backend_options' => ['server' => 'redis.server', 'port' => 6379],],
-                    ],
-                    'frontName4' => [
-                        'backend' => 'SomeModel',
-                    ],
-                ],
                 ]]
             );
         $this->loggerMock->expects($this->once())
@@ -538,13 +569,16 @@ class CacheTest extends TestCase
     }
 
     /**
-     * @param  $options
-     * @param  $errorMessage
-     * @throws StepException
+     * Test execute with wrong configuration method.
      *
+     * @param array $options
+     * @param string $errorMessage
      * @dataProvider dataProviderExecuteWithWrongConfiguration
+     * @return void
+     * @throws StepException
      */
-    public function testExecuteWithWrongConfiguration($options, $errorMessage)
+    #[DataProvider('dataProviderExecuteWithWrongConfiguration')]
+    public function testExecuteWithWrongConfiguration(array $options, string $errorMessage): void
     {
         $this->expectExceptionCode(Error::DEPLOY_WRONG_CACHE_CONFIGURATION);
         $this->expectException(StepException::class);
@@ -557,17 +591,22 @@ class CacheTest extends TestCase
             ->method('get')
             ->willReturn(
                 [
-                'frontend' => ['frontName' => [
-                    'backend' => 'Cm_Cache_Backend_Redis',
-                    'backend_options' => $options,
-                ]],
+                    'frontend' => ['frontName' => [
+                        'backend' => 'Cm_Cache_Backend_Redis',
+                        'backend_options' => $options,
+                    ]],
                 ]
             );
 
         $this->step->execute();
     }
 
-    public function dataProviderExecuteWithWrongConfiguration()
+    /**
+     * DataProvider for execute with wrong configuration method.
+     *
+     * @return array
+     */
+    public static function dataProviderExecuteWithWrongConfiguration(): array
     {
         return [
             [
@@ -586,9 +625,12 @@ class CacheTest extends TestCase
     }
 
     /**
+     * Test execute with file system exception method.
+     *
+     * @return void
      * @throws StepException
      */
-    public function testExecuteWithFileSystemException()
+    public function testExecuteWithFileSystemException(): void
     {
         $this->expectExceptionCode(Error::DEPLOY_ENV_PHP_IS_NOT_WRITABLE);
         $this->expectException(StepException::class);
@@ -604,7 +646,10 @@ class CacheTest extends TestCase
     }
 
     /**
+     * Prepare mocks method.
+     *
      * @param bool $socketConnect
+     * @return void
      */
     public function prepareMocks(bool $socketConnect = true): void
     {
@@ -615,10 +660,10 @@ class CacheTest extends TestCase
             ->method('get')
             ->willReturn(
                 [
-                'frontend' => ['frontName' => [
-                    'backend' => 'Cm_Cache_Backend_Redis',
-                    'backend_options' => ['server' => 'redis.server', 'port' => 6379],
-                ]],
+                    'frontend' => ['frontName' => [
+                        'backend' => 'Cm_Cache_Backend_Redis',
+                        'backend_options' => ['server' => 'redis.server', 'port' => 6379],
+                    ]],
                 ]
             );
 

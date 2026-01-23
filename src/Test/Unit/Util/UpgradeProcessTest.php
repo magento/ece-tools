@@ -62,10 +62,10 @@ class UpgradeProcessTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
-        $this->shellMock = $this->getMockForAbstractClass(ShellInterface::class);
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
+        $this->shellMock = $this->createMock(ShellInterface::class);
         $this->fileListMock = $this->createMock(FileList::class);
-        $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
+        $this->stageConfigMock = $this->createMock(DeployInterface::class);
         $this->utilityManagerMock = $this->createMock(UtilityManager::class);
 
         $this->step = new UpgradeProcess(

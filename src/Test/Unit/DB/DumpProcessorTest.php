@@ -13,20 +13,23 @@ use Magento\MagentoCloud\Config\Database\DbConfig;
 use Magento\MagentoCloud\Cron\JobUnlocker;
 use Magento\MagentoCloud\Cron\Switcher;
 use Magento\MagentoCloud\DB\Data\ConnectionFactory;
+use Magento\MagentoCloud\DB\Data\ConnectionInterface;
 use Magento\MagentoCloud\DB\DumpGenerator;
 use Magento\MagentoCloud\DB\DumpProcessor;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Package\UndefinedPackageException;
 use Magento\MagentoCloud\Util\BackgroundProcess;
 use Magento\MagentoCloud\Util\MaintenanceModeSwitcher;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Magento\MagentoCloud\DB\Data\ConnectionInterface;
 
 /**
  * @inheritdoc
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
+#[AllowMockObjectsWithoutExpectations]
 class DumpProcessorTest extends TestCase
 {
     /**
@@ -86,7 +89,7 @@ class DumpProcessorTest extends TestCase
         $this->connectionFactoryMock = $this->createMock(ConnectionFactory::class);
         $this->jobUnlockerMock = $this->createMock(JobUnlocker::class);
         $this->dbConfigMock = $this->createMock(DbConfig::class);
-        $this->connectionDataMock = $this->getMockForAbstractClass(ConnectionInterface::class);
+        $this->connectionDataMock = $this->createMock(ConnectionInterface::class);
 
         $this->connectionFactoryMock->method('create')
             ->willReturn($this->connectionDataMock);
@@ -111,16 +114,20 @@ class DumpProcessorTest extends TestCase
     }
 
     /**
+     * Test execute method.
+     *
      * @param array $dbConfig
-     * @param $expects
+     * @param int $expectCount
      * @param bool $removeDefiners
      * @throws ConfigException
      * @throws FileSystemException
      * @throws GenericException
      * @throws UndefinedPackageException
      * @dataProvider executeDataProvider
+     * @return void
      */
-    public function testExecute(array $dbConfig, $expects, bool $removeDefiners)
+    #[DataProvider('executeDataProvider')]
+    public function testExecute(array $dbConfig, int $expectCount, bool $removeDefiners): void
     {
         $series = [
             ['main', $this->connectionDataMock, $removeDefiners],
@@ -141,7 +148,7 @@ class DumpProcessorTest extends TestCase
             'quote',
             'sales'
         ];
-        $this->dumpGeneratorMock->expects($expects)
+        $this->dumpGeneratorMock->expects($this->exactly($expectCount))
             ->method('create')
             // withConsecutive() alternative.
             ->with(
@@ -155,7 +162,12 @@ class DumpProcessorTest extends TestCase
         $this->dumpProcessor->execute($removeDefiners);
     }
 
-    public function executeDataProvider()
+    /**
+     * Data provider for execute method.
+     *
+     * @return array
+     */
+    public static function executeDataProvider(): array
     {
         return [
             [
@@ -165,7 +177,7 @@ class DumpProcessorTest extends TestCase
                         'indexer' => [],
                     ],
                 ],
-                'expects' => $this->once(),
+                'expectCount' => 1,
                 'removeDefiners' => true
             ],
             [
@@ -177,13 +189,18 @@ class DumpProcessorTest extends TestCase
                         'sales' => [],
                     ],
                 ],
-                'expects' => $this->exactly(3),
+                'expectCount' => 3,
                 'removeDefiners' => false
             ]
         ];
     }
 
-    public function testExecuteWithoutConnections()
+    /**
+     * Test execute method without connections.
+     *
+     * @return void
+     */
+    public function testExecuteWithoutConnections(): void
     {
         $this->dbConfigMock->expects($this->once())
             ->method('get')
@@ -205,18 +222,22 @@ class DumpProcessorTest extends TestCase
     }
 
     /**
+     * Test execute method with databases.
+     *
      * @param array $databases
-     * @param $expects
+     * @param int $expectCount
      * @throws ConfigException
      * @throws FileSystemException
      * @throws GenericException
      * @throws UndefinedPackageException
-     * @dataProvider executeWithDatabasesDataProvider()
+     * @dataProvider executeWithDatabasesDataProvider
+     * @return void
      */
+    #[DataProvider('executeWithDatabasesDataProvider')]
     public function testExecuteWithDatabases(
         array $databases,
-        $expects
-    ) {
+        int $expectCount
+    ): void {
         $series = [
             ['main', $this->connectionDataMock, true],
             ['quote', $this->connectionDataMock, true],
@@ -243,7 +264,7 @@ class DumpProcessorTest extends TestCase
             'quote',
             'sales'
         ];
-        $this->dumpGeneratorMock->expects($expects)
+        $this->dumpGeneratorMock->expects($this->exactly($expectCount))
             ->method('create')
             // withConsecutive() alternative.
             ->with(
@@ -257,25 +278,35 @@ class DumpProcessorTest extends TestCase
         $this->dumpProcessor->execute(true, $databases);
     }
 
-    public function executeWithDatabasesDataProvider()
+    /**
+     * Data provider for executeWithDatabases method.
+     *
+     * @return array
+     */
+    public static function executeWithDatabasesDataProvider(): array
     {
         return [
             [
                 'databases' => ['main'],
-                'expects' => $this->once(),
+                'expectCount' => 1,
             ],
             [
                 'databases' => ['main', 'quote'],
-                'expects' => $this->exactly(2),
+                'expectCount' => 2,
             ],
             [
                 'databases' => ['main', 'quote', 'sales'],
-                'expects' => $this->exactly(3),
+                'expectCount' => 3,
             ]
         ];
     }
 
-    public function testExecuteWithUnavailableConnection()
+    /**
+     * Test execute method with unavailable connection.
+     *
+     * @return void
+     */
+    public function testExecuteWithUnavailableConnection(): void
     {
         $this->dbConfigMock->expects($this->once())
             ->method('get')

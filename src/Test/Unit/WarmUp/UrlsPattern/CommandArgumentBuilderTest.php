@@ -9,12 +9,15 @@ namespace Magento\MagentoCloud\Test\Unit\WarmUp\UrlsPattern;
 
 use Codeception\PHPUnit\TestCase;
 use Magento\MagentoCloud\WarmUp\UrlsPattern\CommandArgumentBuilder;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use Psr\Log\LoggerInterface;
 
 /**
  * @inheritDoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class CommandArgumentBuilderTest extends TestCase
 {
     /**
@@ -32,17 +35,21 @@ class CommandArgumentBuilderTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
 
         $this->argumentBuilder = new CommandArgumentBuilder($this->loggerMock);
     }
 
     /**
+     * Test generate method.
+     *
      * @param string $entity
      * @param string $storeIds
      * @param array $expected
      * @dataProvider generateDataProvider
+     * @return void
      */
+    #[DataProvider('generateDataProvider')]
     public function testGenerate(string $entity, string $storeIds, array $expected)
     {
         $this->assertEquals(
@@ -52,9 +59,11 @@ class CommandArgumentBuilderTest extends TestCase
     }
 
     /**
+     * Data provider for generate method.
+     *
      * @return array
      */
-    public function generateDataProvider(): array
+    public static function generateDataProvider(): array
     {
         return [
             [
@@ -102,7 +111,12 @@ class CommandArgumentBuilderTest extends TestCase
         ];
     }
 
-    public function testGenerateWithProductSkus()
+    /**
+     * Test generate with product SKUs.
+     *
+     * @return void
+     */
+    public function testGenerateWithProductSkus(): void
     {
         $this->loggerMock->expects($this->never())
             ->method('info')
@@ -120,7 +134,12 @@ class CommandArgumentBuilderTest extends TestCase
         );
     }
 
-    public function testGenerateWithProductSkusAll()
+    /**
+     * Test generate with product SKUs all.
+     *
+     * @return void
+     */
+    public function testGenerateWithProductSkusAll(): void
     {
         $this->loggerMock->expects($this->once())
             ->method('info')

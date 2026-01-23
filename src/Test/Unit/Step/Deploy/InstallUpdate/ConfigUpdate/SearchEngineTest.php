@@ -9,14 +9,16 @@ namespace Magento\MagentoCloud\Test\Unit\Step\Deploy\InstallUpdate\ConfigUpdate;
 
 use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface as EnvReader;
 use Magento\MagentoCloud\Config\Magento\Env\WriterInterface as EnvWriter;
-use Magento\MagentoCloud\Config\SearchEngine as SearchEngineConfig;
 use Magento\MagentoCloud\Config\Magento\Shared\ReaderInterface as SharedReader;
 use Magento\MagentoCloud\Config\Magento\Shared\WriterInterface as SharedWriter;
+use Magento\MagentoCloud\Config\SearchEngine as SearchEngineConfig;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Package\UndefinedPackageException;
 use Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\SearchEngine;
 use Magento\MagentoCloud\Step\StepException;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -24,6 +26,7 @@ use Psr\Log\LoggerInterface;
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class SearchEngineTest extends TestCase
 {
     /**
@@ -71,11 +74,11 @@ class SearchEngineTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->envWriterMock = $this->getMockForAbstractClass(EnvWriter::class);
-        $this->envReaderMock = $this->getMockForAbstractClass(EnvReader::class);
-        $this->sharedWriterMock = $this->getMockForAbstractClass(SharedWriter::class);
-        $this->sharedReaderMock = $this->getMockForAbstractClass(SharedReader::class);
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->envWriterMock = $this->createMock(EnvWriter::class);
+        $this->envReaderMock = $this->createMock(EnvReader::class);
+        $this->sharedWriterMock = $this->createMock(SharedWriter::class);
+        $this->sharedReaderMock = $this->createMock(SharedReader::class);
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
         $this->configMock = $this->createMock(SearchEngineConfig::class);
 
@@ -91,6 +94,8 @@ class SearchEngineTest extends TestCase
     }
 
     /**
+     * Test execute method.
+     *
      * @param bool $is21
      * @param $useSharedWriter
      * @param $useSharedReader
@@ -99,19 +104,22 @@ class SearchEngineTest extends TestCase
      * @param array $searchConfig
      * @param array $fileConfig
      * @param array $expectedConfig
-     * @throws StepException
      * @dataProvider executeDataProvider
+     * @return void
+     * @throws \ReflectionException
+     * @throws StepException
      */
+    #[DataProvider('executeDataProvider')]
     public function testExecute(
         bool $is21,
-        $useSharedWriter,
-        $useSharedReader,
-        $useEnvWriter,
-        $useEnvReader,
+        bool $useSharedWriter,
+        bool $useSharedReader,
+        bool $useEnvWriter,
+        bool $useEnvReader,
         array $searchConfig,
         array $fileConfig,
         array $expectedConfig
-    ) {
+    ): void {
         $this->configMock->expects($this->once())
             ->method('getConfig')
             ->willReturn($searchConfig);
@@ -133,16 +141,16 @@ class SearchEngineTest extends TestCase
             ->method('satisfies')
             ->with('2.1.*')
             ->willReturn($is21);
-        $this->sharedReaderMock->expects($useSharedReader)
+        $this->sharedReaderMock->expects($useSharedReader ? $this->once() : $this->never())
             ->method('read')
             ->willReturn($fileConfig);
-        $this->sharedWriterMock->expects($useSharedWriter)
+        $this->sharedWriterMock->expects($useSharedWriter ? $this->once() : $this->never())
             ->method('create')
             ->with($expectedConfig);
-        $this->envReaderMock->expects($useEnvReader)
+        $this->envReaderMock->expects($useEnvReader ? $this->once() : $this->never())
             ->method('read')
             ->willReturn($fileConfig);
-        $this->envWriterMock->expects($useEnvWriter)
+        $this->envWriterMock->expects($useEnvWriter ? $this->once() : $this->never())
             ->method('create')
             ->with($expectedConfig);
 
@@ -150,10 +158,12 @@ class SearchEngineTest extends TestCase
     }
 
     /**
+     * Execute data provider method.
+     *
      * @return array
      * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
-    public function executeDataProvider(): array
+    public static function executeDataProvider(): array
     {
         $mysqlSearchConfig['system']['default']['catalog']['search'] = ['engine' => 'mysql'];
         $elasticSearchConfig = [
@@ -249,40 +259,40 @@ class SearchEngineTest extends TestCase
         return [
             'magento version 2.1 mysql config' => [
                 'is21' => true,
-                'useSharedWriter' => $this->once(),
-                'useSharedReader' => $this->once(),
-                'useEnvWriter' => $this->never(),
-                'useEnvReader' => $this->never(),
+                'useSharedWriter' => true,
+                'useSharedReader' => true,
+                'useEnvWriter' => false,
+                'useEnvReader' => false,
                 'searchConfig' => $mysqlSearchConfig,
                 'fileConfig' => $fileConfig,
                 'expectedConfig' => $mysqlExpectedConfig
             ],
             'magento version > 2.1 mysql config' => [
                 'is21' => false,
-                'useSharedWriter' => $this->never(),
-                'useSharedReader' => $this->never(),
-                'useEnvWriter' => $this->once(),
-                'useEnvReader' => $this->once(),
+                'useSharedWriter' => false,
+                'useSharedReader' => false,
+                'useEnvWriter' => true,
+                'useEnvReader' => true,
                 'searchConfig' => $mysqlSearchConfig,
                 'fileConfig' => $fileConfig,
                 'expectedConfig' => $mysqlExpectedConfig
             ],
             'magento version 2.1 elasticsearch config' => [
                 'is21' => true,
-                'useSharedWriter' => $this->once(),
-                'useSharedReader' => $this->once(),
-                'useEnvWriter' => $this->never(),
-                'useEnvReader' => $this->never(),
+                'useSharedWriter' => true,
+                'useSharedReader' => true,
+                'useEnvWriter' => false,
+                'useEnvReader' => false,
                 'searchConfig' => $elasticSearchConfig,
                 'fileConfig' => $fileConfig,
                 'expectedConfig' => $elasticExpectedConfig
             ],
             'magento version > 2.1 elasticsearch config' => [
                 'is21' => false,
-                'useSharedWriter' => $this->never(),
-                'useSharedReader' => $this->never(),
-                'useEnvWriter' => $this->once(),
-                'useEnvReader' => $this->once(),
+                'useSharedWriter' => false,
+                'useSharedReader' => false,
+                'useEnvWriter' => true,
+                'useEnvReader' => true,
                 'searchConfig' => $elasticSearchConfig,
                 'fileConfig' => $fileConfig,
                 'expectedConfig' => $elasticExpectedConfig
@@ -292,9 +302,13 @@ class SearchEngineTest extends TestCase
     }
 
     /**
+     * Test execute with exception method.
+     *
+     * @return void
+     * @throws \ReflectionException
      * @throws StepException
      */
-    public function testExecuteWithException()
+    public function testExecuteWithException(): void
     {
         $this->expectException(StepException::class);
         $this->expectExceptionMessage('Some error');
@@ -334,9 +348,13 @@ class SearchEngineTest extends TestCase
     }
 
     /**
+     * Test execute with package exception method.
+     *
+     * @return void
+     * @throws \ReflectionException
      * @throws StepException
      */
-    public function testExecuteWithPackageException()
+    public function testExecuteWithPackageException(): void
     {
         $this->expectException(StepException::class);
         $this->expectExceptionMessage('Some error');
@@ -369,9 +387,13 @@ class SearchEngineTest extends TestCase
     }
 
     /**
+     * Test execute with config exception method.
+     *
+     * @return void
+     * @throws \ReflectionException
      * @throws StepException
      */
-    public function testExecuteWithConfigException()
+    public function testExecuteWithConfigException(): void
     {
         $this->expectException(StepException::class);
         $this->expectExceptionMessage('Some error');

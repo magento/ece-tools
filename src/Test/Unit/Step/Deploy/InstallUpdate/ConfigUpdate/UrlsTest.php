@@ -12,6 +12,7 @@ use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\Urls;
 use Magento\MagentoCloud\Step\StepException;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -19,6 +20,7 @@ use Psr\Log\LoggerInterface;
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class UrlsTest extends TestCase
 {
     /**
@@ -57,8 +59,8 @@ class UrlsTest extends TestCase
     protected function setUp(): void
     {
         $this->environmentMock = $this->createMock(Environment::class);
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
-        $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
+        $this->stageConfigMock = $this->createMock(DeployInterface::class);
         $this->databaseUrlMock = $this->createMock(Urls\Database::class);
         $this->environmentUrlMock = $this->createMock(Urls\Environment::class);
 

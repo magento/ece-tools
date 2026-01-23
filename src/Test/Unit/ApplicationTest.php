@@ -13,6 +13,7 @@ use Composer\Package\RootPackageInterface;
 use Magento\MagentoCloud\App\ContainerInterface;
 use Magento\MagentoCloud\Application;
 use Magento\MagentoCloud\Command;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Input\InputDefinition;
@@ -20,6 +21,7 @@ use Symfony\Component\Console\Input\InputDefinition;
 /**
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
+#[AllowMockObjectsWithoutExpectations]
 class ApplicationTest extends TestCase
 {
     /**
@@ -100,8 +102,8 @@ class ApplicationTest extends TestCase
      */
     public function setUp(): void
     {
-        $this->containerMock = $this->getMockForAbstractClass(ContainerInterface::class);
-        $this->packageMock = $this->getMockForAbstractClass(RootPackageInterface::class);
+        $this->containerMock = $this->createMock(ContainerInterface::class);
+        $this->packageMock = $this->createMock(RootPackageInterface::class);
         $this->composerMock = $this->createMock(Composer::class);
         $this->inputDefinitionMock = $this->createMock(InputDefinition::class);
 
@@ -110,7 +112,7 @@ class ApplicationTest extends TestCase
         ];
 
         foreach ($this->classMap as $name => $className) {
-            $mock = $this->createMock($className);
+            $mock = $this->createStub($className);
             $mock->method('getName')
                 ->willReturn($name);
             $mock->method('isEnabled')

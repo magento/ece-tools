@@ -1,8 +1,10 @@
 <?php
+
 /**
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+
 declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Config\Stage\Deploy;
@@ -16,6 +18,8 @@ use Magento\MagentoCloud\Config\Stage\Deploy\EnvironmentConfig;
 use Magento\MagentoCloud\Config\Stage\Deploy\MergedConfig;
 use Magento\MagentoCloud\Config\StageConfigInterface;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Yaml\Exception\ParseException;
@@ -23,6 +27,7 @@ use Symfony\Component\Yaml\Exception\ParseException;
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class MergedConfigTest extends TestCase
 {
     /**
@@ -62,14 +67,17 @@ class MergedConfigTest extends TestCase
     }
 
     /**
+     * Test get method.
+     *
      * @param array $defaults
      * @param array $envConfig
      * @param array $envVarConfig
      * @param array $expectedConfig
      * @dataProvider getDataProvider
-     *
+     * @return void
      * @throws ConfigException
      */
+    #[DataProvider('getDataProvider')]
     public function testGet(array $defaults, array $envConfig, array $envVarConfig, array $expectedConfig): void
     {
         $this->schemaMock->expects($this->once())
@@ -90,9 +98,11 @@ class MergedConfigTest extends TestCase
     }
 
     /**
+     * Data provider for get method.
+     *
      * @return array
      */
-    public function getDataProvider(): array
+    public static function getDataProvider(): array
     {
         return [
             'empty data' => [
@@ -177,6 +187,9 @@ class MergedConfigTest extends TestCase
     }
 
     /**
+     * Test getWithFileSystemException method.
+     *
+     * @return void
      * @throws ConfigException
      */
     public function testGetWithFileSystemException(): void
@@ -193,6 +206,9 @@ class MergedConfigTest extends TestCase
     }
 
     /**
+     * Test getWithParseException method.
+     *
+     * @return void
      * @throws ConfigException
      */
     public function testGetWithParseException(): void
@@ -209,6 +225,9 @@ class MergedConfigTest extends TestCase
     }
 
     /**
+     * Test getWithSchemaReadException method.
+     *
+     * @return void
      * @throws ConfigException
      */
     public function testGetWithSchemaReadException(): void

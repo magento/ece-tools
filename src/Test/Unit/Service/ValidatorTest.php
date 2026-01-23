@@ -12,12 +12,15 @@ use Magento\MagentoCloud\Package\UndefinedPackageException;
 use Magento\MagentoCloud\Service\ServiceInterface;
 use Magento\MagentoCloud\Service\ServiceMismatchException;
 use Magento\MagentoCloud\Service\Validator;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class ValidatorTest extends TestCase
 {
     /**
@@ -41,33 +44,43 @@ class ValidatorTest extends TestCase
     }
 
     /**
+     * Test validate versions.
+     *
      * @param string $magentoVersion
      * @param array $versions
      * @param int $errorsNumber
+     * @dataProvider validateVersionsDataProvider
+     * @return void
      * @throws UndefinedPackageException
      * @throws ServiceMismatchException
      *
-     * @dataProvider validateVersionsDataProvider
      */
-    public function testValidateVersions(string $magentoVersion, array $versions, int $errorsNumber = 0)
+    #[DataProvider('validateVersionsDataProvider')]
+    public function testValidateVersions(string $magentoVersion, array $versions, int $errorsNumber = 0): void
     {
         $this->magentoVersionMock->method('getVersion')
             ->willReturn($magentoVersion);
 
-        $this->assertEquals($errorsNumber, count($this->validator->validateVersions($versions)));
+        $this->assertEquals(
+            $errorsNumber,
+            count($this->validator->validateVersions($versions))
+        );
     }
 
     /**
+     * Test validate fail message.
+     *
+     * @return void
      * @throws UndefinedPackageException
      * @throws ServiceMismatchException
      */
-    public function testValidateFailMessage()
+    public function testValidateFailMessage(): void
     {
         $magentoVersion = '2.2.6';
         $version = '6.5';
         $message = sprintf(
             'Magento %s does not support version "%s" for service "%s". '
-            . 'Service version should satisfy "~1.7.0 || ~2.4.0 || ~5.2.0" constraint.',
+                . 'Service version should satisfy "~1.7.0 || ~2.4.0 || ~5.2.0" constraint.',
             $magentoVersion,
             $version,
             ServiceInterface::NAME_ELASTICSEARCH
@@ -83,6 +96,9 @@ class ValidatorTest extends TestCase
     }
 
     /**
+     * Test validate nonexistent service.
+     *
+     * @return void
      * @throws UndefinedPackageException
      * @throws ServiceMismatchException
      */
@@ -106,11 +122,13 @@ class ValidatorTest extends TestCase
     }
 
     /**
+     * Data provider for validate versions.
+     *
      * @return array
      *
      * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
-    public function validateVersionsDataProvider(): array
+    public static function validateVersionsDataProvider(): array
     {
         return [
             [

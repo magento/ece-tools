@@ -9,6 +9,7 @@ namespace Magento\MagentoCloud\Test\Unit\Config;
 
 use Magento\MagentoCloud\Config\ConfigMerger;
 use Magento\MagentoCloud\Config\StageConfigInterface;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -30,19 +31,25 @@ class ConfigMergerTest extends TestCase
     }
 
     /**
+     * Data provider for testIsEmpty.
+     *
      * @param array $config
      * @param bool $expected
      * @dataProvider isEmptyDataProvider
      */
+    #[DataProvider('isEmptyDataProvider')]
+
     public function testIsEmpty(array $config, bool $expected): void
     {
         $this->assertEquals($expected, $this->configMerger->isEmpty($config));
     }
 
     /**
+     * Data provider for testIsEmpty.
+     *
      * @return array
      */
-    public function isEmptyDataProvider(): array
+    public static function isEmptyDataProvider(): array
     {
         return [
             [
@@ -67,6 +74,11 @@ class ConfigMergerTest extends TestCase
         ];
     }
 
+    /**
+     * Test clear method.
+     *
+     * @return void
+     */
     public function testClear(): void
     {
         $this->assertSame(
@@ -79,19 +91,24 @@ class ConfigMergerTest extends TestCase
     }
 
     /**
+     * Data provider for testIsMergeRequired.
+     *
      * @param array $config
      * @param bool $expected
      * @dataProvider isMergeRequiredDataProvider
      */
+    #[DataProvider('isMergeRequiredDataProvider')]
     public function testIsMergeRequired(array $config, bool $expected): void
     {
         $this->assertEquals($expected, $this->configMerger->isMergeRequired($config));
     }
 
     /**
+     * Data provider for testIsMergeRequired.
+     *
      * @return array
      */
-    public function isMergeRequiredDataProvider(): array
+    public static function isMergeRequiredDataProvider(): array
     {
         return [
             [
@@ -124,11 +141,14 @@ class ConfigMergerTest extends TestCase
     }
 
     /**
+     * Data provider for testMerge.
+     *
      * @param array $baseConfig
      * @param array $configToMerge
      * @param array $expected
      * @dataProvider mergeDataProvider
      */
+    #[DataProvider('mergeDataProvider')]
     public function testMerge(array $baseConfig, array $configToMerge, array $expected): void
     {
         $this->assertEquals(
@@ -138,9 +158,11 @@ class ConfigMergerTest extends TestCase
     }
 
     /**
+     * Data provider for testMerge.
+     *
      * @return array
      */
-    public function mergeDataProvider(): array
+    public static function mergeDataProvider(): array
     {
         return [
             [

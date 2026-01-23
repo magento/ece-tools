@@ -44,9 +44,9 @@ class CronKillTest extends TestCase
     public function testExecute()
     {
         /** @var InputInterface|MockObject $inputMock */
-        $inputMock = $this->createMock(InputInterface::class);
+        $inputMock = $this->createStub(InputInterface::class);
         /** @var OutputInterface|MockObject $outputMock */
-        $outputMock = $this->createMock(OutputInterface::class);
+        $outputMock = $this->createStub(OutputInterface::class);
 
         $this->backgroundProcessMock->expects($this->once())
             ->method('kill');

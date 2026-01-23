@@ -13,12 +13,14 @@ use Magento\MagentoCloud\DB\Connection;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\StaticContent\Deploy\Option;
 use Magento\MagentoCloud\StaticContent\ThreadCountOptimizer;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class OptionTest extends TestCase
 {
     /**
@@ -58,9 +60,9 @@ class OptionTest extends TestCase
     {
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
         $this->connectionMock = $this->createMock(Connection::class);
-        $this->adminDataMock = $this->getMockForAbstractClass(AdminDataInterface::class);
+        $this->adminDataMock = $this->createMock(AdminDataInterface::class);
         $this->threadCountOptimizerMock = $this->createMock(ThreadCountOptimizer::class);
-        $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
+        $this->stageConfigMock = $this->createMock(DeployInterface::class);
 
         $this->option = new Option(
             $this->adminDataMock,

@@ -12,15 +12,18 @@ use Magento\MagentoCloud\DB\Data\Connection;
 use Magento\MagentoCloud\DB\Data\ConnectionFactory;
 use Magento\MagentoCloud\DB\Data\ConnectionTypes;
 use Magento\MagentoCloud\Service\Database;
+use Magento\MagentoCloud\Service\ServiceException;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class DatabaseTest extends TestCase
 {
-
     /**
      * @var Database
      */
@@ -52,7 +55,7 @@ class DatabaseTest extends TestCase
     public function setUp(): void
     {
         $this->connectionTypeMock = $this->createMock(ConnectionTypes::class);
-        $this->connectionMock = $this->getMockForAbstractClass(ConnectionInterface::class);
+        $this->connectionMock = $this->createMock(ConnectionInterface::class);
         $this->connectionFactoryMock = $this->createMock(ConnectionFactory::class);
         $this->connectionDataMock = $this->createMock(Connection::class);
         $this->connectionFactoryMock->expects($this->any())
@@ -85,11 +88,14 @@ class DatabaseTest extends TestCase
     }
 
     /**
+     * Test get version from config method.
+     *
      * @param array $config
      * @param string $expectedVersion
-     *
      * @dataProvider getVersionFromConfigDataProvider
+     * @return void
      */
+    #[DataProvider('getVersionFromConfigDataProvider')]
     public function testGetVersionFromConfig(array $config, string $expectedVersion): void
     {
         $this->connectionDataMock->expects($this->once())
@@ -106,9 +112,10 @@ class DatabaseTest extends TestCase
 
     /**
      * Data provider for testGetVersionFromConfig
+     *
      * @return array
      */
-    public function getVersionFromConfigDataProvider(): array
+    public static function getVersionFromConfigDataProvider(): array
     {
         return [
             [
@@ -123,7 +130,9 @@ class DatabaseTest extends TestCase
     }
 
     /**
-     * @inheritDoc
+     * Test get version custom host method.
+     *
+     * @return void
      */
     public function testGetVersionCustomHost(): void
     {
@@ -148,12 +157,15 @@ class DatabaseTest extends TestCase
     }
 
     /**
+     * Test get version method.
+     *
      * @param array $version
      * @param string $expectedResult
-     * @throws \Magento\MagentoCloud\Service\ServiceException
-     *
      * @dataProvider getVersionDataProvider
+     * @return void
+     * @throws ServiceException
      */
+    #[DataProvider('getVersionDataProvider')]
     public function testGetVersion(array $version, string $expectedResult): void
     {
         $this->connectionTypeMock->expects($this->once())
@@ -175,17 +187,46 @@ class DatabaseTest extends TestCase
 
     /**
      * Data provider for testGetVersion
+     *
      * @return array
      */
-    public function getVersionDataProvider(): array
+    public static function getVersionDataProvider(): array
     {
         return [
-            [['version' => '10.2.33-MariaDB-10.2.33+maria~stretch-lo'], '10.2'],
-            [['version' => '10.3.20-MariaDB-1:10.3.20+maria~jessie'], '10.3'],
-            [['version' => 's10.3.20-MariaDB-1:10.3.20+maria~jessie'], '0'],
-            [['version' => ''], '0'],
-            [['version' => '10.version'], '0'],
-            [[], '0'],
+            [
+                [
+                    'version' => '10.2.33-MariaDB-10.2.33+maria~stretch-lo'
+                ],
+                '10.2',
+            ],
+            [
+                [
+                    'version' => '10.3.20-MariaDB-1:10.3.20+maria~jessie'
+                ],
+                '10.3',
+            ],
+            [
+                [
+                    'version' => 's10.3.20-MariaDB-1:10.3.20+maria~jessie'
+                ],
+                '0',
+            ],
+            [
+                [
+                    'version' => ''
+                ],
+                '0',
+            ],
+            [
+                [
+                    'version' => '10.version'
+                ],
+                '0',
+            ],
+            [
+                [],
+                '0',
+            ],
         ];
     }
 }

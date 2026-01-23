@@ -8,10 +8,12 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit\StaticContent;
 
 use Magento\MagentoCloud\Config\GlobalSection;
+use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\StaticContent\CommandFactory;
 use Magento\MagentoCloud\StaticContent\OptionInterface;
-use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\StaticContent\ThemeResolver;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -19,6 +21,7 @@ use Psr\Log\LoggerInterface;
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class CommandFactoryTest extends TestCase
 {
     /**
@@ -54,7 +57,7 @@ class CommandFactoryTest extends TestCase
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
         $this->globalConfigMock = $this->createMock(GlobalSection::class);
         $this->themeResolverMock = $this->createMock(ThemeResolver::class);
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
 
         $this->commandFactory = new CommandFactory(
             $this->magentoVersionMock,
@@ -65,12 +68,16 @@ class CommandFactoryTest extends TestCase
     }
 
     /**
+     * Test create method.
+     *
      * @param array $optionConfig
      * @param bool $useScdStrategy
      * @param string $expected
-     *
      * @dataProvider createDataProvider
+     * @return void
+     * @throws \ReflectionException
      */
+    #[DataProvider('createDataProvider')]
     public function testCreate(array $optionConfig, bool $useScdStrategy, string $expected): void
     {
         $this->magentoVersionMock
@@ -99,11 +106,13 @@ class CommandFactoryTest extends TestCase
     }
 
     /**
+     * Data provider for create method.
+     *
      * @return array
      *
      * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
-    public function createDataProvider(): array
+    public static function createDataProvider(): array
     {
         return [
             [
@@ -217,14 +226,15 @@ class CommandFactoryTest extends TestCase
     }
 
     /**
+     * Create option mock.
+     *
      * @param array $optionConfig
      * @param int $getStrategyTimes
-     *
      * @return MockObject|OptionInterface
      */
-    private function createOption(array $optionConfig, int $getStrategyTimes)
+    private function createOption(array $optionConfig, int $getStrategyTimes): MockObject|OptionInterface
     {
-        $optionMock = $this->getMockForAbstractClass(OptionInterface::class);
+        $optionMock = $this->createMock(OptionInterface::class);
 
         if (isset($optionConfig['thread_count'])) {
             $optionMock->expects($this->once())
@@ -254,16 +264,20 @@ class CommandFactoryTest extends TestCase
     }
 
     /**
+     * Test matrix method.
+     *
      * @param array $optionConfig
      * @param array $matrix
      * @param array $expected
-     *
      * @dataProvider matrixDataProvider
+     * @return void
+     * @throws \ReflectionException
      */
-    public function testMatrix(array $optionConfig, array $matrix, array $expected)
+    #[DataProvider('matrixDataProvider')]
+    public function testMatrix(array $optionConfig, array $matrix, array $expected): void
     {
         /** @var OptionInterface|MockObject $optionMock */
-        $optionMock = $this->getMockForAbstractClass(OptionInterface::class);
+        $optionMock = $this->createMock(OptionInterface::class);
         $optionMock->expects($this->any())
             ->method('getStrategy')
             ->willReturn($optionConfig['strategy']);
@@ -299,9 +313,11 @@ class CommandFactoryTest extends TestCase
     }
 
     /**
+     * Data provider for matrix method.
+     *
      * @return array
      */
-    public function matrixDataProvider(): array
+    public static function matrixDataProvider(): array
     {
         return [
             [
@@ -383,7 +399,12 @@ class CommandFactoryTest extends TestCase
         ];
     }
 
-    public function testCreateNoResolve()
+    /**
+     * Test create no resolve.
+     *
+     * @return void
+     */
+    public function testCreateNoResolve(): void
     {
         $excludedThemes = ['Theme1'];
         $optionConfig = [
@@ -421,6 +442,11 @@ class CommandFactoryTest extends TestCase
         );
     }
 
+    /**
+     * Test matrix no resolve.
+     *
+     * @return void
+     */
     public function testMatrixNoResolve(): void
     {
         $matrix = [
@@ -434,7 +460,7 @@ class CommandFactoryTest extends TestCase
         ];
 
         /** @var OptionInterface|MockObject $optionMock */
-        $optionMock = $this->getMockForAbstractClass(OptionInterface::class);
+        $optionMock = $this->createMock(OptionInterface::class);
 
         $optionMock->expects($this->any())
             ->method('getStrategy')

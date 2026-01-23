@@ -3,7 +3,6 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-
 declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Util;
@@ -14,13 +13,17 @@ use Magento\MagentoCloud\Shell\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Shell\ShellFactory;
 use Magento\MagentoCloud\Util\UrlManager;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
 /**
+ * @inheritdoc
  * @see UrlManager
  */
+#[AllowMockObjectsWithoutExpectations]
 class UrlManagerTest extends TestCase
 {
     /**
@@ -48,7 +51,7 @@ class UrlManagerTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
         $this->environmentMock = $this->createMock(Environment::class);
         $this->magentoShellMock = $this->createMock(MagentoShell::class);
         /** @var ShellFactory|MockObject $shellFactoryMock */
@@ -65,9 +68,12 @@ class UrlManagerTest extends TestCase
     }
 
     /**
+     * Test parsing of secure routes.
+     *
      * @param array $routes
-     * @dataProvider secureRouteDataProvider
+     * @dataProvider secureRouteDataProviderForParse
      */
+    #[DataProvider('secureRouteDataProviderForParse')]
     public function testParseRoutesSecure(array $routes): void
     {
         $this->environmentMock->expects($this->once())
@@ -78,9 +84,24 @@ class UrlManagerTest extends TestCase
     }
 
     /**
-     * @param array $routes
-     * @dataProvider unsecureRouteDataProvider
+     * Data provider for testParseRoutesSecure (routes only).
+     *
+     * @return array
      */
+    public static function secureRouteDataProviderForParse(): array
+    {
+        return [
+            [self::secureUrlExample()],
+        ];
+    }
+
+    /**
+     * Test parsing of unsecure routes.
+     *
+     * @param array $routes
+     * @dataProvider unsecureRouteDataProviderForParse
+     */
+    #[DataProvider('unsecureRouteDataProviderForParse')]
     public function testParseRoutesUnsecure(array $routes): void
     {
         $this->environmentMock->expects($this->once())
@@ -91,10 +112,25 @@ class UrlManagerTest extends TestCase
     }
 
     /**
+     * Data provider for testParseRoutesUnsecure (routes only).
+     *
+     * @return array
+     */
+    public static function unsecureRouteDataProviderForParse(): array
+    {
+        return [
+            [self::unsecureUrlExample()],
+        ];
+    }
+
+    /**
+     * Test getting secure URLs.
+     *
      * @param array $secureRoute
      * @param string $expectedUrl
      * @dataProvider secureRouteDataProvider
      */
+    #[DataProvider('secureRouteDataProvider')]
     public function testGetSecureUrlMethod(array $secureRoute, string $expectedUrl): void
     {
         $this->environmentMock->expects($this->once())
@@ -105,10 +141,13 @@ class UrlManagerTest extends TestCase
     }
 
     /**
+     * Test getting unsecure URLs.
+     *
      * @param array $unsecureRoute
      * @param string $expectedUrl
      * @dataProvider unsecureRouteDataProvider
      */
+    #[DataProvider('unsecureRouteDataProvider')]
     public function testGetUnsecureUrlMethod(array $unsecureRoute, string $expectedUrl): void
     {
         $this->environmentMock->expects($this->once())
@@ -121,10 +160,13 @@ class UrlManagerTest extends TestCase
     }
 
     /**
+     * Test no secure routes present.
+     *
      * @param array $unsecureRoute
      * @param $expectedUrl
      * @dataProvider noSecureRouteUrlDataProvider
      */
+    #[DataProvider('noSecureRouteUrlDataProvider')]
     public function testNoSecure(array $unsecureRoute, array $expectedUrl): void
     {
         $this->environmentMock->expects($this->once())
@@ -135,9 +177,12 @@ class UrlManagerTest extends TestCase
     }
 
     /**
+     * Test getting secure URLs.
+     *
      * @param array $secureRoute
      * @dataProvider secureRouteUrlDataProvider
      */
+    #[DataProvider('secureRouteUrlDataProvider')]
     public function testGetSecureUrl(array $secureRoute): void
     {
         $this->environmentMock->expects($this->once())
@@ -149,10 +194,13 @@ class UrlManagerTest extends TestCase
     }
 
     /**
+     * Test getting all URLs.
+     *
      * @param array $routes
      * @param array $expectedResult
      * @dataProvider getUrlsDataProvider
      */
+    #[DataProvider('getUrlsDataProvider')]
     public function testGetUrls(array $routes, array $expectedResult): void
     {
         $this->environmentMock->expects($this->once())
@@ -165,10 +213,13 @@ class UrlManagerTest extends TestCase
     }
 
     /**
+     * Test getting primary URLs.
+     *
      * @param array $routes
      * @param array $expectedResult
      * @dataProvider getPrimaryUrlsDataProvider
      */
+    #[DataProvider('getPrimaryUrlsDataProvider')]
     public function testGetPrimaryUrls(array $routes, array $expectedResult): void
     {
         $this->environmentMock->expects($this->once())
@@ -178,6 +229,12 @@ class UrlManagerTest extends TestCase
         $this->assertEquals($expectedResult, $this->manager->getUrls());
     }
 
+    /**
+     * Test getting URLs exception.
+     *
+     * @return void
+     * @throws \RuntimeException
+     */
     public function testGetUrlsException(): void
     {
         $this->expectException(\RuntimeException::class);
@@ -188,26 +245,30 @@ class UrlManagerTest extends TestCase
     }
 
     /**
+     * Test all routes data provider.
+     *
      * @return array
      */
-    public function allRoutesDataProvider(): array
+    public static function allRoutesDataProvider(): array
     {
         return [
             [
-                $this->secureUrlExample(),
-                $this->unsecureUrlExample(),
+                self::secureUrlExample(),
+                self::unsecureUrlExample(),
             ],
         ];
     }
 
     /**
+     * Test no secure routes present.
+     *
      * @return array
      */
-    public function noSecureRouteUrlDataProvider(): array
+    public static function noSecureRouteUrlDataProvider(): array
     {
         return [
             [
-                $this->unsecureUrlExample(),
+                self::unsecureUrlExample(),
                 [
                     'example.com' => 'https://example.com/',
                 ],
@@ -216,54 +277,67 @@ class UrlManagerTest extends TestCase
     }
 
     /**
+     * Test secure routes data provider.
+     *
      * @return array
      */
-    public function secureRouteDataProvider(): array
+    public static function secureRouteDataProvider(): array
     {
         return [
             [
-                $this->secureUrlExample(),
+                self::secureUrlExample(),
                 'example.com',
             ],
         ];
     }
 
     /**
+     * Test unsecure routes data provider.
+     *
      * @return array
      */
-    public function unsecureRouteDataProvider(): array
+    public static function unsecureRouteDataProvider(): array
     {
         return [
             [
-                $this->unsecureUrlExample(),
+                self::unsecureUrlExample(),
                 'example.com',
             ],
         ];
     }
 
     /**
+     * Test secure routes data provider.
+     *
      * @return array
      */
-    public function secureRouteUrlDataProvider(): array
+    public static function secureRouteUrlDataProvider(): array
     {
         return [
             [
-                $this->secureUrlExample(),
+                self::secureUrlExample(),
             ],
         ];
     }
 
     /**
+     * Test unsecure routes data provider.
+     *
      * @return array
      */
-    public function unsecureRouteUrlDataProvider(): array
+    public static function unsecureRouteUrlDataProvider(): array
     {
         return [
-            $this->secureUrlExample(),
+            self::secureUrlExample(),
         ];
     }
 
-    private function secureUrlExample(): array
+    /**
+     * Secure URL example.
+     *
+     * @return array
+     */
+    private static function secureUrlExample(): array
     {
         return [
             'https://example.com/' => [
@@ -286,7 +360,12 @@ class UrlManagerTest extends TestCase
         ];
     }
 
-    private function unsecureUrlExample(): array
+    /**
+     * Unsecure URL example.
+     *
+     * @return array
+     */
+    private static function unsecureUrlExample(): array
     {
         return [
             'http://example.com/' => [
@@ -310,10 +389,11 @@ class UrlManagerTest extends TestCase
     }
 
     /**
-     * DataProvider for testGetUrls
+     * DataProvider for testGetUrls.
+     *
      * @return array
      */
-    public function getUrlsDataProvider(): array
+    public static function getUrlsDataProvider(): array
     {
         return [
             [
@@ -360,7 +440,7 @@ class UrlManagerTest extends TestCase
                         'type' => 'upstream',
                     ],
                 ],
-                [
+                'expectedResult' => [
                     'secure' => [
                         '' => 'https://example.com/',
                         '*' => 'https://*.example.com/',
@@ -373,7 +453,7 @@ class UrlManagerTest extends TestCase
                     ],
                 ],
             ],
-            'domain with www by default' => [
+            [
                 'routes' => [
                     'http://example.com/' => ['original_url' => 'http://www.{default}/', 'type' => 'upstream'],
                     'https://example.com/' => ['original_url' => 'https://www.{default}/', 'type' => 'upstream'],
@@ -388,7 +468,7 @@ class UrlManagerTest extends TestCase
                         'type' => 'upstream',
                     ],
                 ],
-                [
+                'expectedResult' => [
                     'secure' => [
                         '' => 'https://example.com/',
                         '*' => 'https://*.example.com/',
@@ -406,9 +486,10 @@ class UrlManagerTest extends TestCase
 
     /**
      * DataProvider for testGetPrimaryUrls
+     *
      * @return array
      */
-    public function getPrimaryUrlsDataProvider(): array
+    public static function getPrimaryUrlsDataProvider(): array
     {
         return [
             'with unsecure primary' => [
@@ -501,9 +582,14 @@ class UrlManagerTest extends TestCase
         ];
     }
 
+    /**
+     * Test getBaseUrl method.
+     *
+     * @return void
+     */
     public function testGetBaseUrl(): void
     {
-        $processMock = $this->getMockForAbstractClass(ProcessInterface::class);
+        $processMock = $this->createMock(ProcessInterface::class);
         $processMock->expects($this->once())
             ->method('getOutput')
             ->willReturn('https://example.com/');
@@ -520,6 +606,11 @@ class UrlManagerTest extends TestCase
         );
     }
 
+    /**
+     * Test expandUrl method.
+     *
+     * @return void
+     */
     public function testExpandUrl(): void
     {
         $processMock = $this->createMock(ProcessInterface::class);
@@ -537,6 +628,11 @@ class UrlManagerTest extends TestCase
         $this->assertSame('https://example2.com/catalog', $this->manager->expandUrl('https://example2.com/catalog'));
     }
 
+    /**
+     * Test isRelatedDomain method.
+     *
+     * @return void
+     */
     public function testIsRelatedDomain(): void
     {
         $processMock = $this->createMock(ProcessInterface::class);
@@ -560,6 +656,11 @@ class UrlManagerTest extends TestCase
         $this->assertFalse($this->manager->isRelatedDomain('https://example4.com'));
     }
 
+    /**
+     * Test isUrlValid method.
+     *
+     * @return void
+     */
     public function testIsUrlValid(): void
     {
         $processMock = $this->createMock(ProcessInterface::class);
@@ -585,9 +686,14 @@ class UrlManagerTest extends TestCase
         $this->assertFalse($this->manager->isUrlValid('https://example4.com/some/more/path'));
     }
 
+    /**
+     * Test getBaseUrl method with empty store URLs.
+     *
+     * @return void
+     */
     public function testGetBaseUrlWithEmptyStoreUrls(): void
     {
-        $processMock = $this->getMockForAbstractClass(ProcessInterface::class);
+        $processMock = $this->createMock(ProcessInterface::class);
         $processMock->expects($this->never())
             ->method('getOutput');
 
@@ -607,7 +713,6 @@ class UrlManagerTest extends TestCase
         $invokedCount = $this->atLeast(3);
         $this->loggerMock->expects($invokedCount)
             ->method('debug')
-            // withConsecutive() alternative.
             ->willReturnCallback(function ($parameters) use ($invokedCount) {
                 if ($invokedCount->numberOfInvocations() === 1) {
                     $this->assertSame('some error', $parameters);
@@ -629,13 +734,16 @@ class UrlManagerTest extends TestCase
     }
 
     /**
+     * Test getBaseUrl method with error from default-url command.
+     *
      * @param array $routes
      * @param string $expectedUrl
      * @dataProvider getBaseUrlDataProvider
      */
+    #[DataProvider('getBaseUrlDataProvider')]
     public function testGetBaseUrlWithErrorFromDefaultUrlCommand(array $routes, string $expectedUrl): void
     {
-        $processMock = $this->getMockForAbstractClass(ProcessInterface::class);
+        $processMock = $this->createMock(ProcessInterface::class);
         $processMock->expects($this->never())
             ->method('getOutput');
         $this->magentoShellMock->expects($this->once())
@@ -650,9 +758,11 @@ class UrlManagerTest extends TestCase
     }
 
     /**
+     * Data provider for testGetBaseUrlWithErrorFromDefaultUrlCommand.
+     *
      * @return array
      */
-    public function getBaseUrlDataProvider(): array
+    public static function getBaseUrlDataProvider(): array
     {
         return [
             [
@@ -688,9 +798,14 @@ class UrlManagerTest extends TestCase
         ];
     }
 
+    /**
+     * Test getBaseUrls method.
+     *
+     * @return void
+     */
     public function testGetBaseUrls(): void
     {
-        $processMock = $this->getMockForAbstractClass(ProcessInterface::class);
+        $processMock = $this->createMock(ProcessInterface::class);
         $processMock->expects($this->once())
             ->method('getOutput')
             ->willReturn(json_encode([

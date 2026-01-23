@@ -12,7 +12,6 @@ use Magento\MagentoCloud\Config\Schema\Validator\Range;
 use Magento\MagentoCloud\Config\Validator\Result\Error;
 use Magento\MagentoCloud\Config\Validator\Result\Success;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
-use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -21,33 +20,39 @@ use PHPUnit\Framework\TestCase;
 class RangeTest extends TestCase
 {
     /**
-     * @var ResultFactory|MockObject
+     * @var ResultFactory
      */
-    private $resultFactoryMock;
+    private $resultFactory;
 
     /**
      * @inheritDoc
      */
     protected function setUp(): void
     {
-        $this->resultFactoryMock = $this->createTestProxy(
-            ResultFactory::class,
-            [
-                $this->createMock(ErrorInfo::class)
-            ]
-        );
+        $errorInfoMock = $this->createStub(ErrorInfo::class);
+        $this->resultFactory = new ResultFactory($errorInfoMock);
     }
 
+    /**
+     * Test validate method.
+     *
+     * @return void
+     */
     public function testValidate(): void
     {
-        $validator = new Range($this->resultFactoryMock, 0, 32);
+        $validator = new Range($this->resultFactory, 0, 32);
 
         $this->assertEquals(new Success(), $validator->validate('SOME_VARIABLE', 4));
     }
 
+    /**
+     * Test validate method with error.
+     *
+     * @return void
+     */
     public function testValidateWithError(): void
     {
-        $validator = new Range($this->resultFactoryMock, 0, 9);
+        $validator = new Range($this->resultFactory, 0, 9);
 
         $this->assertEquals(
             new Error(

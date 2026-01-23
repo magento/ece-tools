@@ -12,18 +12,20 @@ use Magento\MagentoCloud\Config\ConfigException;
 use Magento\MagentoCloud\Config\GlobalSection as GlobalConfig;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
+use Magento\MagentoCloud\Shell\ShellInterface;
+use Magento\MagentoCloud\Step\Deploy\DeployStaticContent;
 use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
-use Magento\MagentoCloud\Shell\ShellInterface;
+use Magento\MagentoCloud\Util\StaticContentCleaner;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Magento\MagentoCloud\Step\Deploy\DeployStaticContent;
-use Magento\MagentoCloud\Util\StaticContentCleaner;
 use Psr\Log\LoggerInterface;
 
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class DeployStaticContentTest extends TestCase
 {
     /**
@@ -72,10 +74,10 @@ class DeployStaticContentTest extends TestCase
     protected function setUp(): void
     {
         $this->flagManagerMock = $this->createMock(FlagManager::class);
-        $this->shellMock = $this->getMockForAbstractClass(ShellInterface::class);
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
-        $this->stepMock = $this->getMockForAbstractClass(StepInterface::class);
-        $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
+        $this->shellMock = $this->createMock(ShellInterface::class);
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
+        $this->stepMock = $this->createMock(StepInterface::class);
+        $this->stageConfigMock = $this->createMock(DeployInterface::class);
         $this->globalConfigMock = $this->createMock(GlobalConfig::class);
         $this->staticContentCleanerMock = $this->createMock(StaticContentCleaner::class);
 

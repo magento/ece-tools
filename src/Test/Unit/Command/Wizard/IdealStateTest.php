@@ -50,8 +50,8 @@ class IdealStateTest extends TestCase
 
     public function testExecute()
     {
-        $inputMock = $this->getMockForAbstractClass(InputInterface::class);
-        $outputMock = $this->getMockForAbstractClass(OutputInterface::class);
+        $inputMock = $this->createStub(InputInterface::class);
+        $outputMock = $this->createStub(OutputInterface::class);
 
         $this->validatorMock->expects($this->once())
             ->method('validate')
@@ -69,8 +69,8 @@ class IdealStateTest extends TestCase
 
     public function testExecuteWithErrors()
     {
-        $inputMock = $this->getMockForAbstractClass(InputInterface::class);
-        $outputMock = $this->getMockForAbstractClass(OutputInterface::class);
+        $inputMock = $this->createStub(InputInterface::class);
+        $outputMock = $this->createStub(OutputInterface::class);
 
         $error1 = new Error('First error');
         $error2 = new Error('Second error');

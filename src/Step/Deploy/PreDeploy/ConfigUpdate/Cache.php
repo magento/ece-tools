@@ -8,15 +8,16 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Step\Deploy\PreDeploy\ConfigUpdate;
 
 use Magento\MagentoCloud\App\Error;
+use Magento\MagentoCloud\Config\Factory\Cache as CacheFactory;
 use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface as ConfigReader;
 use Magento\MagentoCloud\Config\Magento\Env\WriterInterface as ConfigWriter;
-use Magento\MagentoCloud\Config\Factory\Cache as CacheFactory;
+use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
-use Psr\Log\LoggerInterface;
 use Magento\MagentoCloud\Package\MagentoVersion;
-use Magento\MagentoCloud\Config\Stage\DeployInterface;
+use Magento\MagentoCloud\Package\UndefinedPackageException;
+use Psr\Log\LoggerInterface;
 
 /**
  * Processes cache configuration.
@@ -56,6 +57,8 @@ class Cache implements StepInterface
     private DeployInterface $stageConfig;
 
     /**
+     * Constructor method.
+     *
      * @param ConfigReader    $configReader
      * @param ConfigWriter    $configWriter
      * @param LoggerInterface $logger
@@ -85,11 +88,11 @@ class Cache implements StepInterface
     public function execute()
     {
         try {
-            $config = $this->configReader->read();
-            $cacheConfig = $this->cacheConfig->get();
+            $config        = $this->configReader->read();
+            $cacheConfig   = $this->cacheConfig->get();
             $graphqlConfig = $config['cache']['graphql'] ?? [];
-            $luaConfig = (boolean)$this->stageConfig->get(DeployInterface::VAR_USE_LUA);
-            $luaConfigKey = (boolean)$this->stageConfig->get(DeployInterface::VAR_LUA_KEY);
+            $luaConfig     = (bool)$this->stageConfig->get(DeployInterface::VAR_USE_LUA);
+            $luaConfigKey  = (bool)$this->stageConfig->get(DeployInterface::VAR_LUA_KEY);
 
             if (isset($cacheConfig['frontend'])) {
                 $cacheConfig['frontend'] = array_filter(
@@ -97,16 +100,16 @@ class Cache implements StepInterface
                     function ($cacheFrontend) {
                         $backend = $cacheFrontend['backend'];
                         $customCacheBackend = $cacheFrontend['_custom_valkey_backend']
-                        ?? $cacheFrontend['_custom_redis_backend']
-                        ?? false;
+                            ?? $cacheFrontend['_custom_redis_backend']
+                            ?? false;
                         $this->checkBackendModel($backend);
 
                         if (!$customCacheBackend && !in_array($backend, CacheFactory::AVAILABLE_REDIS_BACKEND, true)) {
                             return true;
                         }
                         $backendOptions = ($backend === CacheFactory::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE)
-                        ? $cacheFrontend['backend_options']['remote_backend_options']
-                        : $cacheFrontend['backend_options'];
+                            ? $cacheFrontend['backend_options']['remote_backend_options']
+                            : $cacheFrontend['backend_options'];
                         return $this->testCacheConnection($backendOptions);
                     }
                 );
@@ -121,22 +124,22 @@ class Cache implements StepInterface
                 $this->logger->info('Cache configuration was not found. Removing cache configuration.');
                 unset($config['cache']);
             } elseif (empty($cacheConfig['frontend'])) {
-                   $isRedisConfigured = !empty($cacheConfig['frontend']['default']['_custom_redis_backend']);
-                   $isValkeyConfigured = !empty($cacheConfig['frontend']['default']['_custom_valkey_backend']);
+                $isRedisConfigured = !empty($cacheConfig['frontend']['default']['_custom_redis_backend']);
+                $isValkeyConfigured = !empty($cacheConfig['frontend']['default']['_custom_valkey_backend']);
                 if ($isRedisConfigured) {
-                        $this->logger->warning(
-                            'Cache is configured for a Redis service that is not available.
+                    $this->logger->warning(
+                        'Cache is configured for a Redis service that is not available.
                              Configuration will be ignored.',
-                            ['errorCode' => Error::WARN_REDIS_SERVICE_NOT_AVAILABLE]
-                        );
+                        ['errorCode' => Error::WARN_REDIS_SERVICE_NOT_AVAILABLE]
+                    );
                 }
 
                 if ($isValkeyConfigured) {
-                        $this->logger->warning(
-                            'Cache is configured for a Valkey service that is not available. 
+                    $this->logger->warning(
+                        'Cache is configured for a Valkey service that is not available. 
                             Configuration will be ignored.',
-                            ['errorCode' => Error::WARN_VALKEY_SERVICE_NOT_AVAILABLE]
-                        );
+                        ['errorCode' => Error::WARN_VALKEY_SERVICE_NOT_AVAILABLE]
+                    );
                 }
 
                 unset($config['cache']);
@@ -177,8 +180,8 @@ class Cache implements StepInterface
             CacheFactory::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE
         ];
 
-        $isValkeyEnabled=  $this->cacheConfig->isValkeyEnabled();
-        $isRedisEnabled=  $this->cacheConfig->isRedisEnabled();
+        $isValkeyEnabled =  $this->cacheConfig->isValkeyEnabled();
+        $isRedisEnabled =  $this->cacheConfig->isRedisEnabled();
         try {
             if (!$this->magentoVersion->isGreaterOrEqual('2.4.5') && ($isValkeyEnabled['scheme'] ?? '') === 'valkey') {
                 $this->logger->warning(
@@ -189,7 +192,8 @@ class Cache implements StepInterface
                     )
                 );
             }
-            if (($isRedisEnabled['scheme'] ?? '') === 'redis' && $this->magentoVersion->isGreaterOrEqual('2.4.8')
+            if (($isRedisEnabled['scheme'] ?? '') === 'redis'
+                && $this->magentoVersion->isGreaterOrEqual('2.4.8')
             ) {
                 $this->logger->warning(
                     sprintf(
@@ -211,7 +215,7 @@ class Cache implements StepInterface
                     )
                 );
             }
-        } catch (\Magento\MagentoCloud\Package\UndefinedPackageException $exception) {
+        } catch (UndefinedPackageException $exception) {
             throw new StepException(
                 $exception->getMessage(),
                 $exception->getCode(),

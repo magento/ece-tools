@@ -1,26 +1,32 @@
 <?php
+
 /**
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+
 declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Config\Schema;
 
 use Magento\MagentoCloud\App\ErrorInfo;
 use Magento\MagentoCloud\Config\Schema;
+use Magento\MagentoCloud\Config\Schema\SchemaException;
 use Magento\MagentoCloud\Config\Schema\Validator;
 use Magento\MagentoCloud\Config\StageConfigInterface;
 use Magento\MagentoCloud\Config\Validator\Result\Error;
 use Magento\MagentoCloud\Config\Validator\Result\Success;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
 use Magento\MagentoCloud\Config\Validator\ResultInterface;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @inheritDoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class ValidatorTest extends TestCase
 {
     /**
@@ -49,8 +55,16 @@ class ValidatorTest extends TestCase
     protected function setUp(): void
     {
         $this->schemaMock = $this->createMock(Schema::class);
-        $this->resultFactoryMock = $this->createTestProxy(ResultFactory::class, [$this->createMock(ErrorInfo::class)]);
+        $this->resultFactoryMock = $this->createMock(ResultFactory::class);
         $this->validatorFactoryMock = $this->createMock(Validator\ValidatorFactory::class);
+
+        // Configure ResultFactory to return real Error/Success objects
+        $this->resultFactoryMock->method('error')
+            ->willReturnCallback(function ($message, $suggestion = '', $errorCode = null) {
+                return new Error($message, $suggestion, $errorCode);
+            });
+        $this->resultFactoryMock->method('success')
+            ->willReturn(new Success());
 
         $this->validator = new Validator(
             $this->schemaMock,
@@ -60,13 +74,17 @@ class ValidatorTest extends TestCase
     }
 
     /**
+     * Test validate method.
+     *
      * @param string $key
      * @param string|bool|int $value
      * @param ResultInterface $expected
      * @param string $stage
-     *
      * @dataProvider validateDataProvider
+     * @return void
+     * @throws SchemaException
      */
+    #[DataProvider('validateDataProvider')]
     public function testValidate(
         string $key,
         $value,
@@ -113,7 +131,7 @@ class ValidatorTest extends TestCase
             ],
         ];
 
-        $mockValidatorError = $this->getMockForAbstractClass(Validator\ValidatorInterface::class);
+        $mockValidatorError = $this->createStub(Validator\ValidatorInterface::class);
         $mockValidatorError->method('validate')
             ->willReturn(new Error('Some error'));
 
@@ -131,9 +149,11 @@ class ValidatorTest extends TestCase
     }
 
     /**
+     * Data provider for testValidate method.
+     *
      * @return array
      */
-    public function validateDataProvider(): array
+    public static function validateDataProvider(): array
     {
         return [
             [
@@ -141,7 +161,7 @@ class ValidatorTest extends TestCase
                 2,
                 new Error(
                     'The TEST_BOOLEAN variable contains an invalid value of type integer. ' .
-                    'Use the following type: boolean.'
+                        'Use the following type: boolean.'
                 )
             ],
             [
@@ -149,7 +169,7 @@ class ValidatorTest extends TestCase
                 'test',
                 new Error(
                     'The TEST_BOOLEAN variable contains an invalid value of type string. ' .
-                    'Use the following type: boolean.'
+                        'Use the following type: boolean.'
                 )
             ],
             [
@@ -157,7 +177,7 @@ class ValidatorTest extends TestCase
                 true,
                 new Error(
                     'The TEST_BOOLEAN variable is not supposed to be in stage deploy. ' .
-                    'Move it to one of the possible stages: global.'
+                        'Move it to one of the possible stages: global.'
                 )
             ],
             [
@@ -171,7 +191,7 @@ class ValidatorTest extends TestCase
                 1,
                 new Error(
                     'The TEST_STRING variable contains an invalid value of type integer. ' .
-                    'Use the following type: string.'
+                        'Use the following type: string.'
                 )
             ],
             [
@@ -179,7 +199,7 @@ class ValidatorTest extends TestCase
                 'test_undefined',
                 new Error(
                     'The TEST_STRING variable contains an invalid value test_undefined. '
-                    . 'Use one of the available value options: test.'
+                        . 'Use one of the available value options: test.'
                 ),
             ],
             [

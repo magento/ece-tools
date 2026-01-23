@@ -53,7 +53,7 @@ class ScdOnDeployTest extends TestCase
     {
         $this->resultFactoryMock = $this->createMock(ResultFactory::class);
         $this->globalConfigMock = $this->createMock(GlobalSection::class);
-        $this->deployConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
+        $this->deployConfigMock = $this->createMock(DeployInterface::class);
         $this->scdOnBuildMock = $this->createMock(ScdOnBuild::class);
 
         $this->validator = new ScdOnDeploy(
@@ -76,7 +76,7 @@ class ScdOnDeployTest extends TestCase
             ->method('get')
             ->with(DeployInterface::VAR_SKIP_SCD)
             ->willReturn(false);
-        $resultMock = $this->createMock(Result\Error::class);
+        $resultMock = $this->createStub(Result\Error::class);
         $this->scdOnBuildMock->expects($this->once())
             ->method('validate')
             ->willReturn($resultMock);
@@ -94,7 +94,7 @@ class ScdOnDeployTest extends TestCase
             ->method('get')
             ->with(DeployInterface::VAR_SKIP_SCD)
             ->willReturn(true);
-        $resultMock = $this->createMock(Result\Success::class);
+        $resultMock = $this->createStub(Result\Success::class);
         $this->scdOnBuildMock->expects($this->once())
             ->method('validate')
             ->willReturn($resultMock);

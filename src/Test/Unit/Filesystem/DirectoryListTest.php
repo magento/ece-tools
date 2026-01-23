@@ -10,14 +10,22 @@ namespace Magento\MagentoCloud\Test\Unit\Filesystem;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\SystemList;
 use Magento\MagentoCloud\Package\MagentoVersion;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class DirectoryListTest extends TestCase
 {
-    public function testGetPathWithException()
+    /**
+     * Test getPathWithException method.
+     *
+     * @return void
+     */
+    public function testGetPathWithException(): void
     {
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('Code some_code is not registered');
@@ -25,7 +33,12 @@ class DirectoryListTest extends TestCase
         $this->get22DirectoryList()->getPath('some_code');
     }
 
-    public function testGetRoot()
+    /**
+     * Test getRoot method.
+     *
+     * @return void
+     */
+    public function testGetRoot(): void
     {
         $directoryList = $this->get22DirectoryList();
 
@@ -35,7 +48,12 @@ class DirectoryListTest extends TestCase
         );
     }
 
-    public function testGetMagentoRoot()
+    /**
+     * Test getMagentoRoot method.
+     *
+     * @return void
+     */
+    public function testGetMagentoRoot(): void
     {
         $directoryList = $this->get22DirectoryList();
 
@@ -45,7 +63,12 @@ class DirectoryListTest extends TestCase
         );
     }
 
-    public function testGetInit()
+    /**
+     * Test getInit method.
+     *
+     * @return void
+     */
+    public function testGetInit(): void
     {
         $directoryList = $this->get22DirectoryList();
 
@@ -55,7 +78,12 @@ class DirectoryListTest extends TestCase
         );
     }
 
-    public function testGetVar()
+    /**
+     * Test getVar method.
+     *
+     * @return void
+     */
+    public function testGetVar(): void
     {
         $directoryList = $this->get22DirectoryList();
 
@@ -65,7 +93,12 @@ class DirectoryListTest extends TestCase
         );
     }
 
-    public function testGetLog()
+    /**
+     * Test getLog method.
+     *
+     * @return void
+     */
+    public function testGetLog(): void
     {
         $directoryList = $this->get22DirectoryList();
 
@@ -75,60 +108,84 @@ class DirectoryListTest extends TestCase
         );
     }
 
-    public function testGetDockerRoot()
+    /**
+     * Test getDockerRoot method.
+     *
+     * @return void
+     */
+    public function testGetDockerRoot(): void
     {
         $this->assertSame(__DIR__ . '/.docker', $this->get22DirectoryList()->getDockerRoot());
     }
 
     /**
-     * @param DirectoryList $directoryList
+     * Test getGeneratedCode method.
+     *
+     * @param string $version
      * @param string $path
      * @dataProvider getGeneratedCodeDataProvider
+     * @return void
      */
-    public function testGetGeneratedCode(DirectoryList $directoryList, string $path)
+    #[DataProvider('getGeneratedCodeDataProvider')]
+    public function testGetGeneratedCode(string $version, string $path): void
     {
+        $directoryList = $version === '2.1' ? $this->get21DirectoryList() : $this->get22DirectoryList();
         $this->assertSame($path, $directoryList->getGeneratedCode());
     }
 
     /**
+     * Data provider for getGeneratedCode method.
+     *
      * @return array
      */
-    public function getGeneratedCodeDataProvider(): array
+    public static function getGeneratedCodeDataProvider(): array
     {
         return [
-            [$this->get21DirectoryList(), __DIR__ . '/var/generation'],
-            [$this->get22DirectoryList(), __DIR__ . '/generated/code'],
+            ['2.1', __DIR__ . '/var/generation'],
+            ['2.2', __DIR__ . '/generated/code'],
         ];
     }
 
     /**
-     * @param DirectoryList $directoryList
+     * Test getGeneratedMetadata method.
+     *
+     * @param string $version
      * @param string $path
      * @dataProvider getGeneratedMetadataDataProvider
+     * @return void
      */
-    public function testGetGeneratedMetadata(DirectoryList $directoryList, string $path)
+    #[DataProvider('getGeneratedMetadataDataProvider')]
+    public function testGetGeneratedMetadata(string $version, string $path): void
     {
+        $directoryList = $version === '2.1' ? $this->get21DirectoryList() : $this->get22DirectoryList();
         $this->assertSame($path, $directoryList->getGeneratedMetadata());
     }
 
     /**
+     * Data provider for getGeneratedMetadata method.
+     *
      * @return array
      */
-    public function getGeneratedMetadataDataProvider(): array
+    public static function getGeneratedMetadataDataProvider(): array
     {
         return [
-            [$this->get21DirectoryList(), __DIR__ . '/var/di'],
-            [$this->get22DirectoryList(), __DIR__ . '/generated/metadata'],
+            ['2.1', __DIR__ . '/var/di'],
+            ['2.2', __DIR__ . '/generated/metadata'],
         ];
     }
 
     /**
-     * @param DirectoryList $directoryList
+     * Test getWritableDirectories method.
+     *
+     * @param string $version
      * @param array $paths
      * @dataProvider getWritableDirectoriesDataProvider
+     * @return void
      */
-    public function testGetWritableDirectories(DirectoryList $directoryList, array $paths)
+    #[DataProvider('getWritableDirectoriesDataProvider')]
+    public function testGetWritableDirectories(string $version, array $paths): void
     {
+        $directoryList = $version === '2.1' ? $this->get21DirectoryList() : $this->get22DirectoryList();
         $result = $directoryList->getWritableDirectories();
         sort($result);
         sort($paths);
@@ -136,9 +193,11 @@ class DirectoryListTest extends TestCase
     }
 
     /**
+     * Data provider for getWritableDirectories method.
+     *
      * @return array
      */
-    public function getWritableDirectoriesDataProvider(): array
+    public static function getWritableDirectoriesDataProvider(): array
     {
         $relative21Paths = [
             'var/di',
@@ -157,18 +216,28 @@ class DirectoryListTest extends TestCase
         ];
 
         return [
-            [$this->get21DirectoryList(), $relative21Paths],
-            [$this->get22DirectoryList(), $relative22Paths],
+            [
+                'version' => '2.1',
+                'paths'   => $relative21Paths,
+            ],
+            [
+                'version' => '2.2',
+                'paths'   => $relative22Paths,
+            ],
         ];
     }
 
     /**
-     * @param DirectoryList $directoryList
+     * Test getMountPoints method.
+     *
+     * @param string $version
      * @return void
      * @dataProvider getDirectoryLists
      */
-    public function testGetMountPoints(DirectoryList $directoryList)
+    #[DataProvider('getDirectoryLists')]
+    public function testGetMountPoints(string $version): void
     {
+        $directoryList = $version === '2.1' ? $this->get21DirectoryList() : $this->get22DirectoryList();
         $paths = [
             'app/etc',
             'pub/media',
@@ -182,11 +251,16 @@ class DirectoryListTest extends TestCase
     }
 
     /**
-     * @param DirectoryList $directoryList
+     * Test getPatches method.
+     *
+     * @param string $version
      * @dataProvider getDirectoryLists
+     * @return void
      */
-    public function testGetPatches(DirectoryList $directoryList)
+    #[DataProvider('getDirectoryLists')]
+    public function testGetPatches(string $version): void
     {
+        $directoryList = $version === '2.1' ? $this->get21DirectoryList() : $this->get22DirectoryList();
         $this->assertSame(
             __DIR__ . '/_files/bp/patches',
             $directoryList->getPatches()
@@ -194,11 +268,16 @@ class DirectoryListTest extends TestCase
     }
 
     /**
-     * @param DirectoryList $directoryList
+     * Test getViews method.
+     *
+     * @param string $version
      * @dataProvider getDirectoryLists
+     * @return void
      */
-    public function testGetViews(DirectoryList $directoryList)
+    #[DataProvider('getDirectoryLists')]
+    public function testGetViews(string $version): void
     {
+        $directoryList = $version === '2.1' ? $this->get21DirectoryList() : $this->get22DirectoryList();
         $this->assertSame(
             __DIR__ . '/_files/bp/views',
             $directoryList->getViews()
@@ -206,28 +285,26 @@ class DirectoryListTest extends TestCase
     }
 
     /**
-     * Data Provider returning both directory lists
+     * Data Provider returning both directory list versions
      *
      * @return array
      */
-    public function getDirectoryLists()
+    public static function getDirectoryLists(): array
     {
         return [
-            [
-                $this->get21DirectoryList(),
-            ],
-            [
-                $this->get22DirectoryList(),
-            ],
+            ['2.1'],
+            ['2.2'],
         ];
     }
 
     /**
+     * Test get21DirectoryList method.
+     *
      * @return DirectoryList
      */
     private function get21DirectoryList(): DirectoryList
     {
-        $magentoVersionMock = $this->createMock(MagentoVersion::class);
+        $magentoVersionMock = $this->createStub(MagentoVersion::class);
         $systemMock = $this->createMock(SystemList::class);
 
         $magentoVersionMock->method('satisfies')
@@ -247,11 +324,13 @@ class DirectoryListTest extends TestCase
     }
 
     /**
+     * Test get22DirectoryList method.
+     *
      * @return DirectoryList
      */
     private function get22DirectoryList(): DirectoryList
     {
-        $magentoVersionMock = $this->createMock(MagentoVersion::class);
+        $magentoVersionMock = $this->createStub(MagentoVersion::class);
         $systemMock = $this->createMock(SystemList::class);
 
         $magentoVersionMock->method('satisfies')

@@ -11,12 +11,14 @@ use Magento\MagentoCloud\App\ContainerInterface;
 use Magento\MagentoCloud\Shell\MagentoShell;
 use Magento\MagentoCloud\Shell\Shell;
 use Magento\MagentoCloud\Shell\ShellFactory;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class ShellFactoryTest extends TestCase
 {
     /**
@@ -34,7 +36,7 @@ class ShellFactoryTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->containerMock = $this->getMockForAbstractClass(ContainerInterface::class);
+        $this->containerMock = $this->createMock(ContainerInterface::class);
 
         $this->factory = new ShellFactory(
             $this->containerMock

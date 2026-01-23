@@ -9,19 +9,21 @@ namespace Magento\MagentoCloud\Test\Unit\Step\Build\BackupData;
 
 use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\Environment;
-use Magento\MagentoCloud\Step\StepException;
-use PHPUnit\Framework\MockObject\MockObject;
-use PHPUnit\Framework\TestCase;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
-use Psr\Log\LoggerInterface;
-use Magento\MagentoCloud\Step\Build\BackupData\StaticContent;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
+use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
+use Magento\MagentoCloud\Step\Build\BackupData\StaticContent;
+use Magento\MagentoCloud\Step\StepException;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
 
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class StaticContentTest extends TestCase
 {
     /**
@@ -75,9 +77,7 @@ class StaticContentTest extends TestCase
     protected function setUp(): void
     {
         $this->fileMock = $this->createMock(File::class);
-        $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
-            ->onlyMethods(['info'])
-            ->getMockForAbstractClass();
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
         $this->directoryListMock = $this->createMock(DirectoryList::class);
         $this->flagManagerMock = $this->createMock(FlagManager::class);
         $this->environment = $this->createMock(Environment::class);

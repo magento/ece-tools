@@ -8,21 +8,24 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit\App;
 
 use Magento\MagentoCloud\App\Logger;
+use Magento\MagentoCloud\App\Logger\Pool;
 use Magento\MagentoCloud\App\Logger\Prepare\ErrorLogFile;
+use Magento\MagentoCloud\App\Logger\Processor\SanitizeProcessor;
 use Magento\MagentoCloud\App\LoggerException;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
-use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\App\Logger\Pool;
+use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Package\UndefinedPackageException;
 use phpmock\phpunit\PHPMock;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Magento\MagentoCloud\App\Logger\Processor\SanitizeProcessor;
 
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class LoggerTest extends TestCase
 {
     use PHPMock;
@@ -73,6 +76,8 @@ class LoggerTest extends TestCase
     }
 
     /**
+     * Test execute method.
+     *
      * @param int $fileMockFileGetContentsExpects
      * @param string $buildPhaseLogContent
      * @param bool $buildLogFileExists
@@ -83,6 +88,7 @@ class LoggerTest extends TestCase
      *
      * @throws LoggerException
      */
+    #[DataProvider('executeDataProvider')]
     public function testExecute(
         $fileMockFileGetContentsExpects,
         $buildPhaseLogContent,
@@ -148,9 +154,11 @@ class LoggerTest extends TestCase
     }
 
     /**
+     * Test execute method data provider.
+     *
      * @return array
      */
-    public function executeDataProvider(): array
+    public static function executeDataProvider(): array
     {
         return [
             [

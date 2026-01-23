@@ -47,9 +47,9 @@ class ApplyPatchesTest extends TestCase
             ->method('apply');
 
         /** @var InputInterface|MockObject $inputMock */
-        $inputMock = $this->getMockForAbstractClass(InputInterface::class);
+        $inputMock = $this->createStub(InputInterface::class);
         /** @var OutputInterface|MockObject $outputMock */
-        $outputMock = $this->getMockForAbstractClass(OutputInterface::class);
+        $outputMock = $this->createStub(OutputInterface::class);
 
         $this->command->execute($inputMock, $outputMock);
     }

@@ -13,6 +13,7 @@ use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Util\YamlNormalizer;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Input\InputInterface;
@@ -21,6 +22,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * @inheritDoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class GenerateSchemaTest extends TestCase
 {
     /**
@@ -82,7 +84,7 @@ class GenerateSchemaTest extends TestCase
     public function testExecute(): void
     {
         /** @var InputInterface|MockObject $input */
-        $input = $this->createMock(InputInterface::class);
+        $input = $this->createStub(InputInterface::class);
         /** @var OutputInterface|MockObject $output */
         $output = $this->createMock(OutputInterface::class);
         $output->expects($this->exactly(2))
@@ -107,7 +109,7 @@ class GenerateSchemaTest extends TestCase
         $this->yamlNormalizerMock = $this->createMock(YamlNormalizer::class);
         $this->yamlNormalizerMock->expects($this->any())
             ->method('normalize')
-            ->with($this->isType('array'))
+            ->with($this->callback(fn($arg) => is_array($arg)))
             ->willReturn([
                 1001 => ['message' => 'Test error'],
             ]);

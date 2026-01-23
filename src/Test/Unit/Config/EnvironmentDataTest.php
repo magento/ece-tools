@@ -18,12 +18,15 @@ use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\PlatformVariable\DecoderInterface;
 use Magento\MagentoCloud\Util\YamlNormalizer;
 use phpmock\phpunit\PHPMock;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @inheritDoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class EnvironmentDataTest extends TestCase
 {
     use PHPMock;
@@ -64,10 +67,10 @@ class EnvironmentDataTest extends TestCase
     protected function setUp(): void
     {
         /** @var MockObject|ReaderInterface $environmentReaderMock */
-        $environmentReaderMock = $this->createMock(ReaderInterface::class);
+        $environmentReaderMock = $this->createStub(ReaderInterface::class);
 
         /** @var MockObject|Schema $schemaMock */
-        $schemaMock = $this->createMock(Schema::class);
+        $schemaMock = $this->createStub(Schema::class);
 
         $schemaMock->method('getDefaults')
             ->with(SystemConfigInterface::SYSTEM_VARIABLES)
@@ -99,7 +102,7 @@ class EnvironmentDataTest extends TestCase
     }
 
     /**
-     * Test for getEnv method
+     * Test for getEnv method.
      *
      * @return void
      */
@@ -127,13 +130,14 @@ class EnvironmentDataTest extends TestCase
     }
 
     /**
-     * Test for getVariables method
+     * Test for getVariables method.
      *
      * @param string $envVariableName
      * @param string $methodName
      * @return void
      * @dataProvider getVariablesDataProvider
      */
+    #[DataProvider('getVariablesDataProvider')]
     public function testGetVariables(string $envVariableName, string $methodName): void
     {
         $decodedValue = base64_encode(json_encode(['some_value']));
@@ -150,11 +154,11 @@ class EnvironmentDataTest extends TestCase
     }
 
     /**
-     * Data provider for testGetVariables method
+     * Data provider for testGetVariables.
      *
      * @return array
      */
-    public function getVariablesDataProvider(): array
+    public static function getVariablesDataProvider(): array
     {
         return [
             ['MAGENTO_CLOUD_ROUTES', 'getRoutes'],
@@ -165,7 +169,7 @@ class EnvironmentDataTest extends TestCase
     }
 
     /**
-     * Test for getBranchName method
+     * Test for getBranchName method.
      *
      * @return void
      */
@@ -177,7 +181,7 @@ class EnvironmentDataTest extends TestCase
     }
 
     /**
-     * Test for getApplication method when .magento.app.yaml file exists
+     * Test for getApplication method when .magento.app.yaml file exists.
      * Following tests to see if .magento.app.yaml can be read (includes file missing)
      * and parsed correctly
      *
@@ -201,7 +205,7 @@ class EnvironmentDataTest extends TestCase
     }
 
     /**
-     * Test for getApplication method when .magento.app.yaml file does not exist
+     * Test for getApplication method when .magento.app.yaml file does not exist.
      *
      * @return void
      */
@@ -224,7 +228,7 @@ class EnvironmentDataTest extends TestCase
     }
 
     /**
-     * Test for getMageMode method
+     * Test for getMageMode method.
      *
      * @return void
      */
@@ -236,7 +240,7 @@ class EnvironmentDataTest extends TestCase
         $_ENV['MAGE_MODE'] = $mode;
         $this->assertEquals($mode, $this->environmentData->getMageMode());
 
-        //check that value was taken from cache
+        // Check that value was taken from cache
         $_ENV['MAGE_MODE'] = 'new value';
         $this->assertEquals($mode, $this->environmentData->getMageMode());
     }

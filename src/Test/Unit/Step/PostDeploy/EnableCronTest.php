@@ -12,6 +12,7 @@ use Magento\MagentoCloud\Cron\Switcher;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Step\PostDeploy\EnableCron;
 use Magento\MagentoCloud\Step\StepException;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -19,6 +20,7 @@ use Psr\Log\LoggerInterface;
 /**
  * Test class for Magento\MagentoCloud\Process\Deploy\EnableCron
  */
+#[AllowMockObjectsWithoutExpectations]
 class EnableCronTest extends TestCase
 {
     /**
@@ -41,7 +43,7 @@ class EnableCronTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
         $this->cronSwitcherMock = $this->createMock(Switcher::class);
 
         $this->step = new EnableCron(

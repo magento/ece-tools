@@ -44,8 +44,7 @@ class CleanFileCacheTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
-            ->getMockForAbstractClass();
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
         $this->fileMock = $this->createMock(File::class);
         $this->directoryListMock = $this->createMock(DirectoryList::class);
 

@@ -8,6 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit\Step\Deploy\InstallUpdate\Install\Setup;
 
 use Magento\MagentoCloud\Config\AdminDataInterface;
+use Magento\MagentoCloud\Config\Amqp as AmqpConfig;
 use Magento\MagentoCloud\Config\ConfigException;
 use Magento\MagentoCloud\Config\Database\DbConfig;
 use Magento\MagentoCloud\Config\RemoteStorage;
@@ -16,21 +17,24 @@ use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\DB\Data\ConnectionFactory;
 use Magento\MagentoCloud\DB\Data\ConnectionInterface;
 use Magento\MagentoCloud\Package\MagentoVersion;
+use Magento\MagentoCloud\Service\ActiveMq;
 use Magento\MagentoCloud\Service\ElasticSearch;
 use Magento\MagentoCloud\Service\OpenSearch;
-use Magento\MagentoCloud\Service\ActiveMq;
-use Magento\MagentoCloud\Config\Amqp as AmqpConfig;
 use Magento\MagentoCloud\Step\Deploy\InstallUpdate\Install\Setup\InstallCommandFactory;
 use Magento\MagentoCloud\Util\PasswordGenerator;
 use Magento\MagentoCloud\Util\UrlManager;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
+ * @inheritdoc
  * @see InstallCommandFactory
  *
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
+#[AllowMockObjectsWithoutExpectations]
 class InstallCommandFactoryTest extends TestCase
 {
     /**
@@ -108,11 +112,11 @@ class InstallCommandFactoryTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->adminDataMock = $this->getMockForAbstractClass(AdminDataInterface::class);
+        $this->adminDataMock = $this->createMock(AdminDataInterface::class);
         $this->urlManagerMock = $this->createMock(UrlManager::class);
         $this->passwordGeneratorMock = $this->createMock(PasswordGenerator::class);
-        $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
-        $this->connectionDataMock = $this->getMockForAbstractClass(ConnectionInterface::class);
+        $this->stageConfigMock = $this->createMock(DeployInterface::class);
+        $this->connectionDataMock = $this->createMock(ConnectionInterface::class);
         /** @var ConnectionFactory|MockObject $connectionFactoryMock */
         $connectionFactoryMock = $this->createMock(ConnectionFactory::class);
         $connectionFactoryMock->expects(self::once())
@@ -145,6 +149,8 @@ class InstallCommandFactoryTest extends TestCase
     }
 
     /**
+     * Test execute method.
+     *
      * @param string $adminEmail
      * @param string $adminName
      * @param string $adminPassword
@@ -159,9 +165,11 @@ class InstallCommandFactoryTest extends TestCase
      * @param bool $elasticSuite
      * @param array $mergedConfig
      * @dataProvider executeDataProvider
+     * @return void
      * @SuppressWarnings(PHPMD.ExcessiveParameterList)
      * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
+    #[DataProvider('executeDataProvider')]
     public function testExecute(
         string $adminEmail,
         string $adminName,
@@ -230,9 +238,11 @@ class InstallCommandFactoryTest extends TestCase
     }
 
     /**
+     * DataProvider for testExecute method.
+     *
      * @return array
      */
-    public function executeDataProvider(): array
+    public static function executeDataProvider(): array
     {
         return [
             [
@@ -247,8 +257,8 @@ class InstallCommandFactoryTest extends TestCase
                 'adminUrlExpected' => 'admino4ka',
                 'adminFirstnameExpected' => 'Firstname',
                 'adminLastnameExpected' => 'Lastname',
-                true,
-                [],
+                'elasticSuite' => true,
+                'mergedConfig' => [],
             ],
             [
                 'adminEmail' => 'admin@example.com',
@@ -262,8 +272,8 @@ class InstallCommandFactoryTest extends TestCase
                 'adminUrlExpected' => AdminDataInterface::DEFAULT_ADMIN_URL,
                 'adminFirstnameExpected' => AdminDataInterface::DEFAULT_ADMIN_FIRST_NAME,
                 'adminLastnameExpected' => AdminDataInterface::DEFAULT_ADMIN_LAST_NAME,
-                false,
-                ['table_prefix' => 'prefix'],
+                'elasticSuite' => false,
+                'mergedConfig' => ['table_prefix' => 'prefix'],
             ],
             [
                 'adminEmail' => '',
@@ -277,8 +287,8 @@ class InstallCommandFactoryTest extends TestCase
                 'adminUrlExpected' => 'admino4ka',
                 'adminFirstnameExpected' => 'Firstname',
                 'adminLastnameExpected' => 'Lastname',
-                false,
-                [],
+                'elasticSuite' => false,
+                'mergedConfig' => [],
             ],
             [
                 'adminEmail' => '',
@@ -292,19 +302,22 @@ class InstallCommandFactoryTest extends TestCase
                 'adminUrlExpected' => AdminDataInterface::DEFAULT_ADMIN_URL,
                 'adminFirstnameExpected' => AdminDataInterface::DEFAULT_ADMIN_FIRST_NAME,
                 'adminLastnameExpected' => AdminDataInterface::DEFAULT_ADMIN_LAST_NAME,
-                false,
-                [],
+                'elasticSuite' => false,
+                'mergedConfig' => [],
             ],
         ];
     }
 
     /**
+     * Mock base config method.
+     *
      * @param string $adminEmail
      * @param string $adminName
      * @param string $adminPassword
      * @param string $adminUrl
      * @param string $adminFirstname
      * @param string $adminLastname
+     * @return void
      */
     private function mockBaseConfig(
         string $adminEmail,
@@ -355,6 +368,9 @@ class InstallCommandFactoryTest extends TestCase
     }
 
     /**
+     * Test execute with remote storage.
+     *
+     * @return void
      * @throws ConfigException
      */
     public function testExecuteWithRemoteStorage(): void
@@ -377,12 +393,15 @@ class InstallCommandFactoryTest extends TestCase
 
         self::assertStringContainsString(
             "--remote-storage-prefix='somePrefix' --remote-storage-bucket='someBucket'"
-            . " --remote-storage-region='someRegion'",
+                . " --remote-storage-region='someRegion'",
             $this->installCommandFactory->create()
         );
     }
 
     /**
+     * Test execute with remote storage with keys.
+     *
+     * @return void
      * @throws ConfigException
      */
     public function testExecuteWithRemoteStorageWithKeys(): void
@@ -407,12 +426,18 @@ class InstallCommandFactoryTest extends TestCase
 
         self::assertStringContainsString(
             "--remote-storage-prefix='somePrefix' --remote-storage-bucket='someBucket'"
-            . " --remote-storage-region='someRegion'"
-            . " --remote-storage-key='someKey' --remote-storage-secret='someSecret'",
+                . " --remote-storage-region='someRegion'"
+                . " --remote-storage-key='someKey' --remote-storage-secret='someSecret'",
             $this->installCommandFactory->create()
         );
     }
 
+    /**
+     * Test execute with remote storage with exception.
+     *
+     * @return void
+     * @throws ConfigException
+     */
     public function testExecuteWithRemoteStorageWithException(): void
     {
         $this->expectExceptionMessage('Bucket and region are required configurations');
@@ -437,6 +462,12 @@ class InstallCommandFactoryTest extends TestCase
         $this->installCommandFactory->create();
     }
 
+    /**
+     * Test execute with ES auth options.
+     *
+     * @return void
+     * @throws ConfigException
+     */
     public function testExecuteWithESauthOptions(): void
     {
         $this->mockBaseConfig('', '', '', '', '', '');
@@ -495,11 +526,15 @@ class InstallCommandFactoryTest extends TestCase
     }
 
     /**
+     * Test execute with OS auth options.
+     *
      * @param bool $greaterOrEqual
      * @param string $enginePrefixName
-     * @throws ConfigException
      * @dataProvider executeWithOSauthOptionsDataProvider
+     * @return void
+     * @throws ConfigException
      */
+    #[DataProvider('executeWithOSauthOptionsDataProvider')]
     public function testExecuteWithOSauthOptions(
         bool $greaterOrEqual,
         string $enginePrefixName
@@ -567,26 +602,42 @@ class InstallCommandFactoryTest extends TestCase
     }
 
     /**
+     * DataProvider for executeWithOSauthOptions method.
+     *
      * @return array
      */
-    public function executeWithOSauthOptionsDataProvider()
+    public static function executeWithOSauthOptionsDataProvider(): array
     {
-        return [[false, 'elasticsearch']];
+        return [
+            [
+                false,
+                'elasticsearch'
+            ]
+        ];
     }
 
     /**
+     * Test execute with Amqp config options.
+     *
      * @param array $amqpConfig
      * @param string $expectedResult
+     * @dataProvider executeWithAmqpConfigOptionsDataProvider
      * @return void
      * @throws ConfigException
-     *
-     * @dataProvider executeWithAmqpConfigOptionsDataProvider
      */
+    #[DataProvider('executeWithAmqpConfigOptionsDataProvider')]
     public function testExecuteWithAmqpConfigOptions(
         array $amqpConfig,
         string $expectedResult
     ): void {
-        $this->mockBaseConfig('', '', '', '', '', '');
+        $this->mockBaseConfig(
+            '',
+            '',
+            '',
+            '',
+            '',
+            ''
+        );
         $this->magentoVersionMock->method('isGreaterOrEqual')
             ->willReturnMap([
                 ['2.4.0', false],
@@ -599,9 +650,11 @@ class InstallCommandFactoryTest extends TestCase
     }
 
     /**
+     * DataProvider for executeWithAmqpConfigOptions method.
+     *
      * @return array
      */
-    public function executeWithAmqpConfigOptionsDataProvider(): array
+    public static function executeWithAmqpConfigOptionsDataProvider(): array
     {
         return [
             'with all parameters and other config' => [
@@ -636,15 +689,25 @@ class InstallCommandFactoryTest extends TestCase
     }
 
     /**
+     * Test execute with Amqp config options without host.
+     *
      * @param array $amqpConfig
+     * @dataProvider executeWithAmqpConfigOptionsWithoutHostDataProvider
      * @return void
      * @throws ConfigException
      *
-     * @dataProvider executeWithAmqpConfigOptionsWithoutHostDataProvider
      */
+    #[DataProvider('executeWithAmqpConfigOptionsWithoutHostDataProvider')]
     public function testExecuteWithAmqpConfigOptionsWithoutHost(array $amqpConfig): void
     {
-        $this->mockBaseConfig('', '', '', '', '', '');
+        $this->mockBaseConfig(
+            '',
+            '',
+            '',
+            '',
+            '',
+            ''
+        );
         $this->magentoVersionMock->method('isGreaterOrEqual')
             ->willReturnMap([
                 ['2.4.0', false],
@@ -662,9 +725,11 @@ class InstallCommandFactoryTest extends TestCase
     }
 
     /**
+     * DataProvider for executeWithAmqpConfigOptionsWithoutHost method.
+     *
      * @return array
      */
-    public function executeWithAmqpConfigOptionsWithoutHostDataProvider(): array
+    public static function executeWithAmqpConfigOptionsWithoutHostDataProvider(): array
     {
         return [
             'host is not set' => [

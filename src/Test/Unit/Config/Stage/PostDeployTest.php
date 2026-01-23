@@ -1,27 +1,32 @@
 <?php
+
 /**
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+
 declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Config\Stage;
 
 use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\ConfigException;
+use Magento\MagentoCloud\Config\Environment\Reader as EnvironmentReader;
 use Magento\MagentoCloud\Config\Schema;
 use Magento\MagentoCloud\Config\Stage\PostDeploy;
 use Magento\MagentoCloud\Config\Stage\PostDeployInterface;
 use Magento\MagentoCloud\Config\StageConfigInterface;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Magento\MagentoCloud\Config\Environment\Reader as EnvironmentReader;
 use Symfony\Component\Yaml\Exception\ParseException;
 
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class PostDeployTest extends TestCase
 {
     /**
@@ -59,13 +64,16 @@ class PostDeployTest extends TestCase
     }
 
     /**
+     * Test get method.
+     *
      * @param string $name
      * @param array $envConfig
      * @param mixed $expectedValue
      * @dataProvider getDataProvider
-     *
+     * @return void
      * @throws ConfigException
      */
+    #[DataProvider('getDataProvider')]
     public function testGet(string $name, array $envConfig, $expectedValue): void
     {
         $this->environmentReaderMock->method('read')
@@ -75,9 +83,11 @@ class PostDeployTest extends TestCase
     }
 
     /**
+     * Data provider for getDataProvider method.
+     *
      * @return array
      */
-    public function getDataProvider(): array
+    public static function getDataProvider(): array
     {
         return [
             'default pages' => [
@@ -104,6 +114,9 @@ class PostDeployTest extends TestCase
     }
 
     /**
+     * Test not exists method.
+     *
+     * @return void
      * @throws ConfigException
      */
     public function testNotExists(): void
@@ -120,6 +133,9 @@ class PostDeployTest extends TestCase
     }
 
     /**
+     * Test unable to read magento env yaml method.
+     *
+     * @return void
      * @throws ConfigException
      */
     public function testUnableToReadMagentoEnvYAml(): void
@@ -136,6 +152,9 @@ class PostDeployTest extends TestCase
     }
 
     /**
+     * Test unable to parse magento env yaml method.
+     *
+     * @return void
      * @throws ConfigException
      */
     public function testUnableToParseMagentoEnvYaml(): void
@@ -152,6 +171,9 @@ class PostDeployTest extends TestCase
     }
 
     /**
+     * Test unable to read schema file method.
+     *
+     * @return void
      * @throws ConfigException
      */
     public function testUnableToReadSchemaFile(): void

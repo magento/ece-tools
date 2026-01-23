@@ -7,18 +7,20 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Scenario;
 
+use Magento\MagentoCloud\Scenario\Collector\Action;
 use Magento\MagentoCloud\Scenario\Collector\Scenario;
 use Magento\MagentoCloud\Scenario\Collector\Step;
-use Magento\MagentoCloud\Scenario\Collector\Action;
 use Magento\MagentoCloud\Scenario\Exception\ValidationException;
 use Magento\MagentoCloud\Scenario\Merger;
 use Magento\MagentoCloud\Scenario\Resolver;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @inheritDoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class MergerTest extends TestCase
 {
     /**

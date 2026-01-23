@@ -10,6 +10,7 @@ namespace Magento\MagentoCloud\Test\Unit\Filesystem\DirectoryCopier;
 use Magento\MagentoCloud\Filesystem\DirectoryCopier\CopyStrategy;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -17,6 +18,7 @@ use Psr\Log\LoggerInterface;
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class CopyStrategyTest extends TestCase
 {
     /**
@@ -37,8 +39,7 @@ class CopyStrategyTest extends TestCase
     protected function setUp(): void
     {
         $this->fileMock = $this->createMock(File::class);
-        $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
-            ->getMockForAbstractClass();
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
 
         $this->copyStrategy = new CopyStrategy($this->fileMock, $this->loggerMock);
     }

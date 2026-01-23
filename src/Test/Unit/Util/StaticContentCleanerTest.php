@@ -46,7 +46,7 @@ class StaticContentCleanerTest extends TestCase
     {
         $this->directoryListMock = $this->createMock(DirectoryList::class);
         $this->fileMock = $this->createMock(File::class);
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
 
         $this->staticContentCleaner = new StaticContentCleaner(
             $this->directoryListMock,

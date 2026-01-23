@@ -12,13 +12,16 @@ use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Util\YamlNormalizer;
-use Symfony\Component\Yaml\Yaml;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Yaml\Yaml;
 
 /**
  * @inheritDoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class ErrorInfoTest extends TestCase
 {
     /**
@@ -63,10 +66,11 @@ class ErrorInfoTest extends TestCase
      * @param int $errorCode
      * @param array $expected
      * @return void
-     * @throws FileSystemException
      * @dataProvider getErrorDataProvider
+     * @throws FileSystemException
      */
-    public function testGetError(int $errorCode, array $expected)
+    #[DataProvider('getErrorDataProvider')]
+    public function testGetError(int $errorCode, array $expected): void
     {
         $filePath = __DIR__ . '/_file/schema.error.yaml';
 
@@ -84,7 +88,7 @@ class ErrorInfoTest extends TestCase
         $yamlNormalizerMock = $this->createMock(YamlNormalizer::class);
         $yamlNormalizerMock->expects($this->once())
             ->method('normalize')
-            ->with($this->isType('array'))
+            ->with($this->callback(fn($arg) => is_array($arg)))
             ->willReturn(Yaml::parse($fileContents)); // Simulate normalized data
 
         $errorInfo = new ErrorInfo(
@@ -101,7 +105,7 @@ class ErrorInfoTest extends TestCase
      *
      * @return array
      */
-    public function getErrorDataProvider(): array
+    public static function getErrorDataProvider(): array
     {
         return [
             [

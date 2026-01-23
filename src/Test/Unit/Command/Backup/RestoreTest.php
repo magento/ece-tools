@@ -13,6 +13,8 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Magento\MagentoCloud\Filesystem\BackupList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\MockObject\RuntimeException;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -47,6 +49,8 @@ class RestoreTest extends TestCase
     }
 
     /**
+     * Test run method.
+     *
      * @param int $getOptionExpects
      * @param string $fileOption
      * @param bool $forceOption
@@ -56,7 +60,9 @@ class RestoreTest extends TestCase
      * @param int $copyExpects
      * @param string $writeLnMsg
      * @dataProvider runDataProvider
+     * @throws RuntimeException
      */
+    #[DataProvider('runDataProvider')]
     public function testRun(
         int $getOptionExpects,
         string $fileOption,
@@ -66,17 +72,15 @@ class RestoreTest extends TestCase
         bool $fileExists,
         int $copyExpects,
         string $writeLnMsg
-    ) {
+    ): void {
         $aliasPath = 'config.php';
         $filePath = 'path/config.php';
         $backupPath = $filePath . BackupList::BACKUP_SUFFIX;
 
         /** @var InputInterface|MockObject $inputMock */
-        $inputMock = $this->getMockBuilder(InputInterface::class)
-            ->getMockForAbstractClass();
+        $inputMock = $this->createMock(InputInterface::class);
         /** @var OutputInterface|MockObject $outputMock */
-        $outputMock = $this->getMockBuilder(OutputInterface::class)
-            ->getMockForAbstractClass();
+        $outputMock = $this->createMock(OutputInterface::class);
 
         $inputMock->expects($this->exactly($getOptionExpects))
             ->method('getOption')
@@ -104,10 +108,12 @@ class RestoreTest extends TestCase
     }
 
     /**
+     * Test run method data provider.
+     *
      * @return array
      * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
-    public function runDataProvider(): array
+    public static function runDataProvider(): array
     {
         return [
             [

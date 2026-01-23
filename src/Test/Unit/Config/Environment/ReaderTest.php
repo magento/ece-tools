@@ -11,8 +11,11 @@ use Magento\MagentoCloud\Config\Environment\Reader;
 use Magento\MagentoCloud\Filesystem\ConfigFileList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
+use Magento\MagentoCloud\Test\Unit\Filesystem\Driver\FileTest;
 use Magento\MagentoCloud\Util\YamlNormalizer;
+use PDO;
 use phpmock\phpunit\PHPMock;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Yaml\Yaml;
@@ -20,6 +23,7 @@ use Symfony\Component\Yaml\Yaml;
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class ReaderTest extends TestCase
 {
     use PHPMock;
@@ -50,7 +54,7 @@ class ReaderTest extends TestCase
     protected function setUp(): void
     {
         /**
-         * This lines are required for proper running of Magento\MagentoCloud\Test\Unit\Filesystem\Driver\FileTest
+         * This lines are required for proper running of FileTest
          */
         self::defineFunctionMock('Magento\MagentoCloud\Filesystem\Driver', 'file_get_contents');
         self::defineFunctionMock('Magento\MagentoCloud\Filesystem\Driver', 'file_exists');
@@ -135,7 +139,7 @@ class ReaderTest extends TestCase
     }
 
     /**
-     * Test read method with empty section and stage.
+     * Test read method with main config with empty section and stage.
      *
      * @return void
      * @throws FileSystemException
@@ -175,7 +179,8 @@ class ReaderTest extends TestCase
      */
     public function testReadWithConstants(): void
     {
-        if (!defined(Yaml::class . '::PARSE_CONSTANT') || !defined(Yaml::class . '::PARSE_CUSTOM_TAGS')) {
+        if (!defined(Yaml::class . '::PARSE_CONSTANT')
+           || !defined(Yaml::class . '::PARSE_CUSTOM_TAGS')) {
             $this->markTestSkipped('Symfony YAML parser does not support PARSE_CONSTANT or PARSE_CUSTOM_TAGS.');
         }
 

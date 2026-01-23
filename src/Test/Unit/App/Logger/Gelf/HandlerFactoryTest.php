@@ -54,8 +54,8 @@ class HandlerFactoryTest extends TestCase
      */
     public function testCreate(): void
     {
-        $httpTransportMock = $this->createMock(HttpTransport::class);
-        $tcpTransportMock = $this->createMock(TcpTransport::class);
+        $httpTransportMock = $this->createStub(HttpTransport::class);
+        $tcpTransportMock = $this->createStub(TcpTransport::class);
 
         $this->repositoryMock->expects($this->exactly(2))
             ->method('get')

@@ -1,8 +1,10 @@
 <?php
+
 /**
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+
 declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Config\Stage\Deploy;
@@ -10,12 +12,15 @@ namespace Magento\MagentoCloud\Test\Unit\Config\Stage\Deploy;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Stage\Deploy\EnvironmentConfig;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class EnvironmentConfigTest extends TestCase
 {
     /**
@@ -39,11 +44,14 @@ class EnvironmentConfigTest extends TestCase
     }
 
     /**
+     * Test getAll method.
+     *
      * @param array $expectedVariables
      * @param array $envVariables
-     *
      * @dataProvider getAllDataProvider
+     * @return void
      */
+    #[DataProvider('getAllDataProvider')]
     public function testGetAll(array $expectedVariables, array $envVariables): void
     {
         $this->environmentMock->method('getVariables')
@@ -56,9 +64,11 @@ class EnvironmentConfigTest extends TestCase
     }
 
     /**
+     * Data provider for getAll method.
+     *
      * @return array
      */
-    public function getAllDataProvider(): array
+    public static function getAllDataProvider(): array
     {
         return [
             [

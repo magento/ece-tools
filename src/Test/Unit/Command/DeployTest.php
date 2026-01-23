@@ -10,6 +10,7 @@ namespace Magento\MagentoCloud\Test\Unit\Command;
 use Magento\MagentoCloud\Command\Deploy;
 use Magento\MagentoCloud\Filesystem\Flag\Manager;
 use Magento\MagentoCloud\Scenario\Processor;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Tester\CommandTester;
@@ -17,6 +18,7 @@ use Symfony\Component\Console\Tester\CommandTester;
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class DeployTest extends TestCase
 {
     /**

@@ -14,6 +14,8 @@ use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Step\Build\PreBuild;
 use Magento\MagentoCloud\Step\StepException;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -21,6 +23,7 @@ use Psr\Log\LoggerInterface;
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class PreBuildTest extends TestCase
 {
     /**
@@ -58,17 +61,11 @@ class PreBuildTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->stageConfigMock = $this->getMockBuilder(BuildInterface::class)
-            ->getMockForAbstractClass();
-        $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
-            ->getMockForAbstractClass();
+        $this->stageConfigMock = $this->createMock(BuildInterface::class);
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
         $this->flagManagerMock = $this->createMock(FlagManager::class);
-        $this->fileMock = $this->getMockBuilder(File::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-        $this->directoryListMock = $this->getMockBuilder(DirectoryList::class)
-            ->disableOriginalConstructor()
-            ->getMock();
+        $this->fileMock = $this->createMock(File::class);
+        $this->directoryListMock = $this->createMock(DirectoryList::class);
 
         $this->directoryListMock->method('getGeneratedCode')
             ->willReturn('generated_code');
@@ -86,11 +83,16 @@ class PreBuildTest extends TestCase
     }
 
     /**
+     * Test execute verbosity method.
+     *
      * @param string $verbosity
      * @param string $expectedVerbosity
      * @dataProvider executeVerbosityDataProvider
+     * @return void
+     * @throws \ReflectionException
      */
-    public function testExecuteVerbosity(string $verbosity, string $expectedVerbosity)
+    #[DataProvider('executeVerbosityDataProvider')]
+    public function testExecuteVerbosity(string $verbosity, string $expectedVerbosity): void
     {
         $this->stageConfigMock->expects($this->once())
             ->method('get')
@@ -107,21 +109,34 @@ class PreBuildTest extends TestCase
     }
 
     /**
+     * Data provider for execute verbosity method.
+     *
      * @return array
      */
-    public function executeVerbosityDataProvider(): array
+    public static function executeVerbosityDataProvider(): array
     {
         return [
-            'verbosity very' => ['input' => ' -vvv', 'output' => ' -vvv'],
-            'verbosity none' => ['input' => '',      'output' => 'not set'],
+            'verbosity very' => [
+                'verbosity'         => ' -vvv',
+                'expectedVerbosity' => ' -vvv',
+            ],
+            'verbosity none' => [
+                'verbosity'         => '',
+                'expectedVerbosity' => 'not set',
+            ],
         ];
     }
 
     /**
+     * Test execute clear directories method.
+     *
      * @param bool $istExists
      * @param int $callCount
      * @dataProvider executeClearDirectoriesDataProvider
+     * @return void
+     * @throws \ReflectionException
      */
+    #[DataProvider('executeClearDirectoriesDataProvider')]
     public function testExecuteClearDirectories(bool $isExists, int $callCount)
     {
         $generatedCode     = 'generated_code';
@@ -146,17 +161,31 @@ class PreBuildTest extends TestCase
     }
 
     /**
+     * Data provider for execute clear directories method.
+     *
      * @return array
      */
-    public function executeClearDirectoriesDataProvider(): array
+    public static function executeClearDirectoriesDataProvider(): array
     {
         return [
-            ['isExist' => true, 'clearDirectories' => 2],
-            ['isExist' => false, 'clearDirectories' => 0],
+            [
+                'isExists'  => true,
+                'callCount' => 2,
+            ],
+            [
+                'isExists'  => false,
+                'callCount' => 0,
+            ],
         ];
     }
 
-    public function testExecuteWithException()
+    /**
+     * Test execute with exception method.
+     *
+     * @return void
+     * @throws \ReflectionException
+     */
+    public function testExecuteWithException(): void
     {
         $exceptionCode = 111;
         $exceptionMsg = 'Error message';

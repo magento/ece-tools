@@ -1,23 +1,28 @@
 <?php
+
 /**
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+
 declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Config\Magento\Shared;
 
-use Magento\MagentoCloud\Filesystem\FileSystemException;
-use PHPUnit\Framework\MockObject\MockObject;
-use PHPUnit\Framework\TestCase;
 use Magento\MagentoCloud\Config\Magento\Shared\ReaderInterface;
 use Magento\MagentoCloud\Config\Magento\Shared\Writer;
-use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Filesystem\FileList;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
 
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class WriterTest extends TestCase
 {
     /**
@@ -45,7 +50,7 @@ class WriterTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->readerMock = $this->getMockForAbstractClass(ReaderInterface::class);
+        $this->readerMock = $this->createMock(ReaderInterface::class);
         $this->fileMock = $this->createMock(File::class);
         $this->fileListMock = $this->createMock(FileList::class);
 
@@ -57,13 +62,15 @@ class WriterTest extends TestCase
     }
 
     /**
+     * Test create method.
+     *
      * @param array $config
      * @param string $updatedConfig
-     *
+     * @return void
      * @throws FileSystemException
-     *
      * @dataProvider createDataProvider
      */
+    #[DataProvider('createDataProvider')]
     public function testCreate(array $config, $updatedConfig): void
     {
         $filePath = '/path/to/file';
@@ -78,9 +85,11 @@ class WriterTest extends TestCase
     }
 
     /**
+     * Data provider for testCreate method.
+     *
      * @return array
      */
-    public function createDataProvider(): array
+    public static function createDataProvider(): array
     {
         return [
             [
@@ -99,15 +108,17 @@ class WriterTest extends TestCase
     }
 
     /**
+     * Test update method.
+     *
      * @param array $config
      * @param array $currentConfig
      * @param string $updatedConfig
-     *
-     * @throws FileSystemException
-     *
+     * @return void
      * @dataProvider updateDataProvider
+     * @throws FileSystemException
      */
-    public function testupdate(array $config, array $currentConfig, $updatedConfig)
+    #[DataProvider('updateDataProvider')]
+    public function testupdate(array $config, array $currentConfig, $updatedConfig): void
     {
         $filePath = '/path/to/file';
         $this->fileListMock->expects($this->once())
@@ -124,9 +135,11 @@ class WriterTest extends TestCase
     }
 
     /**
+     * Data provider for testUpdate method.
+     *
      * @return array
      */
-    public function updateDataProvider(): array
+    public static function updateDataProvider(): array
     {
         return [
             [
@@ -158,7 +171,7 @@ class WriterTest extends TestCase
                     ]
                 ],
                 "<?php\nreturn array (\n  'key1' => \n  array (\n    'key11' => 'value1',\n" .
-                "    'key12' => 'value2new',\n    'key13' => 'value3new',\n  ),\n);"
+                    "    'key12' => 'value2new',\n    'key13' => 'value3new',\n  ),\n);"
             ],
         ];
     }

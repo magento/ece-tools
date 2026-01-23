@@ -11,10 +11,11 @@ use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Config\Module;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
+use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Step\Build\RefreshModules;
 use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
-use Magento\MagentoCloud\Shell\ShellException;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -22,6 +23,7 @@ use Psr\Log\LoggerInterface;
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class RefreshModulesTest extends TestCase
 {
     /**
@@ -44,7 +46,7 @@ class RefreshModulesTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
         $this->configMock = $this->createMock(Module::class);
 
         $this->step = new RefreshModules(

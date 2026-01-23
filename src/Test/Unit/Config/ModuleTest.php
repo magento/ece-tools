@@ -14,12 +14,14 @@ use Magento\MagentoCloud\Config\Stage\BuildInterface;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Shell\MagentoShell;
 use Magento\MagentoCloud\Shell\ShellFactory;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class ModuleTest extends TestCase
 {
     /**
@@ -52,8 +54,8 @@ class ModuleTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->readerMock = $this->getMockForAbstractClass(ReaderInterface::class);
-        $this->writerMock = $this->getMockForAbstractClass(WriterInterface::class);
+        $this->readerMock = $this->createMock(ReaderInterface::class);
+        $this->writerMock = $this->createMock(WriterInterface::class);
         $this->stageConfigMock = $this->createMock(BuildInterface::class);
         $this->magentoShellMock = $this->createMock(MagentoShell::class);
 

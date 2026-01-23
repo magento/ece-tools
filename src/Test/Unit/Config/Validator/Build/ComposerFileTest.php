@@ -15,12 +15,14 @@ use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Package\Manager;
 use Magento\MagentoCloud\Package\UndefinedPackageException;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class ComposerFileTest extends TestCase
 {
     /**

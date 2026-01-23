@@ -11,6 +11,8 @@ use Codeception\PHPUnit\TestCase;
 use Magento\MagentoCloud\Command\ConfigCreate;
 use Magento\MagentoCloud\Filesystem\ConfigFileList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -18,6 +20,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class ConfigCreateTest extends TestCase
 {
     /**
@@ -52,8 +55,8 @@ class ConfigCreateTest extends TestCase
     {
         $this->configFileListMock = $this->createMock(ConfigFileList::class);
         $this->fileMock = $this->createMock(File::class);
-        $this->inputMock = $this->getMockForAbstractClass(InputInterface::class);
-        $this->outputMock = $this->getMockForAbstractClass(OutputInterface::class);
+        $this->inputMock = $this->createMock(InputInterface::class);
+        $this->outputMock = $this->createMock(OutputInterface::class);
 
         $this->command = new ConfigCreate(
             $this->configFileListMock,
@@ -62,11 +65,16 @@ class ConfigCreateTest extends TestCase
     }
 
     /**
-     * @dataProvider executeDataProvider
+     * Test execute method.
+     *
      * @param string $configuration
      * @param string $expected
+     * @dataProvider executeDataProvider
+     * @return void
+     * @throws \Exception
      */
-    public function testExecute(string $configuration, string $expected)
+    #[DataProvider('executeDataProvider')]
+    public function testExecute(string $configuration, string $expected): void
     {
         $this->inputMock->expects($this->once())
             ->method('getArgument')
@@ -82,29 +90,32 @@ class ConfigCreateTest extends TestCase
         $this->command->execute($this->inputMock, $this->outputMock);
     }
 
-    public function executeDataProvider(): array
+    /**
+     * Execute data provider method.
+     *
+     * @return array
+     */
+    public static function executeDataProvider(): array
     {
         return [
             [
                 '{"stage":{"build":{"SKIP_COMPOSER_DUMP_AUTOLOAD":false}}}',
-                'stage:
-  build:
-    SKIP_COMPOSER_DUMP_AUTOLOAD: false
-'
+                "stage:\n  build:\n    SKIP_COMPOSER_DUMP_AUTOLOAD: false\n"
             ],
             [
                 '{"stage":{"deploy":{"DATABASE_CONFIGURATION":{"password":"test", "_merge":true}}}}',
-                'stage:
-  deploy:
-    DATABASE_CONFIGURATION:
-      password: test
-      _merge: true
-'
+                "stage:\n  deploy:\n    DATABASE_CONFIGURATION:\n      password: test\n      _merge: true\n"
             ],
         ];
     }
 
-    public function testExecuteWithWrongArgument()
+    /**
+     * Test execute method with wrong argument.
+     *
+     * @return void
+     * @throws \Exception
+     */
+    public function testExecuteWithWrongArgument(): void
     {
         $this->expectException(\Exception::class);
         $this->expectExceptionMessageRegExp('/Wrong JSON format.*/');

@@ -45,9 +45,9 @@ class DeployCompletionTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
         $this->hookChecker = $this->createMock(HookChecker::class);
-        $this->stepMock = $this->getMockForAbstractClass(StepInterface::class);
+        $this->stepMock = $this->createMock(StepInterface::class);
 
         $this->step = new DeployCompletion(
             $this->loggerMock,
