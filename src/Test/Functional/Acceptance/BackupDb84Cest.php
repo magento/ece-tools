@@ -14,6 +14,8 @@ namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 class BackupDb84Cest extends BackupDbCest
 {
     /**
+     * Data provider for Magento Cloud versions.
+     *
      * @return array
      */
     protected function dataProviderMagentoCloudVersions(): array
