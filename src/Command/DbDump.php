@@ -21,7 +21,6 @@ use Symfony\Component\Console\Input\InputArgument;
 /**
  * Class DbDump for safely creating backup of database
  *
- * @api
  */
 class DbDump extends Command
 {
@@ -55,7 +54,6 @@ class DbDump extends Command
     }
 
     /**
-     * @inheritdoc
      */
     protected function configure(): void
     {

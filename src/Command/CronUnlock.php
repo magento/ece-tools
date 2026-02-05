@@ -20,7 +20,6 @@ use Exception;
 /**
  * CLI command for unlocking cron jobs that stuck in "running" state.
  *
- * @api
  */
 class CronUnlock extends Command
 {
@@ -58,7 +57,6 @@ class CronUnlock extends Command
     }
 
     /**
-     * @inheritdoc
      */
     protected function configure(): void
     {

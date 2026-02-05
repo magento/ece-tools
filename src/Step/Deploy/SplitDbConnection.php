@@ -23,12 +23,7 @@ use Magento\MagentoCloud\Util\UpgradeProcess;
 use Psr\Log\LoggerInterface;
 
 /**
- * Enables split database
- *
- * {@inheritDoc}
- *
- * @SuppressWarnings("PHPMD.CouplingBetweenObjects")
- * @deprecated started from Magento 2.4.2 and will be removed in 2.5.0
+ * Enables split database. Deprecated: started from Magento 2.4.2.
  */
 class SplitDbConnection implements StepInterface
 {

@@ -12,7 +12,6 @@ use Magento\MagentoCloud\DB\Data\ConnectionFactory;
 use Psr\Log\LoggerInterface;
 
 /**
- * @inheritdoc
  */
 class Connection implements ConnectionInterface
 {
@@ -64,7 +63,6 @@ class Connection implements ConnectionInterface
     }
 
     /**
-     * @inheritdoc
      */
     public function query(string $query, array $bindings = []): bool
     {
@@ -82,7 +80,6 @@ class Connection implements ConnectionInterface
     }
 
     /**
-     * @inheritdoc
      */
     public function affectingQuery(string $query, array $bindings = []): int
     {
@@ -98,7 +95,6 @@ class Connection implements ConnectionInterface
     }
 
     /**
-     * @inheritdoc
      */
     public function select(string $query, array $bindings = []): array
     {
@@ -106,7 +102,6 @@ class Connection implements ConnectionInterface
     }
 
     /**
-     * @inheritdoc
      */
     public function selectOne(string $query, array $bindings = []): array
     {
@@ -145,7 +140,6 @@ class Connection implements ConnectionInterface
     }
 
     /**
-     * @inheritdoc
      */
     public function listTables(): array
     {
@@ -160,7 +154,6 @@ class Connection implements ConnectionInterface
     }
 
     /**
-     * @inheritdoc
      */
     public function bindValues(\PDOStatement $statement, array $bindings)
     {
@@ -177,7 +170,6 @@ class Connection implements ConnectionInterface
      * {@inheritdoc}
      *
      * @throws PDOException
-     * @codeCoverageIgnore
      */
     public function getPdo(): \PDO
     {
@@ -201,7 +193,6 @@ class Connection implements ConnectionInterface
     /**
      * Create PDO connection.
      *
-     * @codeCoverageIgnore
      */
     private function connect()
     {
@@ -240,7 +231,6 @@ class Connection implements ConnectionInterface
     }
 
     /**
-     * @inheritdoc
      */
     public function close()
     {
@@ -248,7 +238,6 @@ class Connection implements ConnectionInterface
     }
 
     /**
-     * @inheritdoc
      */
     public function getTableName(string $name): string
     {

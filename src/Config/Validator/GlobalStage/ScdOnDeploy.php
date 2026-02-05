@@ -14,7 +14,6 @@ use Magento\MagentoCloud\Config\Validator;
 use Magento\MagentoCloud\Config\Validator\CompositeValidator;
 
 /**
- * @inheritdoc
  */
 class ScdOnDeploy implements CompositeValidator
 {
@@ -57,7 +56,6 @@ class ScdOnDeploy implements CompositeValidator
     }
 
     /**
-     * @inheritdoc
      */
     public function validate(): Validator\ResultInterface
     {
@@ -69,7 +67,6 @@ class ScdOnDeploy implements CompositeValidator
     }
 
     /**
-     * @inheritdoc
      */
     public function getErrors(): array
     {

@@ -23,7 +23,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * Update composer command for deployment from git.
  *
- * @api
  */
 class UpdateComposer extends Command
 {
@@ -86,7 +85,6 @@ class UpdateComposer extends Command
     }
 
     /**
-     * @inheritdoc
      */
     protected function configure(): void
     {
@@ -102,7 +100,6 @@ class UpdateComposer extends Command
      * @throws ConfigException
      * @throws FileSystemException
      *
-     * @SuppressWarnings("PHPMD.UnusedFormalParameter")
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {

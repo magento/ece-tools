@@ -10,11 +10,7 @@ namespace Magento\MagentoCloud\Service\Adapter;
 use Credis_Client;
 
 /**
- * Factory for Cvalkey Client
- *
- * @see Credis_Client
- *
- * @codeCoverageIgnore
+ * Factory for Cvalkey Client *
  */
 class CvalkeyFactory
 {

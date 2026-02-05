@@ -22,7 +22,6 @@ use Psr\Log\LoggerInterface;
 /**
  * Processes cache configuration.
  *
- * @SuppressWarnings("PHPMD.CyclomaticComplexity")
  */
 class Cache implements StepInterface
 {
@@ -83,7 +82,6 @@ class Cache implements StepInterface
     }
 
     /**
-     * @inheritdoc
      */
     public function execute()
     {

@@ -17,7 +17,7 @@ use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Package\UndefinedPackageException;
 
 /**
- * @inheritdoc
+ * Custom logger for ECE-Tools.
  */
 class Logger extends \Monolog\Logger // @phpstan-ignore-line
 {

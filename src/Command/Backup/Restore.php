@@ -15,7 +15,6 @@ use Magento\MagentoCloud\Filesystem\Driver\File;
 /**
  * Class for restoring Magento files from backup
  *
- * @see \Magento\MagentoCloud\Filesystem\BackupList contains the list of files for restoring
  */
 class Restore
 {

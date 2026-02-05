@@ -10,7 +10,6 @@ namespace Magento\MagentoCloud\Service;
 use Magento\MagentoCloud\App\GenericException;
 
 /**
- * @inheritdoc
  */
 class ServiceMismatchException extends GenericException
 {

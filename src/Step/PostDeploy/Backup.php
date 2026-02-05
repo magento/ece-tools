@@ -17,7 +17,6 @@ use Psr\Log\LoggerInterface;
 
 /**
  * Creates backup Magento files
- * @see \Magento\MagentoCloud\Filesystem\BackupList contains the list of files for backup
  */
 class Backup implements StepInterface
 {
@@ -52,7 +51,6 @@ class Backup implements StepInterface
     }
 
     /**
-     * @inheritdoc
      */
     public function execute()
     {

@@ -19,10 +19,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * Verifies whether DB was split or not
- *
- * @api
- * @deprecated started from Magento 2.4.2 and will be removed in 2.5.0
+ * Verifies whether DB was split or not. Deprecated: started from Magento 2.4.2.
  */
 class SplitDbState extends Command
 {
@@ -67,7 +64,6 @@ class SplitDbState extends Command
     }
 
     /**
-     * @inheritdoc
      */
     protected function configure(): void
     {
@@ -76,7 +72,6 @@ class SplitDbState extends Command
     }
 
     /**
-     * @inheritdoc
      */
     public function execute(InputInterface $input, OutputInterface $output): int
     {

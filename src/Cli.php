@@ -8,9 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud;
 
 /**
- * @api
- *
- * @codeCoverageIgnore
+ * CLI exit code constants.
  */
 class Cli
 {

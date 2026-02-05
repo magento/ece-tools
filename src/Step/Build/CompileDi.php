@@ -18,7 +18,6 @@ use Psr\Log\LoggerInterface;
 use Magento\MagentoCloud\Config\Stage\BuildInterface;
 
 /**
- * @inheritdoc
  */
 class CompileDi implements StepInterface
 {

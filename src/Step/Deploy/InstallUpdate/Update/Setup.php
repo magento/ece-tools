@@ -17,7 +17,6 @@ use Magento\MagentoCloud\Util\UpgradeProcess;
 use Magento\MagentoCloud\Step\StepException;
 
 /**
- * @inheritdoc
  */
 class Setup implements StepInterface
 {
@@ -43,9 +42,7 @@ class Setup implements StepInterface
         $this->upgradeProcess = $upgradeProcess;
     }
 
-    /**
-     * @inheritdoc
-     *
+    /* *
      * @throws StepException
      */
     public function execute()

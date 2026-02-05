@@ -10,11 +10,7 @@ namespace Magento\MagentoCloud\Service\Adapter;
 use Credis_Client;
 
 /**
- * Factory for Credis Client
- *
- * @see Credis_Client
- *
- * @codeCoverageIgnore
+ * Factory for Credis Client *
  */
 class CredisFactory
 {

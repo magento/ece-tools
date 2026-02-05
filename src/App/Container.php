@@ -19,9 +19,7 @@ use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 use Exception;
 
 /**
- * @inheritdoc
- * @codeCoverageIgnore
- * @SuppressWarnings("PHPMD.CouplingBetweenObjects")
+ * Dependency injection container for ECE-Tools.
  */
 class Container implements ContainerInterface
 {

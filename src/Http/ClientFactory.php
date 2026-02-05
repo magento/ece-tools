@@ -13,7 +13,6 @@ use Magento\MagentoCloud\App\ContainerInterface;
 /**
  * Creates configured instances of Client.
  *
- * @see Client
  */
 class ClientFactory
 {

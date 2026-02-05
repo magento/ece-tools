@@ -18,7 +18,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * CLI command to friendly display the encoded cloud configuration environment variables
  *
- * @api
  */
 class ConfigShow extends Command
 {
@@ -64,7 +63,6 @@ class ConfigShow extends Command
     }
 
     /**
-     * @inheritdoc
      */
     protected function configure(): void
     {

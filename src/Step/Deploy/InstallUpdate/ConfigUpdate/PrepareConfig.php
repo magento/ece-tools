@@ -15,7 +15,6 @@ use Magento\MagentoCloud\Config\Magento\Env\WriterInterface as ConfigWriter;
 use Psr\Log\LoggerInterface;
 
 /**
- * @inheritdoc
  */
 class PrepareConfig implements StepInterface
 {
@@ -50,7 +49,6 @@ class PrepareConfig implements StepInterface
     }
 
     /**
-     * @inheritdoc
      */
     public function execute()
     {

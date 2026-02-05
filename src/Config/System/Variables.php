@@ -14,7 +14,6 @@ use Magento\MagentoCloud\Config\SystemConfigInterface;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 
 /**
- * @inheritdoc
  */
 class Variables implements SystemConfigInterface
 {
@@ -44,7 +43,6 @@ class Variables implements SystemConfigInterface
     }
 
     /**
-     * @inheritdoc
      */
     public function get(string $name)
     {

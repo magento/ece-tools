@@ -17,7 +17,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * Verifies master-slave configuration
  *
- * @api
  */
 class MasterSlave extends Command
 {
@@ -46,7 +45,6 @@ class MasterSlave extends Command
     }
 
     /**
-     * @inheritdoc
      */
     protected function configure(): void
     {
@@ -55,7 +53,6 @@ class MasterSlave extends Command
     }
 
     /**
-     * @inheritdoc
      */
     public function execute(InputInterface $input, OutputInterface $output): int
     {

@@ -20,8 +20,6 @@ use Symfony\Component\Yaml\Yaml;
 /**
  * Generates the dist/error-codes.md file from the schema.error.yaml file.
  *
- * @codeCoverageIgnore
- * @SuppressWarnings("PHPMD.CouplingBetweenObjects")
  */
 class GenerateSchemaError extends Command
 {
@@ -62,7 +60,6 @@ class GenerateSchemaError extends Command
     }
 
     /**
-     * @inheritdoc
      */
     protected function configure(): void
     {
@@ -72,11 +69,8 @@ class GenerateSchemaError extends Command
         parent::configure();
     }
 
-    /**
-     * @inheritdoc
-     *
+    /* *
      * @throws FileSystemException
-     * @SuppressWarnings("PHPMD.UnusedFormalParameter")
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {

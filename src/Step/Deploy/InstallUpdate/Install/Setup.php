@@ -20,7 +20,6 @@ use Magento\MagentoCloud\Shell\ShellInterface;
 use Psr\Log\LoggerInterface;
 
 /**
- * @inheritdoc
  */
 class Setup implements StepInterface
 {
@@ -71,7 +70,6 @@ class Setup implements StepInterface
     }
 
     /**
-     * @inheritdoc
      */
     public function execute(): void
     {

@@ -16,7 +16,6 @@ use Magento\MagentoCloud\Config\Stage\BuildInterface;
 use Psr\Log\LoggerInterface;
 
 /**
- * @inheritdoc
  */
 class PreBuild implements StepInterface
 {
@@ -67,7 +66,6 @@ class PreBuild implements StepInterface
     }
 
     /**
-     * @inheritdoc
      */
     public function execute()
     {

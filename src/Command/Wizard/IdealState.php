@@ -18,7 +18,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * Verifies ideal state of configuration
  *
- * @api
  */
 class IdealState extends Command
 {
@@ -47,7 +46,6 @@ class IdealState extends Command
     }
 
     /**
-     * @inheritdoc
      */
     protected function configure()
     {
@@ -58,7 +56,6 @@ class IdealState extends Command
     }
 
     /**
-     * @inheritdoc
      */
     public function execute(InputInterface $input, OutputInterface $output): int
     {

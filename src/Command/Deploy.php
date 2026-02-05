@@ -17,9 +17,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * CLI command for deploy hook. Responsible for installing/updating/configuring Magento
- *
- * @api
+ * CLI command for deploy hook. Responsible for installing/updating/configuring Magento.
  */
 class Deploy extends Command
 {

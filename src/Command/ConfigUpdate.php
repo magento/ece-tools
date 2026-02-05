@@ -22,7 +22,6 @@ use InvalidArgumentException;
 /**
  * Updates .magento.env.yaml.
  *
- * @api
  */
 class ConfigUpdate extends Command
 {
@@ -59,7 +58,6 @@ class ConfigUpdate extends Command
     }
 
     /**
-     * @inheritdoc
      */
     protected function configure(): void
     {

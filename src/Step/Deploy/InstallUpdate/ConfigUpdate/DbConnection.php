@@ -27,7 +27,6 @@ use Psr\Log\LoggerInterface;
 /**
  * Updates DB connection configuration.
  *
- * @SuppressWarnings("PHPMD.CouplingBetweenObjects")
  */
 class DbConnection implements StepInterface
 {
@@ -128,7 +127,6 @@ class DbConnection implements StepInterface
      * In the case when the database was split with the user configuration then sets the flag '.ignore_split_db'
      * If the flag '.ignore_split_db' exists, the split process will be ignored
      *
-     * @inheritDoc
      */
     public function execute()
     {

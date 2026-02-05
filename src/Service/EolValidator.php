@@ -23,7 +23,6 @@ use Symfony\Component\Yaml\Yaml;
  *
  * Class EolValidator
  *
- * @SuppressWarnings("PHPMD.CouplingBetweenObjects")
  */
 class EolValidator
 {

@@ -16,8 +16,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * Performs post-deploy operations.
- *
- * @api
  */
 class PostDeploy extends Command
 {

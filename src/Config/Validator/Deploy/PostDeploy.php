@@ -12,7 +12,6 @@ use Magento\MagentoCloud\Config\Validator;
 use Magento\MagentoCloud\Config\ValidatorInterface;
 
 /**
- * @inheritdoc
  */
 class PostDeploy implements ValidatorInterface
 {
@@ -39,7 +38,6 @@ class PostDeploy implements ValidatorInterface
     }
 
     /**
-     * @inheritdoc
      */
     public function validate(): Validator\ResultInterface
     {

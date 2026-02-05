@@ -18,7 +18,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * Execute given scenarios.
  *
- * @api
  */
 class RunCommand extends Command
 {
@@ -41,7 +40,6 @@ class RunCommand extends Command
     }
 
     /**
-     * @inheritDoc
      */
     protected function configure(): void
     {

@@ -14,7 +14,6 @@ use Magento\MagentoCloud\Filesystem\Driver\File;
 use Psr\Log\LoggerInterface;
 
 /**
- * @inheritdoc
  */
 class ClearInitDirectory implements StepInterface
 {
@@ -57,7 +56,6 @@ class ClearInitDirectory implements StepInterface
     }
 
     /**
-     * @inheritdoc
      */
     public function execute()
     {

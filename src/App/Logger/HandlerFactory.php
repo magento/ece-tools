@@ -22,8 +22,6 @@ use Monolog\Logger;
 
 /**
  * The handler factory.
- *
- * @SuppressWarnings("PHPMD.CouplingBetweenObjects")
  */
 class HandlerFactory
 {

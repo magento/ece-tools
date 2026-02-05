@@ -13,7 +13,6 @@ use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
 
 /**
- * @inheritDoc
  */
 class DeployFailed implements StepInterface
 {
@@ -31,7 +30,6 @@ class DeployFailed implements StepInterface
     }
 
     /**
-     * @inheritDoc
      */
     public function execute()
     {

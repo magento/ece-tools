@@ -11,8 +11,6 @@ use LogicException;
 
 /**
  * Provides ability to statically register extensions for ece-tools.
- *
- * @codeCoverageIgnore
  */
 class ExtensionRegistrar
 {

@@ -17,7 +17,6 @@ use Magento\MagentoCloud\Util\ArrayManager;
 use Magento\MagentoCloud\Util\PhpFormatter;
 
 /**
- * @inheritdoc
  */
 class Generate
 {

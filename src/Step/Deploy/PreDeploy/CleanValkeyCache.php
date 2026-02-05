@@ -19,8 +19,6 @@ use CredisException;
 /**
  * Cleans Valkey cache.
  *
- * @SuppressWarnings("PHPMD.CyclomaticComplexity")
- * @SuppressWarnings("PHPMD.NPathComplexity")
  */
 class CleanValkeyCache implements StepInterface
 {

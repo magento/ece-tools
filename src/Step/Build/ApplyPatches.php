@@ -15,7 +15,6 @@ use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
 
 /**
- * @inheritdoc
  */
 class ApplyPatches implements StepInterface
 {
@@ -33,7 +32,6 @@ class ApplyPatches implements StepInterface
     }
 
     /**
-     * @inheritdoc
      */
     public function execute(): void
     {

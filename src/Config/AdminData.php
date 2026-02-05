@@ -8,7 +8,6 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Config;
 
 /**
- * @inheritDoc
  */
 class AdminData implements AdminDataInterface
 {
@@ -26,7 +25,6 @@ class AdminData implements AdminDataInterface
     }
 
     /**
-     * @inheritDoc
      */
     public function getLocale(): string
     {
@@ -34,7 +32,6 @@ class AdminData implements AdminDataInterface
     }
 
     /**
-     * @inheritDoc
      */
     public function getUsername(): string
     {
@@ -42,7 +39,6 @@ class AdminData implements AdminDataInterface
     }
 
     /**
-     * @inheritDoc
      */
     public function getFirstName(): string
     {
@@ -50,7 +46,6 @@ class AdminData implements AdminDataInterface
     }
 
     /**
-     * @inheritDoc
      */
     public function getLastName(): string
     {
@@ -58,7 +53,6 @@ class AdminData implements AdminDataInterface
     }
 
     /**
-     * @inheritDoc
      */
     public function getEmail(): string
     {
@@ -66,7 +60,6 @@ class AdminData implements AdminDataInterface
     }
 
     /**
-     * @inheritDoc
      */
     public function getPassword(): string
     {
@@ -74,7 +67,6 @@ class AdminData implements AdminDataInterface
     }
 
     /**
-     * @inheritDoc
      */
     public function getUrl(): string
     {
@@ -82,7 +74,6 @@ class AdminData implements AdminDataInterface
     }
 
     /**
-     * @inheritDoc
      */
     public function getDefaultCurrency(): string
     {

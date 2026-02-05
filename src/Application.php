@@ -13,9 +13,7 @@ use Magento\MagentoCloud\App\Container;
 use Magento\MagentoCloud\Command;
 
 /**
- * @inheritdoc
- *
- * @SuppressWarnings("PHPMD.CouplingBetweenObjects")
+ * Main ECE-Tools console application.
  */
 class Application extends \Symfony\Component\Console\Application
 {

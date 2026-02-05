@@ -12,7 +12,6 @@ use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Psr\Log\LoggerInterface;
 
 /**
- * @inheritdoc
  */
 class CopyStrategy implements StrategyInterface
 {
@@ -37,7 +36,6 @@ class CopyStrategy implements StrategyInterface
     }
 
     /**
-     * @inheritdoc
      */
     public function copy(string $fromDirectory, string $toDirectory): bool
     {
