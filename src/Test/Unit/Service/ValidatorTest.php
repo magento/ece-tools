@@ -111,8 +111,7 @@ class ValidatorTest extends TestCase
             $serviceName,
             $magentoVersion
         );
-        $this->magentoVersionMock->expects($this->any())
-            ->method('getVersion')
+        $this->magentoVersionMock->method('getVersion')
             ->willReturn($magentoVersion);
 
         $this->assertEquals(
@@ -290,11 +289,34 @@ class ValidatorTest extends TestCase
                 0
             ],
             [
-                '2.4.7-p6',
+               '2.4.8',
                 [
-                    ServiceInterface::NAME_VALKEY => '8.0.0'
+                    ServiceInterface::NAME_PHP => '8.4.0'
                 ],
                 0
+            ],
+            [
+                '2.4.8',
+                [
+                    ServiceInterface::NAME_PHP => '8.5.0'
+                ],
+                1
+            ],
+            [
+                '2.4.9-beta1',
+                [
+                    ServiceInterface::NAME_PHP => '8.5.0',
+                    ServiceInterface::NAME_RABBITMQ => '4.1.0'
+                ],
+                0
+            ],
+            [
+                '2.4.9-beta1',
+                [
+                    ServiceInterface::NAME_PHP => '8.3.0',
+                    ServiceInterface::NAME_RABBITMQ => '4.1.0'
+                ],
+                1
             ],
         ];
     }
