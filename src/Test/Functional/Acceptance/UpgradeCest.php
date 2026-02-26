@@ -40,6 +40,7 @@ abstract class UpgradeCest extends AbstractCest
         // Step 1: Deploy old version
         $this->prepareWorkplace($I, $data['from']);
         $I->generateDockerCompose('--mode=production');
+        $this->removeVendorVolumeMountFromDockerCompose($I);
 
         $I->runDockerComposeCommand('run build cloud-build');
         $I->assertTrue($I->startEnvironment(), 'Environment failed to start');

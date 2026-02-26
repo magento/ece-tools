@@ -360,6 +360,7 @@ class Redis84Cest extends RedisCest
             '--mode=production --expose-db-port=%s',
             $I->getExposedPort()
         ));
+        $this->removeVendorVolumeMountFromDockerCompose($I);
 
         $I->assertTrue($I->runDockerComposeCommand('run build cloud-build'), 'Build phase was failed');
         $I->assertTrue($I->startEnvironment(), 'Docker could not start');

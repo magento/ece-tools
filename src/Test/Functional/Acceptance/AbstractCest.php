@@ -8,6 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 
 use Magento\MagentoCloud\Util\ArrayManager;
+use Symfony\Component\Yaml\Yaml;
 
 /**
  * General Cest
@@ -108,6 +109,58 @@ abstract class AbstractCest
         }
 
         $this->removeESIfExists($I, $templateVersion);
+    }
+
+    /**
+     * Removes the dedicated vendor volume mount from generated docker-compose.yml.
+     *
+     * We want `/app/vendor` to be a normal directory inside the `/app` root mount, otherwise
+     * Composer may fail trying to delete `/app/vendor` (mounted volume root).
+     */
+    protected function removeVendorVolumeMountFromDockerCompose(\CliTester $I): void
+    {
+        $composePath = $I->getWorkDirPath() . DIRECTORY_SEPARATOR . 'docker-compose.yml';
+        if (!is_file($composePath)) {
+            return;
+        }
+
+        $compose = Yaml::parseFile($composePath);
+        if (!is_array($compose) || !isset($compose['services']) || !is_array($compose['services'])) {
+            return;
+        }
+
+        $vendorVolumeNames = [];
+
+        foreach ($compose['services'] as &$service) {
+            if (!is_array($service) || !isset($service['volumes']) || !is_array($service['volumes'])) {
+                continue;
+            }
+
+            $service['volumes'] = array_values(array_filter(
+                $service['volumes'],
+                static function ($volume) use (&$vendorVolumeNames): bool {
+                    if (!is_string($volume)) {
+                        return true;
+                    }
+
+                    if (preg_match('#^([^:]+):/app/vendor(?::|$)#', $volume, $matches)) {
+                        $vendorVolumeNames[] = $matches[1];
+                        return false;
+                    }
+
+                    return true;
+                }
+            ));
+        }
+        unset($service);
+
+        if (isset($compose['volumes']) && is_array($compose['volumes'])) {
+            foreach (array_unique($vendorVolumeNames) as $name) {
+                unset($compose['volumes'][$name]);
+            }
+        }
+
+        file_put_contents($composePath, Yaml::dump($compose, 25, 2));
     }
 
     /**

@@ -28,6 +28,7 @@ abstract class ScdStrategyCest extends AbstractCest
     {
         $I->copyFileToWorkDir($data['env_yaml'], '.magento.env.yaml');
         $I->generateDockerCompose('--mode=production');
+        $this->removeVendorVolumeMountFromDockerCompose($I);
         $I->runDockerComposeCommand('run build cloud-build');
         $I->startEnvironment();
         $I->runDockerComposeCommand('run deploy cloud-deploy');

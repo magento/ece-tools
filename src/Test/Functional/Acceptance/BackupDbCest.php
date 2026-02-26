@@ -72,6 +72,7 @@ abstract class BackupDbCest extends AbstractCest
     {
         $I->writeEnvMagentoYaml($this->envMagento);
         $I->generateDockerCompose('--mode=production');
+        $this->removeVendorVolumeMountFromDockerCompose($I);
 
         // Build phase
         $I->runDockerComposeCommand('run build cloud-build');

@@ -115,6 +115,7 @@ abstract class RedisCest extends AbstractCest
             '--mode=production --expose-db-port=%s',
             $I->getExposedPort()
         ));
+        $this->removeVendorVolumeMountFromDockerCompose($I);
 
         $I->assertTrue($I->runDockerComposeCommand('run build cloud-build'), 'Build phase was failed');
         $I->assertTrue($I->startEnvironment(), 'Docker could not start');
@@ -179,6 +180,7 @@ abstract class RedisCest extends AbstractCest
             '--mode=production --expose-db-port=%s',
             $I->getExposedPort()
         ));
+        $this->removeVendorVolumeMountFromDockerCompose($I);
 
         $I->writeEnvMagentoYaml($data['wrongConfiguration']);
 
@@ -207,6 +209,7 @@ abstract class RedisCest extends AbstractCest
             '--mode=production --expose-db-port=%s',
             $I->getExposedPort()
         ));
+        $this->removeVendorVolumeMountFromDockerCompose($I);
 
         $I->writeEnvMagentoYaml($data['configuration']);
 
@@ -233,6 +236,7 @@ abstract class RedisCest extends AbstractCest
             '--mode=production --expose-db-port=%s',
             $I->getExposedPort()
         ));
+        $this->removeVendorVolumeMountFromDockerCompose($I);
 
         $I->writeEnvMagentoYaml($data['configuration']);
 

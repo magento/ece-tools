@@ -56,6 +56,7 @@ abstract class AcceptanceCest extends AbstractCest
                 $this->convertEnvFromArrayToJson($data['variables'])
             )
         );
+        $this->removeVendorVolumeMountFromDockerCompose($I);
         $I->runDockerComposeCommand('run build cloud-build');
         $I->startEnvironment();
         $I->runDockerComposeCommand('run deploy cloud-deploy');
@@ -250,6 +251,7 @@ abstract class AcceptanceCest extends AbstractCest
         $I->writeAppMagentoYaml($config);
 
         $I->generateDockerCompose('--mode=production');
+        $this->removeVendorVolumeMountFromDockerCompose($I);
         $I->runDockerComposeCommand('run build cloud-build');
         $I->startEnvironment();
         $I->runDockerComposeCommand('run deploy cloud-deploy');
@@ -267,6 +269,7 @@ abstract class AcceptanceCest extends AbstractCest
     {
         $tmpConfig = sys_get_temp_dir() . '/app/etc/config.php';
         $I->generateDockerCompose('--mode=production');
+        $this->removeVendorVolumeMountFromDockerCompose($I);
         $I->runDockerComposeCommand('run build cloud-build');
         $I->startEnvironment();
         $I->runDockerComposeCommand('run deploy cloud-deploy');

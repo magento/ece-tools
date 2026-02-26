@@ -74,6 +74,7 @@ abstract class ActiveMqCest extends AbstractCest
                 $I->getExposedPort()
             )
         );
+        $this->removeVendorVolumeMountFromDockerCompose($I);
 
         $I->assertTrue($I->runDockerComposeCommand('run build cloud-build'), 'Build phase was failed');
         $I->assertTrue($I->startEnvironment(), 'Docker could not start');
@@ -141,6 +142,7 @@ abstract class ActiveMqCest extends AbstractCest
                 $I->getExposedPort()
             )
         );
+        $this->removeVendorVolumeMountFromDockerCompose($I);
 
         $I->writeEnvMagentoYaml($data['configuration']);
 
@@ -188,6 +190,7 @@ abstract class ActiveMqCest extends AbstractCest
                 $I->getExposedPort()
             )
         );
+        $this->removeVendorVolumeMountFromDockerCompose($I);
 
         $I->writeEnvMagentoYaml($data['wrongConfiguration']);
 
@@ -229,6 +232,7 @@ abstract class ActiveMqCest extends AbstractCest
                 $I->getExposedPort()
             )
         );
+        $this->removeVendorVolumeMountFromDockerCompose($I);
 
         $I->writeEnvMagentoYaml($data['configuration']);
 
@@ -286,6 +290,7 @@ abstract class ActiveMqCest extends AbstractCest
                 $I->getExposedPort()
             )
         );
+        $this->removeVendorVolumeMountFromDockerCompose($I);
 
         $I->assertTrue($I->runDockerComposeCommand('run build cloud-build'), 'Build phase was failed');
         $I->assertTrue($I->startEnvironment(), 'Docker could not start');

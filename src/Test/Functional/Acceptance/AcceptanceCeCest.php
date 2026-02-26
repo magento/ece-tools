@@ -50,6 +50,7 @@ class AcceptanceCeCest extends AbstractCest
     public function testWithSplitBuildCommand(\CliTester $I): void
     {
         $I->generateDockerCompose('--mode=production');
+        $this->removeVendorVolumeMountFromDockerCompose($I);
         $I->startEnvironment();
         $I->runDockerComposeCommand('run build cloud-build');
         $I->runDockerComposeCommand('run deploy cloud-deploy');

@@ -49,6 +49,7 @@ abstract class ScenarioExtensibilityCest extends AbstractCest
         $I->writeAppMagentoYaml($app);
 
         $I->generateDockerCompose('--mode=production');
+        $this->removeVendorVolumeMountFromDockerCompose($I);
         $I->runDockerComposeCommand('run build cloud-build');
         $I->startEnvironment();
 

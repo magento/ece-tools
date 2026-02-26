@@ -114,6 +114,7 @@ abstract class ValkeyCest extends AbstractCest
                 $I->getExposedPort()
             )
         );
+        $this->removeVendorVolumeMountFromDockerCompose($I);
 
         $I->assertTrue($I->runDockerComposeCommand('run build cloud-build'), 'Build phase was failed');
         $I->assertTrue($I->startEnvironment(), 'Docker could not start');
@@ -181,6 +182,7 @@ abstract class ValkeyCest extends AbstractCest
                 $I->getExposedPort()
             )
         );
+        $this->removeVendorVolumeMountFromDockerCompose($I);
 
         $I->writeEnvMagentoYaml($data['wrongConfiguration']);
 
@@ -211,6 +213,7 @@ abstract class ValkeyCest extends AbstractCest
                 $I->getExposedPort()
             )
         );
+        $this->removeVendorVolumeMountFromDockerCompose($I);
 
         $I->writeEnvMagentoYaml($data['configuration']);
 
@@ -239,6 +242,7 @@ abstract class ValkeyCest extends AbstractCest
                 $I->getExposedPort()
             )
         );
+        $this->removeVendorVolumeMountFromDockerCompose($I);
 
         $I->writeEnvMagentoYaml($data['configuration']);
 
