@@ -161,6 +161,19 @@ class ValidatorTest extends TestCase
                 0
             ],
             [
+                '2.4.4-p17',
+                [
+                    ServiceInterface::NAME_PHP => '8.1.0',
+                    ServiceInterface::NAME_DB_MARIA => '10.6',
+                    ServiceInterface::NAME_NGINX => '1.22.0',
+                    ServiceInterface::NAME_VARNISH => '7.0.0',
+                    ServiceInterface::NAME_REDIS => '7.2',
+                    ServiceInterface::NAME_OPENSEARCH => '2.19',
+                    ServiceInterface::NAME_RABBITMQ => '3.9.0'
+                ],
+                0
+            ],
+            [
                 '2.4.5',
                 [
                     ServiceInterface::NAME_ELASTICSEARCH => '7.10'
@@ -264,6 +277,45 @@ class ValidatorTest extends TestCase
                 '2.4.7',
                 [
                     ServiceInterface::NAME_RABBITMQ => '3.13.0'
+                ],
+                0
+            ],
+            [
+                '2.4.4-p12',
+                [
+                    ServiceInterface::NAME_PHP => '8.1.0',
+                    ServiceInterface::NAME_DB_MARIA => '10.6.0',
+                    ServiceInterface::NAME_NGINX => '1.18.0',
+                    ServiceInterface::NAME_VARNISH => '7.0.0',
+                    ServiceInterface::NAME_REDIS => '6.2.6',
+                    ServiceInterface::NAME_OPENSEARCH => '1.3.0',
+                    ServiceInterface::NAME_RABBITMQ => '3.9.0'
+                ],
+                0
+            ],
+            [
+                '2.4.5-p11',
+                [
+                    ServiceInterface::NAME_PHP => '8.1.0',
+                    ServiceInterface::NAME_DB_MARIA => '10.6.0',
+                    ServiceInterface::NAME_NGINX => '1.18.0',
+                    ServiceInterface::NAME_VARNISH => '7.0.0',
+                    ServiceInterface::NAME_REDIS => '6.2.6',
+                    ServiceInterface::NAME_OPENSEARCH => '1.3.0',
+                    ServiceInterface::NAME_RABBITMQ => '3.11.0'
+                ],
+                0
+            ],
+            [
+                '2.4.5-p12',
+                [
+                    ServiceInterface::NAME_PHP => '8.1.0',
+                    ServiceInterface::NAME_DB_MARIA => '10.6.0',
+                    ServiceInterface::NAME_NGINX => '1.18.0',
+                    ServiceInterface::NAME_VARNISH => '7.0.0',
+                    ServiceInterface::NAME_REDIS => '6.2.6',
+                    ServiceInterface::NAME_OPENSEARCH => '2.0.0',
+                    ServiceInterface::NAME_RABBITMQ => '3.11.0'
                 ],
                 0
             ],
