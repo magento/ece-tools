@@ -15,7 +15,6 @@ use Magento\MagentoCloud\Step\StepInterface;
 use Psr\Log\LoggerInterface;
 
 /**
- * @inheritdoc
  */
 class DeployStaticContent implements StepInterface
 {
@@ -58,7 +57,6 @@ class DeployStaticContent implements StepInterface
     }
 
     /**
-     * @inheritdoc
      */
     public function execute()
     {

@@ -9,6 +9,7 @@ namespace Magento\MagentoCloud\Test\Unit\Http;
 
 use Magento\MagentoCloud\App\ContainerInterface;
 use Magento\MagentoCloud\Http\RequestFactory;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\RequestInterface;
@@ -16,6 +17,7 @@ use Psr\Http\Message\RequestInterface;
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class RequestFactoryTest extends TestCase
 {
     /**
@@ -38,8 +40,8 @@ class RequestFactoryTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->containerMock = $this->getMockForAbstractClass(ContainerInterface::class);
-        $this->requestMock = $this->getMockForAbstractClass(RequestInterface::class);
+        $this->containerMock = $this->createMock(ContainerInterface::class);
+        $this->requestMock = $this->createMock(RequestInterface::class);
 
         $this->requestFactory = new RequestFactory(
             $this->containerMock

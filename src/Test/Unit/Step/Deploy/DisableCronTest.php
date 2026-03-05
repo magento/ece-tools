@@ -13,6 +13,7 @@ use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Step\Deploy\BackgroundProcessKill;
 use Magento\MagentoCloud\Step\Deploy\DisableCron;
 use Magento\MagentoCloud\Step\StepException;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -20,6 +21,7 @@ use Psr\Log\LoggerInterface;
 /**
  * Test class for Magento\MagentoCloud\Process\Deploy\DisableCron
  */
+#[AllowMockObjectsWithoutExpectations]
 class DisableCronTest extends TestCase
 {
     /**
@@ -49,7 +51,7 @@ class DisableCronTest extends TestCase
     {
         $this->backgroundProcessKillMock = $this->createMock(BackgroundProcessKill::class);
         $this->cronSwitcherMock = $this->createMock(Switcher::class);
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
 
         $this->step = new DisableCron(
             $this->backgroundProcessKillMock,

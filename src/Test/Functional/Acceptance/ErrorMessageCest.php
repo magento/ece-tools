@@ -27,6 +27,7 @@ abstract class ErrorMessageCest extends AbstractCest
     public function testShellErrorMessage(CliTester $I): void
     {
         $I->generateDockerCompose('--mode=production');
+        $this->removeVendorVolumeMountFromDockerCompose($I);
         $I->runDockerComposeCommand('run build cloud-build');
         $I->cleanDirectories(['/bin/*']);
         $I->assertFalse($I->runDockerComposeCommand('run build ece-command build'));

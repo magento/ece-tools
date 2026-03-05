@@ -26,7 +26,7 @@ class RemoteStorageTest extends TestCase
      */
     protected function setUp(): void
     {
-        $stageConfig = $this->getMockForAbstractClass(DeployInterface::class);
+        $stageConfig = $this->createStub(DeployInterface::class);
         $this->config = new RemoteStorage(
             $stageConfig
         );

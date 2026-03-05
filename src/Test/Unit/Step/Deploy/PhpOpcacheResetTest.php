@@ -38,7 +38,7 @@ class PhpOpcacheResetTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
         $this->phpMock = $this->createMock(Php::class);
 
         $this->step = new PhpOpcacheReset(

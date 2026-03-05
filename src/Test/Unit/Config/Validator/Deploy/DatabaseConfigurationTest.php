@@ -13,12 +13,15 @@ use Magento\MagentoCloud\Config\Validator\Deploy\DatabaseConfiguration;
 use Magento\MagentoCloud\Config\Validator\Result\Error;
 use Magento\MagentoCloud\Config\Validator\Result\Success;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class DatabaseConfigurationTest extends TestCase
 {
     /**
@@ -45,7 +48,7 @@ class DatabaseConfigurationTest extends TestCase
             'success' => $this->createMock(Success::class),
             'error' => $this->createMock(Error::class)
         ]);
-        $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
+        $this->stageConfigMock = $this->createMock(DeployInterface::class);
 
         $this->validator = new DatabaseConfiguration(
             $this->resultFactoryMock,
@@ -53,7 +56,12 @@ class DatabaseConfigurationTest extends TestCase
         );
     }
 
-    public function testErrorCode()
+    /**
+     * Test error code method.
+     *
+     * @return void
+     */
+    public function testErrorCode(): void
     {
         $this->stageConfigMock->expects($this->once())
             ->method('get')
@@ -71,10 +79,14 @@ class DatabaseConfigurationTest extends TestCase
     }
 
     /**
+     * Test validate method.
+     *
      * @param array $dbConfiguration
      * @param string $expectedResultClass
      * @dataProvider validateDataProvider
+     * @return void
      */
+    #[DataProvider('validateDataProvider')]
     public function testValidate(array $dbConfiguration, string $expectedResultClass): void
     {
         $this->stageConfigMock->expects($this->once())
@@ -86,9 +98,11 @@ class DatabaseConfigurationTest extends TestCase
     }
 
     /**
+     * Data provider for validate method.
+     *
      * @return array
      */
-    public function validateDataProvider(): array
+    public static function validateDataProvider(): array
     {
         return [
             [

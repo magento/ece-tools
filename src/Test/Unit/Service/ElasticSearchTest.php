@@ -14,6 +14,8 @@ use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Http\ClientFactory;
 use Magento\MagentoCloud\Service\ElasticSearch;
 use Magento\MagentoCloud\Service\ServiceException;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\StreamInterface;
@@ -22,6 +24,7 @@ use Psr\Log\LoggerInterface;
 /**
  * @see ElasticSearch
  */
+#[AllowMockObjectsWithoutExpectations]
 class ElasticSearchTest extends TestCase
 {
     /**
@@ -50,7 +53,7 @@ class ElasticSearchTest extends TestCase
     public function setUp(): void
     {
         $this->environmentMock = $this->createMock(Environment::class);
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
         $this->clientFactoryMock = $this->createMock(ClientFactory::class);
 
         $this->elasticSearch = new ElasticSearch(
@@ -61,6 +64,9 @@ class ElasticSearchTest extends TestCase
     }
 
     /**
+     * Test get version elasticsearch not exist in relationships method.
+     *
+     * @return void
      * @throws ServiceException
      */
     public function testGetVersionElasticSearchNotExistInRelationships(): void
@@ -75,19 +81,22 @@ class ElasticSearchTest extends TestCase
     }
 
     /**
+     * Test get version method.
+     *
      * @param array $esRelationship
      * @param string $esConfiguration
      * @param string $expectedVersion
-     * @throws ServiceException
-     *
      * @dataProvider getVersionDataProvider
+     * @return void
+     * @throws ServiceException
      */
+    #[DataProvider('getVersionDataProvider')]
     public function testGetVersion(array $esRelationship, string $esConfiguration, string $expectedVersion): void
     {
         $esConfig = $esRelationship[0];
         $clientMock = $this->createPartialMock(Client::class, ['get']);
         $responseMock = $this->createMock(Response::class);
-        $streamMock = $this->getMockForAbstractClass(StreamInterface::class);
+        $streamMock = $this->createMock(StreamInterface::class);
 
         $this->environmentMock->expects($this->any())
             ->method('getRelationship')
@@ -112,14 +121,16 @@ class ElasticSearchTest extends TestCase
     }
 
     /**
+     * Data provider for get version method.
+     *
      * @return array
      */
-    public function getVersionDataProvider(): array
+    public static function getVersionDataProvider(): array
     {
         $relationships = [
             [
-                'host' => '127.0.0.1',
-                'port' => '1234',
+                'host'     => '127.0.0.1',
+                'port'     => '1234',
                 'username' => 'user',
                 'password' => 'secret'
             ],
@@ -160,12 +171,15 @@ class ElasticSearchTest extends TestCase
     }
 
     /**
+     * Test get version from type method.
+     *
      * @param array $esRelationship
      * @param string $expectedVersion
-     * @throws ServiceException
-     *
      * @dataProvider getVersionFromTypeDataProvider
+     * @return void
+     * @throws ServiceException
      */
+    #[DataProvider('getVersionFromTypeDataProvider')]
     public function testGetVersionFromType($esRelationship, $expectedVersion)
     {
         $this->environmentMock->expects($this->any())
@@ -178,7 +192,12 @@ class ElasticSearchTest extends TestCase
         $this->assertSame($expectedVersion, $this->elasticSearch->getVersion());
     }
 
-    public function getVersionFromTypeDataProvider()
+    /**
+     * Data provider for get version from type method.
+     *
+     * @return array
+     */
+    public static function getVersionFromTypeDataProvider(): array
     {
         return [
             [
@@ -187,32 +206,42 @@ class ElasticSearchTest extends TestCase
             ],
             [
                 [
-                    ['host' => '127.0.0.1', 'port' => '1234', 'type' => 'elasticsearch:7.7']
+                    [
+                        'host' => '127.0.0.1',
+                        'port' => '1234',
+                        'type' => 'elasticsearch:7.7'
+                    ]
                 ],
                 '7.7'
             ],
             [
                 [
-                    ['host' => '127.0.0.1', 'port' => '1234', 'type' => 'elasticsearch:5.2']
+                    [
+                        'host' => '127.0.0.1',
+                        'port' => '1234',
+                        'type' => 'elasticsearch:5.2'
+                    ]
                 ],
                 '5.2'
             ],
-
         ];
     }
 
     /**
+     * Test get full engine name method.
+     *
      * @param string $version
      * @param string $expected
-     * @throws ServiceException
-     *
      * @dataProvider getFullVersionDataProvider
+     * @return void
+     * @throws ServiceException
      */
+    #[DataProvider('getFullVersionDataProvider')]
     public function testGetFullEngineName(string $version, string $expected): void
     {
         $clientMock = $this->createPartialMock(Client::class, ['get']);
         $responseMock = $this->createMock(Response::class);
-        $streamMock = $this->getMockForAbstractClass(StreamInterface::class);
+        $streamMock = $this->createMock(StreamInterface::class);
 
         $esConfig = [
             'host' => '127.0.0.1',
@@ -220,11 +249,11 @@ class ElasticSearchTest extends TestCase
         ];
         $esRelationship = [$esConfig];
         $esConfiguration = json_encode([
-            'name' => 'ZaIj9mo',
+            'name'         => 'ZaIj9mo',
             'cluster_name' => 'elasticsearch',
             'cluster_uuid' => 'CIXBGIVdS6mwM_0lmVhF4g',
-            'version' => [
-                'number' => $version,
+            'version'      => [
+                'number'     => $version,
                 'build_hash' => 'c59ff00'
             ],
             'tagline' => 'You Know, for Search'
@@ -250,9 +279,11 @@ class ElasticSearchTest extends TestCase
     }
 
     /**
+     * Data provider for get full engine name method.
+     *
      * @return array
      */
-    public function getFullVersionDataProvider(): array
+    public static function getFullVersionDataProvider(): array
     {
         return [
             [
@@ -270,6 +301,12 @@ class ElasticSearchTest extends TestCase
         ];
     }
 
+    /**
+     * Test get version with exception method.
+     *
+     * @return void
+     * @throws ServiceException
+     */
     public function testGetVersionWithException(): void
     {
         $this->expectException(ServiceException::class);
@@ -295,6 +332,12 @@ class ElasticSearchTest extends TestCase
         $this->assertEquals(0, $this->elasticSearch->getVersion());
     }
 
+    /**
+     * Test get template method.
+     *
+     * @return void
+     * @throws ServiceException
+     */
     public function testGetTemplate(): void
     {
         $this->environmentMock->expects($this->any())
@@ -308,7 +351,7 @@ class ElasticSearchTest extends TestCase
             ]);
         $clientMock = $this->createPartialMock(Client::class, ['get']);
         $responseMock = $this->createMock(Response::class);
-        $streamMock = $this->getMockForAbstractClass(StreamInterface::class);
+        $streamMock = $this->createMock(StreamInterface::class);
 
         $esConfiguration = json_encode(
             [
@@ -349,6 +392,11 @@ class ElasticSearchTest extends TestCase
         );
     }
 
+    /**
+     * Test get template no config.
+     *
+     * @return void
+     */
     public function testGetTemplateNoConfig(): void
     {
         $this->environmentMock->expects($this->once())
@@ -359,6 +407,12 @@ class ElasticSearchTest extends TestCase
         $this->assertSame([], $this->elasticSearch->getTemplate());
     }
 
+    /**
+     * Test get template with exception.
+     *
+     * @return void
+     * @throws ServiceException
+     */
     public function testGetTemplateWithException(): void
     {
         $this->environmentMock->expects($this->any())
@@ -388,6 +442,12 @@ class ElasticSearchTest extends TestCase
         $this->assertSame([], $this->elasticSearch->getTemplate());
     }
 
+    /**
+     * Test is installed method.
+     *
+     * @return void
+     * @throws ServiceException
+     */
     public function testIsInstalled(): void
     {
         $this->environmentMock->expects($this->exactly(2))
@@ -407,6 +467,12 @@ class ElasticSearchTest extends TestCase
         $this->assertFalse($this->elasticSearch->isInstalled());
     }
 
+    /**
+     * Test auth enabled true.
+     *
+     * @return void
+     * @throws ServiceException
+     */
     public function testAuthEnabledTrue()
     {
         $this->environmentMock->expects($this->exactly(2))
@@ -415,8 +481,8 @@ class ElasticSearchTest extends TestCase
             ->willReturn(
                 [
                     [
-                        'host' => '127.0.0.1',
-                        'port' => '1234',
+                        'host'     => '127.0.0.1',
+                        'port'     => '1234',
                         'username' => 'test',
                         'password' => 'secret',
                     ],
@@ -426,7 +492,13 @@ class ElasticSearchTest extends TestCase
         $this->assertTrue($this->elasticSearch->isAuthEnabled());
     }
 
-    public function testAuthEnabledFalse()
+    /**
+     * Test auth enabled false.
+     *
+     * @return void
+     * @throws ServiceException
+     */
+    public function testAuthEnabledFalse(): void
     {
         $this->environmentMock->expects($this->exactly(1))
             ->method('getRelationship')

@@ -32,7 +32,7 @@ class SkipActionTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
         $this->action = new SkipAction($this->loggerMock, 'test-action');
     }
 

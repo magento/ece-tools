@@ -19,9 +19,7 @@ use Symfony\Component\Yaml\Yaml;
 use InvalidArgumentException;
 
 /**
- * Creates .magento.env.yaml
- *
- * @api
+ * Creates .magento.env.yaml configuration file.
  */
 class ConfigCreate extends Command
 {

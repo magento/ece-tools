@@ -33,6 +33,7 @@ abstract class OpenSearchCest extends AbstractCest
         $this->prepareWorkplace($I, $data['magento']);
 
         $I->generateDockerCompose('--mode=production');
+        $this->removeVendorVolumeMountFromDockerCompose($I);
 
         $I->runDockerComposeCommand('run build cloud-build');
         $I->startEnvironment();

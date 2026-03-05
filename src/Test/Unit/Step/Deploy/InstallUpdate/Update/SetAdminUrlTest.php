@@ -13,6 +13,7 @@ use Magento\MagentoCloud\Config\Magento\Env\WriterInterface;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Step\Deploy\InstallUpdate\Update\SetAdminUrl;
 use Magento\MagentoCloud\Step\StepException;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -20,6 +21,7 @@ use Psr\Log\LoggerInterface;
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class SetAdminUrlTest extends TestCase
 {
     /**
@@ -47,10 +49,9 @@ class SetAdminUrlTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->adminDataMock = $this->getMockForAbstractClass(AdminDataInterface::class);
-        $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
-            ->getMockForAbstractClass();
-        $this->configWriterMock = $this->getMockForAbstractClass(WriterInterface::class);
+        $this->adminDataMock = $this->createMock(AdminDataInterface::class);
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
+        $this->configWriterMock = $this->createMock(WriterInterface::class);
 
         $this->setAdminUrl = new SetAdminUrl(
             $this->adminDataMock,

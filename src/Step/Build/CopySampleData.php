@@ -16,7 +16,6 @@ use Magento\MagentoCloud\Step\StepInterface;
 use Psr\Log\LoggerInterface;
 
 /**
- * @inheritdoc
  */
 class CopySampleData implements StepInterface
 {
@@ -51,7 +50,6 @@ class CopySampleData implements StepInterface
     }
 
     /**
-     * @inheritdoc
      */
     public function execute()
     {

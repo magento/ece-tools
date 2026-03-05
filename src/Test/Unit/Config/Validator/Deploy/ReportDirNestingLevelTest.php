@@ -7,22 +7,24 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Config\Validator\Deploy;
 
+use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Validator\Deploy\ReportDirNestingLevel;
 use Magento\MagentoCloud\Config\Validator\Result\Error;
 use Magento\MagentoCloud\Config\Validator\Result\Success;
-use PHPUnit\Framework\TestCase;
-use PHPUnit\Framework\MockObject\MockObject;
-use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\Validator\ResultFactory;
 use Magento\MagentoCloud\Filesystem\ConfigFileList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
-use Symfony\Component\Serializer\Encoder\XmlEncoder;
-use Magento\MagentoCloud\Config\Validator\ResultFactory;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
+use Symfony\Component\Serializer\Encoder\XmlEncoder;
 use Symfony\Component\Serializer\Exception\NotEncodableValueException;
 
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class ReportDirNestingLevelTest extends TestCase
 {
     /**

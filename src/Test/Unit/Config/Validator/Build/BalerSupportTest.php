@@ -7,10 +7,11 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Config\Validator\Build;
 
-use Magento\MagentoCloud\Config\Validator\Build\BalerSupport;
 use Magento\MagentoCloud\Config\Magento\Shared\ReaderInterface;
 use Magento\MagentoCloud\Config\Validator;
+use Magento\MagentoCloud\Config\Validator\Build\BalerSupport;
 use Magento\MagentoCloud\Config\Validator\Result;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Process\ExecutableFinder;
@@ -18,6 +19,7 @@ use Symfony\Component\Process\ExecutableFinder;
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class BalerSupportTest extends TestCase
 {
     /**

@@ -14,12 +14,14 @@ use Magento\MagentoCloud\Config\Validator\ResultFactory;
 use Magento\MagentoCloud\Config\ValidatorInterface;
 use Magento\MagentoCloud\Service\EolValidator;
 use Magento\MagentoCloud\Service\ServiceMismatchException;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @inheritDoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class ServiceEolTest extends TestCase
 {
     /**

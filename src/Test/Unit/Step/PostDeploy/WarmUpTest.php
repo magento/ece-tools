@@ -16,6 +16,7 @@ use Magento\MagentoCloud\Http\PoolFactory;
 use Magento\MagentoCloud\Step\PostDeploy\WarmUp;
 use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\WarmUp\Urls;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
@@ -24,6 +25,7 @@ use Psr\Log\LoggerInterface;
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class WarmUpTest extends TestCase
 {
     /**
@@ -85,9 +87,12 @@ class WarmUpTest extends TestCase
     }
 
     /**
+     * Test execute method.
+     *
+     * @return void
      * @throws StepException
      */
-    public function testExecute()
+    public function testExecute(): void
     {
         $urls = [
             'http://base-url.com/index.php',
@@ -101,8 +106,8 @@ class WarmUpTest extends TestCase
             ->with(PostDeployInterface::VAR_WARM_UP_CONCURRENCY)
             ->willReturn($concurrency);
 
-        $mockResponse = $this->createMock(ResponseInterface::class);
-        $mockException = $this->createMock(RequestException::class);
+        $mockResponse = $this->createStub(ResponseInterface::class);
+        $mockException = $this->createStub(RequestException::class);
 
         $mockException->method('getResponse')
             ->willReturn($mockResponse);
@@ -142,9 +147,12 @@ class WarmUpTest extends TestCase
     }
 
     /**
+     * Test execute with promise exception method.
+     *
+     * @return void
      * @throws StepException
      */
-    public function testExecuteWithPromiseException()
+    public function testExecuteWithPromiseException(): void
     {
         $urls = [
             'http://base-url.com/index.php',
@@ -161,7 +169,10 @@ class WarmUpTest extends TestCase
 
         $this->poolFactoryMock->expects($this->once())
             ->method('create')
-            ->with($this->equalTo($urls), $this->isType('array'))
+            ->with(
+                $this->equalTo($urls),
+                $this->callback(fn($arg) => is_array($arg))
+            )
             ->willReturn($this->poolMock);
         $this->promiseMock->expects($this->any())
             ->method('wait')
@@ -175,9 +186,12 @@ class WarmUpTest extends TestCase
     }
 
     /**
+     * Test execute with concurrency method.
+     *
+     * @return void
      * @throws StepException
      */
-    public function testExecuteWithConcurrency()
+    public function testExecuteWithConcurrency(): void
     {
         $urls = [
             'http://base-url.com/index.php',
@@ -187,7 +201,7 @@ class WarmUpTest extends TestCase
         $series = [
             'Starting page warmup',
             'Warmup concurrency set to ' . $concurrency . ' as specified by the '
-            . PostDeployInterface::VAR_WARM_UP_CONCURRENCY . ' configuration'
+                . PostDeployInterface::VAR_WARM_UP_CONCURRENCY . ' configuration'
         ];
         $this->loggerMock->expects($this->any())
             ->method('info')

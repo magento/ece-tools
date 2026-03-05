@@ -12,12 +12,15 @@ use Magento\MagentoCloud\Package\UndefinedPackageException;
 use Magento\MagentoCloud\Service\ServiceInterface;
 use Magento\MagentoCloud\Service\ServiceMismatchException;
 use Magento\MagentoCloud\Service\Validator;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class ValidatorTest extends TestCase
 {
     /**
@@ -41,33 +44,43 @@ class ValidatorTest extends TestCase
     }
 
     /**
+     * Test validate versions.
+     *
      * @param string $magentoVersion
      * @param array $versions
      * @param int $errorsNumber
+     * @dataProvider validateVersionsDataProvider
+     * @return void
      * @throws UndefinedPackageException
      * @throws ServiceMismatchException
      *
-     * @dataProvider validateVersionsDataProvider
      */
-    public function testValidateVersions(string $magentoVersion, array $versions, int $errorsNumber = 0)
+    #[DataProvider('validateVersionsDataProvider')]
+    public function testValidateVersions(string $magentoVersion, array $versions, int $errorsNumber = 0): void
     {
         $this->magentoVersionMock->method('getVersion')
             ->willReturn($magentoVersion);
 
-        $this->assertEquals($errorsNumber, count($this->validator->validateVersions($versions)));
+        $this->assertEquals(
+            $errorsNumber,
+            count($this->validator->validateVersions($versions))
+        );
     }
 
     /**
+     * Test validate fail message.
+     *
+     * @return void
      * @throws UndefinedPackageException
      * @throws ServiceMismatchException
      */
-    public function testValidateFailMessage()
+    public function testValidateFailMessage(): void
     {
         $magentoVersion = '2.2.6';
         $version = '6.5';
         $message = sprintf(
             'Magento %s does not support version "%s" for service "%s". '
-            . 'Service version should satisfy "~1.7.0 || ~2.4.0 || ~5.2.0" constraint.',
+                . 'Service version should satisfy "~1.7.0 || ~2.4.0 || ~5.2.0" constraint.',
             $magentoVersion,
             $version,
             ServiceInterface::NAME_ELASTICSEARCH
@@ -83,6 +96,9 @@ class ValidatorTest extends TestCase
     }
 
     /**
+     * Test validate nonexistent service.
+     *
+     * @return void
      * @throws UndefinedPackageException
      * @throws ServiceMismatchException
      */
@@ -95,8 +111,7 @@ class ValidatorTest extends TestCase
             $serviceName,
             $magentoVersion
         );
-        $this->magentoVersionMock->expects($this->any())
-            ->method('getVersion')
+        $this->magentoVersionMock->method('getVersion')
             ->willReturn($magentoVersion);
 
         $this->assertEquals(
@@ -106,11 +121,13 @@ class ValidatorTest extends TestCase
     }
 
     /**
+     * Data provider for validate versions.
+     *
      * @return array
      *
      * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
-    public function validateVersionsDataProvider(): array
+    public static function validateVersionsDataProvider(): array
     {
         return [
             [
@@ -139,6 +156,19 @@ class ValidatorTest extends TestCase
                     ServiceInterface::NAME_VARNISH => '7.0.0',
                     ServiceInterface::NAME_REDIS => '6.2.6',
                     ServiceInterface::NAME_OPENSEARCH => '1.2',
+                    ServiceInterface::NAME_RABBITMQ => '3.9.0'
+                ],
+                0
+            ],
+            [
+                '2.4.4-p17',
+                [
+                    ServiceInterface::NAME_PHP => '8.1.0',
+                    ServiceInterface::NAME_DB_MARIA => '10.6',
+                    ServiceInterface::NAME_NGINX => '1.22.0',
+                    ServiceInterface::NAME_VARNISH => '7.0.0',
+                    ServiceInterface::NAME_REDIS => '7.2',
+                    ServiceInterface::NAME_OPENSEARCH => '2.19',
                     ServiceInterface::NAME_RABBITMQ => '3.9.0'
                 ],
                 0
@@ -251,6 +281,45 @@ class ValidatorTest extends TestCase
                 0
             ],
             [
+                '2.4.4-p12',
+                [
+                    ServiceInterface::NAME_PHP => '8.1.0',
+                    ServiceInterface::NAME_DB_MARIA => '10.6.0',
+                    ServiceInterface::NAME_NGINX => '1.18.0',
+                    ServiceInterface::NAME_VARNISH => '7.0.0',
+                    ServiceInterface::NAME_REDIS => '6.2.6',
+                    ServiceInterface::NAME_OPENSEARCH => '1.3.0',
+                    ServiceInterface::NAME_RABBITMQ => '3.9.0'
+                ],
+                0
+            ],
+            [
+                '2.4.5-p11',
+                [
+                    ServiceInterface::NAME_PHP => '8.1.0',
+                    ServiceInterface::NAME_DB_MARIA => '10.6.0',
+                    ServiceInterface::NAME_NGINX => '1.18.0',
+                    ServiceInterface::NAME_VARNISH => '7.0.0',
+                    ServiceInterface::NAME_REDIS => '6.2.6',
+                    ServiceInterface::NAME_OPENSEARCH => '1.3.0',
+                    ServiceInterface::NAME_RABBITMQ => '3.11.0'
+                ],
+                0
+            ],
+            [
+                '2.4.5-p12',
+                [
+                    ServiceInterface::NAME_PHP => '8.1.0',
+                    ServiceInterface::NAME_DB_MARIA => '10.6.0',
+                    ServiceInterface::NAME_NGINX => '1.18.0',
+                    ServiceInterface::NAME_VARNISH => '7.0.0',
+                    ServiceInterface::NAME_REDIS => '6.2.6',
+                    ServiceInterface::NAME_OPENSEARCH => '2.0.0',
+                    ServiceInterface::NAME_RABBITMQ => '3.11.0'
+                ],
+                0
+            ],
+            [
                 '2.4.5-p13',
                 [
                     ServiceInterface::NAME_VALKEY => '8.0.0'
@@ -272,11 +341,34 @@ class ValidatorTest extends TestCase
                 0
             ],
             [
-                '2.4.7-p6',
+               '2.4.8',
                 [
-                    ServiceInterface::NAME_VALKEY => '8.0.0'
+                    ServiceInterface::NAME_PHP => '8.4.0'
                 ],
                 0
+            ],
+            [
+                '2.4.8',
+                [
+                    ServiceInterface::NAME_PHP => '8.5.0'
+                ],
+                1
+            ],
+            [
+                '2.4.9-beta1',
+                [
+                    ServiceInterface::NAME_PHP => '8.5.0',
+                    ServiceInterface::NAME_RABBITMQ => '4.1.0'
+                ],
+                0
+            ],
+            [
+                '2.4.9-beta1',
+                [
+                    ServiceInterface::NAME_PHP => '8.3.0',
+                    ServiceInterface::NAME_RABBITMQ => '4.1.0'
+                ],
+                1
             ],
         ];
     }

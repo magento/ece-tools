@@ -9,17 +9,19 @@ namespace Magento\MagentoCloud\Test\Unit\App\Logger;
 
 use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\App\Logger\Formatter\JsonErrorFormatter;
-use Magento\MagentoCloud\App\Logger\Pool;
-use Magento\MagentoCloud\App\Logger\LineFormatterFactory;
-use Magento\MagentoCloud\App\LoggerException;
 use Magento\MagentoCloud\App\Logger\Formatter\LineFormatter;
 use Magento\MagentoCloud\App\Logger\HandlerFactory;
+use Magento\MagentoCloud\App\Logger\LineFormatterFactory;
+use Magento\MagentoCloud\App\Logger\Pool;
+use Magento\MagentoCloud\App\LoggerException;
 use Magento\MagentoCloud\Config\Log as LogConfig;
 use Monolog\Handler\AbstractProcessingHandler;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Yaml\Exception\ParseException;
 
+#[AllowMockObjectsWithoutExpectations]
 class PoolTest extends TestCase
 {
     /**
@@ -59,7 +61,7 @@ class PoolTest extends TestCase
      */
     public function testGetHandlers(): void
     {
-        $jsonErrorFormatterMock = $this->createMock(JsonErrorFormatter::class);
+        $jsonErrorFormatterMock = $this->createStub(JsonErrorFormatter::class);
         $this->logConfigMock->expects($this->once())
             ->method('getHandlers')
             ->willReturn([
@@ -69,12 +71,12 @@ class PoolTest extends TestCase
                 'error-logger' => ['formatter' => $jsonErrorFormatterMock]
             ]);
 
-        $formatterMock = $this->createMock(LineFormatter::class);
+        $formatterMock = $this->createStub(LineFormatter::class);
         $this->lineFormatterFactoryMock->expects($this->exactly(2))
             ->method('create')
             ->willReturn($formatterMock);
 
-        $slackHandlerMock = $this->getMockForAbstractClass(
+        $slackHandlerMock = $this->createMock(
             AbstractProcessingHandler::class,
             [],
             '',
@@ -87,7 +89,7 @@ class PoolTest extends TestCase
             ->method('setFormatter')
             ->with($formatterMock)
             ->willReturnSelf();
-        $emailHandlerMock = $this->getMockForAbstractClass(
+        $emailHandlerMock = $this->createMock(
             AbstractProcessingHandler::class,
             [],
             '',
@@ -100,7 +102,7 @@ class PoolTest extends TestCase
             ->method('setFormatter')
             ->with($formatterMock)
             ->willReturnSelf();
-        $syslogHandler = $this->getMockForAbstractClass(
+        $syslogHandler = $this->createMock(
             AbstractProcessingHandler::class,
             [],
             '',
@@ -111,7 +113,7 @@ class PoolTest extends TestCase
         );
         $syslogHandler->expects($this->never())
             ->method('setFormatter');
-        $errorHandler = $this->getMockForAbstractClass(
+        $errorHandler = $this->createMock(
             AbstractProcessingHandler::class,
             [],
             '',

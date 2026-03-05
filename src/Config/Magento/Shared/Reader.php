@@ -11,7 +11,6 @@ use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileList;
 
 /**
- * @inheritdoc
  */
 class Reader implements ReaderInterface
 {

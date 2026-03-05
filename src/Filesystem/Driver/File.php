@@ -14,7 +14,6 @@ use Magento\MagentoCloud\Filesystem\FileSystemException;
 /**
  * Class File.
  *
- * @package Magento\Framework\Filesystem\Driver
  */
 class File
 {
@@ -276,7 +275,6 @@ class File
      *
      * @param string $path
      * @return bool
-     * @codeCoverageIgnore
      */
     public function deleteDirectory(string $path): bool
     {
@@ -299,7 +297,6 @@ class File
      *
      * @param string $path
      * @return bool
-     * @codeCoverageIgnore
      */
     public function clearDirectory(string $path): bool
     {
@@ -327,7 +324,6 @@ class File
      * @param string $path Path to flush
      * @param array $excludes
      * @return void
-     * @codeCoverageIgnore
      * @throws FileSystemException
      */
     public function backgroundClearDirectory(string $path, array $excludes = [])

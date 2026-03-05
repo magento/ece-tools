@@ -7,18 +7,21 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Step\Deploy\InstallUpdate\ConfigUpdate;
 
+use Magento\MagentoCloud\Config\GlobalSection as GlobalConfig;
+use Magento\MagentoCloud\Config\Magento\Env\WriterInterface as ConfigWriter;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\PrepareConfig;
 use Magento\MagentoCloud\Step\StepException;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Magento\MagentoCloud\Config\GlobalSection as GlobalConfig;
-use Magento\MagentoCloud\Config\Magento\Env\WriterInterface as ConfigWriter;
 use Psr\Log\LoggerInterface;
 
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class PrepareConfigTest extends TestCase
 {
     /**
@@ -46,7 +49,7 @@ class PrepareConfigTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
         $this->configWriterMock = $this->createMock(ConfigWriter::class);
         $this->globalConfigMock = $this->createMock(GlobalConfig::class);
 
@@ -58,15 +61,19 @@ class PrepareConfigTest extends TestCase
     }
 
     /**
+     * Test execute method.
+     *
      * @param bool $scdOnDemand
      * @param bool $skipHtmlMinification
      * @param null|string $xFrameOptions
      * @param array $expectedResult
-     *
+     * @dataProvider executeDataProvider
+     * @return void
+     * @throws \ReflectionException
      * @throws StepException
      *
-     * @dataProvider executeDataProvider
      */
+    #[DataProvider('executeDataProvider')]
     public function testExecute(
         bool $scdOnDemand,
         bool $skipHtmlMinification,
@@ -91,9 +98,11 @@ class PrepareConfigTest extends TestCase
     }
 
     /**
+     * Execute data provider method.
+     *
      * @return array
      */
-    public function executeDataProvider(): array
+    public static function executeDataProvider(): array
     {
         return [
             [
@@ -119,15 +128,18 @@ class PrepareConfigTest extends TestCase
     }
 
     /**
+     * Test execute with exception method.
+     *
      * @param bool $scdOnDemand
      * @param bool $skipHtmlMinification
      * @param null|string $xFrameOptions
      * @param array $expectedResult
-     *
-     * @throws StepException
-     *
      * @dataProvider executeDataProvider
+     * @return void
+     * @throws \ReflectionException
+     * @throws StepException
      */
+    #[DataProvider('executeDataProvider')]
     public function testExecuteWithException(
         bool $scdOnDemand,
         bool $skipHtmlMinification,

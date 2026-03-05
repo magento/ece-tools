@@ -17,7 +17,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * Verifies configuration to be properly set and ready to use SCD on deploy phase.
  *
- * @api
  */
 class ScdOnDeploy extends Command
 {
@@ -46,7 +45,6 @@ class ScdOnDeploy extends Command
     }
 
     /**
-     * @inheritdoc
      */
     protected function configure()
     {
@@ -55,7 +53,6 @@ class ScdOnDeploy extends Command
     }
 
     /**
-     * @inheritdoc
      */
     public function execute(InputInterface $input, OutputInterface $output): int
     {

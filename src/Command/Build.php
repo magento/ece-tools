@@ -17,8 +17,6 @@ use RuntimeException;
 
 /**
  * CLI command for build hook. Responsible for preparing the codebase before it's moved to the server.
- *
- * @api
  */
 class Build extends Command
 {

@@ -1,8 +1,10 @@
 <?php
+
 /**
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+
 declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Config;
@@ -16,12 +18,15 @@ use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Service\ElasticSearch;
 use Magento\MagentoCloud\Service\OpenSearch;
 use Magento\MagentoCloud\Service\ServiceException;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @see SearchEngine
  */
+#[AllowMockObjectsWithoutExpectations]
 class SearchEngineTest extends TestCase
 {
     /**
@@ -65,7 +70,7 @@ class SearchEngineTest extends TestCase
     protected function setUp(): void
     {
         $this->environmentMock = $this->createMock(Environment::class);
-        $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
+        $this->stageConfigMock = $this->createMock(DeployInterface::class);
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
         $this->elasticSearchMock = $this->createMock(ElasticSearch::class);
         $this->openSearchMock = $this->createMock(OpenSearch::class);
@@ -83,10 +88,13 @@ class SearchEngineTest extends TestCase
     }
 
     /**
+     * Test getWhenCustomConfigValidWithoutMerge method.
+     *
      * @param array $envSearchConfig
      * @return void
      * @dataProvider getWhenCustomConfigValidWithoutMergeDataProvider
      */
+    #[DataProvider('getWhenCustomConfigValidWithoutMergeDataProvider')]
     public function testGetWhenCustomConfigValidWithoutMerge(array $envSearchConfig): void
     {
         $expectedConfig = ['system' => ['default' => ['catalog' => ['search' => ['engine' => 'some_engine']]]]];
@@ -107,9 +115,11 @@ class SearchEngineTest extends TestCase
     }
 
     /**
+     * Data provider for testGetWhenCustomConfigValidWithoutMerge method.
+     *
      * @return array
      */
-    public function getWhenCustomConfigValidWithoutMergeDataProvider(): array
+    public static function getWhenCustomConfigValidWithoutMergeDataProvider(): array
     {
         return [
             [['engine' => 'some_engine']],
@@ -118,14 +128,17 @@ class SearchEngineTest extends TestCase
     }
 
     /**
+     * Test getWithElasticSearch method.
+     *
      * @param array $customSearchConfig
      * @param array $esServiceConfig
      * @param array $expected
      * @param bool $authEnabled
-     *
-     * @throws ServiceException
      * @dataProvider getWithElasticSearchDataProvider
+     * @return void
+     * @throws ServiceException
      */
+    #[DataProvider('getWithElasticSearchDataProvider')]
     public function testGetWithElasticSearch(
         array $customSearchConfig,
         array $esServiceConfig,
@@ -164,16 +177,18 @@ class SearchEngineTest extends TestCase
     }
 
     /**
+     * Data provider for testGetWithElasticSearch method.
+     *
      * @return array
      *
      * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
-    public function getWithElasticSearchDataProvider(): array
+    public static function getWithElasticSearchDataProvider(): array
     {
         $generateDataForVersionChecking = static function ($engine) {
             return [
                 'customSearchConfig' => [],
-                'relationship' => [
+                'esServiceConfig' => [
                     'host' => 'localhost',
                     'port' => 1234,
                 ],
@@ -265,7 +280,7 @@ class SearchEngineTest extends TestCase
                     'elasticsearch_username' => 'user',
                     'elasticsearch_password' => 'secret',
                 ],
-                true
+                'authEnabled' => true
             ],
             $generateDataForVersionChecking('elasticsearch'),
             $generateDataForVersionChecking('elasticsearch'),
@@ -273,14 +288,17 @@ class SearchEngineTest extends TestCase
     }
 
     /**
+     * Test getWithOpenSearch method.
+     *
      * @param array $customSearchConfig
      * @param array $osServiceConfig
      * @param array $expected
      * @param bool $authEnabled
-     *
-     * @throws ServiceException
      * @dataProvider getWithOpenSearchDataProvider
+     * @return void
+     * @throws ServiceException
      */
+    #[DataProvider('getWithOpenSearchDataProvider')]
     public function testGetWithOpenSearch(
         array $customSearchConfig,
         array $osServiceConfig,
@@ -315,16 +333,18 @@ class SearchEngineTest extends TestCase
     }
 
     /**
+     * Data provider for testGetWithOpenSearch method.
+     *
      * @return array
      *
      * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
-    public function getWithOpenSearchDataProvider(): array
+    public static function getWithOpenSearchDataProvider(): array
     {
         $generateDataForVersionChecking = static function ($engine) {
             return [
                 'customSearchConfig' => [],
-                'relationship' => [
+                'osServiceConfig' => [
                     'host' => 'localhost',
                     'port' => 1234,
                 ],
@@ -416,7 +436,7 @@ class SearchEngineTest extends TestCase
                     'opensearch_username' => 'user',
                     'opensearch_password' => 'secret',
                 ],
-                true
+                'authEnabled' => true
             ],
             $generateDataForVersionChecking('opensearch'),
             $generateDataForVersionChecking('opensearch'),
@@ -424,12 +444,16 @@ class SearchEngineTest extends TestCase
     }
 
     /**
+     * Test getWithElasticSuite method.
+     *
      * @param array $customSearchConfig
      * @param array $esServiceConfig
      * @param array $expected
-     *
      * @dataProvider getWithElasticSuiteDataProvider
+     * @return void
+     * @throws ServiceException
      */
+    #[DataProvider('getWithElasticSuiteDataProvider')]
     public function testGetWithElasticSuite(
         array $customSearchConfig,
         array $esServiceConfig,
@@ -465,11 +489,13 @@ class SearchEngineTest extends TestCase
     }
 
     /**
+     * Data provider for testGetWithElasticSuite method.
+     *
      * @return array
      *
      * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
-    public function getWithElasticSuiteDataProvider(): array
+    public static function getWithElasticSuiteDataProvider(): array
     {
         return [
             [
@@ -497,6 +523,8 @@ class SearchEngineTest extends TestCase
     }
 
     /**
+     * Test getWithSolr method.
+     *
      * @return void
      */
     public function testGetWithSolr(): void
@@ -538,11 +566,15 @@ class SearchEngineTest extends TestCase
     }
 
     /**
+     * Test isESFamily method.
+     *
      * @param $searchConfig
      * @param bool $expected
-     *
      * @dataProvider isEsFamilyDataProvider
+     * @return void
+     * @throws ServiceException
      */
+    #[DataProvider('isEsFamilyDataProvider')]
     public function testIsEsFamily(array $searchConfig, bool $expected): void
     {
         $this->stageConfigMock->expects($this->once())
@@ -553,7 +585,12 @@ class SearchEngineTest extends TestCase
         $this->assertSame($expected, $this->config->isESFamily());
     }
 
-    public function isEsFamilyDataProvider(): array
+    /**
+     * Data provider for testIsEsFamily method.
+     *
+     * @return array
+     */
+    public static function isEsFamilyDataProvider(): array
     {
         return [
             [[], false],

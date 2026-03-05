@@ -7,11 +7,12 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Step\Build;
 
-use Magento\MagentoCloud\Step\Build\CopyPubStatic;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileList;
+use Magento\MagentoCloud\Step\Build\CopyPubStatic;
 use Magento\MagentoCloud\Step\StepException;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -19,6 +20,7 @@ use Psr\Log\LoggerInterface;
 /**
  * @inheritDoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class CopyPubStaticTest extends TestCase
 {
     /**
@@ -52,7 +54,7 @@ class CopyPubStaticTest extends TestCase
     protected function setUp(): void
     {
         $this->fileMock = $this->createMock(File::class);
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
         $this->directoryListMock = $this->createMock(DirectoryList::class);
         $this->fileListMock = $this->createMock(FileList::class);
 

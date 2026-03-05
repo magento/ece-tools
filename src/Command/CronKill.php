@@ -16,7 +16,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * CLI command for killing Magento cron processes
  *
- * @api
  */
 class CronKill extends Command
 {
@@ -38,7 +37,6 @@ class CronKill extends Command
     }
 
     /**
-     * @inheritdoc
      */
     protected function configure(): void
     {

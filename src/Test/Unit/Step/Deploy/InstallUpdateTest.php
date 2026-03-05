@@ -13,6 +13,7 @@ use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Step\Deploy\InstallUpdate;
 use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -20,6 +21,7 @@ use Psr\Log\LoggerInterface;
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class InstallUpdateTest extends TestCase
 {
     /**
@@ -58,10 +60,10 @@ class InstallUpdateTest extends TestCase
     protected function setUp(): void
     {
         $this->stateMock = $this->createMock(State::class);
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
         $this->flagManagerMock = $this->createMock(FlagManager::class);
-        $this->stepInstallMock = $this->getMockForAbstractClass(StepInterface::class);
-        $this->stepUpdateMock = $this->getMockForAbstractClass(StepInterface::class);
+        $this->stepInstallMock = $this->createMock(StepInterface::class);
+        $this->stepUpdateMock = $this->createMock(StepInterface::class);
 
         $this->step = new InstallUpdate(
             $this->loggerMock,

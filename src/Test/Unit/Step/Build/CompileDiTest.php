@@ -10,11 +10,12 @@ namespace Magento\MagentoCloud\Test\Unit\Step\Build;
 use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\ConfigException;
 use Magento\MagentoCloud\Config\Stage\BuildInterface;
-use Magento\MagentoCloud\Shell\ShellException;
-use Magento\MagentoCloud\Step\Build\CompileDi;
 use Magento\MagentoCloud\Shell\MagentoShell;
+use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Shell\ShellFactory;
+use Magento\MagentoCloud\Step\Build\CompileDi;
 use Magento\MagentoCloud\Step\StepException;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -22,6 +23,7 @@ use Psr\Log\LoggerInterface;
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class CompileDiTest extends TestCase
 {
     /**
@@ -49,14 +51,14 @@ class CompileDiTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
         $this->magentoShellMock = $this->createMock(MagentoShell::class);
         /** @var ShellFactory|MockObject $shellFactoryMock */
         $shellFactoryMock = $this->createMock(ShellFactory::class);
         $shellFactoryMock->expects($this->once())
             ->method('createMagento')
             ->willReturn($this->magentoShellMock);
-        $this->stageConfigMock = $this->getMockForAbstractClass(BuildInterface::class);
+        $this->stageConfigMock = $this->createMock(BuildInterface::class);
 
         $this->step = new CompileDi(
             $this->loggerMock,

@@ -11,12 +11,16 @@ use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Step\Build\MarshallFiles;
-use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\MockObject\Rule\InvocationOrder;
+use PHPUnit\Framework\TestCase;
 
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class MarshallFilesTest extends TestCase
 {
     /**
@@ -59,12 +63,17 @@ class MarshallFilesTest extends TestCase
     }
 
     /**
+     * Test execute method.
+     *
      * @param bool $isExist
      * @param int $deleteDirectory
      * @param int $createDirectory
      * @dataProvider executeDataProvider
+     * @return void
+     * @throws \ReflectionException
      */
-    public function testExecuteForMagento21($isExist, $deleteDirectory, $createDirectory)
+    #[DataProvider('executeDataProvider')]
+    public function testExecuteForMagento21(bool $isExist, int $deleteDirectory, int $createDirectory): void
     {
         $enterpriseFolder = 'magento_root/app/enterprise';
         $varCache = 'magento_root/var/cache/';
@@ -88,16 +97,19 @@ class MarshallFilesTest extends TestCase
         ];
         $this->fileMock->expects($matcher)
             ->method('copy')
-            // withConsecutive() alternative.
             ->with(
                 $this->callback(function ($param) use ($series, $matcher) {
-                    $arguments = $series[$this->resolveInvocations($matcher) - 1];  // retrieves arguments
-                    $this->assertStringContainsString($arguments[0], $param); // performs assertion on the argument
+                    // retrieves arguments
+                    $arguments = $series[$this->resolveInvocations($matcher) - 1];
+                    // performs assertion on the argument
+                    $this->assertStringContainsString($arguments[0], $param);
                     return true;
                 }),
                 $this->callback(function ($param) use ($series, $matcher) {
-                    $arguments = $series[$this->resolveInvocations($matcher) - 1];  // retrieves arguments
-                    $this->assertStringContainsString($arguments[1], $param); // performs assertion on the argument
+                    // retrieves arguments
+                    $arguments = $series[$this->resolveInvocations($matcher) - 1];
+                    // performs assertion on the argument
+                    $this->assertStringContainsString($arguments[1], $param);
                     return true;
                 }),
             );
@@ -113,17 +125,33 @@ class MarshallFilesTest extends TestCase
     }
 
     /**
+     * Data provider for execute method.
+     *
      * @return array
      */
-    public function executeDataProvider()
+    public static function executeDataProvider(): array
     {
         return [
-            ['isExist' => true, 'deleteDirectory' => 1, 'createDirectory' => 0],
-            ['isExist' => false, 'deleteDirectory' => 0, 'createDirectory' => 1],
+            [
+                'isExist'         => true,
+                'deleteDirectory' => 1,
+                'createDirectory' => 0,
+            ],
+            [
+                'isExist'         => false,
+                'deleteDirectory' => 0,
+                'createDirectory' => 1,
+            ],
         ];
     }
 
-    public function testExecuteFroMagentoGreater22()
+    /**
+     * Test execute for Magento greater than 2.2.
+     *
+     * @return void
+     * @throws \ReflectionException
+     */
+    public function testExecuteFroMagentoGreater22(): void
     {
         $varCache = 'magento_root/var/cache/';
 
@@ -145,13 +173,21 @@ class MarshallFilesTest extends TestCase
         $this->step->execute();
     }
 
-    private function resolveInvocations(\PHPUnit\Framework\MockObject\Rule\InvocationOrder $matcher): int
+    /**
+     * Resolve invocations.
+     *
+     * @param InvocationOrder $matcher
+     * @return int
+     */
+    private function resolveInvocations(InvocationOrder $matcher): int
     {
-        if (method_exists($matcher, 'numberOfInvocations')) { // PHPUnit 10+ (including PHPUnit 12)
+        if (method_exists($matcher, 'numberOfInvocations')) {
+            // PHPUnit 10+ (including PHPUnit 12)
             return $matcher->numberOfInvocations();
         }
 
-        if (method_exists($matcher, 'getInvocationCount')) { // before PHPUnit 10
+        if (method_exists($matcher, 'getInvocationCount')) {
+            // before PHPUnit 10
             return $matcher->getInvocationCount();
         }
 

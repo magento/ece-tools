@@ -17,7 +17,6 @@ use Magento\MagentoCloud\Config\Stage\BuildInterface;
 use Psr\Log\LoggerInterface;
 
 /**
- * @inheritdoc
  */
 class ComposerDumpAutoload implements StepInterface
 {
@@ -48,7 +47,6 @@ class ComposerDumpAutoload implements StepInterface
     }
 
     /**
-     * @inheritdoc
      */
     public function execute()
     {

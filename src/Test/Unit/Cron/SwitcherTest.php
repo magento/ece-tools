@@ -10,12 +10,14 @@ namespace Magento\MagentoCloud\Test\Unit\Cron;
 use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface;
 use Magento\MagentoCloud\Config\Magento\Env\WriterInterface;
 use Magento\MagentoCloud\Cron\Switcher;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @inheritDoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class SwitcherTest extends TestCase
 {
     /**
@@ -38,8 +40,8 @@ class SwitcherTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->readerMock = $this->getMockForAbstractClass(ReaderInterface::class);
-        $this->writerMock = $this->getMockForAbstractClass(WriterInterface::class);
+        $this->readerMock = $this->createMock(ReaderInterface::class);
+        $this->writerMock = $this->createMock(WriterInterface::class);
 
         $this->switcher = new Switcher($this->writerMock, $this->readerMock);
     }

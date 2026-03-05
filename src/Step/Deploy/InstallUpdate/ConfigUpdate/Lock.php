@@ -17,7 +17,6 @@ use Magento\MagentoCloud\Package\MagentoVersion;
 use Psr\Log\LoggerInterface;
 
 /**
- * @inheritdoc
  */
 class Lock implements StepInterface
 {
@@ -70,7 +69,6 @@ class Lock implements StepInterface
     /**
      * Set lock configuration.
      *
-     * @inheritdoc
      */
     public function execute()
     {

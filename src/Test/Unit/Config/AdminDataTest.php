@@ -9,12 +9,15 @@ namespace Magento\MagentoCloud\Test\Unit\Config;
 
 use Magento\MagentoCloud\Config\AdminData;
 use Magento\MagentoCloud\Config\EnvironmentDataInterface;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @inheritDoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class AdminDataTest extends TestCase
 {
     /**
@@ -32,18 +35,22 @@ class AdminDataTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->environmentDataMock = $this->getMockForAbstractClass(EnvironmentDataInterface::class);
+        $this->environmentDataMock = $this->createMock(EnvironmentDataInterface::class);
 
         $this->adminData = new AdminData($this->environmentDataMock);
     }
 
     /**
+     * Test various getter methods.
+     *
      * @param array $envVariables
      * @param string $expectedValue
      * @param string $methodName
+     * @return void
      * @dataProvider methodsDataProvider
      */
-    public function testMethods(array $envVariables, string $expectedValue, string $methodName)
+    #[DataProvider('methodsDataProvider')]
+    public function testMethods(array $envVariables, string $expectedValue, string $methodName): void
     {
         $this->environmentDataMock->expects($this->once())
             ->method('getVariables')
@@ -53,9 +60,11 @@ class AdminDataTest extends TestCase
     }
 
     /**
+     * Data provider for testMethods.
+     *
      * @return array
      */
-    public function methodsDataProvider(): array
+    public static function methodsDataProvider(): array
     {
         return [
             [
@@ -101,7 +110,12 @@ class AdminDataTest extends TestCase
         ];
     }
 
-    public function testGetDefaultCurrency()
+    /**
+     * Test getDefaultCurrency method.
+     *
+     * @return void
+     */
+    public function testGetDefaultCurrency(): void
     {
         $this->assertEquals('USD', $this->adminData->getDefaultCurrency());
     }

@@ -29,7 +29,7 @@ class ValidateConfigurationTest extends TestCase
 
     public function setUp(): void
     {
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
     }
 
     /**
@@ -67,7 +67,7 @@ class ValidateConfigurationTest extends TestCase
         $this->expectExceptionMessage('some error');
         $this->expectExceptionCode(127);
 
-        $warningValidator = $this->getMockForAbstractClass(ValidatorInterface::class);
+        $warningValidator = $this->createMock(ValidatorInterface::class);
         $warningValidator->expects($this->once())
             ->method('validate');
 
@@ -322,7 +322,7 @@ class ValidateConfigurationTest extends TestCase
         string $suggestion,
         int | null $errorCode = null
     ): MockObject {
-        $warningValidator = $this->getMockForAbstractClass(ValidatorInterface::class);
+        $warningValidator = $this->createMock(ValidatorInterface::class);
         $warningResultMock = $this->createMock(Result\Error::class);
 
         $warningResultMock->expects($this->any())

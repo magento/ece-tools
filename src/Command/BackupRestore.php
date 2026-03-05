@@ -19,8 +19,6 @@ use Exception;
 
 /**
  * CLI command for restoring Magento configuration files from backup.
- *
- * @api
  */
 class BackupRestore extends Command
 {

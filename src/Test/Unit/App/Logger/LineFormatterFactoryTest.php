@@ -11,6 +11,7 @@ use Magento\MagentoCloud\App\ContainerInterface;
 use Magento\MagentoCloud\App\Logger\LineFormatterFactory;
 use Monolog\Formatter\LineFormatter;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -20,8 +21,8 @@ class LineFormatterFactoryTest extends TestCase
 {
     public function testCreate(): void
     {
-        /** @var ContainerInterface|MockObject $containerMock */
-        $containerMock = $this->getMockForAbstractClass(ContainerInterface::class);
+        /** @var ContainerInterface|MockObject|Stub $containerMock */
+        $containerMock = $this->createStub(ContainerInterface::class);
 
         $this->assertInstanceOf(
             LineFormatter::class,

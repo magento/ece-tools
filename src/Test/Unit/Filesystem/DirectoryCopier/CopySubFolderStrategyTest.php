@@ -10,13 +10,16 @@ namespace Magento\MagentoCloud\Test\Unit\Filesystem\DirectoryCopier;
 use Magento\MagentoCloud\Filesystem\DirectoryCopier\CopySubFolderStrategy;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
-use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\MockObject\Rule\InvocationOrder;
+use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class CopySubFolderStrategyTest extends TestCase
 {
     /**
@@ -34,16 +37,23 @@ class CopySubFolderStrategyTest extends TestCase
      */
     private $loggerMock;
 
+    /**
+     * @inheritDoc
+     */
     protected function setUp(): void
     {
         $this->fileMock = $this->createMock(File::class);
-        $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
-            ->getMockForAbstractClass();
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
 
         $this->copySubFolderStrategy = new CopySubFolderStrategy($this->fileMock, $this->loggerMock);
     }
 
-    public function testCopy()
+    /**
+     * Test copy method.
+     *
+     * @return void
+     */
+    public function testCopy(): void
     {
         $this->fileMock->expects($this->exactly(2))
             ->method('isExists')
@@ -65,14 +75,23 @@ class CopySubFolderStrategyTest extends TestCase
             ->method('copyDirectory')
             ->with('fromDir', 'toDir');
 
-        $this->assertTrue($this->copySubFolderStrategy->copy('fromDir', 'toDir'));
+        $this->assertTrue(
+            $this->copySubFolderStrategy->copy(
+                'fromDir',
+                'toDir'
+            )
+        );
     }
 
-    public function testCopyToDirectoryIsLink()
+    /**
+     * Test copy to directory is link.
+     *
+     * @return void
+     */
+    public function testCopyToDirectoryIsLink(): void
     {
         $this->fileMock->expects($this->exactly(2))
             ->method('isExists')
-            // withConsecutive() alternative.
             ->willReturnCallback(fn($param) => match ([$param]) {
                 ['fromDir'] => true,
                 ['toDir'] => false
@@ -94,7 +113,12 @@ class CopySubFolderStrategyTest extends TestCase
         $this->assertTrue($this->copySubFolderStrategy->copy('fromDir', 'toDir'));
     }
 
-    public function testCopyFromDirNotExists()
+    /**
+     * Test copy from directory not exists.
+     *
+     * @return void
+     */
+    public function testCopyFromDirNotExists(): void
     {
         $this->expectException(FileSystemException::class);
         $this->expectExceptionMessage('Cannot copy directory fromDir. Directory does not exist.');
@@ -107,7 +131,12 @@ class CopySubFolderStrategyTest extends TestCase
         $this->copySubFolderStrategy->copy('fromDir', 'toDir');
     }
 
-    public function testIsEmptyDirectory()
+    /**
+     * Test is empty directory.
+     *
+     * @return void
+     */
+    public function testIsEmptyDirectory(): void
     {
         $this->fileMock->expects($this->once())
             ->method('isExists')
@@ -126,7 +155,12 @@ class CopySubFolderStrategyTest extends TestCase
         $this->assertFalse($this->copySubFolderStrategy->copy('fromDir', 'toDir'));
     }
 
-    public function testIterativeCopy()
+    /**
+     * Test iterative copy.
+     *
+     * @return void
+     */
+    public function testIterativeCopy(): void
     {
         $splFileInfoOne = $this->createFileInfoMock('file1', false);
         $splFileInfoTwo = $this->createFileInfoMock('file2', false);
@@ -141,7 +175,6 @@ class CopySubFolderStrategyTest extends TestCase
 
         $this->fileMock->expects($this->exactly(2))
             ->method('isExists')
-            // withConsecutive() alternative.
             ->willReturnCallback(fn($param) => match ([$param]) {
                 ['fromDir'] => true,
                 ['toDir'] => true
@@ -163,7 +196,6 @@ class CopySubFolderStrategyTest extends TestCase
         $matcher = $this->exactly(2);
         $this->fileMock->expects($matcher)
             ->method('copy')
-            // withConsecutive() alternative.
             ->with(
                 $this->callback(function ($param) use ($series, $matcher) {
                     $arguments = $series[$this->resolveInvocations($matcher) - 1];  // retrieves arguments
@@ -180,6 +212,8 @@ class CopySubFolderStrategyTest extends TestCase
     }
 
     /**
+     * Create file info mock.
+     *
      * @param string $fileName
      * @param bool $isDot
      * @return MockObject
@@ -217,64 +251,62 @@ class CopySubFolderStrategyTest extends TestCase
 
         $iteratorMock->expects($this->any())
             ->method('rewind')
-            ->will(
-                $this->returnCallback(
-                    function () use ($iteratorData) {
-                        $iteratorData->position = 0;
-                    }
-                )
+            ->willReturnCallback(
+                function () use ($iteratorData) {
+                    $iteratorData->position = 0;
+                }
             );
 
         $iteratorMock->expects($this->any())
             ->method('current')
-            ->will(
-                $this->returnCallback(
-                    function () use ($iteratorData) {
-                        return $iteratorData->array[$iteratorData->position];
-                    }
-                )
+            ->willReturnCallback(
+                function () use ($iteratorData) {
+                    return $iteratorData->array[$iteratorData->position];
+                }
             );
 
         $iteratorMock->expects($this->any())
             ->method('key')
-            ->will(
-                $this->returnCallback(
-                    function () use ($iteratorData) {
-                        return $iteratorData->position;
-                    }
-                )
+            ->willReturnCallback(
+                function () use ($iteratorData) {
+                    return $iteratorData->position;
+                }
             );
 
         $iteratorMock->expects($this->any())
             ->method('next')
-            ->will(
-                $this->returnCallback(
-                    function () use ($iteratorData) {
-                        $iteratorData->position++;
-                    }
-                )
+            ->willReturnCallback(
+                function () use ($iteratorData) {
+                    $iteratorData->position++;
+                }
             );
 
         $iteratorMock->expects($this->any())
             ->method('valid')
-            ->will(
-                $this->returnCallback(
-                    function () use ($iteratorData) {
-                        return isset($iteratorData->array[$iteratorData->position]);
-                    }
-                )
+            ->willReturnCallback(
+                function () use ($iteratorData) {
+                    return isset($iteratorData->array[$iteratorData->position]);
+                }
             );
 
         return $iteratorMock;
     }
 
-    private function resolveInvocations(\PHPUnit\Framework\MockObject\Rule\InvocationOrder $matcher): int
+    /**
+     * Resolve invocations.
+     *
+     * @param InvocationOrder $matcher
+     * @return int
+     */
+    private function resolveInvocations(InvocationOrder $matcher): int
     {
-        if (method_exists($matcher, 'numberOfInvocations')) { // PHPUnit 10+ (including PHPUnit 12)
+        if (method_exists($matcher, 'numberOfInvocations')) {
+            // PHPUnit 10+ (including PHPUnit 12)
             return $matcher->numberOfInvocations();
         }
 
-        if (method_exists($matcher, 'getInvocationCount')) { // before PHPUnit 10
+        if (method_exists($matcher, 'getInvocationCount')) {
+            // before PHPUnit 10
             return $matcher->getInvocationCount();
         }
 

@@ -10,16 +10,18 @@ namespace Magento\MagentoCloud\Test\Unit\Config\Validator\Build;
 use Magento\MagentoCloud\Config\Validator\Build\ConfigFileExists;
 use Magento\MagentoCloud\Config\Validator\Result\Error;
 use Magento\MagentoCloud\Config\Validator\Result\Success;
-use Magento\MagentoCloud\Config\Validator\ResultInterface;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
-use Magento\MagentoCloud\Filesystem\FileList;
+use Magento\MagentoCloud\Config\Validator\ResultInterface;
 use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Filesystem\FileList;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class ConfigFileExistsTest extends TestCase
 {
     /**
@@ -86,7 +88,7 @@ class ConfigFileExistsTest extends TestCase
             ->method('isExists')
             ->with('magento_root/app/etc/config.php')
             ->willReturn(false);
-        $resultMock = $this->createMock(Error::class);
+        $resultMock = $this->createStub(Error::class);
         $this->resultFactoryMock->expects($this->once())
             ->method('error')
             ->with(

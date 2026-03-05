@@ -13,12 +13,14 @@ use Magento\MagentoCloud\Config\Validator\Result\Error;
 use Magento\MagentoCloud\Config\Validator\Result\Success;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
 use Magento\MagentoCloud\Config\ValidatorException;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @see DeprecatedSearchEngine
  */
+#[AllowMockObjectsWithoutExpectations]
 class DeprecatedSearchEngineTest extends TestCase
 {
     /**

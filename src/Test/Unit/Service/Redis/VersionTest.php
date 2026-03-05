@@ -13,6 +13,7 @@ use Magento\MagentoCloud\Service\ServiceException;
 use Magento\MagentoCloud\Shell\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Shell\ShellInterface;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -36,16 +37,20 @@ class VersionTest extends TestCase
      */
     public function setUp(): void
     {
-        $this->shellMock = $this->getMockForAbstractClass(ShellInterface::class);
+        $this->shellMock = $this->createMock(ShellInterface::class);
         $this->version = new Version($this->shellMock);
     }
 
     /**
+     * Test get version from config.
+     *
      * @param array $config
      * @param string $expectedResult
-     * @throws ServiceException
      * @dataProvider getVersionFromConfigDataProvider
+     * @return void
+     * @throws ServiceException
      */
+    #[DataProvider('getVersionFromConfigDataProvider')]
     public function testGetVersionFromConfig(array $config, string $expectedResult): void
     {
         $this->shellMock->expects($this->never())
@@ -59,7 +64,7 @@ class VersionTest extends TestCase
      *
      * @return array
      */
-    public function getVersionFromConfigDataProvider(): array
+    public static function getVersionFromConfigDataProvider(): array
     {
         return [
             [
@@ -84,15 +89,19 @@ class VersionTest extends TestCase
     }
 
     /**
+     * Test get version from CLI.
+     *
      * @param string $version
      * @param string $expectedResult
+     * @dataProvider getVersionFromCliDataProvider
+     * @return void
      * @throws ServiceException
      * @throws \ReflectionException
-     * @dataProvider getVersionFromCliDataProvider
      */
+    #[DataProvider('getVersionFromCliDataProvider')]
     public function testGetVersionFromCli(string $version, string $expectedResult): void
     {
-        $processMock = $this->getMockForAbstractClass(ProcessInterface::class);
+        $processMock = $this->createMock(ProcessInterface::class);
         $processMock->expects($this->once())
             ->method('getOutput')
             ->willReturn($version);
@@ -117,7 +126,7 @@ class VersionTest extends TestCase
      *
      * @return array
      */
-    public function getVersionFromCliDataProvider(): array
+    public static function getVersionFromCliDataProvider(): array
     {
         return [
             ['redis_version:5.3.6', '5.3'],
@@ -129,7 +138,13 @@ class VersionTest extends TestCase
         ];
     }
 
-    public function testGetVersionWithException()
+    /**
+     * Test get version with exception.
+     *
+     * @return void
+     * @throws ServiceException
+     */
+    public function testGetVersionWithException(): void
     {
         $exceptionMessage = 'Some shell exception';
         $this->expectException(ServiceException::class);
@@ -145,9 +160,11 @@ class VersionTest extends TestCase
     }
 
     /**
+     * Data provider for get version with password.
+     *
      * @return array
      */
-    public function getVersionWithPasswordDataProvider(): array
+    public static function getVersionWithPasswordDataProvider(): array
     {
         return [
             ['redis_version:5.3.6', '5.3'],
@@ -160,16 +177,19 @@ class VersionTest extends TestCase
     }
 
     /**
+     * Test get version with password.
+     *
      * @param string $version
      * @param string $expectedResult
+     * @dataProvider getVersionWithPasswordDataProvider
+     * @return void
      * @throws ReflectionException
      * @throws ServiceException
-     *
-     * @dataProvider getVersionWithPasswordDataProvider
      */
+    #[DataProvider('getVersionWithPasswordDataProvider')]
     public function testGetVersionWithPassword(string $version, string $expectedResult): void
     {
-        $processMock = $this->getMockForAbstractClass(ProcessInterface::class);
+        $processMock = $this->createMock(ProcessInterface::class);
         $processMock->expects(self::once())
             ->method('getOutput')
             ->willReturn($version);

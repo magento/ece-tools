@@ -7,15 +7,18 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Step\Deploy\InstallUpdate\ConfigUpdate\Lock;
 
-use Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\Lock\Config;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
+use Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\Lock\Config;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class ConfigTest extends TestCase
 {
     /**
@@ -39,18 +42,21 @@ class ConfigTest extends TestCase
     protected function setUp(): void
     {
         $this->environmentMock = $this->createMock(Environment::class);
-        $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
+        $this->stageConfigMock = $this->createMock(DeployInterface::class);
 
         $this->config = new Config($this->environmentMock, $this->stageConfigMock);
     }
 
     /**
-     * @param $lockPath
+     * Test get method.
+     *
+     * @param string $lockPath
      * @param string $lockProvider
      * @param array $expectedResult
-     *
      * @dataProvider getDataProvider
+     * @return void
      */
+    #[DataProvider('getDataProvider')]
     public function testGet($lockPath, $lockProvider, array $expectedResult): void
     {
         $this->environmentMock->expects($this->once())
@@ -65,9 +71,11 @@ class ConfigTest extends TestCase
     }
 
     /**
+     * Data provider for getDataProvider method.
+     *
      * @return array
      */
-    public function getDataProvider(): array
+    public static function getDataProvider(): array
     {
         return [
             'There is MAGENTO_CLOUD_LOCKS_DIR and LOCK_PROVIDER is file' => [

@@ -19,7 +19,6 @@ use Magento\MagentoCloud\Step\StepInterface;
 use Psr\Log\LoggerInterface;
 
 /**
- * @inheritdoc
  */
 class CacheType implements StepInterface
 {
@@ -64,7 +63,6 @@ class CacheType implements StepInterface
     /**
      * Enable all cache types if env.php was absence
      *
-     * @inheritdoc
      */
     public function execute()
     {

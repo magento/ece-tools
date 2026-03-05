@@ -8,19 +8,21 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit\Step\Deploy\InstallUpdate\ConfigUpdate;
 
 use Magento\MagentoCloud\App\GenericException;
-use Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\Lock;
 use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface as ConfigReader;
 use Magento\MagentoCloud\Config\Magento\Env\WriterInterface as ConfigWriter;
-use Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\Lock\Config as LockConfig;
 use Magento\MagentoCloud\Package\MagentoVersion;
+use Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\Lock;
+use Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\Lock\Config as LockConfig;
 use Magento\MagentoCloud\Step\StepException;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
-use Psr\Log\LoggerInterface;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
 
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class LockTest extends TestCase
 {
     /**
@@ -58,7 +60,7 @@ class LockTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
         $this->configWriterMock = $this->createMock(ConfigWriter::class);
         $this->configReaderMock = $this->createMock(ConfigReader::class);
         $this->lockConfigMock = $this->createMock(LockConfig::class);

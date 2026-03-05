@@ -9,13 +9,14 @@ namespace Magento\MagentoCloud\Test\Unit\Step\Build;
 
 use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\Stage\BuildInterface;
-use Magento\MagentoCloud\Config\ValidatorInterface;
 use Magento\MagentoCloud\Config\Validator\Result;
+use Magento\MagentoCloud\Config\ValidatorInterface;
 use Magento\MagentoCloud\Filesystem\Flag;
 use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Magento\MagentoCloud\Step\Build\RunBaler;
 use Magento\MagentoCloud\Step\StepException;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -23,6 +24,7 @@ use Psr\Log\LoggerInterface;
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class RunBalerTest extends TestCase
 {
     /**

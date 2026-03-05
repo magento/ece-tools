@@ -18,7 +18,6 @@ use Magento\MagentoCloud\Step\StepInterface;
 use Psr\Log\LoggerInterface;
 
 /**
- * @inheritdoc
  */
 class WarmUp implements StepInterface
 {
@@ -62,7 +61,6 @@ class WarmUp implements StepInterface
 
     /**
      * {@inheritdoc}
-     * @SuppressWarnings("PHPMD.UnusedLocalVariable")
      */
     public function execute()
     {

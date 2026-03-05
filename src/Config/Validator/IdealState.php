@@ -11,7 +11,6 @@ use Magento\MagentoCloud\Config\Validator\Result\Error;
 use Magento\MagentoCloud\Config\ValidatorFactory;
 
 /**
- * @inheritdoc
  */
 class IdealState implements CompositeValidator
 {
@@ -36,7 +35,6 @@ class IdealState implements CompositeValidator
     }
 
     /**
-     * @inheritdoc
      */
     public function validate(): ResultInterface
     {
@@ -64,7 +62,6 @@ class IdealState implements CompositeValidator
     }
 
     /**
-     * @inheritdoc
      */
     public function getErrors(): array
     {

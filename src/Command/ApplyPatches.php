@@ -16,9 +16,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * @inheritdoc
- *
- * @deprecated
+ * CLI command for applying patches. Deprecated: use quality-patches instead.
  */
 class ApplyPatches extends Command
 {

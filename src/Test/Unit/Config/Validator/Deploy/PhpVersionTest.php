@@ -8,26 +8,28 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit\Config\Validator\Deploy;
 
 use Composer\Composer;
-use Composer\Repository\LockArrayRepository;
-use Magento\MagentoCloud\Config\GlobalSection;
-use Magento\MagentoCloud\Config\Validator\Deploy\PhpVersion;
-use Composer\Package\Version\VersionParser;
-use Composer\Semver\Constraint\ConstraintInterface;
-use Magento\MagentoCloud\Config\Validator;
-use Magento\MagentoCloud\Package\MagentoVersion;
-use Psr\Log\LoggerInterface;
-use PHPUnit\Framework\MockObject\MockObject;
-use PHPUnit\Framework\TestCase;
-use Magento\MagentoCloud\Config\Validator\ResultInterface;
+use Composer\Package\Link;
 use Composer\Package\Locker;
 use Composer\Package\PackageInterface;
-use Composer\Package\Link;
+use Composer\Package\Version\VersionParser;
+use Composer\Repository\LockArrayRepository;
+use Composer\Semver\Constraint\ConstraintInterface;
+use Magento\MagentoCloud\Config\GlobalSection;
+use Magento\MagentoCloud\Config\Validator;
+use Magento\MagentoCloud\Config\Validator\Deploy\PhpVersion;
 use Magento\MagentoCloud\Config\Validator\Result\Error;
 use Magento\MagentoCloud\Config\Validator\Result\Success;
+use Magento\MagentoCloud\Package\MagentoVersion;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
 
 /**
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
+#[AllowMockObjectsWithoutExpectations]
 class PhpVersionTest extends TestCase
 {
     /**
@@ -84,7 +86,7 @@ class PhpVersionTest extends TestCase
         $this->composerMock = $this->createMock(Composer::class);
         $this->versionParserMock = $this->createMock(VersionParser::class);
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
         $this->globalSectionMock = $this->createMock(GlobalSection::class);
 
         $this->phpVersion = new PhpVersion(
@@ -98,15 +100,19 @@ class PhpVersionTest extends TestCase
     }
 
     /**
+     * Test validate method.
+     *
      * @param bool $matchesResult
      * @param string $calledMethod
-     * @param ResultInterface|MockObject $resultMock
+     * @param string $resultClass
      * @return void
      * @dataProvider validateDataProvider
      */
-    public function testValidateSuccess($matchesResult, $calledMethod, $resultMock): void
+    #[DataProvider('validateDataProvider')]
+    public function testValidateSuccess(bool $matchesResult, string $calledMethod, string $resultClass): void
     {
         $this->setUpComposerMocks();
+        $resultMock = $this->createStub($resultClass);
         $this->versionParserMock->expects(self::exactly(2))
             ->method('parseConstraints')
             ->willReturnMap([
@@ -125,23 +131,35 @@ class PhpVersionTest extends TestCase
     }
 
     /**
+     * Data provider for validate method.
+     *
      * @return array
      */
-    public function validateDataProvider(): array
+    public static function validateDataProvider(): array
     {
         return [
-            ['matchesResult' => false, 'calledMethod' => 'error', 'resultMock' => $this->createMock(Error::class)],
-            ['matchesResult' => true, 'calledMethod' => 'success', 'resultMock' => $this->createMock(Success::class)],
+            [
+                'matchesResult' => false,
+                'calledMethod'  => 'error',
+                'resultClass'   => Error::class
+            ],
+            [
+                'matchesResult' => true,
+                'calledMethod'  => 'success',
+                'resultClass'   => Success::class
+            ],
         ];
     }
 
     /**
+     * Test validate method.
+     *
      * @return void
      */
     public function testValidateException(): void
     {
         $this->setUpComposerMocks();
-        $resultMock = $this->createMock(Success::class);
+        $resultMock = $this->createStub(Success::class);
         $this->versionParserMock->method('parseConstraints')
             ->willThrowException(new \Exception('some error'));
         $this->resultFactoryMock->expects(self::once())
@@ -154,6 +172,11 @@ class PhpVersionTest extends TestCase
         self::assertSame($resultMock, $this->phpVersion->validate());
     }
 
+    /**
+     * Test validate method.
+     *
+     * @return void
+     */
     public function testValidationSuccessInstallFromGit(): void
     {
         $this->globalSectionMock->expects(self::once())
@@ -168,6 +191,11 @@ class PhpVersionTest extends TestCase
         self::assertInstanceOf(Success::class, $this->phpVersion->validate());
     }
 
+    /**
+     * Test validate method.
+     *
+     * @return void
+     */
     public function testValidationSuccessInstallFromComposerVersion(): void
     {
         $this->globalSectionMock->expects(self::once())
@@ -175,7 +203,7 @@ class PhpVersionTest extends TestCase
             ->with(GlobalSection::VAR_DEPLOYED_MAGENTO_VERSION_FROM_GIT)
             ->willReturn(null);
 
-        $repoMock = $this->createMock(LockArrayRepository::class);
+        $repoMock = $this->createStub(LockArrayRepository::class);
         $lockerMock = $this->createMock(Locker::class);
         $repoMock->method('findPackage')
             ->with('magento/magento2-base', '*')
@@ -194,15 +222,15 @@ class PhpVersionTest extends TestCase
      *
      * @return void
      */
-    protected function setUpComposerMocks(): void
+    private function setUpComposerMocks(): void
     {
-        $constraintMock = $this->getMockForAbstractClass(ConstraintInterface::class);
+        $constraintMock = $this->createMock(ConstraintInterface::class);
         $linkMock = $this->createMock(Link::class);
-        $packageMock = $this->getMockForAbstractClass(PackageInterface::class);
-        $repoMock = $this->createMock(LockArrayRepository::class);
+        $packageMock = $this->createMock(PackageInterface::class);
+        $repoMock = $this->createStub(LockArrayRepository::class);
         $lockerMock = $this->createMock(Locker::class);
-        $this->composerConstraintMock = $this->getMockForAbstractClass(ConstraintInterface::class);
-        $this->phpConstraintMock = $this->getMockForAbstractClass(ConstraintInterface::class);
+        $this->composerConstraintMock = $this->createMock(ConstraintInterface::class);
+        $this->phpConstraintMock = $this->createMock(ConstraintInterface::class);
 
         $constraintMock->expects(self::once())
             ->method('getPrettyString')

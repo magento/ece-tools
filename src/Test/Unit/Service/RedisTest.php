@@ -10,12 +10,14 @@ namespace Magento\MagentoCloud\Test\Unit\Service;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Service\Redis;
 use Magento\MagentoCloud\Service\Redis\Version;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class RedisTest extends TestCase
 {
     /**

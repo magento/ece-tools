@@ -13,11 +13,9 @@ use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Package\UndefinedPackageException;
 
 /**
- * Resolves the correct config file depending on Magento version
- *
- * Possible files: app/etc/config.php or app/etc/config.php.local
- *
- * @deprecated should be removed with dropping Magento 2.1 support
+ * Resolves the correct config file depending on Magento version.
+ * Possible files: app/etc/config.php or app/etc/config.php.local.
+ * Deprecated: should be removed with dropping Magento 2.1 support.
  */
 class Resolver
 {

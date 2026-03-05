@@ -12,12 +12,14 @@ use Magento\MagentoCloud\App\ErrorInfo;
 use Magento\MagentoCloud\Config\Validator\Result;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
 use Magento\MagentoCloud\Config\Validator\ResultInterface;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class ResultFactoryTest extends TestCase
 {
     /**

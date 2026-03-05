@@ -9,11 +9,12 @@ namespace Magento\MagentoCloud\Test\Unit\Step\PostDeploy;
 
 use Magento\MagentoCloud\Config\ConfigException;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
-use Magento\MagentoCloud\Step\PostDeploy\CleanCache;
-use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Shell\MagentoShell;
 use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Shell\ShellFactory;
+use Magento\MagentoCloud\Step\PostDeploy\CleanCache;
+use Magento\MagentoCloud\Step\StepException;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -21,6 +22,7 @@ use Psr\Log\LoggerInterface;
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class CleanCacheTest extends TestCase
 {
     /**
@@ -49,14 +51,13 @@ class CleanCacheTest extends TestCase
     protected function setUp(): void
     {
         $this->magentoShellMock = $this->createMock(MagentoShell::class);
-        $this->stageConfig = $this->getMockForAbstractClass(DeployInterface::class);
+        $this->stageConfig = $this->createMock(DeployInterface::class);
         /** @var ShellFactory|MockObject $shellFactoryMock */
         $shellFactoryMock = $this->createMock(ShellFactory::class);
         $shellFactoryMock->expects($this->once())
             ->method('createMagento')
             ->willReturn($this->magentoShellMock);
-        $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
-            ->getMockForAbstractClass();
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
 
         $this->step = new CleanCache(
             $shellFactoryMock,

@@ -14,11 +14,13 @@ use Magento\MagentoCloud\Config\ConfigMerger;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Config\StageConfigInterface;
 use Magento\MagentoCloud\Package\Manager;
+use Magento\MagentoCloud\Service\Redis;
 use Magento\MagentoCloud\Service\RedisSession;
+use Magento\MagentoCloud\Service\Valkey;
 use Magento\MagentoCloud\Service\ValkeySession;
 use Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\Session\Config;
-use Magento\MagentoCloud\Service\Redis;
-use Magento\MagentoCloud\Service\Valkey;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -28,6 +30,7 @@ use Psr\Log\LoggerInterface;
  * @inheritdoc
  * @SuppressWarnings("CouplingBetweenObjects")
  */
+#[AllowMockObjectsWithoutExpectations]
 class ConfigTest extends TestCase
 {
     /**
@@ -56,7 +59,7 @@ class ConfigTest extends TestCase
     private $stageConfigMock;
 
     /**
-     * @var ConfigMerger|MockObject
+     * @var ConfigMerger
      */
     private $configMergerMock;
 
@@ -82,7 +85,8 @@ class ConfigTest extends TestCase
 
     /**
      * @inheritdoc
-     * @throws     Exception
+     *
+     * @throws Exception
      */
     protected function setUp(): void
     {
@@ -90,9 +94,9 @@ class ConfigTest extends TestCase
         $this->redisSessionMock = $this->createMock(RedisSession::class);
         $this->valkeyMock = $this->createMock(Valkey::class);
         $this->valkeySessionMock = $this->createMock(ValkeySession::class);
-        $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
-        $this->configMergerMock = $this->createTestProxy(ConfigMerger::class);
+        $this->stageConfigMock = $this->createMock(DeployInterface::class);
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
+        $this->configMergerMock = new ConfigMerger();
         $this->managerMock = $this->createMock(Manager::class);
         $this->comparatorMock = new Comparator();
 
@@ -110,6 +114,9 @@ class ConfigTest extends TestCase
     }
 
     /**
+     * Test get method with valid env config.
+     *
+     * @return void
      * @throws ConfigException
      */
     public function testGetWithValidEnvConfig()
@@ -134,15 +141,20 @@ class ConfigTest extends TestCase
     }
 
     /**
-     * @param        array  $envSessionConfiguration
-     * @param        array  $redisSessionConfig
-     * @param        array  $redisConfig
-     * @param        int    $redisCallTime
-     * @param        array  $expected
-     * @param        string $expectedLogMessage
+     * Test env configuration merging.
+     *
+     * @param array $envSessionConfiguration
+     * @param array $redisSessionConfig
+     * @param array $redisConfig
+     * @param int $redisCallTime
+     * @param array $expected
+     * @param string $expectedLogMessage
      * @dataProvider envConfigurationMergingDataProvider
-     * @throws       ConfigException|Exception
+     * @return void
+     * @throws ConfigException
+     * @throws Exception
      */
+    #[DataProvider('envConfigurationMergingDataProvider')]
     public function testEnvConfigurationMerging(
         array $envSessionConfiguration,
         array $redisSessionConfig,
@@ -150,7 +162,7 @@ class ConfigTest extends TestCase
         int $redisCallTime,
         array $expected,
         string $expectedLogMessage
-    ) {
+    ): void {
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with($expectedLogMessage);
@@ -164,7 +176,7 @@ class ConfigTest extends TestCase
         $this->redisSessionMock->expects($this->once())
             ->method('getConfiguration')
             ->willReturn($redisSessionConfig);
-        $package = $this->getMockForAbstractClass(PackageInterface::class);
+        $package = $this->createMock(PackageInterface::class);
         $this->managerMock->expects($this->once())
             ->method('get')
             ->with('colinmollenhour/php-redis-session-abstract')
@@ -180,16 +192,20 @@ class ConfigTest extends TestCase
     }
 
     /**
-     * @param        array  $envSessionConfiguration
-     * @param        array  $valkeySessionConfig
-     * @param        array  $valkeyConfig
-     * @param        int    $valkeyCallTime
-     * @param        array  $expected
-     * @param        string $expectedLogMessage
-     * @throws       ConfigException
-     * @throws       Exception
+     * Test env configuration merging valkey.
+     *
+     * @param array $envSessionConfiguration
+     * @param array $valkeySessionConfig
+     * @param array $valkeyConfig
+     * @param int $valkeyCallTime
+     * @param array $expected
+     * @param string $expectedLogMessage
      * @dataProvider envConfigurationMergingDataProviderValkey
+     * @return void
+     * @throws ConfigException
+     * @throws Exception
      */
+    #[DataProvider('envConfigurationMergingDataProviderValkey')]
     public function testEnvConfigurationMergingValkey(
         array $envSessionConfiguration,
         array $valkeySessionConfig,
@@ -197,7 +213,7 @@ class ConfigTest extends TestCase
         int $valkeyCallTime,
         array $expected,
         string $expectedLogMessage
-    ) {
+    ): void {
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with($expectedLogMessage);
@@ -227,24 +243,26 @@ class ConfigTest extends TestCase
     }
 
     /**
+     * Data provider for envConfigurationMergingDataProviderValkey method.
+     *
      * @return array
      */
-    public function envConfigurationMergingDataProviderValkey(): array
+    public static function envConfigurationMergingDataProviderValkey(): array
     {
         $redisConfig = [
-        'host' => 'host',
-        'port' => 'port',
-        'scheme' => 'redis',
+            'host' => 'host',
+            'port' => 'port',
+            'scheme' => 'redis',
         ];
 
         $result = [
-        'save' => 'redis',
-        'redis' => [
-        'host' => 'host',
-        'port' => 'port',
-        'database' => Config::CACHE_DATABASE_SESSION,
-        'disable_locking' => 1
-        ],
+            'save' => 'redis',
+            'redis' => [
+                'host' => 'host',
+                'port' => 'port',
+                'database' => Config::CACHE_DATABASE_SESSION,
+                'disable_locking' => 1
+            ],
         ];
 
         $resultWithMergedKey = $result;
@@ -255,54 +273,56 @@ class ConfigTest extends TestCase
         $resultWithMergedHostAndPort['redis']['port'] = 'new_port';
 
         return [
-        [
-        [],
-        [],
-        $redisConfig,
-        1,
-        $result,
-        'valkey will be used for session if it was not override by SESSION_CONFIGURATION',
-        ],
-        [
-        [StageConfigInterface::OPTION_MERGE => true],
-        [],
-        $redisConfig,
-        1,
-        $result,
-        'valkey will be used for session if it was not override by SESSION_CONFIGURATION',
-        ],
-        [
-        [
-          StageConfigInterface::OPTION_MERGE => true,
-          'key' => 'value',
-        ],
-        [],
-        $redisConfig,
-        1,
-        $resultWithMergedKey,
-        'valkey will be used for session if it was not override by SESSION_CONFIGURATION',
-        ],
-        [
-        [
-          StageConfigInterface::OPTION_MERGE => true,
-          'redis' => [
-            'host' => 'new_host',
-            'port' => 'new_port',
-          ],
-        ],
-        $redisConfig,
-        $redisConfig,
-        0,
-        $resultWithMergedHostAndPort,
-        'valkey-session will be used for session if it was not override by SESSION_CONFIGURATION',
-        ],
+            [
+                [],
+                [],
+                $redisConfig,
+                1,
+                $result,
+                'valkey will be used for session if it was not override by SESSION_CONFIGURATION',
+            ],
+            [
+                [StageConfigInterface::OPTION_MERGE => true],
+                [],
+                $redisConfig,
+                1,
+                $result,
+                'valkey will be used for session if it was not override by SESSION_CONFIGURATION',
+            ],
+            [
+                [
+                    StageConfigInterface::OPTION_MERGE => true,
+                    'key' => 'value',
+                ],
+                [],
+                $redisConfig,
+                1,
+                $resultWithMergedKey,
+                'valkey will be used for session if it was not override by SESSION_CONFIGURATION',
+            ],
+            [
+                [
+                    StageConfigInterface::OPTION_MERGE => true,
+                    'redis' => [
+                        'host' => 'new_host',
+                        'port' => 'new_port',
+                    ],
+                ],
+                $redisConfig,
+                $redisConfig,
+                0,
+                $resultWithMergedHostAndPort,
+                'valkey-session will be used for session if it was not override by SESSION_CONFIGURATION',
+            ],
         ];
     }
 
     /**
+     * Data provider for envConfigurationMergingDataProvider method.
+     *
      * @return array
      */
-    public function envConfigurationMergingDataProvider(): array
+    public static function envConfigurationMergingDataProvider(): array
     {
         $redisConfig = [
             'host' => 'host',
@@ -373,15 +393,20 @@ class ConfigTest extends TestCase
     }
 
     /**
-     * @param        array  $envSessionConfiguration
-     * @param        array  $redisSessionConfig
-     * @param        array  $redisConfig
-     * @param        int    $redisCallTime
-     * @param        array  $expected
-     * @param        string $expectedLogMessage
+     * Test env configuration merging with previous version.
+     *
+     * @param array $envSessionConfiguration
+     * @param array $redisSessionConfig
+     * @param array $redisConfig
+     * @param int $redisCallTime
+     * @param array $expected
+     * @param string $expectedLogMessage
      * @dataProvider envConfigurationMergingWithPrevVersionDataProvider
-     * @throws       ConfigException|Exception
+     * @return void
+     * @throws ConfigException
+     * @throws Exception
      */
+    #[DataProvider('envConfigurationMergingWithPrevVersionDataProvider')]
     public function testEnvConfigurationMergingWithPrevVersion(
         array $envSessionConfiguration,
         array $redisSessionConfig,
@@ -389,7 +414,7 @@ class ConfigTest extends TestCase
         int $redisCallTime,
         array $expected,
         string $expectedLogMessage
-    ) {
+    ): void {
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with($expectedLogMessage);
@@ -403,7 +428,7 @@ class ConfigTest extends TestCase
         $this->redisSessionMock->expects($this->once())
             ->method('getConfiguration')
             ->willReturn($redisSessionConfig);
-        $package = $this->getMockForAbstractClass(PackageInterface::class);
+        $package = $this->createMock(PackageInterface::class);
         $this->managerMock->expects($this->once())
             ->method('get')
             ->with('colinmollenhour/php-redis-session-abstract')
@@ -419,9 +444,11 @@ class ConfigTest extends TestCase
     }
 
     /**
+     * Data provider for envConfigurationMergingWithPrevVersionDataProvider method.
+     *
      * @return array
      */
-    public function envConfigurationMergingWithPrevVersionDataProvider(): array
+    public static function envConfigurationMergingWithPrevVersionDataProvider(): array
     {
         $redisConfig = [
             'host' => 'host',

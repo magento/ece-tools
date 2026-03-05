@@ -20,7 +20,6 @@ use Magento\MagentoCloud\StaticContent\Deploy\Option;
 use Psr\Log\LoggerInterface;
 
 /**
- * @inheritdoc
  */
 class Generate implements StepInterface
 {
@@ -87,7 +86,6 @@ class Generate implements StepInterface
     }
 
     /**
-     * @inheritdoc
      */
     public function execute()
     {

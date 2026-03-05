@@ -8,6 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit\App\Logger;
 
 use Magento\MagentoCloud\App\Logger\Sanitizer;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -16,19 +17,24 @@ use PHPUnit\Framework\TestCase;
 class SanitizerTest extends TestCase
 {
     /**
+     * Test invoke method.
+     *
      * @param string $message
      * @param string $expectedMesssage
      * @dataProvider invokeDataProvider
      */
+    #[DataProvider('invokeDataProvider')]
     public function testInvoke(string $message, string $expectedMesssage)
     {
         $this->assertEquals($expectedMesssage, (new Sanitizer())->sanitize($message));
     }
 
     /**
+     * Test invoke method data provider.
+     *
      * @return array
      */
-    public function invokeDataProvider()
+    public static function invokeDataProvider()
     {
         return [
             [

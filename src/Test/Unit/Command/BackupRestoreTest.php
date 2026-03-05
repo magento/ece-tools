@@ -9,9 +9,10 @@ namespace Magento\MagentoCloud\Test\Unit\Command;
 
 use Magento\MagentoCloud\Command\BackupRestore;
 use Magento\MagentoCloud\Command\Backup\Restore;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
-use Psr\Log\LoggerInterface;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Tester\CommandTester;
 use Symfony\Component\Console\Helper\HelperSet;
 use Symfony\Component\Console\Helper\QuestionHelper;
@@ -52,11 +53,10 @@ class BackupRestoreTest extends TestCase
     protected function setUp(): void
     {
         $this->restoreMock = $this->createMock(Restore::class);
-        $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
-            ->getMockForAbstractClass();
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
         $this->questionMock = $this->getMockBuilder(QuestionHelper::class)
-            ->onlyMethods(['ask'])
-            ->getMock();
+                                ->onlyMethods(['ask'])
+                                ->getMock();
         $this->helperSetMock = $this->createMock(HelperSet::class);
 
         $this->command = new BackupRestore($this->restoreMock, $this->loggerMock);
@@ -64,12 +64,15 @@ class BackupRestoreTest extends TestCase
     }
 
     /**
+     * Test execute method.
+     *
      * @param int $askExpected
      * @param bool $askAnswer
      * @param array $options
      * @param int $runExpected
      * @dataProvider executeDataProvider
      */
+    #[DataProvider('executeDataProvider')]
     public function testExecute(int $askExpected, bool $askAnswer, array $options, int $runExpected): void
     {
         $this->helperSetMock->expects($this->exactly($askExpected))
@@ -89,9 +92,11 @@ class BackupRestoreTest extends TestCase
     }
 
     /**
+     * Execute data provider method.
+     *
      * @return array
      */
-    public function executeDataProvider(): array
+    public static function executeDataProvider(): array
     {
         return [
             ['askExpected' => 0, 'askAnswer' => true, 'options' => [], 'runExpected' => 1],

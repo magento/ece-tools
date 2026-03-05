@@ -11,6 +11,7 @@ use Magento\MagentoCloud\Command\Dev\UpdateComposer\ClearModuleRequirements;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use phpmock\phpunit\PHPMock;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -55,8 +56,12 @@ class ClearModuleRequirementsTest extends TestCase
     }
 
     /**
+     * Test generate method with gitignore update.
+     *
+     * @return void
      * @dataProvider generateGitignoreUpdateDataProvider
      */
+    #[DataProvider('generateGitignoreUpdateDataProvider')]
     public function testGenerateGitignoreUpdate($gitignoreContent): void
     {
         $this->directoryListMock->expects($this->once())
@@ -79,8 +84,12 @@ class ClearModuleRequirementsTest extends TestCase
     }
 
     /**
+     * Test generate method with no gitignore update.
+     *
+     * @return void
      * @dataProvider generateGitignoreNoUpdateDataProvider
      */
+    #[DataProvider('generateGitignoreNoUpdateDataProvider')]
     public function testGenerateGitignoreNoUpdate($gitignoreContent): void
     {
         $this->directoryListMock->expects($this->once())
@@ -96,7 +105,12 @@ class ClearModuleRequirementsTest extends TestCase
         $this->assertEquals('clear_module_requirements.php', $this->clearModuleRequirements->generate());
     }
 
-    public static function generateGitignoreUpdateDataProvider()
+    /**
+     * Data provider for testGenerateGitignoreUpdate.
+     *
+     * @return array
+     */
+    public static function generateGitignoreUpdateDataProvider(): array
     {
         return [
             [''],
@@ -104,7 +118,12 @@ class ClearModuleRequirementsTest extends TestCase
         ];
     }
 
-    public static function generateGitignoreNoUpdateDataProvider()
+    /**
+     * Data provider for testGenerateGitignoreNoUpdate.
+     *
+     * @return array
+     */
+    public static function generateGitignoreNoUpdateDataProvider(): array
     {
         return [
             ['clear_module_requirements.php'],

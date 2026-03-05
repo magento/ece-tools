@@ -8,19 +8,20 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 
 /**
- * Checks split database functionality
- *
- * @group php82
+ * Checks database backup functionality
+ * @group php85
  */
-class SplitDb82Cest extends SplitDbCest
+class BackupDb85Cest extends BackupDbCest
 {
     /**
+     * Data provider for Magento Cloud versions.
+     *
      * @return array
      */
     protected function dataProviderMagentoCloudVersions(): array
     {
         return [
-            ['version' => '2.4.6'],
+            ['version' => '2.4.9-alpha-opensearch3.0'],
         ];
     }
 }

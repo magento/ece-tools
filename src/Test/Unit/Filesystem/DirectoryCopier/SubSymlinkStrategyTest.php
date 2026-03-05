@@ -10,6 +10,7 @@ namespace Magento\MagentoCloud\Test\Unit\Filesystem\DirectoryCopier;
 use Magento\MagentoCloud\Filesystem\DirectoryCopier\SubSymlinkStrategy;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -17,6 +18,7 @@ use Psr\Log\LoggerInterface;
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class SubSymlinkStrategyTest extends TestCase
 {
     /**
@@ -44,8 +46,7 @@ class SubSymlinkStrategyTest extends TestCase
             ->method('getRealPath')
             ->with('fromDir')
             ->willReturnOnConsecutiveCalls('realFromDir');
-        $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
-            ->getMockForAbstractClass();
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
 
         $this->subSymlinkStrategy = new SubSymlinkStrategy($this->fileMock, $this->loggerMock);
     }

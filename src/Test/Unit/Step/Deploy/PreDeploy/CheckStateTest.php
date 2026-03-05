@@ -12,13 +12,16 @@ use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface as ConfigReader;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Step\Deploy\PreDeploy\CheckState;
 use Magento\MagentoCloud\Step\StepException;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
-use Psr\Log\LoggerInterface;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
 
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class CheckStateTest extends TestCase
 {
     /**
@@ -47,8 +50,8 @@ class CheckStateTest extends TestCase
     protected function setUp(): void
     {
         $this->configReaderMock = $this->createMock(ConfigReader::class);
-        $this->flagManagerMock = $this->createMock(FlagManager::class);
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->flagManagerMock  = $this->createMock(FlagManager::class);
+        $this->loggerMock       = $this->createMock(LoggerInterface::class);
 
         $this->checkState = new CheckState(
             $this->configReaderMock,
@@ -58,11 +61,14 @@ class CheckStateTest extends TestCase
     }
 
     /**
-     * @param $config array
-     * @throws \Magento\MagentoCloud\Step\StepException
+     * Test execute with empty file method.
      *
+     * @param array $config
      * @dataProvider executeWithEmptyFileDataProvider
+     * @return void
+     * @throws StepException
      */
+    #[DataProvider('executeWithEmptyFileDataProvider')]
     public function testExecuteWithEmptyFile($config)
     {
         $this->configReaderMock->expects($this->once())
@@ -81,24 +87,40 @@ class CheckStateTest extends TestCase
 
     /**
      * Data provider for testExecuteWithEmptyFile test
+     *
      * @return array
      */
-    public function executeWithEmptyFileDataProvider()
+    public static function executeWithEmptyFileDataProvider(): array
     {
         return [
-            [[]],
-            [['cache_types' => '', ]],
-            [['cache_types' => ['type_1' => 1], ]],
+            [
+                [],
+            ],
+            [
+                [
+                    'cache_types' => '',
+                ],
+            ],
+            [
+                [
+                    'cache_types' => [
+                        'type_1' => 1,
+                    ],
+                ],
+            ],
         ];
     }
 
     /**
-     * @param $config
-     * @throws \Magento\MagentoCloud\Step\StepException
+     * Data provider for testExecuteWithFullOfDataFile test.
      *
+     * @param $config
      * @dataProvider executeWithFullOfDataFileDataProvider
+     * @return void
+     * @throws StepException
      */
-    public function testExecuteWithFullOfDataFile($config)
+    #[DataProvider('executeWithFullOfDataFileDataProvider')]
+    public function testExecuteWithFullOfDataFile(array $config): void
     {
         $this->configReaderMock->expects($this->once())
             ->method('read')
@@ -113,11 +135,12 @@ class CheckStateTest extends TestCase
     }
 
     /**
-     * Checks that method throws only StepException
+     * Test execute with exception method.
      *
+     * @return void
      * @throws StepException
      */
-    public function testExecuteWithException()
+    public function testExecuteWithException(): void
     {
         $eCode = 111;
         $eMessage = 'Exception message';
@@ -130,7 +153,12 @@ class CheckStateTest extends TestCase
         $this->checkState->execute();
     }
 
-    public function executeWithFullOfDataFileDataProvider()
+    /**
+     * Data provider for testExecuteWithFullOfDataFile test
+     *
+     * @return array
+     */
+    public static function executeWithFullOfDataFileDataProvider(): array
     {
         return [
             [

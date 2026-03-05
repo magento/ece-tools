@@ -12,6 +12,7 @@ use Magento\MagentoCloud\Config\GlobalSection;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Shell\ShellInterface;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Tester\CommandTester;
@@ -19,6 +20,7 @@ use Symfony\Component\Console\Tester\CommandTester;
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class UpdateComposerTest extends TestCase
 {
     /**

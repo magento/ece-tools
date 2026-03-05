@@ -21,7 +21,6 @@ use Magento\MagentoCloud\Step\StepInterface;
 use Psr\Log\LoggerInterface;
 
 /**
- * @inheritdoc
  */
 class CronConsumersRunner implements StepInterface
 {
@@ -93,7 +92,6 @@ class CronConsumersRunner implements StepInterface
     }
 
     /**
-     * @inheritdoc
      */
     public function execute()
     {

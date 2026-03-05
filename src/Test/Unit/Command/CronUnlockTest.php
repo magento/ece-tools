@@ -10,6 +10,7 @@ namespace Magento\MagentoCloud\Test\Unit\Command;
 use Magento\MagentoCloud\Command\CronUnlock;
 use Magento\MagentoCloud\Cron\JobUnlocker;
 use Magento\MagentoCloud\Package\MagentoVersion;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -18,6 +19,7 @@ use Symfony\Component\Console\Tester\CommandTester;
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class CronUnlockTest extends TestCase
 {
     /**
@@ -46,7 +48,7 @@ class CronUnlockTest extends TestCase
     protected function setUp(): void
     {
         $this->jobUnlockerMock = $this->createMock(JobUnlocker::class);
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
 
         $this->cronUnlockCommand = new CronUnlock(

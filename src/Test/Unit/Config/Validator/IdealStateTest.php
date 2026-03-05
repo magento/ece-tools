@@ -7,20 +7,22 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Config\Validator;
 
-use Magento\MagentoCloud\Config\ValidatorFactory;
 use Magento\MagentoCloud\Config\Validator\Deploy\PostDeploy;
 use Magento\MagentoCloud\Config\Validator\GlobalStage\ScdOnBuild;
 use Magento\MagentoCloud\Config\Validator\GlobalStage\SkipHtmlMinification;
 use Magento\MagentoCloud\Config\Validator\IdealState;
-use Magento\MagentoCloud\Config\Validator\ResultFactory;
 use Magento\MagentoCloud\Config\Validator\Result\Error;
 use Magento\MagentoCloud\Config\Validator\Result\Success;
+use Magento\MagentoCloud\Config\Validator\ResultFactory;
+use Magento\MagentoCloud\Config\ValidatorFactory;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class IdealStateTest extends TestCase
 {
     /**

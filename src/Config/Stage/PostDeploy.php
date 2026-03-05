@@ -16,7 +16,6 @@ use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Symfony\Component\Yaml\Exception\ParseException;
 
 /**
- * @inheritdoc
  */
 class PostDeploy implements PostDeployInterface
 {
@@ -46,7 +45,6 @@ class PostDeploy implements PostDeployInterface
     }
 
     /**
-     * @inheritdoc
      */
     public function get(string $name)
     {

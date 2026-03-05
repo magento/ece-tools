@@ -54,8 +54,7 @@ class SetCryptKeyTest extends TestCase
     public function setUp(): void
     {
         $this->environmentMock = $this->createMock(Environment::class);
-        $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
-            ->getMockForAbstractClass();
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
         $this->configReaderMock = $this->createMock(ConfigReader::class);
         $this->configWriterMock = $this->createMock(ConfigWriter::class);
 

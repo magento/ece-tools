@@ -12,7 +12,6 @@ use Symfony\Component\Process\Exception\ProcessFailedException;
 /**
  * Runs console commands.
  *
- * @codeCoverageIgnore
  */
 class Process extends \Symfony\Component\Process\Process implements ProcessInterface
 {
@@ -27,7 +26,6 @@ class Process extends \Symfony\Component\Process\Process implements ProcessInter
     }
 
     /**
-     * @inheritdoc
      */
     public function execute(): void
     {

@@ -12,12 +12,14 @@ use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Magento\MagentoCloud\Shell\UtilityException;
 use Magento\MagentoCloud\Shell\UtilityManager;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class UtilityManagerTest extends TestCase
 {
     /**
@@ -35,7 +37,7 @@ class UtilityManagerTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->shellMock = $this->getMockForAbstractClass(ShellInterface::class);
+        $this->shellMock = $this->createMock(ShellInterface::class);
 
         $this->utilityManager = new UtilityManager(
             $this->shellMock
@@ -44,11 +46,11 @@ class UtilityManagerTest extends TestCase
 
     public function testGet(): void
     {
-        $processMock1 = $this->getMockForAbstractClass(ProcessInterface::class);
+        $processMock1 = $this->createMock(ProcessInterface::class);
         $processMock1->expects($this->once())
             ->method('getOutput')
             ->willReturn("/usr/bash\n/usr/bin/bash");
-        $processMock2 = $this->getMockForAbstractClass(ProcessInterface::class);
+        $processMock2 = $this->createMock(ProcessInterface::class);
         $processMock2->expects($this->once())
             ->method('getOutput')
             ->willReturn('/usr/timeout');
@@ -70,11 +72,11 @@ class UtilityManagerTest extends TestCase
         $this->expectException(UtilityException::class);
         $this->expectExceptionMessage('Utility some_util not found');
 
-        $processMock1 = $this->getMockForAbstractClass(ProcessInterface::class);
+        $processMock1 = $this->createMock(ProcessInterface::class);
         $processMock1->expects($this->once())
             ->method('getOutput')
             ->willReturn('/usr/bash');
-        $processMock2 = $this->getMockForAbstractClass(ProcessInterface::class);
+        $processMock2 = $this->createMock(ProcessInterface::class);
         $processMock2->expects($this->once())
             ->method('getOutput')
             ->willReturn('/usr/timeout');

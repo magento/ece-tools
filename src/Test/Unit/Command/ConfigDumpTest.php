@@ -14,17 +14,19 @@ use Magento\MagentoCloud\Config\Magento\Env\WriterInterface;
 use Magento\MagentoCloud\Config\Stage\PostDeployInterface;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Shell\MagentoShell;
+use Magento\MagentoCloud\Shell\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellFactory;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Tester\CommandTester;
-use Magento\MagentoCloud\Shell\ProcessInterface;
 
 /**
  * @inheritdoc
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
+#[AllowMockObjectsWithoutExpectations]
 class ConfigDumpTest extends TestCase
 {
     /**
@@ -82,15 +84,15 @@ class ConfigDumpTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
         $this->shellFactoryMock = $this->createMock(ShellFactory::class);
         $this->shellMock = $this->createMock(MagentoShell::class);
         $this->generateMock = $this->createMock(ConfigDump\Generate::class);
-        $this->readerMock = $this->getMockForAbstractClass(ReaderInterface::class);
-        $this->writerMock = $this->getMockForAbstractClass(WriterInterface::class);
+        $this->readerMock = $this->createMock(ReaderInterface::class);
+        $this->writerMock = $this->createMock(WriterInterface::class);
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
         $this->stageConfigMock = $this->createMock(PostDeployInterface::class);
-        $this->processMock = $this->getMockForAbstractClass(ProcessInterface::class);
+        $this->processMock = $this->createMock(ProcessInterface::class);
 
         $this->shellFactoryMock->method('createMagento')
             ->willReturn($this->shellMock);

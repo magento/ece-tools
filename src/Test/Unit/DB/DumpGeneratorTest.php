@@ -13,6 +13,9 @@ use Magento\MagentoCloud\DB\DumpGenerator;
 use Magento\MagentoCloud\DB\DumpInterface;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Shell\ShellInterface;
+use phpmock\phpunit\PHPMock;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -20,9 +23,10 @@ use Psr\Log\LoggerInterface;
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class DumpGeneratorTest extends TestCase
 {
-    use \phpmock\phpunit\PHPMock;
+    use PHPMock;
 
     /**
      * Mock time() function which is used as part of file name
@@ -68,16 +72,17 @@ class DumpGeneratorTest extends TestCase
 
     /**
      * Setup the test environment.
+     * @inheritdoc
      */
     protected function setUp(): void
     {
-        $this->dumpMock = $this->getMockForAbstractClass(DumpInterface::class);
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
-        $this->shellMock = $this->getMockForAbstractClass(ShellInterface::class);
-        $this->directoryListMock = $this->createMock(DirectoryList::class);
+        $this->dumpMock           = $this->createMock(DumpInterface::class);
+        $this->loggerMock         = $this->createMock(LoggerInterface::class);
+        $this->shellMock          = $this->createMock(ShellInterface::class);
+        $this->directoryListMock  = $this->createMock(DirectoryList::class);
         $this->connectionDataMock = $this->createMock(ConnectionInterface::class);
+        $this->tmpDir             = sys_get_temp_dir();
 
-        $this->tmpDir = sys_get_temp_dir();
         $this->directoryListMock->expects($this->any())
             ->method('getVar')
             ->willReturn($this->tmpDir);
@@ -97,6 +102,11 @@ class DumpGeneratorTest extends TestCase
         );
     }
 
+    /**
+     * Tear down the test environment.
+     *
+     * @return void
+     */
     protected function tearDown(): void
     {
         if (file_exists($this->tmpDir . '/dbdump.lock')) {
@@ -106,11 +116,15 @@ class DumpGeneratorTest extends TestCase
     }
 
     /**
+     * Test create method.
+     *
      * @param bool $removeDefiners
      * @throws GenericException
      * @dataProvider getCreateDataProvider
+     * @return void
      */
-    public function testCreate(bool $removeDefiners)
+    #[DataProvider('getCreateDataProvider')]
+    public function testCreate(bool $removeDefiners): void
     {
         $dumpFilePath = $this->getDumpFilePath('main');
         $series = [
@@ -141,9 +155,11 @@ class DumpGeneratorTest extends TestCase
     }
 
     /**
+     * Data provider for testCreate method.
+     *
      * @return array
      */
-    public function getCreateDataProvider(): array
+    public static function getCreateDataProvider(): array
     {
         return [
             'without definers' => [true],
@@ -152,9 +168,12 @@ class DumpGeneratorTest extends TestCase
     }
 
     /**
+     * Test create with exception method.
+     *
+     * @return void
      * @throws GenericException
      */
-    public function testCreateWithException()
+    public function testCreateWithException(): void
     {
         $dumpCommand = $this->getDumpCommand('main');
         $this->loggerMock->expects($this->exactly(2))
@@ -186,7 +205,12 @@ class DumpGeneratorTest extends TestCase
         $this->dumpGenerator->create('main', $this->connectionDataMock, false, '');
     }
 
-    public function testFailedCreationLockFile()
+    /**
+     * Test failed creation lock file method.
+     *
+     * @return void
+     */
+    public function testFailedCreationLockFile(): void
     {
         // Mock fopen() function which is used for creation lock file
         $fopenMock = $this->getFunctionMock('Magento\MagentoCloud\DB', 'fopen');
@@ -203,7 +227,12 @@ class DumpGeneratorTest extends TestCase
         $this->dumpGenerator->create('main', $this->connectionDataMock, false, '');
     }
 
-    public function testLockedFile()
+    /**
+     * Test locked file method.
+     *
+     * @return void
+     */
+    public function testLockedFile(): void
     {
         // Mock fopen() function which is used for creation lock file
         $fopenMock = $this->getFunctionMock('Magento\MagentoCloud\DB', 'flock');
@@ -225,16 +254,36 @@ class DumpGeneratorTest extends TestCase
         $this->dumpGenerator->create('main', $this->connectionDataMock, false, '');
     }
 
+    /**
+     * Get dump file path method.
+     *
+     * @param string $type
+     * @return string
+     */
     private function getDumpFilePath(string $type): string
     {
         return $this->tmpDir . '/dump-' . $type . '-' . $this->time . '.sql.gz';
     }
 
+    /**
+     * Get dump command method.
+     *
+     * @param string $type
+     * @return string
+     */
     private function getDumpCommand(string $type): string
     {
         return 'cli command for dump db by ' . $type . ' connection';
     }
 
+    /**
+     * Add wrapper to run method.
+     *
+     * @param string $command
+     * @param string $dumpFilePath
+     * @param bool $removeDefiners
+     * @return string
+     */
     private function addWrapperToRun(string $command, string $dumpFilePath, $removeDefiners = false): string
     {
         $command = 'bash -c "set -o pipefail; timeout 3600 ' . $command;

@@ -8,19 +8,23 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit\Config\Validator\Build;
 
 use Magento\MagentoCloud\App\Error as AppError;
-use Magento\MagentoCloud\Config\Validator\Result\Error as ResultError;
 use Magento\MagentoCloud\Config\Validator\Build\OpcacheExcludePaths;
+use Magento\MagentoCloud\Config\Validator\Result\Error as ResultError;
 use Magento\MagentoCloud\Config\Validator\Result\Success;
-use Magento\MagentoCloud\Config\Validator\ResultInterface;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
-use Magento\MagentoCloud\Filesystem\FileList;
+use Magento\MagentoCloud\Config\Validator\ResultInterface;
+use Magento\MagentoCloud\Config\ValidatorException;
 use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Filesystem\FileList;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class OpcacheExcludePathsTest extends TestCase
 {
     /**
@@ -60,22 +64,22 @@ class OpcacheExcludePathsTest extends TestCase
     }
 
     /**
+     * Test validateSuccess method.
+     *
      * @return void
-     * @throws \Magento\MagentoCloud\Config\ValidatorException
+     * @throws ValidatorException
      */
     public function testValidateSuccess(): void
     {
         $phpIniPath = '/app/php.ini';
         $excludeListPath = '/app/op-exclude.txt';
         $phpIni = ['opcache.blacklist_filename' => $excludeListPath];
-        $excludeList = <<<EXCLUDE
-/app/*/app/etc/config.php
-/app/*/app/etc/env.php
-/app/app/etc/config.php
-/app/app/etc/env.php
-/app/etc/config.php
-/app/etc/env.php
-EXCLUDE;
+        $excludeList = "/app/*/app/etc/config.php\n" .
+            "/app/*/app/etc/env.php\n" .
+            "/app/app/etc/config.php\n" .
+            "/app/app/etc/env.php\n" .
+            "/app/etc/config.php\n" .
+            "/app/etc/env.php";
 
         $this->fileListMock->expects($this->once())
             ->method('getPhpIni')
@@ -85,7 +89,6 @@ EXCLUDE;
             ->willReturn($excludeListPath);
         $this->fileMock->expects($this->exactly(2))
             ->method('isExists')
-            // withConsecutive() alternative.
             ->willReturnCallback(fn($param) => match ([$param]) {
                 [$phpIniPath] => true,
                 [$excludeListPath] => true
@@ -112,13 +115,16 @@ EXCLUDE;
     }
 
     /**
+     * Test validateFilesDoNotExist method.
+     *
      * @param int $invokeCount
      * @param bool $phpIniExists
      * @param bool $opCacheExcludeListExists
-     * @return void
-     * @throws \Magento\MagentoCloud\Config\ValidatorException
      * @dataProvider validateFilesDoNotExistDataProvider
+     * @return void
+     * @throws ValidatorException
      */
+    #[DataProvider('validateFilesDoNotExistDataProvider')]
     public function testValidateFilesDoNotExist(
         int $invokeCount,
         bool $phpIniExists,
@@ -158,9 +164,11 @@ EXCLUDE;
     }
 
     /**
+     * Data provider for validateFilesDoNotExist method.
+     *
      * @return array[]
      */
-    public function validateFilesDoNotExistDataProvider(): array
+    public static function validateFilesDoNotExistDataProvider(): array
     {
         return [
             [
@@ -182,11 +190,14 @@ EXCLUDE;
     }
 
     /**
+     * Test validatePhpIniWrongConfiguration method.
+     *
      * @param array|bool $phpIni
+     * @dataProvider validatePhpIniWrongConfigurationDataProvider
      * @return void
      * @throws \Magento\MagentoCloud\Config\ValidatorException
-     * @dataProvider validatePhpIniWrongConfigurationDataProvider
      */
+    #[DataProvider('validatePhpIniWrongConfigurationDataProvider')]
     public function testValidatePhpIniWrongConfiguration($phpIni): void
     {
         $phpIniPath = '/app/php.ini';
@@ -228,9 +239,11 @@ EXCLUDE;
     }
 
     /**
+     * Data provider for validatePhpIniWrongConfiguration method.
+     *
      * @return array
      */
-    public function validatePhpIniWrongConfigurationDataProvider(): array
+    public static function validatePhpIniWrongConfigurationDataProvider(): array
     {
         return [
             ['phpIni' => false],
@@ -240,6 +253,8 @@ EXCLUDE;
     }
 
     /**
+     * Test validateMissedPaths method.
+     *
      * @return void
      * @throws \Magento\MagentoCloud\Config\ValidatorException
      */
@@ -248,12 +263,10 @@ EXCLUDE;
         $phpIniPath = '/app/php.ini';
         $excludeListPath = '/app/op-exclude.txt';
         $phpIni = ['opcache.blacklist_filename' => $excludeListPath];
-        $excludeList = <<<EXCLUDE
-/app/app/etc/config.php
-/app/app/etc/env.php
-/app/etc/config.php
-/app/etc/env.php
-EXCLUDE;
+        $excludeList = "/app/app/etc/config.php\n" .
+            "/app/app/etc/env.php\n" .
+            "/app/etc/config.php\n" .
+            "/app/etc/env.php";
 
         $this->fileListMock->expects($this->once())
             ->method('getPhpIni')
@@ -281,7 +294,7 @@ EXCLUDE;
             ->with(
                 'File op-exclude.txt does not contain required paths to exclude for OPCache',
                 'Check if your op-exclude.txt contains the next paths:' . PHP_EOL
-                    . '/app/*/app/etc/config.php'. PHP_EOL .'/app/*/app/etc/env.php',
+                    . '/app/*/app/etc/config.php' . PHP_EOL . '/app/*/app/etc/env.php',
                 AppError::WARN_WRONG_OPCACHE_CONFIG
             )
             ->willReturn($this->createMock(ResultError::class));

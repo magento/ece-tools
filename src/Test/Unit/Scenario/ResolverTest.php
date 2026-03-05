@@ -10,12 +10,13 @@ namespace Magento\MagentoCloud\Test\Unit\Scenario;
 use Magento\MagentoCloud\App\ContainerInterface;
 use Magento\MagentoCloud\OnFail\Action\ActionInterface;
 use Magento\MagentoCloud\Scenario\Collector\Step;
-use Magento\MagentoCloud\Scenario\Sorter;
-use Magento\MagentoCloud\Step\SkipStep;
-use Magento\MagentoCloud\Step\StepInterface;
 use Magento\MagentoCloud\Scenario\Exception\ValidationException;
 use Magento\MagentoCloud\Scenario\Resolver;
+use Magento\MagentoCloud\Scenario\Sorter;
 use Magento\MagentoCloud\Shell\ShellInterface;
+use Magento\MagentoCloud\Step\SkipStep;
+use Magento\MagentoCloud\Step\StepInterface;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -23,6 +24,7 @@ use Psr\Log\LoggerInterface;
 /**
  * @inheritDoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class ResolverTest extends TestCase
 {
     /**
@@ -50,7 +52,7 @@ class ResolverTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->containerMock = $this->getMockForAbstractClass(ContainerInterface::class);
+        $this->containerMock = $this->createMock(ContainerInterface::class);
         $this->sorterMock = $this->createMock(Sorter::class);
         $this->loggerMock = $this->createMock(LoggerInterface::class);
 
@@ -119,10 +121,10 @@ class ResolverTest extends TestCase
             ],
         ];
 
-        $step1Mock = $this->getMockForAbstractClass(StepInterface::class);
-        $skipStepMock = $this->getMockForAbstractClass(StepInterface::class);
-        $arg2Mock = $this->getMockForAbstractClass(ShellInterface::class);
-        $actionMock = $this->getMockForAbstractClass(ActionInterface::class);
+        $step1Mock = $this->createStub(StepInterface::class);
+        $skipStepMock = $this->createStub(StepInterface::class);
+        $arg2Mock = $this->createStub(ShellInterface::class);
+        $actionMock = $this->createStub(ActionInterface::class);
 
         $instances = [
             'steps' => [
@@ -214,7 +216,7 @@ class ResolverTest extends TestCase
             'actions' => [],
         ];
 
-        $step1Mock = $this->getMockForAbstractClass(StepInterface::class);
+        $step1Mock = $this->createStub(StepInterface::class);
 
         $instances = [
             'steps' => [
@@ -254,7 +256,7 @@ class ResolverTest extends TestCase
             'actions' => [],
         ];
 
-        $step1Mock = $this->getMockForAbstractClass(StepInterface::class);
+        $step1Mock = $this->createStub(StepInterface::class);
 
         $instances = [
             'steps' => [
@@ -289,7 +291,7 @@ class ResolverTest extends TestCase
             'actions' => [],
         ];
 
-        $step1Mock = $this->getMockForAbstractClass(ShellInterface::class);
+        $step1Mock = $this->createStub(ShellInterface::class);
 
         $instances = [
             'steps' => [

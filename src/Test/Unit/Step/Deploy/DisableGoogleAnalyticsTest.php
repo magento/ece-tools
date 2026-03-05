@@ -10,18 +10,20 @@ namespace Magento\MagentoCloud\Test\Unit\Step\Deploy;
 use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\ConfigException;
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\Stage\Deploy as DeployConfig;
+use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\DB\ConnectionInterface;
 use Magento\MagentoCloud\Step\Deploy\DisableGoogleAnalytics;
 use Magento\MagentoCloud\Step\StepException;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
-use Magento\MagentoCloud\Config\Stage\Deploy as DeployConfig;
-use Magento\MagentoCloud\Config\Stage\DeployInterface;
 
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class DisableGoogleAnalyticsTest extends TestCase
 {
     /**
@@ -52,10 +54,8 @@ class DisableGoogleAnalyticsTest extends TestCase
     protected function setUp(): void
     {
         $this->environmentMock = $this->createMock(Environment::class);
-        $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
-            ->getMockForAbstractClass();
-        $this->connectionMock = $this->getMockBuilder(ConnectionInterface::class)
-            ->getMockForAbstractClass();
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
+        $this->connectionMock = $this->createMock(ConnectionInterface::class);
         $this->deployConfigMock = $this->createMock(DeployConfig::class);
 
         $this->step = new DisableGoogleAnalytics(

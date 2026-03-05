@@ -12,6 +12,8 @@ use Magento\MagentoCloud\Command\ConfigUpdate;
 use Magento\MagentoCloud\Config\Environment\ReaderInterface;
 use Magento\MagentoCloud\Filesystem\ConfigFileList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -19,6 +21,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class ConfigUpdateTest extends TestCase
 {
     /**
@@ -57,9 +60,9 @@ class ConfigUpdateTest extends TestCase
     {
         $this->configFileListMock = $this->createMock(ConfigFileList::class);
         $this->fileMock = $this->createMock(File::class);
-        $this->readerMock = $this->getMockForAbstractClass(ReaderInterface::class);
-        $this->inputMock = $this->getMockForAbstractClass(InputInterface::class);
-        $this->outputMock = $this->getMockForAbstractClass(OutputInterface::class);
+        $this->readerMock = $this->createMock(ReaderInterface::class);
+        $this->inputMock = $this->createMock(InputInterface::class);
+        $this->outputMock = $this->createMock(OutputInterface::class);
 
         $this->command = new ConfigUpdate(
             $this->configFileListMock,
@@ -69,12 +72,17 @@ class ConfigUpdateTest extends TestCase
     }
 
     /**
+     * Test execute method.
+     *
      * @dataProvider executeDataProvider
      * @param string $configuration
      * @param array $currentConfig
      * @param string $expected
+     * @return void
+     * @throws \Exception
      */
-    public function testExecute(string $configuration, array $currentConfig, string $expected)
+    #[DataProvider('executeDataProvider')]
+    public function testExecute(string $configuration, array $currentConfig, string $expected): void
     {
         $this->inputMock->expects($this->once())
             ->method('getArgument')
@@ -93,7 +101,12 @@ class ConfigUpdateTest extends TestCase
         $this->command->execute($this->inputMock, $this->outputMock);
     }
 
-    public function executeDataProvider(): array
+    /**
+     * Execute data provider method.
+     *
+     * @return array
+     */
+    public static function executeDataProvider(): array
     {
         return [
             [
@@ -108,13 +121,8 @@ class ConfigUpdateTest extends TestCase
                         ],
                     ],
                 ],
-                'stage:
-  build:
-    SCD_THREADS: 5
-    SKIP_COMPOSER_DUMP_AUTOLOAD: false
-  deploy:
-    SCD_THREADS: 6
-'
+                "stage:\n  build:\n    SCD_THREADS: 5\n    SKIP_COMPOSER_DUMP_AUTOLOAD: false\n"
+                . "  deploy:\n    SCD_THREADS: 6\n"
             ],
             [
                 '{"stage":{"deploy":{"DATABASE_CONFIGURATION":{"password":"test test", "_merge":true}}}}',
@@ -128,18 +136,19 @@ class ConfigUpdateTest extends TestCase
                         ]
                     ]
                 ],
-                'stage:
-  deploy:
-    DATABASE_CONFIGURATION:
-      host: localhost
-      password: \'test test\'
-      _merge: true
-'
+                "stage:\n  deploy:\n    DATABASE_CONFIGURATION:\n      host: localhost\n"
+                . "      password: 'test test'\n      _merge: true\n"
             ],
         ];
     }
 
-    public function testExecuteWithWrongArgument()
+    /**
+     * Test execute method with wrong argument.
+     *
+     * @return void
+     * @throws \Exception
+     */
+    public function testExecuteWithWrongArgument(): void
     {
         $this->expectException(\Exception::class);
         $this->expectExceptionMessageRegExp('/Wrong JSON format.*/');

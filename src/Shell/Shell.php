@@ -13,7 +13,6 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Exception\LogicException;
 
 /**
- * @inheritdoc
  */
 class Shell implements ShellInterface
 {

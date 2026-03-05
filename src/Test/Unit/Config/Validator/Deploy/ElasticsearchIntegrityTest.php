@@ -15,12 +15,14 @@ use Magento\MagentoCloud\Config\ValidatorException;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Service\ElasticSearch;
 use Magento\MagentoCloud\Service\OpenSearch;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @see ElasticSearchIntegrity
  */
+#[AllowMockObjectsWithoutExpectations]
 class ElasticsearchIntegrityTest extends TestCase
 {
     /**

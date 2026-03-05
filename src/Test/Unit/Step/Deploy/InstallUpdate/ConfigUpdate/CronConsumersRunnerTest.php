@@ -7,18 +7,20 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Step\Deploy\InstallUpdate\ConfigUpdate;
 
+use Illuminate\Config\Repository;
 use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\App\GenericException;
+use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface as ConfigReader;
 use Magento\MagentoCloud\Config\Magento\Env\WriterInterface as ConfigWriter;
-use Magento\MagentoCloud\Config\Environment;
-use Illuminate\Config\Repository;
 use Magento\MagentoCloud\Config\RepositoryFactory;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\CronConsumersRunner;
 use Magento\MagentoCloud\Step\StepException;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -28,6 +30,7 @@ use Psr\Log\LoggerInterface;
  *
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
+#[AllowMockObjectsWithoutExpectations]
 class CronConsumersRunnerTest extends TestCase
 {
     /**
@@ -75,12 +78,12 @@ class CronConsumersRunnerTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->environmentMock = $this->createMock(Environment::class);
-        $this->configReaderMock = $this->createMock(ConfigReader::class);
-        $this->configWriterMock = $this->createMock(ConfigWriter::class);
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
-        $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
-        $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
+        $this->environmentMock       = $this->createMock(Environment::class);
+        $this->configReaderMock      = $this->createMock(ConfigReader::class);
+        $this->configWriterMock      = $this->createMock(ConfigWriter::class);
+        $this->loggerMock            = $this->createMock(LoggerInterface::class);
+        $this->stageConfigMock       = $this->createMock(DeployInterface::class);
+        $this->magentoVersionMock    = $this->createMock(MagentoVersion::class);
         $this->repositoryFactoryMock = $this->createMock(RepositoryFactory::class);
 
         $this->cronConsumersRunner = new CronConsumersRunner(
@@ -95,14 +98,17 @@ class CronConsumersRunnerTest extends TestCase
     }
 
     /**
+     * Test execute method.
+     *
      * @param array $config
      * @param array $configFromVariable
      * @param array $expectedResult
-     *
-     * @throws StepException
-     *
      * @dataProvider executeDataProvider
+     * @return void
+     * @throws StepException
+     * @throws \ReflectionException
      */
+    #[DataProvider('executeDataProvider')]
     public function testExecute(array $config, array $configFromVariable, array $expectedResult): void
     {
         $this->magentoVersionMock->method('isGreaterOrEqual')
@@ -129,10 +135,12 @@ class CronConsumersRunnerTest extends TestCase
     }
 
     /**
+     * Data provider for execute method.
+     *
      * @return array
      * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
-    public function executeDataProvider(): array
+    public static function executeDataProvider(): array
     {
         return [
             [
@@ -266,6 +274,10 @@ class CronConsumersRunnerTest extends TestCase
     }
 
     /**
+     * Test skip execute method.
+     *
+     * @return void
+     * @throws \ReflectionException
      * @throws StepException
      */
     public function testSkipExecute(): void
@@ -285,9 +297,13 @@ class CronConsumersRunnerTest extends TestCase
     }
 
     /**
+     * Test execute with generic exception method.
+     *
+     * @return void
+     * @throws \ReflectionException
      * @throws StepException
      */
-    public function testExecuteWithGenericException()
+    public function testExecuteWithGenericException(): void
     {
         $exceptionMsg = 'Error';
         $exceptionCode = 111;
@@ -304,11 +320,15 @@ class CronConsumersRunnerTest extends TestCase
     }
 
     /**
+     * Test execute with file system exception in create method.
+     *
+     * @return void
+     * @throws \ReflectionException
      * @throws StepException
      */
-    public function testExecuteWithFileSystemExceptionInCreate()
+    public function testExecuteWithFileSystemExceptionInCreate(): void
     {
-        $exceptionMsg = 'Some error';
+        $exceptionMsg  = 'Some error';
         $exceptionCode = 11111;
         $this->expectException(StepException::class);
         $this->expectExceptionCode(Error::DEPLOY_ENV_PHP_IS_NOT_WRITABLE);

@@ -8,19 +8,21 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit\Package;
 
 use Composer\Composer;
+use Composer\Package\Link;
 use Composer\Package\Locker;
 use Composer\Package\RootPackageInterface;
 use Composer\Repository\LockArrayRepository;
-use Composer\Package\Link;
 use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Package\Manager;
 use Magento\MagentoCloud\Package\UndefinedPackageException;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class ManagerTest extends TestCase
 {
     /**
@@ -50,7 +52,7 @@ class ManagerTest extends TestCase
     {
         $this->composerMock = $this->createMock(Composer::class);
         $this->repositoryMock = $this->createMock(LockArrayRepository::class);
-        $this->packageMock = $this->getMockForAbstractClass(RootPackageInterface::class);
+        $this->packageMock = $this->createMock(RootPackageInterface::class);
         $lockerMock = $this->createMock(Locker::class);
 
         $this->composerMock->expects($this->once())
@@ -67,8 +69,7 @@ class ManagerTest extends TestCase
 
     public function testGetPrettyInfo(): void
     {
-        $packageOneMock = $this->getMockBuilder(RootPackageInterface::class)
-            ->getMockForAbstractClass();
+        $packageOneMock = $this->createMock(RootPackageInterface::class);
         $packageOneMock->expects($this->once())
             ->method('getPrettyName')
             ->willReturn('magento/ece-tools');
@@ -76,8 +77,7 @@ class ManagerTest extends TestCase
             ->method('getPrettyVersion')
             ->willReturn('v1.0.0');
 
-        $packageTwoMock = $this->getMockBuilder(RootPackageInterface::class)
-            ->getMockForAbstractClass();
+        $packageTwoMock = $this->createMock(RootPackageInterface::class);
         $packageTwoMock->expects($this->once())
             ->method('getPrettyName')
             ->willReturn('magento/magento2-base');
@@ -106,8 +106,7 @@ class ManagerTest extends TestCase
 
     public function testGetPrettyInfoWithNotExistPackage(): void
     {
-        $packageOneMock = $this->getMockBuilder(RootPackageInterface::class)
-            ->getMockForAbstractClass();
+        $packageOneMock = $this->createMock(RootPackageInterface::class);
         $packageOneMock->expects($this->once())
             ->method('getPrettyName')
             ->willReturn('vendor/package1');

@@ -10,7 +10,6 @@ namespace Magento\MagentoCloud\Scenario\Exception;
 use Magento\MagentoCloud\App\GenericException;
 
 /**
- * @inheritDoc
  */
 class ProcessorException extends GenericException
 {

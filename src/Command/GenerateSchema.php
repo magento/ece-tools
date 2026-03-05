@@ -20,7 +20,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * Dist schema generator.
  *
- * @api
  */
 class GenerateSchema extends Command
 {
@@ -67,7 +66,6 @@ class GenerateSchema extends Command
     }
 
     /**
-     * @inheritDoc
      */
     protected function configure(): void
     {

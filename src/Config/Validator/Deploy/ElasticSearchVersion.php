@@ -24,7 +24,6 @@ use Psr\Log\LoggerInterface;
 /**
  * Validates compatibility of elasticsearch and magento versions.
  *
- * @SuppressWarnings("PHPMD.CouplingBetweenObjects")
  */
 class ElasticSearchVersion implements ValidatorInterface
 {

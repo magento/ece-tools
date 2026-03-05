@@ -46,6 +46,11 @@ class DeployFailedTest extends TestCase
      */
     public function testExecute(): void
     {
+        $this->flagManagerMock->expects($this->once())
+            ->method('exists')
+            ->with(Manager::FLAG_DEPLOY_HOOK_IS_FAILED)
+            ->willReturn(false);
+
         $this->process->execute();
     }
 

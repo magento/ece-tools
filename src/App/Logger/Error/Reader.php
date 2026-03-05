@@ -11,7 +11,7 @@ use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Package\UndefinedPackageException;
 
 /**
- * @inheritDoc
+ * Error log reader implementation.
  */
 class Reader implements ReaderInterface
 {

@@ -17,12 +17,15 @@ use Magento\MagentoCloud\Config\Validator\ResultFactory;
 use Magento\MagentoCloud\Config\ValidatorException;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Package\UndefinedPackageException;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class SearchConfigurationTest extends TestCase
 {
     /**
@@ -54,7 +57,7 @@ class SearchConfigurationTest extends TestCase
             'success' => $this->createMock(Success::class),
             'error' => $this->createMock(Error::class)
         ]);
-        $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
+        $this->stageConfigMock = $this->createMock(DeployInterface::class);
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
 
         $this->validator = new SearchConfiguration(
@@ -65,7 +68,12 @@ class SearchConfigurationTest extends TestCase
         );
     }
 
-    public function testErrorCode()
+    /**
+     * Test error code method.
+     *
+     * @return void
+     */
+    public function testErrorCode(): void
     {
         $this->stageConfigMock->expects($this->once())
             ->method('get')
@@ -83,14 +91,21 @@ class SearchConfigurationTest extends TestCase
     }
 
     /**
+     * Test validate method.
+     *
      * @param array $searchConfiguration
      * @param string $expectedResultClass
      * @param bool $isMagento24plus
      * @dataProvider validateDataProvider
+     * @return void
      * @throws ValidatorException
      */
-    public function testValidate(array $searchConfiguration, string $expectedResultClass, bool $isMagento24plus = false)
-    {
+    #[DataProvider('validateDataProvider')]
+    public function testValidate(
+        array $searchConfiguration,
+        string $expectedResultClass,
+        bool $isMagento24plus = false
+    ): void {
         $this->magentoVersionMock->expects($this->once())
             ->method('isGreaterOrEqual')
             ->with('2.4.0')
@@ -104,9 +119,11 @@ class SearchConfigurationTest extends TestCase
     }
 
     /**
+     * Data provider for validate method.
+     *
      * @return array
      */
-    public function validateDataProvider(): array
+    public static function validateDataProvider(): array
     {
         return [
             [
@@ -192,6 +209,9 @@ class SearchConfigurationTest extends TestCase
     }
 
     /**
+     * Test validate method with exception.
+     *
+     * @return void
      * @throws ValidatorException
      */
     public function testValidateWithException()

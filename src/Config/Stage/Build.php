@@ -16,7 +16,6 @@ use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Symfony\Component\Yaml\Exception\ParseException;
 
 /**
- * @inheritdoc
  */
 class Build implements BuildInterface
 {
@@ -48,7 +47,6 @@ class Build implements BuildInterface
     }
 
     /**
-     * @inheritdoc
      */
     public function get(string $name)
     {

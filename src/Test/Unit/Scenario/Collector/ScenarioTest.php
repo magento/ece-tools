@@ -12,6 +12,7 @@ use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Scenario\Collector\Scenario;
 use Magento\MagentoCloud\Scenario\Exception\ValidationException;
 use Magento\MagentoCloud\Scenario\PathResolver;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Serializer\Encoder\XmlEncoder;
@@ -19,6 +20,7 @@ use Symfony\Component\Serializer\Encoder\XmlEncoder;
 /**
  * @inheritDoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class ScenarioTest extends TestCase
 {
     /**

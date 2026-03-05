@@ -10,7 +10,7 @@ namespace Magento\MagentoCloud\Config\Validator\Deploy;
 use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Config\Validator;
-use Magento\MagentoCloud\Service\EolValidator as EOLValidator;
+use Magento\MagentoCloud\Service\EolValidator;
 use Magento\MagentoCloud\Config\ValidatorInterface;
 
 /**
@@ -29,18 +29,18 @@ class ServiceEol implements ValidatorInterface
     private $resultFactory;
 
     /**
-     * @var EOLValidator
+     * @var EolValidator
      */
     private $eolValidator;
 
     /**
      * @param Validator\ResultFactory $resultFactory
-     * @param EOLValidator $eolValidator
+     * @param EolValidator $eolValidator
      * @param int $errorLevel
      */
     public function __construct(
         Validator\ResultFactory $resultFactory,
-        EOLValidator $eolValidator,
+        EolValidator $eolValidator,
         int $errorLevel
     ) {
         $this->resultFactory = $resultFactory;

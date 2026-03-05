@@ -13,6 +13,7 @@ use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Step\Build\DeployStaticContent;
 use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -20,6 +21,7 @@ use Psr\Log\LoggerInterface;
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class DeployStaticContentTest extends TestCase
 {
     /**
@@ -52,8 +54,8 @@ class DeployStaticContentTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
-        $this->stepMock = $this->getMockForAbstractClass(StepInterface::class);
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
+        $this->stepMock = $this->createMock(StepInterface::class);
         $this->flagManagerMock = $this->createMock(FlagManager::class);
         $this->scdOnBuildMock = $this->createMock(ScdOnBuild::class);
 

@@ -8,19 +8,21 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit\Config\Validator\Build;
 
 use Magento\MagentoCloud\App\Error as AppError;
+use Magento\MagentoCloud\Config\Environment\Reader as EnvironmentReader;
+use Magento\MagentoCloud\Config\Schema\Validator as SchemaValidator;
+use Magento\MagentoCloud\Config\StageConfigInterface;
+use Magento\MagentoCloud\Config\Validator;
 use Magento\MagentoCloud\Config\Validator\Build\StageConfig;
 use Magento\MagentoCloud\Config\ValidatorException;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Magento\MagentoCloud\Config\StageConfigInterface;
-use Magento\MagentoCloud\Config\Validator;
-use Magento\MagentoCloud\Config\Environment\Reader as EnvironmentReader;
-use Magento\MagentoCloud\Config\Schema\Validator as SchemaValidator;
 
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class StageConfigTest extends TestCase
 {
     /**

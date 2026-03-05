@@ -9,18 +9,20 @@ namespace Magento\MagentoCloud\Test\Unit\Config\Validator\Deploy;
 
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Validator\Deploy\SolrIntegrity;
-use Magento\MagentoCloud\Config\Validator\ResultFactory;
-use Magento\MagentoCloud\Config\Validator\ResultInterface;
 use Magento\MagentoCloud\Config\Validator\Result\Error;
 use Magento\MagentoCloud\Config\Validator\Result\Success;
+use Magento\MagentoCloud\Config\Validator\ResultFactory;
+use Magento\MagentoCloud\Config\Validator\ResultInterface;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Package\UndefinedPackageException;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class SolrIntegrityTest extends TestCase
 {
     /**

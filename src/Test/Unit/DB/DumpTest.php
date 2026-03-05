@@ -10,12 +10,15 @@ namespace Magento\MagentoCloud\Test\Unit\DB;
 use Magento\MagentoCloud\DB\Data\ConnectionFactory;
 use Magento\MagentoCloud\DB\Data\ConnectionInterface;
 use Magento\MagentoCloud\DB\Dump;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class DumpTest extends TestCase
 {
     /**
@@ -38,7 +41,7 @@ class DumpTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->connectionDataMock = $this->getMockForAbstractClass(ConnectionInterface::class);
+        $this->connectionDataMock = $this->createMock(ConnectionInterface::class);
         $this->connectionFactoryMock = $this->createMock(ConnectionFactory::class);
         $this->connectionFactoryMock->expects($this->any())
             ->method('create')
@@ -48,17 +51,26 @@ class DumpTest extends TestCase
     }
 
     /**
+     * Test getCommand method.
+     *
      * @param string $host
      * @param int $port
      * @param string $dbName
      * @param string $user
      * @param string|null $password
      * @param string $expectedCommand
-     *
      * @dataProvider getCommandDataProvider
+     * @return void
      */
-    public function testGetCommand($host, $port, $dbName, $user, $password, $expectedCommand)
-    {
+    #[DataProvider('getCommandDataProvider')]
+    public function testGetCommand(
+        string $host,
+        string $port,
+        string $dbName,
+        string $user,
+        string|null $password,
+        string $expectedCommand
+    ): void {
         $this->connectionDataMock->expects($this->once())
             ->method('getHost')
             ->willReturn($host);
@@ -78,10 +90,11 @@ class DumpTest extends TestCase
     }
 
     /**
-     * Data provider for testExecute
+     * Data provider for getCommand method.
+     *
      * @return array
      */
-    public function getCommandDataProvider()
+    public static function getCommandDataProvider(): array
     {
         $command = 'mysqldump %s --single-transaction --no-autocommit --quick';
         return [

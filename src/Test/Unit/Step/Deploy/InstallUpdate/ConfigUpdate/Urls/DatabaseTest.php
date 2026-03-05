@@ -7,18 +7,21 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Step\Deploy\InstallUpdate\ConfigUpdate\Urls;
 
-use Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\Urls\Database;
-use Magento\MagentoCloud\Step\StepException;
-use PHPUnit\Framework\MockObject\MockObject;
-use PHPUnit\Framework\TestCase;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\DB\ConnectionInterface;
-use Psr\Log\LoggerInterface;
+use Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\Urls\Database;
+use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Util\UrlManager;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
 
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class DatabaseTest extends TestCase
 {
     /**
@@ -52,9 +55,9 @@ class DatabaseTest extends TestCase
     protected function setUp(): void
     {
         $this->environmentMock = $this->createMock(Environment::class);
-        $this->connectionMock = $this->getMockForAbstractClass(ConnectionInterface::class);
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
-        $this->urlManagerMock = $this->createMock(UrlManager::class);
+        $this->connectionMock  = $this->createMock(ConnectionInterface::class);
+        $this->loggerMock      = $this->createMock(LoggerInterface::class);
+        $this->urlManagerMock  = $this->createMock(UrlManager::class);
 
         $this->step = new Database(
             $this->environmentMock,
@@ -65,20 +68,20 @@ class DatabaseTest extends TestCase
     }
 
     /**
-     * @param $loggerInfoExpects
+     * Test execute method.
+     *
+     * @param int $connectionAffectingQueryCount
      * @param array $urlManagerGetUrlsWillReturn
-     * @param $connectionExpectsAffectingQuery
-     *
-     * @throws StepException
-     *
      * @dataProvider executeDataProvider
+     * @return void
+     * @throws StepException
      */
+    #[DataProvider('executeDataProvider')]
     public function testExecute(
-        $loggerInfoExpects,
-        array $urlManagerGetUrlsWillReturn,
-        $connectionExpectsAffectingQuery
+        int $connectionAffectingQueryCount,
+        array $urlManagerGetUrlsWillReturn
     ): void {
-        $this->loggerMock->expects($loggerInfoExpects)
+        $this->loggerMock->expects($this->once())
             ->method('info')
             // withConsecutive() alternative.
             ->willReturnCallback(function ($args) {
@@ -105,48 +108,55 @@ class DatabaseTest extends TestCase
         $this->urlManagerMock->expects($this->once())
             ->method('getUrls')
             ->willReturn($urlManagerGetUrlsWillReturn);
-        $this->connectionMock->expects($connectionExpectsAffectingQuery)
-            ->method('affectingQuery')
-            // withConsecutive() alternative.
-            ->willReturnCallback(fn($param) => match ($param) {
-                    ['UPDATE `core_config_data` SET `value` = REPLACE(`value`, ?, ?) WHERE `value` LIKE ?',
-                    ['example1.com', 'example2.com', '%example1.com%']] => 2,
+        
+        if ($connectionAffectingQueryCount === 0) {
+            $this->connectionMock->expects($this->never())
+                ->method('affectingQuery');
+        } else {
+            $this->connectionMock->expects($this->exactly($connectionAffectingQueryCount))
+                ->method('affectingQuery')
+                // withConsecutive() alternative.
+                ->willReturnCallback(fn($param) => match ($param) {
+                    [
+                        'UPDATE `core_config_data` SET `value` = REPLACE(`value`, ?, ?) WHERE `value` LIKE ?',
+                        ['example1.com', 'example2.com', '%example1.com%']
+                    ] => 2,
                     'UPDATE `core_config_data` SET `value` = REPLACE(`value`, ?, ?) WHERE `value` LIKE ?',
                     ['example1.com', 'example2.com', '%example1.com%'] => 0,
-            });
+                });
+        }
 
         $this->step->execute();
     }
 
     /**
+     * Data provider for execute method.
+     *
      * @return array
      */
-    public function executeDataProvider(): array
+    public static function executeDataProvider(): array
     {
         return [
             'urls not equal' => [
-                'loggerInfoExpects' => $this->once(),
+                'connectionAffectingQueryCount' => 2,
                 'urlManagerGetUrlsWillReturn' => [
                     'secure' => ['' => 'https://example2.com', '*' => 'https://subsite---example2.com'],
                     'unsecure' => ['' => 'http://example2.com', '*' => 'http://subsite---example2.com'],
                 ],
-                'connectionExpectsAffectingQuery' => $this->exactly(2)
             ],
             'urls equal' => [
-                'loggerInfoExpects' => $this->once(),
+                'connectionAffectingQueryCount' => 0,
                 'urlManagerGetUrlsWillReturn' => [
                     'secure' => ['' => 'https://example1.com', '*' => 'https://subsite---example1.com'],
                     'unsecure' => ['' => 'http://example1.com', '*' => 'http://subsite---example1.com'],
                 ],
-                'connectionExpectsAffectingQuery' => $this->never()
             ],
             'urls not exists' => [
-                'loggerInfoExpects' => $this->once(),
+                'connectionAffectingQueryCount' => 0,
                 'urlManagerGetUrlsWillReturn' => [
                     'secure' => [],
                     'unsecure' => [],
                 ],
-                'connectionExpectsAffectingQuery' => $this->never()
             ]
         ];
     }

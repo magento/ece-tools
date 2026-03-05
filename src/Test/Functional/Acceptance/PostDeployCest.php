@@ -32,6 +32,7 @@ abstract class PostDeployCest extends AbstractCest
                 $this->convertEnvFromArrayToJson($data['variables'])
             )
         );
+        $this->removeVendorVolumeMountFromDockerCompose($I);
 
         $I->copyFileToWorkDir('files/scdondemand/.magento.env.yaml', '.magento.env.yaml');
 
@@ -74,6 +75,7 @@ abstract class PostDeployCest extends AbstractCest
     public function testPostDeployIsNotRun(\CliTester $I): void
     {
         $I->generateDockerCompose('--mode=production');
+        $this->removeVendorVolumeMountFromDockerCompose($I);
         $I->copyFileToWorkDir('files/wrong_db_configuration/.magento.env.yaml', '.magento.env.yaml');
 
         $I->runDockerComposeCommand('run build cloud-build');

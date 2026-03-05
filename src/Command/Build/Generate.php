@@ -18,7 +18,6 @@ use Symfony\Component\Console\Output\OutputInterface;
  * CLI command that used as part of build hook.
  * Responsible for patches applying, validating configuration, preparing the codebase, etc.
  *
- * @api
  */
 class Generate extends Command
 {
@@ -40,7 +39,6 @@ class Generate extends Command
     }
 
     /**
-     * @inheritdoc
      */
     protected function configure(): void
     {

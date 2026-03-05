@@ -8,24 +8,28 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit\Step\Deploy\InstallUpdate\ConfigUpdate;
 
 use Magento\MagentoCloud\Config\ConfigMerger;
-use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface as ConfigReader;
-use Magento\MagentoCloud\Config\Magento\Env\WriterInterface as ConfigWriter;
 use Magento\MagentoCloud\Config\Database\DbConfig;
 use Magento\MagentoCloud\Config\Database\ResourceConfig;
+use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface as ConfigReader;
+use Magento\MagentoCloud\Config\Magento\Env\WriterInterface as ConfigWriter;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\DB\Data\ConnectionInterface;
 use Magento\MagentoCloud\DB\Data\RelationshipConnectionFactory;
+use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\DbConnection;
+use Magento\MagentoCloud\Step\StepException;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
-use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 
 /**
  * @inheritdoc
  *
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
+#[AllowMockObjectsWithoutExpectations]
 class DbConnectionTest extends TestCase
 {
     private const DEFAULT_CONNECTION = [
@@ -137,16 +141,16 @@ class DbConnectionTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
+        $this->stageConfigMock = $this->createMock(DeployInterface::class);
         $this->dbConfigMock = $this->createMock(DbConfig::class);
         $this->resourceConfigMock = $this->createMock(ResourceConfig::class);
         $this->configWriterMock = $this->createMock(ConfigWriter::class);
         $this->configReaderMock = $this->createMock(ConfigReader::class);
         $this->envConnectionDataFactoryMock = $this->createMock(RelationshipConnectionFactory::class);
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
         $this->flagManagerMock = $this->createMock(FlagManager::class);
 
-        $this->envConnectionDataMock = $this->getMockForAbstractClass(ConnectionInterface::class);
+        $this->envConnectionDataMock = $this->createMock(ConnectionInterface::class);
         $this->envConnectionDataFactoryMock->expects($this->any())
             ->method('create')
             ->willReturn($this->envConnectionDataMock);
@@ -165,9 +169,12 @@ class DbConnectionTest extends TestCase
     }
 
     /**
-     * Case when an environment has no database configuration
+     * Test execute without db config in environment method.
+     *
+     * @return void
+     * @throws \ReflectionException
      */
-    public function testExecuteWithoutDbConfigInEnvironment()
+    public function testExecuteWithoutDbConfigInEnvironment(): void
     {
         $this->dbConfigMock->expects($this->once())
             ->method('get')
@@ -185,15 +192,22 @@ class DbConnectionTest extends TestCase
     }
 
     /**
-     * Case when slave connections and split database are not used
+     * Test execute without split and slave config method.
      *
      * @param $mageConfig array
      * @param $envConfig array
      * @param $expectedResult array
      * @dataProvider executeWithoutSplitAndSlaveConfigDataProvider
+     * @return void
+     * @throws \ReflectionException
+     * @throws StepException
      */
-    public function testExecuteWithoutSplitAndSlaveConfig(array $mageConfig, array $envConfig, array $expectedResult)
-    {
+    #[DataProvider('executeWithoutSplitAndSlaveConfigDataProvider')]
+    public function testExecuteWithoutSplitAndSlaveConfig(
+        array $mageConfig,
+        array $envConfig,
+        array $expectedResult
+    ): void {
         $resourceConfig = [
             'default_setup' => self::RESOURCE_DEFAULT_SETUP,
         ];
@@ -225,9 +239,11 @@ class DbConnectionTest extends TestCase
     }
 
     /**
+     * Data provider for execute without split and slave config method.
+     *
      * @return array
      */
-    public function executeWithoutSplitAndSlaveConfigDataProvider()
+    public static function executeWithoutSplitAndSlaveConfigDataProvider(): array
     {
         $dbConfig = [
             'connection' => [
@@ -263,7 +279,11 @@ class DbConnectionTest extends TestCase
     }
 
     /**
-     * Case with slave connections and without split config
+     * Test execute with slave connections and without split config method.
+     *
+     * @return void
+     * @throws \ReflectionException
+     * @throws StepException
      */
     public function testExecuteWithSlaveWithoutSplitConfigs()
     {
@@ -297,7 +317,6 @@ class DbConnectionTest extends TestCase
             ->method('warning');
         $this->stageConfigMock->expects($this->exactly(2))
             ->method('get')
-            // withConsecutive() alternative.
             ->willReturnCallback(fn($param) => match ([$param]) {
                 [DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION] => true,
                 [DeployInterface::VAR_DATABASE_CONFIGURATION] => []
@@ -325,7 +344,11 @@ class DbConnectionTest extends TestCase
     }
 
     /**
-     * Case when with not compatible database settings for slave connection
+     * Test execute with not compatible database settings for slave connection.
+     *
+     * @return void
+     * @throws \ReflectionException
+     * @throws StepException
      */
     public function testExecuteWithNotCompatibleDatabaseConfigForSlaveConnection()
     {
@@ -383,9 +406,13 @@ class DbConnectionTest extends TestCase
     }
 
     /**
-     * Case with incorrect slave connections
+     * Test execute set slave connection had no effect method.
+     *
+     * @return void
+     * @throws \ReflectionException
+     * @throws StepException
      */
-    public function testExecuteSetSlaveConnectionHadNoEffect()
+    public function testExecuteSetSlaveConnectionHadNoEffect(): void
     {
         $this->dbConfigMock->expects($this->once())
             ->method('get')
@@ -422,7 +449,7 @@ class DbConnectionTest extends TestCase
             ->method('notice')
             ->with(
                 'Enabling of the variable MYSQL_USE_SLAVE_CONNECTION had no effect'
-                . ' for default connection, because default slave connection is not configured on your environment.'
+                    . ' for default connection, because default slave connection is not configured on your environment.'
             );
         $this->configWriterMock->expects($this->once())
             ->method('create')
@@ -437,9 +464,13 @@ class DbConnectionTest extends TestCase
     }
 
     /**
-     * Case when database was split before but with custom split connections
+     * Test execute split was enabled with custom configuration method.
+     *
+     * @return void
+     * @throws \ReflectionException
+     * @throws StepException
      */
-    public function testExecuteSplitWasEnabledWithCustomConfiguration()
+    public function testExecuteSplitWasEnabledWithCustomConfiguration(): void
     {
         $mageConfig = [
             'db' => [
@@ -497,11 +528,13 @@ class DbConnectionTest extends TestCase
     }
 
     /**
-     * Case when split and slave was enabled previous deploy but salve is disabled right now
+     * Test execute disable slave connections when split db enabled method.
      *
-     * @throws \Magento\MagentoCloud\Step\StepException
+     * @return void
+     * @throws \ReflectionException
+     * @throws StepException
      */
-    public function testExecuteDisableSlaveConnectionsWhenSplitDbEnabled()
+    public function testExecuteDisableSlaveConnectionsWhenSplitDbEnabled(): void
     {
         $connections = [
             'connection' => [
@@ -564,8 +597,11 @@ class DbConnectionTest extends TestCase
     /**
      * Case when custom connections added in DATABASE_CONFIGURATION.
      * Tests that custom resources saves and split db resources are ignored if split db not configured
+     *
+     * @return void
+     * @throws \ReflectionException
      */
-    public function testExecuteSaveCustomConfiguration()
+    public function testExecuteSaveCustomConfiguration(): void
     {
         $this->dbConfigMock->expects($this->once())
             ->method('get')

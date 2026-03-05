@@ -13,6 +13,7 @@ use Magento\MagentoCloud\Patch\Manager;
 use Magento\MagentoCloud\Shell\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Shell\ShellInterface;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -20,6 +21,7 @@ use Psr\Log\LoggerInterface;
 /**
  * @see Manager
  */
+#[AllowMockObjectsWithoutExpectations]
 class ManagerTest extends TestCase
 {
     /**
@@ -47,8 +49,8 @@ class ManagerTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
-        $this->shellMock = $this->getMockForAbstractClass(ShellInterface::class);
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
+        $this->shellMock = $this->createMock(ShellInterface::class);
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
 
         $this->manager = new Manager(
@@ -67,7 +69,7 @@ class ManagerTest extends TestCase
             ->method('isGitInstallation')
             ->willReturn(false);
 
-        $processMock = $this->getMockForAbstractClass(ProcessInterface::class);
+        $processMock = $this->createStub(ProcessInterface::class);
         $this->shellMock->expects(self::once())
             ->method('execute')
             ->with('php ./vendor/bin/ece-patches apply --no-interaction')

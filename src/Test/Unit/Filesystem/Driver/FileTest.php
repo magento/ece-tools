@@ -10,7 +10,7 @@ namespace Magento\MagentoCloud\Test\Unit\Filesystem\Driver;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use phpmock\phpunit\PHPMock;
-use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -44,15 +44,17 @@ class FileTest extends TestCase
     }
 
     /**
+     * Test copy directory.
+     *
      * @param string $source
      * @param string $destination
      * @dataProvider copyDirectoryDataProvider
-     *
+     * @return void
      * @throws FileSystemException
      */
+    #[DataProvider('copyDirectoryDataProvider')]
     public function testCopyDirectory(string $source, string $destination): void
     {
-
         $execCommand = "/bin/bash -c 'shopt -s dotglob; cp -R '\''source'\''/* '\''destination'\''/'";
 
         $this->shellMock->expects($this->once())
@@ -71,12 +73,15 @@ class FileTest extends TestCase
     }
 
     /**
+     * Test copy directory with error method.
+     *
      * @param string $source
      * @param string $destination
      * @dataProvider copyDirectoryDataProvider
-     *
+     * @return void
      * @throws FileSystemException
      */
+    #[DataProvider('copyDirectoryDataProvider')]
     public function testCopyDirectoryWithError(string $source, string $destination): void
     {
         $this->expectExceptionMessage('The content of path "source" cannot be copied to "destination"');
@@ -100,15 +105,25 @@ class FileTest extends TestCase
     }
 
     /**
+     * Data provider for copy directory method.
+     *
      * @return array
      */
-    public function copyDirectoryDataProvider(): array
+    public static function copyDirectoryDataProvider(): array
     {
         return [
-            ['source', 'destination'],
+            [
+                'source'      => 'source',
+                'destination' => 'destination',
+            ],
         ];
     }
 
+    /**
+     * Test is exists method.
+     *
+     * @return void
+     */
     public function testIsExists(): void
     {
         $fileExistsMock = $this->getFunctionMock(
@@ -122,6 +137,9 @@ class FileTest extends TestCase
     }
 
     /**
+     * Test is link method.
+     *
+     * @return void
      * @throws FileSystemException
      */
     public function testIsLink(): void
@@ -136,6 +154,11 @@ class FileTest extends TestCase
         $this->driver->isLink('test');
     }
 
+    /**
+     * Test is directory method.
+     *
+     * @return void
+     */
     public function testIsDirectory(): void
     {
         $isDirMock = $this->getFunctionMock(
@@ -149,6 +172,9 @@ class FileTest extends TestCase
     }
 
     /**
+     * Test unlink method.
+     *
+     * @return void
      * @throws FileSystemException
      */
     public function testUnLink(): void
@@ -164,6 +190,9 @@ class FileTest extends TestCase
     }
 
     /**
+     * Test parse ini method.
+     *
+     * @return void
      * @throws FileSystemException
      */
     public function testParseIni(): void
@@ -178,7 +207,13 @@ class FileTest extends TestCase
         $this->driver->parseIni('test');
     }
 
-    public function testCreateDirectory()
+    /**
+     * Test create directory method.
+     *
+     * @return void
+     * @throws FileSystemException
+     */
+    public function testCreateDirectory(): void
     {
         $mkDirMock = $this->getFunctionMock(
             'Magento\MagentoCloud\Filesystem\Driver',
@@ -191,6 +226,9 @@ class FileTest extends TestCase
     }
 
     /**
+     * Test rename method.
+     *
+     * @return void
      * @throws FileSystemException
      */
     public function testRename(): void
@@ -205,6 +243,12 @@ class FileTest extends TestCase
         $this->driver->rename('test', 'testnewpath');
     }
 
+    /**
+     * Test copy method.
+     *
+     * @return void
+     * @throws FileSystemException
+     */
     public function testCopy(): void
     {
         $copyMock = $this->getFunctionMock(
@@ -217,6 +261,11 @@ class FileTest extends TestCase
         $this->driver->copy('source', 'destination');
     }
 
+    /**
+     * Test is empty directory method.
+     *
+     * @return void
+     */
     public function testIsEmptyDirectory(): void
     {
         $scanDirMock = $this->getFunctionMock(
@@ -236,6 +285,12 @@ class FileTest extends TestCase
         $this->driver->isEmptyDirectory('test');
     }
 
+    /**
+     * Test symlink method.
+     *
+     * @return void
+     * @throws FileSystemException
+     */
     public function testSymlink(): void
     {
         $symLinkMock = $this->getFunctionMock(
@@ -248,6 +303,12 @@ class FileTest extends TestCase
         $this->driver->symlink('source', 'destination');
     }
 
+    /**
+     * Test delete file method.
+     *
+     * @return void
+     * @throws FileSystemException
+     */
     public function testDeleteFile(): void
     {
         $unlinkMock = $this->getFunctionMock(
@@ -260,6 +321,12 @@ class FileTest extends TestCase
         $this->driver->deleteFile('test');
     }
 
+    /**
+     * Test touch method.
+     *
+     * @return void
+     * @throws FileSystemException
+     */
     public function testTouch(): void
     {
         $touchMock = $this->getFunctionMock(
@@ -273,6 +340,9 @@ class FileTest extends TestCase
     }
 
     /**
+     * Test file put contents method.
+     *
+     * @return void
      * @throws FileSystemException
      */
     public function testFilePutContents(): void
@@ -289,6 +359,11 @@ class FileTest extends TestCase
         $this->driver->filePutContents('test', 'test');
     }
 
+    /**
+     * Test get real path.
+     *
+     * @return void
+     */
     public function testGetRealPath(): void
     {
         $realpathMock = $this->getFunctionMock(
@@ -301,6 +376,11 @@ class FileTest extends TestCase
         $this->driver->getRealPath('test');
     }
 
+    /**
+     * Test scan dir.
+     *
+     * @return void
+     */
     public function testScanDir(): void
     {
         $scandirMock = $this->getFunctionMock(
@@ -313,6 +393,11 @@ class FileTest extends TestCase
         $this->driver->scanDir('test');
     }
 
+    /**
+     * Test file get contents.
+     *
+     * @return void
+     */
     public function testFileGetContents(): void
     {
         $fileGetContentsMock = $this->getFunctionMock(

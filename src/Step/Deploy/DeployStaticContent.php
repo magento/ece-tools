@@ -17,7 +17,6 @@ use Psr\Log\LoggerInterface;
 use Magento\MagentoCloud\Util\StaticContentCleaner;
 
 /**
- * @inheritdoc
  */
 class DeployStaticContent implements StepInterface
 {

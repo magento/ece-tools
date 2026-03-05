@@ -1,8 +1,10 @@
 <?php
+
 /**
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+
 declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Config;
@@ -10,17 +12,20 @@ namespace Magento\MagentoCloud\Test\Unit\Config;
 use Illuminate\Contracts\Config\Repository;
 use Magento\MagentoCloud\App\Logger\Formatter\ErrorFormatterFactory;
 use Magento\MagentoCloud\App\Logger\Formatter\JsonErrorFormatter;
+use Magento\MagentoCloud\App\Logger\HandlerFactory;
+use Magento\MagentoCloud\Config\Environment\Reader;
 use Magento\MagentoCloud\Config\Log as LogConfig;
 use Magento\MagentoCloud\Config\RepositoryFactory;
 use Magento\MagentoCloud\Filesystem\FileList;
-use Magento\MagentoCloud\Config\Environment\Reader;
-use Magento\MagentoCloud\App\Logger\HandlerFactory;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class LogTest extends TestCase
 {
     /**
@@ -85,10 +90,14 @@ class LogTest extends TestCase
     }
 
     /**
+     * Test getHandlers method.
+     *
      * @param array $config
      * @param array $expectedResult
      * @dataProvider getHandlersDataProvider
+     * @return void
      */
+    #[DataProvider('getHandlersDataProvider')]
     public function testGetHandlers(array $config, array $expectedResult): void
     {
         $this->fileListMock->expects($this->once())
@@ -107,9 +116,11 @@ class LogTest extends TestCase
     }
 
     /**
+     * Data provider for testGetHandlers method.
+     *
      * @return array
      */
-    public function getHandlersDataProvider(): array
+    public static function getHandlersDataProvider(): array
     {
         return [
             [
@@ -160,6 +171,11 @@ class LogTest extends TestCase
         ];
     }
 
+    /**
+     * Test get method.
+     *
+     * @return void
+     */
     public function testGet(): void
     {
         $config = ['log' => ['SomeHandler' => ['SomeConfig']], 'someConfig' => ['someConfig']];
@@ -185,6 +201,11 @@ class LogTest extends TestCase
         );
     }
 
+    /**
+     * Test get method with exception.
+     *
+     * @return void
+     */
     public function testGetWithException(): void
     {
         $this->expectException(\Exception::class);

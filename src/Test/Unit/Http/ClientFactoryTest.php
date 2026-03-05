@@ -10,12 +10,14 @@ namespace Magento\MagentoCloud\Test\Unit\Http;
 use GuzzleHttp\Client;
 use Magento\MagentoCloud\App\ContainerInterface;
 use Magento\MagentoCloud\Http\ClientFactory;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class ClientFactoryTest extends TestCase
 {
     /**
@@ -38,7 +40,7 @@ class ClientFactoryTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->containerMock = $this->getMockForAbstractClass(ContainerInterface::class);
+        $this->containerMock = $this->createMock(ContainerInterface::class);
         $this->clientMock = $this->createMock(Client::class);
 
         $this->clientFactory = new ClientFactory(

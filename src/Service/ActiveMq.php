@@ -12,23 +12,25 @@ use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Shell\ShellInterface;
 
 /**
- * Service class for ActiveMQ Artemis
+ * Returns ActiveMQ Artemis service configurations.
  */
 class ActiveMq implements ServiceInterface
 {
     /**
      * Possible names for activemq/artemis relationship
-     *
-     * @var array
      */
-    private array $possibleRelationshipNames = ['activemq', 'activemq-artemis', 'artemis', 'amq', 'jms'];
+    private const POSSIBLE_RELATIONSHIP_NAMES = ['activemq', 'activemq-artemis', 'artemis', 'amq', 'jms'];
 
     /**
-     * Cache for configuration to avoid multiple relationship lookups
-     *
-     * @var array|null
+     * Possible package names for version detection
      */
-    private ?array $cachedConfiguration = null;
+    private const DPKG_PACKAGES = ['activemq-artemis', 'artemis'];
+
+    /**
+     * Version regex pattern - supports: 2, 2.42, 2.42.0
+     * Captures major and optional minor/patch versions
+     */
+    private const VERSION_PATTERN = '/^Version:\s?(\d+)(?:\.(\d+))?(?:\.\d+)?/';
 
     /**
      * @var Environment
@@ -46,7 +48,9 @@ class ActiveMq implements ServiceInterface
     private ?string $version = null;
 
     /**
-     * @param Environment    $environment
+     * ActiveMq constructor.
+     *
+     * @param Environment $environment
      * @param ShellInterface $shell
      */
     public function __construct(
@@ -58,93 +62,70 @@ class ActiveMq implements ServiceInterface
     }
 
     /**
-     * Finds if configuration exists for one of possible activemq relationship names and return first match,
-     * activemq relationship can have different name on different environment.
-     *
-     * {@inheritDoc}
+     * @inheritDoc
      */
     public function getConfiguration(): array
     {
-        if ($this->cachedConfiguration === null) {
-            $this->cachedConfiguration = [];
-            foreach ($this->possibleRelationshipNames as $relationshipName) {
-                $mqConfig = $this->environment->getRelationship($relationshipName);
-                if (count($mqConfig)) {
-                    $this->cachedConfiguration = $mqConfig[0];
-                    break;
-                }
+        foreach (self::POSSIBLE_RELATIONSHIP_NAMES as $relationshipName) {
+            $mqConfig = $this->environment->getRelationship($relationshipName);
+            if (!empty($mqConfig)) {
+                return $mqConfig[0];
             }
         }
 
-        return $this->cachedConfiguration;
+        return [];
     }
 
     /**
-     * Retrieve ActiveMQ service version whether from relationship configuration
-     * or using CLI command (for PRO environments)
-     *
-     * {@inheritDoc}
+     * @inheritDoc
      */
     public function getVersion(): string
     {
         if ($this->version === null) {
-            $this->version = $this->detectVersion();
+            $config = $this->getConfiguration();
+            
+            // If no configuration exists, return '0' without system detection
+            if (empty($config)) {
+                $this->version = '0';
+                return $this->version;
+            }
+            
+            $this->version = $config['type'] ?? '';
+
+            // Extract version from type string (e.g., "activemq-artemis:2.42")
+            if (strpos($this->version, ':') !== false) {
+                $this->version = explode(':', $this->version)[1] ?? '0';
+            } elseif (empty($this->version) || $this->version === 'activemq-artemis') {
+                // Fall back to system detection if config exists but no version in type field
+                $this->version = $this->detectVersionFromSystem();
+            }
         }
 
         return $this->version;
     }
 
     /**
-     * Detect ActiveMQ version from configuration or system
+     * Detect version from system using dpkg
      *
      * @return string
      */
-    private function detectVersion(): string
+    private function detectVersionFromSystem(): string
     {
-        $config = $this->getConfiguration();
-
-        if (isset($config['type']) && strpos($config['type'], ':') !== false) {
-            return explode(':', $config['type'])[1];
-        }
-
-        if (isset($config['host']) && isset($config['port'])) {
-            return $this->detectVersionFromSystem();
+        // Try different package names
+        foreach (self::DPKG_PACKAGES as $packageName) {
+            $version = $this->getVersionFromDpkg($packageName);
+            if ($version !== '0') {
+                return $version;
+            }
         }
 
         return '0';
     }
 
     /**
-     * Detect ActiveMQ version from system using various methods
-     *
-     * @return string
-     */
-    private function detectVersionFromSystem(): string
-    {
-        // Try dpkg for activemq-artemis package
-        $version = $this->getVersionFromDpkg('activemq-artemis');
-        if ($version !== '0') {
-            return $version;
-        }
-
-        // Try dpkg for artemis package
-        $version = $this->getVersionFromDpkg('artemis');
-        if ($version !== '0') {
-            return $version;
-        }
-
-        // Try CLI commands
-        $version = $this->getVersionFromCli('activemq-artemis --version 2>/dev/null | head -1');
-        if ($version !== '0') {
-            return $version;
-        }
-
-        // Try artemis CLI command
-        return $this->getVersionFromCli('artemis version 2>/dev/null | head -1');
-    }
-
-    /**
      * Get version from dpkg package info
+     * Returns normalized version in major.minor format (e.g., "2.42")
+     * If only major version exists, returns it (e.g., "2")
      *
      * @param string $packageName
      * @return string
@@ -153,25 +134,18 @@ class ActiveMq implements ServiceInterface
     {
         try {
             $process = $this->shell->execute("dpkg -s {$packageName} | grep Version");
-            preg_match('/^(?:Version:(?:\s)?)(\d+\.\d+)/', $process->getOutput(), $matches);
-            return $matches[1] ?? '0';
-        } catch (ShellException $exception) {
-            return '0';
-        }
-    }
-
-    /**
-     * Get version from CLI command
-     *
-     * @param string $command
-     * @return string
-     */
-    private function getVersionFromCli(string $command): string
-    {
-        try {
-            $process = $this->shell->execute($command);
-            preg_match('/(?:ActiveMQ|Artemis)\s+(\d+\.\d+)/', $process->getOutput(), $matches);
-            return $matches[1] ?? '0';
+            preg_match(self::VERSION_PATTERN, $process->getOutput(), $matches);
+            
+            if (!isset($matches[1])) {
+                return '0';
+            }
+            
+            // Normalize version: return major.minor (strip patch version)
+            // Examples: "2.42.1" → "2.42", "2.42" → "2.42", "2" → "2"
+            $major = $matches[1];
+            $minor = $matches[2] ?? null;
+            
+            return $minor !== null ? "{$major}.{$minor}" : $major;
         } catch (ShellException $exception) {
             return '0';
         }
@@ -179,13 +153,11 @@ class ActiveMq implements ServiceInterface
 
     /**
      * Check if ActiveMQ is available (any configuration present)
-     * This determines if STOMP should be used with hardcoded values
      *
      * @return bool
      */
     public function isStompEnabled(): bool
     {
-        $config = $this->getConfiguration();
-        return !empty($config);
+        return !empty($this->getConfiguration());
     }
 }

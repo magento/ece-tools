@@ -13,16 +13,19 @@ use Composer\Package\RootPackageInterface;
 use Composer\Semver\Comparator;
 use Composer\Semver\Semver;
 use Magento\MagentoCloud\Config\ConfigException;
+use Magento\MagentoCloud\Config\GlobalSection as GlobalConfig;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Package\Manager;
 use Magento\MagentoCloud\Package\UndefinedPackageException;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Magento\MagentoCloud\Config\GlobalSection as GlobalConfig;
 
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class MagentoVersionTest extends TestCase
 {
     /**
@@ -61,10 +64,10 @@ class MagentoVersionTest extends TestCase
     protected function setUp(): void
     {
         $this->managerMock = $this->createMock(Manager::class);
-        $this->packageMock = $this->getMockForAbstractClass(PackageInterface::class);
+        $this->packageMock = $this->createMock(PackageInterface::class);
         $this->globalConfigMock = $this->createMock(GlobalConfig::class);
         $this->composerMock = $this->createMock(Composer::class);
-        $this->rootPackageMock = $this->getMockForAbstractClass(RootPackageInterface::class);
+        $this->rootPackageMock = $this->createMock(RootPackageInterface::class);
 
         $this->composerMock->method('getPackage')
             ->willReturn($this->rootPackageMock);
@@ -79,11 +82,14 @@ class MagentoVersionTest extends TestCase
     }
 
     /**
+     * Test isGreaterOrEqual method.
+     *
      * @param string $version
      * @param string $packageVersion
      * @param bool $expected
      * @dataProvider isGreaterOrEqualDataProvider
      */
+    #[DataProvider('isGreaterOrEqualDataProvider')]
     public function testIsGreaterOrEqual(string $version, string $packageVersion, bool $expected): void
     {
         $this->managerMock->method('has')
@@ -105,7 +111,7 @@ class MagentoVersionTest extends TestCase
     /**
      * @return array
      */
-    public function isGreaterOrEqualDataProvider(): array
+    public static function isGreaterOrEqualDataProvider(): array
     {
         return [
             ['2.2', '2.1.9', false],
@@ -118,6 +124,8 @@ class MagentoVersionTest extends TestCase
     }
 
     /**
+     * Test getting the version number from the installed version of Magento.
+     *
      * @throws UndefinedPackageException
      */
     public function testGetVersionFromBasePackage(): void
@@ -173,6 +181,7 @@ class MagentoVersionTest extends TestCase
      * @param bool $expected Method name of the assertion to call
      * @dataProvider satisfiesDataProvider
      */
+    #[DataProvider('satisfiesDataProvider')]
     public function testSatisfies(string $constraint, string $packageVersion, bool $expected): void
     {
         $this->globalConfigMock->expects(self::once())
@@ -196,9 +205,11 @@ class MagentoVersionTest extends TestCase
     }
 
     /**
+     * Test the constraint matcher using various Composer-style version constraints.
+     *
      * @return array[]
      */
-    public function satisfiesDataProvider(): array
+    public static function satisfiesDataProvider(): array
     {
         return [
             ['2.2.1', '2.2.1', true],
@@ -213,6 +224,12 @@ class MagentoVersionTest extends TestCase
         ];
     }
 
+    /**
+     * Test getting the version number from the installed version of Magento.
+     *
+     * @return void
+     * @throws UndefinedPackageException
+     */
     public function testWithComposerVersion(): void
     {
         $this->rootPackageMock->method('getPrettyVersion')
@@ -224,6 +241,8 @@ class MagentoVersionTest extends TestCase
     }
 
     /**
+     * Test getVersion method when the version cannot be resolved.
+     *
      * @throws UndefinedPackageException
      */
     public function testCannotResolve(): void
@@ -234,6 +253,11 @@ class MagentoVersionTest extends TestCase
         $this->magentoVersion->getVersion();
     }
 
+    /**
+     * Test getVersion method when an exception is thrown.
+     *
+     * @throws UndefinedPackageException
+     */
     public function testGetVersionWithException(): void
     {
         $this->expectException(UndefinedPackageException::class);
@@ -246,6 +270,8 @@ class MagentoVersionTest extends TestCase
     }
 
     /**
+     * Test isGitInstallation method.
+     *
      * @throws ConfigException
      */
     public function testIsGitInstallation(): void
@@ -262,6 +288,8 @@ class MagentoVersionTest extends TestCase
     }
 
     /**
+     * Test isGitInstallation method when the installation is detected via environment variable.
+     *
      * @throws ConfigException
      */
     public function testIsGitInstallationEnvVariable(): void
@@ -278,6 +306,8 @@ class MagentoVersionTest extends TestCase
     }
 
     /**
+     * Test isGitInstallation method when the installation is detected via Composer.
+     *
      * @throws ConfigException
      */
     public function testIsGitInstallationComposer(): void
@@ -296,6 +326,8 @@ class MagentoVersionTest extends TestCase
     }
 
     /**
+     * Test isGitInstallation method when an exception is thrown.
+     *
      * @throws ConfigException
      */
     public function testIsGitInstallationException(): void

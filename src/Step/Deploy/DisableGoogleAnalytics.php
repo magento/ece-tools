@@ -17,7 +17,6 @@ use Psr\Log\LoggerInterface;
 use Magento\MagentoCloud\Config\Stage\Deploy as DeployConfig;
 
 /**
- * @inheritdoc
  */
 class DisableGoogleAnalytics implements StepInterface
 {
@@ -60,7 +59,6 @@ class DisableGoogleAnalytics implements StepInterface
     }
 
     /**
-     * @inheritdoc
      */
     public function execute()
     {

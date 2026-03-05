@@ -16,7 +16,6 @@ use Magento\MagentoCloud\Command\Wizard\Util\OutputFormatter;
 /**
  * Verifies configuration to be properly set and ready to use SCD on demand.
  *
- * @api
  */
 class ScdOnDemand extends Command
 {
@@ -45,7 +44,6 @@ class ScdOnDemand extends Command
     }
 
     /**
-     * @inheritdoc
      */
     protected function configure()
     {
@@ -56,7 +54,6 @@ class ScdOnDemand extends Command
     }
 
     /**
-     * @inheritdoc
      */
     public function execute(InputInterface $input, OutputInterface $output): int
     {

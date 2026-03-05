@@ -18,7 +18,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * Performs module:refresh command
  *
- * @api
  */
 class ModuleRefresh extends Command
 {
@@ -40,7 +39,6 @@ class ModuleRefresh extends Command
     }
 
     /**
-     * @inheritdoc
      */
     protected function configure(): void
     {

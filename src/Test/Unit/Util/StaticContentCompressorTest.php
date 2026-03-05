@@ -7,18 +7,22 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Util;
 
-use Magento\MagentoCloud\Shell\ShellInterface;
-use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Util\StaticContentCompressor;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
+use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Shell\ShellInterface;
 use Magento\MagentoCloud\Shell\UtilityManager;
+use Magento\MagentoCloud\Util\StaticContentCompressor;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
-use Psr\Log\LoggerInterface;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
 
 /**
  * Unit test for static content compression.
+ * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class StaticContentCompressorTest extends TestCase
 {
     /**
@@ -52,8 +56,8 @@ class StaticContentCompressorTest extends TestCase
     protected function setUp(): void
     {
         $this->directoryListMock = $this->createMock(DirectoryList::class);
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
-        $this->shellMock = $this->getMockForAbstractClass(ShellInterface::class);
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
+        $this->shellMock = $this->createMock(ShellInterface::class);
         $this->utilityManagerMock = $this->createMock(UtilityManager::class);
 
         $this->staticContentCompressor = new StaticContentCompressor(
@@ -65,11 +69,15 @@ class StaticContentCompressorTest extends TestCase
     }
 
     /**
+     * Test compression method.
+     *
      * @param int $compressionLevel
      * @param int $compressionTimeout
      * @dataProvider compressionDataProvider
+     * @return void
      */
-    public function testCompression(int $compressionLevel, int $compressionTimeout)
+    #[DataProvider('compressionDataProvider')]
+    public function testCompression(int $compressionLevel, int $compressionTimeout): void
     {
         $directoryListDirStatic = 'this/is/a/test/static/directory';
         $timeoutCommand = '/usr/bin/timeout';
@@ -114,9 +122,11 @@ class StaticContentCompressorTest extends TestCase
     }
 
     /**
+     * Data provider for compression method.
+     *
      * @return array
      */
-    public function compressionDataProvider(): array
+    public static function compressionDataProvider(): array
     {
         return [
             [4, 500],
@@ -124,7 +134,12 @@ class StaticContentCompressorTest extends TestCase
         ];
     }
 
-    public function testCompressionDisabled()
+    /**
+     * Test compression disabled method.
+     *
+     * @return void
+     */
+    public function testCompressionDisabled(): void
     {
         $this->shellMock
             ->expects($this->never())
@@ -136,7 +151,12 @@ class StaticContentCompressorTest extends TestCase
         $this->staticContentCompressor->process(0);
     }
 
-    public function testUtilityNotFound()
+    /**
+     * Test utility not found method.
+     *
+     * @return void
+     */
+    public function testUtilityNotFound(): void
     {
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('Utility was not found');

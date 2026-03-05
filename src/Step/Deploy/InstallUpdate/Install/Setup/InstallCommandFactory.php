@@ -29,8 +29,6 @@ use Magento\MagentoCloud\Service\ActiveMq;
 /**
  * Generates command for magento installation
  *
- * @SuppressWarnings("PHPMD.CouplingBetweenObjects")
- * @SuppressWarnings("PHPMD.NPathComplexity")
  */
 class InstallCommandFactory
 {
@@ -118,7 +116,6 @@ class InstallCommandFactory
      * @param AmqpConfig $amqpConfig
      * @param ActiveMq $activeMq
      *
-     * @SuppressWarnings("PHPMD.ExcessiveParameterList")
      */
     public function __construct(
         UrlManager $urlManager,
@@ -254,7 +251,6 @@ class InstallCommandFactory
      * @throws UndefinedPackageException
      * @throws ConfigException
      * @throws ServiceException
-     * @SuppressWarnings("PHPMD.CyclomaticComplexity")
      */
     private function getEsOptions(): array
     {

@@ -41,8 +41,8 @@ class SetProductionModeTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
-        $this->writer = $this->getMockForAbstractClass(WriterInterface::class);
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
+        $this->writer = $this->createMock(WriterInterface::class);
 
         $this->step = new SetProductionMode(
             $this->loggerMock,

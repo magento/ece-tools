@@ -12,6 +12,7 @@ use Magento\MagentoCloud\Command\Wizard\Util\OutputFormatter;
 use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface;
 use Magento\MagentoCloud\DB\Data\RelationshipConnection;
 use Magento\MagentoCloud\DB\Data\RelationshipConnectionFactory;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Input\InputInterface;
@@ -48,7 +49,7 @@ class SplitDbStateTest extends TestCase
     protected function setUp(): void
     {
         $this->outputFormatterMock = $this->createMock(OutputFormatter::class);
-        $this->configReaderMock = $this->getMockForAbstractClass(ReaderInterface::class);
+        $this->configReaderMock = $this->createMock(ReaderInterface::class);
         $this->connectionDataFactoryMock = $this->createMock(RelationshipConnectionFactory::class);
 
         $this->command = new SplitDbState(
@@ -59,15 +60,18 @@ class SplitDbStateTest extends TestCase
     }
 
     /**
-     * @param $mageConf
-     * @param $message
+     * Test execute method with split DB configuration.
      *
+     * @param array $mageConf
+     * @param string $message
+     * @return void
      * @dataProvider executeWithSplitDataProvider
      */
-    public function testExecuteWithSplit($mageConf, $message)
+    #[DataProvider('executeWithSplitDataProvider')]
+    public function testExecuteWithSplit($mageConf, $message): void
     {
-        $inputMock = $this->getMockForAbstractClass(InputInterface::class);
-        $outputMock = $this->getMockForAbstractClass(OutputInterface::class);
+        $inputMock = $this->createStub(InputInterface::class);
+        $outputMock = $this->createStub(OutputInterface::class);
 
         $this->configReaderMock->expects($this->once())
             ->method('read')
@@ -92,16 +96,19 @@ class SplitDbStateTest extends TestCase
     }
 
     /**
+     * Test execute method with no split DB configuration.
+     *
      * @param $quoteConnection
      * @param $salesConnection
      * @param $message
      *
      * @dataProvider executeNoSplitDataProvider
      */
-    public function testExecuteNoSplit($quoteConnection, $salesConnection, $message)
+    #[DataProvider('executeNoSplitDataProvider')]
+    public function testExecuteNoSplit($quoteConnection, $salesConnection, $message): void
     {
-        $inputMock = $this->getMockForAbstractClass(InputInterface::class);
-        $outputMock = $this->getMockForAbstractClass(OutputInterface::class);
+        $inputMock = $this->createStub(InputInterface::class);
+        $outputMock = $this->createStub(OutputInterface::class);
 
         $mageConf = [
             'db' => [
@@ -133,9 +140,10 @@ class SplitDbStateTest extends TestCase
 
     /**
      * Data provider for executeWithSplit
+     *
      * @return array
      */
-    public function executeWithSplitDataProvider(): array
+    public static function executeWithSplitDataProvider(): array
     {
         $mageConfQuote = [
             'db' => [
@@ -163,9 +171,10 @@ class SplitDbStateTest extends TestCase
 
     /**
      * Data provider for testExecuteNoSplit
+     *
      * @return array
      */
-    public function executeNoSplitDataProvider(): array
+    public static function executeNoSplitDataProvider(): array
     {
         $connection = [
             'host' => '120.0.0.1',

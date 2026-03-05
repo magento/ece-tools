@@ -36,6 +36,7 @@ abstract class ReportDirNestingLevelCest extends AbstractCest
     public function testDefault(\CliTester $I): void
     {
         $I->generateDockerCompose('--mode=production');
+        $this->removeVendorVolumeMountFromDockerCompose($I);
         $I->runDockerComposeCommand('run build cloud-build');
         $I->startEnvironment();
         $I->runDockerComposeCommand('run deploy cloud-deploy');
@@ -65,6 +66,7 @@ abstract class ReportDirNestingLevelCest extends AbstractCest
     {
         $I->copyFileToWorkDir('files/report_dir_nesting_level/.magento.env.yaml', '.magento.env.yaml');
         $I->generateDockerCompose('--mode=production');
+        $this->removeVendorVolumeMountFromDockerCompose($I);
         $I->runDockerComposeCommand('run build cloud-build');
         $I->startEnvironment();
         $I->runDockerComposeCommand('run deploy cloud-deploy');
@@ -95,6 +97,7 @@ abstract class ReportDirNestingLevelCest extends AbstractCest
         $I->copyFileToWorkDir('files/report_dir_nesting_level/.magento.env.yaml', '.magento.env.yaml');
         $I->copyFileToWorkDir('files/report_dir_nesting_level/local_with_property.xml', 'pub/errors/local.xml');
         $I->generateDockerCompose('--mode=production');
+        $this->removeVendorVolumeMountFromDockerCompose($I);
         $I->runDockerComposeCommand('run build cloud-build');
         $I->startEnvironment();
         $I->runDockerComposeCommand('run deploy cloud-deploy');
@@ -126,6 +129,7 @@ abstract class ReportDirNestingLevelCest extends AbstractCest
             '--mode=production --env-vars="%s"',
             $this->convertEnvFromArrayToJson(['MAGE_ERROR_REPORT_DIR_NESTING_LEVEL' => 7])
         ));
+        $this->removeVendorVolumeMountFromDockerCompose($I);
         $I->runDockerComposeCommand('run build cloud-build');
         $I->startEnvironment();
         $I->runDockerComposeCommand('run deploy cloud-deploy');
@@ -155,6 +159,7 @@ abstract class ReportDirNestingLevelCest extends AbstractCest
         $I->copyFileToWorkDir('files/report_dir_nesting_level/.magento.env.yaml', '.magento.env.yaml');
         $I->copyFileToWorkDir('files/report_dir_nesting_level/local_without_property.xml', 'pub/errors/local.xml');
         $I->generateDockerCompose('--mode=production');
+        $this->removeVendorVolumeMountFromDockerCompose($I);
         $I->runDockerComposeCommand('run build cloud-build');
         $I->startEnvironment();
         $I->runDockerComposeCommand('run deploy cloud-deploy');
@@ -192,6 +197,7 @@ abstract class ReportDirNestingLevelCest extends AbstractCest
         $I->copyFileToWorkDir('files/report_dir_nesting_level/.magento.env.yaml', '.magento.env.yaml');
         $I->copyFileToWorkDir('files/report_dir_nesting_level/invalid_local.xml', 'pub/errors/local.xml');
         $I->generateDockerCompose('--mode=production');
+        $this->removeVendorVolumeMountFromDockerCompose($I);
         $I->runDockerComposeCommand('run build cloud-build');
         $I->startEnvironment();
         $I->runDockerComposeCommand('run deploy cloud-deploy');

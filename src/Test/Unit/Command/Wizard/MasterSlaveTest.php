@@ -42,7 +42,7 @@ class MasterSlaveTest extends TestCase
     protected function setUp(): void
     {
         $this->outputFormatterMock = $this->createMock(OutputFormatter::class);
-        $this->deployConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
+        $this->deployConfigMock = $this->createMock(DeployInterface::class);
 
         $this->command = new MasterSlave(
             $this->outputFormatterMock,
@@ -52,8 +52,8 @@ class MasterSlaveTest extends TestCase
 
     public function testExecute()
     {
-        $inputMock = $this->getMockForAbstractClass(InputInterface::class);
-        $outputMock = $this->getMockForAbstractClass(OutputInterface::class);
+        $inputMock = $this->createStub(InputInterface::class);
+        $outputMock = $this->createStub(OutputInterface::class);
 
         $this->deployConfigMock->expects($this->exactly(3))
             ->method('get')
@@ -73,8 +73,8 @@ class MasterSlaveTest extends TestCase
 
     public function testExecuteWithErrors()
     {
-        $inputMock = $this->getMockForAbstractClass(InputInterface::class);
-        $outputMock = $this->getMockForAbstractClass(OutputInterface::class);
+        $inputMock = $this->createStub(InputInterface::class);
+        $outputMock = $this->createStub(OutputInterface::class);
 
         $series = [
             [$outputMock, 'MySQL slave connection is not configured'],

@@ -13,15 +13,18 @@ use Magento\MagentoCloud\Service\Database;
 use Magento\MagentoCloud\Service\ElasticSearch;
 use Magento\MagentoCloud\Service\RabbitMq;
 use Magento\MagentoCloud\Service\Redis;
-use Magento\MagentoCloud\Service\Valkey;
 use Magento\MagentoCloud\Service\ServiceFactory;
 use Magento\MagentoCloud\Service\ServiceInterface;
 use Magento\MagentoCloud\Service\ServiceMismatchException;
+use Magento\MagentoCloud\Service\Valkey;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class ServiceFactoryTest extends TestCase
 {
     /**
@@ -39,23 +42,27 @@ class ServiceFactoryTest extends TestCase
      */
     public function setUp(): void
     {
-        $this->containerMock = $this->getMockForAbstractClass(ContainerInterface::class);
+        $this->containerMock = $this->createMock(ContainerInterface::class);
 
         $this->serviceFactory = new ServiceFactory($this->containerMock);
     }
 
     /**
+     * Test create method.
+     *
      * @param string $serviceName
      * @param string $serviceClass
-     * @throws \Magento\MagentoCloud\Service\ServiceMismatchException
      * @dataProvider createDataProvider
+     * @return void
+     * @throws ServiceMismatchException
      */
-    public function testCreate(string $serviceName, string $serviceClass)
+    #[DataProvider('createDataProvider')]
+    public function testCreate(string $serviceName, string $serviceClass): void
     {
         $this->containerMock->expects($this->once())
             ->method('create')
             ->with($serviceClass)
-            ->willReturn($this->getMockForAbstractClass(ServiceInterface::class));
+            ->willReturn($this->createMock(ServiceInterface::class));
 
         $this->assertInstanceOf(
             ServiceInterface::class,
@@ -63,7 +70,13 @@ class ServiceFactoryTest extends TestCase
         );
     }
 
-    public function testServiceNotExists()
+    /**
+     * Test service not exists.
+     *
+     * @return void
+     * @throws ServiceMismatchException
+     */
+    public function testServiceNotExists(): void
     {
         $this->expectException(ServiceMismatchException::class);
         $this->expectExceptionMessage('Service "wrong-service-name" is not supported');
@@ -75,16 +88,33 @@ class ServiceFactoryTest extends TestCase
     }
 
     /**
+     * Data provider for create method.
+     *
      * @return array
      */
-    public function createDataProvider(): array
+    public static function createDataProvider(): array
     {
         return [
-            [ServiceInterface::NAME_REDIS, Redis::class],
-            [ServiceInterface::NAME_VALKEY, Valkey::class],
-            [ServiceInterface::NAME_RABBITMQ, RabbitMq::class],
-            [ServiceInterface::NAME_ELASTICSEARCH, ElasticSearch::class],
-            [ServiceInterface::NAME_DB_MARIA, Database::class],
+            [
+                ServiceInterface::NAME_REDIS,
+                Redis::class
+            ],
+            [
+                ServiceInterface::NAME_VALKEY,
+                Valkey::class
+            ],
+            [
+                ServiceInterface::NAME_RABBITMQ,
+                RabbitMq::class
+            ],
+            [
+                ServiceInterface::NAME_ELASTICSEARCH,
+                ElasticSearch::class
+            ],
+            [
+                ServiceInterface::NAME_DB_MARIA,
+                Database::class
+            ],
         ];
     }
 }

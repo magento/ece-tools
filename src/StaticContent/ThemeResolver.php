@@ -7,9 +7,8 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\StaticContent;
 
-use Magento\MagentoCloud\Filesystem\DirectoryList;
+use Magento\Framework\Component\ComponentRegistrar;
 use Psr\Log\LoggerInterface;
-use Magento\MagentoCloud\Filesystem\Driver\File;
 
 /**
  * Resolves themes to their correct names
@@ -27,6 +26,8 @@ class ThemeResolver
     private $themes;
 
     /**
+     * Constructor method.
+     *
      * @param LoggerInterface $logger
      */
     public function __construct(LoggerInterface $logger)
@@ -35,10 +36,12 @@ class ThemeResolver
     }
 
     /**
+     * Resolve theme name.
      * Takes in name of a theme, compares it against the names and corrects if necessary.
      *
      * @param string $themeName
      * @return string
+     * @throws \ReflectionException
      */
     public function resolve(string $themeName): string
     {
@@ -63,6 +66,8 @@ class ThemeResolver
     }
 
     /**
+     * Get available themes.
+     *
      * @return array
      * @codeCoverageIgnore
      * @throws \ReflectionException
@@ -71,13 +76,15 @@ class ThemeResolver
     {
         $this->logger->debug('Finding available themes.');
         if (empty($this->themes)) {
-            if (class_exists(\Magento\Framework\Component\ComponentRegistrar::class)) {
-                $reflectionClass = new \ReflectionClass(\Magento\Framework\Component\ComponentRegistrar::class);
-                $property = $reflectionClass->getProperty('paths');
-                $property->setAccessible(true);
+            if (class_exists(ComponentRegistrar::class)) {
+                $reflectionClass = new \ReflectionClass(ComponentRegistrar::class);
+                $property        = $reflectionClass->getProperty('paths');
+
+                # Note: setAccessible(true) is deprecated in PHP 8.5 as properties are always accessible in PHP 8.1+
+                # so removed the call to setAccessible(true)
 
                 $this->themes = array_keys(
-                    $property->getValue($reflectionClass)[\Magento\Framework\Component\ComponentRegistrar::THEME]
+                    $property->getValue($reflectionClass)[ComponentRegistrar::THEME]
                 );
 
                 foreach ($this->themes as &$aTheme) {

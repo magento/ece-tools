@@ -10,15 +10,18 @@ namespace Magento\MagentoCloud\Test\Unit\Config\Validator\Deploy;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Config\Validator\Deploy\DeprecatedVariables;
-use Magento\MagentoCloud\Config\Validator\ResultFactory;
 use Magento\MagentoCloud\Config\Validator\Result\Error;
 use Magento\MagentoCloud\Config\Validator\Result\Success;
+use Magento\MagentoCloud\Config\Validator\ResultFactory;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class DeprecatedVariablesTest extends TestCase
 {
     /**
@@ -61,12 +64,16 @@ class DeprecatedVariablesTest extends TestCase
     }
 
     /**
+     * Test validate method.
+     *
      * @param array $variables
      * @param array $env
      * @param string $expectedResultClass
      * @dataProvider executeDataProvider
+     * @return void
      */
-    public function testValidate(array $variables, array $env, string $expectedResultClass)
+    #[DataProvider('executeDataProvider')]
+    public function testValidate(array $variables, array $env, string $expectedResultClass): void
     {
         $this->environmentMock->expects($this->once())
             ->method('getVariables')
@@ -78,9 +85,11 @@ class DeprecatedVariablesTest extends TestCase
     }
 
     /**
+     * Data provider for validate method.
+     *
      * @return array
      */
-    public function executeDataProvider(): array
+    public static function executeDataProvider(): array
     {
         return [
             [
@@ -101,8 +110,13 @@ class DeprecatedVariablesTest extends TestCase
         ];
     }
 
-    public function tearDown(): void
+    /**
+     * Restore the environment variables.
+     *
+     * @return void
+     */
+    protected function tearDown(): void
     {
-        $_ENV = $this->envBackup;
+        $_ENV = $this->envBackup; // phpcs:ignore
     }
 }

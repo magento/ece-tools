@@ -14,7 +14,6 @@ use Psr\Http\Message\RequestInterface;
 /**
  * Creates instances of Request.
  *
- * @see RequestInterface
  */
 class RequestFactory
 {

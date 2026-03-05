@@ -8,12 +8,10 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\PlatformVariable;
 
 /**
- * @inheritdoc
  */
 class Decoder implements DecoderInterface
 {
     /**
-     * @inheritdoc
      */
     public function decode(string $encodedString)
     {

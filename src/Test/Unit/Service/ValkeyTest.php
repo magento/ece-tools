@@ -10,12 +10,14 @@ namespace Magento\MagentoCloud\Test\Unit\Service;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Service\Valkey;
 use Magento\MagentoCloud\Service\Valkey\Version;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class ValkeyTest extends TestCase
 {
     /**

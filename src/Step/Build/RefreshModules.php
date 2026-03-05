@@ -17,7 +17,6 @@ use Magento\MagentoCloud\Step\StepInterface;
 use Psr\Log\LoggerInterface;
 
 /**
- * @inheritdoc
  */
 class RefreshModules implements StepInterface
 {
@@ -44,7 +43,6 @@ class RefreshModules implements StepInterface
     }
 
     /**
-     * @inheritdoc
      */
     public function execute()
     {

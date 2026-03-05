@@ -14,6 +14,8 @@ use Magento\MagentoCloud\Shell\ProcessFactory;
 use Magento\MagentoCloud\Shell\ProcessInterface;
 use Magento\MagentoCloud\Shell\Shell;
 use Magento\MagentoCloud\Shell\ShellException;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -22,6 +24,7 @@ use Symfony\Component\Console\Exception\LogicException;
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class ShellTest extends TestCase
 {
     /**
@@ -54,9 +57,9 @@ class ShellTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
-        $this->systemListMock = $this->createMock(SystemList::class);
-        $this->sanitizerMock = $this->createMock(Sanitizer::class);
+        $this->loggerMock         = $this->createMock(LoggerInterface::class);
+        $this->systemListMock     = $this->createMock(SystemList::class);
+        $this->sanitizerMock      = $this->createMock(Sanitizer::class);
         $this->processFactoryMock = $this->createMock(ProcessFactory::class);
 
         $this->shell = new Shell(
@@ -68,17 +71,21 @@ class ShellTest extends TestCase
     }
 
     /**
+     * Test execute method.
+     *
      * @param string $processOutput
      * @dataProvider executeDataProvider
+     * @return void
      */
-    public function testExecute($processOutput)
+    #[DataProvider('executeDataProvider')]
+    public function testExecute(string $processOutput): void
     {
-        $command = 'ls';
-        $args = ['-al', '0'];
-        $magentoRoot = '/magento';
+        $command         = 'ls';
+        $args            = ['-al', '0'];
+        $magentoRoot     = '/magento';
         $commandWithArgs = "ls '-al' '0'";
 
-        $processMock = $this->getMockForAbstractClass(ProcessInterface::class);
+        $processMock = $this->createMock(ProcessInterface::class);
         $processMock->expects($this->once())
             ->method('getCommandLine')
             ->willReturn($commandWithArgs);
@@ -105,7 +112,6 @@ class ShellTest extends TestCase
         }
         $this->loggerMock->expects($this->exactly(count($logExpects)))
             ->method('debug')
-            // withConsecutive() alternative.
             ->willReturnCallback(function (...$logExpects) {
                 return null;
             });
@@ -116,19 +122,30 @@ class ShellTest extends TestCase
     }
 
     /**
+     * Data provider for execute method.
+     *
      * @return array
      */
-    public function executeDataProvider(): array
+    public static function executeDataProvider(): array
     {
         return [
-            'empty process output' => ['processOutput' => ''],
-            'non empty process output' => ['processOutput' => 'test'],
+            [
+                'processOutput' => '',
+            ],
+            [
+                'processOutput' => 'test',
+            ],
         ];
     }
 
-    public function testExecuteHandleOutputException()
+    /**
+     * Test execute handle output exception.
+     *
+     * @return void
+     */
+    public function testExecuteHandleOutputException(): void
     {
-        $command = 'ls';
+        $command     = 'ls';
         $magentoRoot = '/magento';
 
         $processMock = $this->createMock(ProcessInterface::class);
@@ -158,13 +175,18 @@ class ShellTest extends TestCase
         $this->shell->execute($command);
     }
 
+    /**
+     * Test execute exception.
+     *
+     * @return void
+     */
     public function testExecuteException()
     {
         $this->expectException(ShellException::class);
         $this->expectExceptionMessage('Command ls -al --password="***" failed');
         $this->expectExceptionCode(3);
 
-        $command = 'ls -al --password="123"';
+        $command     = 'ls -al --password="123"';
         $magentoRoot = '/magento';
 
         /** @var ProcessInterface|MockObject $processMock */
@@ -199,6 +221,11 @@ class ShellTest extends TestCase
         $this->shell->execute($command);
     }
 
+    /**
+     * Test execute with arguments.
+     *
+     * @return void
+     */
     public function testExecuteWithArguments()
     {
         $command = 'ls -al';

@@ -13,15 +13,17 @@ use Magento\MagentoCloud\Service\ServiceException;
 use Magento\MagentoCloud\Shell\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Shell\ShellInterface;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class RabbitMqTest extends TestCase
 {
-
     /**
      * @var RabbitMq|MockObject
      */
@@ -43,7 +45,7 @@ class RabbitMqTest extends TestCase
     public function setUp(): void
     {
         $this->environmentMock = $this->createMock(Environment::class);
-        $this->shellMock = $this->getMockForAbstractClass(ShellInterface::class);
+        $this->shellMock = $this->createMock(ShellInterface::class);
 
         $this->rabbitMq = new RabbitMq(
             $this->environmentMock,
@@ -51,15 +53,19 @@ class RabbitMqTest extends TestCase
         );
     }
 
+    /**
+     * Test get configuration.
+     *
+     * @return void
+     */
     public function testGetConfiguration(): void
     {
         $this->environmentMock->expects($this->exactly(3))
             ->method('getRelationship')
-            // withConsecutive() alternative.
             ->willReturnCallback(fn($param) => match ([$param]) {
                 ['rabbitmq'] => [],
-                ['mq'] => [],
-                ['amqp'] => [
+                ['mq']       => [],
+                ['amqp']     => [
                     [
                         'host' => '127.0.0.1',
                         'port' => '5672',
@@ -76,6 +82,11 @@ class RabbitMqTest extends TestCase
         );
     }
 
+    /**
+     * Test get version.
+     *
+     * @return void
+     */
     public function testGetVersion(): void
     {
         $this->environmentMock->expects($this->exactly(3))
@@ -99,6 +110,9 @@ class RabbitMqTest extends TestCase
     }
 
     /**
+     * Test get version not installed.
+     *
+     * @return void
      * @throws ServiceException
      */
     public function testGetVersionNotInstalled(): void
@@ -110,7 +124,6 @@ class RabbitMqTest extends TestCase
         ];
         $this->environmentMock->expects($this->exactly(3))
             ->method('getRelationship')
-            // withConsecutive() alternative.
             ->willReturnCallback(fn($param) => match ([$param]) {
                 ['rabbitmq'] => [],
                 ['mq'] => [],
@@ -123,12 +136,15 @@ class RabbitMqTest extends TestCase
     }
 
     /**
+     * Test get version from CLI.
+     *
      * @param string $version
      * @param string $expectedResult
-     * @throws ServiceException
-     *
      * @dataProvider getVersionFromCliDataProvider
+     * @return void
+     * @throws ServiceException
      */
+    #[DataProvider('getVersionFromCliDataProvider')]
     public function testGetVersionFromCli(string $version, string $expectedResult): void
     {
         $this->environmentMock->expects($this->once())
@@ -139,7 +155,7 @@ class RabbitMqTest extends TestCase
                 'port' => '5672',
             ]]);
 
-        $processMock = $this->getMockForAbstractClass(ProcessInterface::class);
+        $processMock = $this->createMock(ProcessInterface::class);
         $processMock->expects($this->once())
             ->method('getOutput')
             ->willReturn($version);
@@ -152,10 +168,11 @@ class RabbitMqTest extends TestCase
     }
 
     /**
-     * Data provider for testGetVersionFromCli
+     * Data provider for get version from CLI.
+     *
      * @return array
      */
-    public function getVersionFromCliDataProvider(): array
+    public static function getVersionFromCliDataProvider(): array
     {
         return [
             ['Version: 3.8.5', '3.8'],
@@ -169,6 +186,12 @@ class RabbitMqTest extends TestCase
         ];
     }
 
+    /**
+     * Test get version with exception.
+     *
+     * @return void
+     * @throws ServiceException
+     */
     public function testGetVersionWithException(): void
     {
         $exceptionMessage = 'Some shell exception';

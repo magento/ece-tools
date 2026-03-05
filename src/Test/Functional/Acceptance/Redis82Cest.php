@@ -24,6 +24,7 @@ class Redis82Cest extends RedisCest
         return [
             [
                 'version' => '2.4.6',
+                'defaultConfiguration' => 'redis',
             ],
         ];
     }

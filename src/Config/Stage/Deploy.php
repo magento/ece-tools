@@ -14,7 +14,6 @@ use Magento\MagentoCloud\Config\Stage\Deploy\MergedConfig;
 use Magento\MagentoCloud\Config\StageConfigInterface;
 
 /**
- * @inheritdoc
  */
 class Deploy implements DeployInterface
 {
@@ -44,7 +43,6 @@ class Deploy implements DeployInterface
      * Retrieves environment configuration for deploy stage.
      * Tries to do json decode for all string type variables and returns decoded value on success.
      * Returns default value in case of wrong json string for array-type variable.
-     * @see Schema for default values.
      *
      * {@inheritdoc}
      */

@@ -9,16 +9,18 @@ namespace Magento\MagentoCloud\Test\Unit\Command\Wizard;
 
 use Magento\MagentoCloud\Command\Wizard\ScdOnDeploy;
 use Magento\MagentoCloud\Command\Wizard\Util\OutputFormatter;
+use Magento\MagentoCloud\Config\Validator\GlobalStage\ScdOnDeploy as ScdOnDeployValidator;
 use Magento\MagentoCloud\Config\Validator\Result\Error;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Magento\MagentoCloud\Config\Validator\GlobalStage\ScdOnDeploy as ScdOnDeployValidator;
 use Symfony\Component\Console\Input\Input;
 use Symfony\Component\Console\Output\Output;
 
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class ScdOnDeployTest extends TestCase
 {
     /**
@@ -52,8 +54,8 @@ class ScdOnDeployTest extends TestCase
 
     public function testExecute()
     {
-        $inputMock = $this->getMockForAbstractClass(Input::class);
-        $outputMock = $this->getMockForAbstractClass(Output::class);
+        $inputMock = $this->createStub(Input::class);
+        $outputMock = $this->createStub(Output::class);
 
         $this->scdOnDeployValidatorMock->expects($this->once())
             ->method('getErrors')
@@ -67,8 +69,8 @@ class ScdOnDeployTest extends TestCase
 
     public function testExecuteWithErrors()
     {
-        $inputMock = $this->getMockForAbstractClass(Input::class);
-        $outputMock = $this->getMockForAbstractClass(Output::class);
+        $inputMock = $this->createStub(Input::class);
+        $outputMock = $this->createStub(Output::class);
 
         $errorMock = $this->createMock(Error::class);
         $errorMock->expects($this->any())

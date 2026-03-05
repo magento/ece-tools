@@ -12,11 +12,12 @@ use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Shell\ShellException;
+use Magento\MagentoCloud\Shell\ShellInterface;
+use Magento\MagentoCloud\StaticContent\CommandFactory;
+use Magento\MagentoCloud\StaticContent\Deploy\Option;
 use Magento\MagentoCloud\Step\Deploy\DeployStaticContent\Generate;
 use Magento\MagentoCloud\Step\StepException;
-use Magento\MagentoCloud\Shell\ShellInterface;
-use Magento\MagentoCloud\StaticContent\Deploy\Option;
-use Magento\MagentoCloud\StaticContent\CommandFactory;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -24,6 +25,7 @@ use Psr\Log\LoggerInterface;
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class GenerateTest extends TestCase
 {
     /**
@@ -71,13 +73,13 @@ class GenerateTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->shellMock = $this->getMockForAbstractClass(ShellInterface::class);
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->shellMock = $this->createMock(ShellInterface::class);
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
         $this->fileMock = $this->createMock(File::class);
         $this->directoryListMock = $this->createMock(DirectoryList::class);
         $this->commandFactoryMock = $this->createMock(CommandFactory::class);
         $this->deployOptionMock = $this->createMock(Option::class);
-        $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
+        $this->stageConfigMock = $this->createMock(DeployInterface::class);
 
         $this->step = new Generate(
             $this->shellMock,

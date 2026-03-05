@@ -14,12 +14,15 @@ use Magento\MagentoCloud\Filesystem\DirectoryCopier\StrategyFactory;
 use Magento\MagentoCloud\Filesystem\DirectoryCopier\StrategyInterface;
 use Magento\MagentoCloud\Filesystem\DirectoryCopier\SubSymlinkStrategy;
 use Magento\MagentoCloud\Filesystem\DirectoryCopier\SymlinkStrategy;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class StrategyFactoryTest extends TestCase
 {
     /**
@@ -37,16 +40,20 @@ class StrategyFactoryTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->containerMock = $this->getMockForAbstractClass(ContainerInterface::class);
+        $this->containerMock = $this->createMock(ContainerInterface::class);
 
         $this->strategyFactory = new StrategyFactory($this->containerMock);
     }
 
     /**
+     * Test create method.
+     *
      * @param string $strategy
      * @param string $expectedClass
      * @dataProvider createDataProvider
+     * @return void
      */
+    #[DataProvider('createDataProvider')]
     public function testCreate(string $strategy, string $expectedClass): void
     {
         $this->containerMock->expects($this->once())
@@ -61,9 +68,11 @@ class StrategyFactoryTest extends TestCase
     }
 
     /**
+     * Data provider for create method.
+     *
      * @return array
      */
-    public function createDataProvider(): array
+    public static function createDataProvider(): array
     {
         return [
             [
@@ -85,6 +94,11 @@ class StrategyFactoryTest extends TestCase
         ];
     }
 
+    /**
+     * Test create method with non-existent strategy.
+     *
+     * @return void
+     */
     public function testCopyFromDirNotExists(): void
     {
         $this->expectException(\RuntimeException::class);

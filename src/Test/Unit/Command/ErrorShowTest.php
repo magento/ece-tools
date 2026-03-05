@@ -37,7 +37,7 @@ class ErrorShowTest extends TestCase
     protected function setUp(): void
     {
         $this->errorInfoMock = $this->createMock(ErrorInfo::class);
-        $this->readerMock = $this->getMockForAbstractClass(ReaderInterface::class);
+        $this->readerMock = $this->createMock(ReaderInterface::class);
 
         $this->command = new ErrorShow($this->errorInfoMock, $this->readerMock);
     }

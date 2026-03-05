@@ -13,7 +13,6 @@ use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Symfony\Component\Yaml\Exception\ParseException;
 
 /**
- * @inheritdoc
  */
 class GlobalSection implements StageConfigInterface
 {
@@ -43,7 +42,6 @@ class GlobalSection implements StageConfigInterface
     }
 
     /**
-     * @inheritdoc
      */
     public function get(string $name)
     {

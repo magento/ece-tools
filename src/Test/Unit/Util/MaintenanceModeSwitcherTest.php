@@ -11,10 +11,11 @@ use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Shell\MagentoShell;
+use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Shell\ShellFactory;
 use Magento\MagentoCloud\Util\MaintenanceModeSwitcher;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -22,6 +23,7 @@ use Psr\Log\LoggerInterface;
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class MaintenanceModeSwitcherTest extends TestCase
 {
     /**
@@ -60,8 +62,8 @@ class MaintenanceModeSwitcherTest extends TestCase
     protected function setUp(): void
     {
         $this->magentoShellMock = $this->createMock(MagentoShell::class);
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
-        $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
+        $this->stageConfigMock = $this->createMock(DeployInterface::class);
         $this->fileMock = $this->createMock(File::class);
         $this->directoryListMock = $this->createMock(DirectoryList::class);
         /** @var ShellFactory|MockObject $shellFactoryMock */

@@ -48,9 +48,9 @@ class RunCommandTest extends TestCase
     public function testExecute(): void
     {
         /** @var InputInterface|MockObject $inputMock */
-        $inputMock = $this->getMockForAbstractClass(InputInterface::class);
+        $inputMock = $this->createMock(InputInterface::class);
         /** @var OutputInterface|MockObject $outputMock */
-        $outputMock = $this->getMockForAbstractClass(OutputInterface::class);
+        $outputMock = $this->createStub(OutputInterface::class);
 
         $scenarios = [
             'scenario/deploy.xml'

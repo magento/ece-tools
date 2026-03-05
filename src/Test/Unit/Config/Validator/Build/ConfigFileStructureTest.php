@@ -14,12 +14,14 @@ use Magento\MagentoCloud\Config\Validator\ResultFactory;
 use Magento\MagentoCloud\Config\Validator\ResultInterface;
 use Magento\MagentoCloud\Package\UndefinedPackageException;
 use Magento\MagentoCloud\Util\ArrayManager;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class ConfigFileStructureTest extends TestCase
 {
     /**
@@ -107,7 +109,7 @@ class ConfigFileStructureTest extends TestCase
             ->method('filter')
             ->with([])
             ->willReturn([]);
-        $resultMock = $this->createMock(Result\Error::class);
+        $resultMock = $this->createStub(Result\Error::class);
         $this->resultFactoryMock->expects($this->once())
             ->method('create')
             ->with(
@@ -144,7 +146,7 @@ class ConfigFileStructureTest extends TestCase
             ->method('filter')
             ->with([])
             ->willReturn([]);
-        $resultMock = $this->createMock(Result\Error::class);
+        $resultMock = $this->createStub(Result\Error::class);
         $this->resultFactoryMock->expects($this->once())
             ->method('create')
             ->with(

@@ -10,16 +10,19 @@ namespace Magento\MagentoCloud\Test\Unit\Command;
 use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Command\DbDump;
 use Magento\MagentoCloud\DB\DumpProcessor;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\Console\Tester\CommandTester;
 use Symfony\Component\Console\Helper\HelperSet;
 use Symfony\Component\Console\Helper\QuestionHelper;
+use Symfony\Component\Console\Tester\CommandTester;
 
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class DbDumpTest extends TestCase
 {
     /**
@@ -53,7 +56,7 @@ class DbDumpTest extends TestCase
     protected function setUp(): void
     {
         $this->dumpProcessorMock = $this->createMock(DumpProcessor::class);
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
         $this->questionMock = $this->getMockBuilder(QuestionHelper::class)
             ->onlyMethods(['ask'])
             ->getMock();
@@ -67,7 +70,12 @@ class DbDumpTest extends TestCase
         $this->command->setHelperSet($this->helperSetMock);
     }
 
-    public function testExecuteWithConfirmation()
+    /**
+     * Test execute method with confirmation.
+     *
+     * @return void
+     */
+    public function testExecuteWithConfirmation(): void
     {
         $this->helperSetMock->expects($this->once())
             ->method('get')
@@ -97,7 +105,12 @@ class DbDumpTest extends TestCase
         $this->assertSame(0, $tester->getStatusCode());
     }
 
-    public function testExecuteConfirmationDeny()
+    /**
+     * Test execute method with confirmation deny.
+     *
+     * @return void
+     */
+    public function testExecuteConfirmationDeny(): void
     {
         $this->helperSetMock->expects($this->once())
             ->method('get')
@@ -120,9 +133,13 @@ class DbDumpTest extends TestCase
     }
 
     /**
+     * Test execute method with removing definers.
+     *
      * @param array $options
      * @dataProvider executeWithRemovingDefinersDataProvider
+     * @return void
      */
+    #[DataProvider('executeWithRemovingDefinersDataProvider')]
     public function testExecuteWithRemovingDefiners(array $options)
     {
         $this->helperSetMock->expects($this->once())
@@ -155,9 +172,11 @@ class DbDumpTest extends TestCase
     }
 
     /**
+     * Test execute method with removing definers data provider.
+     *
      * @return array
      */
-    public function executeWithRemovingDefinersDataProvider(): array
+    public static function executeWithRemovingDefinersDataProvider(): array
     {
         return [
             [['--' . DbDump::OPTION_REMOVE_DEFINERS => true]],
@@ -165,7 +184,12 @@ class DbDumpTest extends TestCase
         ];
     }
 
-    public function testExecuteWithException()
+    /**
+     * Test execute method with exception.
+     *
+     * @return void
+     */
+    public function testExecuteWithException(): void
     {
         $this->helperSetMock->expects($this->once())
             ->method('get')
@@ -194,7 +218,12 @@ class DbDumpTest extends TestCase
         $tester->execute([]);
     }
 
-    public function testExecuteWithDatabases()
+    /**
+     * Test execute method with databases.
+     *
+     * @return void
+     */
+    public function testExecuteWithDatabases(): void
     {
         $this->helperSetMock->expects($this->once())
             ->method('get')
@@ -223,7 +252,12 @@ class DbDumpTest extends TestCase
         $tester->execute([DbDump::ARGUMENT_DATABASES => ['main', 'sales', 'quote']]);
     }
 
-    public function testExecuteWithInvalidDatabases()
+    /**
+     * Test execute method with invalid databases.
+     *
+     * @return void
+     */
+    public function testExecuteWithInvalidDatabases(): void
     {
         $exceptionMessage = 'Incorrect the database names: [ invalidName0 invalidName1 invalidName2 ].'
             . ' Available database names: [ main quote sales ]';

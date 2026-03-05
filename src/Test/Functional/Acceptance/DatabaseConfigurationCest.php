@@ -34,6 +34,7 @@ abstract class DatabaseConfigurationCest extends AbstractCest
                 $this->convertEnvFromArrayToJson($data['variables'])
             )
         );
+        $this->removeVendorVolumeMountFromDockerCompose($I);
         $I->runDockerComposeCommand('run build cloud-build');
         $I->startEnvironment();
         $I->runDockerComposeCommand('run deploy cloud-deploy');
@@ -116,6 +117,7 @@ abstract class DatabaseConfigurationCest extends AbstractCest
                 ])
             )
         );
+        $this->removeVendorVolumeMountFromDockerCompose($I);
 
         $I->assertTrue($I->runDockerComposeCommand('run build cloud-build'));
         $I->assertTrue($I->startEnvironment());
@@ -139,6 +141,7 @@ abstract class DatabaseConfigurationCest extends AbstractCest
     {
         $I->copyFileToWorkDir('files/custom_db_configuration/.magento.env.yaml', '.magento.env.yaml');
         $I->generateDockerCompose('--mode=production');
+        $this->removeVendorVolumeMountFromDockerCompose($I);
         $I->assertTrue($I->runDockerComposeCommand('run build cloud-build'));
         $I->assertTrue($I->startEnvironment());
         $I->assertTrue(

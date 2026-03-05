@@ -2,27 +2,15 @@
 /**
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
- *
- * @category Magento
- * @package  Magento\MagentoCloud\Test\Functional\Acceptance
- * @author   Magento Core Team <core@magentocommerce.com>
- * @license  https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
- * @link     https://magento.com
  */
 declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 
 /**
- * ActiveMQ acceptance tests for PHP 8.4 and Magento 2.4.x
+ * Checks ActiveMQ configuration for PHP 8.4 and Magento 2.4.9-alpha
  *
  * @group php84
- *
- * @category Magento
- * @package  Magento\MagentoCloud\Test\Functional\Acceptance
- * @author   Magento Core Team <core@magentocommerce.com>
- * @license  https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
- * @link     https://magento.com
  */
 class ActiveMq84Cest extends ActiveMqCest
 {
@@ -33,7 +21,7 @@ class ActiveMq84Cest extends ActiveMqCest
     {
         return [
             'artemis-2.42' => [
-                'version' => '2.4.9-alpha-opensearch3.0',
+                'version' => '2.4.9-alpha',
                 'expectedHost' => 'activemq-artemis',
                 'expectedPort' => 61616,
                 'expectedUser' => 'admin',
@@ -51,7 +39,7 @@ class ActiveMq84Cest extends ActiveMqCest
     {
         return [
             'custom-artemis-config' => [
-                'version' => '2.4.9-alpha-opensearch3.0',
+                'version' => '2.4.9-alpha',
                 'configuration' => [
                     'stage' => [
                         'deploy' => [
@@ -79,7 +67,7 @@ class ActiveMq84Cest extends ActiveMqCest
                 ],
             ],
             'merge-artemis-config' => [
-                'version' => '2.4.9-alpha-opensearch3.0',
+                'version' => '2.4.9-alpha',
                 'configuration' => [
                     'stage' => [
                         'deploy' => [
@@ -114,7 +102,7 @@ class ActiveMq84Cest extends ActiveMqCest
     {
         return [
             'invalid-port' => [
-                'version' => '2.4.9-alpha-opensearch3.0',
+                'version' => '2.4.9-alpha',
                 'wrongConfiguration' => [
                     'stage' => [
                         'deploy' => [
@@ -135,7 +123,7 @@ class ActiveMq84Cest extends ActiveMqCest
                 'errorDeployMessage' => '',
             ],
             'missing-host' => [
-                'version' => '2.4.9-alpha-opensearch3.0',
+                'version' => '2.4.9-alpha',
                 'wrongConfiguration' => [
                     'stage' => [
                         'deploy' => [
@@ -165,8 +153,8 @@ class ActiveMq84Cest extends ActiveMqCest
     {
         // Test with RabbitMQ version to verify AMQP configuration
         return [
-            'rabbitmq-default-config-2.4.9' => [
-                'version' => '2.4.9-alpha-rabbitmq',
+            'rabbitmq-default-config-2.4.9-alpha' => [
+                'version' => '2.4.9-alpha',
                 'configuration' => [
                     'stage' => [
                         'deploy' => [
@@ -191,9 +179,39 @@ class ActiveMq84Cest extends ActiveMqCest
     {
         // Test with no ActiveMQ and no RabbitMQ - validates database queue usage
         return [
-            'db-queue-only-2.4.9' => [
+            'db-queue-only-2.4.9-alpha' => [
                 'version' => '2.4.9-alpha',
             ],
         ];
+    }
+
+    /**
+     * Override testFallbackToRabbitMq to add RabbitMQ service instead of ActiveMQ
+     *
+     * @param        \CliTester           $I
+     * @param        \Codeception\Example $data
+     * @return       void
+     * @throws       \Robo\Exception\TaskException
+     * @dataProvider fallbackToRabbitMqDataProvider
+     */
+    public function testFallbackToRabbitMq(\CliTester $I, \Codeception\Example $data): void
+    {
+        $this->serviceToAdd = 'rabbitmq';
+        parent::testFallbackToRabbitMq($I, $data);
+    }
+
+    /**
+     * Override testNoMessageBroker to not add any message broker service
+     *
+     * @param        \CliTester           $I
+     * @param        \Codeception\Example $data
+     * @return       void
+     * @throws       \Robo\Exception\TaskException
+     * @dataProvider noMessageBrokerDataProvider
+     */
+    public function testNoMessageBroker(\CliTester $I, \Codeception\Example $data): void
+    {
+        $this->serviceToAdd = 'none';
+        parent::testNoMessageBroker($I, $data);
     }
 }

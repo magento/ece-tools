@@ -32,6 +32,7 @@ abstract class CronCest extends AbstractCest
             $I->getExposedPort(),
             $this->convertEnvFromArrayToJson($data['variables'])
         ));
+        $this->removeVendorVolumeMountFromDockerCompose($I);
         $I->copyDirToWorkDir('modules/Magento/CronTest', 'app/code/Magento/CronTest');
         $I->runDockerComposeCommand('run build cloud-build');
         $I->startEnvironment();

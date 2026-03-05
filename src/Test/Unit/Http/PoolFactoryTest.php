@@ -14,8 +14,8 @@ use Magento\MagentoCloud\Http\ClientFactory;
 use Magento\MagentoCloud\Http\PoolFactory;
 use Magento\MagentoCloud\Http\RequestFactory;
 use Magento\MagentoCloud\Util\UrlManager;
-use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\RequestInterface;
 
 /**
@@ -68,9 +68,9 @@ class PoolFactoryTest extends TestCase
 
     public function testCreate()
     {
-        $clientMock = $this->createMock(Client::class);
-        $poolMock = $this->createMock(Pool::class);
-        $requestMock = $this->createMock(RequestInterface::class);
+        $clientMock = $this->createStub(Client::class);
+        $poolMock = $this->createStub(Pool::class);
+        $requestMock = $this->createStub(RequestInterface::class);
 
         $this->clientFactoryMock->expects($this->once())
             ->method('create')

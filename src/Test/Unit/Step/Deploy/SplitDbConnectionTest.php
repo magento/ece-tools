@@ -8,63 +8,66 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit\Step\Deploy;
 
 use Magento\MagentoCloud\App\Error;
+use Magento\MagentoCloud\Config\Database\DbConfig;
+use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface as ConfigReader;
+use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
+use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
+use Magento\MagentoCloud\Shell\MagentoShell;
 use Magento\MagentoCloud\Step\Deploy\SplitDbConnection;
 use Magento\MagentoCloud\Step\Deploy\SplitDbConnection\SlaveConnection;
 use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Util\UpgradeProcess;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
-use Magento\MagentoCloud\Shell\MagentoShell;
-use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
-use Magento\MagentoCloud\Config\Stage\DeployInterface;
-use Magento\MagentoCloud\Config\Database\DbConfig;
-use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface as ConfigReader;
 
 /**
  * @inheritdoc
  *
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
+#[AllowMockObjectsWithoutExpectations]
 class SplitDbConnectionTest extends TestCase
 {
     private const CHECKOUT_CONNECTION_CONFIG = [
-        'host' => 'checkout.host',
-        'dbname' => 'checkout.dbname',
+        'host'     => 'checkout.host',
+        'dbname'   => 'checkout.dbname',
         'username' => 'checkout.username',
         'password' => 'checkout.password',
     ];
 
     private const SALES_CONNECTION_CONFIG = [
-        'host' => 'sales.host',
-        'dbname' => 'sales.dbname',
+        'host'     => 'sales.host',
+        'dbname'   => 'sales.dbname',
         'username' => 'sales.username',
         'password' => 'sales.password',
     ];
 
     private const CONNECTION = [
         'checkout' => self::CHECKOUT_CONNECTION_CONFIG,
-        'sales' => self::SALES_CONNECTION_CONFIG,
+        'sales'    => self::SALES_CONNECTION_CONFIG,
     ];
 
     private const SLAVE_CHECKOUT_CONNECTION_CONFIG = [
-        'host' => 'slave.checkout.host',
-        'dbname' => 'slave.checkout.dbname',
+        'host'     => 'slave.checkout.host',
+        'dbname'   => 'slave.checkout.dbname',
         'username' => 'slave.checkout.username',
         'password' => 'slave.checkout.password',
     ];
 
     private const SLAVE_SALES_CONNECTION_CONFIG = [
-        'host' => 'slave.sales.host',
-        'dbname' => 'slave.sales.dbname',
+        'host'     => 'slave.sales.host',
+        'dbname'   => 'slave.sales.dbname',
         'username' => 'slave.sales.username',
         'password' => 'slave.sales.password',
     ];
 
     private const SLAVE_CONNECTION = [
         'checkout' => self::SLAVE_CHECKOUT_CONNECTION_CONFIG,
-        'sales' => self::SLAVE_SALES_CONNECTION_CONFIG,
+        'sales'    => self::SLAVE_SALES_CONNECTION_CONFIG,
     ];
 
     /**
@@ -119,9 +122,9 @@ class SplitDbConnectionTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
+        $this->stageConfigMock = $this->createMock(DeployInterface::class);
         $this->dbConfigMock = $this->createMock(DbConfig::class);
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
         $this->flagManagerMock = $this->createMock(FlagManager::class);
         $this->configReaderMock = $this->createMock(ConfigReader::class);
         $this->magentoShellMock = $this->createMock(MagentoShell::class);
@@ -141,9 +144,12 @@ class SplitDbConnectionTest extends TestCase
     }
 
     /**
-     * Flag IGNORES_SPLIT_DB exists
+     * Test execute flag ignore split db exists.
+     * Flag IGNORES_SPLIT_DB exists.
+     *
+     * @return void
      */
-    public function testExecuteFlagIgnoreSplitDbExists()
+    public function testExecuteFlagIgnoreSplitDbExists(): void
     {
         $this->flagManagerMock->expects($this->once())
             ->method('exists')
@@ -166,14 +172,19 @@ class SplitDbConnectionTest extends TestCase
     }
 
     /**
-     * Relationships have no connections for split database
+     * Relationships have no connections for split database.
+     * Test execute relationship not have configurations.
      *
      * @param array $dbConfig
      * @param array $splitTypes
-     * @dataProvider  dataProviderExecuteRelationshipNotHaveConfigurations
+     * @return void
+     * @dataProvider dataProviderExecuteRelationshipNotHaveConfigurations
      */
-    public function testExecuteRelationshipNotHaveConfigurations(array $dbConfig, array $splitTypes)
-    {
+    #[DataProvider('dataProviderExecuteRelationshipNotHaveConfigurations')]
+    public function testExecuteRelationshipNotHaveConfigurations(
+        array $dbConfig,
+        array $splitTypes
+    ): void {
         $this->flagManagerMock->expects($this->once())
             ->method('exists')
             ->with(FlagManager::FLAG_IGNORE_SPLIT_DB)
@@ -189,7 +200,7 @@ class SplitDbConnectionTest extends TestCase
             ->method('warning')
             ->with(
                 'Enabling a split database will be skipped.'
-                . ' Relationship do not have configuration for next types: ' . implode(', ', $splitTypes)
+                    . ' Relationship do not have configuration for next types: ' . implode(', ', $splitTypes)
             );
         $this->magentoShellMock->expects($this->never())
             ->method('execute');
@@ -202,10 +213,11 @@ class SplitDbConnectionTest extends TestCase
     }
 
     /**
-     * DataProvider for testExecuteWhenRelationshipNotHaveConfigurations
+     * DataProvider for testExecuteWhenRelationshipNotHaveConfigurations method.
+     *
      * @return array
      */
-    public function dataProviderExecuteRelationshipNotHaveConfigurations(): array
+    public static function dataProviderExecuteRelationshipNotHaveConfigurations(): array
     {
         return [
             [
@@ -224,20 +236,22 @@ class SplitDbConnectionTest extends TestCase
     }
 
     /**
-     * Variable SPLIT_DB does not have some split type connections which exists in env.php
+     * Variable SPLIT_DB does not have some split type connections which exists in env.php.
      *
      * @param array $varSplitDb
      * @param array $dbConfig
      * @param array $mageConfig
      * @param array $splitTypes
      * @dataProvider dataProviderExecuteVarSplitDbDoesNotHaveSplitTypes
+     * @return void
      */
+    #[DataProvider('dataProviderExecuteVarSplitDbDoesNotHaveSplitTypes')]
     public function testExecuteVarSplitDbDoesNotHaveSplitTypes(
         array $varSplitDb,
         array $dbConfig,
         array $mageConfig,
         array $splitTypes
-    ) {
+    ): void {
         $this->stageConfigMock->expects($this->once())
             ->method('get')
             ->with(DeployInterface::VAR_SPLIT_DB)
@@ -256,7 +270,7 @@ class SplitDbConnectionTest extends TestCase
             ->method('warning')
             ->with(
                 'The SPLIT_DB variable is missing the configuration for split connection types: '
-                . implode(', ', $splitTypes)
+                    . implode(', ', $splitTypes)
             );
         $this->magentoShellMock->expects($this->never())
             ->method('execute');
@@ -269,9 +283,11 @@ class SplitDbConnectionTest extends TestCase
     }
 
     /**
-     * DataProvider for testExecuteVarSplitDbDoesNotHaveSplitTypes
+     * DataProvider for testExecuteVarSplitDbDoesNotHaveSplitTypes method.
+     *
+     * @return array
      */
-    public function dataProviderExecuteVarSplitDbDoesNotHaveSplitTypes()
+    public static function dataProviderExecuteVarSplitDbDoesNotHaveSplitTypes(): array
     {
         return [
             [
@@ -321,9 +337,11 @@ class SplitDbConnectionTest extends TestCase
     }
 
     /**
-     * Split db will be enabled with slave connections
+     * Test execute enable split db with slave connection.
+     *
+     * @return void
      */
-    public function testExecuteEnableSplitDbWithSlaveConnection()
+    public function testExecuteEnableSplitDbWithSlaveConnection(): void
     {
         $this->flagManagerMock->expects($this->once())
             ->method('exists')
@@ -346,7 +364,7 @@ class SplitDbConnectionTest extends TestCase
                 static $i = 0;
                 return match (++$i) {
                     1 => $message === 'setup:db-schema:split-quote --host="checkout.host" --dbname="checkout.dbname"'
-                    . ' --username="checkout.username" --password="checkout.password"',
+                        . ' --username="checkout.username" --password="checkout.password"',
                     2 => $message === 'setup:db-schema:split-sales --host="sales.host" --dbname="sales.dbname"'
                         . ' --username="sales.username" --password="sales.password"',
                 };
@@ -370,9 +388,11 @@ class SplitDbConnectionTest extends TestCase
     }
 
     /**
-     * Case when enable slave connections only
+     * Test execute only update slave connections.
+     *
+     * @return void
      */
-    public function testExecuteOnlyUpdateSlaveConnections()
+    public function testExecuteOnlyUpdateSlaveConnections(): void
     {
         $this->stageConfigMock->expects($this->once())
             ->method('get')
@@ -401,7 +421,12 @@ class SplitDbConnectionTest extends TestCase
         $this->step->execute();
     }
 
-    public function testExecuteWithFileSystemExceptionInRead()
+    /**
+     * Test execute with file system exception in read.
+     *
+     * @return void
+     */
+    public function testExecuteWithFileSystemExceptionInRead(): void
     {
         $errorMsg = 'Some error';
         $errorCode = 111;
@@ -431,7 +456,12 @@ class SplitDbConnectionTest extends TestCase
         $this->step->execute();
     }
 
-    public function testExecuteWithFileSystemExceptionInSlaveUpdate()
+    /**
+     * Test execute with file system exception in slave update.
+     *
+     * @return void
+     */
+    public function testExecuteWithFileSystemExceptionInSlaveUpdate(): void
     {
         $errorMsg = 'Some error';
         $errorCode = 111;

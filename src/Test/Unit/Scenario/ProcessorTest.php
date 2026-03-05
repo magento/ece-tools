@@ -10,11 +10,12 @@ namespace Magento\MagentoCloud\Test\Unit\Scenario;
 use Magento\MagentoCloud\OnFail\Action\ActionException;
 use Magento\MagentoCloud\OnFail\Action\ActionInterface;
 use Magento\MagentoCloud\Package\Manager;
-use Magento\MagentoCloud\Step\StepException;
-use Magento\MagentoCloud\Step\StepInterface;
 use Magento\MagentoCloud\Scenario\Exception\ProcessorException;
 use Magento\MagentoCloud\Scenario\Merger;
 use Magento\MagentoCloud\Scenario\Processor;
+use Magento\MagentoCloud\Step\StepException;
+use Magento\MagentoCloud\Step\StepInterface;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -22,6 +23,7 @@ use Psr\Log\LoggerInterface;
 /**
  * @inheritDoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class ProcessorTest extends TestCase
 {
     /**
@@ -50,7 +52,7 @@ class ProcessorTest extends TestCase
     protected function setUp(): void
     {
         $this->mergerMock = $this->createMock(Merger::class);
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
         $this->packageManagerMock = $this->createMock(Manager::class);
 
         $this->processor = new Processor(
@@ -70,8 +72,8 @@ class ProcessorTest extends TestCase
             'some/scenario.xml'
         ];
 
-        $step1 = $this->getMockForAbstractClass(StepInterface::class);
-        $step2 = $this->getMockForAbstractClass(StepInterface::class);
+        $step1 = $this->createMock(StepInterface::class);
+        $step2 = $this->createMock(StepInterface::class);
 
         $step1->expects($this->once())
             ->method('execute');
@@ -83,7 +85,7 @@ class ProcessorTest extends TestCase
             'step2' => $step2
         ];
 
-        $action = $this->getMockForAbstractClass(ActionInterface::class);
+        $action = $this->createMock(ActionInterface::class);
         $action->expects($this->never())
             ->method('execute');
 
@@ -135,7 +137,7 @@ class ProcessorTest extends TestCase
             'some/scenario.xml'
         ];
 
-        $step1 = $this->getMockForAbstractClass(StepInterface::class);
+        $step1 = $this->createMock(StepInterface::class);
 
         $step1->expects($this->once())
             ->method('execute')
@@ -145,7 +147,7 @@ class ProcessorTest extends TestCase
             'step1' => $step1
         ];
 
-        $action = $this->getMockForAbstractClass(ActionInterface::class);
+        $action = $this->createMock(ActionInterface::class);
         $action->expects($this->once())
             ->method('execute');
 
@@ -203,7 +205,7 @@ class ProcessorTest extends TestCase
             'some/scenario.xml'
         ];
 
-        $step1 = $this->getMockForAbstractClass(StepInterface::class);
+        $step1 = $this->createMock(StepInterface::class);
 
         $step1->expects($this->once())
             ->method('execute')
@@ -213,7 +215,7 @@ class ProcessorTest extends TestCase
             'step1' => $step1
         ];
 
-        $action = $this->getMockForAbstractClass(ActionInterface::class);
+        $action = $this->createMock(ActionInterface::class);
         $action->expects($this->once())
             ->method('execute')
             ->willThrowException(new ActionException('Action error'));
@@ -289,11 +291,11 @@ class ProcessorTest extends TestCase
                 };
             }));
 
-        $step1 = $this->getMockForAbstractClass(StepInterface::class);
+        $step1 = $this->createMock(StepInterface::class);
         $step1->expects($this->never())
             ->method('execute');
 
-        $action = $this->getMockForAbstractClass(ActionInterface::class);
+        $action = $this->createMock(ActionInterface::class);
         $action->expects($this->never())
             ->method('execute');
 

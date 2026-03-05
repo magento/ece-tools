@@ -11,7 +11,6 @@ use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileList;
 
 /**
- * @inheritdoc
  */
 class Writer implements WriterInterface
 {
@@ -46,7 +45,6 @@ class Writer implements WriterInterface
     }
 
     /**
-     * @inheritdoc
      */
     public function create(array $config)
     {
@@ -56,7 +54,6 @@ class Writer implements WriterInterface
     }
 
     /**
-     * @inheritdoc
      */
     public function update(array $config)
     {

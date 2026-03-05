@@ -20,7 +20,6 @@ use Psr\Log\LoggerInterface;
 /**
  * Validates installed service versions according to version mapping.
  *
- * @see \Magento\MagentoCloud\Service\Validator::MAGENTO_SUPPORTED_SERVICE_VERSIONS
  */
 class ServiceVersion implements ValidatorInterface
 {

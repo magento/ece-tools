@@ -15,6 +15,7 @@ use Magento\MagentoCloud\Package\UndefinedPackageException;
 use Magento\MagentoCloud\Config\Amqp;
 use Magento\MagentoCloud\Service\ActiveMq;
 use Magento\MagentoCloud\Service\RabbitMq;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -57,7 +58,7 @@ class AmqpTest extends TestCase
     {
         $this->activeMq = $this->createMock(ActiveMq::class);
         $this->rabbitMq = $this->createMock(RabbitMq::class);
-        $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
+        $this->stageConfigMock = $this->createMock(DeployInterface::class);
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
 
         $this->config = new Amqp(
@@ -70,16 +71,20 @@ class AmqpTest extends TestCase
     }
 
     /**
+     * Test getConfig method.
+     *
      * @param  array $customQueueConfig
      * @param  array $amqpServiceConfig
      * @param  bool  $isGreaterOrEqualReturns
      * @param  bool  $consumersWaitMaxMessages
      * @param  int   $countCallGetConfig
      * @param  array $expectedQueueConfig
+     * @return void
      * @throws UndefinedPackageException|ConfigException
      *
      * @dataProvider getConfigDataProvider
      */
+    #[DataProvider('getConfigDataProvider')]
     public function testGetConfig(
         array $customQueueConfig,
         array $amqpServiceConfig,
@@ -117,6 +122,8 @@ class AmqpTest extends TestCase
     }
 
     /**
+     * Data provider for testGetConfig.
+     *
      * @return array
      *
      * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
@@ -425,6 +432,8 @@ class AmqpTest extends TestCase
 
     /**
      * Test that RabbitMQ is used as fallback when ActiveMQ is not available
+     *
+     * @return void
      */
     public function testRabbitMqFallbackWhenActiveMqNotAvailable(): void
     {

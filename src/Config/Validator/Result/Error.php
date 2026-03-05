@@ -10,7 +10,6 @@ namespace Magento\MagentoCloud\Config\Validator\Result;
 use Magento\MagentoCloud\Config\Validator\ResultInterface;
 
 /**
- * @inheritdoc
  */
 class Error implements ResultInterface
 {

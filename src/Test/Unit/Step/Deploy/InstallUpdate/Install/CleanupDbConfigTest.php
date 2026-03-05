@@ -14,6 +14,7 @@ use Magento\MagentoCloud\Step\Deploy\InstallUpdate\Install\CleanupDbConfig;
 use Magento\MagentoCloud\Step\StepException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -51,10 +52,10 @@ class CleanupDbConfigTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->loggerMock       = $this->createMock(LoggerInterface::class);
         $this->configWriterMock = $this->createMock(ConfigWriter::class);
         $this->configReaderMock = $this->createMock(ConfigReader::class);
-        $this->dbConfigMock = $this->createMock(DbConfig::class);
+        $this->dbConfigMock     = $this->createMock(DbConfig::class);
 
         $this->step = new CleanupDbConfig(
             $this->loggerMock,
@@ -65,9 +66,12 @@ class CleanupDbConfigTest extends TestCase
     }
 
     /**
+     * Test execute with update db config.
+     *
+     * @return void
      * @throws StepException
      */
-    public function testExecuteWithUpdateDbConfig()
+    public function testExecuteWithUpdateDbConfig(): void
     {
         $this->dbConfigMock->expects($this->once())
             ->method('get')
@@ -98,13 +102,16 @@ class CleanupDbConfigTest extends TestCase
     }
 
     /**
+     * Test execute without update db config.
+     *
      * @param array $dbConfig
      * @param array $mageConfig
-     *
-     * @throws StepException
      * @dataProvider dataProviderExecuteInstallUpdateByDefault
+     * @return void
+     * @throws StepException
      */
-    public function testExecuteWithoutUpdateDbConfig(array $dbConfig, array $mageConfig)
+    #[DataProvider('dataProviderExecuteInstallUpdateByDefault')]
+    public function testExecuteWithoutUpdateDbConfig(array $dbConfig, array $mageConfig): void
     {
         $this->dbConfigMock->expects($this->once())
             ->method('get')
@@ -123,9 +130,11 @@ class CleanupDbConfigTest extends TestCase
     }
 
     /**
+     * DataProvider for testExecuteWithoutUpdateDbConfig method.
+     *
      * @return array
      */
-    public function dataProviderExecuteInstallUpdateByDefault(): array
+    public static function dataProviderExecuteInstallUpdateByDefault(): array
     {
         return [
             'deploy with new installation' => [

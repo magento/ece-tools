@@ -19,7 +19,6 @@ use Magento\MagentoCloud\Config\Amqp as AmqpConfig;
 use Magento\MagentoCloud\Config\Stomp as StompConfig;
 
 /**
- * @inheritdoc
  */
 class Amqp implements StepInterface
 {

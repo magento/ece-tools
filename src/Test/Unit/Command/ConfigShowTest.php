@@ -9,6 +9,7 @@ namespace Magento\MagentoCloud\Test\Unit\Command;
 
 use Codeception\PHPUnit\TestCase;
 use Magento\MagentoCloud\Command\ConfigShow;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Input\InputInterface;
@@ -17,6 +18,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class ConfigShowTest extends TestCase
 {
     /**
@@ -50,9 +52,9 @@ class ConfigShowTest extends TestCase
     protected function setUp(): void
     {
         $this->configRendererMock = $this->createMock(ConfigShow\Renderer::class);
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
-        $this->inputMock = $this->getMockForAbstractClass(InputInterface::class);
-        $this->outputMock = $this->getMockForAbstractClass(OutputInterface::class);
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
+        $this->inputMock = $this->createMock(InputInterface::class);
+        $this->outputMock = $this->createMock(OutputInterface::class);
 
         $this->command = new ConfigShow(
             $this->configRendererMock,

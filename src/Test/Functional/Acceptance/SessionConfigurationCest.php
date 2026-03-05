@@ -33,6 +33,7 @@ abstract class SessionConfigurationCest extends AbstractCest
                 $this->convertEnvFromArrayToJson($data['variables'])
             )
         );
+        $this->removeVendorVolumeMountFromDockerCompose($I);
         $I->runDockerComposeCommand('run build cloud-build');
         $I->startEnvironment();
         $I->runDockerComposeCommand('run deploy cloud-deploy');

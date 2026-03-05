@@ -38,7 +38,7 @@ class ModulesExistsTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->readerMock = $this->getMockForAbstractClass(ReaderInterface::class);
+        $this->readerMock = $this->createMock(ReaderInterface::class);
         $this->resultFactoryMock = $this->createMock(ResultFactory::class);
 
         $this->validator = new ModulesExists(

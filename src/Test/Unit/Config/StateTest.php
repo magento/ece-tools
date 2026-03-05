@@ -1,8 +1,10 @@
 <?php
+
 /**
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+
 declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Config;
@@ -12,15 +14,18 @@ use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface;
 use Magento\MagentoCloud\Config\Magento\Env\WriterInterface;
-use Magento\MagentoCloud\DB\ConnectionInterface;
-use PHPUnit\Framework\MockObject\MockObject;
-use Psr\Log\LoggerInterface;
 use Magento\MagentoCloud\Config\State;
+use Magento\MagentoCloud\DB\ConnectionInterface;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
 
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class StateTest extends TestCase
 {
     use \phpmock\phpunit\PHPMock;
@@ -60,10 +65,10 @@ class StateTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
-        $this->connectionMock = $this->getMockForAbstractClass(ConnectionInterface::class);
-        $this->readerMock = $this->getMockForAbstractClass(ReaderInterface::class);
-        $this->writerMock = $this->getMockForAbstractClass(WriterInterface::class);
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
+        $this->connectionMock = $this->createMock(ConnectionInterface::class);
+        $this->readerMock = $this->createMock(ReaderInterface::class);
+        $this->writerMock = $this->createMock(WriterInterface::class);
         $this->environmentMock = $this->createMock(Environment::class);
 
         $this->state = new State(
@@ -76,11 +81,14 @@ class StateTest extends TestCase
     }
 
     /**
+     * Test isInstalledTablesCount method.
+     *
      * @param mixed $tables
      * @throws GenericException
-     *
      * @dataProvider tablesCountDataProvider
+     * @return void
      */
+    #[DataProvider('tablesCountDataProvider')]
     public function testIsInstalledTablesCount($tables): void
     {
         $this->loggerMock->expects($this->once())
@@ -96,19 +104,24 @@ class StateTest extends TestCase
     }
 
     /**
+     * Data provider for tablesCountDataProvider method.
+     *
      * @return array
      */
-    public function tablesCountDataProvider(): array
+    public static function tablesCountDataProvider(): array
     {
         return [[['']], [['table1']]];
     }
 
     /**
+     * Test isInstalledTablesWithException method.
+     *
      * @param array $tables
      * @throws GenericException
-     *
      * @dataProvider tablesWithExceptionDataProvider
+     * @return void
      */
+    #[DataProvider('tablesWithExceptionDataProvider')]
     public function testIsInstalledTablesWithException($tables): void
     {
         $this->expectException(GenericException::class);
@@ -127,9 +140,11 @@ class StateTest extends TestCase
     }
 
     /**
+     * Data provider for tablesWithExceptionDataProvider method.
+     *
      * @return array
      */
-    public function tablesWithExceptionDataProvider(): array
+    public static function tablesWithExceptionDataProvider(): array
     {
         return [
             [['core_config_data', 'some_table']],
@@ -139,6 +154,9 @@ class StateTest extends TestCase
     }
 
     /**
+     * Test installedDbAndEmptyFile method.
+     *
+     * @return void
      * @throws GenericException
      */
     public function testInstalledDbAndEmptyFile(): void
@@ -160,6 +178,9 @@ class StateTest extends TestCase
     }
 
     /**
+     * Test installedDbAndFileWithoutDate method.
+     *
+     * @return void
      * @throws GenericException
      */
     public function testInstalledDbAndFileWithoutDate(): void
@@ -184,6 +205,9 @@ class StateTest extends TestCase
     }
 
     /**
+     * Test installedWithCryptKeyOnlyInEnvironmentVar method.
+     *
+     * @return void
      * @throws GenericException
      */
     public function testInstalledWithCryptKeyOnlyInEnvironmentVar(): void
@@ -194,7 +218,7 @@ class StateTest extends TestCase
             'Checking if db exists and has tables',
             'Magento was installed on ' . $date
         ];
-  
+
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
             // withConsecutive() alternative.
@@ -213,6 +237,9 @@ class StateTest extends TestCase
     }
 
     /**
+     * Test isInstalledWithFullData method.
+     *
+     * @return void
      * @throws GenericException
      */
     public function testIsInstalledWithFullData(): void
@@ -241,6 +268,12 @@ class StateTest extends TestCase
         $this->assertTrue($this->state->isInstalled());
     }
 
+    /**
+     * Mock for tables exist.
+     *
+     * @param array $config
+     * @return void
+     */
     private function mockForTablesExist($config = [])
     {
         $this->connectionMock->expects($this->once())

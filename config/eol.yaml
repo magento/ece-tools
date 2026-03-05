@@ -1,52 +1,52 @@
 # Service EOLs (YYYY-MM-DD).
 php:
   - version: '8.1'
-    eol: 2024-11-24
+    eol: 2025-12-31
   - version: '8.2'
-    eol: 2025-12-08
-  - version: '8.3'
     eol: 2026-12-31
-  - version: '8.4'
+  - version: '8.3'
     eol: 2027-12-31
+  - version: '8.4'
+    eol: 2028-12-31
 mariadb:
   - version: '10.4'
-    eol: 2024-06-30
+    eol: 2024-06-18
   - version: '10.5'
-    eol: 2025-05-30  
+    eol: 2025-06-24
   - version: '10.6'
-    eol: 2026-06-30
+    eol: 2026-07-06
   - version: '10.11'
-    eol: 2027-10-25
+    eol: 2028-02-16
   - version: '11.4'
-    eol: 2028-04-30
+    eol: 2029-05-29
 opensearch:
   - version: '1'
-    eol: 2024-09-30
+    eol: 2026-11-07
   - version: '2'
-    eol: 2025-02-28
+    eol: 2026-11-07
   - version: '3'
     eol: 2026-05-06 
 rabbitmq: 
   - version: '3.9'
-    eol: 2024-10-31
+    eol: 2023-01-31
   - version: '3.11'
-    eol: 2025-11-30   
+    eol: 2023-06-02
   - version: '3.12'
-    eol: 2026-05-31
+    eol: 2024-02-22
   - version: '3.13'
-    eol: 2027-11-30
+    eol: 2024-09-18
   - version: '4.1'
-    eol: 2028-12-31    
+    eol: 2026-01-31  
 redis:
   - version: '6.2'
-    eol: 2024-04-30
+    eol: 2025-02-28
   - version: '7.0'
-    eol: 2026-04-30
+    eol: 2024-07-29
   - version: '7.2'
-    eol: 2028-06-30
+    eol: 2026-02-28
 valkey:
   - version: '8.0'
     eol: 2027-09-15
 activemq-artemis:
   - version: '2.42.0'
-    eol: 2026-07-17
+    eol: 2025-10-13

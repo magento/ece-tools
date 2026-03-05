@@ -9,23 +9,26 @@ namespace Magento\MagentoCloud\Test\Unit\Step\Deploy\InstallUpdate\Install;
 
 use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\AdminDataInterface;
+use Magento\MagentoCloud\Filesystem\DirectoryList;
+use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
+use Magento\MagentoCloud\Step\Deploy\InstallUpdate\Install\ResetPassword;
 use Magento\MagentoCloud\Step\StepException;
+use Magento\MagentoCloud\Util\UrlManager;
+use phpmock\phpunit\PHPMock;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Magento\MagentoCloud\Step\Deploy\InstallUpdate\Install\ResetPassword;
 use Psr\Log\LoggerInterface;
-use Magento\MagentoCloud\Util\UrlManager;
-use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Filesystem\DirectoryList;
-use PHPUnit\Framework\MockObject\Matcher\InvokedCount;
 
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class ResetPasswordTest extends TestCase
 {
-    use \phpmock\phpunit\PHPMock;
+    use PHPMock;
 
     /**
      * @var LoggerInterface|MockObject
@@ -67,10 +70,10 @@ class ResetPasswordTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
-        $this->adminDataMock = $this->getMockForAbstractClass(AdminDataInterface::class);
-        $this->urlManagerMock = $this->createMock(UrlManager::class);
-        $this->fileMock = $this->createMock(File::class);
+        $this->loggerMock        = $this->createMock(LoggerInterface::class);
+        $this->adminDataMock     = $this->createMock(AdminDataInterface::class);
+        $this->urlManagerMock    = $this->createMock(UrlManager::class);
+        $this->fileMock          = $this->createMock(File::class);
         $this->directoryListMock = $this->createMock(DirectoryList::class);
 
         $this->mailFunctionMock = $this->getFunctionMock(
@@ -88,25 +91,32 @@ class ResetPasswordTest extends TestCase
     }
 
     /**
-     * @param InvokedCount $expectsAdminEmail
+     * Test execute with password set or admin email not set.
+     *
+     * @param int $expectsAdminEmailCount
      * @param string $dataAdminPassword
      * @param string $dataAdminEmail
      * @return void
      * @throws StepException
-     *
-     * @dataProvider executeWithPasswordSetOrAdminEmailNotSetDataProvider
      */
+    #[DataProvider('executeWithPasswordSetOrAdminEmailNotSetDataProvider')]
     public function testExecuteWithPasswordSetOrAdminEmailNotSet(
-        $expectsAdminEmail,
-        $dataAdminPassword,
-        $dataAdminEmail
+        int $expectsAdminEmailCount,
+        string $dataAdminPassword,
+        string $dataAdminEmail
     ): void {
         $this->adminDataMock->expects($this->once())
             ->method('getPassword')
             ->willReturn($dataAdminPassword);
-        $this->adminDataMock->expects($expectsAdminEmail)
-            ->method('getEmail')
-            ->willReturn($dataAdminEmail);
+        
+        if ($expectsAdminEmailCount === 0) {
+            $this->adminDataMock->expects($this->never())
+                ->method('getEmail');
+        } else {
+            $this->adminDataMock->expects($this->once())
+                ->method('getEmail')
+                ->willReturn($dataAdminEmail);
+        }
         $this->directoryListMock->expects($this->never())
             ->method('getMagentoRoot');
         $this->urlManagerMock->expects($this->never())
@@ -125,33 +135,38 @@ class ResetPasswordTest extends TestCase
     }
 
     /**
+     * DataProvider for testExecuteWithPasswordSetOrAdminEmailNotSet method.
+     *
      * @return array
      */
-    public function executeWithPasswordSetOrAdminEmailNotSetDataProvider(): array
+    public static function executeWithPasswordSetOrAdminEmailNotSetDataProvider(): array
     {
         return [
             [
-                'expectsAdminEmail' => $this->never(),
-                'dataAdminPassword' => 'somePassword',
-                'dataAdminEmail' => ''
+                'expectsAdminEmailCount' => 0,
+                'dataAdminPassword'      => 'somePassword',
+                'dataAdminEmail'         => ''
             ],
             [
-                'expectsAdminEmail' => $this->once(),
-                'dataAdminPassword' => '',
-                'dataAdminEmail' => ''
+                'expectsAdminEmailCount' => 1,
+                'dataAdminPassword'      => '',
+                'dataAdminEmail'         => ''
             ],
         ];
     }
 
     /**
+     * Test execute method.
+     *
      * @param string $adminUrl
      * @param string $adminUsername
      * @param string $expectedAdminUsername
      * @param string $expectedContent
+     * @dataProvider executeDataProvider
      * @throws StepException
      *
-     * @dataProvider executeDataProvider
      */
+    #[DataProvider('executeDataProvider')]
     public function testExecute(
         string $adminUrl,
         string $adminUsername,
@@ -159,13 +174,14 @@ class ResetPasswordTest extends TestCase
         string $expectedContent
     ): void {
         $adminEmail = 'admin@example.com';
-        $url = 'https://localhost/';
-        $dir = '/root';
-        $file = $dir . '/var/credentials_email.txt';
-        $series = [
+        $url        = 'https://localhost/';
+        $dir        = '/root';
+        $file       = $dir . '/var/credentials_email.txt';
+        $series     = [
             'Emailing admin URL to admin user ' . $expectedAdminUsername . ' at ' . $adminEmail,
             'Saving email with admin URL: ' . $file
         ];
+
         $this->adminDataMock->expects($this->once())
             ->method('getPassword')
             ->willReturn('');
@@ -186,7 +202,6 @@ class ResetPasswordTest extends TestCase
             ->willReturn($adminUsername);
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
-            // withConsecutive() alternative.
             ->willReturnCallback(function ($args) use (&$series) {
                 $expectedArgs = array_shift($series);
                 $this->assertSame($expectedArgs, $args);
@@ -211,9 +226,11 @@ class ResetPasswordTest extends TestCase
     }
 
     /**
+     * DataProvider for testExecute method.
+     *
      * @return array
      */
-    public function executeDataProvider(): array
+    public static function executeDataProvider(): array
     {
         return [
             [
@@ -228,9 +245,12 @@ class ResetPasswordTest extends TestCase
     }
 
     /**
+     * Test exception template not readable.
+     *
+     * @return void
      * @throws StepException
      */
-    public function testExceptionTemplateNotReadable()
+    public function testExceptionTemplateNotReadable(): void
     {
         $url = 'https://localhost/';
         $this->adminDataMock->expects($this->once())
@@ -253,7 +273,13 @@ class ResetPasswordTest extends TestCase
         $this->resetPassword->execute();
     }
 
-    public function testExceptionFileNotWritable()
+    /**
+     * Test exception file not writable.
+     *
+     * @return void
+     * @throws StepException
+     */
+    public function testExceptionFileNotWritable(): void
     {
         $url = 'https://localhost/';
         $this->adminDataMock->expects($this->once())

@@ -27,6 +27,7 @@ abstract class WizardScdCest extends AbstractCest
         parent::_before($I);
 
         $I->generateDockerCompose('--mode=production');
+        $this->removeVendorVolumeMountFromDockerCompose($I);
     }
 
     /**

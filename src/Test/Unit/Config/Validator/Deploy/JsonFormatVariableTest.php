@@ -14,12 +14,14 @@ use Magento\MagentoCloud\Config\StageConfigInterface;
 use Magento\MagentoCloud\Config\Validator\Deploy\JsonFormatVariable;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class JsonFormatVariableTest extends TestCase
 {
     /**

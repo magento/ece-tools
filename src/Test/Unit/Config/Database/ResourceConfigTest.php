@@ -7,16 +7,19 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Config\Database;
 
-use Magento\MagentoCloud\Config\Database\DbConfig;
-use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Config\ConfigMerger;
+use Magento\MagentoCloud\Config\Database\DbConfig;
 use Magento\MagentoCloud\Config\Database\ResourceConfig;
+use Magento\MagentoCloud\Config\Stage\DeployInterface;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class ResourceConfigTest extends TestCase
 {
     /**
@@ -39,7 +42,7 @@ class ResourceConfigTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
+        $this->stageConfigMock = $this->createMock(DeployInterface::class);
         $this->dbConfigMock = $this->createMock(DbConfig::class);
         $this->resourceConfig = new ResourceConfig(
             $this->dbConfigMock,
@@ -49,12 +52,16 @@ class ResourceConfigTest extends TestCase
     }
 
     /**
+     * Test for get method.
+     *
      * @param array $stageConfig
      * @param array $dbConfig
      * @param $expectedResult
+     * @return void
      * @dataProvider getDataProvider
      */
-    public function testGet($stageConfig, $dbConfig, $expectedResult)
+    #[DataProvider('getDataProvider')]
+    public function testGet($stageConfig, $dbConfig, $expectedResult): void
     {
         $this->stageConfigMock->expects($this->once())
             ->method('get')
@@ -73,7 +80,7 @@ class ResourceConfigTest extends TestCase
      *
      * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
-    public function getDataProvider(): array
+    public static function getDataProvider(): array
     {
         return [
             'default resource config' => [

@@ -19,7 +19,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * Display info about particular error or info about all errors from the last deployment.
  *
- * @api
  */
 class ErrorShow extends Command
 {
@@ -50,7 +49,6 @@ class ErrorShow extends Command
     }
 
     /**
-     * @inheritdoc
      */
     protected function configure(): void
     {

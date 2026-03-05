@@ -8,13 +8,16 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit\StaticContent;
 
 use Magento\MagentoCloud\StaticContent\ThemeResolver;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
-use Psr\Log\LoggerInterface;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
 
 /**
  * Test class for ThemeResolver
  */
+#[AllowMockObjectsWithoutExpectations]
 class ThemeResolverTest extends TestCase
 {
     /**
@@ -41,10 +44,15 @@ class ThemeResolverTest extends TestCase
     }
 
     /**
-     * @param        string $expectedReturn
-     * @param        string $passedTheme
+     * Test resolve method.
+     *
+     * @param string $expectedReturn
+     * @param  string $passedTheme
      * @dataProvider resolveDataProvider
+     * @return void
+     * @throws \ReflectionException
      */
+    #[DataProvider('resolveDataProvider')]
     public function testResolve(string $expectedReturn, string $passedTheme): void
     {
         $this->themeResolver->method('getThemes')
@@ -78,7 +86,12 @@ class ThemeResolverTest extends TestCase
         );
     }
 
-    public function resolveDataProvider(): array
+    /**
+     * Data provider for resolve method.
+     *
+     * @return array
+     */
+    public static function resolveDataProvider(): array
     {
         return [
             'Incorrect Theme' => [
@@ -92,6 +105,11 @@ class ThemeResolverTest extends TestCase
         ];
     }
 
+    /**
+     * Test correct method.
+     *
+     * @return void
+     */
     public function testCorrect(): void
     {
         $this->themeResolver->method('getThemes')
@@ -108,6 +126,11 @@ class ThemeResolverTest extends TestCase
         );
     }
 
+    /**
+     * Test no resolve method.
+     *
+     * @return void
+     */
     public function testNoResolve(): void
     {
         $this->themeResolver->method('getThemes')

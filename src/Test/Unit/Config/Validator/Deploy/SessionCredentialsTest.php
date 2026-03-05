@@ -11,6 +11,7 @@ use Magento\MagentoCloud\Config\Validator\ResultInterface;
 use Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\Session\Config;
 use Magento\MagentoCloud\Config\Validator\Deploy\SessionCredentials;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -49,12 +50,15 @@ class SessionCredentialsTest extends TestCase
     }
 
     /**
-     * @param array       $sessionConfig
-     * @param string      $expectedResultType
-     * @param string|null $expectedErrorMessage
+     * Test validate method.
      *
+     * @param array $sessionConfig
+     * @param string $expectedResultType
+     * @param string|null $expectedErrorMessage
      * @dataProvider validateDataProvider
+     * @return void
      */
+    #[DataProvider('validateDataProvider')]
     public function testValidate(
         array $sessionConfig,
         string $expectedResultType,
@@ -65,18 +69,24 @@ class SessionCredentialsTest extends TestCase
             ->willReturn($sessionConfig);
         $this->resultFactoryMock->expects($this->once())
             ->method('create')
-            ->with($expectedResultType, $expectedErrorMessage ? ['error' => $expectedErrorMessage] : $this->anything());
+            ->with(
+                $expectedResultType,
+                $expectedErrorMessage ? ['error' => $expectedErrorMessage] : $this->anything()
+            );
 
         $this->sessionCredentials->validate();
     }
 
     /**
-     * @param array       $sessionConfig
-     * @param string      $expectedResultType
-     * @param string|null $expectedErrorMessage
+     * Test validate method with valkey configuration.
      *
+     * @param array $sessionConfig
+     * @param string $expectedResultType
+     * @param string|null $expectedErrorMessage
      * @dataProvider validateDataProviderValkey
+     * @return void
      */
+    #[DataProvider('validateDataProviderValkey')]
     public function testValidateValkey(
         array $sessionConfig,
         string $expectedResultType,
@@ -93,9 +103,11 @@ class SessionCredentialsTest extends TestCase
     }
 
     /**
+     * Data provider for validate method.
+     *
      * @return array
      */
-    public function validateDataProvider(): array
+    public static function validateDataProvider(): array
     {
         return [
             [
@@ -121,30 +133,32 @@ class SessionCredentialsTest extends TestCase
     }
 
     /**
+     * Data provider for validate method with valkey configuration.
+     *
      * @return array
      */
-    public function validateDataProviderValkey(): array
+    public static function validateDataProviderValkey(): array
     {
         return [
-        [
-        [],
-        ResultInterface::SUCCESS
-        ],
-        [
-        ['some' => 'option'],
-        ResultInterface::ERROR,
-        'Missed required parameter \'save\' in session configuration'
-        ],
-        [
-        ['save' => 'valkey'],
-        ResultInterface::ERROR,
-        'Missed valkey options in session configuration'
-        ],
-        [
-        ['save' => 'valkey', 'valkey' => []],
-        ResultInterface::ERROR,
-        'Missed host option for valkey in session configuration'
-        ]
+            [
+                [],
+                ResultInterface::SUCCESS
+            ],
+            [
+                ['some' => 'option'],
+                ResultInterface::ERROR,
+                'Missed required parameter \'save\' in session configuration'
+            ],
+            [
+                ['save' => 'valkey'],
+                ResultInterface::ERROR,
+                'Missed valkey options in session configuration'
+            ],
+            [
+                ['save' => 'valkey', 'valkey' => []],
+                ResultInterface::ERROR,
+                'Missed host option for valkey in session configuration'
+            ]
         ];
     }
 }

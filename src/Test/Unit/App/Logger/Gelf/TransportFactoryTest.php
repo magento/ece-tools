@@ -11,6 +11,7 @@ use Gelf\Transport\HttpTransport;
 use Gelf\Transport\TcpTransport;
 use Gelf\Transport\UdpTransport;
 use Magento\MagentoCloud\App\Logger\Gelf\TransportFactory;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -32,11 +33,14 @@ class TransportFactoryTest extends TestCase
     }
 
     /**
+     * Test create method.
+     *
      * @param string $type
      * @param string $expectedClass
      * @dataProvider createDataProvider
      * @throws \Exception
      */
+    #[DataProvider('createDataProvider')]
     public function testCreate(string $type, string $expectedClass)
     {
         $transport = $this->transportFactory->create($type, [
@@ -51,7 +55,12 @@ class TransportFactoryTest extends TestCase
         );
     }
 
-    public function createDataProvider(): array
+    /**
+     * Create data provider method.
+     *
+     * @return array
+     */
+    public static function createDataProvider(): array
     {
         return [
             [
@@ -69,7 +78,12 @@ class TransportFactoryTest extends TestCase
         ];
     }
 
-    public function testCreateUnknownType()
+    /**
+     * Test create method with unknown type.
+     *
+     * @throws \Exception
+     */
+    public function testCreateUnknownType(): void
     {
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage('Unknown transport type:');

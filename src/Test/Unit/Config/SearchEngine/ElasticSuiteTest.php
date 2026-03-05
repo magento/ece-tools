@@ -8,17 +8,19 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit\Config\SearchEngine;
 
 use Magento\MagentoCloud\Config\ConfigMerger;
+use Magento\MagentoCloud\Config\SearchEngine\ElasticSuite;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Config\StageConfigInterface;
 use Magento\MagentoCloud\Package\Manager;
 use Magento\MagentoCloud\Service\ElasticSearch;
-use Magento\MagentoCloud\Config\SearchEngine\ElasticSuite;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @inheritDoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class ElasticSuiteTest extends TestCase
 {
     /**
@@ -37,9 +39,9 @@ class ElasticSuiteTest extends TestCase
     private $stageConfigMock;
 
     /**
-     * @var ConfigMerger|MockObject
+     * @var ConfigMerger
      */
-    private $configMergerMock;
+    private $configMerger;
 
     /**
      * @var ElasticSearch|MockObject
@@ -52,18 +54,23 @@ class ElasticSuiteTest extends TestCase
     protected function setUp(): void
     {
         $this->managerMock = $this->createMock(Manager::class);
-        $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
-        $this->configMergerMock = $this->createTestProxy(ConfigMerger::class);
+        $this->stageConfigMock = $this->createMock(DeployInterface::class);
+        $this->configMerger = new ConfigMerger();
         $this->elasticSearchMock = $this->createMock(ElasticSearch::class);
 
         $this->elasticSuite = new ElasticSuite(
             $this->managerMock,
             $this->stageConfigMock,
-            $this->configMergerMock,
+            $this->configMerger,
             $this->elasticSearchMock
         );
     }
 
+    /**
+     * Test get method without ElasticSearch.
+     *
+     * @return void
+     */
     public function testGetNoES(): void
     {
         $this->stageConfigMock->expects($this->once())
@@ -79,6 +86,11 @@ class ElasticSuiteTest extends TestCase
         );
     }
 
+    /**
+     * Test get method with ElasticSearch.
+     *
+     * @return void
+     */
     public function testGet(): void
     {
         $this->stageConfigMock->expects($this->once())
@@ -119,6 +131,11 @@ class ElasticSuiteTest extends TestCase
         );
     }
 
+    /**
+     * Test get method with only replica.
+     *
+     * @return void
+     */
     public function testGetOnlyReplica(): void
     {
         $this->stageConfigMock->expects($this->once())
@@ -157,6 +174,11 @@ class ElasticSuiteTest extends TestCase
         );
     }
 
+    /**
+     * Test get method with only shards.
+     *
+     * @return void
+     */
     public function testGetOnlyShards(): void
     {
         $this->stageConfigMock->expects($this->once())
@@ -195,6 +217,11 @@ class ElasticSuiteTest extends TestCase
         );
     }
 
+    /**
+     * Test is installed method.
+     *
+     * @return void
+     */
     public function testIsInstalled(): void
     {
         $this->managerMock->expects($this->exactly(2))
@@ -209,6 +236,11 @@ class ElasticSuiteTest extends TestCase
         $this->assertFalse($this->elasticSuite->isInstalled());
     }
 
+    /**
+     * Test is available method.
+     *
+     * @return void
+     */
     public function testIsAvailable(): void
     {
         $this->elasticSearchMock->expects($this->exactly(3))

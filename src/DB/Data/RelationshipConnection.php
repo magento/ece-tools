@@ -12,7 +12,6 @@ namespace Magento\MagentoCloud\DB\Data;
  *
  * This connection can be overwritten by environment variable or in .magento.env.yaml.
  *
- * @see \Magento\MagentoCloud\DB\Data\Connection
  */
 class RelationshipConnection implements ConnectionInterface
 {
@@ -30,7 +29,6 @@ class RelationshipConnection implements ConnectionInterface
     }
 
     /**
-     * @inheritdoc
      */
     public function getHost()
     {
@@ -38,7 +36,6 @@ class RelationshipConnection implements ConnectionInterface
     }
 
     /**
-     * @inheritdoc
      */
     public function getPort()
     {
@@ -46,7 +43,6 @@ class RelationshipConnection implements ConnectionInterface
     }
 
     /**
-     * @inheritdoc
      */
     public function getDbName()
     {
@@ -54,7 +50,6 @@ class RelationshipConnection implements ConnectionInterface
     }
 
     /**
-     * @inheritdoc
      */
     public function getUser()
     {
@@ -62,7 +57,6 @@ class RelationshipConnection implements ConnectionInterface
     }
 
     /**
-     * @inheritdoc
      */
     public function getPassword()
     {
@@ -70,7 +64,6 @@ class RelationshipConnection implements ConnectionInterface
     }
 
     /**
-     * @inheritDoc
      */
     public function getDriverOptions()
     {

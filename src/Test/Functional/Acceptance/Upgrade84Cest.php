@@ -18,7 +18,7 @@ class Upgrade84Cest extends UpgradeCest
     protected function testProvider(): array
     {
         return [
-            ['from' => '2.4.8', 'to' => '>=2.4.8-p1 <2.4.9']
+            ['from' => '2.4.8', 'to' => '>=2.4.8-p1 <2.4.9-alpha3']
         ];
     }
 }

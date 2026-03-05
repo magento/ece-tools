@@ -8,19 +8,22 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit\Filesystem;
 
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\GlobalSection as GlobalConfig;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Filesystem\DirectoryCopier\StrategyInterface;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Filesystem\RecoverableDirectoryList;
 use Magento\MagentoCloud\Package\MagentoVersion;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Magento\MagentoCloud\Config\GlobalSection as GlobalConfig;
 
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class RecoverableDirectoryListTest extends TestCase
 {
     /**
@@ -69,7 +72,7 @@ class RecoverableDirectoryListTest extends TestCase
     protected function setUp(): void
     {
         $this->environmentMock = $this->createMock(Environment::class);
-        $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
+        $this->stageConfigMock = $this->createMock(DeployInterface::class);
         $this->flagManagerMock = $this->createMock(FlagManager::class);
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
         $this->directoryListMock = $this->createMock(DirectoryList::class);
@@ -95,11 +98,15 @@ class RecoverableDirectoryListTest extends TestCase
     }
 
     /**
+     * Test get list method.
+     *
      * @param bool $isStaticInBuild
      * @param bool $isStaticCleanFiles
      * @param array $expected
      * @dataProvider getListDataProvider22
+     * @return void
      */
+    #[DataProvider('getListDataProvider22')]
     public function testGetList22(
         bool $isStaticInBuild,
         bool $isStaticCleanFiles,
@@ -133,66 +140,68 @@ class RecoverableDirectoryListTest extends TestCase
     }
 
     /**
+     * Data provider for get list method.
+     *
      * @return array
      */
-    public function getListDataProvider22(): array
+    public static function getListDataProvider22(): array
     {
         return [
             'symlink and static in build' => [
-                'isStaticInBuild' => true,
+                'isStaticInBuild'    => true,
                 'isStaticCleanFiles' => true,
                 'expected' => [
                     [
                         'directory' => 'app/etc',
-                        'strategy' => StrategyInterface::STRATEGY_COPY,
+                        'strategy'  => StrategyInterface::STRATEGY_COPY,
                     ],
                     [
                         'directory' => 'pub/media',
-                        'strategy' => StrategyInterface::STRATEGY_COPY,
+                        'strategy'  => StrategyInterface::STRATEGY_COPY,
                     ],
                     [
                         'directory' => 'var/view_preprocessed',
-                        'strategy' => StrategyInterface::STRATEGY_COPY,
+                        'strategy'  => StrategyInterface::STRATEGY_COPY,
                     ],
                     [
                         'directory' => 'pub/static',
-                        'strategy' => StrategyInterface::STRATEGY_SUB_SYMLINK,
+                        'strategy'  => StrategyInterface::STRATEGY_SUB_SYMLINK,
                     ],
                 ],
             ],
             'static in build and clean' => [
-                'isStaticInBuild' => true,
+                'isStaticInBuild'    => true,
                 'isStaticCleanFiles' => false,
                 'expected' => [
                     [
                         'directory' => 'app/etc',
-                        'strategy' => StrategyInterface::STRATEGY_COPY,
+                        'strategy'  => StrategyInterface::STRATEGY_COPY,
                     ],
                     [
                         'directory' => 'pub/media',
-                        'strategy' => StrategyInterface::STRATEGY_COPY,
+                        'strategy'  => StrategyInterface::STRATEGY_COPY,
                     ],
                     [
                         'directory' => 'var/view_preprocessed',
-                        'strategy' => StrategyInterface::STRATEGY_COPY_SUB_FOLDERS,
+                        'strategy'  => StrategyInterface::STRATEGY_COPY_SUB_FOLDERS,
                     ],
                     [
                         'directory' => 'pub/static',
-                        'strategy' => StrategyInterface::STRATEGY_SUB_SYMLINK,
+                        'strategy'  => StrategyInterface::STRATEGY_SUB_SYMLINK,
                     ],
                 ],
             ],
             'symlink and no static in build' => [
-                'isStaticInBuild' => false,
+                'isStaticInBuild'    => false,
                 'isStaticCleanFiles' => false,
                 'expected' => [
                     [
                         'directory' => 'app/etc',
-                        'strategy' => StrategyInterface::STRATEGY_COPY,
+                        'strategy'  => StrategyInterface::STRATEGY_COPY,
                     ],
                     [
                         'directory' => 'pub/media',
-                        'strategy' => StrategyInterface::STRATEGY_COPY,
+                        'strategy'  => StrategyInterface::STRATEGY_COPY,
                     ],
                 ],
             ],
@@ -200,12 +209,16 @@ class RecoverableDirectoryListTest extends TestCase
     }
 
     /**
+     * Test get list method.
+     *
      * @param bool $isStaticInBuild
      * @param bool $isGeneratedSymlinkOn
      * @param bool $isStaticCleanFiles
      * @param array $expected
      * @dataProvider getListDataProvider21
+     * @return void
      */
+    #[DataProvider('getListDataProvider21')]
     public function testGetList21(
         bool $isGeneratedSymlinkOn,
         bool $isStaticInBuild,
@@ -240,87 +253,89 @@ class RecoverableDirectoryListTest extends TestCase
     }
 
     /**
+     * Data provider for get list method.
+     *
      * @return array
      *
      * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
-    public function getListDataProvider21(): array
+    public static function getListDataProvider21(): array
     {
         return [
             'static symlink, no generated symlink, static in build' => [
                 'isGeneratedSymlinkOn' => false,
-                'isStaticInBuild' => true,
-                'isStaticCleanFiles' => true,
+                'isStaticInBuild'      => true,
+                'isStaticCleanFiles'   => true,
                 'expected' => [
                     [
                         'directory' => 'app/etc',
-                        'strategy' => StrategyInterface::STRATEGY_COPY,
+                        'strategy'  => StrategyInterface::STRATEGY_COPY,
                     ],
                     [
                         'directory' => 'pub/media',
-                        'strategy' => StrategyInterface::STRATEGY_COPY,
+                        'strategy'  => StrategyInterface::STRATEGY_COPY,
                     ],
                     [
                         'directory' => 'var/view_preprocessed',
-                        'strategy' => StrategyInterface::STRATEGY_COPY,
+                        'strategy'  => StrategyInterface::STRATEGY_COPY,
                     ],
                     [
                         'directory' => 'pub/static',
-                        'strategy' => StrategyInterface::STRATEGY_SUB_SYMLINK,
+                        'strategy'  => StrategyInterface::STRATEGY_SUB_SYMLINK,
                     ],
                     [
                         'directory' => 'var/di',
-                        'strategy' => StrategyInterface::STRATEGY_COPY,
+                        'strategy'  => StrategyInterface::STRATEGY_COPY,
                     ],
                     [
                         'directory' => 'var/generation',
-                        'strategy' => StrategyInterface::STRATEGY_COPY,
+                        'strategy'  => StrategyInterface::STRATEGY_COPY,
                     ],
                 ],
             ],
             'static symlink, no generated symlink, no static in build' => [
                 'isGeneratedSymlinkOn' => false,
-                'isStaticInBuild' => false,
-                'isStaticCleanFiles' => true,
+                'isStaticInBuild'      => false,
+                'isStaticCleanFiles'   => true,
                 'expected' => [
                     [
                         'directory' => 'app/etc',
-                        'strategy' => StrategyInterface::STRATEGY_COPY,
+                        'strategy'  => StrategyInterface::STRATEGY_COPY,
                     ],
                     [
                         'directory' => 'pub/media',
-                        'strategy' => StrategyInterface::STRATEGY_COPY,
+                        'strategy'  => StrategyInterface::STRATEGY_COPY,
                     ],
                     [
                         'directory' => 'var/di',
-                        'strategy' => StrategyInterface::STRATEGY_COPY,
+                        'strategy'  => StrategyInterface::STRATEGY_COPY,
                     ],
                     [
                         'directory' => 'var/generation',
-                        'strategy' => StrategyInterface::STRATEGY_COPY,
+                        'strategy'  => StrategyInterface::STRATEGY_COPY,
                     ],
                 ],
             ],
             'static symlink, generated symlink, no static in build' => [
                 'isGeneratedSymlinkOn' => true,
-                'isStaticInBuild' => false,
-                'isStaticCleanFiles' => true,
+                'isStaticInBuild'      => false,
+                'isStaticCleanFiles'   => true,
                 'expected' => [
                     [
                         'directory' => 'app/etc',
-                        'strategy' => StrategyInterface::STRATEGY_COPY,
+                        'strategy'  => StrategyInterface::STRATEGY_COPY,
                     ],
                     [
                         'directory' => 'pub/media',
-                        'strategy' => StrategyInterface::STRATEGY_COPY,
+                        'strategy'  => StrategyInterface::STRATEGY_COPY,
                     ],
                     [
                         'directory' => 'var/di',
-                        'strategy' => StrategyInterface::STRATEGY_SYMLINK,
+                        'strategy'  => StrategyInterface::STRATEGY_SYMLINK,
                     ],
                     [
                         'directory' => 'var/generation',
-                        'strategy' => StrategyInterface::STRATEGY_SYMLINK,
+                        'strategy'  => StrategyInterface::STRATEGY_SYMLINK,
                     ],
                 ],
             ],
@@ -328,11 +343,15 @@ class RecoverableDirectoryListTest extends TestCase
     }
 
     /**
+     * Test get list skip copying var view preprocessed method.
+     *
      * @param bool $skipCopyingViewPreprocessed
      * @param bool $isStaticCleanFiles
      * @param array $expected
      * @dataProvider getListSkipCopyingVarViewPreprocessedDataProvider
+     * @return void
      */
+    #[DataProvider('getListSkipCopyingVarViewPreprocessedDataProvider')]
     public function testGetListSkipCopyingVarViewPreprocessed(
         bool $skipCopyingViewPreprocessed,
         bool $isStaticCleanFiles,
@@ -372,48 +391,50 @@ class RecoverableDirectoryListTest extends TestCase
     }
 
     /**
+     * Data provider for get list skip copying var view preprocessed method.
+     *
      * @return array
      */
-    public function getListSkipCopyingVarViewPreprocessedDataProvider(): array
+    public static function getListSkipCopyingVarViewPreprocessedDataProvider(): array
     {
         return [
             'copying view preprocessed dir' => [
                 'skipCopyingViewPreprocessed' => false,
-                'isStaticCleanFiles' => true,
+                'isStaticCleanFiles'          => true,
                 'expected' => [
                     [
                         'directory' => 'app/etc',
-                        'strategy' => StrategyInterface::STRATEGY_COPY,
+                        'strategy'  => StrategyInterface::STRATEGY_COPY,
                     ],
                     [
                         'directory' => 'pub/media',
-                        'strategy' => StrategyInterface::STRATEGY_COPY,
+                        'strategy'  => StrategyInterface::STRATEGY_COPY,
                     ],
                     [
                         'directory' => 'var/view_preprocessed',
-                        'strategy' => StrategyInterface::STRATEGY_COPY,
+                        'strategy'  => StrategyInterface::STRATEGY_COPY,
                     ],
                     [
                         'directory' => 'pub/static',
-                        'strategy' => StrategyInterface::STRATEGY_SUB_SYMLINK,
+                        'strategy'  => StrategyInterface::STRATEGY_SUB_SYMLINK,
                     ]
                 ],
             ],
             'skip copying view preprocessed dir' => [
                 'skipCopyingViewPreprocessed' => true,
-                'isStaticCleanFiles' => true,
+                'isStaticCleanFiles'          => true,
                 'expected' => [
                     [
                         'directory' => 'app/etc',
-                        'strategy' => StrategyInterface::STRATEGY_COPY,
+                        'strategy'  => StrategyInterface::STRATEGY_COPY,
                     ],
                     [
                         'directory' => 'pub/media',
-                        'strategy' => StrategyInterface::STRATEGY_COPY,
+                        'strategy'  => StrategyInterface::STRATEGY_COPY,
                     ],
                     [
                         'directory' => 'pub/static',
-                        'strategy' => StrategyInterface::STRATEGY_SUB_SYMLINK,
+                        'strategy'  => StrategyInterface::STRATEGY_SUB_SYMLINK,
                     ]
                 ],
             ],

@@ -7,18 +7,21 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Step\Deploy\InstallUpdate\ConfigUpdate\Urls;
 
-use Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\Urls\Environment;
-use Magento\MagentoCloud\Step\StepException;
-use PHPUnit\Framework\MockObject\MockObject;
-use PHPUnit\Framework\TestCase;
 use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface;
 use Magento\MagentoCloud\Config\Magento\Env\WriterInterface;
-use Psr\Log\LoggerInterface;
+use Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\Urls\Environment;
+use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Util\UrlManager;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
 
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class EnvironmentTest extends TestCase
 {
     /**
@@ -51,10 +54,10 @@ class EnvironmentTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->loggerMock     = $this->createMock(LoggerInterface::class);
         $this->urlManagerMock = $this->createMock(UrlManager::class);
-        $this->readerMock = $this->getMockForAbstractClass(ReaderInterface::class);
-        $this->writerMock = $this->getMockForAbstractClass(WriterInterface::class);
+        $this->readerMock     = $this->createMock(ReaderInterface::class);
+        $this->writerMock     = $this->createMock(WriterInterface::class);
 
         $this->step = new Environment(
             $this->loggerMock,
@@ -65,20 +68,21 @@ class EnvironmentTest extends TestCase
     }
 
     /**
-     * @param $loggerInfoExpects
+     * Test execute method.
+     *
+     * @param int $loggerInfoCount
      * @param array $urlManagerGetUrlsWillReturn
-     * @param $writerWriteExpects
-     *
-     * @throws StepException
-     *
+     * @param int $writerWriteCount
      * @dataProvider executeDataProvider
+     * @throws StepException
      */
+    #[DataProvider('executeDataProvider')]
     public function testExecute(
-        $loggerInfoExpects,
+        int $loggerInfoCount,
         array $urlManagerGetUrlsWillReturn,
-        $writerWriteExpects
+        int $writerWriteCount
     ): void {
-        $this->loggerMock->expects($loggerInfoExpects)
+        $this->loggerMock->expects($this->exactly($loggerInfoCount))
             ->method('info')
             // withConsecutive() alternative.
             ->willReturnCallback(function ($args) {
@@ -105,56 +109,67 @@ class EnvironmentTest extends TestCase
         $this->urlManagerMock->expects($this->once())
             ->method('getUrls')
             ->willReturn($urlManagerGetUrlsWillReturn);
-        $this->writerMock->expects($writerWriteExpects)
-            ->method('create')
-            ->with([
-                'system' => [
-                    'default' => [
-                        'web' => [
-                            'secure' => ['base_url' => 'https://example2.com/'],
-                            'unsecure' => ['base_url' => 'http://example2.com/']
+        
+        if ($writerWriteCount === 0) {
+            $this->writerMock->expects($this->never())
+                ->method('create');
+        } else {
+            $this->writerMock->expects($this->once())
+                ->method('create')
+                ->with([
+                    'system' => [
+                        'default' => [
+                            'web' => [
+                                'secure' => ['base_url' => 'https://example2.com/'],
+                                'unsecure' => ['base_url' => 'http://example2.com/']
+                            ]
                         ]
                     ]
-                ]
-            ]);
+                ]);
+        }
 
         $this->step->execute();
     }
 
     /**
+     * Data provider for execute method.
+     *
      * @return array
      */
-    public function executeDataProvider(): array
+    public static function executeDataProvider(): array
     {
         return [
             'urls not equal' => [
-                'loggerInfoExpects' => $this->exactly(3),
+                'loggerInfoCount' => 3,
                 'urlManagerGetUrlsWillReturn' => [
                     'secure' => ['' => 'https://example2.com/', '*' => 'https://subsite---example2.com'],
                     'unsecure' => ['' => 'http://example2.com/', '*' => 'http://subsite---example2.com'],
                 ],
-                'writerWriteExpects' => $this->once()
+                'writerWriteCount' => 1,
             ],
             'urls equal' => [
-                'loggerInfoExpects' => $this->once(),
+                'loggerInfoCount' => 1,
                 'urlManagerGetUrlsWillReturn' => [
                     'secure' => ['' => 'https://example1.com/', '*' => 'https://subsite---example1.com'],
                     'unsecure' => ['' => 'http://example1.com/', '*' => 'http://subsite---example1.com'],
                 ],
-                'writerWriteExpects' => $this->never()
+                'writerWriteCount' => 0,
             ],
             'urls not exists' => [
-                'loggerInfoExpects' => $this->once(),
+                'loggerInfoCount' => 1,
                 'urlManagerGetUrlsWillReturn' => [
                     'secure' => [],
                     'unsecure' => [],
                 ],
-                'writerWriteExpects' => $this->never()
+                'writerWriteCount' => 0,
             ],
         ];
     }
 
     /**
+     * Test execute with placeholders method.
+     *
+     * @return void
      * @throws StepException
      */
     public function testExecuteWithPlaceholders(): void

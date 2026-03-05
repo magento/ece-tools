@@ -9,19 +9,21 @@ namespace Magento\MagentoCloud\Test\Unit\Process\Build;
 
 use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\ConfigException;
-use Magento\MagentoCloud\Filesystem\FileSystemException;
-use Magento\MagentoCloud\Step\Build\SetReportDirNestingLevel;
-use Magento\MagentoCloud\Step\StepException;
-use PHPUnit\Framework\TestCase;
-use PHPUnit\Framework\MockObject\MockObject;
 use Magento\MagentoCloud\Config\Stage\BuildInterface;
 use Magento\MagentoCloud\Filesystem\ConfigFileList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
+use Magento\MagentoCloud\Step\Build\SetReportDirNestingLevel;
+use Magento\MagentoCloud\Step\StepException;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
 /**
  * @inheritdoc
  */
+#[AllowMockObjectsWithoutExpectations]
 class SetErrorReportDirNestingLevelTest extends TestCase
 {
     /**
@@ -60,7 +62,7 @@ class SetErrorReportDirNestingLevelTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Configuring directory nesting level for saving error reports');
@@ -68,7 +70,7 @@ class SetErrorReportDirNestingLevelTest extends TestCase
         $this->configFileListMock->expects($this->once())
             ->method('getErrorReportConfig')
             ->willReturn($this->configFile);
-        $this->stageConfigMock = $this->getMockForAbstractClass(BuildInterface::class);
+        $this->stageConfigMock = $this->createMock(BuildInterface::class);
         $this->fileMock = $this->createMock(File::class);
 
         $this->processor = new SetReportDirNestingLevel(
