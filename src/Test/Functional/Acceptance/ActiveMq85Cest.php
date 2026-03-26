@@ -8,7 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 
 /**
- * Checks ActiveMQ configuration for PHP 8.5 and Magento 2.4.9-alpha-opensearch3.0
+ * Checks ActiveMQ configuration for PHP 8.5 and Magento 2.4.9-beta
  *
  * @group php85
  */
@@ -154,7 +154,7 @@ class ActiveMq85Cest extends ActiveMqCest
         // Test with RabbitMQ version to verify AMQP configuration
         return [
             'rabbitmq-default-config-2.4.9-beta' => [
-                'version' => '2.4.9-alpha-opensearch3.0',
+                'version' => '2.4.9-beta',
                 'configuration' => [
                     'stage' => [
                         'deploy' => [
