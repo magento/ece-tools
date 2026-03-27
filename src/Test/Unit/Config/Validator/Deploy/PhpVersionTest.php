@@ -203,7 +203,7 @@ class PhpVersionTest extends TestCase
             ->with(GlobalSection::VAR_DEPLOYED_MAGENTO_VERSION_FROM_GIT)
             ->willReturn(null);
 
-        $repoMock = $this->createStub(LockArrayRepository::class);
+        $repoMock = $this->createMock(LockArrayRepository::class);
         $lockerMock = $this->createMock(Locker::class);
         $repoMock->method('findPackage')
             ->with('magento/magento2-base', '*')
@@ -227,7 +227,7 @@ class PhpVersionTest extends TestCase
         $constraintMock = $this->createMock(ConstraintInterface::class);
         $linkMock = $this->createMock(Link::class);
         $packageMock = $this->createMock(PackageInterface::class);
-        $repoMock = $this->createStub(LockArrayRepository::class);
+        $repoMock = $this->createMock(LockArrayRepository::class);
         $lockerMock = $this->createMock(Locker::class);
         $this->composerConstraintMock = $this->createMock(ConstraintInterface::class);
         $this->phpConstraintMock = $this->createMock(ConstraintInterface::class);
