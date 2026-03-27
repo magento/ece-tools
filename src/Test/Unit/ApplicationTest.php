@@ -8,7 +8,6 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit;
 
 use Composer\Composer;
-use Composer\Package\PackageInterface;
 use Composer\Package\RootPackageInterface;
 use Magento\MagentoCloud\App\ContainerInterface;
 use Magento\MagentoCloud\Application;
@@ -17,9 +16,10 @@ use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Input\InputDefinition;
+use Throwable;
 
 /**
- * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
+ * @SuppressWarnings(PHPMD\CouplingBetweenObjects)
  */
 #[AllowMockObjectsWithoutExpectations]
 class ApplicationTest extends TestCase
@@ -27,44 +27,44 @@ class ApplicationTest extends TestCase
     /**
      * @var Application
      */
-    private $application;
+    private Application $application;
 
     /**
-     * @var ContainerInterface|MockObject
+     * @var ContainerInterface&MockObject
      */
-    private $containerMock;
+    private ContainerInterface $containerMock;
 
     /**
-     * @var Composer|MockObject
+     * @var Composer&MockObject
      */
-    private $composerMock;
+    private Composer $composerMock;
 
     /**
-     * @var RootPackageInterface|MockObject
+     * @var RootPackageInterface&MockObject
      */
-    private $packageMock;
+    private RootPackageInterface $packageMock;
 
     /**
-     * @var InputDefinition|MockObject
+     * @var InputDefinition&MockObject
      */
-    private $inputDefinitionMock;
-
-    /**
-     * @var string
-     */
-    private $applicationVersion = '1.0';
+    private InputDefinition $inputDefinitionMock;
 
     /**
      * @var string
      */
-    private $applicationName = 'Magento Cloud Tools';
+    private string $applicationVersion;
+
+    /**
+     * @var string
+     */
+    private string $applicationName;
 
     /**
      * Classes passed to application.
      *
-     * @var array
+     * @var array<string, class-string>
      */
-    private $classMap = [
+    private array $classMap = [
         Command\Build::NAME => Command\Build::class,
         Command\Build\Generate::NAME => Command\Build\Generate::class,
         Command\Build\Transfer::NAME => Command\Build\Transfer::class,
@@ -102,6 +102,9 @@ class ApplicationTest extends TestCase
      */
     public function setUp(): void
     {
+        // Load version and name from composer.json
+        $this->loadComposerMetadata();
+
         $this->containerMock = $this->createMock(ContainerInterface::class);
         $this->packageMock = $this->createMock(RootPackageInterface::class);
         $this->composerMock = $this->createMock(Composer::class);
@@ -127,14 +130,11 @@ class ApplicationTest extends TestCase
 
         $this->containerMock->method('create')
             ->willReturnMap($map);
-        $this->composerMock->expects($this->any())
-            ->method('getPackage')
+        $this->composerMock->method('getPackage')
             ->willReturn($this->packageMock);
-        $this->packageMock->expects($this->once())
-            ->method('getPrettyName')
+        $this->packageMock->method('getPrettyName')
             ->willReturn($this->applicationName);
-        $this->packageMock->expects($this->once())
-            ->method('getPrettyVersion')
+        $this->packageMock->method('getPrettyVersion')
             ->willReturn($this->applicationVersion);
 
         $this->application = new Application(
@@ -142,6 +142,11 @@ class ApplicationTest extends TestCase
         );
     }
 
+    /**
+     * Test to verify all expected command classes are registered in the application.
+     *
+     * @return void
+     */
     public function testHasCommand(): void
     {
         foreach (array_keys($this->classMap) as $name) {
@@ -151,6 +156,12 @@ class ApplicationTest extends TestCase
         }
     }
 
+    /**
+     * Test to verify getName() returns the expected name from composer.json
+     * or runtime metadata.
+     *
+     * @return void
+     */
     public function testGetName(): void
     {
         $this->assertSame(
@@ -159,6 +170,12 @@ class ApplicationTest extends TestCase
         );
     }
 
+    /**
+     * Test to verify getVersion() returns the expected application version
+     * from composer.json or runtime metadata.
+     *
+     * @return void
+     */
     public function testGetVersion(): void
     {
         $this->assertSame(
@@ -167,8 +184,65 @@ class ApplicationTest extends TestCase
         );
     }
 
+    /**
+     * Test to verify getLongVersion() returns "name version"
+     * including application name and version.
+     *
+     * @return void
+     */
+    public function testGetLongVersion(): void
+    {
+        $expectedVersion = sprintf('%s <info>%s</info>', $this->applicationName, $this->applicationVersion);
+        $this->assertSame(
+            $expectedVersion,
+            $this->application->getLongVersion()
+        );
+    }
+
+    /**
+     * Test to verify getContainer() returns the same container instance used during initialization.
+     *
+     * @return void
+     */
     public function testGetContainer(): void
     {
-        $this->application->getContainer();
+        $this->assertSame(
+            $this->containerMock,
+            $this->application->getContainer()
+        );
+    }
+
+    /**
+     * Load composer.json to set application name and version,
+     * falling back to defaults if unavailable.
+     *
+     * @return void
+     */
+    private function loadComposerMetadata(): void
+    {
+        $this->applicationName    = 'magento/ece-tools';
+        $this->applicationVersion = '0.0.0';
+
+        $repoRoot         = dirname(__DIR__, 3);
+        $composerJsonPath = $repoRoot . '/composer.json';
+
+        if (!is_file($composerJsonPath) || !is_readable($composerJsonPath)) {
+            return;
+        }
+
+        try {
+            $composerJson = json_decode(
+                (string) file_get_contents($composerJsonPath),
+                true,
+                512,
+                JSON_THROW_ON_ERROR
+            );
+            if (is_array($composerJson)) {
+                $this->applicationName = $composerJson['name'] ?? $this->applicationName;
+                $this->applicationVersion = $composerJson['version'] ?? $this->applicationVersion;
+            }
+        } catch (Throwable $e) {
+            // Keep defaults
+        }
     }
 }

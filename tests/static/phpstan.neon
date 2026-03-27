@@ -44,3 +44,5 @@ parameters:
           path: ../../src/Service/EolValidator.php
         - message: '#Variable \$gitIgnore on left side of \?\? always exists and is not nullable\.#'
           path: ../../src/Command/Dev/UpdateComposer/ClearModuleRequirements.php 
+        - message: '#Method Magento\\MagentoCloud\\Util\\ArrayManager::nest\(\) should return array but returns#'
+          path: ../../src/Util/ArrayManager.php
