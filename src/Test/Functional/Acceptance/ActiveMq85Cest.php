@@ -15,6 +15,11 @@ namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 class ActiveMq85Cest extends ActiveMqCest
 {
     /**
+     * Must match PHP 8.5-compatible Magento line; _before() uses this before data provider versions run.
+     */
+    protected string $magentoCloudTemplate = '2.4.9-beta';
+
+    /**
      * @inheritdoc
      */
     protected function defaultConfigurationDataProvider(): array
@@ -45,7 +50,7 @@ class ActiveMq85Cest extends ActiveMqCest
                         'deploy' => [
                             'QUEUE_CONFIGURATION' => [
                                 '_merge' => false,
-                                'default_connection'=> 'stomp',
+                                'default_connection' => 'stomp',
                                 'stomp' => [
                                     'host' => 'custom-activemq.test',
                                     'port' => 61617,
@@ -73,7 +78,7 @@ class ActiveMq85Cest extends ActiveMqCest
                         'deploy' => [
                             'QUEUE_CONFIGURATION' => [
                                 '_merge' => true,
-                                'default_connection'=> 'stomp',
+                                'default_connection' => 'stomp',
                                 'stomp' => [
                                     'user' => 'merged_user',
                                     'password' => 'merged_password',
@@ -107,7 +112,7 @@ class ActiveMq85Cest extends ActiveMqCest
                     'stage' => [
                         'deploy' => [
                             'QUEUE_CONFIGURATION' => [
-                                'default_connection'=> 'stomp',
+                                'default_connection' => 'stomp',
                                 'stomp' => [
                                     'host' => 'activemq-artemis',
                                     'port' => 'invalid_port',
@@ -129,7 +134,7 @@ class ActiveMq85Cest extends ActiveMqCest
                         'deploy' => [
                             'QUEUE_CONFIGURATION' => [
                                 '_merge' => false,
-                                'default_connection'=> 'stomp',
+                                'default_connection' => 'stomp',
                                 'stomp' => [
                                     'port' => 61616,
                                     'user' => 'admin',
