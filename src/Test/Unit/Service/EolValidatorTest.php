@@ -309,6 +309,11 @@ redis:
     eol: null
   - version: '5.2'
     eol: null
+valkey:
+  - version: '8.0'
+    eol: null
+  - version: '9.0'
+    eol: null
 YAML;
     }
 

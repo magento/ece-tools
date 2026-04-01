@@ -83,6 +83,20 @@ class VersionTest extends TestCase
                 '8.2.5'
             ],
             [
+                [
+                    'host' => '127.0.0.1',
+                    'port' => '3306',
+                    'type' => 'valkey:9.0'
+                ],
+                '9.0'
+            ],
+            [
+                [
+                    'type' => 'valkey:9.0.1'
+                ],
+                '9.0.1'
+            ],
+            [
                 [],
                 '0'
             ],
@@ -132,6 +146,7 @@ class VersionTest extends TestCase
         return [
             ['valkey_version:5.3.6', '5.3'],
             ['valkey_version:1.2.3.4.5', '1.2'],
+            ['valkey_version:9.0.0', '9.0'],
             ['valkey_version:abc', '0'],
             ['valkey:5.3.6', '0'],
             ['', '0'],
@@ -172,6 +187,7 @@ class VersionTest extends TestCase
         return [
             ['valkey_version:5.3.6', '5.3'],
             ['valkey_version:1.2.3.4.5', '1.2'],
+            ['valkey_version:9.0.0', '9.0'],
             ['valkey_version:abc', '0'],
             ['valkey:5.3.6', '0'],
             ['', '0'],

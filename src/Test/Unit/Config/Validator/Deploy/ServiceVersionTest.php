@@ -18,6 +18,7 @@ use Magento\MagentoCloud\Service\ServiceInterface;
 use Magento\MagentoCloud\Service\ServiceMismatchException;
 use Magento\MagentoCloud\Service\Validator as ServiceVersionValidator;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -88,10 +89,13 @@ class ServiceVersionTest extends TestCase
     }
 
     /**
+     * @param string $valkeyVersion
      * @throws ValidatorException
      * @throws Exception
+     * @dataProvider validateDataProvider
      */
-    public function testValidate(): void
+    #[DataProvider('validateDataProvider')]
+    public function testValidate(string $valkeyVersion): void
     {
         $this->databaseTypeMock->expects($this->once())
             ->method('getServiceName')
@@ -115,11 +119,11 @@ class ServiceVersionTest extends TestCase
         $serviceValkey = $this->createMock(ServiceInterface::class);
         $serviceValkey->expects($this->once())
             ->method('getVersion')
-            ->willReturn('8.0');
+            ->willReturn($valkeyVersion);
         $serviceValkeySession = $this->createMock(ServiceInterface::class);
         $serviceValkeySession->expects($this->once())
             ->method('getVersion')
-            ->willReturn('8.0');
+            ->willReturn($valkeyVersion);
         $serviceES = $this->createMock(ServiceInterface::class);
         $serviceES->expects($this->once())
             ->method('getVersion')
@@ -150,8 +154,8 @@ class ServiceVersionTest extends TestCase
             ['Version of service \'rabbitmq\' is not detected', []],
             ['Version of service \'redis\' is 3.2', []],
             ['Version of service \'redis-session\' is 3.2', []],
-            ['Version of service \'valkey\' is 8.0', []],
-            ['Version of service \'valkey-session\' is 8.0', []],
+            ['Version of service \'valkey\' is ' . $valkeyVersion, []],
+            ['Version of service \'valkey-session\' is ' . $valkeyVersion, []],
             ['Version of service \'elasticsearch\' is 7.7', []],
             ['Version of service \'opensearch\' is 1.2', []],
             ['Version of service \'mariadb\' is 10.2', []]
@@ -300,6 +304,14 @@ class ServiceVersionTest extends TestCase
             ->with('Can\'t validate version of some services: some error');
 
         $this->validator->validate();
+    }
+
+    public static function validateDataProvider(): array
+    {
+        return [
+            ['8.0'],
+            ['9.0']
+        ];
     }
 
     private function resolveInvocations(\PHPUnit\Framework\MockObject\Rule\InvocationOrder $matcher): int

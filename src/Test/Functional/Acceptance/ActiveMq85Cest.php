@@ -21,7 +21,7 @@ class ActiveMq85Cest extends ActiveMqCest
     {
         return [
             'artemis-2.42' => [
-                'version' => '2.4.9-alpha-opensearch3.0',
+                'version' => '2.4.9-beta',
                 'expectedHost' => 'activemq-artemis',
                 'expectedPort' => 61616,
                 'expectedUser' => 'admin',
@@ -39,7 +39,7 @@ class ActiveMq85Cest extends ActiveMqCest
     {
         return [
             'custom-artemis-config' => [
-                'version' => '2.4.9-alpha-opensearch3.0',
+                'version' => '2.4.9-beta',
                 'configuration' => [
                     'stage' => [
                         'deploy' => [
@@ -67,7 +67,7 @@ class ActiveMq85Cest extends ActiveMqCest
                 ],
             ],
             'merge-artemis-config' => [
-                'version' => '2.4.9-alpha-opensearch3.0',
+                'version' => '2.4.9-beta',
                 'configuration' => [
                     'stage' => [
                         'deploy' => [
@@ -102,7 +102,7 @@ class ActiveMq85Cest extends ActiveMqCest
     {
         return [
             'invalid-port' => [
-                'version' => '2.4.9-alpha-opensearch3.0',
+                'version' => '2.4.9-beta',
                 'wrongConfiguration' => [
                     'stage' => [
                         'deploy' => [
@@ -123,7 +123,7 @@ class ActiveMq85Cest extends ActiveMqCest
                 'errorDeployMessage' => '',
             ],
             'missing-host' => [
-                'version' => '2.4.9-alpha-opensearch3.0',
+                'version' => '2.4.9-beta',
                 'wrongConfiguration' => [
                     'stage' => [
                         'deploy' => [
@@ -153,7 +153,7 @@ class ActiveMq85Cest extends ActiveMqCest
     {
         // Test with RabbitMQ version to verify AMQP configuration
         return [
-            'rabbitmq-default-config-2.4.9-alpha-opensearch3.0' => [
+            'rabbitmq-default-config-2.4.9-beta' => [
                 'version' => '2.4.9-alpha-opensearch3.0',
                 'configuration' => [
                     'stage' => [
@@ -179,8 +179,8 @@ class ActiveMq85Cest extends ActiveMqCest
     {
         // Test with no ActiveMQ and no RabbitMQ - validates database queue usage
         return [
-            'db-queue-only-2.4.9-alpha-opensearch3.0' => [
-                'version' => '2.4.9-alpha-opensearch3.0',
+            'db-queue-only-2.4.9-beta' => [
+                'version' => '2.4.9-beta',
             ],
         ];
     }

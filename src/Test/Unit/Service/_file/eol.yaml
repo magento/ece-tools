@@ -36,3 +36,8 @@ redis:
     eol:
   - version: '5.2'
     eol:
+valkey:
+  - version: '8.0'
+    eol:
+  - version: '9.0'
+    eol:

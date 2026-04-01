@@ -18,5 +18,5 @@ class AdminCredential85Cest extends AdminCredentialCest
      *
      * @var string
      */
-    protected string $magentoCloudTemplate = '2.4.9-alpha-opensearch3.0';
+    protected string $magentoCloudTemplate = '2.4.9-beta';
 }
