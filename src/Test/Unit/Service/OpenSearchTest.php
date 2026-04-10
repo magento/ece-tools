@@ -221,10 +221,10 @@ class OpenSearchTest extends TestCase
                     [
                         'host' => '127.0.0.1',
                         'port' => '1234',
-                        'type' => 'opensearch:1.0',
+                        'type' => 'opensearch:1.3',
                     ]
                 ],
-                '1.0'
+                '1.3'
             ],
             [
                 [
@@ -241,10 +241,10 @@ class OpenSearchTest extends TestCase
                     [
                         'host' => '127.0.0.1',
                         'port' => '1234',
-                        'type' => 'opensearch:2.0',
+                        'type' => 'opensearch:2.3',
                     ]
                 ],
-                '2.0'
+                '2.3'
             ],
             [
                 [

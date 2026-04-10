@@ -314,7 +314,7 @@ class ValidatorTest extends TestCase
                     ServiceInterface::NAME_NGINX => '1.18.0',
                     ServiceInterface::NAME_VARNISH => '7.0.0',
                     ServiceInterface::NAME_REDIS => '6.2.6',
-                    ServiceInterface::NAME_OPENSEARCH => '2.0.0',
+                    ServiceInterface::NAME_OPENSEARCH => '2.3.0',
                     ServiceInterface::NAME_RABBITMQ => '3.11.0'
                 ],
                 0
