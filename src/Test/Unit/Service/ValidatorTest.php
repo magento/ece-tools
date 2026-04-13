@@ -174,6 +174,13 @@ class ValidatorTest extends TestCase
                 0
             ],
             [
+                '2.4.4-p18',
+                [
+                    ServiceInterface::NAME_OPENSEARCH => '2.19.0'
+                ],
+                0
+            ],
+            [
                 '2.4.5',
                 [
                     ServiceInterface::NAME_ELASTICSEARCH => '7.10'
@@ -404,6 +411,118 @@ class ValidatorTest extends TestCase
                     ServiceInterface::NAME_VALKEY => 'latest'
                 ],
                 0
+            ],
+            [
+                '2.4.8-p2',
+                [
+                    ServiceInterface::NAME_OPENSEARCH => '3.0.0'
+                ],
+                0
+            ],
+            [
+                '2.4.8-p2',
+                [
+                    ServiceInterface::NAME_OPENSEARCH => '4.0.0'
+                ],
+                1
+            ],
+            [
+                '2.4.8-p5',
+                [
+                    ServiceInterface::NAME_OPENSEARCH => '3.5.0'
+                ],
+                0
+            ],
+            [
+                '2.4.8-p5',
+                [
+                    ServiceInterface::NAME_OPENSEARCH => '3.4.0'
+                ],
+                1
+            ],
+            [
+                '2.4.8-p5',
+                [
+                    ServiceInterface::NAME_OPENSEARCH => '3.5.1'
+                ],
+                0
+            ],
+            [
+                '2.4.5-p17',
+                [
+                    ServiceInterface::NAME_OPENSEARCH => '2.19.0'
+                ],
+                0
+            ],
+            [
+                '2.4.5-p17',
+                [
+                    ServiceInterface::NAME_OPENSEARCH => '3.5.0'
+                ],
+                1
+            ],
+            [
+                '2.4.6-p15',
+                [
+                    ServiceInterface::NAME_OPENSEARCH => '2.19.0'
+                ],
+                0
+            ],
+            [
+                '2.4.6-p15',
+                [
+                    ServiceInterface::NAME_OPENSEARCH => '3.5.0'
+                ],
+                0
+            ],
+            [
+                '2.4.6-p15',
+                [
+                    ServiceInterface::NAME_OPENSEARCH => '3.4.0'
+                ],
+                1
+            ],
+            [
+                '2.4.7-p10',
+                [
+                    ServiceInterface::NAME_OPENSEARCH => '2.19.0'
+                ],
+                0
+            ],
+            [
+                '2.4.7-p10',
+                [
+                    ServiceInterface::NAME_OPENSEARCH => '3.5.0'
+                ],
+                0
+            ],
+            [
+                '2.4.7-p10',
+                [
+                    ServiceInterface::NAME_OPENSEARCH => '3.4.0'
+                ],
+                1
+            ],
+            [
+                '2.4.9',
+                [
+                    ServiceInterface::NAME_OPENSEARCH => '3.5.0'
+                ],
+                0
+            ],
+            [
+                '2.4.9',
+                [
+                    ServiceInterface::NAME_OPENSEARCH => '3.4.0'
+                ],
+                1
+            ],
+            [
+                '2.4.9',
+                [
+                    ServiceInterface::NAME_OPENSEARCH => '2.19.0'
+                ],
+                1
             ],
         ];
     }
