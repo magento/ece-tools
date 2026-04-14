@@ -348,6 +348,34 @@ class ValidatorTest extends TestCase
                 0
             ],
             [
+                '2.4.5-p17',
+                [
+                    ServiceInterface::NAME_RABBITMQ => '4.2.0'
+                ],
+                0
+            ],
+            [
+                '2.4.6-p15',
+                [
+                    ServiceInterface::NAME_RABBITMQ => '4.2.0'
+                ],
+                0
+            ],
+            [
+                '2.4.7-p10',
+                [
+                    ServiceInterface::NAME_RABBITMQ => '4.2.0'
+                ],
+                0
+            ],
+            [
+                '2.4.8-p5',
+                [
+                    ServiceInterface::NAME_RABBITMQ => '4.2.0'
+                ],
+                0
+            ],
+            [
                 '2.4.8',
                 [
                     ServiceInterface::NAME_VALKEY => '9.0.0'
@@ -380,6 +408,13 @@ class ValidatorTest extends TestCase
                 [
                     ServiceInterface::NAME_PHP => '8.5.0',
                     ServiceInterface::NAME_RABBITMQ => '4.1.0'
+                ],
+                0
+            ],
+            [
+                '2.4.9',
+                [
+                    ServiceInterface::NAME_RABBITMQ => '4.2.0'
                 ],
                 0
             ],

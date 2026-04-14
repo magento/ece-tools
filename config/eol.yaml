@@ -51,6 +51,8 @@ rabbitmq:
     eol: 2024-09-18
   - version: '4.1'
     eol: 2026-01-31  
+  - version: '4.2'
+    eol: 2026-07-31
 redis:
   - version: '6.2'
     eol: 2025-02-28
