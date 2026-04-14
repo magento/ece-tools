@@ -26,6 +26,10 @@ class Valkey81Cest extends ValkeyCest
             [
                 'version' => '2.4.6',
             ],
+            [
+                'version' => '2.4.6',
+                'valkey_version' => '8.1',
+            ],
         ];
     }
 

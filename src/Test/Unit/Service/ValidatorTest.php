@@ -176,6 +176,14 @@ class ValidatorTest extends TestCase
             [
                 '2.4.4-p18',
                 [
+                    ServiceInterface::NAME_REDIS => '7.2',
+                    ServiceInterface::NAME_REDIS_SESSION => '7.2',
+                ],
+                0
+            ],
+            [
+                '2.4.4-p18',
+                [
                     ServiceInterface::NAME_DB_MARIA => '10.11.0',
                 ],
                 1
@@ -404,6 +412,13 @@ class ValidatorTest extends TestCase
                 1
             ],
             [
+                '2.4.8',
+                [
+                    ServiceInterface::NAME_VALKEY => '8.1.0'
+                ],
+                1
+            ],
+            [
                 '2.4.9-beta1',
                 [
                     ServiceInterface::NAME_VALKEY => '9.0.0'
@@ -507,6 +522,48 @@ class ValidatorTest extends TestCase
                 '2.4.9-beta1',
                 [
                     ServiceInterface::NAME_VALKEY_SESSION => '9.0.0'
+                ],
+                0
+            ],
+            [
+                '2.4.9',
+                [
+                    ServiceInterface::NAME_VALKEY => '9.0.0'
+                ],
+                0
+            ],
+            [
+                '2.4.9',
+                [
+                    ServiceInterface::NAME_VALKEY => '8.1.0'
+                ],
+                1
+            ],
+            [
+                '2.4.5-p17',
+                [
+                    ServiceInterface::NAME_VALKEY => '8.1.0'
+                ],
+                0
+            ],
+            [
+                '2.4.6-p15',
+                [
+                    ServiceInterface::NAME_VALKEY => '8.1.0'
+                ],
+                0
+            ],
+            [
+                '2.4.7-p10',
+                [
+                    ServiceInterface::NAME_VALKEY => '8.1.0'
+                ],
+                0
+            ],
+            [
+                '2.4.8-p5',
+                [
+                    ServiceInterface::NAME_VALKEY => '8.1.0'
                 ],
                 0
             ],

@@ -351,6 +351,7 @@ class ServiceVersionTest extends TestCase
     {
         return [
             ['8.0'],
+            ['8.1'],
             ['9.0']
         ];
     }

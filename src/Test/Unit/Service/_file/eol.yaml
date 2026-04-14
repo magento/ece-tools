@@ -54,6 +54,8 @@ redis-session:
 valkey:
   - version: '8.0'
     eol:
+  - version: '8.1'
+    eol:
   - version: '9.0'
     eol:
 valkey-session:

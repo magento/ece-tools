@@ -243,8 +243,8 @@ YAML;
             'redis' => '3.2',
             'redis-session' => '3.2',
             'mariadb' => '10.2',
-            'valkey' => '8.0',
-            'valkey-session' => '8.0',
+            'valkey' => '8.1',
+            'valkey-session' => '8.1',
             'opensearch' => '2',
             'activemq-artemis' => '2.42',
         ];
@@ -311,6 +311,8 @@ redis:
     eol: null
 valkey:
   - version: '8.0'
+    eol: null
+  - version: '8.1'
     eol: null
   - version: '9.0'
     eol: null
