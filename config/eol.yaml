@@ -74,3 +74,5 @@ valkey:
 activemq-artemis:
   - version: '2.42.0'
     eol: 2025-10-13
+  - version: '2.51.0'
+    eol: 2026-03-02

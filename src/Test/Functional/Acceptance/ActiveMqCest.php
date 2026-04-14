@@ -32,13 +32,28 @@ abstract class ActiveMqCest extends AbstractCest
     protected string $serviceToAdd = 'activemq';
 
     /**
+     * When non-empty, used as the ActiveMQ Artemis version from dataProvider for the next prepareWorkplace() call.
+     *
+     * @var string
+     */
+    protected string $selectedActiveMqArtemisVersion = '';
+
+    /**
+     * Default ActiveMQ Artemis version for prepareWorkplace when
+     * selectedActiveMqArtemisVersion is empty (e.g. _before).
+     *
+     * @var string
+     */
+    protected string $defaultActivemqArtemisVersion = '2.42.0';
+
+    /**
      * @inheritdoc
      */
     public function _before(\CliTester $I): void
     {
         // Reset to default service for each test
         $this->serviceToAdd = 'activemq';
-        parent::_before($I);
+        $this->selectedActiveMqArtemisVersion = '';
     }
 
     /**
@@ -67,6 +82,7 @@ abstract class ActiveMqCest extends AbstractCest
      */
     public function testDefaultConfiguration(\CliTester $I, \Codeception\Example $data): void
     {
+        $this->selectedActiveMqArtemisVersion = $data['activemqArtemisVersion'] ?? $this->defaultActivemqArtemisVersion;
         $this->prepareWorkplace($I, $data['version']);
         $I->generateDockerCompose(
             sprintf(
@@ -75,7 +91,6 @@ abstract class ActiveMqCest extends AbstractCest
             )
         );
         $this->removeVendorVolumeMountFromDockerCompose($I);
-
         $I->assertTrue($I->runDockerComposeCommand('run build cloud-build'), 'Build phase was failed');
         $I->assertTrue($I->startEnvironment(), 'Docker could not start');
         $I->assertTrue($I->runDockerComposeCommand('run deploy cloud-deploy'), 'Deploy phase was failed');
@@ -135,6 +150,7 @@ abstract class ActiveMqCest extends AbstractCest
      */
     public function testCustomConfiguration(\CliTester $I, \Codeception\Example $data): void
     {
+        $this->selectedActiveMqArtemisVersion = $data['activemqArtemisVersion'] ?? $this->defaultActivemqArtemisVersion;
         $this->prepareWorkplace($I, $data['version']);
         $I->generateDockerCompose(
             sprintf(
@@ -183,6 +199,7 @@ abstract class ActiveMqCest extends AbstractCest
      */
     public function testWrongConfiguration(\CliTester $I, \Codeception\Example $data): void
     {
+        $this->selectedActiveMqArtemisVersion = $data['activemqArtemisVersion'] ?? $this->defaultActivemqArtemisVersion;
         $this->prepareWorkplace($I, $data['version']);
         $I->generateDockerCompose(
             sprintf(
@@ -225,6 +242,7 @@ abstract class ActiveMqCest extends AbstractCest
      */
     public function testFallbackToRabbitMq(\CliTester $I, \Codeception\Example $data): void
     {
+        $this->selectedActiveMqArtemisVersion = $data['activemqArtemisVersion'] ?? $this->defaultActivemqArtemisVersion;
         $this->prepareWorkplace($I, $data['version']);
         $I->generateDockerCompose(
             sprintf(
@@ -340,13 +358,18 @@ abstract class ActiveMqCest extends AbstractCest
     {
         parent::prepareWorkplace($I, $templateVersion);
 
+        $artemisVersion = $this->selectedActiveMqArtemisVersion !== ''
+            ? $this->selectedActiveMqArtemisVersion
+            : $this->defaultActivemqArtemisVersion;
         // Add the appropriate service based on the test scenario
         if ($this->serviceToAdd === 'activemq') {
-            $this->addActiveMqService($I);
+            $this->addActiveMqService($I, $artemisVersion);
         } elseif ($this->serviceToAdd === 'rabbitmq') {
             $this->addRabbitMqService($I);
         }
+
         // If serviceToAdd is null or empty, no message broker service is added
+        $this->selectedActiveMqArtemisVersion = '';
     }
 
     /**
@@ -355,7 +378,7 @@ abstract class ActiveMqCest extends AbstractCest
      * @param \CliTester $I
      * @return void
      */
-    protected function addActiveMqService(\CliTester $I): void
+    protected function addActiveMqService(\CliTester $I, string $activemqArtemisVersion): void
     {
         // Read current services.yaml
         $services = $I->readServicesYaml();
@@ -363,7 +386,7 @@ abstract class ActiveMqCest extends AbstractCest
         // Add ActiveMQ Artemis service if not present
         if (!isset($services['activemq-artemis'])) {
             $services['activemq-artemis'] = [
-                'type' => 'activemq-artemis:2.42.0',
+                'type' => 'activemq-artemis:'.$activemqArtemisVersion,
                 'disk' => 1024,
             ];
             $I->writeServicesYaml($services);

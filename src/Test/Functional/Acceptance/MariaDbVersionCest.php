@@ -111,6 +111,8 @@ abstract class MariaDbVersionCest extends AbstractCest
      * @param string $magentoCloudTemplate
      * @param string $mariaDbVersion
      * @return void
+     * @SuppressWarnings(PHPMD.NPathComplexity)
+     * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
     protected function applySqlVersionProviderBypass(
         CliTester $I,

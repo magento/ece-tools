@@ -42,6 +42,10 @@ redis:
     eol:
   - version: '5.2'
     eol:
+activemq-artemis:
+  - version: '2.42.0'
+    eol:
+  - version: '2.51.0'
 redis-session:
   - version: '3.2'
     eol:

@@ -309,6 +309,11 @@ redis:
     eol: null
   - version: '5.2'
     eol: null
+activemq-artemis:
+  - version: '2.42'
+    eol: null
+  - version: '2.51'
+    eol: null
 valkey:
   - version: '8.0'
     eol: null

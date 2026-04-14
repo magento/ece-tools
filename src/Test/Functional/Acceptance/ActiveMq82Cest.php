@@ -20,9 +20,20 @@ class ActiveMq82Cest extends ActiveMqCest
     protected function defaultConfigurationDataProvider(): array
     {
         return [
-            'artemis-2.42-php82' => [
+            'artemis-2.51.0-php82' => [
                 'version' => '2.4.6',
                 'expectedHost' => 'activemq-artemis',
+                'activemqArtemisVersion' => '2.51.0',
+                'expectedPort' => 61616,
+                'expectedUser' => 'admin',
+                'expectedPassword' => 'admin',
+                'expectedVirtualHost' => '/',
+                'expectedConsumersWait' => 0,
+            ],
+            'artemis-2.42.0-php82' => [
+                'version' => '2.4.6',
+                'expectedHost' => 'activemq-artemis',
+                'activemqArtemisVersion' => '2.42.0',
                 'expectedPort' => 61616,
                 'expectedUser' => 'admin',
                 'expectedPassword' => 'admin',
@@ -38,59 +49,73 @@ class ActiveMq82Cest extends ActiveMqCest
     protected function customConfigurationDataProvider(): array
     {
         return [
-            'custom-artemis-config-php82' => [
-                'version' => '2.4.6',
-                'configuration' => [
-                    'stage' => [
-                        'deploy' => [
-                            'QUEUE_CONFIGURATION' => [
-                                '_merge' => false,
-                                'default_connection'=> 'stomp',
-                                'stomp' => [
-                                    'host' => 'custom-activemq.test',
-                                    'port' => 61617,
-                                    'user' => 'activemq_user',
-                                    'password' => 'activemq_password',
-                                ],
+            'custom-artemis-config-2.51.0-php82' => $this->customArtemisConfigurationCase('2.51.0'),
+            'custom-artemis-config-2.42.0-php82' => $this->customArtemisConfigurationCase('2.42.0'),
+            'merge-artemis-config-2.51.0-php82' => $this->mergedArtemisConfigurationCase('2.51.0'),
+            'merge-artemis-config-2.42.0-php82' => $this->mergedArtemisConfigurationCase('2.42.0'),
+        ];
+    }
+
+    private function customArtemisConfigurationCase(string $activemqArtemisVersion): array
+    {
+        return [
+            'version' => '2.4.6',
+            'activemqArtemisVersion' => $activemqArtemisVersion,
+            'configuration' => [
+                'stage' => [
+                    'deploy' => [
+                        'QUEUE_CONFIGURATION' => [
+                            '_merge' => false,
+                            'default_connection'=> 'stomp',
+                            'stomp' => [
+                                'host' => 'custom-activemq.test',
+                                'port' => 61617,
+                                'user' => 'activemq_user',
+                                'password' => 'activemq_password',
                             ],
                         ],
                     ],
-                ],
-                'expectedQueueConfig' => [
-                    'stomp' => [
-                        'host' => 'custom-activemq.test',
-                        'port' => 61617,
-                        'user' => 'activemq_user',
-                        'password' => 'activemq_password',
-                    ],
-                    'consumers_wait_for_messages' => 0,
                 ],
             ],
-            'merge-artemis-config-php82' => [
-                'version' => '2.4.6',
-                'configuration' => [
-                    'stage' => [
-                        'deploy' => [
-                            'QUEUE_CONFIGURATION' => [
-                                '_merge' => true,
-                                'default_connection'=> 'stomp',
-                                'stomp' => [
-                                    'user' => 'merged_user',
-                                    'password' => 'merged_password',
-                                ],
+            'expectedQueueConfig' => [
+                'stomp' => [
+                    'host' => 'custom-activemq.test',
+                    'port' => 61617,
+                    'user' => 'activemq_user',
+                    'password' => 'activemq_password',
+                ],
+                'consumers_wait_for_messages' => 0,
+            ],
+        ];
+    }
+
+    private function mergedArtemisConfigurationCase(string $activemqArtemisVersion): array
+    {
+        return [
+            'version' => '2.4.6',
+            'activemqArtemisVersion' => $activemqArtemisVersion,
+            'configuration' => [
+                'stage' => [
+                    'deploy' => [
+                        'QUEUE_CONFIGURATION' => [
+                            '_merge' => true,
+                            'default_connection'=> 'stomp',
+                            'stomp' => [
+                                'user' => 'merged_user',
+                                'password' => 'merged_password',
                             ],
                         ],
                     ],
                 ],
-                'expectedQueueConfig' => [
-                    'stomp' => [
-                        'host' => 'activemq-artemis',
-                        'port' => 61616,
-                        'user' => 'merged_user',
-                        'password' => 'merged_password',
-                    ],
-                    'consumers_wait_for_messages' => 0,
+            ],
+            'expectedQueueConfig' => [
+                'stomp' => [
+                    'host' => 'activemq-artemis',
+                    'port' => 61616,
+                    'user' => 'merged_user',
+                    'password' => 'merged_password',
                 ],
+                'consumers_wait_for_messages' => 0,
             ],
         ];
     }
@@ -101,8 +126,9 @@ class ActiveMq82Cest extends ActiveMqCest
     protected function wrongConfigurationDataProvider(): array
     {
         return [
-            'invalid-port-php82' => [
+            'invalid-port-2.51.0-php82' => [
                 'version' => '2.4.6',
+                'activemqArtemisVersion' => '2.51.0',
                 'wrongConfiguration' => [
                     'stage' => [
                         'deploy' => [
@@ -122,8 +148,53 @@ class ActiveMq82Cest extends ActiveMqCest
                 'deploySuccess' => true,
                 'errorDeployMessage' => '',
             ],
-            'missing-host-php82' => [
+            'invalid-port-2.42.0-php82' => [
                 'version' => '2.4.6',
+                'activemqArtemisVersion' => '2.42.0',
+                'wrongConfiguration' => [
+                    'stage' => [
+                        'deploy' => [
+                            'QUEUE_CONFIGURATION' => [
+                                'default_connection'=> 'stomp',
+                                'stomp' => [
+                                    'host' => 'activemq-artemis',
+                                    'port' => 'invalid_port',
+                                    'user' => 'admin',
+                                    'password' => 'admin',
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+                'buildSuccess' => true,
+                'deploySuccess' => true,
+                'errorDeployMessage' => '',
+            ],
+            'missing-host-2.51.0-php82' => [
+                'version' => '2.4.6',
+                'activemqArtemisVersion' => '2.51.0',
+                'wrongConfiguration' => [
+                    'stage' => [
+                        'deploy' => [
+                            'QUEUE_CONFIGURATION' => [
+                                '_merge' => false,
+                                'default_connection'=> 'stomp',
+                                'stomp' => [
+                                    'port' => 61616,
+                                    'user' => 'admin',
+                                    'password' => 'admin',
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+                'buildSuccess' => true,
+                'deploySuccess' => true,
+                'errorDeployMessage' => '',
+            ],
+            'missing-host-2.42.0-php82' => [
+                'version' => '2.4.6',
+                'activemqArtemisVersion' => '2.42.0',
                 'wrongConfiguration' => [
                     'stage' => [
                         'deploy' => [
@@ -152,8 +223,26 @@ class ActiveMq82Cest extends ActiveMqCest
     protected function fallbackToRabbitMqDataProvider(): array
     {
         return [
-            'rabbitmq-default-config-php82' => [
+            'rabbitmq-default-config-2.4.6-2.51.0-php82' => [
                 'version' => '2.4.6',
+                'activemqArtemisVersion' => '2.51.0',
+                'configuration' => [
+                    'stage' => [
+                        'deploy' => [
+                            // No custom queue configuration, should use default RabbitMQ
+                        ],
+                    ],
+                ],
+                'expectedRabbitMqConfig' => [
+                    'host' => 'rabbitmq',
+                    'port' => 5672,
+                    'user' => 'guest',
+                    'password' => 'guest',
+                ],
+            ],
+            'rabbitmq-default-config-2.4.6-2.42.0-php82' => [
+                'version' => '2.4.6',
+                'activemqArtemisVersion' => '2.42.0',
                 'configuration' => [
                     'stage' => [
                         'deploy' => [
