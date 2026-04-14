@@ -176,6 +176,13 @@ class ValidatorTest extends TestCase
             [
                 '2.4.4-p18',
                 [
+                    ServiceInterface::NAME_DB_MARIA => '10.11.0',
+                ],
+                1
+            ],
+            [
+                '2.4.4-p18',
+                [
                     ServiceInterface::NAME_OPENSEARCH => '2.19.0'
                 ],
                 0
@@ -334,9 +341,23 @@ class ValidatorTest extends TestCase
                 0
             ],
             [
+                '2.4.5-p17',
+                [
+                    ServiceInterface::NAME_DB_MARIA => '10.11.0'
+                ],
+                0
+            ],
+            [
                 '2.4.6-p11',
                 [
                     ServiceInterface::NAME_VALKEY => '8.0.0'
+                ],
+                0
+            ],
+            [
+                '2.4.6-p15',
+                [
+                    ServiceInterface::NAME_DB_MARIA => '10.11.0'
                 ],
                 0
             ],
@@ -425,6 +446,55 @@ class ValidatorTest extends TestCase
                     ServiceInterface::NAME_RABBITMQ => '4.1.0'
                 ],
                 1
+            ],
+            [
+                '2.4.7',
+                [
+                    ServiceInterface::NAME_DB_MARIA => '11.8.0'
+                ],
+                1
+            ],
+            [
+                '2.4.7-p10',
+                [
+                    ServiceInterface::NAME_DB_MARIA => '11.8.0'
+                ],
+                0
+            ],
+            [
+                '2.4.8',
+                [
+                    ServiceInterface::NAME_DB_MARIA => '11.4.1'
+                ],
+                0
+            ],
+            [
+                '2.4.8',
+                [
+                    ServiceInterface::NAME_DB_MARIA => '11.8.0'
+                ],
+                0
+            ],
+            [
+                '2.4.8-p5',
+                [
+                    ServiceInterface::NAME_DB_MARIA => '11.8.0'
+                ],
+                0
+            ],
+            [
+                '2.4.9-beta1',
+                [
+                    ServiceInterface::NAME_DB_MARIA => '11.8.0'
+                ],
+                0
+            ],
+            [
+                '2.4.9-beta1',
+                [
+                    ServiceInterface::NAME_DB_MARIA => '12.2.0'
+                ],
+                0
             ],
             [
                 '2.4.9-beta1',

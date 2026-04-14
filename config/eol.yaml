@@ -21,6 +21,10 @@ mariadb:
     eol: 2028-02-16
   - version: '11.4'
     eol: 2029-05-29
+  - version: '11.8'
+    eol: 2028-06-04
+  - version: '12.2'
+    eol: 2026-05-13
 opensearch:
   - version: '1.1'
     eol: 2026-11-07
@@ -40,7 +44,7 @@ opensearch:
     eol: 2026-05-06
   - version: '3.5'
     eol: 2027-05-06
-rabbitmq: 
+rabbitmq:
   - version: '3.9'
     eol: 2023-01-31
   - version: '3.11'
@@ -50,7 +54,7 @@ rabbitmq:
   - version: '3.13'
     eol: 2024-09-18
   - version: '4.1'
-    eol: 2026-01-31  
+    eol: 2026-01-31
   - version: '4.2'
     eol: 2026-07-31
 redis:

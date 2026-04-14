@@ -103,6 +103,14 @@ abstract class AbstractCest
             );
         }
 
+        if ($templateVersion === '2.4.5') {
+            // Keep Composer in the 2.2 line for 2.4.5 templates to avoid forcing Magento package downgrades.
+            $I->assertTrue(
+                $I->addDependencyToComposer('composer/composer', '~2.2.0'),
+                'Can not pin composer/composer for 2.4.5 template'
+            );
+        }
+
         if ($this->runComposerUpdate) {
             $I->assertTrue($I->composerUpdate(), 'Composer update failed');
             $I->cacheWorkDir($templateVersion);

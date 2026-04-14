@@ -13,6 +13,12 @@ mariadb:
     eol:
   - version: '10.2'
     eol:
+  - version: '11.4'
+    eol:
+  - version: '11.8'
+    eol:
+  - version: '12.3'
+    eol:
 elasticsearch:
   - version: '1.7'
     eol:
