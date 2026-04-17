@@ -18,6 +18,9 @@ use Magento\MagentoCloud\Config\GlobalSection;
  */
 class MagentoVersion
 {
+    /**
+     * Minimum supported Magento version.
+     */
     public const MIN_VERSION = '2.1.14';
 
     /**
@@ -51,6 +54,8 @@ class MagentoVersion
     private $composer;
 
     /**
+     * MagentoVersion class constructor.
+     *
      * @param Manager $manager
      * @param Comparator $comparator
      * @param Semver $semver
@@ -85,21 +90,36 @@ class MagentoVersion
 
         try {
             if ($this->globalSection->get(GlobalSection::VAR_DEPLOYED_MAGENTO_VERSION_FROM_GIT)) {
-                return $this->version = $this->globalSection->get(GlobalSection::VAR_DEPLOYED_MAGENTO_VERSION_FROM_GIT);
+                return $this->version = $this->normalizeVersion(
+                    $this->globalSection->get(GlobalSection::VAR_DEPLOYED_MAGENTO_VERSION_FROM_GIT)
+                );
             }
         } catch (ConfigException $exception) {
             throw new UndefinedPackageException($exception->getMessage(), $exception->getCode(), $exception);
         }
 
         if ($this->manager->has('magento/magento2-base')) {
-            return $this->version = $this->manager->get('magento/magento2-base')->getVersion();
+            return $this->version = $this->normalizeVersion($this->manager->get('magento/magento2-base')->getVersion());
         }
 
         if ($version = $this->composer->getPackage()->getPrettyVersion()) {
-            return $this->version = $version;
+            return $this->version = $this->normalizeVersion($version);
         }
 
         throw new UndefinedPackageException('Magento version cannot be resolved');
+    }
+
+    /**
+     * Normalize version string by removing trailing .0 from patch version if it exists.
+     * This is needed to ensure that versions like
+     * 2.4.6.0 becomes 2.4.6, which is the format used in Composer constraints.
+     *
+     * @param string $version
+     * @return string
+     */
+    private function normalizeVersion(string $version): string
+    {
+        return preg_replace('/^(\d+\.\d+\.\d+)\.0(-patch\d+)$/', '$1$2', $version) ?? $version;
     }
 
     /**
@@ -126,6 +146,8 @@ class MagentoVersion
     }
 
     /**
+     * Check if the current Magento version is greater than or equal to the specified version.
+     *
      * @param string $version
      * @return bool
      * @throws UndefinedPackageException

@@ -20,6 +20,8 @@ use Magento\MagentoCloud\Config\Validator\Deploy\PhpVersion;
 use Magento\MagentoCloud\Config\Validator\Result\Error;
 use Magento\MagentoCloud\Config\Validator\Result\Success;
 use Magento\MagentoCloud\Package\MagentoVersion;
+use Magento\MagentoCloud\Service\ServiceInterface;
+use Magento\MagentoCloud\Service\Validator as ServiceValidator;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -102,27 +104,46 @@ class PhpVersionTest extends TestCase
     /**
      * Test validate method.
      *
-     * @param bool $matchesResult
+     * @param string $magentoVersion
+     * @param string $allowedConstraint
+     * @param bool $allowedMatches
+     * @param bool $recommendedMatches
      * @param string $calledMethod
      * @param string $resultClass
      * @return void
      * @dataProvider validateDataProvider
      */
     #[DataProvider('validateDataProvider')]
-    public function testValidateSuccess(bool $matchesResult, string $calledMethod, string $resultClass): void
-    {
-        $this->setUpComposerMocks();
+    public function testValidateSuccess(
+        string $magentoVersion,
+        string $allowedConstraint,
+        bool $allowedMatches,
+        bool $recommendedMatches,
+        string $calledMethod,
+        string $resultClass
+    ): void {
+        $this->setUpComposerMocks($magentoVersion);
         $resultMock = $this->createStub($resultClass);
-        $this->versionParserMock->expects(self::exactly(2))
+        $allowedPhpConstraintMock = $this->createMock(ConstraintInterface::class);
+
+        $this->versionParserMock->expects(self::exactly(3))
             ->method('parseConstraints')
             ->willReturnMap([
                 ['~7.2.0', $this->composerConstraintMock],
+                [$allowedConstraint, $allowedPhpConstraintMock],
                 [preg_replace('#^([^~+-]+).*$#', '$1', PHP_VERSION), $this->phpConstraintMock]
             ]);
-        $this->composerConstraintMock->expects(self::once())
+
+        $allowedPhpConstraintMock->expects(self::once())
             ->method('matches')
             ->with($this->phpConstraintMock)
-            ->willReturn($matchesResult);
+            ->willReturn($allowedMatches);
+
+        $this->composerConstraintMock->expects($allowedMatches ? self::never() : self::once())
+            ->method('matches')
+            ->with($this->phpConstraintMock)
+            ->willReturn($recommendedMatches);
+
         $this->resultFactoryMock->expects(self::once())
             ->method($calledMethod)
             ->willReturn($resultMock);
@@ -139,12 +160,22 @@ class PhpVersionTest extends TestCase
     {
         return [
             [
-                'matchesResult' => false,
+                'magentoVersion' => '2.4.6-p15',
+                'allowedConstraint' => ServiceValidator::MAGENTO_SUPPORTED_SERVICE_VERSIONS[
+                    ServiceInterface::NAME_PHP
+                ]['>=2.4.6 <2.4.7'],
+                'allowedMatches' => false,
+                'recommendedMatches' => false,
                 'calledMethod'  => 'error',
                 'resultClass'   => Error::class
             ],
             [
-                'matchesResult' => true,
+                'magentoVersion' => '2.4.6-p15',
+                'allowedConstraint' => ServiceValidator::MAGENTO_SUPPORTED_SERVICE_VERSIONS[
+                    ServiceInterface::NAME_PHP
+                ]['>=2.4.6 <2.4.7'],
+                'allowedMatches' => true,
+                'recommendedMatches' => false,
                 'calledMethod'  => 'success',
                 'resultClass'   => Success::class
             ],
@@ -158,7 +189,7 @@ class PhpVersionTest extends TestCase
      */
     public function testValidateException(): void
     {
-        $this->setUpComposerMocks();
+        $this->setUpComposerMocks('2.4.6-p15');
         $resultMock = $this->createStub(Success::class);
         $this->versionParserMock->method('parseConstraints')
             ->willThrowException(new \Exception('some error'));
@@ -222,7 +253,7 @@ class PhpVersionTest extends TestCase
      *
      * @return void
      */
-    private function setUpComposerMocks(): void
+    private function setUpComposerMocks(string $magentoVersion): void
     {
         $constraintMock = $this->createMock(ConstraintInterface::class);
         $linkMock = $this->createMock(Link::class);
@@ -249,5 +280,7 @@ class PhpVersionTest extends TestCase
             ->willReturn($repoMock);
         $this->composerMock->method('getLocker')
             ->willReturn($lockerMock);
+        $this->magentoVersionMock->method('getVersion')
+            ->willReturn($magentoVersion);
     }
 }
