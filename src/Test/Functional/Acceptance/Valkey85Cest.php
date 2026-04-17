@@ -23,7 +23,7 @@ class Valkey85Cest extends ValkeyCest
     {
         return [
             [
-                'version' => '2.4.9-beta',
+                'version' => '2.4.9',
             ],
         ];
     }
@@ -35,7 +35,7 @@ class Valkey85Cest extends ValkeyCest
     {
         return [
             [
-                'version' => '2.4.9-beta',
+                'version' => '2.4.9',
                 'wrongConfiguration' => [
                     'stage' => [
                         'deploy' => [
@@ -61,7 +61,7 @@ class Valkey85Cest extends ValkeyCest
     {
         return [
             [
-                'version' => '2.4.9-beta',
+                'version' => '2.4.9',
                 'configuration' => [
                     'stage' => [
                         'deploy' => [
@@ -81,7 +81,7 @@ class Valkey85Cest extends ValkeyCest
                 ],
             ],
             [
-                'version' => '2.4.9-beta',
+                'version' => '2.4.9',
                 'configuration' => [
                     'stage' => [
                         'deploy' => [
@@ -112,7 +112,7 @@ class Valkey85Cest extends ValkeyCest
     {
         return [
             [
-                'version' => '2.4.9-beta',
+                'version' => '2.4.9',
                 'configuration' => [
                     'stage' => [
                         'deploy' => [
@@ -130,7 +130,7 @@ class Valkey85Cest extends ValkeyCest
                 ],
             ],
             [
-                'version' => '2.4.9-beta',
+                'version' => '2.4.9',
                 'valkey_version' => '9.0',
                 'configuration' => [
                     'stage' => [
@@ -149,7 +149,7 @@ class Valkey85Cest extends ValkeyCest
                 ],
             ],
             [
-                'version' => '2.4.9-beta',
+                'version' => '2.4.9',
                 'configuration' => [
                     'stage' => [
                         'deploy' => [
@@ -169,7 +169,7 @@ class Valkey85Cest extends ValkeyCest
                 'expectedConfig' => [],
             ],
             [
-                'version' => '2.4.9-beta',
+                'version' => '2.4.9',
                 'configuration' => [
                     'stage' => [
                         'deploy' => [

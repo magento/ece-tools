@@ -17,7 +17,7 @@ class CronUnlock85Cest extends CronUnlockCest
     /**
      * @var string
      */
-    protected string $magentoCloudTemplate = '2.4.9-beta';
+    protected string $magentoCloudTemplate = '2.4.9';
 
     /**
      * @param \CliTester $I

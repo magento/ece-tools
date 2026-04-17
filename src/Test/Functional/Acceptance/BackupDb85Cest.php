@@ -21,7 +21,7 @@ class BackupDb85Cest extends BackupDbCest
     protected function dataProviderMagentoCloudVersions(): array
     {
         return [
-            ['version' => '2.4.9-beta'],
+            ['version' => '2.4.9'],
         ];
     }
 }
