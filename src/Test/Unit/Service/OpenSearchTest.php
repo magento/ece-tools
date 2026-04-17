@@ -181,10 +181,22 @@ class OpenSearchTest extends TestCase
                 '{"version" : {"number" : "3.0.0"}}',
                 '3.0.0',
             ],
+            [
+                $relationships,
+                '{"version" : {"number" : "3.5.0"}}',
+                '3.5.0',
+            ],
+            [
+                $relationships,
+                '{"version" : {"number" : "3.5.1"}}',
+                '3.5.1',
+            ],
         ];
     }
 
     /**
+     * Test get version from type method.
+     *
      * @param array $osRelationship
      * @param string $expectedVersion
      * @dataProvider getVersionFromTypeDataProvider
@@ -211,69 +223,42 @@ class OpenSearchTest extends TestCase
      */
     public static function getVersionFromTypeDataProvider(): array
     {
-        return [
-            [
-                [],
-                '0'
-            ],
-            [
-                [
-                    [
-                        'host' => '127.0.0.1',
-                        'port' => '1234',
-                        'type' => 'opensearch:1.0',
-                    ]
-                ],
-                '1.0'
-            ],
-            [
-                [
-                    [
-                        'host' => '127.0.0.1',
-                        'port' => '1234',
-                        'type' => 'opensearch:1.1',
-                    ]
-                ],
-                '1.1'
-            ],
-            [
-                [
-                    [
-                        'host' => '127.0.0.1',
-                        'port' => '1234',
-                        'type' => 'opensearch:2.0',
-                    ]
-                ],
-                '2.0'
-            ],
-            [
-                [
-                    [
-                        'host' => '127.0.0.1',
-                        'port' => '1234',
-                        'type' => 'opensearch:3.0',
-                    ]
-                ],
-                '3.0'
-            ],
+        $versions = ['1.1', '1.2', '1.3', '2.3', '2.4', '2.5', '2.12', '3', '3.0', '3.5'];
+        $data = [
+            [[], '0'],
         ];
+
+        foreach ($versions as $version) {
+            $data[] = [
+                [
+                    [
+                        'host' => '127.0.0.1',
+                        'port' => '1234',
+                        'type' => "opensearch:$version",
+                    ]
+                ],
+                $version
+            ];
+        }
+
+        return $data;
     }
 
     /**
      * Test get full engine name method.
      *
-     * @param bool $greaterOrEqual
+     * @param bool $satisfies
      * @param string $expectedResult
      * @dataProvider getFullEngineNameDataProvider
      * @return void
      * @throws ServiceException
      */
     #[DataProvider('getFullEngineNameDataProvider')]
-    public function testGetFullEngineName(bool $greaterOrEqual, string $expectedResult): void
+    public function testGetFullEngineName(bool $satisfies, string $expectedResult): void
     {
         $this->magentoVersionMock->expects($this->any())
-            ->method('isGreaterOrEqual')
-            ->willReturn($greaterOrEqual);
+            ->method('satisfies')
+            ->willReturn($satisfies);
         $this->assertSame($expectedResult, $this->openSearch->getFullEngineName());
     }
 
@@ -285,14 +270,8 @@ class OpenSearchTest extends TestCase
     public static function getFullEngineNameDataProvider(): array
     {
         return [
-            [
-                true,
-                'elasticsearch7'
-            ],
-            [
-                false,
-                'elasticsearch7'
-            ],
+            [true, 'opensearch'],
+            [false, 'elasticsearch7'],
         ];
     }
 

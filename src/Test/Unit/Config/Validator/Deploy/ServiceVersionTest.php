@@ -187,6 +187,47 @@ class ServiceVersionTest extends TestCase
     }
 
     /**
+     * Tests successful deploy service version validation when MariaDB is 12.3.
+     *
+     * @throws ValidatorException
+     * @throws Exception
+     */
+    public function testValidateMariaDb123(): void
+    {
+        $this->databaseTypeMock->expects($this->once())
+            ->method('getServiceName')
+            ->willReturn(ServiceInterface::NAME_DB_MARIA);
+
+        $serviceMariaDB = $this->createMock(ServiceInterface::class);
+        $serviceMariaDB->expects($this->once())
+            ->method('getVersion')
+            ->willReturn('12.3');
+
+        // We only mock the MariaDB service for this specific test
+        // Other services will be skipped or return null/0 in mock
+        $this->serviceFactory->expects($this->any())
+            ->method('create')
+            ->willReturnCallback(function ($name) use ($serviceMariaDB) {
+                if ($name === ServiceInterface::NAME_DB_MARIA) {
+                    return $serviceMariaDB;
+                }
+                $mock = $this->createMock(ServiceInterface::class);
+                $mock->method('getVersion')->willReturn('0');
+                return $mock;
+            });
+
+        $this->serviceVersionValidatorMock->expects($this->once())
+            ->method('validateService')
+            ->with(ServiceInterface::NAME_DB_MARIA, '12.3')
+            ->willReturn('');
+
+        $this->resultFactoryMock->expects($this->once())
+            ->method('success');
+
+        $this->validator->validate();
+    }
+
+    /**
      * @SuppressWarnings("PHPMD.CyclomaticComplexity")
      * @throws                                         ValidatorException
      * @throws                                         Exception
@@ -310,6 +351,7 @@ class ServiceVersionTest extends TestCase
     {
         return [
             ['8.0'],
+            ['8.1'],
             ['9.0']
         ];
     }

@@ -8,7 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 
 /**
- * Checks ActiveMQ configuration for PHP 8.4 and Magento 2.4.9-alpha
+ * Checks ActiveMQ configuration for PHP 8.4 and Magento 2.4.8
  *
  * @group php84
  */
@@ -20,9 +20,20 @@ class ActiveMq84Cest extends ActiveMqCest
     protected function defaultConfigurationDataProvider(): array
     {
         return [
-            'artemis-2.42' => [
-                'version' => '2.4.9-alpha',
+            'artemis-2.51.0' => [
+                'version' => '2.4.8',
                 'expectedHost' => 'activemq-artemis',
+                'activemqArtemisVersion' => '2.51.0',
+                'expectedPort' => 61616,
+                'expectedUser' => 'admin',
+                'expectedPassword' => 'admin',
+                'expectedVirtualHost' => '/',
+                'expectedConsumersWait' => 0,
+            ],
+            'artemis-2.42.0' => [
+                'version' => '2.4.8',
+                'expectedHost' => 'activemq-artemis',
+                'activemqArtemisVersion' => '2.42.0',
                 'expectedPort' => 61616,
                 'expectedUser' => 'admin',
                 'expectedPassword' => 'admin',
@@ -38,59 +49,73 @@ class ActiveMq84Cest extends ActiveMqCest
     protected function customConfigurationDataProvider(): array
     {
         return [
-            'custom-artemis-config' => [
-                'version' => '2.4.9-alpha',
-                'configuration' => [
-                    'stage' => [
-                        'deploy' => [
-                            'QUEUE_CONFIGURATION' => [
-                                '_merge' => false,
-                                'default_connection'=> 'stomp',
-                                'stomp' => [
-                                    'host' => 'custom-activemq.test',
-                                    'port' => 61617,
-                                    'user' => 'activemq_user',
-                                    'password' => 'activemq_password',
-                                ],
+            'custom-artemis-config-2.51.0' => $this->customArtemisConfigurationCase('2.51.0'),
+            'custom-artemis-config-2.42.0' => $this->customArtemisConfigurationCase('2.42.0'),
+            'merge-artemis-config-2.51.0' => $this->mergedArtemisConfigurationCase('2.51.0'),
+            'merge-artemis-config-2.42.0' => $this->mergedArtemisConfigurationCase('2.42.0'),
+        ];
+    }
+
+    private function customArtemisConfigurationCase(string $activemqArtemisVersion): array
+    {
+        return [
+            'version' => '2.4.8',
+            'activemqArtemisVersion' => $activemqArtemisVersion,
+            'configuration' => [
+                'stage' => [
+                    'deploy' => [
+                        'QUEUE_CONFIGURATION' => [
+                            '_merge' => false,
+                            'default_connection'=> 'stomp',
+                            'stomp' => [
+                                'host' => 'custom-activemq.test',
+                                'port' => 61617,
+                                'user' => 'activemq_user',
+                                'password' => 'activemq_password',
                             ],
                         ],
                     ],
-                ],
-                'expectedQueueConfig' => [
-                    'stomp' => [
-                        'host' => 'custom-activemq.test',
-                        'port' => 61617,
-                        'user' => 'activemq_user',
-                        'password' => 'activemq_password',
-                    ],
-                    'consumers_wait_for_messages' => 0,
                 ],
             ],
-            'merge-artemis-config' => [
-                'version' => '2.4.9-alpha',
-                'configuration' => [
-                    'stage' => [
-                        'deploy' => [
-                            'QUEUE_CONFIGURATION' => [
-                                '_merge' => true,
-                                'default_connection'=> 'stomp',
-                                'stomp' => [
-                                    'user' => 'merged_user',
-                                    'password' => 'merged_password',
-                                ],
+            'expectedQueueConfig' => [
+                'stomp' => [
+                    'host' => 'custom-activemq.test',
+                    'port' => 61617,
+                    'user' => 'activemq_user',
+                    'password' => 'activemq_password',
+                ],
+                'consumers_wait_for_messages' => 0,
+            ],
+        ];
+    }
+
+    private function mergedArtemisConfigurationCase(string $activemqArtemisVersion): array
+    {
+        return [
+            'version' => '2.4.8',
+            'activemqArtemisVersion' => $activemqArtemisVersion,
+            'configuration' => [
+                'stage' => [
+                    'deploy' => [
+                        'QUEUE_CONFIGURATION' => [
+                            '_merge' => true,
+                            'default_connection'=> 'stomp',
+                            'stomp' => [
+                                'user' => 'merged_user',
+                                'password' => 'merged_password',
                             ],
                         ],
                     ],
                 ],
-                'expectedQueueConfig' => [
-                    'stomp' => [
-                        'host' => 'activemq-artemis',
-                        'port' => 61616,
-                        'user' => 'merged_user',
-                        'password' => 'merged_password',
-                    ],
-                    'consumers_wait_for_messages' => 0,
+            ],
+            'expectedQueueConfig' => [
+                'stomp' => [
+                    'host' => 'activemq-artemis',
+                    'port' => 61616,
+                    'user' => 'merged_user',
+                    'password' => 'merged_password',
                 ],
+                'consumers_wait_for_messages' => 0,
             ],
         ];
     }
@@ -101,8 +126,9 @@ class ActiveMq84Cest extends ActiveMqCest
     protected function wrongConfigurationDataProvider(): array
     {
         return [
-            'invalid-port' => [
-                'version' => '2.4.9-alpha',
+            'invalid-port-2.51.0' => [
+                'version' => '2.4.8',
+                'activemqArtemisVersion' => '2.51.0',
                 'wrongConfiguration' => [
                     'stage' => [
                         'deploy' => [
@@ -122,8 +148,53 @@ class ActiveMq84Cest extends ActiveMqCest
                 'deploySuccess' => true,
                 'errorDeployMessage' => '',
             ],
-            'missing-host' => [
-                'version' => '2.4.9-alpha',
+            'invalid-port-2.42.0' => [
+                'version' => '2.4.8',
+                'activemqArtemisVersion' => '2.42.0',
+                'wrongConfiguration' => [
+                    'stage' => [
+                        'deploy' => [
+                            'QUEUE_CONFIGURATION' => [
+                                'default_connection'=> 'stomp',
+                                'stomp' => [
+                                    'host' => 'activemq-artemis',
+                                    'port' => 'invalid_port',
+                                    'user' => 'admin',
+                                    'password' => 'admin',
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+                'buildSuccess' => true,
+                'deploySuccess' => true,
+                'errorDeployMessage' => '',
+            ],
+            'missing-host-2.51.0' => [
+                'version' => '2.4.8',
+                'activemqArtemisVersion' => '2.51.0',
+                'wrongConfiguration' => [
+                    'stage' => [
+                        'deploy' => [
+                            'QUEUE_CONFIGURATION' => [
+                                '_merge' => false,
+                                'default_connection'=> 'stomp',
+                                'stomp' => [
+                                    'port' => 61616,
+                                    'user' => 'admin',
+                                    'password' => 'admin',
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+                'buildSuccess' => true,
+                'deploySuccess' => true,
+                'errorDeployMessage' => '',
+            ],
+            'missing-host-2.42.0' => [
+                'version' => '2.4.8',
+                'activemqArtemisVersion' => '2.42.0',
                 'wrongConfiguration' => [
                     'stage' => [
                         'deploy' => [
@@ -153,8 +224,26 @@ class ActiveMq84Cest extends ActiveMqCest
     {
         // Test with RabbitMQ version to verify AMQP configuration
         return [
-            'rabbitmq-default-config-2.4.9-alpha' => [
-                'version' => '2.4.9-alpha',
+            'rabbitmq-default-config-2.4.8-2.51.0' => [
+                'version' => '2.4.8',
+                'activemqArtemisVersion' => '2.51.0',
+                'configuration' => [
+                    'stage' => [
+                        'deploy' => [
+                            // No custom queue configuration, should use default RabbitMQ
+                        ],
+                    ],
+                ],
+                'expectedRabbitMqConfig' => [
+                    'host' => 'rabbitmq',
+                    'port' => 5672,
+                    'user' => 'guest',
+                    'password' => 'guest',
+                ],
+            ],
+            'rabbitmq-default-config-2.4.8-2.42.0' => [
+                'version' => '2.4.8',
+                'activemqArtemisVersion' => '2.42.0',
                 'configuration' => [
                     'stage' => [
                         'deploy' => [
@@ -179,8 +268,8 @@ class ActiveMq84Cest extends ActiveMqCest
     {
         // Test with no ActiveMQ and no RabbitMQ - validates database queue usage
         return [
-            'db-queue-only-2.4.9-alpha' => [
-                'version' => '2.4.9-alpha',
+            'db-queue-only-2.4.8' => [
+                'version' => '2.4.8',
             ],
         ];
     }

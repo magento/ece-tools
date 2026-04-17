@@ -241,6 +241,19 @@ class MagentoVersionTest extends TestCase
     }
 
     /**
+     * Test normalizing Magento patch version from Composer metadata.
+     *
+     * @throws UndefinedPackageException
+     */
+    public function testWithComposerVersionPatchNormalized(): void
+    {
+        $this->rootPackageMock->method('getPrettyVersion')
+            ->willReturn('2.4.6.0-patch15');
+
+        self::assertSame('2.4.6-patch15', $this->magentoVersion->getVersion());
+    }
+
+    /**
      * Test getVersion method when the version cannot be resolved.
      *
      * @throws UndefinedPackageException
