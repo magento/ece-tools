@@ -304,7 +304,7 @@ class DirectoryListTest extends TestCase
      */
     private function get21DirectoryList(): DirectoryList
     {
-        $magentoVersionMock = $this->createMock(MagentoVersion::class);
+        $magentoVersionMock = $this->createStub(MagentoVersion::class);
         $systemMock = $this->createMock(SystemList::class);
 
         $magentoVersionMock->method('satisfies')
@@ -330,7 +330,7 @@ class DirectoryListTest extends TestCase
      */
     private function get22DirectoryList(): DirectoryList
     {
-        $magentoVersionMock = $this->createMock(MagentoVersion::class);
+        $magentoVersionMock = $this->createStub(MagentoVersion::class);
         $systemMock = $this->createMock(SystemList::class);
 
         $magentoVersionMock->method('satisfies')
