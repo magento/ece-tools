@@ -220,10 +220,10 @@ class ApplicationTest extends TestCase
      */
     private function loadComposerMetadata(): void
     {
-        $this->applicationName    = 'magento/ece-tools';
+        $this->applicationName = 'magento/ece-tools';
         $this->applicationVersion = '0.0.0';
 
-        $repoRoot         = dirname(__DIR__, 3);
+        $repoRoot = dirname(__DIR__, 3);
         $composerJsonPath = $repoRoot . '/composer.json';
 
         if (!is_file($composerJsonPath) || !is_readable($composerJsonPath)) {
