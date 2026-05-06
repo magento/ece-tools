@@ -2,64 +2,44 @@
 /**
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
- *
- * @category Magento
- * @package  Magento\MagentoCloud\Test\Functional\Acceptance
- * @author   Magento Core Team <core@magentocommerce.com>
- * @license  https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
- * @link     https://magento.com
  */
 declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 
 /**
- * Checks ActiveMQ queue configuration
- *
- * @category Magento
- * @package  Magento\MagentoCloud\Test\Functional\Acceptance
- * @author   Magento Core Team <core@magentocommerce.com>
- * @license  https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
- * @link     https://magento.com
+ * Checks RabbitMQ queue configuration
  */
-abstract class ActiveMqCest extends AbstractCest
+abstract class RabbitMqCest extends AbstractCest
 {
     /**
-     * Flag to determine which service to add: 'activemq', 'rabbitmq', or 'none'
+     * Flag to determine which service to add: 'rabbitmq' or 'none'
      *
      * @var string
      */
-    protected string $serviceToAdd = 'activemq';
+    protected string $serviceToAdd = 'rabbitmq';
 
     /**
-     * When non-empty, used as the ActiveMQ Artemis version from dataProvider for the next prepareWorkplace() call.
+     * RabbitMQ version used when rabbitmq service is added.
      *
      * @var string
      */
-    protected string $selectedActiveMqArtemisVersion = '';
-
-    /**
-     * Default ActiveMQ Artemis version for prepareWorkplace when
-     * selectedActiveMqArtemisVersion is empty (e.g. _before).
-     *
-     * @var string
-     */
-    protected string $defaultActivemqArtemisVersion = '2.42.0';
+    protected string $rabbitMqVersion = '4.2';
 
     /**
      * @inheritdoc
      */
     public function _before(\CliTester $I): void
     {
-        // Reset to default service for each test
-        $this->serviceToAdd = 'activemq';
-        $this->selectedActiveMqArtemisVersion = '';
+        $this->serviceToAdd = 'rabbitmq';
+        $this->rabbitMqVersion = '4.2';
+        parent::_before($I);
     }
 
     /**
      * Get configuration from deployed environment
      *
-     * @param  \CliTester $I
+     * @param \CliTester $I
      * @return array
      */
     protected function getConfig(\CliTester $I): array
@@ -72,17 +52,20 @@ abstract class ActiveMqCest extends AbstractCest
     }
 
     /**
-     * Test default ActiveMQ configuration
+     * Test default RabbitMQ configuration
      *
-     * @param        \CliTester           $I
-     * @param        \Codeception\Example $data
-     * @return       void
-     * @throws       \Robo\Exception\TaskException
+     * @param \CliTester $I
+     * @param \Codeception\Example $data
+     * @return void
+     * @throws \Robo\Exception\TaskException
      * @dataProvider defaultConfigurationDataProvider
      */
     public function testDefaultConfiguration(\CliTester $I, \Codeception\Example $data): void
     {
-        $this->selectedActiveMqArtemisVersion = $data['activemqArtemisVersion'] ?? $this->defaultActivemqArtemisVersion;
+        if (isset($data['rabbitMqVersion'])) {
+            $this->rabbitMqVersion = $data['rabbitMqVersion'];
+        }
+
         $this->prepareWorkplace($I, $data['version']);
         $I->generateDockerCompose(
             sprintf(
@@ -91,6 +74,7 @@ abstract class ActiveMqCest extends AbstractCest
             )
         );
         $this->removeVendorVolumeMountFromDockerCompose($I);
+
         $I->assertTrue($I->runDockerComposeCommand('run build cloud-build'), 'Build phase was failed');
         $I->assertTrue($I->startEnvironment(), 'Docker could not start');
         $I->assertTrue($I->runDockerComposeCommand('run deploy cloud-deploy'), 'Deploy phase was failed');
@@ -98,9 +82,8 @@ abstract class ActiveMqCest extends AbstractCest
 
         $config = $this->getConfig($I);
 
-        // Check that queue configuration is present and correctly set
         $I->assertArrayHasKey('queue', $config, 'Queue configuration missing from env.php');
-        $I->assertArrayHasKey('stomp', $config['queue'], 'STOMP configuration missing from queue config');
+        $I->assertArrayHasKey('amqp', $config['queue'], 'AMQP configuration missing from queue config');
 
         $this->checkArraySubset(
             [
@@ -109,11 +92,10 @@ abstract class ActiveMqCest extends AbstractCest
                 'user' => $data['expectedUser'],
                 'password' => $data['expectedPassword'],
             ],
-            $config['queue']['stomp'],
+            $config['queue']['amqp'],
             $I
         );
 
-        // Check consumers wait for messages configuration for Magento >= 2.2
         if (isset($data['expectedConsumersWait'])) {
             $I->assertArrayHasKey(
                 'consumers_wait_for_messages',
@@ -140,17 +122,20 @@ abstract class ActiveMqCest extends AbstractCest
     abstract protected function defaultConfigurationDataProvider(): array;
 
     /**
-     * Test ActiveMQ configuration with custom settings
+     * Test RabbitMQ configuration with custom settings
      *
-     * @param        \CliTester           $I
-     * @param        \Codeception\Example $data
-     * @return       void
-     * @throws       \Robo\Exception\TaskException
+     * @param \CliTester $I
+     * @param \Codeception\Example $data
+     * @return void
+     * @throws \Robo\Exception\TaskException
      * @dataProvider customConfigurationDataProvider
      */
     public function testCustomConfiguration(\CliTester $I, \Codeception\Example $data): void
     {
-        $this->selectedActiveMqArtemisVersion = $data['activemqArtemisVersion'] ?? $this->defaultActivemqArtemisVersion;
+        if (isset($data['rabbitMqVersion'])) {
+            $this->rabbitMqVersion = $data['rabbitMqVersion'];
+        }
+
         $this->prepareWorkplace($I, $data['version']);
         $I->generateDockerCompose(
             sprintf(
@@ -164,6 +149,7 @@ abstract class ActiveMqCest extends AbstractCest
 
         $I->assertTrue($I->runDockerComposeCommand('run build cloud-build'), 'Build phase was failed');
         $I->assertTrue($I->startEnvironment(), 'Docker could not start');
+        $this->configureRabbitMqUserForInstall($I, $data['configuration']);
         $I->assertTrue($I->runDockerComposeCommand('run deploy cloud-deploy'), 'Deploy phase was failed');
         $I->assertTrue($I->runDockerComposeCommand('run deploy cloud-post-deploy'), 'Post Deploy phase was failed');
 
@@ -189,17 +175,62 @@ abstract class ActiveMqCest extends AbstractCest
     abstract protected function customConfigurationDataProvider(): array;
 
     /**
-     * Test ActiveMQ wrong configuration
+     * Creates/updates custom RabbitMQ users before cloud-deploy installation step.
      *
-     * @param        \CliTester           $I
-     * @param        \Codeception\Example $data
-     * @return       void
-     * @throws       \Robo\Exception\TaskException
+     * Magento validates AMQP credentials during setup:install, so custom test credentials
+     * must exist in the RabbitMQ service ahead of deploy.
+     *
+     * @param \CliTester $I
+     * @param array $configuration
+     */
+    protected function configureRabbitMqUserForInstall(\CliTester $I, array $configuration): void
+    {
+        $amqpConfig = $configuration['stage']['deploy']['QUEUE_CONFIGURATION']['amqp'] ?? null;
+        if (!is_array($amqpConfig)) {
+            return;
+        }
+
+        $user = isset($amqpConfig['user']) ? (string)$amqpConfig['user'] : '';
+        $password = isset($amqpConfig['password']) ? (string)$amqpConfig['password'] : '';
+        $host = isset($amqpConfig['host']) ? (string)$amqpConfig['host'] : 'rabbitmq';
+
+        if ($user === '' || $password === '' || $user === 'guest' || $host !== 'rabbitmq') {
+            return;
+        }
+
+        $innerCommand = sprintf(
+            "rabbitmqctl add_user %s %s 2>/dev/null || rabbitmqctl change_password %s %s; " .
+            "rabbitmqctl set_permissions -p / %s '.*' '.*' '.*'",
+            escapeshellarg($user),
+            escapeshellarg($password),
+            escapeshellarg($user),
+            escapeshellarg($password),
+            escapeshellarg($user)
+        );
+
+        $command = sprintf(
+            'docker-compose exec -T rabbitmq bash -lc %s',
+            escapeshellarg($innerCommand)
+        );
+
+        $I->assertTrue($I->runBashCommand($command), 'Failed to configure RabbitMQ user for install validation');
+    }
+
+    /**
+     * Test RabbitMQ wrong configuration
+     *
+     * @param \CliTester $I
+     * @param \Codeception\Example $data
+     * @return void
+     * @throws \Robo\Exception\TaskException
      * @dataProvider wrongConfigurationDataProvider
      */
     public function testWrongConfiguration(\CliTester $I, \Codeception\Example $data): void
     {
-        $this->selectedActiveMqArtemisVersion = $data['activemqArtemisVersion'] ?? $this->defaultActivemqArtemisVersion;
+        if (isset($data['rabbitMqVersion'])) {
+            $this->rabbitMqVersion = $data['rabbitMqVersion'];
+        }
+
         $this->prepareWorkplace($I, $data['version']);
         $I->generateDockerCompose(
             sprintf(
@@ -232,75 +263,18 @@ abstract class ActiveMqCest extends AbstractCest
     abstract protected function wrongConfigurationDataProvider(): array;
 
     /**
-     * Test ActiveMQ fallback to RabbitMQ
-     *
-     * @param        \CliTester           $I
-     * @param        \Codeception\Example $data
-     * @return       void
-     * @throws       \Robo\Exception\TaskException
-     * @dataProvider fallbackToRabbitMqDataProvider
-     */
-    public function testFallbackToRabbitMq(\CliTester $I, \Codeception\Example $data): void
-    {
-        $this->selectedActiveMqArtemisVersion = $data['activemqArtemisVersion'] ?? $this->defaultActivemqArtemisVersion;
-        $this->prepareWorkplace($I, $data['version']);
-        $I->generateDockerCompose(
-            sprintf(
-                '--mode=production --expose-db-port=%s',
-                $I->getExposedPort()
-            )
-        );
-        $this->removeVendorVolumeMountFromDockerCompose($I);
-
-        $I->writeEnvMagentoYaml($data['configuration']);
-
-        $I->assertTrue($I->runDockerComposeCommand('run build cloud-build'), 'Build phase was failed');
-        $I->assertTrue($I->startEnvironment(), 'Docker could not start');
-        $I->assertTrue($I->runDockerComposeCommand('run deploy cloud-deploy'), 'Deploy phase was failed');
-        $I->assertTrue($I->runDockerComposeCommand('run deploy cloud-post-deploy'), 'Post Deploy phase was failed');
-
-        $config = $this->getConfig($I);
-
-        // Should have queue configuration
-        $I->assertArrayHasKey('queue', $config, 'Queue configuration missing from env.php');
-
-        // Check for either AMQP (RabbitMQ) or STOMP (ActiveMQ Artemis)
-        $queueType = isset($config['queue']['amqp']) ? 'amqp' : 'stomp';
-        $I->assertArrayHasKey(
-            $queueType,
-            $config['queue'],
-            'Queue configuration (AMQP or STOMP) missing from queue config'
-        );
-
-        $this->checkArraySubset(
-            $data['expectedRabbitMqConfig'],
-            $config['queue'][$queueType],
-            $I
-        );
-
-        $I->amOnPage('/');
-        $I->see('Home page');
-        $I->see('CMS homepage content goes here.');
-    }
-
-    /**
-     * Data provider for RabbitMQ fallback test
-     *
-     * @return array
-     */
-    abstract protected function fallbackToRabbitMqDataProvider(): array;
-
-    /**
      * Test queue configuration without any message broker (uses DB)
      *
-     * @param        \CliTester           $I
-     * @param        \Codeception\Example $data
-     * @return       void
-     * @throws       \Robo\Exception\TaskException
+     * @param \CliTester $I
+     * @param \Codeception\Example $data
+     * @return void
+     * @throws \Robo\Exception\TaskException
      * @dataProvider noMessageBrokerDataProvider
      */
     public function testNoMessageBroker(\CliTester $I, \Codeception\Example $data): void
     {
+        $this->serviceToAdd = 'none';
+
         $this->prepareWorkplace($I, $data['version']);
         $I->generateDockerCompose(
             sprintf(
@@ -317,13 +291,10 @@ abstract class ActiveMqCest extends AbstractCest
 
         $config = $this->getConfig($I);
 
-        // When no message broker is available, queue config should exist with only consumers_wait_for_messages
-        // No AMQP (RabbitMQ) or STOMP (ActiveMQ) should be present - database queue is used
         $I->assertArrayHasKey('queue', $config, 'Queue configuration should be present');
         $I->assertArrayNotHasKey('amqp', $config['queue'], 'AMQP configuration should not be present (no RabbitMQ)');
         $I->assertArrayNotHasKey('stomp', $config['queue'], 'STOMP configuration should not be present (no ActiveMQ)');
 
-        // Should only have consumers_wait_for_messages setting
         $I->assertArrayHasKey(
             'consumers_wait_for_messages',
             $config['queue'],
@@ -348,57 +319,18 @@ abstract class ActiveMqCest extends AbstractCest
     abstract protected function noMessageBrokerDataProvider(): array;
 
     /**
-     * Override prepareWorkplace to add ActiveMQ or RabbitMQ service based on test scenario
+     * Override prepareWorkplace to add RabbitMQ service based on test scenario
      *
      * @param \CliTester $I
-     * @param string     $templateVersion
+     * @param string $templateVersion
      * @return void
      */
     protected function prepareWorkplace(\CliTester $I, string $templateVersion): void
     {
         parent::prepareWorkplace($I, $templateVersion);
 
-        $artemisVersion = $this->selectedActiveMqArtemisVersion !== ''
-            ? $this->selectedActiveMqArtemisVersion
-            : $this->defaultActivemqArtemisVersion;
-        // Add the appropriate service based on the test scenario
-        if ($this->serviceToAdd === 'activemq') {
-            $this->addActiveMqService($I, $artemisVersion);
-        } elseif ($this->serviceToAdd === 'rabbitmq') {
+        if ($this->serviceToAdd === 'rabbitmq') {
             $this->addRabbitMqService($I);
-        }
-
-        // If serviceToAdd is null or empty, no message broker service is added
-        $this->selectedActiveMqArtemisVersion = '';
-    }
-
-    /**
-     * Add ActiveMQ Artemis service to services.yaml and .magento.app.yaml
-     *
-     * @param \CliTester $I
-     * @return void
-     */
-    protected function addActiveMqService(\CliTester $I, string $activemqArtemisVersion): void
-    {
-        // Read current services.yaml
-        $services = $I->readServicesYaml();
-
-        // Add ActiveMQ Artemis service if not present
-        if (!isset($services['activemq-artemis'])) {
-            $services['activemq-artemis'] = [
-                'type' => 'activemq-artemis:'.$activemqArtemisVersion,
-                'disk' => 1024,
-            ];
-            $I->writeServicesYaml($services);
-        }
-
-        // Read current .magento.app.yaml
-        $app = $I->readAppMagentoYaml();
-
-        // Add ActiveMQ Artemis relationship if not present
-        if (!isset($app['relationships']['activemq-artemis'])) {
-            $app['relationships']['activemq-artemis'] = 'activemq-artemis:activemq-artemis';
-            $I->writeAppMagentoYaml($app);
         }
     }
 
@@ -410,22 +342,18 @@ abstract class ActiveMqCest extends AbstractCest
      */
     protected function addRabbitMqService(\CliTester $I): void
     {
-        // Read current services.yaml
         $services = $I->readServicesYaml();
 
-        // Add RabbitMQ service if not present
         if (!isset($services['rabbitmq'])) {
             $services['rabbitmq'] = [
-                'type' => 'rabbitmq:4.1',
+                'type' => sprintf('rabbitmq:%s', $this->rabbitMqVersion),
                 'disk' => 1024,
             ];
             $I->writeServicesYaml($services);
         }
 
-        // Read current .magento.app.yaml
         $app = $I->readAppMagentoYaml();
 
-        // Add RabbitMQ relationship if not present
         if (!isset($app['relationships']['rabbitmq'])) {
             $app['relationships']['rabbitmq'] = 'rabbitmq:rabbitmq';
             $I->writeAppMagentoYaml($app);

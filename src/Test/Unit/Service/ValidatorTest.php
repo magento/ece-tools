@@ -80,7 +80,7 @@ class ValidatorTest extends TestCase
         $version = '6.5';
         $message = sprintf(
             'Magento %s does not support version "%s" for service "%s". '
-                . 'Service version should satisfy "~1.7.0 || ~2.4.0 || ~5.2.0" constraint.',
+            . 'Service version should satisfy "~1.7.0 || ~2.4.0 || ~5.2.0" constraint.',
             $magentoVersion,
             $version,
             ServiceInterface::NAME_ELASTICSEARCH
@@ -170,6 +170,28 @@ class ValidatorTest extends TestCase
                     ServiceInterface::NAME_REDIS => '7.2',
                     ServiceInterface::NAME_OPENSEARCH => '2.19',
                     ServiceInterface::NAME_RABBITMQ => '3.9.0'
+                ],
+                0
+            ],
+            [
+                '2.4.4-p18',
+                [
+                    ServiceInterface::NAME_REDIS => '7.2',
+                    ServiceInterface::NAME_REDIS_SESSION => '7.2',
+                ],
+                0
+            ],
+            [
+                '2.4.4-p18',
+                [
+                    ServiceInterface::NAME_DB_MARIA => '10.11.0',
+                ],
+                1
+            ],
+            [
+                '2.4.4-p18',
+                [
+                    ServiceInterface::NAME_OPENSEARCH => '2.19.0'
                 ],
                 0
             ],
@@ -294,6 +316,20 @@ class ValidatorTest extends TestCase
                 0
             ],
             [
+                '2.4.4-p8',
+                [
+                    ServiceInterface::NAME_OPENSEARCH => '1.3.0'
+                ],
+                0
+            ],
+            [
+                '2.4.4-p8',
+                [
+                    ServiceInterface::NAME_OPENSEARCH => '1.2.0'
+                ],
+                1
+            ],
+            [
                 '2.4.5-p11',
                 [
                     ServiceInterface::NAME_PHP => '8.1.0',
@@ -307,6 +343,20 @@ class ValidatorTest extends TestCase
                 0
             ],
             [
+                '2.4.4-p13',
+                [
+                    ServiceInterface::NAME_OPENSEARCH => '2.19.0'
+                ],
+                0
+            ],
+            [
+                '2.4.4-p13',
+                [
+                    ServiceInterface::NAME_OPENSEARCH => '1.3.0'
+                ],
+                1
+            ],
+            [
                 '2.4.5-p12',
                 [
                     ServiceInterface::NAME_PHP => '8.1.0',
@@ -314,7 +364,7 @@ class ValidatorTest extends TestCase
                     ServiceInterface::NAME_NGINX => '1.18.0',
                     ServiceInterface::NAME_VARNISH => '7.0.0',
                     ServiceInterface::NAME_REDIS => '6.2.6',
-                    ServiceInterface::NAME_OPENSEARCH => '2.0.0',
+                    ServiceInterface::NAME_OPENSEARCH => '2.3.0',
                     ServiceInterface::NAME_RABBITMQ => '3.11.0'
                 ],
                 0
@@ -327,9 +377,44 @@ class ValidatorTest extends TestCase
                 0
             ],
             [
+                '2.4.5-p17',
+                [
+                    ServiceInterface::NAME_DB_MARIA => '10.11.0'
+                ],
+                0
+            ],
+            [
+                '2.4.5-p16',
+                [
+                    ServiceInterface::NAME_DB_MARIA => '10.11.0'
+                ],
+                0
+            ],
+            [
                 '2.4.6-p11',
                 [
                     ServiceInterface::NAME_VALKEY => '8.0.0'
+                ],
+                0
+            ],
+            [
+                '2.4.6-p11',
+                [
+                    ServiceInterface::NAME_DB_MARIA => '10.11.0'
+                ],
+                0
+            ],
+            [
+                '2.4.6-p11',
+                [
+                    ServiceInterface::NAME_DB_MARIA => '10.6.0'
+                ],
+                1
+            ],
+            [
+                '2.4.6-p15',
+                [
+                    ServiceInterface::NAME_DB_MARIA => '10.11.0'
                 ],
                 0
             ],
@@ -341,7 +426,56 @@ class ValidatorTest extends TestCase
                 0
             ],
             [
-               '2.4.8',
+                '2.4.5-p17',
+                [
+                    ServiceInterface::NAME_RABBITMQ => '4.2.0'
+                ],
+                0
+            ],
+            [
+                '2.4.6-p15',
+                [
+                    ServiceInterface::NAME_RABBITMQ => '4.2.0'
+                ],
+                0
+            ],
+            [
+                '2.4.7-p10',
+                [
+                    ServiceInterface::NAME_RABBITMQ => '4.2.0'
+                ],
+                0
+            ],
+            [
+                '2.4.8-p5',
+                [
+                    ServiceInterface::NAME_RABBITMQ => '4.2.0'
+                ],
+                0
+            ],
+            [
+                '2.4.8',
+                [
+                    ServiceInterface::NAME_VALKEY => '9.0.0'
+                ],
+                1
+            ],
+            [
+                '2.4.8',
+                [
+                    ServiceInterface::NAME_VALKEY => '8.1.0'
+                ],
+                1
+            ],
+            [
+                '2.4.9-beta1',
+                [
+                    ServiceInterface::NAME_VALKEY => '9.0.0'
+                ],
+                0
+            ],
+            [
+                '2.4.8',
                 [
                     ServiceInterface::NAME_PHP => '8.4.0'
                 ],
@@ -355,10 +489,25 @@ class ValidatorTest extends TestCase
                 1
             ],
             [
+                '2.4.8',
+                [
+                    ServiceInterface::NAME_ACTIVEMQ => '2.51.0'
+                ],
+                1
+            ],
+            [
                 '2.4.9-beta1',
                 [
                     ServiceInterface::NAME_PHP => '8.5.0',
-                    ServiceInterface::NAME_RABBITMQ => '4.1.0'
+                    ServiceInterface::NAME_RABBITMQ => '4.1.0',
+                    ServiceInterface::NAME_ACTIVEMQ => '2.51.0'
+                ],
+                0
+            ],
+            [
+                '2.4.9',
+                [
+                    ServiceInterface::NAME_RABBITMQ => '4.2.0'
                 ],
                 0
             ],
@@ -369,6 +518,269 @@ class ValidatorTest extends TestCase
                     ServiceInterface::NAME_RABBITMQ => '4.1.0'
                 ],
                 1
+            ],
+            [
+                '2.4.7',
+                [
+                    ServiceInterface::NAME_DB_MARIA => '11.8.0'
+                ],
+                1
+            ],
+            [
+                '2.4.7-p10',
+                [
+                    ServiceInterface::NAME_DB_MARIA => '11.8.0'
+                ],
+                0
+            ],
+            [
+                '2.4.8',
+                [
+                    ServiceInterface::NAME_DB_MARIA => '11.4.1'
+                ],
+                0
+            ],
+            [
+                '2.4.8',
+                [
+                    ServiceInterface::NAME_DB_MARIA => '11.8.0'
+                ],
+                1
+            ],
+            [
+                '2.4.8-p5',
+                [
+                    ServiceInterface::NAME_DB_MARIA => '11.4.1'
+                ],
+                0
+            ],
+            [
+                '2.4.8-p5',
+                [
+                    ServiceInterface::NAME_DB_MARIA => '11.8.0'
+                ],
+                0
+            ],
+            [
+                '2.4.9-beta1',
+                [
+                    ServiceInterface::NAME_DB_MARIA => '11.8.0'
+                ],
+                0
+            ],
+            [
+                '2.4.9-beta1',
+                [
+                    ServiceInterface::NAME_DB_MARIA => '12.2.0'
+                ],
+                0
+            ],
+            [
+                '2.4.9-beta1',
+                [
+                    ServiceInterface::NAME_VALKEY => '8.0.0'
+                ],
+                0
+            ],
+            [
+                '2.4.9-beta1',
+                [
+                    ServiceInterface::NAME_VALKEY_SESSION => '9.0.0'
+                ],
+                0
+            ],
+            [
+                '2.4.9',
+                [
+                    ServiceInterface::NAME_VALKEY => '9.0.0'
+                ],
+                0
+            ],
+            [
+                '2.4.9',
+                [
+                    ServiceInterface::NAME_VALKEY => '8.1.0'
+                ],
+                1
+            ],
+            [
+                '2.4.5-p17',
+                [
+                    ServiceInterface::NAME_VALKEY => '8.1.0'
+                ],
+                0
+            ],
+            [
+                '2.4.6-p15',
+                [
+                    ServiceInterface::NAME_VALKEY => '8.1.0'
+                ],
+                0
+            ],
+            [
+                '2.4.7-p10',
+                [
+                    ServiceInterface::NAME_VALKEY => '8.1.0'
+                ],
+                0
+            ],
+            [
+                '2.4.8-p5',
+                [
+                    ServiceInterface::NAME_VALKEY => '8.1.0'
+                ],
+                0
+            ],
+            [
+                '2.4.9-beta1',
+                [
+                    ServiceInterface::NAME_VALKEY => 'latest'
+                ],
+                0
+            ],
+            [
+                '2.4.8-p2',
+                [
+                    ServiceInterface::NAME_OPENSEARCH => '3.0.0'
+                ],
+                0
+            ],
+            [
+                '2.4.8-p2',
+                [
+                    ServiceInterface::NAME_OPENSEARCH => '2.19.0'
+                ],
+                1
+            ],
+            [
+                '2.4.8-p2',
+                [
+                    ServiceInterface::NAME_OPENSEARCH => '4.0.0'
+                ],
+                1
+            ],
+            [
+                '2.4.8-p5',
+                [
+                    ServiceInterface::NAME_OPENSEARCH => '3.5.0'
+                ],
+                0
+            ],
+            [
+                '2.4.8-p5',
+                [
+                    ServiceInterface::NAME_OPENSEARCH => '2.19.0'
+                ],
+                1
+            ],
+            [
+                '2.4.8-p5',
+                [
+                    ServiceInterface::NAME_OPENSEARCH => '3.5.1'
+                ],
+                0
+            ],
+            [
+                '2.4.5-p17',
+                [
+                    ServiceInterface::NAME_OPENSEARCH => '2.19.0'
+                ],
+                0
+            ],
+            [
+                '2.4.5-p17',
+                [
+                    ServiceInterface::NAME_OPENSEARCH => '3.5.0'
+                ],
+                1
+            ],
+            [
+                '2.4.6-p15',
+                [
+                    ServiceInterface::NAME_OPENSEARCH => '2.19.0'
+                ],
+                0
+            ],
+            [
+                '2.4.6-p15',
+                [
+                    ServiceInterface::NAME_OPENSEARCH => '3.5.0'
+                ],
+                0
+            ],
+            [
+                '2.4.6-p15',
+                [
+                    ServiceInterface::NAME_OPENSEARCH => '1.3.0'
+                ],
+                1
+            ],
+            [
+                '2.4.7-p10',
+                [
+                    ServiceInterface::NAME_OPENSEARCH => '2.19.0'
+                ],
+                0
+            ],
+            [
+                '2.4.7-p10',
+                [
+                    ServiceInterface::NAME_OPENSEARCH => '3.5.0'
+                ],
+                0
+            ],
+            [
+                '2.4.7-p10',
+                [
+                    ServiceInterface::NAME_OPENSEARCH => '1.3.0'
+                ],
+                1
+            ],
+            [
+                '2.4.9',
+                [
+                    ServiceInterface::NAME_OPENSEARCH => '3.5.0'
+                ],
+                0
+            ],
+            [
+                '2.4.9',
+                [
+                    ServiceInterface::NAME_OPENSEARCH => '2.19.0'
+                ],
+                1
+            ],
+            [
+                '2.4.9',
+                [
+                    ServiceInterface::NAME_OPENSEARCH => '2.19.0'
+                ],
+                1
+            ],
+            [
+                '2.4.5-p17',
+                [ServiceInterface::NAME_ACTIVEMQ => '2.51.0'],
+                0
+            ],
+            [
+                '2.4.6-p15',
+                [ServiceInterface::NAME_ACTIVEMQ => '2.51.0'],
+                0
+            ],
+            [
+                '2.4.7-p10',
+                [ServiceInterface::NAME_ACTIVEMQ => '2.51.0'],
+                0
+            ],
+            [
+                '2.4.8-p5',
+                [ServiceInterface::NAME_ACTIVEMQ => '2.51.0'],
+                0
+            ],
+            [
+                '2.4.9',
+                [ServiceInterface::NAME_ACTIVEMQ => '2.51.0'],
+                0
             ],
         ];
     }

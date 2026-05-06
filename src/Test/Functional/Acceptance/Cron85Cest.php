@@ -21,7 +21,7 @@ class Cron85Cest extends CronCest
     {
         return [
             [
-                'version' => '2.4.9-alpha-opensearch3.0',
+                'version' => '2.4.9-beta',
                 'variables' => [
                     'MAGENTO_CLOUD_VARIABLES' => [
                         'ADMIN_EMAIL' => 'admin@example.com',

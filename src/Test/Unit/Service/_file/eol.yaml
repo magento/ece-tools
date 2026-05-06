@@ -13,6 +13,12 @@ mariadb:
     eol:
   - version: '10.2'
     eol:
+  - version: '11.4'
+    eol:
+  - version: '11.8'
+    eol:
+  - version: '12.3'
+    eol:
 elasticsearch:
   - version: '1.7'
     eol:
@@ -35,4 +41,39 @@ redis:
   - version: '5.0'
     eol:
   - version: '5.2'
+    eol:
+activemq-artemis:
+  - version: '2.42.0'
+    eol:
+  - version: '2.51.0'
+redis-session:
+  - version: '3.2'
+    eol:
+  - version: '4.0'
+    eol:
+  - version: '5.0'
+    eol:
+  - version: '5.2'
+    eol:
+valkey:
+  - version: '8.0'
+    eol:
+  - version: '8.1'
+    eol:
+  - version: '9.0'
+    eol:
+valkey-session:
+  - version: '8.0'
+    eol:
+  - version: '9.0'
+    eol:
+opensearch:
+  - version: '1.3'
+    eol:
+  - version: '2.3'
+    eol:
+  - version: '2.5'
+    eol:
+activemq-artemis:
+  - version: '2.42'
     eol:

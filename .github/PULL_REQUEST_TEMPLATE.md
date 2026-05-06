@@ -34,13 +34,13 @@
 
 ### Release notes
 
-For user-facing changes, add a meaningful release note. For examples, see [Magento Cloud ECE-tools release notes](https://experienceleague.adobe.com/docs/commerce-cloud-service/user-guide/release-notes/ece-tools-package.html).
+For user-facing changes, add a meaningful release note. For examples, see [Commerce on Cloud - ECE-tools release notes](https://experienceleague.adobe.com/en/docs/commerce-on-cloud/user-guide/release-notes/ece-tools-package).
 
 ### Associated documentation updates
 <!--
- If your proposed update requires user documentation, submit a PR to the Magento DevDocs repository. For extensive updates requiring assistance, submit an issue to DevDocs. See https://github.com/magento/devdocs/blob/master/.github/CONTRIBUTING.md.
+ If your proposed update requires user documentation, submit a PR to the [documentation repository](https://github.com/AdobeDocs/commerce-on-cloud.en). For extensive updates requiring assistance, [submit an issue](https://github.com/AdobeDocs/commerce-on-cloud.en/issues/new/choose). See [Contributing to Commerce on Cloud documentation](https://github.com/AdobeDocs/commerce-on-cloud.en/blob/main/contributing.md).
  -->
-Add link to Magento DevDocs PR or Issue, if needed.
+Add link to Commerce on Cloud documentation PR or Issue, if needed.
 
 ### Contribution checklist
  - [ ] Pull request has a meaningful description of its purpose

@@ -69,8 +69,8 @@ class EnvironmentDataTest extends TestCase
         /** @var MockObject|ReaderInterface $environmentReaderMock */
         $environmentReaderMock = $this->createStub(ReaderInterface::class);
 
-        /** @var MockObject|Schema $schemaMock */
-        $schemaMock = $this->createStub(Schema::class);
+        /** @var Schema&MockObject $schemaMock */
+        $schemaMock = $this->createMock(Schema::class);
 
         $schemaMock->method('getDefaults')
             ->with(SystemConfigInterface::SYSTEM_VARIABLES)

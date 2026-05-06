@@ -40,34 +40,45 @@ abstract class ValkeyCest extends AbstractCest
      * Override prepareWorkplace to replace Redis with Valkey service
      *
      * @param CliTester $I
-     * @param string    $templateVersion
+     * @param string|Example $data
      * @return void
      */
-    protected function prepareWorkplace(CliTester $I, string $templateVersion): void
+    protected function prepareWorkplace(CliTester $I, $data): void
     {
+        $templateVersion = is_string($data) ? $data : $data['version'];
         parent::prepareWorkplace($I, $templateVersion);
 
         // Check if replacement is needed by examining actual services
         $services = $I->readServicesYaml();
-        
+
         // Only replace if Redis exists and Valkey/cache doesn't exist
         $hasRedis = isset($services['redis']);
         $hasValkey = isset($services['valkey']) || isset($services['cache']);
-        
+
         if ($hasRedis && !$hasValkey) {
             // Template has Redis but not Valkey, so replace it
-            $this->replaceRedisWithValkey($I);
+            $this->replaceRedisWithValkey($I, is_string($data) ? null : $data);
         }
         // If template already has Valkey (2.4.8+), do nothing
+    }
+
+    /**
+     * @param Example|null $data
+     * @return string
+     */
+    protected function getValkeyVersion(?Example $data = null): string
+    {
+        return $data['valkey_version'] ?? '8.0';
     }
 
     /**
      * Replace Redis service with Valkey service in services.yaml and .magento.app.yaml
      *
      * @param CliTester $I
+     * @param Example|null $data
      * @return void
      */
-    protected function replaceRedisWithValkey(CliTester $I): void
+    protected function replaceRedisWithValkey(CliTester $I, ?Example $data = null): void
     {
         // Read current services.yaml
         $services = $I->readServicesYaml();
@@ -79,7 +90,7 @@ abstract class ValkeyCest extends AbstractCest
 
         // Add Valkey service
         $services['valkey'] = [
-            'type' => 'valkey:8.0'
+            'type' => 'valkey:' . $this->getValkeyVersion($data)
         ];
 
         $I->writeServicesYaml($services);
@@ -107,7 +118,7 @@ abstract class ValkeyCest extends AbstractCest
      */
     public function testDefaultConfiguration(CliTester $I, Example $data): void
     {
-        $this->prepareWorkplace($I, $data['version']);
+        $this->prepareWorkplace($I, $data);
         $I->generateDockerCompose(
             sprintf(
                 '--mode=production --expose-db-port=%s',
@@ -175,7 +186,7 @@ abstract class ValkeyCest extends AbstractCest
      */
     public function testWrongConfigurationValkeyBackend(CliTester $I, Example $data): void
     {
-        $this->prepareWorkplace($I, $data['version']);
+        $this->prepareWorkplace($I, $data);
         $I->generateDockerCompose(
             sprintf(
                 '--mode=production --expose-db-port=%s',
@@ -189,7 +200,7 @@ abstract class ValkeyCest extends AbstractCest
         $I->assertSame($data['buildSuccess'], $I->runDockerComposeCommand('run build cloud-build'));
         $I->seeInOutput($data['errorBuildMessage']);
         $I->assertTrue($I->startEnvironment(), 'Docker could not start');
-        $I->assertSame($data['deploySuccess'], $I->runDockerComposeCommand('run build cloud-deploy'));
+        $I->assertSame($data['deploySuccess'], $I->runDockerComposeCommand('run deploy cloud-deploy'));
         $I->seeInOutput($data['errorDeployMessage']);
     }
 
@@ -206,7 +217,7 @@ abstract class ValkeyCest extends AbstractCest
      */
     public function testValkeyWrongConnection(CliTester $I, Example $data): void
     {
-        $this->prepareWorkplace($I, $data['version']);
+        $this->prepareWorkplace($I, $data);
         $I->generateDockerCompose(
             sprintf(
                 '--mode=production --expose-db-port=%s',
@@ -235,7 +246,7 @@ abstract class ValkeyCest extends AbstractCest
      */
     public function testGoodConfiguration(CliTester $I, Example $data): void
     {
-        $this->prepareWorkplace($I, $data['version']);
+        $this->prepareWorkplace($I, $data);
         $I->generateDockerCompose(
             sprintf(
                 '--mode=production --expose-db-port=%s',

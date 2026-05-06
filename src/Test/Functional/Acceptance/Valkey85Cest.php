@@ -23,7 +23,7 @@ class Valkey85Cest extends ValkeyCest
     {
         return [
             [
-                'version' => '2.4.9-alpha-opensearch3.0',
+                'version' => '2.4.9-beta',
             ],
         ];
     }
@@ -35,7 +35,7 @@ class Valkey85Cest extends ValkeyCest
     {
         return [
             [
-                'version' => '2.4.9-alpha-opensearch3.0',
+                'version' => '2.4.9-beta',
                 'wrongConfiguration' => [
                     'stage' => [
                         'deploy' => [
@@ -61,7 +61,7 @@ class Valkey85Cest extends ValkeyCest
     {
         return [
             [
-                'version' => '2.4.9-alpha-opensearch3.0',
+                'version' => '2.4.9-beta',
                 'configuration' => [
                     'stage' => [
                         'deploy' => [
@@ -81,7 +81,7 @@ class Valkey85Cest extends ValkeyCest
                 ],
             ],
             [
-                'version' => '2.4.9-alpha-opensearch3.0',
+                'version' => '2.4.9-beta',
                 'configuration' => [
                     'stage' => [
                         'deploy' => [
@@ -112,7 +112,7 @@ class Valkey85Cest extends ValkeyCest
     {
         return [
             [
-                'version' => '2.4.9-alpha-opensearch3.0',
+                'version' => '2.4.9-beta',
                 'configuration' => [
                     'stage' => [
                         'deploy' => [
@@ -130,7 +130,26 @@ class Valkey85Cest extends ValkeyCest
                 ],
             ],
             [
-                'version' => '2.4.9-alpha-opensearch3.0',
+                'version' => '2.4.9-beta',
+                'valkey_version' => '9.0',
+                'configuration' => [
+                    'stage' => [
+                        'deploy' => [
+                            'VALKEY_BACKEND' => '\Magento\Framework\Cache\Backend\Redis',
+                        ],
+                    ],
+                ],
+                'expectedBackend' => '\Magento\Framework\Cache\Backend\Redis',
+                'expectedConfig' => [
+                    'backend_options' => [
+                        'server' => 'cache',
+                        'port' => '6379',
+                        'database' => 1,
+                    ]
+                ],
+            ],
+            [
+                'version' => '2.4.9-beta',
                 'configuration' => [
                     'stage' => [
                         'deploy' => [
@@ -150,7 +169,7 @@ class Valkey85Cest extends ValkeyCest
                 'expectedConfig' => [],
             ],
             [
-                'version' => '2.4.9-alpha-opensearch3.0',
+                'version' => '2.4.9-beta',
                 'configuration' => [
                     'stage' => [
                         'deploy' => [

@@ -10,11 +10,14 @@ namespace Magento\MagentoCloud\Config\Validator\Deploy;
 use Composer\Composer;
 use Composer\Package\Version\VersionParser;
 use Composer\Semver\Constraint\ConstraintInterface;
+use Composer\Semver\Semver;
 use Magento\MagentoCloud\App\Error;
 use Magento\MagentoCloud\Config\GlobalSection;
 use Magento\MagentoCloud\Config\ValidatorInterface;
 use Magento\MagentoCloud\Config\Validator;
 use Magento\MagentoCloud\Package\MagentoVersion;
+use Magento\MagentoCloud\Service\ServiceInterface;
+use Magento\MagentoCloud\Service\Validator as ServiceValidator;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -106,6 +109,23 @@ class PhpVersion implements ValidatorInterface
 
             $recommendedPhpConstraint = $this->versionParser->parseConstraints($lastConstraint);
             $currentPhpConstraint = $this->getCurrentPhpConstraint();
+
+            // Check against Service Validator's allowed PHP versions for this Magento version
+            $magentoVersion = $this->magentoVersion->getVersion();
+            $supportedPhpVersions = ServiceValidator::MAGENTO_SUPPORTED_SERVICE_VERSIONS[ServiceInterface::NAME_PHP];
+
+            $allowedPhpConstraint = null;
+            foreach ($supportedPhpVersions as $versionConstraint => $phpConstraint) {
+                if (Semver::satisfies($magentoVersion, $versionConstraint)) {
+                    $allowedPhpConstraint = $this->versionParser->parseConstraints($phpConstraint);
+                    break;
+                }
+            }
+
+            // If current PHP version satisfies the allowed constraint from Service Validator, it's OK
+            if ($allowedPhpConstraint && $allowedPhpConstraint->matches($currentPhpConstraint)) {
+                return $this->resultFactory->success();
+            }
 
             if (!$recommendedPhpConstraint->matches($currentPhpConstraint)) {
                 return $this->resultFactory->error(
