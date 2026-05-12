@@ -80,7 +80,7 @@ class ValidatorTest extends TestCase
         $version = '6.5';
         $message = sprintf(
             'Magento %s does not support version "%s" for service "%s". '
-                . 'Service version should satisfy "~1.7.0 || ~2.4.0 || ~5.2.0" constraint.',
+            . 'Service version should satisfy "~1.7.0 || ~2.4.0 || ~5.2.0" constraint.',
             $magentoVersion,
             $version,
             ServiceInterface::NAME_ELASTICSEARCH
@@ -475,7 +475,7 @@ class ValidatorTest extends TestCase
                 0
             ],
             [
-               '2.4.8',
+                '2.4.8',
                 [
                     ServiceInterface::NAME_PHP => '8.4.0'
                 ],
@@ -494,7 +494,7 @@ class ValidatorTest extends TestCase
                     ServiceInterface::NAME_ACTIVEMQ => '2.51.0'
                 ],
                 1
-             ],
+            ],
             [
                 '2.4.9-beta1',
                 [
