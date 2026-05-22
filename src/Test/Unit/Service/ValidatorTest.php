@@ -468,7 +468,7 @@ class ValidatorTest extends TestCase
                 1
             ],
             [
-                '2.4.9-beta1',
+                '2.4.9',
                 [
                     ServiceInterface::NAME_VALKEY => '9.0.0'
                 ],
@@ -496,7 +496,7 @@ class ValidatorTest extends TestCase
                 1
             ],
             [
-                '2.4.9-beta1',
+                '2.4.9',
                 [
                     ServiceInterface::NAME_PHP => '8.5.0',
                     ServiceInterface::NAME_RABBITMQ => '4.1.0',
@@ -512,7 +512,7 @@ class ValidatorTest extends TestCase
                 0
             ],
             [
-                '2.4.9-beta1',
+                '2.4.9',
                 [
                     ServiceInterface::NAME_PHP => '8.3.0',
                     ServiceInterface::NAME_RABBITMQ => '4.1.0'
@@ -562,28 +562,28 @@ class ValidatorTest extends TestCase
                 0
             ],
             [
-                '2.4.9-beta1',
+                '2.4.9',
                 [
                     ServiceInterface::NAME_DB_MARIA => '11.8.0'
                 ],
                 0
             ],
             [
-                '2.4.9-beta1',
+                '2.4.9',
                 [
                     ServiceInterface::NAME_DB_MARIA => '12.2.0'
                 ],
                 0
             ],
             [
-                '2.4.9-beta1',
+                '2.4.9',
                 [
                     ServiceInterface::NAME_VALKEY => '8.0.0'
                 ],
                 0
             ],
             [
-                '2.4.9-beta1',
+                '2.4.9',
                 [
                     ServiceInterface::NAME_VALKEY_SESSION => '9.0.0'
                 ],
@@ -632,7 +632,7 @@ class ValidatorTest extends TestCase
                 0
             ],
             [
-                '2.4.9-beta1',
+                '2.4.9',
                 [
                     ServiceInterface::NAME_VALKEY => 'latest'
                 ],
