@@ -22,11 +22,6 @@ class MariaDbVersion85Cest extends MariaDbVersionCest
     protected function mariaDbVersionDataProvider(): array
     {
         return [
-            '2.4.9_supported_11.4' => [
-                'magentoCloudTemplate' => '2.4.9',
-                'mariaDbVersion' => '11.4',
-                'expectedSuccess' => true,
-            ],
             '2.4.9_supported_11.8' => [
                 'magentoCloudTemplate' => '2.4.9',
                 'mariaDbVersion' => '11.8',

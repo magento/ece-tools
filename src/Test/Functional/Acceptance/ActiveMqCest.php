@@ -416,7 +416,7 @@ abstract class ActiveMqCest extends AbstractCest
         // Add RabbitMQ service if not present
         if (!isset($services['rabbitmq'])) {
             $services['rabbitmq'] = [
-                'type' => 'rabbitmq:4.1',
+                'type' => 'rabbitmq:4.2',
                 'disk' => 1024,
             ];
             $I->writeServicesYaml($services);

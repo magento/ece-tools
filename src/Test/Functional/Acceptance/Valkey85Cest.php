@@ -24,6 +24,7 @@ class Valkey85Cest extends ValkeyCest
         return [
             [
                 'version' => '2.4.9',
+                'valkey_version' => '9.0',
             ],
         ];
     }

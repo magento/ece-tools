@@ -68,7 +68,7 @@ abstract class ValkeyCest extends AbstractCest
      */
     protected function getValkeyVersion(?Example $data = null): string
     {
-        return $data['valkey_version'] ?? '8.0';
+        return $data['valkey_version'];
     }
 
     /**
