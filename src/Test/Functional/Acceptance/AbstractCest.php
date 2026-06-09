@@ -103,20 +103,32 @@ abstract class AbstractCest
             );
         }
 
-        if ($templateVersion === '2.4.5') {
-            // Keep Composer in the 2.2 line for 2.4.5 templates to avoid forcing Magento package downgrades.
-            $I->assertTrue(
-                $I->addDependencyToComposer('composer/composer', '~2.2.0'),
-                'Can not pin composer/composer for 2.4.5 template'
-            );
-        }
-
         if ($this->runComposerUpdate) {
+            $this->pinComposerVersionFromLock($I);
             $I->assertTrue($I->composerUpdate(), 'Composer update failed');
             $I->cacheWorkDir($templateVersion);
         }
 
         $this->removeESIfExists($I, $templateVersion);
+    }
+
+    /**
+     * Pin composer/composer to the version from template lock to prevent dependency drift.
+     */
+    protected function pinComposerVersionFromLock(\CliTester $I): void
+    {
+        $lockPath = $I->getWorkDirPath() . DIRECTORY_SEPARATOR . 'composer.lock';
+        if (!is_file($lockPath)) {
+            return;
+        }
+
+        $lock = json_decode(file_get_contents($lockPath), true);
+        foreach ($lock['packages'] ?? [] as $pkg) {
+            if ($pkg['name'] === 'composer/composer') {
+                $I->addDependencyToComposer('composer/composer', $pkg['version']);
+                return;
+            }
+        }
     }
 
     /**
