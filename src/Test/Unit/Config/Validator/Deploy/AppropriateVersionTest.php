@@ -68,8 +68,9 @@ class AppropriateVersionTest extends TestCase
         $series = [
             [['2.2'], true],
             [['2.4.7'], true],
+            [['2.4.8'], true],
         ];
-        $this->magentoVersion->expects($this->exactly(2))
+        $this->magentoVersion->expects($this->exactly(3))
             ->method('isGreaterOrEqual')
             ->willReturnCallback(function (...$args) use (&$series) {
                 [$expectedArgs, $return] = array_shift($series);
@@ -91,8 +92,9 @@ class AppropriateVersionTest extends TestCase
         $series = [
             [['2.2'], false],
             [['2.4.7'], false],
+            [['2.4.8'], false],
         ];
-        $this->magentoVersion->expects($this->exactly(2))
+        $this->magentoVersion->expects($this->exactly(3))
             ->method('isGreaterOrEqual')
             ->willReturnCallback(function (...$args) use (&$series) {
                 [$expectedArgs, $return] = array_shift($series);
@@ -115,8 +117,9 @@ class AppropriateVersionTest extends TestCase
         $series = [
             [['2.2'], false],
             [['2.4.7'], false],
+            [['2.4.8'], false],
         ];
-        $this->magentoVersion->expects($this->exactly(2))
+        $this->magentoVersion->expects($this->exactly(3))
             ->method('isGreaterOrEqual')
             ->willReturnCallback(function (...$args) use (&$series) {
                 [$expectedArgs, $return] = array_shift($series);
@@ -140,8 +143,40 @@ class AppropriateVersionTest extends TestCase
                     'SCD_MAX_EXECUTION_TIME is available for Magento 2.2.0 and later.',
                     'GENERATED_CODE_SYMLINK is available for Magento 2.1.x.',
                     'USE_LUA is available for Magento 2.4.7 and later.',
-                    'LUA_KEY is available for Magento 2.4.7 and later.'
+                    'USE_LUA_ON_GC is available for Magento 2.4.8 and later.'
                 ])
+            );
+
+        $this->assertInstanceOf(Error::class, $this->validator->validate());
+    }
+
+    public function testValidateVersionForMagento247WithUseLuaOnGcConfigured()
+    {
+        $series = [
+            [['2.2'], true],
+            [['2.4.7'], true],
+            [['2.4.8'], false],
+        ];
+        $this->magentoVersion->expects($this->exactly(3))
+            ->method('isGreaterOrEqual')
+            ->willReturnCallback(function (...$args) use (&$series) {
+                [$expectedArgs, $return] = array_shift($series);
+                $this->assertSame($expectedArgs, $args);
+
+                return $return;
+            });
+        $this->magentoVersion->expects($this->once())
+            ->method('satisfies')
+            ->willReturn(true);
+        $this->configurationCheckerMock->expects($this->once())
+            ->method('isConfigured')
+            ->with(DeployInterface::VAR_USE_LUA_ON_GC, true)
+            ->willReturn(true);
+        $this->resultFactoryMock->expects($this->once())
+            ->method('error')
+            ->with(
+                'The current configuration is not compatible with this version of Magento',
+                'USE_LUA_ON_GC is available for Magento 2.4.8 and later.'
             );
 
         $this->assertInstanceOf(Error::class, $this->validator->validate());

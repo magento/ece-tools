@@ -90,7 +90,9 @@ class Cache implements StepInterface
             $cacheConfig   = $this->cacheConfig->get();
             $graphqlConfig = $config['cache']['graphql'] ?? [];
             $luaConfig     = (bool)$this->stageConfig->get(DeployInterface::VAR_USE_LUA);
-            $luaConfigKey  = (bool)$this->stageConfig->get(DeployInterface::VAR_LUA_KEY);
+            $luaConfigOnGc = (bool)$this->stageConfig->get(DeployInterface::VAR_USE_LUA_ON_GC);
+            $isUseLuaSupported = $this->magentoVersion->isGreaterOrEqual('2.4.7');
+            $isUseLuaOnGcSupported = $this->magentoVersion->isGreaterOrEqual('2.4.8');
 
             if (isset($cacheConfig['frontend'])) {
                 $cacheConfig['frontend'] = array_filter(
@@ -143,8 +145,13 @@ class Cache implements StepInterface
                 unset($config['cache']);
             } else {
                 if (isset($cacheConfig['frontend']['default'])) {
-                    $cacheConfig['frontend']['default']['backend_options']['_useLua'] = $luaConfigKey;
-                    $cacheConfig['frontend']['default']['backend_options']['use_lua'] = $luaConfig;
+                    $cacheConfig['frontend']['default']['backend_options'] = $this->applyLuaOptions(
+                        $cacheConfig['frontend']['default']['backend_options'] ?? [],
+                        $luaConfig,
+                        $luaConfigOnGc,
+                        $isUseLuaSupported,
+                        $isUseLuaOnGcSupported
+                    );
                 }
                 $this->logger->info('Updating cache configuration.');
                 $config['cache'] = $cacheConfig;
@@ -158,6 +165,38 @@ class Cache implements StepInterface
         } catch (FileSystemException $e) {
             throw new StepException($e->getMessage(), Error::DEPLOY_ENV_PHP_IS_NOT_WRITABLE);
         }
+    }
+
+    /**
+     * Apply Lua-related backend options according to Magento version support.
+     *
+     * @param array $backendOptions
+     * @param bool $useLua
+     * @param bool $useLuaOnGc
+     * @param bool $isUseLuaSupported
+     * @param bool $isUseLuaOnGcSupported
+     * @return array
+     */
+    private function applyLuaOptions(
+        array $backendOptions,
+        bool $useLua,
+        bool $useLuaOnGc,
+        bool $isUseLuaSupported,
+        bool $isUseLuaOnGcSupported
+    ): array {
+        if ($isUseLuaSupported) {
+            $backendOptions['use_lua'] = $useLua;
+        } else {
+            unset($backendOptions['use_lua']);
+        }
+
+        if ($isUseLuaOnGcSupported) {
+            $backendOptions['use_lua_on_gc'] = $useLuaOnGc;
+        } else {
+            unset($backendOptions['use_lua_on_gc']);
+        }
+
+        return $backendOptions;
     }
 
     /**

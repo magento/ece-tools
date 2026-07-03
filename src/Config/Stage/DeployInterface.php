@@ -99,7 +99,7 @@ interface DeployInterface extends StageConfigInterface
     public const VAR_USE_LUA = 'USE_LUA';
 
     /**
-     * The variable responsible for LUA KEY in environments starting from Magento 2.4.7.
+     * The variable responsible for LUA usage during GC in environments starting from Magento 2.4.8.
      */
-    public const VAR_LUA_KEY = 'LUA_KEY';
+    public const VAR_USE_LUA_ON_GC = 'USE_LUA_ON_GC';
 }
