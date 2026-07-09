@@ -33,10 +33,33 @@ class ValidatorTest extends TestCase
         );
     }
 
-    public function testRabbitMq43IsNotSupported(): void
+    /**
+     * @param string $magentoVersion
+     * @dataProvider rabbitMq43SupportedDataProvider
+     */
+    #[DataProvider('rabbitMq43SupportedDataProvider')]
+    public function testRabbitMq43IsSupported(string $magentoVersion): void
     {
         $magentoVersionMock = $this->createMock(MagentoVersion::class);
-        $magentoVersionMock->method('getVersion')->willReturn('2.4.9');
+        $magentoVersionMock->method('getVersion')->willReturn($magentoVersion);
+
+        $validator = new Validator($magentoVersionMock);
+
+        $this->assertSame(
+            '',
+            $validator->validateService(ServiceInterface::NAME_RABBITMQ, '4.3.0')
+        );
+    }
+
+    /**
+     * @param string $magentoVersion
+     * @dataProvider rabbitMq43NotSupportedDataProvider
+     */
+    #[DataProvider('rabbitMq43NotSupportedDataProvider')]
+    public function testRabbitMq43IsNotSupported(string $magentoVersion): void
+    {
+        $magentoVersionMock = $this->createMock(MagentoVersion::class);
+        $magentoVersionMock->method('getVersion')->willReturn($magentoVersion);
 
         $validator = new Validator($magentoVersionMock);
         $message = $validator->validateService(ServiceInterface::NAME_RABBITMQ, '4.3.0');
@@ -52,6 +75,28 @@ class ValidatorTest extends TestCase
             ['2.4.7-p10'],
             ['2.4.8-p5'],
             ['2.4.9'],
+        ];
+    }
+
+    public static function rabbitMq43SupportedDataProvider(): array
+    {
+        return [
+            ['2.4.5-p17'],
+            ['2.4.6-p15'],
+            ['2.4.7-p10'],
+            ['2.4.8-p5'],
+            ['2.4.9'],
+        ];
+    }
+
+    public static function rabbitMq43NotSupportedDataProvider(): array
+    {
+        return [
+            ['2.4.5-p16'],
+            ['2.4.6-p14'],
+            ['2.4.7-p9'],
+            ['2.4.8'],
+            ['2.4.8-p4'],
         ];
     }
 }

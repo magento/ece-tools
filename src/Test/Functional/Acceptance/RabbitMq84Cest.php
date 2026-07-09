@@ -31,6 +31,15 @@ class RabbitMq84Cest extends RabbitMqCest
                 'expectedPassword' => 'guest',
                 'expectedConsumersWait' => 0,
             ],
+            'rabbitmq43-default-config-php84' => [
+                'version' => '2.4.8',
+                'rabbitMqVersion' => '4.3',
+                'expectedHost' => 'rabbitmq',
+                'expectedPort' => 5672,
+                'expectedUser' => 'guest',
+                'expectedPassword' => 'guest',
+                'expectedConsumersWait' => 0,
+            ],
         ];
     }
 
