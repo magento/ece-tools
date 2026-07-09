@@ -868,6 +868,125 @@ class CacheTest extends TestCase
     }
 
     /**
+     * Test that symfony_l2 backend is rejected on Magento versions older than 2.4.9.
+     *
+     * @return void
+     * @throws StepException
+     */
+    public function testExecuteSymfonyL2RejectedOnOldMagentoVersion(): void
+    {
+        $this->expectException(StepException::class);
+        $this->expectExceptionCode(Error::DEPLOY_WRONG_CACHE_CONFIGURATION);
+        $this->expectExceptionMessage('does not support symfony_l2 cache backend');
+
+        $this->configReaderMock->expects($this->once())
+            ->method('read')
+            ->willReturn([]);
+        $this->cacheConfigMock->expects($this->once())
+            ->method('get')
+            ->willReturn([
+                'frontend' => [
+                    'default' => [
+                        'backend' => CacheFactory::VALKEY_BACKEND_SYMFONY_L2,
+                        'backend_options' => [
+                            'remote_backend'         => 'redis',
+                            'remote_backend_options' => ['server' => 'localhost', 'port' => 6379],
+                            'local_backend'          => 'file',
+                            'local_backend_options'  => ['cache_dir' => '/dev/shm/magento_l1'],
+                        ],
+                    ],
+                ],
+            ]);
+
+        $this->magentoVersion->method('isGreaterOrEqual')
+            ->willReturnMap([
+                ['2.4.5', true],
+                ['2.4.7', true],
+                ['2.4.8', false],
+                ['2.4.9', false],
+                ['2.3.0', true],
+            ]);
+
+        $this->socketCreateMock->expects($this->never());
+
+        $this->step->execute();
+    }
+
+    /**
+     * Test that symfony_l2 config with both default and stale_cache_enabled frontends passes
+     * connection testing and is written to env.php with LUA injection skipped.
+     *
+     * @return void
+     * @throws StepException
+     */
+    public function testExecuteSymfonyL2TwoFrontendsConnectAndNoLua(): void
+    {
+        $symfonyL2Config = [
+            'frontend' => [
+                'default' => [
+                    'backend' => CacheFactory::VALKEY_BACKEND_SYMFONY_L2,
+                    'backend_options' => [
+                        'remote_backend'         => 'redis',
+                        'remote_backend_options' => ['server' => 'redis.server', 'port' => 6379],
+                        'local_backend'          => 'file',
+                        'local_backend_options'  => ['cache_dir' => '/dev/shm/magento_l1'],
+                    ],
+                ],
+                'stale_cache_enabled' => [
+                    'backend' => CacheFactory::VALKEY_BACKEND_SYMFONY_L2,
+                    'backend_options' => [
+                        'remote_backend'         => 'redis',
+                        'remote_backend_options' => ['server' => 'redis.server', 'port' => 6379],
+                        'local_backend'          => 'file',
+                        'local_backend_options'  => ['cache_dir' => '/dev/shm/magento_l1_stale'],
+                        'use_stale_cache'        => true,
+                    ],
+                ],
+            ],
+            'type' => [
+                'default'    => ['frontend' => 'default'],
+                'layout'     => ['frontend' => 'stale_cache_enabled'],
+                'block_html' => ['frontend' => 'stale_cache_enabled'],
+            ],
+        ];
+
+        $this->configReaderMock->expects($this->once())
+            ->method('read')
+            ->willReturn([]);
+        $this->cacheConfigMock->expects($this->once())
+            ->method('get')
+            ->willReturn($symfonyL2Config);
+        $this->magentoVersion->method('isGreaterOrEqual')
+            ->willReturnMap([
+                ['2.4.5', true],
+                ['2.4.7', true],
+                ['2.4.8', true],
+                ['2.4.9', true],
+                ['2.3.0', true],
+            ]);
+
+        $this->socketCreateMock->expects($this->exactly(2))
+            ->with(AF_INET, SOCK_STREAM, SOL_TCP)
+            ->willReturn('socket resource');
+        $this->socketConnectMock->expects($this->exactly(2))
+            ->with('socket resource', 'redis.server', 6379)
+            ->willReturn(true);
+        $this->socketCloseMock->expects($this->exactly(2))
+            ->with('socket resource');
+
+        // LUA keys must NOT be injected into symfony_l2 backend_options
+        $this->configWriterMock->expects($this->once())
+            ->method('create')
+            ->with(['cache' => $symfonyL2Config]);
+
+        $this->loggerMock->expects($this->once())
+            ->method('info')
+            ->with('Updating cache configuration.');
+
+        $this->step->execute();
+    }
+
+    /**
      * Test execute with file system exception method.
      *
      * @return void

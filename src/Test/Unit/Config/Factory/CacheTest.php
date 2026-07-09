@@ -615,6 +615,88 @@ class CacheTest extends TestCase
     }
 
     /**
+     * Test symfony_l2 config generation with Valkey backend.
+     *
+     * @return void
+     * @throws ConfigException
+     */
+    public function testGetSymfonyL2WithValkey(): void
+    {
+        $valkeyConfig = [
+            'host'   => 'valkey.host',
+            'port'   => '6379',
+            'scheme' => 'valkey',
+        ];
+
+        $this->stageConfigMock->expects(self::any())
+            ->method('get')
+            ->willReturnMap([
+                [DeployInterface::VAR_CACHE_CONFIGURATION, []],
+                [DeployInterface::VAR_CACHE_REDIS_BACKEND, ''],
+                [DeployInterface::VAR_CACHE_VALKEY_BACKEND, Cache::VALKEY_BACKEND_SYMFONY_L2],
+                [DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION, false],
+                [DeployInterface::VAR_VALKEY_USE_SLAVE_CONNECTION, false],
+            ]);
+
+        $this->redisMock->expects(self::any())
+            ->method('getConfiguration')
+            ->willReturn([]);
+        $this->valkeyMock->expects(self::any())
+            ->method('getConfiguration')
+            ->willReturn($valkeyConfig);
+
+        $remoteOptions = [
+            'server'          => 'valkey.host',
+            'port'            => '6379',
+            'database'        => Cache::CACHE_DATABASE_DEFAULT,
+            'serializer'      => 'igbinary',
+            'compression_lib' => 'gzip',
+        ];
+
+        $expected = [
+            'frontend' => [
+                'default' => [
+                    'backend' => Cache::VALKEY_BACKEND_SYMFONY_L2,
+                    'backend_options' => [
+                        'remote_backend'         => 'valkey',
+                        'remote_backend_options' => array_merge(
+                            $remoteOptions,
+                            ['persistent_id' => 'magento_l2_default']
+                        ),
+                        'local_backend'          => 'file',
+                        'local_backend_options'  => ['cache_dir' => '/dev/shm/magento_l1'],
+                    ],
+                ],
+                'stale_cache_enabled' => [
+                    'backend' => Cache::VALKEY_BACKEND_SYMFONY_L2,
+                    'backend_options' => [
+                        'remote_backend'         => 'valkey',
+                        'remote_backend_options' => array_merge(
+                            $remoteOptions,
+                            ['persistent_id' => 'magento_l2_stale']
+                        ),
+                        'local_backend'          => 'file',
+                        'local_backend_options'  => ['cache_dir' => '/dev/shm/magento_l1_stale'],
+                        'use_stale_cache'        => true,
+                    ],
+                ],
+            ],
+            'type' => [
+                'default'                => ['frontend' => 'default'],
+                'layout'                 => ['frontend' => 'stale_cache_enabled'],
+                'block_html'             => ['frontend' => 'stale_cache_enabled'],
+                'reflection'             => ['frontend' => 'stale_cache_enabled'],
+                'config_integration'     => ['frontend' => 'stale_cache_enabled'],
+                'config_integration_api' => ['frontend' => 'stale_cache_enabled'],
+                'full_page'              => ['frontend' => 'stale_cache_enabled'],
+                'translate'              => ['frontend' => 'stale_cache_enabled'],
+            ],
+        ];
+
+        self::assertEquals($expected, $this->config->get());
+    }
+
+    /**
      * Test env configuration merging method.
      *
      * @param  array $envCacheConfiguration

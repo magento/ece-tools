@@ -21,7 +21,6 @@ use Psr\Log\LoggerInterface;
 
 /**
  * Processes cache configuration.
- *
  */
 class Cache implements StepInterface
 {
@@ -82,6 +81,11 @@ class Cache implements StepInterface
     }
 
     /**
+     * Execute method.
+     * @throws StepException
+     * @throws FileSystemException
+     * @throws UndefinedPackageException
+     * @SuppressWarnings("PHPMD.CyclomaticComplexity")
      */
     public function execute()
     {
@@ -104,10 +108,13 @@ class Cache implements StepInterface
                             ?? false;
                         $this->checkBackendModel($backend);
 
-                        if (!$customCacheBackend && !in_array($backend, CacheFactory::AVAILABLE_REDIS_BACKEND, true)) {
+                        $isKnownBackend = in_array($backend, CacheFactory::AVAILABLE_REDIS_BACKEND, true)
+                            || in_array($backend, CacheFactory::AVAILABLE_VALKEY_BACKEND, true);
+                        if (!$customCacheBackend && !$isKnownBackend) {
                             return true;
                         }
-                        $backendOptions = ($backend === CacheFactory::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE)
+                        $backendOptions = ($backend === CacheFactory::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE
+                            || $backend === CacheFactory::VALKEY_BACKEND_SYMFONY_L2)
                             ? $cacheFrontend['backend_options']['remote_backend_options']
                             : $cacheFrontend['backend_options'];
                         return $this->testCacheConnection($backendOptions);
@@ -136,7 +143,7 @@ class Cache implements StepInterface
 
                 if ($isValkeyConfigured) {
                     $this->logger->warning(
-                        'Cache is configured for a Valkey service that is not available. 
+                        'Cache is configured for a Valkey service that is not available.
                             Configuration will be ignored.',
                         ['errorCode' => Error::WARN_VALKEY_SERVICE_NOT_AVAILABLE]
                     );
@@ -144,7 +151,10 @@ class Cache implements StepInterface
 
                 unset($config['cache']);
             } else {
-                if (isset($cacheConfig['frontend']['default'])) {
+                $defaultBackend = $cacheConfig['frontend']['default']['backend'] ?? '';
+                if (isset($cacheConfig['frontend']['default'])
+                    && $defaultBackend !== CacheFactory::VALKEY_BACKEND_SYMFONY_L2
+                ) {
                     $cacheConfig['frontend']['default']['backend_options'] = $this->applyLuaOptions(
                         $cacheConfig['frontend']['default']['backend_options'] ?? [],
                         $luaConfig,
@@ -250,6 +260,18 @@ class Cache implements StepInterface
                         $this->magentoVersion->getVersion(),
                         $backend
                     )
+                );
+            }
+
+            if ($backend === CacheFactory::VALKEY_BACKEND_SYMFONY_L2
+                && !$this->magentoVersion->isGreaterOrEqual('2.4.9')
+            ) {
+                throw new StepException(
+                    sprintf(
+                        'Magento version \'%s\' does not support symfony_l2 cache backend. Requires 2.4.9 or later.',
+                        $this->magentoVersion->getVersion()
+                    ),
+                    Error::DEPLOY_WRONG_CACHE_CONFIGURATION
                 );
             }
         } catch (UndefinedPackageException $exception) {
