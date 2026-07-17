@@ -39,11 +39,13 @@ class Cache
     public const REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE = '\Magento\Framework\Cache\Backend\RemoteSynchronizedCache';
 
     public const VALKEY_BACKEND_SYMFONY_L2 = 'symfony_l2';
+    public const REDIS_BACKEND_SYMFONY_L2 = 'symfony_l2';
 
     public const AVAILABLE_REDIS_BACKEND = [
         self::REDIS_BACKEND_CM_CACHE,
         self::REDIS_BACKEND_REDIS_CACHE,
         self::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE,
+        self::REDIS_BACKEND_SYMFONY_L2,
     ];
 
     public const AVAILABLE_VALKEY_BACKEND = [
@@ -112,8 +114,8 @@ class Cache
      */
     public function get(): array
     {
-         $envCacheConfiguration = (array)$this->stageConfig->get(DeployInterface::VAR_CACHE_CONFIGURATION);
-         $envCacheRadisBackendModel = (string)$this->stageConfig->get(DeployInterface::VAR_CACHE_REDIS_BACKEND);
+         $envCacheConfiguration      = (array)$this->stageConfig->get(DeployInterface::VAR_CACHE_CONFIGURATION);
+         $envCacheRedisBackendModel  = (string)$this->stageConfig->get(DeployInterface::VAR_CACHE_REDIS_BACKEND);
          $envCacheValkeyBackendModel = (string)$this->stageConfig->get(DeployInterface::VAR_CACHE_VALKEY_BACKEND);
 
         if ($this->isCacheConfigurationValid($envCacheConfiguration)
@@ -142,19 +144,19 @@ class Cache
             return $this->configMerger->clear($envCacheConfiguration);
         }
 
-        $redisConfig = $this->redis->getConfiguration();
-
+        $redisConfig  = $this->redis->getConfiguration();
         $valkeyConfig = $this->valkey->getConfiguration();
-
         if (empty($redisConfig) && empty($valkeyConfig)) {
             return [];
         }
 
         // Determine backend based on available configuration
-        $backendConfig = !empty($redisConfig) ? $redisConfig : $valkeyConfig;
-        $cacheBackendModel = !empty($redisConfig) ? $envCacheRadisBackendModel :$envCacheValkeyBackendModel;
+        $backendConfig     = !empty($redisConfig) ? $redisConfig : $valkeyConfig;
+        $cacheBackendModel = !empty($redisConfig) ? $envCacheRedisBackendModel : $envCacheValkeyBackendModel;
+
         if ($this->isSymfonyL2Structure()) {
-            $finalConfig = $this->getSymfonyL2ConfigStructure($backendConfig);
+            $remoteBackend = !empty($redisConfig) ? 'redis' : 'valkey';
+            $finalConfig = $this->getSymfonyL2ConfigStructure($backendConfig, $remoteBackend);
         } elseif ($this->isSynchronizedConfigStructure()) {
             $cacheCacheBackend = $this->getSynchronizedConfigStructure($cacheBackendModel, $backendConfig);
             $cacheCacheBackend['backend_options']['remote_backend_options'] = array_merge(
@@ -392,25 +394,28 @@ class Cache
      */
     private function isSymfonyL2Structure(): bool
     {
+        $redisModel = (string)$this->stageConfig->get(DeployInterface::VAR_CACHE_REDIS_BACKEND);
         $valkeyModel = (string)$this->stageConfig->get(DeployInterface::VAR_CACHE_VALKEY_BACKEND);
-        return $valkeyModel === self::VALKEY_BACKEND_SYMFONY_L2;
+        return $redisModel === self::REDIS_BACKEND_SYMFONY_L2 || $valkeyModel === self::VALKEY_BACKEND_SYMFONY_L2;
     }
 
     /**
      * Builds the full symfony_l2 config: default frontend (no stale) + stale_cache_enabled frontend + type mappings.
      *
-     * @param  array $backendConfig
+     * $remoteBackend is passed in explicitly (rather than derived from $backendConfig['scheme']) because the
+     * relationship's scheme reflects the wire protocol (typically 'redis' for both Redis and Valkey services,
+     * since Valkey is Redis-protocol-compatible), not which service is actually behind it.
+     *
+     * @param  array  $backendConfig
+     * @param  string $remoteBackend 'redis' or 'valkey'
      * @return array
      */
-    private function getSymfonyL2ConfigStructure(array $backendConfig): array
+    private function getSymfonyL2ConfigStructure(array $backendConfig, string $remoteBackend): array
     {
-        $remoteBackend = ($backendConfig['scheme'] ?? 'redis') === 'valkey' ? 'valkey' : 'redis';
-
         $remoteBackendOptions = [
             'server'          => $backendConfig['host'],
             'port'            => $backendConfig['port'],
             'database'        => self::CACHE_DATABASE_DEFAULT,
-            'serializer'      => 'igbinary',
             'compression_lib' => 'gzip',
         ];
 

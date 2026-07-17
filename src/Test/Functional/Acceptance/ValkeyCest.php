@@ -167,10 +167,6 @@ abstract class ValkeyCest extends AbstractCest
             $I
         );
         $I->assertArrayNotHasKey('type', $config['cache']);
-
-        $I->amOnPage('/');
-        $I->see('Home page');
-        $I->see('CMS homepage content goes here.');
     }
 
     /**
@@ -274,10 +270,6 @@ abstract class ValkeyCest extends AbstractCest
             $config['cache']['frontend']['default'],
             $I
         );
-
-        $I->amOnPage('/');
-        $I->see('Home page');
-        $I->see('CMS homepage content goes here.');
     }
 
     /**

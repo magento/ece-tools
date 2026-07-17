@@ -467,6 +467,7 @@ variables:
       - 'Cm_Cache_Backend_Redis'
       - '\Magento\Framework\Cache\Backend\Redis'
       - '\Magento\Framework\Cache\Backend\RemoteSynchronizedCache'
+      - 'symfony_l2'
     stages:
       - deploy
     default:

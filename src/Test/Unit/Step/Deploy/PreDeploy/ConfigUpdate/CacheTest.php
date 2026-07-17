@@ -914,12 +914,13 @@ class CacheTest extends TestCase
 
     /**
      * Test that symfony_l2 config with both default and stale_cache_enabled frontends passes
-     * connection testing and is written to env.php with LUA injection skipped.
+     * connection testing and gets Lua options injected into both frontends' remote_backend_options,
+     * written as '1'/'0' strings (required by Magento's SymfonyAdapterProvider).
      *
      * @return void
      * @throws StepException
      */
-    public function testExecuteSymfonyL2TwoFrontendsConnectAndNoLua(): void
+    public function testExecuteSymfonyL2TwoFrontendsConnectAndSetsLua(): void
     {
         $symfonyL2Config = [
             'frontend' => [
@@ -964,6 +965,12 @@ class CacheTest extends TestCase
                 ['2.4.9', true],
                 ['2.3.0', true],
             ]);
+        $this->stageConfig->expects($this->exactly(2))
+            ->method('get')
+            ->willReturnMap([
+                [DeployInterface::VAR_USE_LUA, true],
+                [DeployInterface::VAR_USE_LUA_ON_GC, false],
+            ]);
 
         $this->socketCreateMock->expects($this->exactly(2))
             ->with(AF_INET, SOCK_STREAM, SOL_TCP)
@@ -974,7 +981,82 @@ class CacheTest extends TestCase
         $this->socketCloseMock->expects($this->exactly(2))
             ->with('socket resource');
 
-        // LUA keys must NOT be injected into symfony_l2 backend_options
+        $expectedConfig = $symfonyL2Config;
+        $expectedConfig['frontend']['default']['backend_options']['remote_backend_options']['use_lua'] = '1';
+        $expectedConfig['frontend']['default']['backend_options']['remote_backend_options']['use_lua_on_gc'] = '0';
+        $expectedConfig['frontend']['stale_cache_enabled']['backend_options']['remote_backend_options']['use_lua']
+            = '1';
+        $expectedConfig['frontend']['stale_cache_enabled']['backend_options']['remote_backend_options']
+            ['use_lua_on_gc'] = '0';
+
+        $this->configWriterMock->expects($this->once())
+            ->method('create')
+            ->with(['cache' => $expectedConfig]);
+
+        $this->loggerMock->expects($this->once())
+            ->method('info')
+            ->with('Updating cache configuration.');
+
+        $this->step->execute();
+    }
+
+    /**
+     * Test that Lua options are not injected into symfony_l2 backend_options on Magento
+     * versions that don't support them (mirrors the legacy-backend version gating).
+     *
+     * @return void
+     * @throws StepException
+     */
+    public function testExecuteSymfonyL2DoesNotSetLuaForUnsupportedVersion(): void
+    {
+        $symfonyL2Config = [
+            'frontend' => [
+                'default' => [
+                    'backend' => CacheFactory::VALKEY_BACKEND_SYMFONY_L2,
+                    'backend_options' => [
+                        'remote_backend'         => 'redis',
+                        'remote_backend_options' => ['server' => 'redis.server', 'port' => 6379],
+                        'local_backend'          => 'file',
+                        'local_backend_options'  => ['cache_dir' => '/dev/shm/magento_l1'],
+                    ],
+                ],
+            ],
+            'type' => [
+                'default' => ['frontend' => 'default'],
+            ],
+        ];
+
+        $this->configReaderMock->expects($this->once())
+            ->method('read')
+            ->willReturn([]);
+        $this->cacheConfigMock->expects($this->once())
+            ->method('get')
+            ->willReturn($symfonyL2Config);
+        $this->magentoVersion->method('isGreaterOrEqual')
+            ->willReturnCallback(static function (string $version): bool {
+                if ($version === '2.4.7' || $version === '2.4.8') {
+                    return false;
+                }
+
+                return true;
+            });
+        $this->stageConfig->expects($this->exactly(2))
+            ->method('get')
+            ->willReturnMap([
+                [DeployInterface::VAR_USE_LUA, true],
+                [DeployInterface::VAR_USE_LUA_ON_GC, true],
+            ]);
+
+        $this->socketCreateMock->expects($this->once())
+            ->with(AF_INET, SOCK_STREAM, SOL_TCP)
+            ->willReturn('socket resource');
+        $this->socketConnectMock->expects($this->once())
+            ->with('socket resource', 'redis.server', 6379)
+            ->willReturn(true);
+        $this->socketCloseMock->expects($this->once())
+            ->with('socket resource');
+
+        // Neither use_lua nor use_lua_on_gc is supported below 2.4.7/2.4.8, so neither is injected.
         $this->configWriterMock->expects($this->once())
             ->method('create')
             ->with(['cache' => $symfonyL2Config]);

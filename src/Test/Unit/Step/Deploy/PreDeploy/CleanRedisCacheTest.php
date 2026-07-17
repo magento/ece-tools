@@ -302,4 +302,59 @@ class CleanRedisCacheTest extends TestCase
 
         $this->step->execute();
     }
+
+    /**
+     * Test execute method uses remote_backend_options for symfony_l2 backend.
+     *
+     * @return void
+     * @throws StepException
+     */
+    public function testExecuteUsesRemoteBackendOptionsForSymfonyL2(): void
+    {
+        $this->cacheConfigMock->expects($this->once())
+            ->method('get')
+            ->willReturn([
+                'frontend' => [
+                    'default' => [
+                        'backend' => CacheConfig::REDIS_BACKEND_SYMFONY_L2,
+                        'backend_options' => [
+                            'remote_backend' => 'redis',
+                            'remote_backend_options' => [
+                                'server' => 'cache',
+                                'port' => 6379,
+                                'database' => 1,
+                                'password' => 'secret',
+                            ],
+                            'local_backend' => 'file',
+                            'local_backend_options' => [
+                                'cache_dir' => '/dev/shm/magento_l1',
+                            ],
+                        ],
+                    ],
+                ],
+            ]);
+
+        $this->loggerMock->expects($this->once())
+            ->method('info')
+            ->with('Clearing redis cache: default');
+
+        /** @var Credis_Client|MockObject $client */
+        $client = $this->getMockBuilder(Credis_Client::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['connect', '__call'])
+            ->getMock();
+
+        $this->credisFactoryMock->expects($this->once())
+            ->method('create')
+            ->with('cache', 6379, 1, 'secret')
+            ->willReturn($client);
+
+        $client->expects($this->once())->method('connect');
+        $client->expects($this->once())
+            ->method('__call')
+            ->with('flushDb', [])
+            ->willReturn(null);
+
+        $this->step->execute();
+    }
 }

@@ -151,18 +151,13 @@ class Cache implements StepInterface
 
                 unset($config['cache']);
             } else {
-                $defaultBackend = $cacheConfig['frontend']['default']['backend'] ?? '';
-                if (isset($cacheConfig['frontend']['default'])
-                    && $defaultBackend !== CacheFactory::VALKEY_BACKEND_SYMFONY_L2
-                ) {
-                    $cacheConfig['frontend']['default']['backend_options'] = $this->applyLuaOptions(
-                        $cacheConfig['frontend']['default']['backend_options'] ?? [],
-                        $luaConfig,
-                        $luaConfigOnGc,
-                        $isUseLuaSupported,
-                        $isUseLuaOnGcSupported
-                    );
-                }
+                $cacheConfig = $this->applyLuaConfiguration(
+                    $cacheConfig,
+                    $luaConfig,
+                    $luaConfigOnGc,
+                    $isUseLuaSupported,
+                    $isUseLuaOnGcSupported
+                );
                 $this->logger->info('Updating cache configuration.');
                 $config['cache'] = $cacheConfig;
             }
@@ -175,6 +170,55 @@ class Cache implements StepInterface
         } catch (FileSystemException $e) {
             throw new StepException($e->getMessage(), Error::DEPLOY_ENV_PHP_IS_NOT_WRITABLE);
         }
+    }
+
+    /**
+     * Apply Lua-related options to the cache config, routing to the symfony_l2 remote
+     * backend options (both frontends) or the legacy flat backend options as appropriate.
+     *
+     * @param array $cacheConfig
+     * @param bool $useLua
+     * @param bool $useLuaOnGc
+     * @param bool $isUseLuaSupported
+     * @param bool $isUseLuaOnGcSupported
+     * @return array
+     */
+    private function applyLuaConfiguration(
+        array $cacheConfig,
+        bool $useLua,
+        bool $useLuaOnGc,
+        bool $isUseLuaSupported,
+        bool $isUseLuaOnGcSupported
+    ): array {
+        $defaultBackend = $cacheConfig['frontend']['default']['backend'] ?? '';
+
+        if ($defaultBackend === CacheFactory::VALKEY_BACKEND_SYMFONY_L2) {
+            foreach (['default', 'stale_cache_enabled'] as $frontendName) {
+                $remoteBackendOptions =
+                    $cacheConfig['frontend'][$frontendName]['backend_options']['remote_backend_options'] ?? null;
+                if ($remoteBackendOptions === null) {
+                    continue;
+                }
+                $cacheConfig['frontend'][$frontendName]['backend_options']['remote_backend_options'] =
+                    $this->applySymfonyL2LuaOptions(
+                        $remoteBackendOptions,
+                        $useLua,
+                        $useLuaOnGc,
+                        $isUseLuaSupported,
+                        $isUseLuaOnGcSupported
+                    );
+            }
+        } elseif (isset($cacheConfig['frontend']['default'])) {
+            $cacheConfig['frontend']['default']['backend_options'] = $this->applyLuaOptions(
+                $cacheConfig['frontend']['default']['backend_options'] ?? [],
+                $useLua,
+                $useLuaOnGc,
+                $isUseLuaSupported,
+                $isUseLuaOnGcSupported
+            );
+        }
+
+        return $cacheConfig;
     }
 
     /**
@@ -204,6 +248,44 @@ class Cache implements StepInterface
             $backendOptions['use_lua_on_gc'] = $useLuaOnGc;
         } else {
             unset($backendOptions['use_lua_on_gc']);
+        }
+
+        return $backendOptions;
+    }
+
+    /**
+     * Apply Lua-related options to the symfony_l2 remote (Redis/Valkey) backend options.
+     *
+     * Magento's SymfonyAdapterProvider compares these values against the string '1' rather than
+     * casting to bool, so they must be written as '1'/'0' here, unlike the legacy backends.
+     *
+     * @param array $backendOptions
+     * @param bool $useLua
+     * @param bool $useLuaOnGc
+     * @param bool $isUseLuaSupported
+     * @param bool $isUseLuaOnGcSupported
+     * @return array
+     */
+    private function applySymfonyL2LuaOptions(
+        array $backendOptions,
+        bool $useLua,
+        bool $useLuaOnGc,
+        bool $isUseLuaSupported,
+        bool $isUseLuaOnGcSupported
+    ): array {
+        $backendOptions = $this->applyLuaOptions(
+            $backendOptions,
+            $useLua,
+            $useLuaOnGc,
+            $isUseLuaSupported,
+            $isUseLuaOnGcSupported
+        );
+
+        if (isset($backendOptions['use_lua'])) {
+            $backendOptions['use_lua'] = $backendOptions['use_lua'] ? '1' : '0';
+        }
+        if (isset($backendOptions['use_lua_on_gc'])) {
+            $backendOptions['use_lua_on_gc'] = $backendOptions['use_lua_on_gc'] ? '1' : '0';
         }
 
         return $backendOptions;

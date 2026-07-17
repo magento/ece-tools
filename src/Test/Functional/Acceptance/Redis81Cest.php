@@ -50,7 +50,8 @@ class Redis81Cest extends RedisCest
                 'errorBuildMessage' => 'The REDIS_BACKEND variable contains an invalid value TestRedisModel.'
                     . ' Use one of the available value options: Cm_Cache_Backend_Redis,'
                     . ' \Magento\Framework\Cache\Backend\Redis,'
-                    . ' \Magento\Framework\Cache\Backend\RemoteSynchronizedCache.',
+                    . ' \Magento\Framework\Cache\Backend\RemoteSynchronizedCache,'
+                    . ' symfony_l2.',
                 'errorDeployMessage' => '',
             ],
         ];

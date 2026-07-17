@@ -86,9 +86,7 @@ class CleanRedisCache implements StepInterface
                 continue;
             }
 
-            $redisConfig = ($backend === CacheConfig::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE)
-                ? $cacheConfig['backend_options']['remote_backend_options']
-                : $cacheConfig['backend_options'];
+            $redisConfig = $this->getRedisConnectionConfig($cacheConfig, $backend);
 
             $this->logger->info('Clearing redis cache: ' . $cacheType);
 
@@ -106,5 +104,24 @@ class CleanRedisCache implements StepInterface
                 throw new StepException($e->getMessage(), Error::DEPLOY_REDIS_CACHE_CLEAN_FAILED, $e);
             }
         }
+    }
+
+    /**
+     * Returns connection settings for Redis-backed cache frontends.
+     *
+     * @param array  $cacheConfig
+     * @param string $backend
+     *
+     * @return array
+     */
+    private function getRedisConnectionConfig(array $cacheConfig, string $backend): array
+    {
+        if ($backend === CacheConfig::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE
+            || $backend === CacheConfig::REDIS_BACKEND_SYMFONY_L2
+        ) {
+            return $cacheConfig['backend_options']['remote_backend_options'] ?? [];
+        }
+
+        return $cacheConfig['backend_options'] ?? [];
     }
 }
