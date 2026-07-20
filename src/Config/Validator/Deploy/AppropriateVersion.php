@@ -84,18 +84,20 @@ class AppropriateVersion implements ValidatorInterface
         }
 
         if (!$this->magentoVersion->isGreaterOrEqual('2.4.7')) {
-            $variables = [
-                DeployInterface::VAR_USE_LUA,
-                DeployInterface::VAR_LUA_KEY,
-            ];
+            if ($this->configurationChecker->isConfigured(DeployInterface::VAR_USE_LUA, true)) {
+                $errors[] = sprintf(
+                    '%s is available for Magento 2.4.7 and later.',
+                    DeployInterface::VAR_USE_LUA
+                );
+            }
+        }
 
-            foreach ($variables as $variableName) {
-                if ($this->configurationChecker->isConfigured($variableName, true)) {
-                    $errors[] = sprintf(
-                        '%s is available for Magento 2.4.7 and later.',
-                        $variableName
-                    );
-                }
+        if (!$this->magentoVersion->isGreaterOrEqual('2.4.8')) {
+            if ($this->configurationChecker->isConfigured(DeployInterface::VAR_USE_LUA_ON_GC, true)) {
+                $errors[] = sprintf(
+                    '%s is available for Magento 2.4.8 and later.',
+                    DeployInterface::VAR_USE_LUA_ON_GC
+                );
             }
         }
 

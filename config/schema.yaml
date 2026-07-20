@@ -467,6 +467,7 @@ variables:
       - 'Cm_Cache_Backend_Redis'
       - '\Magento\Framework\Cache\Backend\Redis'
       - '\Magento\Framework\Cache\Backend\RemoteSynchronizedCache'
+      - 'symfony_l2'
     stages:
       - deploy
     default:
@@ -482,6 +483,7 @@ variables:
       - 'Cm_Cache_Backend_Redis'
       - '\Magento\Framework\Cache\Backend\Redis'
       - '\Magento\Framework\Cache\Backend\RemoteSynchronizedCache'
+      - 'symfony_l2'
     stages:
       - deploy
     default:
@@ -513,6 +515,7 @@ variables:
   USE_LUA:
     description: "Enable/Disable LUA in environments starting from Magento 2.4.7"
     type: boolean
+    magento_version: '>=2.4.7'
     stages:
       - deploy
     default:
@@ -521,9 +524,10 @@ variables:
       - stage:
           deploy:
             USE_LUA: true
-  LUA_KEY:
-    description: "LUA KEY for environments starting from Magento 2.4.7"
+  USE_LUA_ON_GC:
+    description: "Enable/Disable LUA usage for Redis GC in environments starting from Magento 2.4.8"
     type: boolean
+    magento_version: '>=2.4.8'
     stages:
       - deploy
     default:
@@ -531,7 +535,7 @@ variables:
     examples:
       - stage:
           deploy:
-            LUA_KEY: false
+            USE_LUA_ON_GC: false
   SESSION_CONFIGURATION:
     description: "Replace or modify the Magento session configuration generated during the deployment process.
       By default, ece-tools configures Magento to store Redis session data. To replace the existing configuration,

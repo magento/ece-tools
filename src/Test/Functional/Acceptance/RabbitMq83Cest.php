@@ -22,18 +22,18 @@ class RabbitMq83Cest extends RabbitMqCest
     protected function defaultConfigurationDataProvider(): array
     {
         return [
-            'rabbitmq41-default-config-php83' => [
+            'rabbitmq42-default-config-php83' => [
                 'version' => '2.4.7',
-                'rabbitMqVersion' => '4.1',
+                'rabbitMqVersion' => '4.2',
                 'expectedHost' => 'rabbitmq',
                 'expectedPort' => 5672,
                 'expectedUser' => 'guest',
                 'expectedPassword' => 'guest',
                 'expectedConsumersWait' => 0,
             ],
-            'rabbitmq42-default-config-php83' => [
+            'rabbitmq43-default-config-php83' => [
                 'version' => '2.4.7',
-                'rabbitMqVersion' => '4.2',
+                'rabbitMqVersion' => '4.3',
                 'expectedHost' => 'rabbitmq',
                 'expectedPort' => 5672,
                 'expectedUser' => 'guest',

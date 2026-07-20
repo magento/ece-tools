@@ -24,5 +24,5 @@ class ErrorCodes85Cest extends ErrorCodesCest
      *
      * @var string
      */
-    protected string $magentoCloudTemplate = '2.4.9-beta';
+    protected string $magentoCloudTemplate = '2.4.9';
 }

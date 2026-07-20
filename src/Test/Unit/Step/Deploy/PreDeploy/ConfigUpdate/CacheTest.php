@@ -168,6 +168,249 @@ class CacheTest extends TestCase
         $this->step->execute();
     }
 
+    public function testExecuteSetsLuaOptionsForDefaultFrontend(): void
+    {
+        $this->magentoVersion->expects($this->any())
+            ->method('isGreaterOrEqual')
+            ->willReturn(true);
+        $this->configReaderMock->expects($this->once())
+            ->method('read')
+            ->willReturn([]);
+        $this->cacheConfigMock->expects($this->once())
+            ->method('get')
+            ->willReturn([
+                'frontend' => [
+                    'default' => [
+                        'backend' => CacheFactory::REDIS_BACKEND_CM_CACHE,
+                        'backend_options' => [
+                            'server' => 'localhost',
+                            'port' => 6370,
+                        ],
+                    ],
+                ],
+            ]);
+        $this->stageConfig->expects($this->exactly(2))
+            ->method('get')
+            ->willReturnMap([
+                [DeployInterface::VAR_USE_LUA, true],
+                [DeployInterface::VAR_USE_LUA_ON_GC, false],
+            ]);
+        $this->configWriterMock->expects($this->once())
+            ->method('create')
+            ->with([
+                'cache' => [
+                    'frontend' => [
+                        'default' => [
+                            'backend' => CacheFactory::REDIS_BACKEND_CM_CACHE,
+                            'backend_options' => [
+                                'server' => 'localhost',
+                                'port' => 6370,
+                                'use_lua' => true,
+                                'use_lua_on_gc' => false,
+                            ],
+                        ],
+                    ],
+                ],
+            ]);
+        $this->loggerMock->expects($this->once())
+            ->method('info')
+            ->with('Updating cache configuration.');
+
+        $sock = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
+        $this->socketCreateMock->expects($this->once())
+            ->willReturn($sock);
+        $this->socketConnectMock->expects($this->once())
+            ->with($sock, 'localhost', 6370)
+            ->willReturn(true);
+        $this->socketCloseMock->expects($this->once())
+            ->with($sock);
+        socket_close($sock);
+
+        $this->step->execute();
+    }
+
+    public function testExecuteDoesNotSetUseLuaOnGcForUnsupportedVersion(): void
+    {
+        $this->magentoVersion->expects($this->any())
+            ->method('isGreaterOrEqual')
+            ->willReturnCallback(static function (string $version): bool {
+                if ($version === '2.4.8') {
+                    return false;
+                }
+
+                return true;
+            });
+        $this->configReaderMock->expects($this->once())
+            ->method('read')
+            ->willReturn([]);
+        $this->cacheConfigMock->expects($this->once())
+            ->method('get')
+            ->willReturn([
+                'frontend' => [
+                    'default' => [
+                        'backend' => CacheFactory::REDIS_BACKEND_CM_CACHE,
+                        'backend_options' => [
+                            'server' => 'localhost',
+                            'port' => 6370,
+                            'use_lua_on_gc' => true,
+                        ],
+                    ],
+                ],
+            ]);
+        $this->stageConfig->expects($this->exactly(2))
+            ->method('get')
+            ->willReturnMap([
+                [DeployInterface::VAR_USE_LUA, true],
+                [DeployInterface::VAR_USE_LUA_ON_GC, true],
+            ]);
+        $this->configWriterMock->expects($this->once())
+            ->method('create')
+            ->with([
+                'cache' => [
+                    'frontend' => [
+                        'default' => [
+                            'backend' => CacheFactory::REDIS_BACKEND_CM_CACHE,
+                            'backend_options' => [
+                                'server' => 'localhost',
+                                'port' => 6370,
+                                'use_lua' => true,
+                            ],
+                        ],
+                    ],
+                ],
+            ]);
+        $this->loggerMock->expects($this->once())
+            ->method('info')
+            ->with('Updating cache configuration.');
+
+        $sock = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
+        $this->socketCreateMock->expects($this->once())
+            ->willReturn($sock);
+        $this->socketConnectMock->expects($this->once())
+            ->with($sock, 'localhost', 6370)
+            ->willReturn(true);
+        $this->socketCloseMock->expects($this->once())
+            ->with($sock);
+        socket_close($sock);
+
+        $this->step->execute();
+    }
+
+    public function testExecuteDoesNotSetUseLuaForUnsupportedVersion(): void
+    {
+        $this->magentoVersion->expects($this->any())
+            ->method('isGreaterOrEqual')
+            ->willReturnCallback(static function (string $version): bool {
+                if ($version === '2.4.7' || $version === '2.4.8') {
+                    return false;
+                }
+
+                return true;
+            });
+        $this->configReaderMock->expects($this->once())
+            ->method('read')
+            ->willReturn([]);
+        $this->cacheConfigMock->expects($this->once())
+            ->method('get')
+            ->willReturn([
+                'frontend' => [
+                    'default' => [
+                        'backend' => CacheFactory::REDIS_BACKEND_CM_CACHE,
+                        'backend_options' => [
+                            'server' => 'localhost',
+                            'port' => 6370,
+                            'use_lua' => true,
+                            'use_lua_on_gc' => true,
+                        ],
+                    ],
+                ],
+            ]);
+        $this->stageConfig->expects($this->exactly(2))
+            ->method('get')
+            ->willReturnMap([
+                [DeployInterface::VAR_USE_LUA, true],
+                [DeployInterface::VAR_USE_LUA_ON_GC, true],
+            ]);
+        $this->configWriterMock->expects($this->once())
+            ->method('create')
+            ->with([
+                'cache' => [
+                    'frontend' => [
+                        'default' => [
+                            'backend' => CacheFactory::REDIS_BACKEND_CM_CACHE,
+                            'backend_options' => [
+                                'server' => 'localhost',
+                                'port' => 6370,
+                            ],
+                        ],
+                    ],
+                ],
+            ]);
+        $this->loggerMock->expects($this->once())
+            ->method('info')
+            ->with('Updating cache configuration.');
+
+        $sock = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
+        $this->socketCreateMock->expects($this->once())
+            ->willReturn($sock);
+        $this->socketConnectMock->expects($this->once())
+            ->with($sock, 'localhost', 6370)
+            ->willReturn(true);
+        $this->socketCloseMock->expects($this->once())
+            ->with($sock);
+        socket_close($sock);
+
+        $this->step->execute();
+    }
+
+    public function testExecuteSetsLuaOptionsWhenDefaultBackendOptionsAreMissing(): void
+    {
+        $this->magentoVersion->expects($this->any())
+            ->method('isGreaterOrEqual')
+            ->willReturn(true);
+        $this->configReaderMock->expects($this->once())
+            ->method('read')
+            ->willReturn([]);
+        $this->cacheConfigMock->expects($this->once())
+            ->method('get')
+            ->willReturn([
+                'frontend' => [
+                    'default' => [
+                        'backend' => 'file',
+                    ],
+                ],
+            ]);
+        $this->stageConfig->expects($this->exactly(2))
+            ->method('get')
+            ->willReturnMap([
+                [DeployInterface::VAR_USE_LUA, true],
+                [DeployInterface::VAR_USE_LUA_ON_GC, false],
+            ]);
+        $this->configWriterMock->expects($this->once())
+            ->method('create')
+            ->with([
+                'cache' => [
+                    'frontend' => [
+                        'default' => [
+                            'backend' => 'file',
+                            'backend_options' => [
+                                'use_lua' => true,
+                                'use_lua_on_gc' => false,
+                            ],
+                        ],
+                    ],
+                ],
+            ]);
+        $this->loggerMock->expects($this->once())
+            ->method('info')
+            ->with('Updating cache configuration.');
+        $this->socketCreateMock->expects($this->never());
+        $this->socketConnectMock->expects($this->never());
+        $this->socketCloseMock->expects($this->never());
+
+        $this->step->execute();
+    }
+
     /**
      * DataProvider for execute method.
      *
@@ -622,6 +865,207 @@ class CacheTest extends TestCase
                 'Missing required Redis or Valkey configuration \'server\'!'
             ],
         ];
+    }
+
+    /**
+     * Test that symfony_l2 backend is rejected on Magento versions older than 2.4.9.
+     *
+     * @return void
+     * @throws StepException
+     */
+    public function testExecuteSymfonyL2RejectedOnOldMagentoVersion(): void
+    {
+        $this->expectException(StepException::class);
+        $this->expectExceptionCode(Error::DEPLOY_WRONG_CACHE_CONFIGURATION);
+        $this->expectExceptionMessage('does not support symfony_l2 cache backend');
+
+        $this->configReaderMock->expects($this->once())
+            ->method('read')
+            ->willReturn([]);
+        $this->cacheConfigMock->expects($this->once())
+            ->method('get')
+            ->willReturn([
+                'frontend' => [
+                    'default' => [
+                        'backend' => CacheFactory::VALKEY_BACKEND_SYMFONY_L2,
+                        'backend_options' => [
+                            'remote_backend'         => 'redis',
+                            'remote_backend_options' => ['server' => 'localhost', 'port' => 6379],
+                            'local_backend'          => 'file',
+                            'local_backend_options'  => ['cache_dir' => '/dev/shm/magento_l1'],
+                        ],
+                    ],
+                ],
+            ]);
+
+        $this->magentoVersion->method('isGreaterOrEqual')
+            ->willReturnMap([
+                ['2.4.5', true],
+                ['2.4.7', true],
+                ['2.4.8', false],
+                ['2.4.9', false],
+                ['2.3.0', true],
+            ]);
+
+        $this->socketCreateMock->expects($this->never());
+
+        $this->step->execute();
+    }
+
+    /**
+     * Test that symfony_l2 config with both default and stale_cache_enabled frontends passes
+     * connection testing and gets Lua options injected into both frontends' remote_backend_options,
+     * written as '1'/'0' strings (required by Magento's SymfonyAdapterProvider).
+     *
+     * @return void
+     * @throws StepException
+     */
+    public function testExecuteSymfonyL2TwoFrontendsConnectAndSetsLua(): void
+    {
+        $symfonyL2Config = [
+            'frontend' => [
+                'default' => [
+                    'backend' => CacheFactory::VALKEY_BACKEND_SYMFONY_L2,
+                    'backend_options' => [
+                        'remote_backend'         => 'redis',
+                        'remote_backend_options' => ['server' => 'redis.server', 'port' => 6379],
+                        'local_backend'          => 'file',
+                        'local_backend_options'  => ['cache_dir' => '/dev/shm/magento_l1'],
+                    ],
+                ],
+                'stale_cache_enabled' => [
+                    'backend' => CacheFactory::VALKEY_BACKEND_SYMFONY_L2,
+                    'backend_options' => [
+                        'remote_backend'         => 'redis',
+                        'remote_backend_options' => ['server' => 'redis.server', 'port' => 6379],
+                        'local_backend'          => 'file',
+                        'local_backend_options'  => ['cache_dir' => '/dev/shm/magento_l1_stale'],
+                        'use_stale_cache'        => true,
+                    ],
+                ],
+            ],
+            'type' => [
+                'default'    => ['frontend' => 'default'],
+                'layout'     => ['frontend' => 'stale_cache_enabled'],
+                'block_html' => ['frontend' => 'stale_cache_enabled'],
+            ],
+        ];
+
+        $this->configReaderMock->expects($this->once())
+            ->method('read')
+            ->willReturn([]);
+        $this->cacheConfigMock->expects($this->once())
+            ->method('get')
+            ->willReturn($symfonyL2Config);
+        $this->magentoVersion->method('isGreaterOrEqual')
+            ->willReturnMap([
+                ['2.4.5', true],
+                ['2.4.7', true],
+                ['2.4.8', true],
+                ['2.4.9', true],
+                ['2.3.0', true],
+            ]);
+        $this->stageConfig->expects($this->exactly(2))
+            ->method('get')
+            ->willReturnMap([
+                [DeployInterface::VAR_USE_LUA, true],
+                [DeployInterface::VAR_USE_LUA_ON_GC, false],
+            ]);
+
+        $this->socketCreateMock->expects($this->exactly(2))
+            ->with(AF_INET, SOCK_STREAM, SOL_TCP)
+            ->willReturn('socket resource');
+        $this->socketConnectMock->expects($this->exactly(2))
+            ->with('socket resource', 'redis.server', 6379)
+            ->willReturn(true);
+        $this->socketCloseMock->expects($this->exactly(2))
+            ->with('socket resource');
+
+        $expectedConfig = $symfonyL2Config;
+        $expectedConfig['frontend']['default']['backend_options']['remote_backend_options']['use_lua'] = '1';
+        $expectedConfig['frontend']['default']['backend_options']['remote_backend_options']['use_lua_on_gc'] = '0';
+        $expectedConfig['frontend']['stale_cache_enabled']['backend_options']['remote_backend_options']['use_lua']
+            = '1';
+        $expectedConfig['frontend']['stale_cache_enabled']['backend_options']['remote_backend_options']
+            ['use_lua_on_gc'] = '0';
+
+        $this->configWriterMock->expects($this->once())
+            ->method('create')
+            ->with(['cache' => $expectedConfig]);
+
+        $this->loggerMock->expects($this->once())
+            ->method('info')
+            ->with('Updating cache configuration.');
+
+        $this->step->execute();
+    }
+
+    /**
+     * Test that Lua options are not injected into symfony_l2 backend_options on Magento
+     * versions that don't support them (mirrors the legacy-backend version gating).
+     *
+     * @return void
+     * @throws StepException
+     */
+    public function testExecuteSymfonyL2DoesNotSetLuaForUnsupportedVersion(): void
+    {
+        $symfonyL2Config = [
+            'frontend' => [
+                'default' => [
+                    'backend' => CacheFactory::VALKEY_BACKEND_SYMFONY_L2,
+                    'backend_options' => [
+                        'remote_backend'         => 'redis',
+                        'remote_backend_options' => ['server' => 'redis.server', 'port' => 6379],
+                        'local_backend'          => 'file',
+                        'local_backend_options'  => ['cache_dir' => '/dev/shm/magento_l1'],
+                    ],
+                ],
+            ],
+            'type' => [
+                'default' => ['frontend' => 'default'],
+            ],
+        ];
+
+        $this->configReaderMock->expects($this->once())
+            ->method('read')
+            ->willReturn([]);
+        $this->cacheConfigMock->expects($this->once())
+            ->method('get')
+            ->willReturn($symfonyL2Config);
+        $this->magentoVersion->method('isGreaterOrEqual')
+            ->willReturnCallback(static function (string $version): bool {
+                if ($version === '2.4.7' || $version === '2.4.8') {
+                    return false;
+                }
+
+                return true;
+            });
+        $this->stageConfig->expects($this->exactly(2))
+            ->method('get')
+            ->willReturnMap([
+                [DeployInterface::VAR_USE_LUA, true],
+                [DeployInterface::VAR_USE_LUA_ON_GC, true],
+            ]);
+
+        $this->socketCreateMock->expects($this->once())
+            ->with(AF_INET, SOCK_STREAM, SOL_TCP)
+            ->willReturn('socket resource');
+        $this->socketConnectMock->expects($this->once())
+            ->with('socket resource', 'redis.server', 6379)
+            ->willReturn(true);
+        $this->socketCloseMock->expects($this->once())
+            ->with('socket resource');
+
+        // Neither use_lua nor use_lua_on_gc is supported below 2.4.7/2.4.8, so neither is injected.
+        $this->configWriterMock->expects($this->once())
+            ->method('create')
+            ->with(['cache' => $symfonyL2Config]);
+
+        $this->loggerMock->expects($this->once())
+            ->method('info')
+            ->with('Updating cache configuration.');
+
+        $this->step->execute();
     }
 
     /**

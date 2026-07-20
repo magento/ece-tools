@@ -8,7 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 
 /**
- * Checks Valkey configuration
+ * Checks Valkey configuration for PHP 8.3 and Magento 2.4.7
  *
  * @group php83
  */
@@ -21,10 +21,7 @@ class Valkey83Cest extends ValkeyCest
     {
         return [
             [
-                'version' => '2.4.8',
-            ],
-            [
-                'version' => '2.4.8',
+                'version' => '2.4.7',
                 'valkey_version' => '8.1',
             ],
         ];
@@ -37,7 +34,7 @@ class Valkey83Cest extends ValkeyCest
     {
         return [
             [
-                'version' => '2.4.8',
+                'version' => '2.4.7',
                 'wrongConfiguration' => [
                     'stage' => [
                         'deploy' => [
@@ -50,7 +47,8 @@ class Valkey83Cest extends ValkeyCest
                 'errorBuildMessage' => 'The VALKEY_BACKEND variable contains an invalid value TestValkeyModel.'
                     . ' Use one of the available value options: Cm_Cache_Backend_Redis,'
                     . ' \Magento\Framework\Cache\Backend\Redis,'
-                    . ' \Magento\Framework\Cache\Backend\RemoteSynchronizedCache.',
+                    . ' \Magento\Framework\Cache\Backend\RemoteSynchronizedCache,'
+                    . ' symfony_l2.',
                 'errorDeployMessage' => '',
             ],
         ];
@@ -63,7 +61,7 @@ class Valkey83Cest extends ValkeyCest
     {
         return [
             [
-                'version' => '2.4.8',
+                'version' => '2.4.7',
                 'configuration' => [
                     'stage' => [
                         'deploy' => [
@@ -83,7 +81,7 @@ class Valkey83Cest extends ValkeyCest
                 ],
             ],
             [
-                'version' => '2.4.8',
+                'version' => '2.4.7',
                 'configuration' => [
                     'stage' => [
                         'deploy' => [
@@ -114,7 +112,7 @@ class Valkey83Cest extends ValkeyCest
     {
         return [
             [
-                'version' => '2.4.8',
+                'version' => '2.4.7',
                 'configuration' => [
                     'stage' => [
                         'deploy' => [
@@ -132,7 +130,7 @@ class Valkey83Cest extends ValkeyCest
                 ],
             ],
             [
-                'version' => '2.4.8',
+                'version' => '2.4.7',
                 'configuration' => [
                     'stage' => [
                         'deploy' => [
@@ -152,7 +150,7 @@ class Valkey83Cest extends ValkeyCest
                 'expectedConfig' => [],
             ],
             [
-                'version' => '2.4.8',
+                'version' => '2.4.7',
                 'configuration' => [
                     'stage' => [
                         'deploy' => [

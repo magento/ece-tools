@@ -468,7 +468,7 @@ class ValidatorTest extends TestCase
                 1
             ],
             [
-                '2.4.9-beta1',
+                '2.4.9',
                 [
                     ServiceInterface::NAME_VALKEY => '9.0.0'
                 ],
@@ -496,7 +496,7 @@ class ValidatorTest extends TestCase
                 1
             ],
             [
-                '2.4.9-beta1',
+                '2.4.9',
                 [
                     ServiceInterface::NAME_PHP => '8.5.0',
                     ServiceInterface::NAME_RABBITMQ => '4.1.0',
@@ -512,7 +512,77 @@ class ValidatorTest extends TestCase
                 0
             ],
             [
-                '2.4.9-beta1',
+                '2.4.5-p17',
+                [
+                    ServiceInterface::NAME_RABBITMQ => '4.3.0'
+                ],
+                0
+            ],
+            [
+                '2.4.6-p15',
+                [
+                    ServiceInterface::NAME_RABBITMQ => '4.3.0'
+                ],
+                0
+            ],
+            [
+                '2.4.7-p10',
+                [
+                    ServiceInterface::NAME_RABBITMQ => '4.3.0'
+                ],
+                0
+            ],
+            [
+                '2.4.8-p5',
+                [
+                    ServiceInterface::NAME_RABBITMQ => '4.3.0'
+                ],
+                0
+            ],
+            [
+                '2.4.9',
+                [
+                    ServiceInterface::NAME_RABBITMQ => '4.3.0'
+                ],
+                0
+            ],
+            [
+                '2.4.5-p16',
+                [
+                    ServiceInterface::NAME_RABBITMQ => '4.3.0' // wrong: 4.3 requires >=2.4.5-p17
+                ],
+                1
+            ],
+            [
+                '2.4.6-p14',
+                [
+                    ServiceInterface::NAME_RABBITMQ => '4.3.0' // wrong: 4.3 requires >=2.4.6-p15
+                ],
+                1
+            ],
+            [
+                '2.4.7-p9',
+                [
+                    ServiceInterface::NAME_RABBITMQ => '4.3.0' // wrong: 4.3 requires >=2.4.7-p10
+                ],
+                1
+            ],
+            [
+                '2.4.8',
+                [
+                    ServiceInterface::NAME_RABBITMQ => '4.3.0' // wrong: 4.3 requires >=2.4.8-p5
+                ],
+                1
+            ],
+            [
+                '2.4.8-p4',
+                [
+                    ServiceInterface::NAME_RABBITMQ => '4.3.0' // wrong: 4.3 requires >=2.4.8-p5
+                ],
+                1
+            ],
+            [
+                '2.4.9',
                 [
                     ServiceInterface::NAME_PHP => '8.3.0',
                     ServiceInterface::NAME_RABBITMQ => '4.1.0'
@@ -562,28 +632,28 @@ class ValidatorTest extends TestCase
                 0
             ],
             [
-                '2.4.9-beta1',
+                '2.4.9',
                 [
                     ServiceInterface::NAME_DB_MARIA => '11.8.0'
                 ],
                 0
             ],
             [
-                '2.4.9-beta1',
+                '2.4.9',
                 [
                     ServiceInterface::NAME_DB_MARIA => '12.2.0'
                 ],
                 0
             ],
             [
-                '2.4.9-beta1',
+                '2.4.9',
                 [
                     ServiceInterface::NAME_VALKEY => '8.0.0'
                 ],
                 0
             ],
             [
-                '2.4.9-beta1',
+                '2.4.9',
                 [
                     ServiceInterface::NAME_VALKEY_SESSION => '9.0.0'
                 ],
@@ -632,7 +702,7 @@ class ValidatorTest extends TestCase
                 0
             ],
             [
-                '2.4.9-beta1',
+                '2.4.9',
                 [
                     ServiceInterface::NAME_VALKEY => 'latest'
                 ],

@@ -119,7 +119,7 @@ abstract class MariaDbVersionCest extends AbstractCest
         string $magentoCloudTemplate,
         string $mariaDbVersion
     ): void {
-        $supportedTemplates = ['2.4.7', '2.4.8', '2.4.9-beta', '2.4.9-beta1'];
+        $supportedTemplates = ['2.4.7', '2.4.8', '2.4.9'];
         if (!in_array($magentoCloudTemplate, $supportedTemplates, true)) {
             return;
         }

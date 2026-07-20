@@ -187,7 +187,7 @@ abstract class RedisCest extends AbstractCest
         $I->assertSame($data['buildSuccess'], $I->runDockerComposeCommand('run build cloud-build'));
         $I->seeInOutput($data['errorBuildMessage']);
         $I->assertTrue($I->startEnvironment(), 'Docker could not start');
-        $I->assertSame($data['deploySuccess'], $I->runDockerComposeCommand('run build cloud-deploy'));
+        $I->assertSame($data['deploySuccess'], $I->runDockerComposeCommand('run deploy cloud-deploy'));
         $I->seeInOutput($data['errorDeployMessage']);
     }
 

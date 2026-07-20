@@ -86,9 +86,7 @@ class CleanValkeyCache implements StepInterface
                 continue;
             }
 
-            $valkeyConfig = ($backend === CacheConfig::VALKEY_BACKEND_REMOTE_SYNCHRONIZED_CACHE)
-                ? $cacheConfig['backend_options']['remote_backend_options']
-                : $cacheConfig['backend_options'];
+            $valkeyConfig = $this->getValkeyConnectionConfig($cacheConfig, $backend);
 
             $this->logger->info('Clearing valkey cache: ' . $cacheType);
 
@@ -106,5 +104,24 @@ class CleanValkeyCache implements StepInterface
                 throw new StepException($e->getMessage(), Error::DEPLOY_VALKEY_CACHE_CLEAN_FAILED, $e);
             }
         }
+    }
+
+    /**
+     * Returns connection settings for Valkey-backed cache frontends.
+     *
+     * @param array  $cacheConfig
+     * @param string $backend
+     *
+     * @return array
+     */
+    private function getValkeyConnectionConfig(array $cacheConfig, string $backend): array
+    {
+        if ($backend === CacheConfig::VALKEY_BACKEND_REMOTE_SYNCHRONIZED_CACHE
+            || $backend === CacheConfig::VALKEY_BACKEND_SYMFONY_L2
+        ) {
+            return $cacheConfig['backend_options']['remote_backend_options'] ?? [];
+        }
+
+        return $cacheConfig['backend_options'] ?? [];
     }
 }

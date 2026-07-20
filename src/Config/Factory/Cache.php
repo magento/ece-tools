@@ -38,16 +38,21 @@ class Cache
     public const VALKEY_BACKEND_REMOTE_SYNCHRONIZED_CACHE = '\Magento\Framework\Cache\Backend\RemoteSynchronizedCache';
     public const REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE = '\Magento\Framework\Cache\Backend\RemoteSynchronizedCache';
 
+    public const VALKEY_BACKEND_SYMFONY_L2 = 'symfony_l2';
+    public const REDIS_BACKEND_SYMFONY_L2 = 'symfony_l2';
+
     public const AVAILABLE_REDIS_BACKEND = [
         self::REDIS_BACKEND_CM_CACHE,
         self::REDIS_BACKEND_REDIS_CACHE,
-        self::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE
+        self::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE,
+        self::REDIS_BACKEND_SYMFONY_L2,
     ];
 
     public const AVAILABLE_VALKEY_BACKEND = [
         self::REDIS_BACKEND_CM_CACHE,
         self::VALKEY_BACKEND_VALKEY_CACHE,
-        self::VALKEY_BACKEND_REMOTE_SYNCHRONIZED_CACHE
+        self::VALKEY_BACKEND_REMOTE_SYNCHRONIZED_CACHE,
+        self::VALKEY_BACKEND_SYMFONY_L2,
     ];
 
     /**
@@ -109,8 +114,8 @@ class Cache
      */
     public function get(): array
     {
-         $envCacheConfiguration = (array)$this->stageConfig->get(DeployInterface::VAR_CACHE_CONFIGURATION);
-         $envCacheRadisBackendModel = (string)$this->stageConfig->get(DeployInterface::VAR_CACHE_REDIS_BACKEND);
+         $envCacheConfiguration      = (array)$this->stageConfig->get(DeployInterface::VAR_CACHE_CONFIGURATION);
+         $envCacheRedisBackendModel  = (string)$this->stageConfig->get(DeployInterface::VAR_CACHE_REDIS_BACKEND);
          $envCacheValkeyBackendModel = (string)$this->stageConfig->get(DeployInterface::VAR_CACHE_VALKEY_BACKEND);
 
         if ($this->isCacheConfigurationValid($envCacheConfiguration)
@@ -139,23 +144,25 @@ class Cache
             return $this->configMerger->clear($envCacheConfiguration);
         }
 
-        $redisConfig = $this->redis->getConfiguration();
-
+        $redisConfig  = $this->redis->getConfiguration();
         $valkeyConfig = $this->valkey->getConfiguration();
-
         if (empty($redisConfig) && empty($valkeyConfig)) {
             return [];
         }
 
         // Determine backend based on available configuration
-        $backendConfig = !empty($redisConfig) ? $redisConfig : $valkeyConfig;
-        $cacheBackendModel = !empty($redisConfig) ? $envCacheRadisBackendModel :$envCacheValkeyBackendModel;
-        if ($this->isSynchronizedConfigStructure()) {
-               $cacheCacheBackend = $this->getSynchronizedConfigStructure($cacheBackendModel, $backendConfig);
-                $cacheCacheBackend['backend_options']['remote_backend_options'] = array_merge(
-                    $cacheCacheBackend['backend_options']['remote_backend_options'],
-                    $this->getSlaveConnection($envCacheConfiguration, $backendConfig)
-                );
+        $backendConfig     = !empty($redisConfig) ? $redisConfig : $valkeyConfig;
+        $cacheBackendModel = !empty($redisConfig) ? $envCacheRedisBackendModel : $envCacheValkeyBackendModel;
+
+        if ($this->isSymfonyL2Structure()) {
+            $remoteBackend = !empty($redisConfig) ? 'redis' : 'valkey';
+            $finalConfig = $this->getSymfonyL2ConfigStructure($backendConfig, $remoteBackend);
+        } elseif ($this->isSynchronizedConfigStructure()) {
+            $cacheCacheBackend = $this->getSynchronizedConfigStructure($cacheBackendModel, $backendConfig);
+            $cacheCacheBackend['backend_options']['remote_backend_options'] = array_merge(
+                $cacheCacheBackend['backend_options']['remote_backend_options'],
+                $this->getSlaveConnection($envCacheConfiguration, $backendConfig)
+            );
             $finalConfig = [
                 'frontend' => [
                     'default' => $cacheCacheBackend,
@@ -168,7 +175,7 @@ class Cache
             $cacheCacheBackend = $this->getUnsyncedConfigStructure($cacheBackendModel, $backendConfig);
             $slaveConnection = $this->getSlaveConnection($envCacheConfiguration, $backendConfig);
             if ($slaveConnection) {
-                  $cacheCacheBackend['frontend_options']['write_control'] = false;
+                $cacheCacheBackend['frontend_options']['write_control'] = false;
                 $cacheCacheBackend['backend_options'] = array_merge(
                     $cacheCacheBackend['backend_options'],
                     $slaveConnection
@@ -377,6 +384,88 @@ class Cache
         $valkeyModel = (string)$this->stageConfig->get(DeployInterface::VAR_CACHE_VALKEY_BACKEND);
         return $redisModel === self::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE ||
         $valkeyModel === self::VALKEY_BACKEND_REMOTE_SYNCHRONIZED_CACHE;
+    }
+
+    /**
+     * Checks whether the symfony_l2 backend is configured (requires Magento 2.4.9+).
+     *
+     * @return bool
+     * @throws ConfigException
+     */
+    private function isSymfonyL2Structure(): bool
+    {
+        $redisModel = (string)$this->stageConfig->get(DeployInterface::VAR_CACHE_REDIS_BACKEND);
+        $valkeyModel = (string)$this->stageConfig->get(DeployInterface::VAR_CACHE_VALKEY_BACKEND);
+        return $redisModel === self::REDIS_BACKEND_SYMFONY_L2 || $valkeyModel === self::VALKEY_BACKEND_SYMFONY_L2;
+    }
+
+    /**
+     * Builds the full symfony_l2 config: default frontend (no stale) + stale_cache_enabled frontend + type mappings.
+     *
+     * $remoteBackend is passed in explicitly (rather than derived from $backendConfig['scheme']) because the
+     * relationship's scheme reflects the wire protocol (typically 'redis' for both Redis and Valkey services,
+     * since Valkey is Redis-protocol-compatible), not which service is actually behind it.
+     *
+     * @param  array  $backendConfig
+     * @param  string $remoteBackend 'redis' or 'valkey'
+     * @return array
+     */
+    private function getSymfonyL2ConfigStructure(array $backendConfig, string $remoteBackend): array
+    {
+        $remoteBackendOptions = [
+            'server'          => $backendConfig['host'],
+            'port'            => $backendConfig['port'],
+            'database'        => self::CACHE_DATABASE_DEFAULT,
+            'compression_lib' => 'gzip',
+        ];
+
+        if (!empty($backendConfig['password'])) {
+            $remoteBackendOptions['password'] = (string)$backendConfig['password'];
+        }
+
+        return [
+            'frontend' => [
+                'default' => [
+                    'backend' => self::VALKEY_BACKEND_SYMFONY_L2,
+                    'backend_options' => [
+                        'remote_backend' => $remoteBackend,
+                        'remote_backend_options' => array_merge(
+                            $remoteBackendOptions,
+                            ['persistent_id' => 'magento_l2_default']
+                        ),
+                        'local_backend' => 'file',
+                        'local_backend_options' => [
+                            'cache_dir' => '/dev/shm/magento_l1',
+                        ],
+                    ],
+                ],
+                'stale_cache_enabled' => [
+                    'backend' => self::VALKEY_BACKEND_SYMFONY_L2,
+                    'backend_options' => [
+                        'remote_backend' => $remoteBackend,
+                        'remote_backend_options' => array_merge(
+                            $remoteBackendOptions,
+                            ['persistent_id' => 'magento_l2_stale']
+                        ),
+                        'local_backend' => 'file',
+                        'local_backend_options' => [
+                            'cache_dir' => '/dev/shm/magento_l1_stale',
+                        ],
+                        'use_stale_cache' => true,
+                    ],
+                ],
+            ],
+            'type' => [
+                'default'                => ['frontend' => 'default'],
+                'layout'                 => ['frontend' => 'stale_cache_enabled'],
+                'block_html'             => ['frontend' => 'stale_cache_enabled'],
+                'reflection'             => ['frontend' => 'stale_cache_enabled'],
+                'config_integration'     => ['frontend' => 'stale_cache_enabled'],
+                'config_integration_api' => ['frontend' => 'stale_cache_enabled'],
+                'full_page'              => ['frontend' => 'stale_cache_enabled'],
+                'translate'              => ['frontend' => 'stale_cache_enabled'],
+            ],
+        ];
     }
 
     /**

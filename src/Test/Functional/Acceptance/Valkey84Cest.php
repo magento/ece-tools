@@ -22,9 +22,6 @@ class Valkey84Cest extends ValkeyCest
         return [
             [
                 'version' => '2.4.8',
-            ],
-            [
-                'version' => '2.4.8',
                 'valkey_version' => '8.1',
             ],
         ];
@@ -50,7 +47,8 @@ class Valkey84Cest extends ValkeyCest
                 'errorBuildMessage' => 'The VALKEY_BACKEND variable contains an invalid value TestValkeyModel.'
                     . ' Use one of the available value options: Cm_Cache_Backend_Redis,'
                     . ' \Magento\Framework\Cache\Backend\Redis,'
-                    . ' \Magento\Framework\Cache\Backend\RemoteSynchronizedCache.',
+                    . ' \Magento\Framework\Cache\Backend\RemoteSynchronizedCache,'
+                    . ' symfony_l2.',
                 'errorDeployMessage' => '',
             ],
         ];

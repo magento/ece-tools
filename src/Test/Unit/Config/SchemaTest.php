@@ -156,7 +156,7 @@ class SchemaTest extends TestCase
                 DeployInterface::VAR_REMOTE_STORAGE => [],
                 DeployInterface::VAR_SCD_NO_PARENT => false,
                 DeployInterface::VAR_USE_LUA => false,
-                DeployInterface::VAR_LUA_KEY => true,
+                DeployInterface::VAR_USE_LUA_ON_GC => true,
             ],
             $this->schema->getDefaults(StageConfigInterface::STAGE_DEPLOY)
         );

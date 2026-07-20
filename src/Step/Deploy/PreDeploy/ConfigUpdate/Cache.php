@@ -21,7 +21,6 @@ use Psr\Log\LoggerInterface;
 
 /**
  * Processes cache configuration.
- *
  */
 class Cache implements StepInterface
 {
@@ -82,6 +81,11 @@ class Cache implements StepInterface
     }
 
     /**
+     * Execute method.
+     * @throws StepException
+     * @throws FileSystemException
+     * @throws UndefinedPackageException
+     * @SuppressWarnings("PHPMD.CyclomaticComplexity")
      */
     public function execute()
     {
@@ -90,7 +94,9 @@ class Cache implements StepInterface
             $cacheConfig   = $this->cacheConfig->get();
             $graphqlConfig = $config['cache']['graphql'] ?? [];
             $luaConfig     = (bool)$this->stageConfig->get(DeployInterface::VAR_USE_LUA);
-            $luaConfigKey  = (bool)$this->stageConfig->get(DeployInterface::VAR_LUA_KEY);
+            $luaConfigOnGc = (bool)$this->stageConfig->get(DeployInterface::VAR_USE_LUA_ON_GC);
+            $isUseLuaSupported = $this->magentoVersion->isGreaterOrEqual('2.4.7');
+            $isUseLuaOnGcSupported = $this->magentoVersion->isGreaterOrEqual('2.4.8');
 
             if (isset($cacheConfig['frontend'])) {
                 $cacheConfig['frontend'] = array_filter(
@@ -102,10 +108,13 @@ class Cache implements StepInterface
                             ?? false;
                         $this->checkBackendModel($backend);
 
-                        if (!$customCacheBackend && !in_array($backend, CacheFactory::AVAILABLE_REDIS_BACKEND, true)) {
+                        $isKnownBackend = in_array($backend, CacheFactory::AVAILABLE_REDIS_BACKEND, true)
+                            || in_array($backend, CacheFactory::AVAILABLE_VALKEY_BACKEND, true);
+                        if (!$customCacheBackend && !$isKnownBackend) {
                             return true;
                         }
-                        $backendOptions = ($backend === CacheFactory::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE)
+                        $backendOptions = ($backend === CacheFactory::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE
+                            || $backend === CacheFactory::VALKEY_BACKEND_SYMFONY_L2)
                             ? $cacheFrontend['backend_options']['remote_backend_options']
                             : $cacheFrontend['backend_options'];
                         return $this->testCacheConnection($backendOptions);
@@ -134,7 +143,7 @@ class Cache implements StepInterface
 
                 if ($isValkeyConfigured) {
                     $this->logger->warning(
-                        'Cache is configured for a Valkey service that is not available. 
+                        'Cache is configured for a Valkey service that is not available.
                             Configuration will be ignored.',
                         ['errorCode' => Error::WARN_VALKEY_SERVICE_NOT_AVAILABLE]
                     );
@@ -142,10 +151,13 @@ class Cache implements StepInterface
 
                 unset($config['cache']);
             } else {
-                if (isset($cacheConfig['frontend']['default'])) {
-                    $cacheConfig['frontend']['default']['backend_options']['_useLua'] = $luaConfigKey;
-                    $cacheConfig['frontend']['default']['backend_options']['use_lua'] = $luaConfig;
-                }
+                $cacheConfig = $this->applyLuaConfiguration(
+                    $cacheConfig,
+                    $luaConfig,
+                    $luaConfigOnGc,
+                    $isUseLuaSupported,
+                    $isUseLuaOnGcSupported
+                );
                 $this->logger->info('Updating cache configuration.');
                 $config['cache'] = $cacheConfig;
             }
@@ -158,6 +170,125 @@ class Cache implements StepInterface
         } catch (FileSystemException $e) {
             throw new StepException($e->getMessage(), Error::DEPLOY_ENV_PHP_IS_NOT_WRITABLE);
         }
+    }
+
+    /**
+     * Apply Lua-related options to the cache config, routing to the symfony_l2 remote
+     * backend options (both frontends) or the legacy flat backend options as appropriate.
+     *
+     * @param array $cacheConfig
+     * @param bool $useLua
+     * @param bool $useLuaOnGc
+     * @param bool $isUseLuaSupported
+     * @param bool $isUseLuaOnGcSupported
+     * @return array
+     */
+    private function applyLuaConfiguration(
+        array $cacheConfig,
+        bool $useLua,
+        bool $useLuaOnGc,
+        bool $isUseLuaSupported,
+        bool $isUseLuaOnGcSupported
+    ): array {
+        $defaultBackend = $cacheConfig['frontend']['default']['backend'] ?? '';
+
+        if ($defaultBackend === CacheFactory::VALKEY_BACKEND_SYMFONY_L2) {
+            foreach (['default', 'stale_cache_enabled'] as $frontendName) {
+                $remoteBackendOptions =
+                    $cacheConfig['frontend'][$frontendName]['backend_options']['remote_backend_options'] ?? null;
+                if ($remoteBackendOptions === null) {
+                    continue;
+                }
+                $cacheConfig['frontend'][$frontendName]['backend_options']['remote_backend_options'] =
+                    $this->applySymfonyL2LuaOptions(
+                        $remoteBackendOptions,
+                        $useLua,
+                        $useLuaOnGc,
+                        $isUseLuaSupported,
+                        $isUseLuaOnGcSupported
+                    );
+            }
+        } elseif (isset($cacheConfig['frontend']['default'])) {
+            $cacheConfig['frontend']['default']['backend_options'] = $this->applyLuaOptions(
+                $cacheConfig['frontend']['default']['backend_options'] ?? [],
+                $useLua,
+                $useLuaOnGc,
+                $isUseLuaSupported,
+                $isUseLuaOnGcSupported
+            );
+        }
+
+        return $cacheConfig;
+    }
+
+    /**
+     * Apply Lua-related backend options according to Magento version support.
+     *
+     * @param array $backendOptions
+     * @param bool $useLua
+     * @param bool $useLuaOnGc
+     * @param bool $isUseLuaSupported
+     * @param bool $isUseLuaOnGcSupported
+     * @return array
+     */
+    private function applyLuaOptions(
+        array $backendOptions,
+        bool $useLua,
+        bool $useLuaOnGc,
+        bool $isUseLuaSupported,
+        bool $isUseLuaOnGcSupported
+    ): array {
+        if ($isUseLuaSupported) {
+            $backendOptions['use_lua'] = $useLua;
+        } else {
+            unset($backendOptions['use_lua']);
+        }
+
+        if ($isUseLuaOnGcSupported) {
+            $backendOptions['use_lua_on_gc'] = $useLuaOnGc;
+        } else {
+            unset($backendOptions['use_lua_on_gc']);
+        }
+
+        return $backendOptions;
+    }
+
+    /**
+     * Apply Lua-related options to the symfony_l2 remote (Redis/Valkey) backend options.
+     *
+     * Magento's SymfonyAdapterProvider compares these values against the string '1' rather than
+     * casting to bool, so they must be written as '1'/'0' here, unlike the legacy backends.
+     *
+     * @param array $backendOptions
+     * @param bool $useLua
+     * @param bool $useLuaOnGc
+     * @param bool $isUseLuaSupported
+     * @param bool $isUseLuaOnGcSupported
+     * @return array
+     */
+    private function applySymfonyL2LuaOptions(
+        array $backendOptions,
+        bool $useLua,
+        bool $useLuaOnGc,
+        bool $isUseLuaSupported,
+        bool $isUseLuaOnGcSupported
+    ): array {
+        $backendOptions = $this->applyLuaOptions(
+            $backendOptions,
+            $useLua,
+            $useLuaOnGc,
+            $isUseLuaSupported,
+            $isUseLuaOnGcSupported
+        );
+
+        if (isset($backendOptions['use_lua'])) {
+            $backendOptions['use_lua'] = $backendOptions['use_lua'] ? '1' : '0';
+        }
+        if (isset($backendOptions['use_lua_on_gc'])) {
+            $backendOptions['use_lua_on_gc'] = $backendOptions['use_lua_on_gc'] ? '1' : '0';
+        }
+
+        return $backendOptions;
     }
 
     /**
@@ -211,6 +342,18 @@ class Cache implements StepInterface
                         $this->magentoVersion->getVersion(),
                         $backend
                     )
+                );
+            }
+
+            if ($backend === CacheFactory::VALKEY_BACKEND_SYMFONY_L2
+                && !$this->magentoVersion->isGreaterOrEqual('2.4.9')
+            ) {
+                throw new StepException(
+                    sprintf(
+                        'Magento version \'%s\' does not support symfony_l2 cache backend. Requires 2.4.9 or later.',
+                        $this->magentoVersion->getVersion()
+                    ),
+                    Error::DEPLOY_WRONG_CACHE_CONFIGURATION
                 );
             }
         } catch (UndefinedPackageException $exception) {
