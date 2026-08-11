@@ -648,6 +648,8 @@ class CacheTest extends TestCase
         $this->valkeyMock->expects(self::any())
             ->method('getConfiguration')
             ->willReturn($valkeyConfig);
+        $this->loggerMock->expects(self::never())
+            ->method('notice');
 
         $remoteOptions = [
             'server'          => 'valkey.host',
@@ -729,6 +731,8 @@ class CacheTest extends TestCase
         $this->valkeyMock->expects(self::any())
             ->method('getConfiguration')
             ->willReturn([]);
+        $this->loggerMock->expects(self::never())
+            ->method('notice');
 
         $remoteOptions = [
             'server'          => 'redis.host',
@@ -778,6 +782,191 @@ class CacheTest extends TestCase
         ];
 
         self::assertEquals($expected, $this->config->get());
+    }
+
+    /**
+     * Magento core added read-replica support to the Symfony Redis adapter for both single-tier and
+     * symfony_l2 (no CACHE_CONFIGURATION shape change - 'load_from_slave' nests inside
+     * remote_backend_options same as it already does for RemoteSynchronizedCache), so
+     * REDIS_USE_SLAVE_CONNECTION must be wired into both symfony_l2 frontends.
+     *
+     * @return void
+     * @throws ConfigException
+     */
+    public function testGetSymfonyL2WithRedisAppliesSlaveConnection(): void
+    {
+        $redisConfig = [
+            'host'   => 'redis.host',
+            'port'   => '6379',
+            'scheme' => 'redis',
+        ];
+        $redisSlaveConfig = [
+            'host' => 'redis-slave.host',
+            'port' => '6380',
+        ];
+
+        $this->stageConfigMock->expects(self::any())
+            ->method('get')
+            ->willReturnMap([
+                [DeployInterface::VAR_CACHE_CONFIGURATION, []],
+                [DeployInterface::VAR_CACHE_REDIS_BACKEND, Cache::REDIS_BACKEND_SYMFONY_L2],
+                [DeployInterface::VAR_CACHE_VALKEY_BACKEND, ''],
+                [DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION, true],
+                [DeployInterface::VAR_VALKEY_USE_SLAVE_CONNECTION, false],
+            ]);
+
+        $this->redisMock->expects(self::any())
+            ->method('getConfiguration')
+            ->willReturn($redisConfig);
+        $this->redisMock->expects(self::any())
+            ->method('getSlaveConfiguration')
+            ->willReturn($redisSlaveConfig);
+        $this->valkeyMock->expects(self::any())
+            ->method('getConfiguration')
+            ->willReturn([]);
+
+        $this->loggerMock->expects(self::once())
+            ->method('info')
+            ->with('Set Redis slave connection');
+        $this->loggerMock->expects(self::never())
+            ->method('notice');
+
+        $result = $this->config->get();
+
+        foreach (['default', 'stale_cache_enabled'] as $frontendName) {
+            $remoteOptions = $result['frontend'][$frontendName]['backend_options']['remote_backend_options'];
+            self::assertSame(
+                ['server' => 'redis-slave.host', 'port' => '6380'],
+                $remoteOptions['load_from_slave']
+            );
+            self::assertSame(1, $remoteOptions['read_timeout']);
+            self::assertSame(1, $remoteOptions['retry_reads_on_master']);
+        }
+    }
+
+    /**
+     * Same as above, for Valkey.
+     *
+     * @return void
+     * @throws ConfigException
+     */
+    public function testGetSymfonyL2WithValkeyAppliesSlaveConnection(): void
+    {
+        $valkeyConfig = [
+            'host'   => 'valkey.host',
+            'port'   => '6379',
+            'scheme' => 'redis',
+        ];
+        $valkeySlaveConfig = [
+            'host' => 'valkey-slave.host',
+            'port' => '6380',
+        ];
+
+        $this->stageConfigMock->expects(self::any())
+            ->method('get')
+            ->willReturnMap([
+                [DeployInterface::VAR_CACHE_CONFIGURATION, []],
+                [DeployInterface::VAR_CACHE_REDIS_BACKEND, ''],
+                [DeployInterface::VAR_CACHE_VALKEY_BACKEND, Cache::VALKEY_BACKEND_SYMFONY_L2],
+                [DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION, false],
+                [DeployInterface::VAR_VALKEY_USE_SLAVE_CONNECTION, true],
+            ]);
+
+        $this->redisMock->expects(self::any())
+            ->method('getConfiguration')
+            ->willReturn([]);
+        $this->valkeyMock->expects(self::any())
+            ->method('getConfiguration')
+            ->willReturn($valkeyConfig);
+        $this->valkeyMock->expects(self::any())
+            ->method('getSlaveConfiguration')
+            ->willReturn($valkeySlaveConfig);
+
+        $this->loggerMock->expects(self::once())
+            ->method('info')
+            ->with('Set Valkey slave connection');
+        $this->loggerMock->expects(self::never())
+            ->method('notice');
+
+        $result = $this->config->get();
+
+        foreach (['default', 'stale_cache_enabled'] as $frontendName) {
+            $remoteOptions = $result['frontend'][$frontendName]['backend_options']['remote_backend_options'];
+            self::assertSame(
+                ['server' => 'valkey-slave.host', 'port' => '6380'],
+                $remoteOptions['load_from_slave']
+            );
+            self::assertSame(1, $remoteOptions['read_timeout']);
+            self::assertSame(1, $remoteOptions['retry_reads_on_master']);
+        }
+    }
+
+    /**
+     * When the merchant has overridden the symfony_l2 remote connection details in CACHE_CONFIGURATION
+     * to point somewhere other than the relationship's host/port, the slave connection must not be
+     * force-applied (it would point at a replica of the WRONG master) - mirrors the existing
+     * RemoteSynchronizedCache/legacy incompatibility notice.
+     *
+     * @return void
+     * @throws ConfigException
+     */
+    public function testGetSymfonyL2WithRedisSkipsSlaveConnectionWhenOverrideIncompatible(): void
+    {
+        $redisConfig = [
+            'host'   => 'redis.host',
+            'port'   => '6379',
+            'scheme' => 'redis',
+        ];
+        $redisSlaveConfig = [
+            'host' => 'redis-slave.host',
+            'port' => '6380',
+        ];
+        $envCacheConfiguration = [
+            'frontend' => [
+                'default' => [
+                    'backend_options' => [
+                        'remote_backend_options' => [
+                            'server' => 'custom.host',
+                        ],
+                    ],
+                ],
+            ],
+            StageConfigInterface::OPTION_MERGE => true,
+        ];
+
+        $this->stageConfigMock->expects(self::any())
+            ->method('get')
+            ->willReturnMap([
+                [DeployInterface::VAR_CACHE_CONFIGURATION, $envCacheConfiguration],
+                [DeployInterface::VAR_CACHE_REDIS_BACKEND, Cache::REDIS_BACKEND_SYMFONY_L2],
+                [DeployInterface::VAR_CACHE_VALKEY_BACKEND, ''],
+                [DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION, true],
+                [DeployInterface::VAR_VALKEY_USE_SLAVE_CONNECTION, false],
+            ]);
+
+        $this->redisMock->expects(self::any())
+            ->method('getConfiguration')
+            ->willReturn($redisConfig);
+        $this->redisMock->expects(self::any())
+            ->method('getSlaveConfiguration')
+            ->willReturn($redisSlaveConfig);
+        $this->valkeyMock->expects(self::any())
+            ->method('getConfiguration')
+            ->willReturn([]);
+
+        $this->loggerMock->expects(self::once())
+            ->method('notice')
+            ->with(
+                'The variable \'' . DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION . '\' is ignored as you\'ve'
+                    . ' changed cache connection settings in \'' . DeployInterface::VAR_CACHE_CONFIGURATION . '\''
+            );
+
+        $result = $this->config->get();
+
+        self::assertArrayNotHasKey(
+            'load_from_slave',
+            $result['frontend']['default']['backend_options']['remote_backend_options']
+        );
     }
 
     /**

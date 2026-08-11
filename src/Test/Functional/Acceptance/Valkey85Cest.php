@@ -143,6 +143,65 @@ class Valkey85Cest extends ValkeyCest
     }
 
     /**
+     * Verifies that VALKEY_USE_SLAVE_CONNECTION populates 'load_from_slave' in remote_backend_options for
+     * both symfony_l2 frontends, and that the deploy still succeeds with it present. The 'valkey-slave'
+     * relationship is self-referenced at the same service as 'valkey' (no separate replica container is
+     * provisioned in this environment) - this proves ece-tools' config wiring and that a real Magento
+     * deploy tolerates the resulting env.php, not genuine replica read-routing (which needs a real
+     * replica topology to observe).
+     *
+     * @param CliTester $I
+     * @throws TaskException
+     */
+    public function testSymfonyL2SlaveConnectionConfiguration(CliTester $I): void
+    {
+        $this->prepareWorkplace($I, '2.4.9');
+        $I->generateDockerCompose(
+            sprintf('--mode=production --expose-db-port=%s', $I->getExposedPort())
+        );
+        $this->removeVendorVolumeMountFromDockerCompose($I);
+
+        $app = $I->readAppMagentoYaml();
+        $app['relationships']['valkey-slave'] = $app['relationships']['valkey'];
+        $I->writeAppMagentoYaml($app);
+
+        $I->writeEnvMagentoYaml([
+            'stage' => [
+                'deploy' => [
+                    'VALKEY_BACKEND' => 'symfony_l2',
+                    'VALKEY_USE_SLAVE_CONNECTION' => true,
+                ],
+            ],
+        ]);
+
+        $I->assertTrue($I->runDockerComposeCommand('run build cloud-build'), 'Build phase was failed');
+        $I->assertTrue($I->startEnvironment(), 'Docker could not start');
+        $I->assertTrue($I->runDockerComposeCommand('run deploy cloud-deploy'), 'Deploy phase was failed');
+        $I->assertTrue($I->runDockerComposeCommand('run deploy cloud-post-deploy'), 'Post deploy phase was failed');
+
+        $config = $this->getConfig($I);
+
+        foreach (['default', 'stale_cache_enabled'] as $frontendName) {
+            $remoteOptions = $config['cache']['frontend'][$frontendName]['backend_options']['remote_backend_options'];
+            $I->assertSame(
+                'cache',
+                $remoteOptions['load_from_slave']['server'] ?? null,
+                "Wrong load_from_slave server for '$frontendName' frontend"
+            );
+            $I->assertSame(
+                '6379',
+                (string)($remoteOptions['load_from_slave']['port'] ?? null),
+                "Wrong load_from_slave port for '$frontendName' frontend"
+            );
+            $I->assertSame(1, $remoteOptions['retry_reads_on_master'] ?? null);
+        }
+
+        $I->amOnPage('/');
+        $I->see('Home page');
+        $I->see('CMS homepage content goes here.');
+    }
+
+    /**
      * Assert both symfony_l2 frontends are generated with expected options.
      *
      * @param array $config

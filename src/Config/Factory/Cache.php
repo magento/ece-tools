@@ -157,6 +157,16 @@ class Cache
         if ($this->isSymfonyL2Structure()) {
             $remoteBackend = !empty($redisConfig) ? 'redis' : 'valkey';
             $finalConfig = $this->getSymfonyL2ConfigStructure($backendConfig, $remoteBackend);
+            $slaveConnection = $this->getSlaveConnection($envCacheConfiguration, $backendConfig);
+            if ($slaveConnection) {
+                foreach (['default', 'stale_cache_enabled'] as $frontendName) {
+                    $finalConfig['frontend'][$frontendName]['backend_options']['remote_backend_options'] =
+                        array_merge(
+                            $finalConfig['frontend'][$frontendName]['backend_options']['remote_backend_options'],
+                            $slaveConnection
+                        );
+                }
+            }
         } elseif ($this->isSynchronizedConfigStructure()) {
             $cacheCacheBackend = $this->getSynchronizedConfigStructure($cacheBackendModel, $backendConfig);
             $cacheCacheBackend['backend_options']['remote_backend_options'] = array_merge(
@@ -281,7 +291,20 @@ class Cache
         array $envCacheConfig,
         array $backendConfig
     ): bool {
-        if ($this->isSynchronizedConfigStructure()) {
+        if ($this->isSymfonyL2Structure()) {
+            foreach (['default', 'stale_cache_enabled'] as $frontendName) {
+                $remoteBackendOptions =
+                    $envCacheConfig['frontend'][$frontendName]['backend_options']['remote_backend_options'] ?? [];
+                $host = $remoteBackendOptions['server'] ?? null;
+                $port = $remoteBackendOptions['port'] ?? null;
+
+                if (($host !== null && $host !== $backendConfig['host'])
+                    || ($port !== null && $port !== $backendConfig['port'])
+                ) {
+                    return false;
+                }
+            }
+        } elseif ($this->isSynchronizedConfigStructure()) {
             $host = $envCacheConfig['frontend']['default']['backend_options']['remote_backend_options']['server']
                 ?? null;
 
