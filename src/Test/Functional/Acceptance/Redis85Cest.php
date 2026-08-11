@@ -159,15 +159,18 @@ class Redis85Cest extends RedisCest
     {
         $this->prepareWorkplace($I, '2.4.9');
 
+        // Must happen before generateDockerCompose() - that's what bakes .magento.app.yaml's
+        // relationships into the generated docker-compose.yml (MAGENTO_CLOUD_RELATIONSHIPS); editing
+        // it afterward has no effect on the already-generated compose file.
+        $app = $I->readAppMagentoYaml();
+        $app['relationships']['redis-slave'] = $app['relationships']['redis'];
+        $I->writeAppMagentoYaml($app);
+
         $I->generateDockerCompose(sprintf(
             '--mode=production --expose-db-port=%s',
             $I->getExposedPort()
         ));
         $this->removeVendorVolumeMountFromDockerCompose($I);
-
-        $app = $I->readAppMagentoYaml();
-        $app['relationships']['redis-slave'] = $app['relationships']['redis'];
-        $I->writeAppMagentoYaml($app);
 
         $I->writeEnvMagentoYaml([
             'stage' => [

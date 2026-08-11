@@ -156,14 +156,18 @@ class Valkey85Cest extends ValkeyCest
     public function testSymfonyL2SlaveConnectionConfiguration(CliTester $I): void
     {
         $this->prepareWorkplace($I, '2.4.9');
+
+        // Must happen before generateDockerCompose() - that's what bakes .magento.app.yaml's
+        // relationships into the generated docker-compose.yml (MAGENTO_CLOUD_RELATIONSHIPS); editing
+        // it afterward has no effect on the already-generated compose file.
+        $app = $I->readAppMagentoYaml();
+        $app['relationships']['valkey-slave'] = $app['relationships']['valkey'];
+        $I->writeAppMagentoYaml($app);
+
         $I->generateDockerCompose(
             sprintf('--mode=production --expose-db-port=%s', $I->getExposedPort())
         );
         $this->removeVendorVolumeMountFromDockerCompose($I);
-
-        $app = $I->readAppMagentoYaml();
-        $app['relationships']['valkey-slave'] = $app['relationships']['valkey'];
-        $I->writeAppMagentoYaml($app);
 
         $I->writeEnvMagentoYaml([
             'stage' => [
