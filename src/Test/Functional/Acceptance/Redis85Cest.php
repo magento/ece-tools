@@ -156,6 +156,13 @@ class Redis85Cest extends RedisCest
      * genuinely distinct container, not a self-reference, and doesn't conflict with the primary 'redis'
      * service/relationship used for the actual cache backend.
      *
+     * Separately, magento-cloud-docker's local Relationship::get() (which produces the container's
+     * MAGENTO_CLOUD_RELATIONSHIPS) only emits entries for its fixed, hardcoded service map (redis, valkey,
+     * database, etc.) - it silently ignores custom relationship names declared in .magento.app.yaml, so
+     * 'redis-slave' never reaches the container through the normal generation path. injectRedisSlaveRelationship()
+     * works around that by patching the generated .docker/config.env directly, after generateDockerCompose()
+     * writes it and before any container starts.
+     *
      * @param CliTester $I
      * @throws TaskException
      */
@@ -179,6 +186,7 @@ class Redis85Cest extends RedisCest
             $I->getExposedPort()
         ));
         $this->removeVendorVolumeMountFromDockerCompose($I);
+        $this->injectRedisSlaveRelationship($I);
 
         $I->writeEnvMagentoYaml([
             'stage' => [
@@ -229,6 +237,43 @@ class Redis85Cest extends RedisCest
         $I->amOnPage('/');
         $I->see('Home page');
         $I->see('CMS homepage content goes here.');
+    }
+
+    /**
+     * Injects the 'redis-slave' relationship into the generated MAGENTO_CLOUD_RELATIONSHIPS.
+     *
+     * magento-cloud-docker's local Relationship::get() only emits entries for its fixed, hardcoded
+     * service map (redis, valkey, database, etc.) - it ignores custom relationship names declared in
+     * .magento.app.yaml, so 'redis-slave' never reaches the container's MAGENTO_CLOUD_RELATIONSHIPS env
+     * var through the normal generation path. This patches the generated .docker/config.env (loaded into
+     * every service via docker-compose's `env_file`) using the same base64(json_encode()) format the
+     * vendor tool itself uses for that variable.
+     *
+     * Must run after generateDockerCompose() - that's what writes .docker/config.env - and before
+     * startEnvironment(), since env_file is only read when containers start.
+     *
+     * @param CliTester $I
+     */
+    private function injectRedisSlaveRelationship(CliTester $I): void
+    {
+        $configEnvPath = $I->getWorkDirPath() . DIRECTORY_SEPARATOR . '.docker' . DIRECTORY_SEPARATOR . 'config.env';
+        $lines = file($configEnvPath, FILE_IGNORE_NEW_LINES);
+
+        foreach ($lines as $index => $line) {
+            if (strpos($line, 'MAGENTO_CLOUD_RELATIONSHIPS=') !== 0) {
+                continue;
+            }
+
+            $relationships = json_decode(
+                base64_decode(substr($line, strlen('MAGENTO_CLOUD_RELATIONSHIPS='))),
+                true
+            );
+            $relationships['redis-slave'] = [['host' => 'cache', 'port' => '6379']];
+            $lines[$index] = 'MAGENTO_CLOUD_RELATIONSHIPS=' . base64_encode(json_encode($relationships));
+            break;
+        }
+
+        file_put_contents($configEnvPath, implode(PHP_EOL, $lines) . PHP_EOL);
     }
 
     /**
