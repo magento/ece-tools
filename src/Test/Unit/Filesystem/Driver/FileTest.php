@@ -258,7 +258,64 @@ class FileTest extends TestCase
         $copyMock->expects($this->once())
             ->willReturn(true);
 
-        $this->driver->copy('source', 'destination');
+        $renameMock = $this->getFunctionMock(
+            'Magento\MagentoCloud\Filesystem\Driver',
+            'rename'
+        );
+        $renameMock->expects($this->once())
+            ->willReturn(true);
+
+        $this->assertTrue($this->driver->copy('source', 'destination'));
+    }
+
+    /**
+     * Test copy method when the underlying copy() call fails.
+     *
+     * @return void
+     * @throws FileSystemException
+     */
+    public function testCopyWithCopyFailure(): void
+    {
+        $copyMock = $this->getFunctionMock(
+            'Magento\MagentoCloud\Filesystem\Driver',
+            'copy'
+        );
+        $copyMock->expects($this->once())
+            ->willReturn(false);
+
+        $this->assertFalse($this->driver->copy('source', 'destination'));
+    }
+
+    /**
+     * Test copy method when the atomic rename into place fails.
+     *
+     * @return void
+     * @throws FileSystemException
+     */
+    public function testCopyWithRenameFailure(): void
+    {
+        $copyMock = $this->getFunctionMock(
+            'Magento\MagentoCloud\Filesystem\Driver',
+            'copy'
+        );
+        $copyMock->expects($this->once())
+            ->willReturn(true);
+
+        $renameMock = $this->getFunctionMock(
+            'Magento\MagentoCloud\Filesystem\Driver',
+            'rename'
+        );
+        $renameMock->expects($this->once())
+            ->willReturn(false);
+
+        $unlinkMock = $this->getFunctionMock(
+            'Magento\MagentoCloud\Filesystem\Driver',
+            'unlink'
+        );
+        $unlinkMock->expects($this->once())
+            ->willReturn(true);
+
+        $this->assertFalse($this->driver->copy('source', 'destination'));
     }
 
     /**
