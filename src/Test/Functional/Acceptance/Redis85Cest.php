@@ -146,11 +146,15 @@ class Redis85Cest extends RedisCest
 
     /**
      * Verifies that REDIS_USE_SLAVE_CONNECTION populates 'load_from_slave' in remote_backend_options for
-     * both symfony_l2 frontends, and that the deploy still succeeds with it present. The 'redis-slave'
-     * relationship is self-referenced at the same service as 'redis' (no separate replica container is
-     * provisioned in this environment) - this proves ece-tools' config wiring and that a real Magento
-     * deploy tolerates the resulting env.php, not genuine replica read-routing (which needs a real
-     * replica topology to observe).
+     * both symfony_l2 frontends, and that the deploy still succeeds with it present.
+     *
+     * The 'redis-slave' relationship cannot point back at the same 'redis' service: magento-cloud-docker's
+     * build:compose (CloudSource::addRelationships()) rejects a second relationship mapping to the same
+     * canonical service type ("Only one instance of service ... supported"). Its service-name map treats
+     * 'redis' and 'cache'/'valkey' as two INDEPENDENT canonical types, so a real, separate Valkey service
+     * (named 'cache') is added purely to serve as a live, connectable 'redis-slave' target - this is a
+     * genuinely distinct container, not a self-reference, and doesn't conflict with the primary 'redis'
+     * service/relationship used for the actual cache backend.
      *
      * @param CliTester $I
      * @throws TaskException
@@ -162,8 +166,12 @@ class Redis85Cest extends RedisCest
         // Must happen before generateDockerCompose() - that's what bakes .magento.app.yaml's
         // relationships into the generated docker-compose.yml (MAGENTO_CLOUD_RELATIONSHIPS); editing
         // it afterward has no effect on the already-generated compose file.
+        $services = $I->readServicesYaml();
+        $services['cache'] = ['type' => 'valkey:9.0'];
+        $I->writeServicesYaml($services);
+
         $app = $I->readAppMagentoYaml();
-        $app['relationships']['redis-slave'] = $app['relationships']['redis'];
+        $app['relationships']['redis-slave'] = 'cache:valkey';
         $I->writeAppMagentoYaml($app);
 
         $I->generateDockerCompose(sprintf(
@@ -206,7 +214,7 @@ class Redis85Cest extends RedisCest
         foreach (['default', 'stale_cache_enabled'] as $frontendName) {
             $remoteOptions = $config['cache']['frontend'][$frontendName]['backend_options']['remote_backend_options'];
             $I->assertSame(
-                'redis',
+                'cache',
                 $remoteOptions['load_from_slave']['server'] ?? null,
                 "Wrong load_from_slave server for '$frontendName' frontend"
             );
