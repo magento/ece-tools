@@ -907,6 +907,10 @@ class CacheTest extends TestCase
      * force-applied (it would point at a replica of the WRONG master) - mirrors the existing
      * RemoteSynchronizedCache/legacy incompatibility notice.
      *
+     * The override here only touches the 'default' frontend, so 'stale_cache_enabled' must still get
+     * the slave connection - compatibility is evaluated per frontend, so one incompatible frontend
+     * does not disable slave routing for the other.
+     *
      * @return void
      * @throws ConfigException
      */
@@ -967,6 +971,57 @@ class CacheTest extends TestCase
             'load_from_slave',
             $result['frontend']['default']['backend_options']['remote_backend_options']
         );
+        self::assertSame(
+            ['server' => 'redis-slave.host', 'port' => '6380'],
+            $result['frontend']['stale_cache_enabled']['backend_options']['remote_backend_options']['load_from_slave']
+        );
+    }
+
+    /**
+     * If both a Redis and a Valkey relationship happen to exist at the same time, only the flag
+     * matching the backend actually selected as active (Redis takes priority when both are present)
+     * may attach a slave connection. Otherwise a stale VALKEY_USE_SLAVE_CONNECTION=true left over from
+     * before Redis was added could attach a Valkey replica's host/port to the Redis master's config.
+     *
+     * @return void
+     * @throws ConfigException
+     */
+    public function testGetDoesNotApplySlaveConnectionFromInactiveBackendWhenBothRelationshipsExist(): void
+    {
+        $redisConfig = [
+            'host'   => 'redis.host',
+            'port'   => '6379',
+            'scheme' => 'redis',
+        ];
+        $valkeyConfig = [
+            'host'   => 'valkey.host',
+            'port'   => '6380',
+            'scheme' => 'redis',
+        ];
+
+        $this->stageConfigMock->expects(self::any())
+            ->method('get')
+            ->willReturnMap([
+                [DeployInterface::VAR_CACHE_CONFIGURATION, []],
+                [DeployInterface::VAR_CACHE_REDIS_BACKEND, Cache::REDIS_BACKEND_CM_CACHE],
+                [DeployInterface::VAR_CACHE_VALKEY_BACKEND, ''],
+                [DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION, false],
+                [DeployInterface::VAR_VALKEY_USE_SLAVE_CONNECTION, true],
+            ]);
+
+        $this->redisMock->expects(self::any())
+            ->method('getConfiguration')
+            ->willReturn($redisConfig);
+        $this->valkeyMock->expects(self::any())
+            ->method('getConfiguration')
+            ->willReturn($valkeyConfig);
+        $this->valkeyMock->expects(self::never())
+            ->method('getSlaveConfiguration');
+
+        $result = $this->config->get();
+
+        self::assertArrayNotHasKey('load_from_slave', $result['frontend']['default']['backend_options']);
+        self::assertArrayNotHasKey('load_from_slave', $result['frontend']['page_cache']['backend_options']);
     }
 
     /**
