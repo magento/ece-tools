@@ -202,7 +202,7 @@ class Cache implements StepInterface
         $defaultBackend = $cacheConfig['frontend']['default']['backend'] ?? '';
 
         if ($defaultBackend === CacheFactory::VALKEY_BACKEND_SYMFONY_L2) {
-            foreach (['default', 'stale_cache_enabled'] as $frontendName) {
+            foreach (CacheFactory::SYMFONY_L2_FRONTENDS as $frontendName) {
                 $remoteBackendOptions =
                     $cacheConfig['frontend'][$frontendName]['backend_options']['remote_backend_options'] ?? null;
                 if ($remoteBackendOptions === null) {

@@ -145,6 +145,138 @@ class Redis85Cest extends RedisCest
     }
 
     /**
+     * Verifies that REDIS_USE_SLAVE_CONNECTION populates 'load_from_slave' in remote_backend_options for
+     * both symfony_l2 frontends, and that the deploy still succeeds with it present.
+     *
+     * The 'redis-slave' relationship cannot point back at the same 'redis' service: magento-cloud-docker's
+     * build:compose (CloudSource::addRelationships()) rejects a second relationship mapping to the same
+     * canonical service type ("Only one instance of service ... supported"). Its service-name map treats
+     * 'redis' and 'cache'/'valkey' as two INDEPENDENT canonical types, so a real, separate Valkey service
+     * (named 'cache') is added purely to serve as a live, connectable 'redis-slave' target - this is a
+     * genuinely distinct container, not a self-reference, and doesn't conflict with the primary 'redis'
+     * service/relationship used for the actual cache backend.
+     *
+     * Separately, magento-cloud-docker's local Relationship::get() (which produces the container's
+     * MAGENTO_CLOUD_RELATIONSHIPS) only emits entries for its fixed, hardcoded service map (redis, valkey,
+     * database, etc.) - it silently ignores custom relationship names declared in .magento.app.yaml, so
+     * 'redis-slave' never reaches the container through the normal generation path. injectRedisSlaveRelationship()
+     * works around that by patching the generated .docker/config.env directly, after generateDockerCompose()
+     * writes it and before any container starts.
+     *
+     * @param CliTester $I
+     * @throws TaskException
+     */
+    public function testSymfonyL2SlaveConnectionConfiguration(CliTester $I): void
+    {
+        $this->prepareWorkplace($I, '2.4.9');
+
+        // Must happen before generateDockerCompose() - that's what bakes .magento.app.yaml's
+        // relationships into the generated docker-compose.yml (MAGENTO_CLOUD_RELATIONSHIPS); editing
+        // it afterward has no effect on the already-generated compose file.
+        $services = $I->readServicesYaml();
+        $services['cache'] = ['type' => 'valkey:9.0'];
+        $I->writeServicesYaml($services);
+
+        $app = $I->readAppMagentoYaml();
+        $app['relationships']['redis-slave'] = 'cache:valkey';
+        $I->writeAppMagentoYaml($app);
+
+        $I->generateDockerCompose(sprintf(
+            '--mode=production --expose-db-port=%s',
+            $I->getExposedPort()
+        ));
+        $this->removeVendorVolumeMountFromDockerCompose($I);
+        $this->injectRedisSlaveRelationship($I);
+
+        $I->writeEnvMagentoYaml([
+            'stage' => [
+                'deploy' => [
+                    'REDIS_BACKEND' => 'symfony_l2',
+                    'REDIS_USE_SLAVE_CONNECTION' => true,
+                ],
+            ],
+        ]);
+
+        $I->assertTrue(
+            $I->runDockerComposeCommand('run build cloud-build'),
+            'Build phase was failed'
+        );
+
+        $I->assertTrue(
+            $I->startEnvironment(),
+            'Docker could not start'
+        );
+
+        $I->assertTrue(
+            $I->runDockerComposeCommand('run deploy cloud-deploy'),
+            'Deploy phase was failed'
+        );
+
+        $I->assertTrue(
+            $I->runDockerComposeCommand('run deploy cloud-post-deploy'),
+            'Post Deploy phase was failed'
+        );
+
+        $config = $this->getConfig($I);
+
+        foreach (['default', 'stale_cache_enabled'] as $frontendName) {
+            $remoteOptions = $config['cache']['frontend'][$frontendName]['backend_options']['remote_backend_options'];
+            $I->assertSame(
+                'cache',
+                $remoteOptions['load_from_slave']['server'] ?? null,
+                "Wrong load_from_slave server for '$frontendName' frontend"
+            );
+            $I->assertSame(
+                '6379',
+                (string)($remoteOptions['load_from_slave']['port'] ?? null),
+                "Wrong load_from_slave port for '$frontendName' frontend"
+            );
+            $I->assertSame(1, $remoteOptions['retry_reads_on_master'] ?? null);
+        }
+
+        $I->amOnPage('/');
+        $I->see('Home page');
+        $I->see('CMS homepage content goes here.');
+    }
+
+    /**
+     * Injects the 'redis-slave' relationship into the generated MAGENTO_CLOUD_RELATIONSHIPS.
+     *
+     * magento-cloud-docker's local Relationship::get() only emits entries for its fixed, hardcoded
+     * service map (redis, valkey, database, etc.) - it ignores custom relationship names declared in
+     * .magento.app.yaml, so 'redis-slave' never reaches the container's MAGENTO_CLOUD_RELATIONSHIPS env
+     * var through the normal generation path. This patches the generated .docker/config.env (loaded into
+     * every service via docker-compose's `env_file`) using the same base64(json_encode()) format the
+     * vendor tool itself uses for that variable.
+     *
+     * Must run after generateDockerCompose() - that's what writes .docker/config.env - and before
+     * startEnvironment(), since env_file is only read when containers start.
+     *
+     * @param CliTester $I
+     */
+    private function injectRedisSlaveRelationship(CliTester $I): void
+    {
+        $configEnvPath = $I->getWorkDirPath() . DIRECTORY_SEPARATOR . '.docker' . DIRECTORY_SEPARATOR . 'config.env';
+        $lines = file($configEnvPath, FILE_IGNORE_NEW_LINES);
+
+        foreach ($lines as $index => $line) {
+            if (strpos($line, 'MAGENTO_CLOUD_RELATIONSHIPS=') !== 0) {
+                continue;
+            }
+
+            $relationships = json_decode(
+                base64_decode(substr($line, strlen('MAGENTO_CLOUD_RELATIONSHIPS='))),
+                true
+            );
+            $relationships['redis-slave'] = [['host' => 'cache', 'port' => '6379']];
+            $lines[$index] = 'MAGENTO_CLOUD_RELATIONSHIPS=' . base64_encode(json_encode($relationships));
+            break;
+        }
+
+        file_put_contents($configEnvPath, implode(PHP_EOL, $lines) . PHP_EOL);
+    }
+
+    /**
      * Assert both symfony_l2 frontends are generated with expected options.
      *
      * @param array $config

@@ -56,6 +56,11 @@ class Cache
     ];
 
     /**
+     * Frontend names used by the symfony_l2 cache backend structure.
+     */
+    public const SYMFONY_L2_FRONTENDS = ['default', 'stale_cache_enabled'];
+
+    /**
      * @var Redis
      */
     private Redis $redis;
@@ -153,15 +158,21 @@ class Cache
         // Determine backend based on available configuration
         $backendConfig     = !empty($redisConfig) ? $redisConfig : $valkeyConfig;
         $cacheBackendModel = !empty($redisConfig) ? $envCacheRedisBackendModel : $envCacheValkeyBackendModel;
+        $activeBackend     = !empty($redisConfig) ? 'redis' : 'valkey';
 
         if ($this->isSymfonyL2Structure()) {
-            $remoteBackend = !empty($redisConfig) ? 'redis' : 'valkey';
-            $finalConfig = $this->getSymfonyL2ConfigStructure($backendConfig, $remoteBackend);
+            $finalConfig = $this->getSymfonyL2ConfigStructure($backendConfig, $activeBackend);
+            $finalConfig = $this->applySymfonyL2SlaveConnection(
+                $finalConfig,
+                $envCacheConfiguration,
+                $backendConfig,
+                $activeBackend
+            );
         } elseif ($this->isSynchronizedConfigStructure()) {
             $cacheCacheBackend = $this->getSynchronizedConfigStructure($cacheBackendModel, $backendConfig);
             $cacheCacheBackend['backend_options']['remote_backend_options'] = array_merge(
                 $cacheCacheBackend['backend_options']['remote_backend_options'],
-                $this->getSlaveConnection($envCacheConfiguration, $backendConfig)
+                $this->getSlaveConnection($envCacheConfiguration, $backendConfig, $activeBackend)
             );
             $finalConfig = [
                 'frontend' => [
@@ -173,7 +184,7 @@ class Cache
             ];
         } else {
             $cacheCacheBackend = $this->getUnsyncedConfigStructure($cacheBackendModel, $backendConfig);
-            $slaveConnection = $this->getSlaveConnection($envCacheConfiguration, $backendConfig);
+            $slaveConnection = $this->getSlaveConnection($envCacheConfiguration, $backendConfig, $activeBackend);
             if ($slaveConnection) {
                 $cacheCacheBackend['frontend_options']['write_control'] = false;
                 $cacheCacheBackend['backend_options'] = array_merge(
@@ -199,32 +210,64 @@ class Cache
     }
 
     /**
-     * Retrieves Redis or Valkey read connection data if it exists and variable
-     * REDIS_USE_SLAVE_CONNECTION or VALKEY_USE_SLAVE_CONNECTION was set as true,
-     * also if CACHE_CONFIGURATION is compatible with slave connections.
-     * Otherwise, retrieves an empty array.
+     * Resolves the slave/replica relationship data for $activeBackend, but only when the
+     * *_USE_SLAVE_CONNECTION flag matching that backend is enabled.
      *
-     * @param  array $envCacheConfiguration
-     * @param  array $backendConfig
+     * The flag is gated on $activeBackend (rather than checked in isolation) so that, if both Redis
+     * and Valkey relationships happen to exist at once, a slave flag left set for the backend that
+     * isn't actually active can't attach a replica from one backend to the master of the other.
+     *
+     * @param  string $activeBackend 'redis' or 'valkey', matching the backend $backendConfig came from
+     * @return array{0: array, 1: string, 2: string}|null [$slaveConfig, $backendType, $flagVariable]
+     */
+    private function resolveActiveSlaveConfig(string $activeBackend): ?array
+    {
+        if ($activeBackend === 'redis'
+            && $this->stageConfig->get(DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION)
+        ) {
+            return [
+                $this->redis->getSlaveConfiguration(),
+                'Redis',
+                DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION,
+            ];
+        }
+
+        if ($activeBackend === 'valkey'
+            && $this->stageConfig->get(DeployInterface::VAR_VALKEY_USE_SLAVE_CONNECTION)
+        ) {
+            return [
+                $this->valkey->getSlaveConfiguration(),
+                'Valkey',
+                DeployInterface::VAR_VALKEY_USE_SLAVE_CONNECTION,
+            ];
+        }
+
+        return null;
+    }
+
+    /**
+     * Retrieves Redis or Valkey read connection data if it exists and the *_USE_SLAVE_CONNECTION
+     * variable matching $activeBackend was set as true, also if CACHE_CONFIGURATION is compatible
+     * with slave connections. Otherwise, retrieves an empty array.
+     *
+     * @param  array  $envCacheConfiguration
+     * @param  array  $backendConfig
+     * @param  string $activeBackend 'redis' or 'valkey', matching the backend $backendConfig came from
      * @return array
      * @throws ConfigException
      */
-    private function getSlaveConnection(array $envCacheConfiguration, array $backendConfig): array
-    {
-         $config = [];
+    private function getSlaveConnection(
+        array $envCacheConfiguration,
+        array $backendConfig,
+        string $activeBackend
+    ): array {
+        $config = [];
 
-        $useRedisSlave = $this->stageConfig->get(DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION);
-        $useValkeySlave = $this->stageConfig->get(DeployInterface::VAR_VALKEY_USE_SLAVE_CONNECTION);
-
-        if ($useRedisSlave) {
-            $slaveConfig = $this->redis->getSlaveConfiguration();
-            $backendType = 'Redis';
-        } elseif ($useValkeySlave) {
-            $slaveConfig = $this->valkey->getSlaveConfiguration();
-            $backendType = 'Valkey';
-        } else {
-            return $config; // No slave connection requested
+        $resolved = $this->resolveActiveSlaveConfig($activeBackend);
+        if ($resolved === null) {
+            return $config; // No slave connection requested for the active backend
         }
+        [$slaveConfig, $backendType, $flagVariable] = $resolved;
         $slaveHost = $slaveConfig['host'] ?? null;
 
         if ($slaveHost) {
@@ -242,9 +285,7 @@ class Cache
                 $this->logger->notice(
                     sprintf(
                         'The variable \'%s\' is ignored as you\'ve changed cache connection settings in \'%s\'',
-                        $useRedisSlave ?
-                          DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION :
-                          DeployInterface::VAR_VALKEY_USE_SLAVE_CONNECTION,
+                        $flagVariable,
                         DeployInterface::VAR_CACHE_CONFIGURATION
                     )
                 );
@@ -252,6 +293,74 @@ class Cache
         }
 
         return $config;
+    }
+
+    /**
+     * Applies the slave/replica connection to whichever symfony_l2 frontends are individually
+     * compatible with it, skipping only the frontends whose CACHE_CONFIGURATION override points at a
+     * different host/port (rather than disabling slave routing for both frontends on a single mismatch).
+     *
+     * @param  array  $finalConfig
+     * @param  array  $envCacheConfiguration
+     * @param  array  $backendConfig
+     * @param  string $activeBackend 'redis' or 'valkey', matching the backend $backendConfig came from
+     * @return array
+     * @throws ConfigException
+     */
+    private function applySymfonyL2SlaveConnection(
+        array $finalConfig,
+        array $envCacheConfiguration,
+        array $backendConfig,
+        string $activeBackend
+    ): array {
+        $resolved = $this->resolveActiveSlaveConfig($activeBackend);
+        if ($resolved === null) {
+            return $finalConfig;
+        }
+        [$slaveConfig, $backendType, $flagVariable] = $resolved;
+        $slaveHost = $slaveConfig['host'] ?? null;
+        if (!$slaveHost) {
+            return $finalConfig;
+        }
+
+        $slaveConnectionData = [
+            'load_from_slave' => ['server' => $slaveHost, 'port' => $slaveConfig['port'] ?? ''],
+            'read_timeout' => 1,
+            'retry_reads_on_master' => 1,
+        ];
+        if (!empty($slaveConfig['password'])) {
+            $slaveConnectionData['load_from_slave']['password'] = $slaveConfig['password'];
+        }
+
+        $applied = false;
+        foreach (self::SYMFONY_L2_FRONTENDS as $frontendName) {
+            $isCompatible = $this->isConfigurationCompatibleWithSlaveConnection(
+                $envCacheConfiguration,
+                $backendConfig,
+                $frontendName
+            );
+            if ($isCompatible) {
+                $finalConfig['frontend'][$frontendName]['backend_options']['remote_backend_options'] = array_merge(
+                    $finalConfig['frontend'][$frontendName]['backend_options']['remote_backend_options'],
+                    $slaveConnectionData
+                );
+                $applied = true;
+            } else {
+                $this->logger->notice(
+                    sprintf(
+                        'The variable \'%s\' is ignored as you\'ve changed cache connection settings in \'%s\'',
+                        $flagVariable,
+                        DeployInterface::VAR_CACHE_CONFIGURATION
+                    )
+                );
+            }
+        }
+
+        if ($applied) {
+            $this->logger->info(sprintf('Set %s slave connection', $backendType));
+        }
+
+        return $finalConfig;
     }
 
     /**
@@ -271,17 +380,38 @@ class Cache
      *
      * Returns false if server or port was changed in merged configuration otherwise false.
      *
-     * @param                                          array $envCacheConfig
-     * @param                                          array $backendConfig
+     * For the symfony_l2 structure, compatibility is checked per frontend: passing $frontendName
+     * restricts the check to that frontend so a mismatch on one (e.g. 'stale_cache_enabled') doesn't
+     * disable slave routing for an otherwise-compatible 'default' frontend. Omitting it checks all
+     * symfony_l2 frontends together.
+     *
+     * @param                                          array       $envCacheConfig
+     * @param                                          array       $backendConfig
+     * @param                                          string|null $frontendName
      * @return                                         bool
      * @throws                                         ConfigException
      * @SuppressWarnings("PHPMD.CyclomaticComplexity")
      */
     private function isConfigurationCompatibleWithSlaveConnection(
         array $envCacheConfig,
-        array $backendConfig
+        array $backendConfig,
+        ?string $frontendName = null
     ): bool {
-        if ($this->isSynchronizedConfigStructure()) {
+        if ($this->isSymfonyL2Structure()) {
+            $frontendNames = $frontendName !== null ? [$frontendName] : self::SYMFONY_L2_FRONTENDS;
+            foreach ($frontendNames as $name) {
+                $remoteBackendOptions =
+                    $envCacheConfig['frontend'][$name]['backend_options']['remote_backend_options'] ?? [];
+                $host = $remoteBackendOptions['server'] ?? null;
+                $port = $remoteBackendOptions['port'] ?? null;
+
+                if (($host !== null && $host !== $backendConfig['host'])
+                    || ($port !== null && $port !== $backendConfig['port'])
+                ) {
+                    return false;
+                }
+            }
+        } elseif ($this->isSynchronizedConfigStructure()) {
             $host = $envCacheConfig['frontend']['default']['backend_options']['remote_backend_options']['server']
                 ?? null;
 
