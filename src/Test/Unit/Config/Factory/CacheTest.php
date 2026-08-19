@@ -902,6 +902,68 @@ class CacheTest extends TestCase
     }
 
     /**
+     * A Valkey service migrated from Redis is conventionally still exposed under the relationship
+     * literally named 'redis' (see Redis::RELATIONSHIP_KEY and ValkeyCest::replaceRedisWithValkey()),
+     * so $this->redis->getConfiguration() - not $this->valkey->getConfiguration() - supplies the
+     * master host/port here. VALKEY_USE_SLAVE_CONNECTION must still be honored in that case: which
+     * *_USE_SLAVE_CONNECTION flag applies is decided by CACHE_VALKEY_BACKEND/CACHE_REDIS_BACKEND (the
+     * merchant's declared backend model), not by which relationship happened to carry the master
+     * connection data.
+     *
+     * @return void
+     * @throws ConfigException
+     */
+    public function testGetSymfonyL2WithValkeyOnLegacyRedisRelationshipAppliesSlaveConnection(): void
+    {
+        $masterConfig = [
+            'host' => 'legacy-redis-relationship.host',
+            'port' => '6379',
+        ];
+        $valkeySlaveConfig = [
+            'host' => 'valkey-slave.host',
+            'port' => '6380',
+        ];
+
+        $this->stageConfigMock->expects(self::any())
+            ->method('get')
+            ->willReturnMap([
+                [DeployInterface::VAR_CACHE_CONFIGURATION, []],
+                [DeployInterface::VAR_CACHE_REDIS_BACKEND, ''],
+                [DeployInterface::VAR_CACHE_VALKEY_BACKEND, Cache::VALKEY_BACKEND_SYMFONY_L2],
+                [DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION, false],
+                [DeployInterface::VAR_VALKEY_USE_SLAVE_CONNECTION, true],
+            ]);
+
+        $this->redisMock->expects(self::any())
+            ->method('getConfiguration')
+            ->willReturn($masterConfig);
+        $this->valkeyMock->expects(self::any())
+            ->method('getConfiguration')
+            ->willReturn([]);
+        $this->valkeyMock->expects(self::any())
+            ->method('getSlaveConfiguration')
+            ->willReturn($valkeySlaveConfig);
+
+        $this->loggerMock->expects(self::once())
+            ->method('info')
+            ->with('Set Valkey slave connection');
+        $this->loggerMock->expects(self::never())
+            ->method('notice');
+
+        $result = $this->config->get();
+
+        foreach (['default', 'stale_cache_enabled'] as $frontendName) {
+            $remoteOptions = $result['frontend'][$frontendName]['backend_options']['remote_backend_options'];
+            self::assertSame(
+                ['server' => 'valkey-slave.host', 'port' => '6380'],
+                $remoteOptions['load_from_slave']
+            );
+            self::assertSame(1, $remoteOptions['read_timeout']);
+            self::assertSame(1, $remoteOptions['retry_reads_on_master']);
+        }
+    }
+
+    /**
      * When the merchant has overridden the symfony_l2 remote connection details in CACHE_CONFIGURATION
      * to point somewhere other than the relationship's host/port, the slave connection must not be
      * force-applied (it would point at a replica of the WRONG master) - mirrors the existing

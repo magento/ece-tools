@@ -154,25 +154,29 @@ class Cache
         if (empty($redisConfig) && empty($valkeyConfig)) {
             return [];
         }
-
         // Determine backend based on available configuration
         $backendConfig     = !empty($redisConfig) ? $redisConfig : $valkeyConfig;
         $cacheBackendModel = !empty($redisConfig) ? $envCacheRedisBackendModel : $envCacheValkeyBackendModel;
         $activeBackend     = !empty($redisConfig) ? 'redis' : 'valkey';
 
+        $slaveConnectionBackend = $this->resolveSlaveConnectionBackend(
+            $envCacheRedisBackendModel,
+            $envCacheValkeyBackendModel,
+            $activeBackend
+        );
         if ($this->isSymfonyL2Structure()) {
             $finalConfig = $this->getSymfonyL2ConfigStructure($backendConfig, $activeBackend);
             $finalConfig = $this->applySymfonyL2SlaveConnection(
                 $finalConfig,
                 $envCacheConfiguration,
                 $backendConfig,
-                $activeBackend
+                $slaveConnectionBackend
             );
         } elseif ($this->isSynchronizedConfigStructure()) {
             $cacheCacheBackend = $this->getSynchronizedConfigStructure($cacheBackendModel, $backendConfig);
             $cacheCacheBackend['backend_options']['remote_backend_options'] = array_merge(
                 $cacheCacheBackend['backend_options']['remote_backend_options'],
-                $this->getSlaveConnection($envCacheConfiguration, $backendConfig, $activeBackend)
+                $this->getSlaveConnection($envCacheConfiguration, $backendConfig, $slaveConnectionBackend)
             );
             $finalConfig = [
                 'frontend' => [
@@ -184,7 +188,11 @@ class Cache
             ];
         } else {
             $cacheCacheBackend = $this->getUnsyncedConfigStructure($cacheBackendModel, $backendConfig);
-            $slaveConnection = $this->getSlaveConnection($envCacheConfiguration, $backendConfig, $activeBackend);
+            $slaveConnection = $this->getSlaveConnection(
+                $envCacheConfiguration,
+                $backendConfig,
+                $slaveConnectionBackend
+            );
             if ($slaveConnection) {
                 $cacheCacheBackend['frontend_options']['write_control'] = false;
                 $cacheCacheBackend['backend_options'] = array_merge(
@@ -210,6 +218,37 @@ class Cache
     }
 
     /**
+     * Determines which backend the *_USE_SLAVE_CONNECTION flags should be matched against.
+     *
+     * This is NOT necessarily $activeBackend: a Valkey service migrated from Redis is conventionally
+     * still exposed under the relationship literally named 'redis' (see Redis::RELATIONSHIP_KEY), so
+     * $activeBackend would resolve to 'redis' even though the merchant configured
+     * CACHE_VALKEY_BACKEND/VALKEY_BACKEND and set VALKEY_USE_SLAVE_CONNECTION. The explicitly
+     * configured backend model takes precedence; $activeBackend is used only as a fallback when
+     * neither *_BACKEND variable is set.
+     *
+     * @param  string $envCacheRedisBackendModel
+     * @param  string $envCacheValkeyBackendModel
+     * @param  string $activeBackend 'redis' or 'valkey', matching the backend $backendConfig came from
+     * @return string 'redis' or 'valkey'
+     */
+    private function resolveSlaveConnectionBackend(
+        string $envCacheRedisBackendModel,
+        string $envCacheValkeyBackendModel,
+        string $activeBackend
+    ): string {
+        if ($envCacheRedisBackendModel !== '') {
+            return 'redis';
+        }
+
+        if ($envCacheValkeyBackendModel !== '') {
+            return 'valkey';
+        }
+
+        return $activeBackend;
+    }
+
+    /**
      * Resolves the slave/replica relationship data for $activeBackend, but only when the
      * *_USE_SLAVE_CONNECTION flag matching that backend is enabled.
      *
@@ -217,7 +256,11 @@ class Cache
      * and Valkey relationships happen to exist at once, a slave flag left set for the backend that
      * isn't actually active can't attach a replica from one backend to the master of the other.
      *
-     * @param  string $activeBackend 'redis' or 'valkey', matching the backend $backendConfig came from
+     * @param  string $activeBackend 'redis' or 'valkey' - the backend selected via the
+     *                                CACHE_REDIS_BACKEND/CACHE_VALKEY_BACKEND config (not necessarily
+     *                                which relationship supplied $backendConfig: a Valkey service
+     *                                migrated from Redis is conventionally still exposed under the
+     *                                relationship literally named 'redis')
      * @return array{0: array, 1: string, 2: string}|null [$slaveConfig, $backendType, $flagVariable]
      */
     private function resolveActiveSlaveConfig(string $activeBackend): ?array
@@ -252,7 +295,8 @@ class Cache
      *
      * @param  array  $envCacheConfiguration
      * @param  array  $backendConfig
-     * @param  string $activeBackend 'redis' or 'valkey', matching the backend $backendConfig came from
+     * @param  string $activeBackend 'redis' or 'valkey' - the backend selected via the
+     *                                CACHE_REDIS_BACKEND/CACHE_VALKEY_BACKEND config
      * @return array
      * @throws ConfigException
      */
@@ -303,7 +347,8 @@ class Cache
      * @param  array  $finalConfig
      * @param  array  $envCacheConfiguration
      * @param  array  $backendConfig
-     * @param  string $activeBackend 'redis' or 'valkey', matching the backend $backendConfig came from
+     * @param  string $activeBackend 'redis' or 'valkey' - the backend selected via the
+     *                                CACHE_REDIS_BACKEND/CACHE_VALKEY_BACKEND config
      * @return array
      * @throws ConfigException
      */
