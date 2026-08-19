@@ -172,13 +172,38 @@ class File
     /**
      * Copy source into destination.
      *
+     * Performed atomically: content is copied to a temporary file in the same
+     * directory as the destination, then swapped into place with rename(), so a
+     * concurrent reader can never observe a truncated or partially-written destination.
+     *
      * @param string $source
      * @param string $destination
      * @return bool
      */
     public function copy(string $source, string $destination): bool
     {
-        return copy($source, $destination);
+        $tmpPath = $destination . '.' . uniqid('tmp', true);
+
+        if (!@copy($source, $tmpPath)) {
+            return false;
+        }
+
+        if ($this->isExists($destination)) {
+            $permissions = @fileperms($destination);
+            if ($permissions !== false) {
+                @chmod($tmpPath, $permissions & 0777);
+            }
+        }
+
+        try {
+            $this->rename($tmpPath, $destination);
+        } catch (FileSystemException $e) {
+            $this->deleteFile($tmpPath);
+
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -385,6 +410,10 @@ class File
     /**
      * Write contents to file in given path
      *
+     * Non-append writes are performed atomically: content is written to a temporary
+     * file in the same directory, then swapped into place with rename(), so a
+     * concurrent reader can never observe a truncated or partially-written file.
+     *
      * @param string $path
      * @param string $content
      * @param int|null $mode
@@ -393,12 +422,43 @@ class File
      */
     public function filePutContents($path, $content, $mode = null)
     {
-        $result = @file_put_contents($path, $content, $mode ?? 0);
+        $mode = $mode ?? 0;
+
+        if ($mode & FILE_APPEND) {
+            $result = @file_put_contents($path, $content, $mode);
+            if (!$result) {
+                $this->fileSystemException(
+                    'The specified "%1" file could not be written %2',
+                    [$path, $this->getWarningMessage()]
+                );
+            }
+
+            return $result;
+        }
+
+        $tmpPath = $path . '.' . uniqid('tmp', true);
+
+        $result = @file_put_contents($tmpPath, $content, $mode);
         if (!$result) {
             $this->fileSystemException(
                 'The specified "%1" file could not be written %2',
                 [$path, $this->getWarningMessage()]
             );
+        }
+
+        if ($this->isExists($path)) {
+            $permissions = @fileperms($path);
+            if ($permissions !== false) {
+                @chmod($tmpPath, $permissions & 0777);
+            }
+        }
+
+        try {
+            $this->rename($tmpPath, $path);
+        } catch (FileSystemException $e) {
+            $this->deleteFile($tmpPath);
+
+            throw $e;
         }
 
         return $result;

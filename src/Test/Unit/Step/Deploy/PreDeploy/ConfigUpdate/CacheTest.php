@@ -868,6 +868,294 @@ class CacheTest extends TestCase
     }
 
     /**
+     * Test that a symfony_l2 frontend with no 'remote_backend_options' key at all (e.g. a merchant's
+     * CACHE_CONFIGURATION that only sets a top-level 'preload_keys' without full remote connection
+     * details) fails with a clean StepException instead of an undefined array key warning.
+     *
+     * @return void
+     * @throws StepException
+     */
+    public function testExecuteSymfonyL2MissingRemoteBackendOptionsThrowsCleanException(): void
+    {
+        $this->expectException(StepException::class);
+        $this->expectExceptionCode(Error::DEPLOY_WRONG_CACHE_CONFIGURATION);
+        $this->expectExceptionMessage('Missing required Redis or Valkey configuration \'server\'!');
+
+        $this->configReaderMock->expects($this->once())
+            ->method('read')
+            ->willReturn([]);
+        $this->cacheConfigMock->expects($this->once())
+            ->method('get')
+            ->willReturn([
+                'frontend' => [
+                    'default' => [
+                        'backend' => CacheFactory::VALKEY_BACKEND_SYMFONY_L2,
+                        'backend_options' => [
+                            'preload_keys' => ['EAV_ENTITY_TYPES:hash'],
+                        ],
+                    ],
+                ],
+            ]);
+        $this->magentoVersion->expects($this->any())
+            ->method('isGreaterOrEqual')
+            ->willReturn(true);
+
+        $this->socketCreateMock->expects($this->never());
+
+        $this->step->execute();
+    }
+
+    /**
+     * Same missing-'remote_backend_options' scenario as above, for the legacy RemoteSynchronizedCache
+     * (L2) backend model rather than symfony_l2.
+     *
+     * @return void
+     * @throws StepException
+     */
+    public function testExecuteRemoteSynchronizedCacheMissingRemoteBackendOptionsThrowsCleanException(): void
+    {
+        $this->expectException(StepException::class);
+        $this->expectExceptionCode(Error::DEPLOY_WRONG_CACHE_CONFIGURATION);
+        $this->expectExceptionMessage('Missing required Redis or Valkey configuration \'server\'!');
+
+        $this->configReaderMock->expects($this->once())
+            ->method('read')
+            ->willReturn([]);
+        $this->cacheConfigMock->expects($this->once())
+            ->method('get')
+            ->willReturn([
+                'frontend' => [
+                    'default' => [
+                        'backend' => CacheFactory::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE,
+                        'backend_options' => [
+                            'preload_keys' => ['061_EAV_ENTITY_TYPES:hash'],
+                        ],
+                    ],
+                ],
+            ]);
+        $this->magentoVersion->expects($this->any())
+            ->method('isGreaterOrEqual')
+            ->willReturn(true);
+
+        $this->socketCreateMock->expects($this->never());
+
+        $this->step->execute();
+    }
+
+    /**
+     * When 'remote_backend_options' is absent for a symfony_l2 frontend but the connection details
+     * ('server'/'port') were placed flat under 'backend_options' instead, the connection test must
+     * fall back to those flat options rather than testing an empty array.
+     *
+     * @return void
+     * @throws StepException
+     */
+    public function testExecuteSymfonyL2FallsBackToFlatBackendOptionsWhenRemoteBackendOptionsMissing(): void
+    {
+        $config = [
+            'frontend' => [
+                'default' => [
+                    'backend' => CacheFactory::VALKEY_BACKEND_SYMFONY_L2,
+                    'backend_options' => [
+                        'server' => 'valkey.server',
+                        'port' => 6379,
+                    ],
+                ],
+            ],
+        ];
+
+        $this->configReaderMock->expects($this->once())
+            ->method('read')
+            ->willReturn([]);
+        $this->cacheConfigMock->expects($this->once())
+            ->method('get')
+            ->willReturn($config);
+        $this->magentoVersion->expects($this->any())
+            ->method('isGreaterOrEqual')
+            ->willReturn(true);
+
+        $this->socketCreateMock->expects($this->once())
+            ->with(AF_INET, SOCK_STREAM, SOL_TCP)
+            ->willReturn('socket resource');
+        $this->socketConnectMock->expects($this->once())
+            ->with('socket resource', 'valkey.server', 6379)
+            ->willReturn(true);
+        $this->socketCloseMock->expects($this->once())
+            ->with('socket resource');
+
+        $this->configWriterMock->expects($this->once())
+            ->method('create')
+            ->with(['cache' => $config]);
+        $this->loggerMock->expects($this->once())
+            ->method('info')
+            ->with('Updating cache configuration.');
+
+        $this->step->execute();
+    }
+
+    /**
+     * Same flat-'backend_options' fallback as above, for the legacy RemoteSynchronizedCache (L2)
+     * backend model rather than symfony_l2.
+     *
+     * @return void
+     * @throws StepException
+     */
+    public function testExecuteRemoteSyncCacheFallsBackToFlatBackendOptionsWhenRemoteBackendOptionsMissing(): void
+    {
+        $this->configReaderMock->expects($this->once())
+            ->method('read')
+            ->willReturn([]);
+        $this->cacheConfigMock->expects($this->once())
+            ->method('get')
+            ->willReturn([
+                'frontend' => [
+                    'default' => [
+                        'backend' => CacheFactory::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE,
+                        'backend_options' => [
+                            'server' => 'redis.server',
+                            'port' => 6379,
+                        ],
+                    ],
+                ],
+            ]);
+        $this->magentoVersion->expects($this->any())
+            ->method('isGreaterOrEqual')
+            ->willReturn(true);
+
+        $this->socketCreateMock->expects($this->once())
+            ->with(AF_INET, SOCK_STREAM, SOL_TCP)
+            ->willReturn('socket resource');
+        $this->socketConnectMock->expects($this->once())
+            ->with('socket resource', 'redis.server', 6379)
+            ->willReturn(true);
+        $this->socketCloseMock->expects($this->once())
+            ->with('socket resource');
+
+        $this->configWriterMock->expects($this->once())
+            ->method('create')
+            ->with(['cache' => [
+                'frontend' => [
+                    'default' => [
+                        'backend' => CacheFactory::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE,
+                        'backend_options' => [
+                            'server' => 'redis.server',
+                            'port' => 6379,
+                            'use_lua' => false,
+                            'use_lua_on_gc' => false,
+                        ],
+                    ],
+                ],
+            ]]);
+        $this->loggerMock->expects($this->once())
+            ->method('info')
+            ->with('Updating cache configuration.');
+
+        $this->step->execute();
+    }
+
+    /**
+     * Mirrors the two real client CACHE_CONFIGURATION shapes: 'default' frontend puts 'preload_keys'
+     * directly under top-level 'backend_options' (alongside a fully-populated 'remote_backend_options'
+     * coming from the auto-generated skeleton, as happens after a normal _merge: true), while
+     * 'stale_cache_enabled' nests 'preload_keys' inside 'remote_backend_options' instead. Both frontends
+     * have a complete 'remote_backend_options' (server/port), so neither hits the missing-key case
+     * directly - this confirms deployment succeeds cleanly for both placements, for both frontends,
+     * in the same deploy.
+     *
+     * @return void
+     * @throws StepException
+     */
+    public function testExecuteSymfonyL2PreloadKeysWorksInBothPlacementsForDefaultAndStaleFrontends(): void
+    {
+        $symfonyL2Config = [
+            'frontend' => [
+                'default' => [
+                    'backend' => CacheFactory::VALKEY_BACKEND_SYMFONY_L2,
+                    'id_prefix' => '061_',
+                    'backend_options' => [
+                        'remote_backend' => 'valkey',
+                        'remote_backend_options' => [
+                            'server' => 'valkey.server',
+                            'port' => 6379,
+                            'database' => 1,
+                        ],
+                        'local_backend' => 'file',
+                        'local_backend_options' => ['cache_dir' => '/dev/shm/magento_l1'],
+                        // top-level placement (client config #1)
+                        'preload_keys' => ['061_EAV_ENTITY_TYPES:hash', '061_GLOBAL_PLUGIN_LIST:hash'],
+                    ],
+                ],
+                'stale_cache_enabled' => [
+                    'backend' => CacheFactory::VALKEY_BACKEND_SYMFONY_L2,
+                    'id_prefix' => '069_',
+                    'backend_options' => [
+                        'remote_backend' => 'valkey',
+                        'remote_backend_options' => [
+                            'server' => 'valkey.server',
+                            'port' => 6379,
+                            'database' => 1,
+                            'serializer' => 'igbinary',
+                            'read_timeout' => 10,
+                            'connect_retries' => 3,
+                            // nested placement (client config #2)
+                            'preload_keys' => ['069_EAV_ENTITY_TYPES'],
+                        ],
+                        'local_backend' => 'file',
+                        'local_backend_options' => ['cache_dir' => '/dev/shm/magento_l1_stale'],
+                        'use_stale_cache' => true,
+                    ],
+                ],
+            ],
+            'type' => [
+                'default' => ['frontend' => 'default'],
+                'layout' => ['frontend' => 'stale_cache_enabled'],
+            ],
+        ];
+
+        $this->configReaderMock->expects($this->once())
+            ->method('read')
+            ->willReturn([]);
+        $this->cacheConfigMock->expects($this->once())
+            ->method('get')
+            ->willReturn($symfonyL2Config);
+        $this->magentoVersion->expects($this->any())
+            ->method('isGreaterOrEqual')
+            ->willReturn(true);
+        $this->stageConfig->expects($this->exactly(2))
+            ->method('get')
+            ->willReturnMap([
+                [DeployInterface::VAR_USE_LUA, false],
+                [DeployInterface::VAR_USE_LUA_ON_GC, false],
+            ]);
+
+        $this->socketCreateMock->expects($this->exactly(2))
+            ->with(AF_INET, SOCK_STREAM, SOL_TCP)
+            ->willReturn('socket resource');
+        $this->socketConnectMock->expects($this->exactly(2))
+            ->with('socket resource', 'valkey.server', 6379)
+            ->willReturn(true);
+        $this->socketCloseMock->expects($this->exactly(2))
+            ->with('socket resource');
+
+        $expectedConfig = $symfonyL2Config;
+        $expectedConfig['frontend']['default']['backend_options']['remote_backend_options']['use_lua'] = '0';
+        $expectedConfig['frontend']['default']['backend_options']['remote_backend_options']['use_lua_on_gc'] = '0';
+        $expectedConfig['frontend']['stale_cache_enabled']['backend_options']['remote_backend_options']['use_lua']
+            = '0';
+        $expectedConfig['frontend']['stale_cache_enabled']['backend_options']['remote_backend_options']
+            ['use_lua_on_gc'] = '0';
+
+        $this->configWriterMock->expects($this->once())
+            ->method('create')
+            ->with(['cache' => $expectedConfig]);
+        $this->loggerMock->expects($this->once())
+            ->method('info')
+            ->with('Updating cache configuration.');
+
+        $this->step->execute();
+    }
+
+    /**
      * Test that symfony_l2 backend is rejected on Magento versions older than 2.4.9.
      *
      * @return void

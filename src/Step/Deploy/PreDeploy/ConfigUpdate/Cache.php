@@ -113,10 +113,19 @@ class Cache implements StepInterface
                         if (!$customCacheBackend && !$isKnownBackend) {
                             return true;
                         }
-                        $backendOptions = ($backend === CacheFactory::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE
-                            || $backend === CacheFactory::VALKEY_BACKEND_SYMFONY_L2)
-                            ? $cacheFrontend['backend_options']['remote_backend_options']
-                            : $cacheFrontend['backend_options'];
+                        $backendOptions = $cacheFrontend['backend_options'] ?? [];
+                        $isRemoteSplitBackend = in_array($backend, [
+                            CacheFactory::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE,
+                            CacheFactory::VALKEY_BACKEND_REMOTE_SYNCHRONIZED_CACHE,
+                            CacheFactory::REDIS_BACKEND_SYMFONY_L2,
+                            CacheFactory::VALKEY_BACKEND_SYMFONY_L2,
+                        ], true);
+                        if ($isRemoteSplitBackend) {
+                            // Some merchant configs place connection options flat under
+                            // backend_options instead of nesting under remote_backend_options;
+                            // fall back to the flat options rather than testing an empty array.
+                            $backendOptions = $backendOptions['remote_backend_options'] ?? $backendOptions;
+                        }
                         return $this->testCacheConnection($backendOptions);
                     }
                 );
@@ -193,7 +202,7 @@ class Cache implements StepInterface
         $defaultBackend = $cacheConfig['frontend']['default']['backend'] ?? '';
 
         if ($defaultBackend === CacheFactory::VALKEY_BACKEND_SYMFONY_L2) {
-            foreach (['default', 'stale_cache_enabled'] as $frontendName) {
+            foreach (CacheFactory::SYMFONY_L2_FRONTENDS as $frontendName) {
                 $remoteBackendOptions =
                     $cacheConfig['frontend'][$frontendName]['backend_options']['remote_backend_options'] ?? null;
                 if ($remoteBackendOptions === null) {
@@ -345,7 +354,8 @@ class Cache implements StepInterface
                 );
             }
 
-            if ($backend === CacheFactory::VALKEY_BACKEND_SYMFONY_L2
+            if (($backend === CacheFactory::VALKEY_BACKEND_SYMFONY_L2
+                    || $backend === CacheFactory::REDIS_BACKEND_SYMFONY_L2)
                 && !$this->magentoVersion->isGreaterOrEqual('2.4.9')
             ) {
                 throw new StepException(
