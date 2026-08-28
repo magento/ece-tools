@@ -97,11 +97,20 @@ class CleanRedisCache implements StepInterface
                 !empty($redisConfig['password']) ? (string)$redisConfig['password'] : null
             );
 
-            try {
-                $client->connect();
-                $client->flushDb();
-            } catch (CredisException $e) {
-                throw new StepException($e->getMessage(), Error::DEPLOY_REDIS_CACHE_CLEAN_FAILED, $e);
+            $maxRetries = 3;
+            for ($attempt = 0; $attempt <= $maxRetries; $attempt++) {
+                try {
+                    $client->connect();
+                    $client->flushDb();
+                    break;
+                } catch (CredisException $e) {
+                    if ($attempt === $maxRetries) {
+                        throw new StepException($e->getMessage(),
+                            Error::DEPLOY_REDIS_CACHE_CLEAN_FAILED, $e);
+                    }
+                    $this->logger->info('Clearing redis cache failed. Retrying in 10 seconds...');
+                    sleep(10);
+                }
             }
         }
     }
