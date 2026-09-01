@@ -230,6 +230,48 @@ class CacheTest extends TestCase
     }
 
     /**
+     * Regression test: RemoteSynchronizedCache must isolate the page_cache (full_page) frontend onto
+     * its own database rather than sharing the default frontend's connection/database, otherwise
+     * full_page cache traffic contends with every other cache type on the same Redis/Valkey connection.
+     *
+     * @throws ConfigException
+     */
+    public function testGetSynchronizedCacheIsolatesPageCacheFromDefault(): void
+    {
+        $this->stageConfigMock->expects(self::any())
+            ->method('get')
+            ->willReturnMap(
+                [
+                    [DeployInterface::VAR_CACHE_CONFIGURATION, []],
+                    [DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION, false],
+                    [DeployInterface::VAR_CACHE_REDIS_BACKEND, Cache::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE],
+                    [DeployInterface::VAR_CACHE_VALKEY_BACKEND, null],
+                    [DeployInterface::VAR_VALKEY_USE_SLAVE_CONNECTION, null],
+                ]
+            );
+        $this->redisMock->method('getConfiguration')->willReturn([
+            'host' => 'master.host',
+            'port' => 'master.port',
+            'password' => 'master.password',
+            'scheme' => 'redis',
+        ]);
+        $this->redisMock->method('getSlaveConfiguration')->willReturn([]);
+
+        $result = $this->config->get();
+
+        self::assertArrayHasKey('page_cache', $result['frontend']);
+        $defaultDatabase = $result['frontend']['default']['backend_options']['remote_backend_options']['database'];
+        $pageCacheDatabase = $result['frontend']['page_cache']['backend_options']['remote_backend_options']['database'];
+        self::assertSame(Cache::CACHE_DATABASE_DEFAULT, $defaultDatabase);
+        self::assertSame(Cache::CACHE_DATABASE_PAGE_CACHE, $pageCacheDatabase);
+        self::assertNotSame(
+            $defaultDatabase,
+            $pageCacheDatabase,
+            'page_cache frontend must not share a database with the default frontend'
+        );
+    }
+
+    /**
      * Data provider for testGetFromRelationships.
      *
      * Results value for next data:
@@ -311,6 +353,10 @@ class CacheTest extends TestCase
                 'default' => ['frontend' => 'default'],
             ],
         ];
+        $resultMasterOnlyConnectionSyncCache['frontend']['page_cache'] = array_replace_recursive(
+            $resultMasterOnlyConnectionSyncCache['frontend']['default'],
+            ['backend_options' => ['remote_backend_options' => ['database' => Cache::CACHE_DATABASE_PAGE_CACHE]]]
+        );
 
         $backendOptions = [
             'load_from_slave' => [
@@ -351,6 +397,10 @@ class CacheTest extends TestCase
         $resultMasterSlaveConnectionSyncCache['frontend']['default'] = array_merge_recursive(
             $resultMasterSlaveConnectionSyncCache['frontend']['default'],
             $slaveConfigurationSyncCache
+        );
+        $resultMasterSlaveConnectionSyncCache['frontend']['page_cache'] = array_replace_recursive(
+            $resultMasterSlaveConnectionSyncCache['frontend']['default'],
+            ['backend_options' => ['remote_backend_options' => ['database' => Cache::CACHE_DATABASE_PAGE_CACHE]]]
         );
 
         $resultMasterSlaveConnectionWithMergedValue = $resultMasterSlaveConnection;

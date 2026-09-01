@@ -173,19 +173,12 @@ class Cache
                 $slaveConnectionBackend
             );
         } elseif ($this->isSynchronizedConfigStructure()) {
-            $cacheCacheBackend = $this->getSynchronizedConfigStructure($cacheBackendModel, $backendConfig);
-            $cacheCacheBackend['backend_options']['remote_backend_options'] = array_merge(
-                $cacheCacheBackend['backend_options']['remote_backend_options'],
-                $this->getSlaveConnection($envCacheConfiguration, $backendConfig, $slaveConnectionBackend)
+            $finalConfig = $this->getSynchronizedFinalConfig(
+                $cacheBackendModel,
+                $backendConfig,
+                $envCacheConfiguration,
+                $slaveConnectionBackend
             );
-            $finalConfig = [
-                'frontend' => [
-                    'default' => $cacheCacheBackend,
-                ],
-                'type' => [
-                    'default' => ['frontend' => 'default'],
-                ],
-            ];
         } else {
             $cacheCacheBackend = $this->getUnsyncedConfigStructure($cacheBackendModel, $backendConfig);
             $slaveConnection = $this->getSlaveConnection(
@@ -551,6 +544,48 @@ class Cache
         }
 
         return $config;
+    }
+
+    /**
+     * Builds the final config for the RemoteSynchronizedCache backend: a default frontend plus a
+     * page_cache frontend on a separate database, so full_page cache traffic doesn't share a
+     * connection/database with every other cache type.
+     *
+     * @param  string $cacheBackendModel
+     * @param  array  $backendConfig
+     * @param  array  $envCacheConfiguration
+     * @param  string $slaveConnectionBackend
+     * @return array
+     * @throws ConfigException
+     */
+    private function getSynchronizedFinalConfig(
+        string $cacheBackendModel,
+        array $backendConfig,
+        array $envCacheConfiguration,
+        string $slaveConnectionBackend
+    ): array {
+        $cacheCacheBackend = $this->getSynchronizedConfigStructure($cacheBackendModel, $backendConfig);
+        $cacheCacheBackend['backend_options']['remote_backend_options'] = array_merge(
+            $cacheCacheBackend['backend_options']['remote_backend_options'],
+            $this->getSlaveConnection($envCacheConfiguration, $backendConfig, $slaveConnectionBackend)
+        );
+
+        return [
+            'frontend' => [
+                'default' => $cacheCacheBackend,
+                'page_cache' => array_replace_recursive(
+                    $cacheCacheBackend,
+                    [
+                        'backend_options' => [
+                            'remote_backend_options' => ['database' => self::CACHE_DATABASE_PAGE_CACHE],
+                        ],
+                    ]
+                ),
+            ],
+            'type' => [
+                'default' => ['frontend' => 'default'],
+            ],
+        ];
     }
 
     /**
