@@ -225,7 +225,13 @@ class Cache
      * $activeBackend would resolve to 'redis' even though the merchant configured
      * CACHE_VALKEY_BACKEND/VALKEY_BACKEND and set VALKEY_USE_SLAVE_CONNECTION. The explicitly
      * configured backend model takes precedence; $activeBackend is used only as a fallback when
-     * neither *_BACKEND variable is set.
+     * neither *_BACKEND variable is explicitly set.
+     *
+     * REDIS_BACKEND and VALKEY_BACKEND both default (in config/schema.yaml) to
+     * self::REDIS_BACKEND_CM_CACHE/self::VALKEY_BACKEND_CM_CACHE ('Cm_Cache_Backend_Redis'), and that
+     * default is merged in unconditionally by Deploy\MergedConfig - so the raw value is never ''
+     * even when the merchant never set it. Comparing against '' alone can therefore never detect
+     * "not explicitly set"; the value must also be compared against its own default.
      *
      * @param  string $envCacheRedisBackendModel
      * @param  string $envCacheValkeyBackendModel
@@ -237,11 +243,11 @@ class Cache
         string $envCacheValkeyBackendModel,
         string $activeBackend
     ): string {
-        if ($envCacheRedisBackendModel !== '') {
+        if ($envCacheRedisBackendModel !== '' && $envCacheRedisBackendModel !== self::REDIS_BACKEND_CM_CACHE) {
             return 'redis';
         }
 
-        if ($envCacheValkeyBackendModel !== '') {
+        if ($envCacheValkeyBackendModel !== '' && $envCacheValkeyBackendModel !== self::VALKEY_BACKEND_CM_CACHE) {
             return 'valkey';
         }
 

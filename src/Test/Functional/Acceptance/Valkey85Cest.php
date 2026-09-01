@@ -163,12 +163,9 @@ class Valkey85Cest extends ValkeyCest
      *
      * @param CliTester $I
      * @throws TaskException
-     * @skip Failing in CI (load_from_slave missing)
      */
     public function testSymfonyL2SlaveConnectionConfiguration(CliTester $I): void
     {
-        return;
-
         $this->prepareWorkplace($I, '2.4.9');
 
         // Must happen before generateDockerCompose() - that's what bakes .magento.app.yaml's
