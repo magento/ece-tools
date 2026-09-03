@@ -19,23 +19,17 @@ use Robo\Exception\TaskException;
 class Redis85Cest extends RedisCest
 {
     /**
-     * Legacy Redis cache backends are not supported on Magento 2.4.9+, so only symfony_l2 is exercised here.
+     * Data provider for Magento Cloud versions using the legacy cache backend.
      *
      * @return array
      */
     protected function defaultConfigurationDataProvider(): array
     {
-        return [];
-    }
-
-    /**
-     * @param CliTester $I
-     * @param Example $data
-     * @skip
-     */
-    public function testDefaultConfiguration(CliTester $I, Example $data): void
-    {
-        return;
+        return [
+            [
+                'version' => '2.4.9',
+            ],
+        ];
     }
 
     /**
