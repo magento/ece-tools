@@ -49,6 +49,7 @@ class Redis81Cest extends RedisCest
                 'deploySuccess' => false,
                 'errorBuildMessage' => 'The REDIS_BACKEND variable contains an invalid value TestRedisModel.'
                     . ' Use one of the available value options: Cm_Cache_Backend_Redis,'
+                    . ' redis,'
                     . ' \Magento\Framework\Cache\Backend\Redis,'
                     . ' \Magento\Framework\Cache\Backend\RemoteSynchronizedCache,'
                     . ' symfony_l2.',
@@ -101,6 +102,24 @@ class Redis81Cest extends RedisCest
                 ],
                 'expectedBackend' => '\CustomRedisModel',
                 'expectedConfig' => [],
+            ],
+            [
+                'version' => '2.4.4',
+                'configuration' => [
+                    'stage' => [
+                        'deploy' => [
+                            'REDIS_BACKEND' => 'redis',
+                        ],
+                    ],
+                ],
+                'expectedBackend' => '\Magento\Framework\Cache\Backend\Redis',
+                'expectedConfig' => [
+                    'backend_options' => [
+                        'server' => 'redis',
+                        'port' => '6379',
+                        'database' => 1,
+                    ]
+                ],
             ],
             [
                 'version' => '2.4.4',
