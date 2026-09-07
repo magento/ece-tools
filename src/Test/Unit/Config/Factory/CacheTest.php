@@ -591,6 +591,24 @@ class CacheTest extends TestCase
                 $redisConfiguration,
                 [],
                 false,
+                Cache::REDIS_BACKEND_ALIAS,
+                6,
+                $resultMasterOnlyConnectionRedisCache,
+            ],
+            [
+                [],
+                $redisConfiguration,
+                $redisSlaveConfiguration,
+                true,
+                Cache::REDIS_BACKEND_ALIAS,
+                7,
+                $resultMasterSlaveConnectionRedisCache,
+            ],
+            [
+                [],
+                $redisConfiguration,
+                [],
+                false,
                 Cache::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE,
                 6,
                 $resultMasterOnlyConnectionSyncCache,
@@ -1134,6 +1152,46 @@ class CacheTest extends TestCase
 
         self::assertArrayNotHasKey('load_from_slave', $result['frontend']['default']['backend_options']);
         self::assertArrayNotHasKey('load_from_slave', $result['frontend']['page_cache']['backend_options']);
+    }
+
+    /**
+     * The 'valkey' shorthand accepted by CACHE_VALKEY_BACKEND must resolve to the real
+     * VALKEY_BACKEND_VALKEY_CACHE class name before it reaches the unsynced (legacy, single-tier)
+     * cache structure's 'backend' field - that field is written verbatim into env.php and
+     * instantiated by Magento's cache framework, so a literal 'valkey' string would break at runtime.
+     *
+     * @return void
+     * @throws ConfigException
+     */
+    public function testGetUnsyncedValkeyAliasResolvesToValkeyBackendClass(): void
+    {
+        $valkeyConfig = [
+            'host'   => 'valkey.host',
+            'port'   => '6379',
+            'scheme' => 'redis',
+        ];
+
+        $this->stageConfigMock->expects(self::any())
+            ->method('get')
+            ->willReturnMap([
+                [DeployInterface::VAR_CACHE_CONFIGURATION, []],
+                [DeployInterface::VAR_CACHE_REDIS_BACKEND, ''],
+                [DeployInterface::VAR_CACHE_VALKEY_BACKEND, Cache::VALKEY_BACKEND_ALIAS],
+                [DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION, false],
+                [DeployInterface::VAR_VALKEY_USE_SLAVE_CONNECTION, false],
+            ]);
+
+        $this->redisMock->expects(self::any())
+            ->method('getConfiguration')
+            ->willReturn([]);
+        $this->valkeyMock->expects(self::any())
+            ->method('getConfiguration')
+            ->willReturn($valkeyConfig);
+
+        $result = $this->config->get();
+
+        self::assertSame(Cache::VALKEY_BACKEND_VALKEY_CACHE, $result['frontend']['default']['backend']);
+        self::assertSame(Cache::VALKEY_BACKEND_VALKEY_CACHE, $result['frontend']['page_cache']['backend']);
     }
 
     /**
