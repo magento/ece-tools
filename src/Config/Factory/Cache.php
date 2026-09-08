@@ -19,9 +19,9 @@ use Psr\Log\LoggerInterface;
  */
 class Cache
 {
-     /**
-      * Redis database to store default cache data
-      */
+    /**
+     * Redis database to store default cache data
+     */
     public const CACHE_DATABASE_DEFAULT = 1;
 
     /**
@@ -33,7 +33,8 @@ class Cache
     public const REDIS_BACKEND_REDIS_CACHE = '\Magento\Framework\Cache\Backend\Redis';
 
     public const VALKEY_BACKEND_CM_CACHE = 'Cm_Cache_Backend_Redis';
-    public const VALKEY_BACKEND_VALKEY_CACHE = '\Magento\Framework\Cache\Backend\Redis';
+    public const VALKEY_BACKEND_REDIS_CACHE = '\Magento\Framework\Cache\Backend\Redis';
+    public const VALKEY_BACKEND_VALKEY_CACHE = '\Magento\Framework\Cache\Backend\Valkey';
 
     public const VALKEY_BACKEND_REMOTE_SYNCHRONIZED_CACHE = '\Magento\Framework\Cache\Backend\RemoteSynchronizedCache';
     public const REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE = '\Magento\Framework\Cache\Backend\RemoteSynchronizedCache';
@@ -41,16 +42,29 @@ class Cache
     public const VALKEY_BACKEND_SYMFONY_L2 = 'symfony_l2';
     public const REDIS_BACKEND_SYMFONY_L2 = 'symfony_l2';
 
+    /**
+     * Short backend type names ('redis'/'valkey') that select the Symfony Cache (2.4.9+) single-tier
+     * backend, as distinct from the legacy Zend-based single-tier backend selected by the full class
+     * name (REDIS_BACKEND_REDIS_CACHE/VALKEY_BACKEND_VALKEY_CACHE). These are passed through to
+     * 'backend' as-is - they must NOT be expanded to the full class name, since Magento's cache
+     * frontend factory only activates the Symfony Cache adapter for the literal short name.
+     */
+    public const REDIS_BACKEND_ALIAS = 'redis';
+    public const VALKEY_BACKEND_ALIAS = 'valkey';
+
     public const AVAILABLE_REDIS_BACKEND = [
         self::REDIS_BACKEND_CM_CACHE,
         self::REDIS_BACKEND_REDIS_CACHE,
+        self::REDIS_BACKEND_ALIAS,
         self::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE,
         self::REDIS_BACKEND_SYMFONY_L2,
     ];
 
     public const AVAILABLE_VALKEY_BACKEND = [
         self::REDIS_BACKEND_CM_CACHE,
+        self::VALKEY_BACKEND_REDIS_CACHE,
         self::VALKEY_BACKEND_VALKEY_CACHE,
+        self::VALKEY_BACKEND_ALIAS,
         self::VALKEY_BACKEND_REMOTE_SYNCHRONIZED_CACHE,
         self::VALKEY_BACKEND_SYMFONY_L2,
     ];
@@ -173,19 +187,12 @@ class Cache
                 $slaveConnectionBackend
             );
         } elseif ($this->isSynchronizedConfigStructure()) {
-            $cacheCacheBackend = $this->getSynchronizedConfigStructure($cacheBackendModel, $backendConfig);
-            $cacheCacheBackend['backend_options']['remote_backend_options'] = array_merge(
-                $cacheCacheBackend['backend_options']['remote_backend_options'],
-                $this->getSlaveConnection($envCacheConfiguration, $backendConfig, $slaveConnectionBackend)
+            $finalConfig = $this->getSynchronizedFinalConfig(
+                $cacheBackendModel,
+                $backendConfig,
+                $envCacheConfiguration,
+                $slaveConnectionBackend
             );
-            $finalConfig = [
-                'frontend' => [
-                    'default' => $cacheCacheBackend,
-                ],
-                'type' => [
-                    'default' => ['frontend' => 'default'],
-                ],
-            ];
         } else {
             $cacheCacheBackend = $this->getUnsyncedConfigStructure($cacheBackendModel, $backendConfig);
             $slaveConnection = $this->getSlaveConnection(
@@ -225,7 +232,13 @@ class Cache
      * $activeBackend would resolve to 'redis' even though the merchant configured
      * CACHE_VALKEY_BACKEND/VALKEY_BACKEND and set VALKEY_USE_SLAVE_CONNECTION. The explicitly
      * configured backend model takes precedence; $activeBackend is used only as a fallback when
-     * neither *_BACKEND variable is set.
+     * neither *_BACKEND variable is explicitly set.
+     *
+     * REDIS_BACKEND and VALKEY_BACKEND both default (in config/schema.yaml) to
+     * self::REDIS_BACKEND_CM_CACHE/self::VALKEY_BACKEND_CM_CACHE ('Cm_Cache_Backend_Redis'), and that
+     * default is merged in unconditionally by Deploy\MergedConfig - so the raw value is never ''
+     * even when the merchant never set it. Comparing against '' alone can therefore never detect
+     * "not explicitly set"; the value must also be compared against its own default.
      *
      * @param  string $envCacheRedisBackendModel
      * @param  string $envCacheValkeyBackendModel
@@ -237,11 +250,11 @@ class Cache
         string $envCacheValkeyBackendModel,
         string $activeBackend
     ): string {
-        if ($envCacheRedisBackendModel !== '') {
+        if ($envCacheRedisBackendModel !== '' && $envCacheRedisBackendModel !== self::REDIS_BACKEND_CM_CACHE) {
             return 'redis';
         }
 
-        if ($envCacheValkeyBackendModel !== '') {
+        if ($envCacheValkeyBackendModel !== '' && $envCacheValkeyBackendModel !== self::VALKEY_BACKEND_CM_CACHE) {
             return 'valkey';
         }
 
@@ -545,6 +558,48 @@ class Cache
         }
 
         return $config;
+    }
+
+    /**
+     * Builds the final config for the RemoteSynchronizedCache backend: a default frontend plus a
+     * page_cache frontend on a separate database, so full_page cache traffic doesn't share a
+     * connection/database with every other cache type.
+     *
+     * @param  string $cacheBackendModel
+     * @param  array  $backendConfig
+     * @param  array  $envCacheConfiguration
+     * @param  string $slaveConnectionBackend
+     * @return array
+     * @throws ConfigException
+     */
+    private function getSynchronizedFinalConfig(
+        string $cacheBackendModel,
+        array $backendConfig,
+        array $envCacheConfiguration,
+        string $slaveConnectionBackend
+    ): array {
+        $cacheCacheBackend = $this->getSynchronizedConfigStructure($cacheBackendModel, $backendConfig);
+        $cacheCacheBackend['backend_options']['remote_backend_options'] = array_merge(
+            $cacheCacheBackend['backend_options']['remote_backend_options'],
+            $this->getSlaveConnection($envCacheConfiguration, $backendConfig, $slaveConnectionBackend)
+        );
+
+        return [
+            'frontend' => [
+                'default' => $cacheCacheBackend,
+                'page_cache' => array_replace_recursive(
+                    $cacheCacheBackend,
+                    [
+                        'backend_options' => [
+                            'remote_backend_options' => ['database' => self::CACHE_DATABASE_PAGE_CACHE],
+                        ],
+                    ]
+                ),
+            ],
+            'type' => [
+                'default' => ['frontend' => 'default'],
+            ],
+        ];
     }
 
     /**

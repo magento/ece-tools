@@ -230,6 +230,48 @@ class CacheTest extends TestCase
     }
 
     /**
+     * Regression test: RemoteSynchronizedCache must isolate the page_cache (full_page) frontend onto
+     * its own database rather than sharing the default frontend's connection/database, otherwise
+     * full_page cache traffic contends with every other cache type on the same Redis/Valkey connection.
+     *
+     * @throws ConfigException
+     */
+    public function testGetSynchronizedCacheIsolatesPageCacheFromDefault(): void
+    {
+        $this->stageConfigMock->expects(self::any())
+            ->method('get')
+            ->willReturnMap(
+                [
+                    [DeployInterface::VAR_CACHE_CONFIGURATION, []],
+                    [DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION, false],
+                    [DeployInterface::VAR_CACHE_REDIS_BACKEND, Cache::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE],
+                    [DeployInterface::VAR_CACHE_VALKEY_BACKEND, null],
+                    [DeployInterface::VAR_VALKEY_USE_SLAVE_CONNECTION, null],
+                ]
+            );
+        $this->redisMock->method('getConfiguration')->willReturn([
+            'host' => 'master.host',
+            'port' => 'master.port',
+            'password' => 'master.password',
+            'scheme' => 'redis',
+        ]);
+        $this->redisMock->method('getSlaveConfiguration')->willReturn([]);
+
+        $result = $this->config->get();
+
+        self::assertArrayHasKey('page_cache', $result['frontend']);
+        $defaultDatabase = $result['frontend']['default']['backend_options']['remote_backend_options']['database'];
+        $pageCacheDatabase = $result['frontend']['page_cache']['backend_options']['remote_backend_options']['database'];
+        self::assertSame(Cache::CACHE_DATABASE_DEFAULT, $defaultDatabase);
+        self::assertSame(Cache::CACHE_DATABASE_PAGE_CACHE, $pageCacheDatabase);
+        self::assertNotSame(
+            $defaultDatabase,
+            $pageCacheDatabase,
+            'page_cache frontend must not share a database with the default frontend'
+        );
+    }
+
+    /**
      * Data provider for testGetFromRelationships.
      *
      * Results value for next data:
@@ -311,6 +353,10 @@ class CacheTest extends TestCase
                 'default' => ['frontend' => 'default'],
             ],
         ];
+        $resultMasterOnlyConnectionSyncCache['frontend']['page_cache'] = array_replace_recursive(
+            $resultMasterOnlyConnectionSyncCache['frontend']['default'],
+            ['backend_options' => ['remote_backend_options' => ['database' => Cache::CACHE_DATABASE_PAGE_CACHE]]]
+        );
 
         $backendOptions = [
             'load_from_slave' => [
@@ -347,10 +393,23 @@ class CacheTest extends TestCase
         $resultMasterSlaveConnectionRedisCache = $resultMasterSlaveConnection;
         $resultMasterSlaveConnectionRedisCache['frontend']['default']['backend'] = Cache::REDIS_BACKEND_REDIS_CACHE;
         $resultMasterSlaveConnectionRedisCache['frontend']['page_cache']['backend'] = Cache::REDIS_BACKEND_REDIS_CACHE;
+        // The 'redis' alias is passed through to 'backend' as-is (not expanded to the full class name),
+        // since Magento's cache frontend factory only activates the Symfony Cache adapter for the
+        // literal short name - see Cache::REDIS_BACKEND_ALIAS.
+        $resultMasterOnlyConnectionRedisAlias = $resultMasterOnlyConnection;
+        $resultMasterOnlyConnectionRedisAlias['frontend']['default']['backend'] = Cache::REDIS_BACKEND_ALIAS;
+        $resultMasterOnlyConnectionRedisAlias['frontend']['page_cache']['backend'] = Cache::REDIS_BACKEND_ALIAS;
+        $resultMasterSlaveConnectionRedisAlias = $resultMasterSlaveConnection;
+        $resultMasterSlaveConnectionRedisAlias['frontend']['default']['backend'] = Cache::REDIS_BACKEND_ALIAS;
+        $resultMasterSlaveConnectionRedisAlias['frontend']['page_cache']['backend'] = Cache::REDIS_BACKEND_ALIAS;
         $resultMasterSlaveConnectionSyncCache = $resultMasterOnlyConnectionSyncCache;
         $resultMasterSlaveConnectionSyncCache['frontend']['default'] = array_merge_recursive(
             $resultMasterSlaveConnectionSyncCache['frontend']['default'],
             $slaveConfigurationSyncCache
+        );
+        $resultMasterSlaveConnectionSyncCache['frontend']['page_cache'] = array_replace_recursive(
+            $resultMasterSlaveConnectionSyncCache['frontend']['default'],
+            ['backend_options' => ['remote_backend_options' => ['database' => Cache::CACHE_DATABASE_PAGE_CACHE]]]
         );
 
         $resultMasterSlaveConnectionWithMergedValue = $resultMasterSlaveConnection;
@@ -535,6 +594,24 @@ class CacheTest extends TestCase
                 Cache::REDIS_BACKEND_REDIS_CACHE,
                 7,
                 $resultMasterSlaveConnectionWithDiffHostRedisCache,
+            ],
+            [
+                [],
+                $redisConfiguration,
+                [],
+                false,
+                Cache::REDIS_BACKEND_ALIAS,
+                6,
+                $resultMasterOnlyConnectionRedisAlias,
+            ],
+            [
+                [],
+                $redisConfiguration,
+                $redisSlaveConfiguration,
+                true,
+                Cache::REDIS_BACKEND_ALIAS,
+                7,
+                $resultMasterSlaveConnectionRedisAlias,
             ],
             [
                 [],
@@ -1084,6 +1161,86 @@ class CacheTest extends TestCase
 
         self::assertArrayNotHasKey('load_from_slave', $result['frontend']['default']['backend_options']);
         self::assertArrayNotHasKey('load_from_slave', $result['frontend']['page_cache']['backend_options']);
+    }
+
+    /**
+     * The 'valkey' shorthand accepted by CACHE_VALKEY_BACKEND must be passed through to the unsynced
+     * (legacy, single-tier) cache structure's 'backend' field as the literal string 'valkey', NOT
+     * expanded to VALKEY_BACKEND_VALKEY_CACHE - Magento's cache frontend factory only activates the
+     * Symfony Cache (2.4.9+) adapter for the literal short name; writing the full class name would
+     * silently select the legacy Zend-based backend instead.
+     *
+     * @return void
+     * @throws ConfigException
+     */
+    public function testGetUnsyncedValkeyAliasIsPassedThroughAsIs(): void
+    {
+        $valkeyConfig = [
+            'host'   => 'valkey.host',
+            'port'   => '6379',
+            'scheme' => 'redis',
+        ];
+
+        $this->stageConfigMock->expects(self::any())
+            ->method('get')
+            ->willReturnMap([
+                [DeployInterface::VAR_CACHE_CONFIGURATION, []],
+                [DeployInterface::VAR_CACHE_REDIS_BACKEND, ''],
+                [DeployInterface::VAR_CACHE_VALKEY_BACKEND, Cache::VALKEY_BACKEND_ALIAS],
+                [DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION, false],
+                [DeployInterface::VAR_VALKEY_USE_SLAVE_CONNECTION, false],
+            ]);
+
+        $this->redisMock->expects(self::any())
+            ->method('getConfiguration')
+            ->willReturn([]);
+        $this->valkeyMock->expects(self::any())
+            ->method('getConfiguration')
+            ->willReturn($valkeyConfig);
+
+        $result = $this->config->get();
+
+        self::assertSame(Cache::VALKEY_BACKEND_ALIAS, $result['frontend']['default']['backend']);
+        self::assertSame(Cache::VALKEY_BACKEND_ALIAS, $result['frontend']['page_cache']['backend']);
+    }
+
+    /**
+     * CACHE_VALKEY_BACKEND set to the dedicated Valkey class name (Zend-based single tier, distinct
+     * from both the 'valkey' Symfony alias and the legacy '...\Backend\Redis' class used against a
+     * Valkey service for backward compatibility) must be written to 'backend' unchanged.
+     *
+     * @return void
+     * @throws ConfigException
+     */
+    public function testGetUnsyncedValkeyDedicatedClassIsPassedThroughAsIs(): void
+    {
+        $valkeyConfig = [
+            'host'   => 'valkey.host',
+            'port'   => '6379',
+            'scheme' => 'redis',
+        ];
+
+        $this->stageConfigMock->expects(self::any())
+            ->method('get')
+            ->willReturnMap([
+                [DeployInterface::VAR_CACHE_CONFIGURATION, []],
+                [DeployInterface::VAR_CACHE_REDIS_BACKEND, ''],
+                [DeployInterface::VAR_CACHE_VALKEY_BACKEND, Cache::VALKEY_BACKEND_VALKEY_CACHE],
+                [DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION, false],
+                [DeployInterface::VAR_VALKEY_USE_SLAVE_CONNECTION, false],
+            ]);
+
+        $this->redisMock->expects(self::any())
+            ->method('getConfiguration')
+            ->willReturn([]);
+        $this->valkeyMock->expects(self::any())
+            ->method('getConfiguration')
+            ->willReturn($valkeyConfig);
+
+        $result = $this->config->get();
+
+        self::assertSame(Cache::VALKEY_BACKEND_VALKEY_CACHE, $result['frontend']['default']['backend']);
+        self::assertSame(Cache::VALKEY_BACKEND_VALKEY_CACHE, $result['frontend']['page_cache']['backend']);
     }
 
     /**

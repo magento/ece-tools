@@ -52,6 +52,8 @@ class Valkey85Cest extends ValkeyCest
                 'errorBuildMessage' => 'The VALKEY_BACKEND variable contains an invalid value TestValkeyModel.'
                     . ' Use one of the available value options: Cm_Cache_Backend_Redis,'
                     . ' \Magento\Framework\Cache\Backend\Redis,'
+                    . ' valkey,'
+                    . ' \Magento\Framework\Cache\Backend\Valkey,'
                     . ' \Magento\Framework\Cache\Backend\RemoteSynchronizedCache,'
                     . ' symfony_l2.',
                 'errorDeployMessage' => '',
@@ -163,12 +165,9 @@ class Valkey85Cest extends ValkeyCest
      *
      * @param CliTester $I
      * @throws TaskException
-     * @skip Failing in CI (load_from_slave missing)
      */
     public function testSymfonyL2SlaveConnectionConfiguration(CliTester $I): void
     {
-        return;
-
         $this->prepareWorkplace($I, '2.4.9');
 
         // Must happen before generateDockerCompose() - that's what bakes .magento.app.yaml's
@@ -412,6 +411,24 @@ class Valkey85Cest extends ValkeyCest
                 'configuration' => [
                     'stage' => [
                         'deploy' => [
+                            'VALKEY_BACKEND' => '\Magento\Framework\Cache\Backend\Valkey',
+                        ],
+                    ],
+                ],
+                'expectedBackend' => '\Magento\Framework\Cache\Backend\Valkey',
+                'expectedConfig' => [
+                    'backend_options' => [
+                        'server' => 'cache',
+                        'port' => '6379',
+                        'database' => 1,
+                    ]
+                ],
+            ],
+            [
+                'version' => '2.4.9',
+                'configuration' => [
+                    'stage' => [
+                        'deploy' => [
                             'CACHE_CONFIGURATION' => [
                                 '_merge' => true,
                                 'frontend' => [
@@ -426,6 +443,24 @@ class Valkey85Cest extends ValkeyCest
                 ],
                 'expectedBackend' => '\CustomValkeyModel',
                 'expectedConfig' => [],
+            ],
+            [
+                'version' => '2.4.9',
+                'configuration' => [
+                    'stage' => [
+                        'deploy' => [
+                            'VALKEY_BACKEND' => 'valkey',
+                        ],
+                    ],
+                ],
+                'expectedBackend' => 'valkey',
+                'expectedConfig' => [
+                    'backend_options' => [
+                        'server' => 'cache',
+                        'port' => '6379',
+                        'database' => 1,
+                    ]
+                ],
             ],
             [
                 'version' => '2.4.9',
