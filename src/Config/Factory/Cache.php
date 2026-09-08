@@ -19,9 +19,9 @@ use Psr\Log\LoggerInterface;
  */
 class Cache
 {
-     /**
-      * Redis database to store default cache data
-      */
+    /**
+     * Redis database to store default cache data
+     */
     public const CACHE_DATABASE_DEFAULT = 1;
 
     /**
@@ -33,7 +33,8 @@ class Cache
     public const REDIS_BACKEND_REDIS_CACHE = '\Magento\Framework\Cache\Backend\Redis';
 
     public const VALKEY_BACKEND_CM_CACHE = 'Cm_Cache_Backend_Redis';
-    public const VALKEY_BACKEND_VALKEY_CACHE = '\Magento\Framework\Cache\Backend\Redis';
+    public const VALKEY_BACKEND_REDIS_CACHE = '\Magento\Framework\Cache\Backend\Redis';
+    public const VALKEY_BACKEND_VALKEY_CACHE = '\Magento\Framework\Cache\Backend\Valkey';
 
     public const VALKEY_BACKEND_REMOTE_SYNCHRONIZED_CACHE = '\Magento\Framework\Cache\Backend\RemoteSynchronizedCache';
     public const REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE = '\Magento\Framework\Cache\Backend\RemoteSynchronizedCache';
@@ -41,16 +42,29 @@ class Cache
     public const VALKEY_BACKEND_SYMFONY_L2 = 'symfony_l2';
     public const REDIS_BACKEND_SYMFONY_L2 = 'symfony_l2';
 
+    /**
+     * Short backend type names ('redis'/'valkey') that select the Symfony Cache (2.4.9+) single-tier
+     * backend, as distinct from the legacy Zend-based single-tier backend selected by the full class
+     * name (REDIS_BACKEND_REDIS_CACHE/VALKEY_BACKEND_VALKEY_CACHE). These are passed through to
+     * 'backend' as-is - they must NOT be expanded to the full class name, since Magento's cache
+     * frontend factory only activates the Symfony Cache adapter for the literal short name.
+     */
+    public const REDIS_BACKEND_ALIAS = 'redis';
+    public const VALKEY_BACKEND_ALIAS = 'valkey';
+
     public const AVAILABLE_REDIS_BACKEND = [
         self::REDIS_BACKEND_CM_CACHE,
         self::REDIS_BACKEND_REDIS_CACHE,
+        self::REDIS_BACKEND_ALIAS,
         self::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE,
         self::REDIS_BACKEND_SYMFONY_L2,
     ];
 
     public const AVAILABLE_VALKEY_BACKEND = [
         self::REDIS_BACKEND_CM_CACHE,
+        self::VALKEY_BACKEND_REDIS_CACHE,
         self::VALKEY_BACKEND_VALKEY_CACHE,
+        self::VALKEY_BACKEND_ALIAS,
         self::VALKEY_BACKEND_REMOTE_SYNCHRONIZED_CACHE,
         self::VALKEY_BACKEND_SYMFONY_L2,
     ];
