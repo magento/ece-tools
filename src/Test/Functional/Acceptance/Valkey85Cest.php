@@ -411,6 +411,24 @@ class Valkey85Cest extends ValkeyCest
                 'configuration' => [
                     'stage' => [
                         'deploy' => [
+                            'VALKEY_BACKEND' => '\Magento\Framework\Cache\Backend\Valkey',
+                        ],
+                    ],
+                ],
+                'expectedBackend' => '\Magento\Framework\Cache\Backend\Valkey',
+                'expectedConfig' => [
+                    'backend_options' => [
+                        'server' => 'cache',
+                        'port' => '6379',
+                        'database' => 1,
+                    ]
+                ],
+            ],
+            [
+                'version' => '2.4.9',
+                'configuration' => [
+                    'stage' => [
+                        'deploy' => [
                             'CACHE_CONFIGURATION' => [
                                 '_merge' => true,
                                 'frontend' => [
@@ -435,7 +453,7 @@ class Valkey85Cest extends ValkeyCest
                         ],
                     ],
                 ],
-                'expectedBackend' => '\Magento\Framework\Cache\Backend\Valkey',
+                'expectedBackend' => 'valkey',
                 'expectedConfig' => [
                     'backend_options' => [
                         'server' => 'cache',

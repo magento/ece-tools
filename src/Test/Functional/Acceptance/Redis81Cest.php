@@ -112,7 +112,7 @@ class Redis81Cest extends RedisCest
                         ],
                     ],
                 ],
-                'expectedBackend' => '\Magento\Framework\Cache\Backend\Redis',
+                'expectedBackend' => 'redis',
                 'expectedConfig' => [
                     'backend_options' => [
                         'server' => 'redis',

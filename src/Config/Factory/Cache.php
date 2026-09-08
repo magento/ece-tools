@@ -43,9 +43,11 @@ class Cache
     public const REDIS_BACKEND_SYMFONY_L2 = 'symfony_l2';
 
     /**
-     * Short aliases accepted in place of the full backend class name for CACHE_REDIS_BACKEND/
-     * CACHE_VALKEY_BACKEND, resolved to REDIS_BACKEND_REDIS_CACHE/VALKEY_BACKEND_VALKEY_CACHE
-     * wherever the configured backend model is read.
+     * Short backend type names ('redis'/'valkey') that select the Symfony Cache (2.4.9+) single-tier
+     * backend, as distinct from the legacy Zend-based single-tier backend selected by the full class
+     * name (REDIS_BACKEND_REDIS_CACHE/VALKEY_BACKEND_VALKEY_CACHE). These are passed through to
+     * 'backend' as-is - they must NOT be expanded to the full class name, since Magento's cache
+     * frontend factory only activates the Symfony Cache adapter for the literal short name.
      */
     public const REDIS_BACKEND_ALIAS = 'redis';
     public const VALKEY_BACKEND_ALIAS = 'valkey';
@@ -53,6 +55,7 @@ class Cache
     public const AVAILABLE_REDIS_BACKEND = [
         self::REDIS_BACKEND_CM_CACHE,
         self::REDIS_BACKEND_REDIS_CACHE,
+        self::REDIS_BACKEND_ALIAS,
         self::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE,
         self::REDIS_BACKEND_SYMFONY_L2,
     ];
@@ -61,6 +64,7 @@ class Cache
         self::REDIS_BACKEND_CM_CACHE,
         self::VALKEY_BACKEND_REDIS_CACHE,
         self::VALKEY_BACKEND_VALKEY_CACHE,
+        self::VALKEY_BACKEND_ALIAS,
         self::VALKEY_BACKEND_REMOTE_SYNCHRONIZED_CACHE,
         self::VALKEY_BACKEND_SYMFONY_L2,
     ];
@@ -130,8 +134,8 @@ class Cache
     public function get(): array
     {
          $envCacheConfiguration      = (array)$this->stageConfig->get(DeployInterface::VAR_CACHE_CONFIGURATION);
-         $envCacheRedisBackendModel  = $this->getRedisBackendModel();
-         $envCacheValkeyBackendModel = $this->getValkeyBackendModel();
+         $envCacheRedisBackendModel  = (string)$this->stageConfig->get(DeployInterface::VAR_CACHE_REDIS_BACKEND);
+         $envCacheValkeyBackendModel = (string)$this->stageConfig->get(DeployInterface::VAR_CACHE_VALKEY_BACKEND);
 
         if ($this->isCacheConfigurationValid($envCacheConfiguration)
             && !$this->configMerger->isMergeRequired($envCacheConfiguration)
@@ -606,8 +610,8 @@ class Cache
      */
     private function isSynchronizedConfigStructure(): bool
     {
-        $redisModel = $this->getRedisBackendModel();
-        $valkeyModel = $this->getValkeyBackendModel();
+        $redisModel = (string)$this->stageConfig->get(DeployInterface::VAR_CACHE_REDIS_BACKEND);
+        $valkeyModel = (string)$this->stageConfig->get(DeployInterface::VAR_CACHE_VALKEY_BACKEND);
         return $redisModel === self::REDIS_BACKEND_REMOTE_SYNCHRONIZED_CACHE ||
         $valkeyModel === self::VALKEY_BACKEND_REMOTE_SYNCHRONIZED_CACHE;
     }
@@ -620,35 +624,9 @@ class Cache
      */
     private function isSymfonyL2Structure(): bool
     {
-        $redisModel = $this->getRedisBackendModel();
-        $valkeyModel = $this->getValkeyBackendModel();
+        $redisModel = (string)$this->stageConfig->get(DeployInterface::VAR_CACHE_REDIS_BACKEND);
+        $valkeyModel = (string)$this->stageConfig->get(DeployInterface::VAR_CACHE_VALKEY_BACKEND);
         return $redisModel === self::REDIS_BACKEND_SYMFONY_L2 || $valkeyModel === self::VALKEY_BACKEND_SYMFONY_L2;
-    }
-
-    /**
-     * Returns the configured CACHE_REDIS_BACKEND value, resolving the 'redis' alias to
-     * REDIS_BACKEND_REDIS_CACHE.
-     *
-     * @return string
-     */
-    private function getRedisBackendModel(): string
-    {
-        $model = (string)$this->stageConfig->get(DeployInterface::VAR_CACHE_REDIS_BACKEND);
-
-        return $model === self::REDIS_BACKEND_ALIAS ? self::REDIS_BACKEND_REDIS_CACHE : $model;
-    }
-
-    /**
-     * Returns the configured CACHE_VALKEY_BACKEND value, resolving the 'valkey' alias to
-     * VALKEY_BACKEND_VALKEY_CACHE.
-     *
-     * @return string
-     */
-    private function getValkeyBackendModel(): string
-    {
-        $model = (string)$this->stageConfig->get(DeployInterface::VAR_CACHE_VALKEY_BACKEND);
-
-        return $model === self::VALKEY_BACKEND_ALIAS ? self::VALKEY_BACKEND_VALKEY_CACHE : $model;
     }
 
     /**

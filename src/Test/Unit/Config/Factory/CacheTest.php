@@ -393,6 +393,15 @@ class CacheTest extends TestCase
         $resultMasterSlaveConnectionRedisCache = $resultMasterSlaveConnection;
         $resultMasterSlaveConnectionRedisCache['frontend']['default']['backend'] = Cache::REDIS_BACKEND_REDIS_CACHE;
         $resultMasterSlaveConnectionRedisCache['frontend']['page_cache']['backend'] = Cache::REDIS_BACKEND_REDIS_CACHE;
+        // The 'redis' alias is passed through to 'backend' as-is (not expanded to the full class name),
+        // since Magento's cache frontend factory only activates the Symfony Cache adapter for the
+        // literal short name - see Cache::REDIS_BACKEND_ALIAS.
+        $resultMasterOnlyConnectionRedisAlias = $resultMasterOnlyConnection;
+        $resultMasterOnlyConnectionRedisAlias['frontend']['default']['backend'] = Cache::REDIS_BACKEND_ALIAS;
+        $resultMasterOnlyConnectionRedisAlias['frontend']['page_cache']['backend'] = Cache::REDIS_BACKEND_ALIAS;
+        $resultMasterSlaveConnectionRedisAlias = $resultMasterSlaveConnection;
+        $resultMasterSlaveConnectionRedisAlias['frontend']['default']['backend'] = Cache::REDIS_BACKEND_ALIAS;
+        $resultMasterSlaveConnectionRedisAlias['frontend']['page_cache']['backend'] = Cache::REDIS_BACKEND_ALIAS;
         $resultMasterSlaveConnectionSyncCache = $resultMasterOnlyConnectionSyncCache;
         $resultMasterSlaveConnectionSyncCache['frontend']['default'] = array_merge_recursive(
             $resultMasterSlaveConnectionSyncCache['frontend']['default'],
@@ -593,7 +602,7 @@ class CacheTest extends TestCase
                 false,
                 Cache::REDIS_BACKEND_ALIAS,
                 6,
-                $resultMasterOnlyConnectionRedisCache,
+                $resultMasterOnlyConnectionRedisAlias,
             ],
             [
                 [],
@@ -602,7 +611,7 @@ class CacheTest extends TestCase
                 true,
                 Cache::REDIS_BACKEND_ALIAS,
                 7,
-                $resultMasterSlaveConnectionRedisCache,
+                $resultMasterSlaveConnectionRedisAlias,
             ],
             [
                 [],
@@ -1155,15 +1164,16 @@ class CacheTest extends TestCase
     }
 
     /**
-     * The 'valkey' shorthand accepted by CACHE_VALKEY_BACKEND must resolve to the real
-     * VALKEY_BACKEND_VALKEY_CACHE class name before it reaches the unsynced (legacy, single-tier)
-     * cache structure's 'backend' field - that field is written verbatim into env.php and
-     * instantiated by Magento's cache framework, so a literal 'valkey' string would break at runtime.
+     * The 'valkey' shorthand accepted by CACHE_VALKEY_BACKEND must be passed through to the unsynced
+     * (legacy, single-tier) cache structure's 'backend' field as the literal string 'valkey', NOT
+     * expanded to VALKEY_BACKEND_VALKEY_CACHE - Magento's cache frontend factory only activates the
+     * Symfony Cache (2.4.9+) adapter for the literal short name; writing the full class name would
+     * silently select the legacy Zend-based backend instead.
      *
      * @return void
      * @throws ConfigException
      */
-    public function testGetUnsyncedValkeyAliasResolvesToValkeyBackendClass(): void
+    public function testGetUnsyncedValkeyAliasIsPassedThroughAsIs(): void
     {
         $valkeyConfig = [
             'host'   => 'valkey.host',
@@ -1177,6 +1187,45 @@ class CacheTest extends TestCase
                 [DeployInterface::VAR_CACHE_CONFIGURATION, []],
                 [DeployInterface::VAR_CACHE_REDIS_BACKEND, ''],
                 [DeployInterface::VAR_CACHE_VALKEY_BACKEND, Cache::VALKEY_BACKEND_ALIAS],
+                [DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION, false],
+                [DeployInterface::VAR_VALKEY_USE_SLAVE_CONNECTION, false],
+            ]);
+
+        $this->redisMock->expects(self::any())
+            ->method('getConfiguration')
+            ->willReturn([]);
+        $this->valkeyMock->expects(self::any())
+            ->method('getConfiguration')
+            ->willReturn($valkeyConfig);
+
+        $result = $this->config->get();
+
+        self::assertSame(Cache::VALKEY_BACKEND_ALIAS, $result['frontend']['default']['backend']);
+        self::assertSame(Cache::VALKEY_BACKEND_ALIAS, $result['frontend']['page_cache']['backend']);
+    }
+
+    /**
+     * CACHE_VALKEY_BACKEND set to the dedicated Valkey class name (Zend-based single tier, distinct
+     * from both the 'valkey' Symfony alias and the legacy '...\Backend\Redis' class used against a
+     * Valkey service for backward compatibility) must be written to 'backend' unchanged.
+     *
+     * @return void
+     * @throws ConfigException
+     */
+    public function testGetUnsyncedValkeyDedicatedClassIsPassedThroughAsIs(): void
+    {
+        $valkeyConfig = [
+            'host'   => 'valkey.host',
+            'port'   => '6379',
+            'scheme' => 'redis',
+        ];
+
+        $this->stageConfigMock->expects(self::any())
+            ->method('get')
+            ->willReturnMap([
+                [DeployInterface::VAR_CACHE_CONFIGURATION, []],
+                [DeployInterface::VAR_CACHE_REDIS_BACKEND, ''],
+                [DeployInterface::VAR_CACHE_VALKEY_BACKEND, Cache::VALKEY_BACKEND_VALKEY_CACHE],
                 [DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION, false],
                 [DeployInterface::VAR_VALKEY_USE_SLAVE_CONNECTION, false],
             ]);
