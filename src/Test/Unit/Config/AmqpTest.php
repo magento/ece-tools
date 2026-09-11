@@ -13,7 +13,6 @@ use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Package\UndefinedPackageException;
 use Magento\MagentoCloud\Config\Amqp;
-use Magento\MagentoCloud\Service\ActiveMq;
 use Magento\MagentoCloud\Service\RabbitMq;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\Exception;
@@ -29,11 +28,6 @@ class AmqpTest extends TestCase
      * @var Amqp
      */
     protected Amqp $config;
-
-    /**
-     * @var ActiveMq|MockObject
-     */
-    protected $activeMq;
 
     /**
      * @var RabbitMq|MockObject
@@ -56,13 +50,11 @@ class AmqpTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->activeMq = $this->createMock(ActiveMq::class);
         $this->rabbitMq = $this->createMock(RabbitMq::class);
         $this->stageConfigMock = $this->createMock(DeployInterface::class);
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
 
         $this->config = new Amqp(
-            $this->activeMq,
             $this->rabbitMq,
             $this->stageConfigMock,
             new ConfigMerger(),
@@ -107,9 +99,6 @@ class AmqpTest extends TestCase
                     return $return;
                 }
             );
-        $this->activeMq->expects($this->once())
-            ->method('getConfiguration')
-            ->willReturn([]);
         $this->rabbitMq->expects($this->once())
             ->method('getConfiguration')
             ->willReturn($amqpServiceConfig);
@@ -365,77 +354,11 @@ class AmqpTest extends TestCase
     }
 
     /**
-     * Test that ActiveMQ takes priority over RabbitMQ
-     */
-    public function testActiveMqPriorityOverRabbitMq(): void
-    {
-        $activeMqConfig = [
-            'host' => 'activemq-host',
-            'port' => 61616,
-            'username' => 'activemq_user',
-            'password' => 'activemq_password',
-            'vhost' => '/activemq'
-        ];
-
-        $rabbitMqConfig = [
-            'host' => 'rabbitmq-host',
-            'port' => 5672,
-            'username' => 'rabbitmq_user',
-            'password' => 'rabbitmq_password',
-            'vhost' => '/rabbitmq'
-        ];
-
-        $this->stageConfigMock->expects($this->exactly(2))
-            ->method('get')
-            ->willReturnCallback(
-                function ($key) {
-                    if ($key === DeployInterface::VAR_QUEUE_CONFIGURATION) {
-                        return [];
-                    }
-                    if ($key === DeployInterface::VAR_CONSUMERS_WAIT_FOR_MAX_MESSAGES) {
-                        return false;
-                    }
-                    return null;
-                }
-            );
-
-        // ActiveMQ is available and should be used
-        $this->activeMq->expects($this->once())
-            ->method('getConfiguration')
-            ->willReturn($activeMqConfig);
-
-        // RabbitMQ should not be called since ActiveMQ is available
-        $this->rabbitMq->expects($this->never())
-            ->method('getConfiguration');
-
-        $this->magentoVersionMock->expects($this->once())
-            ->method('isGreaterOrEqual')
-            ->with('2.2')
-            ->willReturn(true);
-
-        $expectedConfig = [
-            'amqp' => [
-                'host' => 'activemq-host',
-                'port' => 61616,
-                'user' => 'activemq_user',
-                'password' => 'activemq_password',
-                'virtualhost' => '/activemq',
-            ],
-            'consumers_wait_for_messages' => 0
-        ];
-
-        try {
-            $this->assertEquals($expectedConfig, $this->config->getConfig());
-        } catch (ConfigException|UndefinedPackageException $e) {
-        }
-    }
-
-    /**
-     * Test that RabbitMQ is used as fallback when ActiveMQ is not available
+     * Test get config with RabbitMQ.
      *
      * @return void
      */
-    public function testRabbitMqFallbackWhenActiveMqNotAvailable(): void
+    public function testGetConfigReturnsRabbitMqRegardlessOfActiveMq(): void
     {
         $rabbitMqConfig = [
             'host' => 'rabbitmq-host',
@@ -459,12 +382,6 @@ class AmqpTest extends TestCase
                 }
             );
 
-        // ActiveMQ is not available
-        $this->activeMq->expects($this->once())
-            ->method('getConfiguration')
-            ->willReturn([]);
-
-        // RabbitMQ should be used as fallback
         $this->rabbitMq->expects($this->once())
             ->method('getConfiguration')
             ->willReturn($rabbitMqConfig);
@@ -489,5 +406,44 @@ class AmqpTest extends TestCase
             $this->assertEquals($expectedConfig, $this->config->getConfig());
         } catch (ConfigException|UndefinedPackageException $e) {
         }
+    }
+
+    /**
+     * Test get config with missing credentials.
+     *
+     * @return void
+     */
+    public function testGetConfigHandlesMissingCredentialsGracefully(): void
+    {
+        $rabbitMqConfig = [
+            'host' => 'rabbitmq-host',
+            'port' => 5672,
+        ];
+
+        $this->stageConfigMock->expects($this->once())
+            ->method('get')
+            ->with(DeployInterface::VAR_QUEUE_CONFIGURATION)
+            ->willReturn([]);
+
+        $this->rabbitMq->expects($this->once())
+            ->method('getConfiguration')
+            ->willReturn($rabbitMqConfig);
+
+        $this->magentoVersionMock->expects($this->once())
+            ->method('isGreaterOrEqual')
+            ->with('2.2')
+            ->willReturn(false);
+
+        $expectedConfig = [
+            'amqp' => [
+                'host' => 'rabbitmq-host',
+                'port' => 5672,
+                'user' => '',
+                'password' => '',
+                'virtualhost' => '/',
+            ],
+        ];
+
+        $this->assertEquals($expectedConfig, $this->config->getConfig());
     }
 }

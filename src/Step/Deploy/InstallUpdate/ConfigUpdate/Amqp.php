@@ -71,10 +71,11 @@ class Amqp implements StepInterface
     /**
      * Saves configuration for queue services.
      *
-     * This method set queue configuration from environment variable QUEUE_CONFIGURATION.
+     * This method sets queue configuration from environment variable QUEUE_CONFIGURATION.
      * If QUEUE_CONFIGURATION variable is not set then configuration gets from relationships.
      *
-     * Prioritizes STOMP configuration for ActiveMQ when STOMP is enabled, otherwise uses AMQP.
+     * STOMP and AMQP are additive: when both ActiveMQ and RabbitMQ are related, both
+     * queue.stomp and queue.amqp are written, with STOMP as the default connection.
      *
      * Removes old queue configuration from env.php if there is no any queue configuration in
      * relationships or environment variable.
@@ -85,16 +86,17 @@ class Amqp implements StepInterface
     {
         try {
             $config = $this->configReader->read();
-            
-            // Priority 1: Check if ActiveMQ is available for STOMP
-            if ($this->stompConfig->isStompEnabled()) {
-                $queueConfig = $this->stompConfig->getConfig();
-                $protocol = 'STOMP';
-            } else {
-                // Fallback: Use AMQP configuration (RabbitMQ or other AMQP brokers)
-                $queueConfig = $this->amqpConfig->getConfig();
-                $protocol = 'AMQP';
-            }
+
+            $amqpConfig = $this->amqpConfig->getConfig();
+            $stompConfig = $this->stompConfig->isStompEnabled() ? $this->stompConfig->getConfig() : [];
+
+            // Stomp wins on shared keys (e.g. default_connection) when both are present.
+            $queueConfig = array_replace_recursive($amqpConfig, $stompConfig);
+
+            $protocol = implode('+', array_filter([
+                $stompConfig ? 'STOMP' : '',
+                isset($amqpConfig['amqp']) ? 'AMQP' : '',
+            ]));
         } catch (GenericException $e) {
             throw new StepException($e->getMessage(), $e->getCode(), $e);
         }
