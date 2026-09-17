@@ -25,6 +25,8 @@ mariadb:
     eol: 2028-06-04
   - version: '12.2'
     eol: 2026-05-13
+  - version: '12.3'
+    eol: 2029-06-12
 opensearch:
   - version: '1.1'
     eol: 2026-11-07

@@ -646,6 +646,34 @@ class ValidatorTest extends TestCase
                 0
             ],
             [
+                '2.4.10-alpha',
+                [
+                    ServiceInterface::NAME_DB_MARIA => '12.3.0'
+                ],
+                0
+            ],
+            [
+                '2.4.10-alpha',
+                [
+                    ServiceInterface::NAME_DB_MARIA => '11.4.1'
+                ],
+                1
+            ],
+            [
+                '2.4.10-alpha',
+                [
+                    ServiceInterface::NAME_DB_MARIA => '11.8.0'
+                ],
+                1
+            ],
+            [
+                '2.4.10-alpha',
+                [
+                    ServiceInterface::NAME_DB_MARIA => '12.2.0'
+                ],
+                1
+            ],
+            [
                 '2.4.9',
                 [
                     ServiceInterface::NAME_VALKEY => '8.0.0'
