@@ -80,3 +80,5 @@ activemq-artemis:
     eol: 2025-10-13
   - version: '2.51.0'
     eol: 2026-03-02
+  - version: '2.54.0'
+    eol: 2026-06-23

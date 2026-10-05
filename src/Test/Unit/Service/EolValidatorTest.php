@@ -314,6 +314,8 @@ activemq-artemis:
     eol: null
   - version: '2.51'
     eol: null
+  - version: '2.54'
+    eol: null
 valkey:
   - version: '8.0'
     eol: null
