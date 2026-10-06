@@ -32,9 +32,13 @@ class RabbitMq85Cest extends RabbitMqCest
     private const RABBITMQ_VERSIONS = ['4.2', '4.3'];
 
     /**
-     * @var string
+     * @inheritdoc
      */
-    protected string $magentoCloudTemplate = self::BASELINE_VERSION;
+    public function _before(\CliTester $I): void
+    {
+        $this->serviceToAdd = 'rabbitmq';
+        $this->rabbitMqVersion = self::RABBITMQ_VERSIONS[0];
+    }
 
     /**
      * Dataset-key tag for a Magento version: empty for the baseline (keeps its original keys),

@@ -30,7 +30,7 @@ class ActiveMq85Cest extends ActiveMqCest
     /**
      * ActiveMQ Artemis versions covered by the default/custom/wrong/fallback providers.
      */
-    private const ARTEMIS_VERSIONS = ['2.51.0', '2.42.0'];
+    private const ARTEMIS_VERSIONS = ['2.54.0','2.51.0', '2.42.0'];
 
     /** @var string */
     protected string $magentoCloudTemplate = self::BASELINE_VERSION;
