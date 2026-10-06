@@ -751,6 +751,13 @@ class ValidatorTest extends TestCase
                 0
             ],
             [
+                '2.4.8-p5',
+                [
+                    ServiceInterface::NAME_OPENSEARCH => '3.7.0'
+                ],
+                0
+            ],
+            [
                 '2.4.8-p2',
                 [
                     ServiceInterface::NAME_OPENSEARCH => '2.19.0'
@@ -816,6 +823,13 @@ class ValidatorTest extends TestCase
             [
                 '2.4.6-p15',
                 [
+                    ServiceInterface::NAME_OPENSEARCH => '3.7.0'
+                ],
+                0
+            ],
+            [
+                '2.4.6-p15',
+                [
                     ServiceInterface::NAME_OPENSEARCH => '1.3.0'
                 ],
                 1
@@ -837,6 +851,13 @@ class ValidatorTest extends TestCase
             [
                 '2.4.7-p10',
                 [
+                    ServiceInterface::NAME_OPENSEARCH => '3.7.0'
+                ],
+                0
+            ],
+            [
+                '2.4.7-p10',
+                [
                     ServiceInterface::NAME_OPENSEARCH => '1.3.0'
                 ],
                 1
@@ -851,9 +872,9 @@ class ValidatorTest extends TestCase
             [
                 '2.4.9',
                 [
-                    ServiceInterface::NAME_OPENSEARCH => '2.19.0'
+                    ServiceInterface::NAME_OPENSEARCH => '3.7.0'
                 ],
-                1
+                0
             ],
             [
                 '2.4.9',
@@ -861,6 +882,13 @@ class ValidatorTest extends TestCase
                     ServiceInterface::NAME_OPENSEARCH => '2.19.0'
                 ],
                 1
+            ],
+            [
+                '2.4.10-alpha',
+                [
+                    ServiceInterface::NAME_OPENSEARCH => '3.7.0'
+                ],
+                0
             ],
             [
                 '2.4.5-p17',

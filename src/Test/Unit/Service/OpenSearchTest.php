@@ -191,6 +191,11 @@ class OpenSearchTest extends TestCase
                 '{"version" : {"number" : "3.5.1"}}',
                 '3.5.1',
             ],
+            [
+                $relationships,
+                '{"version" : {"number" : "3.7.0"}}',
+                '3.7.0',
+            ],
         ];
     }
 
