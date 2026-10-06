@@ -14,8 +14,6 @@ namespace Magento\MagentoCloud\Test\Functional\Acceptance;
  */
 class MariaDbVersion85Cest extends MariaDbVersionCest
 {
-    use Connect20ComposerSetupTrait;
-
     /**
      * Provides MariaDB compatibility scenarios for PHP 8.5 templates.
      *

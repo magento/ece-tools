@@ -14,7 +14,6 @@ namespace Magento\MagentoCloud\Test\Functional\Acceptance;
  */
 class OpenSearch85Cest extends OpenSearchCest
 {
-        use Connect20ComposerSetupTrait;
 
     /**
      * Data provider for Magento Cloud versions.
