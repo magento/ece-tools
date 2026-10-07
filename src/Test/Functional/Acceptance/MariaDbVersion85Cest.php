@@ -34,7 +34,12 @@ class MariaDbVersion85Cest extends MariaDbVersionCest
             ],
             '2.4.9_supported_12.3' => [
                 'magentoCloudTemplate' => '2.4.9',
-                'mariaDbVersion' => '12.3-rc',
+                'mariaDbVersion' => '12.3',
+                'expectedSuccess' => true,
+            ],
+            '2.4.10_supported_12.3' => [
+                'magentoCloudTemplate' => '2.4.10-alpha',
+                'mariaDbVersion' => '12.3',
                 'expectedSuccess' => true,
             ],
         ];
