@@ -29,6 +29,10 @@ class Valkey85Cest extends ValkeyCest
                 'version' => '2.4.9',
                 'valkey_version' => '9.0',
             ],
+            [
+                'version' => '2.4.10-alpha',
+                'valkey_version' => '9.0',
+            ],
         ];
     }
 
@@ -40,6 +44,26 @@ class Valkey85Cest extends ValkeyCest
         return [
             [
                 'version' => '2.4.9',
+                'wrongConfiguration' => [
+                    'stage' => [
+                        'deploy' => [
+                            'VALKEY_BACKEND' => 'TestValkeyModel'
+                        ]
+                    ]
+                ],
+                'buildSuccess' => false,
+                'deploySuccess' => false,
+                'errorBuildMessage' => 'The VALKEY_BACKEND variable contains an invalid value TestValkeyModel.'
+                    . ' Use one of the available value options: Cm_Cache_Backend_Redis,'
+                    . ' \Magento\Framework\Cache\Backend\Redis,'
+                    . ' valkey,'
+                    . ' \Magento\Framework\Cache\Backend\Valkey,'
+                    . ' \Magento\Framework\Cache\Backend\RemoteSynchronizedCache,'
+                    . ' symfony_l2.',
+                'errorDeployMessage' => '',
+            ],
+            [
+                'version' => '2.4.10-alpha',
                 'wrongConfiguration' => [
                     'stage' => [
                         'deploy' => [
@@ -108,6 +132,47 @@ class Valkey85Cest extends ValkeyCest
                     ],
                 ],
             ],
+            [
+                'version' => '2.4.10-alpha',
+                'configuration' => [
+                    'stage' => [
+                        'deploy' => [
+                            'CACHE_CONFIGURATION' => [
+                                '_merge' => true,
+                                'frontend' => [
+                                    'default' => [
+                                        'backend' => '\Magento\Framework\Cache\Backend\Redis',
+                                        'backend_options' => [
+                                            'port' => 9999,
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+            [
+                'version' => '2.4.10-alpha',
+                'configuration' => [
+                    'stage' => [
+                        'deploy' => [
+                            'CACHE_CONFIGURATION' => [
+                                '_merge' => true,
+                                'frontend' => [
+                                    'default' => [
+                                        '_custom_valkey_backend' => true,
+                                        'backend' => '\CustomValkeyModel',
+                                        'backend_options' => [
+                                            'port' => 9999,
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
         ];
     }
 
@@ -120,6 +185,39 @@ class Valkey85Cest extends ValkeyCest
     public function testSymfonyL2Configuration(CliTester $I): void
     {
         $this->prepareWorkplace($I, '2.4.9');
+        $I->generateDockerCompose(
+            sprintf('--mode=production --expose-db-port=%s', $I->getExposedPort())
+        );
+        $this->removeVendorVolumeMountFromDockerCompose($I);
+
+        $I->writeEnvMagentoYaml([
+            'stage' => [
+                'deploy' => [
+                    'VALKEY_BACKEND' => 'symfony_l2',
+                ],
+            ],
+        ]);
+
+        $I->assertTrue($I->runDockerComposeCommand('run build cloud-build'), 'Build phase was failed');
+        $I->assertTrue($I->startEnvironment(), 'Docker could not start');
+        $I->assertTrue($I->runDockerComposeCommand('run deploy cloud-deploy'), 'Deploy phase was failed');
+        $I->assertTrue($I->runDockerComposeCommand('run deploy cloud-post-deploy'), 'Post deploy phase was failed');
+
+        $config = $this->getConfig($I);
+        $this->assertSymfonyL2Frontends($config, $I);
+        $this->assertSymfonyL2TypeMappings($config, $I);
+        $this->assertSymfonyL2LuaOptions($config, $I);
+    }
+
+    /**
+     * Verifies that symfony_l2 generates the full two-frontend structure in env.php on Magento 2.4.10.
+     *
+     * @param CliTester $I
+     * @throws TaskException
+     */
+    public function testSymfonyL2Configuration2410(CliTester $I): void
+    {
+        $this->prepareWorkplace($I, '2.4.10-alpha');
         $I->generateDockerCompose(
             sprintf('--mode=production --expose-db-port=%s', $I->getExposedPort())
         );
@@ -169,6 +267,72 @@ class Valkey85Cest extends ValkeyCest
     public function testSymfonyL2SlaveConnectionConfiguration(CliTester $I): void
     {
         $this->prepareWorkplace($I, '2.4.9');
+
+        // Must happen before generateDockerCompose() - that's what bakes .magento.app.yaml's
+        // relationships into the generated docker-compose.yml (MAGENTO_CLOUD_RELATIONSHIPS); editing
+        // it afterward has no effect on the already-generated compose file.
+        $services = $I->readServicesYaml();
+        $services['redis'] = ['type' => 'redis:7.2'];
+        $I->writeServicesYaml($services);
+
+        $app = $I->readAppMagentoYaml();
+        $app['relationships']['valkey-slave'] = 'redis:redis';
+        $I->writeAppMagentoYaml($app);
+
+        $I->generateDockerCompose(
+            sprintf('--mode=production --expose-db-port=%s', $I->getExposedPort())
+        );
+        $this->removeVendorVolumeMountFromDockerCompose($I);
+        $this->injectValkeySlaveRelationship($I);
+
+        $I->writeEnvMagentoYaml([
+            'stage' => [
+                'deploy' => [
+                    'VALKEY_BACKEND' => 'symfony_l2',
+                    'VALKEY_USE_SLAVE_CONNECTION' => true,
+                ],
+            ],
+        ]);
+
+        $I->assertTrue($I->runDockerComposeCommand('run build cloud-build'), 'Build phase was failed');
+        $I->assertTrue($I->startEnvironment(), 'Docker could not start');
+        $I->assertTrue($I->runDockerComposeCommand('run deploy cloud-deploy'), 'Deploy phase was failed');
+        $I->assertTrue($I->runDockerComposeCommand('run deploy cloud-post-deploy'), 'Post deploy phase was failed');
+
+        $config = $this->getConfig($I);
+
+        foreach (['default', 'stale_cache_enabled'] as $frontendName) {
+            $remoteOptions = $config['cache']['frontend'][$frontendName]['backend_options']['remote_backend_options'];
+            $I->assertSame(
+                'redis',
+                $remoteOptions['load_from_slave']['server'] ?? null,
+                "Wrong load_from_slave server for '$frontendName' frontend"
+            );
+            $I->assertSame(
+                '6379',
+                (string)($remoteOptions['load_from_slave']['port'] ?? null),
+                "Wrong load_from_slave port for '$frontendName' frontend"
+            );
+            $I->assertSame(1, $remoteOptions['retry_reads_on_master'] ?? null);
+        }
+
+        $I->amOnPage('/');
+        $I->see('Home page');
+        $I->see('CMS homepage content goes here.');
+    }
+
+    /**
+     * Same as testSymfonyL2SlaveConnectionConfiguration() but on Magento 2.4.10.
+     *
+     * See testSymfonyL2SlaveConnectionConfiguration() for the full rationale on why a separate 'redis'
+     * service is used as the 'valkey-slave' target and why injectValkeySlaveRelationship() is required.
+     *
+     * @param CliTester $I
+     * @throws TaskException
+     */
+    public function testSymfonyL2SlaveConnectionConfiguration2410(CliTester $I): void
+    {
+        $this->prepareWorkplace($I, '2.4.10-alpha');
 
         // Must happen before generateDockerCompose() - that's what bakes .magento.app.yaml's
         // relationships into the generated docker-compose.yml (MAGENTO_CLOUD_RELATIONSHIPS); editing
@@ -464,6 +628,127 @@ class Valkey85Cest extends ValkeyCest
             ],
             [
                 'version' => '2.4.9',
+                'configuration' => [
+                    'stage' => [
+                        'deploy' => [
+                            'VALKEY_BACKEND' => '\Magento\Framework\Cache\Backend\RemoteSynchronizedCache',
+                        ],
+                    ],
+                ],
+                'expectedBackend' => '\Magento\Framework\Cache\Backend\RemoteSynchronizedCache',
+                'expectedConfig' => [
+                    'backend_options' => [
+                        'remote_backend' => '\Magento\Framework\Cache\Backend\Redis',
+                        'remote_backend_options' => [
+                            'persistent' => 0,
+                            'server' => 'cache',
+                            'database' => 1,
+                            'port' => '6379',
+                            'password' => '',
+                            'compress_data' => '1',
+                        ],
+                        'local_backend' => 'Cm_Cache_Backend_File',
+                        'local_backend_options' => [
+                            'cache_dir' => '/dev/shm/',
+                        ],
+                    ],
+                ],
+            ],
+            [
+                'version' => '2.4.10-alpha',
+                'configuration' => [
+                    'stage' => [
+                        'deploy' => [
+                            'VALKEY_BACKEND' => '\Magento\Framework\Cache\Backend\Redis',
+                        ],
+                    ],
+                ],
+                'expectedBackend' => '\Magento\Framework\Cache\Backend\Redis',
+                'expectedConfig' => [
+                    'backend_options' => [
+                        'server' => 'cache',
+                        'port' => '6379',
+                        'database' => 1,
+                    ]
+                ],
+            ],
+            [
+                'version' => '2.4.10-alpha',
+                'valkey_version' => '9.0',
+                'configuration' => [
+                    'stage' => [
+                        'deploy' => [
+                            'VALKEY_BACKEND' => '\Magento\Framework\Cache\Backend\Redis',
+                        ],
+                    ],
+                ],
+                'expectedBackend' => '\Magento\Framework\Cache\Backend\Redis',
+                'expectedConfig' => [
+                    'backend_options' => [
+                        'server' => 'cache',
+                        'port' => '6379',
+                        'database' => 1,
+                    ]
+                ],
+            ],
+            [
+                'version' => '2.4.10-alpha',
+                'configuration' => [
+                    'stage' => [
+                        'deploy' => [
+                            'VALKEY_BACKEND' => '\Magento\Framework\Cache\Backend\Valkey',
+                        ],
+                    ],
+                ],
+                'expectedBackend' => '\Magento\Framework\Cache\Backend\Valkey',
+                'expectedConfig' => [
+                    'backend_options' => [
+                        'server' => 'cache',
+                        'port' => '6379',
+                        'database' => 1,
+                    ]
+                ],
+            ],
+            [
+                'version' => '2.4.10-alpha',
+                'configuration' => [
+                    'stage' => [
+                        'deploy' => [
+                            'CACHE_CONFIGURATION' => [
+                                '_merge' => true,
+                                'frontend' => [
+                                    'default' => [
+                                        'backend' => '\CustomValkeyModel',
+                                        'backend_options' => [],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+                'expectedBackend' => '\CustomValkeyModel',
+                'expectedConfig' => [],
+            ],
+            [
+                'version' => '2.4.10-alpha',
+                'configuration' => [
+                    'stage' => [
+                        'deploy' => [
+                            'VALKEY_BACKEND' => 'valkey',
+                        ],
+                    ],
+                ],
+                'expectedBackend' => 'valkey',
+                'expectedConfig' => [
+                    'backend_options' => [
+                        'server' => 'cache',
+                        'port' => '6379',
+                        'database' => 1,
+                    ]
+                ],
+            ],
+            [
+                'version' => '2.4.10-alpha',
                 'configuration' => [
                     'stage' => [
                         'deploy' => [

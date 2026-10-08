@@ -198,8 +198,8 @@ class ReaderTest extends TestCase
                 'deploy' => [
                     'DATABASE_CONFIGURATION' => [
                         'connection' => [
-                            'default' => ['driver_options' => [1001 => 1]],
-                            'indexer' => ['driver_options' => [1002 => 1]],
+                            'default' => ['driver_options' => [PDO::ATTR_ERRMODE => 1]],
+                            'indexer' => ['driver_options' => [PDO::ATTR_TIMEOUT => 1]],
                         ],
                         '_merge' => true,
                     ],
@@ -207,10 +207,11 @@ class ReaderTest extends TestCase
             ],
         ];
 
-        // Mock normalization to simulate constant resolution
         $this->yamlNormalizerMock
+            ->expects($this->once())
             ->method('normalize')
-            ->willReturnCallback(fn($data) => $expected);
+            ->with($expected)
+            ->willReturn($expected);
 
         $this->assertEquals($expected, $this->reader->read());
     }

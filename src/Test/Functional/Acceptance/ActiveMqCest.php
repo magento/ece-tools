@@ -291,6 +291,66 @@ abstract class ActiveMqCest extends AbstractCest
     abstract protected function fallbackToRabbitMqDataProvider(): array;
 
     /**
+     * Test both ActiveMQ and RabbitMQ available at the same time.
+     *
+     * @param        \CliTester           $I
+     * @param        \Codeception\Example $data
+     * @return       void
+     * @throws       \Robo\Exception\TaskException
+     * @dataProvider bothBrokersDataProvider
+     */
+    public function testBothActiveMqAndRabbitMqAvailable(\CliTester $I, \Codeception\Example $data): void
+    {
+        $this->serviceToAdd = 'both';
+        $this->selectedActiveMqArtemisVersion = $data['activemqArtemisVersion'] ?? $this->defaultActivemqArtemisVersion;
+        $this->prepareWorkplace($I, $data['version']);
+        $I->generateDockerCompose(
+            sprintf(
+                '--mode=production --expose-db-port=%s',
+                $I->getExposedPort()
+            )
+        );
+        $this->removeVendorVolumeMountFromDockerCompose($I);
+        $I->assertTrue($I->runDockerComposeCommand('run build cloud-build'), 'Build phase was failed');
+        $I->assertTrue($I->startEnvironment(), 'Docker could not start');
+        $I->assertTrue($I->runDockerComposeCommand('run deploy cloud-deploy'), 'Deploy phase was failed');
+        $I->assertTrue($I->runDockerComposeCommand('run deploy cloud-post-deploy'), 'Post Deploy phase was failed');
+
+        $config = $this->getConfig($I);
+
+        $I->assertArrayHasKey('queue', $config, 'Queue configuration missing from env.php');
+        $I->assertArrayHasKey(
+            'stomp',
+            $config['queue'],
+            'STOMP configuration missing when both brokers are available'
+        );
+        $I->assertArrayHasKey(
+            'amqp',
+            $config['queue'],
+            'AMQP configuration missing when both brokers are available'
+        );
+        $I->assertSame(
+            'stomp',
+            $config['queue']['default_connection'] ?? null,
+            'STOMP should remain the default connection when both brokers are available'
+        );
+
+        $this->checkArraySubset($data['expectedStompConfig'], $config['queue']['stomp'], $I);
+        $this->checkArraySubset($data['expectedAmqpConfig'], $config['queue']['amqp'], $I);
+
+        $I->amOnPage('/');
+        $I->see('Home page');
+        $I->see('CMS homepage content goes here.');
+    }
+
+    /**
+     * Data provider for both-brokers-available test
+     *
+     * @return array
+     */
+    abstract protected function bothBrokersDataProvider(): array;
+
+    /**
      * Test queue configuration without any message broker (uses DB)
      *
      * @param        \CliTester           $I
@@ -365,6 +425,9 @@ abstract class ActiveMqCest extends AbstractCest
         if ($this->serviceToAdd === 'activemq') {
             $this->addActiveMqService($I, $artemisVersion);
         } elseif ($this->serviceToAdd === 'rabbitmq') {
+            $this->addRabbitMqService($I);
+        } elseif ($this->serviceToAdd === 'both') {
+            $this->addActiveMqService($I, $artemisVersion);
             $this->addRabbitMqService($I);
         }
 

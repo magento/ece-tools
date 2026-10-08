@@ -9,7 +9,6 @@ namespace Magento\MagentoCloud\Config;
 
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Package\UndefinedPackageException;
-use Magento\MagentoCloud\Service\ActiveMq;
 use Magento\MagentoCloud\Service\RabbitMq;
 use Magento\MagentoCloud\Package\MagentoVersion;
 
@@ -18,11 +17,6 @@ use Magento\MagentoCloud\Package\MagentoVersion;
  */
 class Amqp
 {
-    /**
-     * @var ActiveMq
-     */
-    private ActiveMq $activeMQ;
-
     /**
      * @var RabbitMq
      */
@@ -44,20 +38,17 @@ class Amqp
     private MagentoVersion $magentoVersion;
 
     /**
-     * @param ActiveMq        $activeMQ
      * @param RabbitMq        $rabbitMQ
      * @param DeployInterface $stageConfig
      * @param ConfigMerger    $configMerger
      * @param MagentoVersion  $magentoVersion
      */
     public function __construct(
-        ActiveMq $activeMQ,
         RabbitMq $rabbitMQ,
         DeployInterface $stageConfig,
         ConfigMerger $configMerger,
         MagentoVersion $magentoVersion
     ) {
-        $this->activeMQ = $activeMQ;
         $this->rabbitMQ = $rabbitMQ;
         $this->stageConfig = $stageConfig;
         $this->configMerger = $configMerger;
@@ -107,33 +98,18 @@ class Amqp
 
     /**
      * Convert amqp service configuration to magento format.
-     * Prioritizes ActiveMQ first, then falls back to RabbitMQ.
      *
      * @return array
      */
     private function getAmqpConfig(): array
     {
-        // First priority: ActiveMQ
-        if ($amqpConfig = $this->activeMQ->getConfiguration()) {
-            return [
-                'amqp' => [
-                    'host' => $amqpConfig['host'],
-                    'port' => $amqpConfig['port'],
-                    'user' => $amqpConfig['username'] ?? $amqpConfig['user'] ?? '',
-                    'password' => $amqpConfig['password'],
-                    'virtualhost' => $amqpConfig['vhost'] ?? '/',
-                ]
-            ];
-        }
-
-        // Fallback: RabbitMQ
         if ($amqpConfig = $this->rabbitMQ->getConfiguration()) {
             return [
                 'amqp' => [
                     'host' => $amqpConfig['host'],
                     'port' => $amqpConfig['port'],
-                    'user' => $amqpConfig['username'],
-                    'password' => $amqpConfig['password'],
+                    'user' => $amqpConfig['username'] ?? '',
+                    'password' => $amqpConfig['password'] ?? '',
                     'virtualhost' => $amqpConfig['vhost'] ?? '/',
                 ]
             ];

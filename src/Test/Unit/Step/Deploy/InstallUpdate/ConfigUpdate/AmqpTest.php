@@ -78,6 +78,9 @@ class AmqpTest extends TestCase
     }
 
     /**
+     * When neither STOMP nor AMQP is configured, and there was no previous queue
+     * configuration, env.php should not be rewritten.
+     *
      * @throws StepException
      */
     public function testExecuteWithoutAmqp(): void
@@ -90,6 +93,8 @@ class AmqpTest extends TestCase
         $this->stompConfigMock->expects($this->once())
             ->method('isStompEnabled')
             ->willReturn(false);
+        $this->stompConfigMock->expects($this->never())
+            ->method('getConfig');
         $this->amqpConfigMock->expects($this->once())
             ->method('getConfig')
             ->willReturn([]);
@@ -134,6 +139,103 @@ class AmqpTest extends TestCase
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Updating env.php AMQP queue configuration.');
+        $this->configWriterMock->expects($this->once())
+            ->method('create')
+            ->with($resultConfig);
+
+        $this->step->execute();
+    }
+
+    /**
+     * @throws StepException
+     */
+    public function testExecuteAddUpdateStompOnly(): void
+    {
+        $config = ['some config'];
+        $stompConfig = [
+            'stomp' => [
+                'host' => 'activemq-artemis',
+                'port' => '61616',
+                'user' => 'admin',
+                'password' => 'admin',
+            ],
+            'default_connection' => 'stomp',
+        ];
+        $resultConfig = [
+            'some config',
+            'queue' => $stompConfig,
+        ];
+
+        $this->configReaderMock->expects($this->once())
+            ->method('read')
+            ->willReturn($config);
+        $this->stompConfigMock->expects($this->once())
+            ->method('isStompEnabled')
+            ->willReturn(true);
+        $this->stompConfigMock->expects($this->once())
+            ->method('getConfig')
+            ->willReturn($stompConfig);
+        $this->amqpConfigMock->expects($this->once())
+            ->method('getConfig')
+            ->willReturn([]);
+        $this->loggerMock->expects($this->once())
+            ->method('info')
+            ->with('Updating env.php STOMP queue configuration.');
+        $this->configWriterMock->expects($this->once())
+            ->method('create')
+            ->with($resultConfig);
+
+        $this->step->execute();
+    }
+
+    /**
+     * @throws StepException
+     */
+    public function testExecuteAddUpdateBothStompAndAmqp(): void
+    {
+        $config = ['some config'];
+        $stompConfig = [
+            'stomp' => [
+                'host' => 'activemq-artemis',
+                'port' => '61616',
+                'user' => 'admin',
+                'password' => 'admin',
+            ],
+            'default_connection' => 'stomp',
+        ];
+        $amqpConfig = [
+            'amqp' => [
+                'host' => 'rabbitmq',
+                'port' => '5672',
+                'user' => 'guest',
+                'password' => 'guest',
+                'virtualhost' => '/',
+            ],
+        ];
+        $resultConfig = [
+            'some config',
+            'queue' => [
+                'amqp' => $amqpConfig['amqp'],
+                'stomp' => $stompConfig['stomp'],
+                'default_connection' => 'stomp',
+            ],
+        ];
+
+        $this->configReaderMock->expects($this->once())
+            ->method('read')
+            ->willReturn($config);
+        $this->stompConfigMock->expects($this->once())
+            ->method('isStompEnabled')
+            ->willReturn(true);
+        $this->stompConfigMock->expects($this->once())
+            ->method('getConfig')
+            ->willReturn($stompConfig);
+        $this->amqpConfigMock->expects($this->once())
+            ->method('getConfig')
+            ->willReturn($amqpConfig);
+        $this->loggerMock->expects($this->once())
+            ->method('info')
+            ->with('Updating env.php STOMP+AMQP queue configuration.');
         $this->configWriterMock->expects($this->once())
             ->method('create')
             ->with($resultConfig);

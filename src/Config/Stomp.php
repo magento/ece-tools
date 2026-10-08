@@ -65,6 +65,10 @@ class Stomp
     {
         $config = $this->getMergedConfig();
 
+        if (isset($config['stomp']['port'])) {
+            $config['stomp']['port'] = (string) $config['stomp']['port'];
+        }
+
         if ($this->magentoVersion->isGreaterOrEqual('2.2')) {
             $config['consumers_wait_for_messages'] = $this->stageConfig->get(
                 DeployInterface::VAR_CONSUMERS_WAIT_FOR_MAX_MESSAGES
@@ -113,9 +117,9 @@ class Stomp
             return [
               'stomp' => [
                   'host' => $stompHost,
-                  'port' => '61616',  // STOMP messaging port (8161 is web console)
+                  'port' => $activeMqConfig['port'] ?? '61616',
                   'user' => $activeMqConfig['username'] ?? $activeMqConfig['user'] ?? '',
-                  'password' => $activeMqConfig['password']
+                  'password' => $activeMqConfig['password'] ?? ''
               ],
               'default_connection' => 'stomp'
             ];

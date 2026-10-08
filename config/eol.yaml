@@ -25,25 +25,15 @@ mariadb:
     eol: 2028-06-04
   - version: '12.2'
     eol: 2026-05-13
+  - version: '12.3'
+    eol: 2029-06-12
 opensearch:
-  - version: '1.1'
-    eol: 2026-11-07
-  - version: '1.2'
-    eol: 2026-11-07
-  - version: '1.3'
-    eol: 2026-11-07
-  - version: '2.3'
-    eol: 2026-11-07
-  - version: '2.4'
-    eol: 2026-11-07
-  - version: '2.5'
-    eol: 2026-11-07
-  - version: '2.12'
-    eol: 2026-11-07
+  - version: '1.0'
+    eol: 2027-11-07
+  - version: '2.0'
+    eol: 2028-11-07
   - version: '3.0'
-    eol: 2026-05-06
-  - version: '3.5'
-    eol: 2027-05-06
+    eol: 2028-11-07
 rabbitmq:
   - version: '3.9'
     eol: 2023-01-31
@@ -78,3 +68,5 @@ activemq-artemis:
     eol: 2025-10-13
   - version: '2.51.0'
     eol: 2026-03-02
+  - version: '2.54.0'
+    eol: 2026-06-23

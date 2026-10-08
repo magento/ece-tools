@@ -273,6 +273,31 @@ class ActiveMq81Cest extends ActiveMqCest
     }
 
     /**
+     * @inheritdoc
+     */
+    protected function bothBrokersDataProvider(): array
+    {
+        return [
+            'both-brokers-2.4.5-2.51.0-php81' => [
+                'version' => '2.4.5',
+                'activemqArtemisVersion' => '2.51.0',
+                'expectedStompConfig' => [
+                    'host' => 'activemq-artemis',
+                    'port' => 61616,
+                    'user' => 'admin',
+                    'password' => 'admin',
+                ],
+                'expectedAmqpConfig' => [
+                    'host' => 'rabbitmq',
+                    'port' => 5672,
+                    'user' => 'guest',
+                    'password' => 'guest',
+                ],
+            ],
+        ];
+    }
+
+    /**
      * Override testFallbackToRabbitMq to add RabbitMQ service instead of ActiveMQ
      *
      * @param        \CliTester           $I

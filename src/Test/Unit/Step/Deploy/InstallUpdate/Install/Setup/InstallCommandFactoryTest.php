@@ -650,6 +650,48 @@ class InstallCommandFactoryTest extends TestCase
     }
 
     /**
+     * Test execute with Amqp config options when ActiveMQ is also available.
+     *
+     * @return void
+     * @throws ConfigException
+     */
+    public function testExecuteWithAmqpConfigOptionsWhenActiveMqAlsoAvailable(): void
+    {
+        $this->mockBaseConfig('', '', '', '', '', '');
+        $this->magentoVersionMock->method('isGreaterOrEqual')
+            ->willReturnMap([
+                ['2.4.0', false],
+                ['2.4.2', true]
+            ]);
+        $this->activeMqMock->method('getConfiguration')
+            ->willReturn([
+                'host' => 'activemq-artemis',
+                'port' => '61616',
+                'username' => 'admin',
+                'password' => 'admin',
+            ]);
+        $this->amqpConfigMock->method('getConfig')
+            ->willReturn([
+                'amqp' => [
+                    'host' => 'rabbitmq',
+                    'port' => '5672',
+                    'user' => 'guest',
+                    'password' => 'guest',
+                    'virtualhost' => '/',
+                ],
+            ]);
+
+        $command = $this->installCommandFactory->create();
+
+        self::assertStringContainsString(
+            "--amqp-host='rabbitmq' --amqp-port='5672' --amqp-user='guest'"
+                . " --amqp-password='guest' --amqp-virtualhost='/'",
+            $command
+        );
+        self::assertStringContainsString("--queue-default-connection='stomp'", $command);
+    }
+
+    /**
      * DataProvider for executeWithAmqpConfigOptions method.
      *
      * @return array

@@ -367,13 +367,7 @@ class InstallCommandFactory
     private function getAmqpOptions(): array
     {
         $options = [];
-        
-        // Check if ActiveMQ is available - if so, skip AMQP
-        $activeMqConfig = $this->activeMq->getConfiguration();
-        if (!empty($activeMqConfig)) {
-            return $options; // Return empty options when ActiveMQ is available
-        }
-        
+
         $config = $this->amqpConfig->getConfig();
         $map = ['host', 'port', 'user', 'password', 'virtualhost'];
 
