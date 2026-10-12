@@ -91,6 +91,9 @@ class Environment implements StepInterface
             }
 
             array_walk_recursive($config, function (&$value) use ($baseHost, $actualHost, &$replaced) {
+                if (!is_string($value)) {
+                    return;
+                }
                 $value = str_replace($baseHost, $actualHost, $value, $replaceCount);
                 if ($replaceCount) {
                     $replaced = true;
